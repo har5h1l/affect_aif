@@ -35,7 +35,9 @@ python scripts/run_analysis.py --results results/betrayal_stress.csv --output-di
 
 - Default experiments use exact policy enumeration when tractable.
 - When the policy space explodes, the control layer can fall back to capped enumeration.
+- Full runs floor `calibration_episodes` at `10` when deriving `mu`, so affective comparisons do not hinge on a `2-3` episode calibration draw.
 - The trust-game rollout uses context-conditioned likelihoods so reciprocators and exploiters are represented faithfully.
+- The current task is still single active agent plus scripted partners, but those partners now implement the same minimal `plan_and_act` / `observe_outcome` lifecycle as agents so the environment loop has a clean extension seam.
 - `affect_aif/configs/betrayal_stress.json` is a harder scheduled-switch scenario for separating precision tracking from reward averaging.
 - `scripts/run_preliminary.py` defaults to the harder `betrayal_stress` setup for a more informative directional smoke test, but accepts `--config` for other variants. It prints directional H1-H5 checks; `scripts/run_analysis.py` also saves `hypothesis_tests.json` alongside plots and summary tables.
 - `scripts/run_analysis.py` auto-emits betrayal-specific outputs when switch events are present, including `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, `betrayal_condition_comparison.csv`, `betrayal_detection_latency.csv`, `betrayal_trajectories.csv`, and `affective_movement_summary.csv`.

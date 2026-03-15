@@ -15,6 +15,14 @@
   - stochastic type switching controls volatility across partner identities
   - exploiter phase switching controls a specific within-type betrayal profile
 
+## Partner Interface Seam
+
+- Scripted `Partner` instances now expose the same minimal lifecycle as agent implementations:
+  - `plan_and_act(...)`
+  - `observe_outcome(...)`
+- This does not change current experiment semantics. Partners are still environment-owned stochastic policies with latent type switching.
+- The purpose is architectural: `TrustGameEnv` no longer depends on partner-specific helper names, which makes a later swap to agent-like peers much cleaner.
+
 ## Precision Modulation
 
 - `affect_modulates_precision=False` by default.
@@ -35,6 +43,9 @@
 - Affective and reward-average agents now both emit terminal signals on a comparable `[0, 1]` scale.
 - Affective agents use raw `beta_k`.
 - Reward-average agents use `0.5 * (1 + tanh(reward_avg / max_abs_payoff))`, which is centered at `0.5` when reward history is neutral.
+- Full experiment runs enforce a minimum of `10` calibration episodes when deriving `mu`, even if the config requests fewer.
+- This guard exists because `mu` is shared across all affective and control conditions in a run, so calibrating from only `2-3` episodes makes downstream comparisons noisier than intended.
+- Direct calls to `ExperimentRunner.calibrate_mu()` can still use fewer episodes for fast unit tests or notebook demos.
 - The terminal value actually used in planning is context-sensitive:
 
 ```text

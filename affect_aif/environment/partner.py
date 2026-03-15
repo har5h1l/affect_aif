@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -12,7 +12,7 @@ from affect_aif.generative_model.payoffs import COOPERATE, DEFECT
 
 @dataclass
 class Partner:
-    """A simulated partner with a hidden behavioral type."""
+    """A scripted partner exposing the same action/outcome lifecycle as an agent."""
 
     partner_idx: int
     type_name: str
@@ -26,8 +26,8 @@ class Partner:
     def type_impl(self) -> PartnerType:
         return self.type_lookup[self.type_name]
 
-    def sample_action(self, correlation_action: int | None = None, correlation_strength: float = 0.9) -> int:
-        """Sample the partner's action from its current type policy."""
+    def plan_and_act(self, correlation_action: int | None = None, correlation_strength: float = 0.9) -> int:
+        """Choose an action using the current scripted type policy."""
 
         if correlation_action is not None and self.rng.random() < correlation_strength:
             action = int(correlation_action)
@@ -40,11 +40,32 @@ class Partner:
         self.last_partner_action = action
         return action
 
-    def update_after_interaction(self, agent_action: int):
+    def sample_action(self, correlation_action: int | None = None, correlation_strength: float = 0.9) -> int:
+        """Backward-compatible alias for the scripted action sampler."""
+
+        return self.plan_and_act(
+            correlation_action=correlation_action,
+            correlation_strength=correlation_strength,
+        )
+
+    def observe_outcome(
+        self,
+        agent_action: int,
+        partner_action: int | None = None,
+        partner_payoff: float | None = None,
+        agent_payoff: float | None = None,
+    ):
         """Update partner-local context after an interaction completes."""
+
+        del partner_action, partner_payoff, agent_payoff
 
         self.last_agent_action = int(agent_action)
         self.interaction_count += 1
+
+    def update_after_interaction(self, agent_action: int):
+        """Backward-compatible alias for the scripted outcome update."""
+
+        self.observe_outcome(agent_action=agent_action)
 
     def force_type_switch(self, new_type: str):
         """Apply a configured type change and reset local context."""

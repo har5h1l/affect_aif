@@ -125,7 +125,7 @@ class TrustGameEnv:
         partner = self.partners[partner_idx]
         true_partner_type = partner.type_name
         correlated_action = self._correlated_action(partner_idx)
-        partner_action = partner.sample_action(
+        partner_action = partner.plan_and_act(
             correlation_action=correlated_action,
             correlation_strength=self.correlation_strength,
         )
@@ -137,7 +137,12 @@ class TrustGameEnv:
             observed_partner_action = 1 - observed_partner_action
         payoff_obs = payoff_to_index(agent_payoff, self.model.payoff_levels)
 
-        partner.update_after_interaction(social_action)
+        partner.observe_outcome(
+            agent_action=social_action,
+            partner_action=partner_action,
+            partner_payoff=partner_payoff,
+            agent_payoff=agent_payoff,
+        )
         stochastic_switch = partner.maybe_switch_type(self.available_types, self.p_switch)
         type_switched = (partner_idx in scheduled_switched) or stochastic_switch
         switch_kind = "scheduled" if partner_idx in scheduled_switched else "stochastic" if stochastic_switch else "none"

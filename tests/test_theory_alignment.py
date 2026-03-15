@@ -99,3 +99,20 @@ def test_mu_calibration_positive():
     runner = ExperimentRunner(cfg)
     mu = runner.calibrate_mu()
     assert mu > 0.0
+
+
+def test_full_run_enforces_minimum_calibration_episodes():
+    cfg = ExperimentConfig(
+        num_rounds=5,
+        num_replications=1,
+        calibration_episodes=2,
+        random_seed=0,
+        deep_horizon=4,
+        shallow_horizon=2,
+        conditions=[2],
+    )
+    runner = ExperimentRunner(cfg)
+    runner.run_all()
+    assert runner.calibration_summary is not None
+    assert runner.calibration_summary["requested_calibration_episodes"] == 2
+    assert runner.calibration_summary["calibration_episodes"] == runner.MIN_FULL_RUN_CALIBRATION_EPISODES

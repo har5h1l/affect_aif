@@ -22,6 +22,8 @@ from affect_aif.generative_model.model import TrustGameModel
 class ExperimentRunner:
     """Run all conditions, including a principled μ calibration phase."""
 
+    MIN_FULL_RUN_CALIBRATION_EPISODES = 10
+
     def __init__(self, config: ExperimentConfig):
         self.config = config
         self.calibration_summary: dict | None = None
@@ -83,20 +85,28 @@ class ExperimentRunner:
             )
         raise ValueError(f"Unknown condition '{condition}'.")
 
-    def calibrate_mu(self) -> float:
+    def _resolve_calibration_episodes(self, enforce_minimum: bool) -> int:
+        requested = int(self.config.calibration_episodes)
+        if enforce_minimum:
+            return max(requested, self.MIN_FULL_RUN_CALIBRATION_EPISODES)
+        return requested
+
+    def calibrate_mu(self, enforce_minimum: bool = False) -> float:
         """Derive μ from deep-planner EFE mass instead of tuning it."""
 
         if self.config.deep_horizon <= self.config.shallow_horizon:
             self.config.mu = 0.0
             self.calibration_summary = {
+                "requested_calibration_episodes": int(self.config.calibration_episodes),
                 "calibration_episodes": 0,
                 "mean_abs_efe_per_step": 0.0,
                 "derived_mu": 0.0,
             }
             return 0.0
 
+        calibration_episodes = self._resolve_calibration_episodes(enforce_minimum=enforce_minimum)
         efe_values = []
-        for offset in range(self.config.calibration_episodes):
+        for offset in range(calibration_episodes):
             seed = self.config.random_seed + 10_000 + offset
             model = self._create_model()
             env = TrustGameEnv(self.config, seed=seed)
@@ -108,7 +118,8 @@ class ExperimentRunner:
         derived_mu = float(mean_abs_efe * (self.config.deep_horizon - self.config.shallow_horizon))
         self.config.mu = derived_mu
         self.calibration_summary = {
-            "calibration_episodes": int(self.config.calibration_episodes),
+            "requested_calibration_episodes": int(self.config.calibration_episodes),
+            "calibration_episodes": calibration_episodes,
             "mean_abs_efe_per_step": mean_abs_efe,
             "derived_mu": derived_mu,
         }
@@ -152,7 +163,7 @@ class ExperimentRunner:
         """Run all configured conditions across all seeds."""
 
         if any(condition in {2, 3, 4, 5} for condition in self.config.conditions):
-            self.calibrate_mu()
+            self.calibrate_mu(enforce_minimum=True)
 
         records: list[dict] = []
         for condition in self.config.conditions:
@@ -196,7 +207,7 @@ class ExperimentRunner:
         """Run one-at-a-time sensitivity sweeps for μ and affective state hyperparameters."""
 
         if self.calibration_summary is None:
-            self.calibrate_mu()
+            self.calibrate_mu(enforce_minimum=True)
         base_mu = float(self.calibration_summary["derived_mu"])
         original_mu = self.config.mu
         original_lambda = self.config.lambda_smooth

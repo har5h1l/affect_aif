@@ -49,3 +49,38 @@ def test_environment_applies_scheduled_type_switches():
     assert first["true_partner_type"] == "cooperator"
     assert second["true_partner_type"] == "exploiter"
     assert second["type_switched"] is True
+
+
+def test_environment_uses_partner_interface_methods():
+    cfg = ExperimentConfig(num_partners=1, num_rounds=1, p_switch=0.0)
+    env = TrustGameEnv(cfg, seed=0)
+    env.reset()
+
+    class StubPartner:
+        type_name = "cooperator"
+        last_partner_action = 0
+
+        def __init__(self):
+            self.plan_calls = []
+            self.outcome_calls = []
+
+        def plan_and_act(self, correlation_action=None, correlation_strength=0.9):
+            self.plan_calls.append((correlation_action, correlation_strength))
+            self.last_partner_action = 0
+            return 0
+
+        def observe_outcome(self, agent_action, partner_action=None, partner_payoff=None, agent_payoff=None):
+            self.outcome_calls.append((agent_action, partner_action, partner_payoff, agent_payoff))
+
+        def maybe_switch_type(self, available_types, p_switch):
+            return False
+
+        def force_type_switch(self, new_type):
+            self.type_name = new_type
+
+    stub = StubPartner()
+    env.partners[0] = stub
+    result = env.step(0)
+
+    assert stub.plan_calls == [(None, cfg.correlation_strength)]
+    assert stub.outcome_calls == [(0, 0, result["partner_payoff"], result["agent_payoff"])]

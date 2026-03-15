@@ -116,6 +116,7 @@ V_affect_k = -mu * beta_k * continuation_k
 ```
 
 Where $\mu$ scales the influence of affect on policy selection. This keeps the terminal contribution context-sensitive rather than treating every policy involving a partner as equally good or bad.
+For full experiment runs, `mu` calibration should average over at least `10` deep-planner episodes; shorter calibrations are acceptable only for smoke tests and fast debugging.
 
 ---
 
