@@ -6,7 +6,7 @@
 
 ## 1. Overview
 
-This document specifies the experimental design for testing the central claim: per-partner affective states (tracking social model precision) allow shallow-planning active inference agents to match deep-planning agents in multi-partner social environments, and ablating these states reproduces the behavioral signature of vmPFC damage — intact social knowledge with impaired social decision-making.
+This document specifies the experimental design for testing the central claim: per-partner affective states (tracking social model precision) improve shallow-planning active inference agents by adding partner-specific confidence information, and ablating these states reproduces the behavioral signature of vmPFC damage — intact social knowledge with impaired social decision-making.
 
 ---
 
@@ -82,7 +82,7 @@ This creates the standard tension: mutual cooperation is collectively optimal bu
 - Deep planner: $T = 8$ steps ahead
 - Shallow planner: $\tau = 2$ steps ahead
 
-**Policy evaluation**: standard expected free energy computation over the planning horizon. For affective agents, an affective terminal value is appended at the end of the shallow horizon.
+**Policy evaluation**: standard expected free energy computation over the planning horizon. For affective agents, the shallow-horizon EFE is precision-weighted by the current partner-specific signal.
 
 ### 2.6 Affective State Update (Level 3 Implementation)
 
@@ -103,20 +103,19 @@ beta_k = lambda * beta_k + (1 - lambda) * sigmoid(charge)
 ```
 
 Parameters:
-- $\lambda = 0.9$ — smoothing parameter (affective state is 10× slower than beliefs)
-- $\alpha = 1.0$ — charge sensitivity
+- $\lambda = 0.6$ — smoothing parameter; slower than belief updates but responsive within 5-10 interactions
+- $\alpha = 3.0$ — charge sensitivity; expands the sigmoid operating range so correct vs. incorrect predictions separate betas materially
 - $\sigma_0^2$ — baseline expected squared surprise; default `0.25` matches a random binary partner because $(1 - 0.5)^2 = 0.25$
 - sigmoid clamps the charge contribution to $[0, 1]$
 
-The affective terminal value is then:
+The affective precision weight is then:
 
 ```
-continuation_k = E[payoff | terminal_state_k, terminal_action] / max_abs_payoff
-V_affect_k = -mu * beta_k * continuation_k
+precision_weight_k = 1 + mu * beta_k
+G_shallow(pi) = sum_t G_t(pi) * precision_weight_k
 ```
 
-Where $\mu$ scales the influence of affect on policy selection. This keeps the terminal contribution context-sensitive rather than treating every policy involving a partner as equally good or bad.
-For full experiment runs, `mu` calibration should average over at least `10` deep-planner episodes; shorter calibrations are acceptable only for smoke tests and fast debugging.
+Where $\mu$ scales the influence of affect on policy selection. The weight is keyed to the first partner implicated by the policy so the affective signal changes first-action marginals rather than washing out at the end of the rollout. For full experiment runs, `mu` calibration should average over at least `10` deep-planner episodes; shorter calibrations are acceptable only for smoke tests and fast debugging.
 
 ---
 
@@ -138,7 +137,7 @@ Partners' hidden types switch according to the geometric distribution ($p_{\text
 This task is chosen to satisfy several requirements:
 
 - **Multi-partner**: forces the agent to maintain separate models (and potentially separate affective states) for each partner, stressing computational resources.
-- **Sequential and volatile**: partner types change, so the agent must continuously update rather than converging to a fixed strategy. This is where planning depth matters most.
+- **Sequential and volatile**: partner types change, so the agent must continuously update rather than converging to a fixed strategy. This is where partner-specific confidence signals and post-switch adaptation should matter most.
 - **Social structure**: the Trust Game payoff matrix creates a genuine social dilemma where understanding partner types is essential for good decisions.
 - **Minimal**: 2 actions, 4 partner types, 4 partners — small enough for exact or near-exact POMDP solutions at depth 8, providing a gold-standard deep planner to compare against.
 
@@ -175,18 +174,18 @@ The repository now treats this as the primary diagnostic benchmark for condition
 
 - Planning horizon: $\tau = 2$
 - Level 3 (affective state): active, per-partner, updated on slow timescale
-- Policy selection: EFE over 2-step horizon + affective terminal value $V_k(\beta_k)$
-- Precision modulation: off by default in the primary experiments (`affect_modulates_precision=False`), so Condition 2 tests the terminal-value mechanism rather than per-partner $\gamma_k$ modulation
-- Purpose: tests the core hypothesis — can affect compensate for reduced planning depth?
+- Policy selection: EFE over 2-step horizon, precision-weighted by the first partner's affective signal
+- Precision modulation: off by default in the primary experiments (`affect_modulates_precision=False`), so Condition 2 tests shallow-EFE weighting rather than per-partner $\gamma_k$ modulation
+- Purpose: tests the core hypothesis — does affective precision weighting improve shallow planning beyond what horizon-2 evaluation can do on its own?
 
 ### 4.3 Condition 3: Lesioned Affective Agent (vmPFC Analog)
 
 - Planning horizon: $\tau = 2$
 - Level 3 (affective state): present in architecture but **decoupled** from policy selection
   - Option 3a: $\beta_k$ fixed at 0.5 (neutral) for all partners, all time
-  - Option 3b: $\beta_k$ updates normally but $\mu = 0$ (affect doesn't influence EFE)
+  - Option 3b: $\beta_k$ updates normally but $\mu = 0$ (affect doesn't weight EFE)
 - Level 2 (social model): fully intact, updates normally
-- Policy selection: EFE over 2-step horizon, no terminal value
+- Policy selection: EFE over 2-step horizon, no affective weighting
 - Purpose: reproduces the Damasio pattern — the agent can correctly identify partner types (inspect level-2 posteriors) but cannot efficiently use this knowledge for decision-making.
 
 Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the agent "feels" things but feelings don't influence decisions, modeling the vmPFC disconnection from action selection rather than destruction of the representation itself.
@@ -201,10 +200,10 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 ### 4.5 Condition 5: Reward-Average Agent (Value Function Control)
 
 - Planning horizon: $\tau = 2$
-- Instead of precision-based affect: a simple exponential moving average of reward per partner, used as terminal value
+- Instead of precision-based affect: a simple exponential moving average of reward per partner, used as the shallow-EFE weight
 - $\bar{R}_k^{(t+1)} = \lambda \bar{R}_k^{(t)} + (1 - \lambda) \cdot r_t$
 - Terminal signal: $\tilde{R}_k = 0.5 \cdot (1 + \tanh(\bar{R}_k / \max |r|))$
-- Terminal value: $V_k = -\mu \cdot \tilde{R}_k \cdot \frac{\mathbb{E}[r \mid s^{\mathrm{terminal}}_k, a^{\mathrm{terminal}}]}{\max |r|}$
+- Weighted objective: $G(\pi) \approx \left(\sum_{t=1}^{\tau} G_t(\pi)\right) \cdot \left(1 + \mu \tilde{R}_k\right)$
 - Purpose: distinguishes the precision-tracking account from a simpler "cached value" account. If Condition 2 outperforms Condition 5, it demonstrates that tracking model precision provides information that reward averaging does not (the uncertainty preservation argument).
 
 ---
@@ -222,7 +221,7 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 
 **Expected outcome**: Affective agents achieve ~95% of deep-planner performance at ~25% of computational cost (2-step horizon vs. 8-step = exponentially fewer branches).
 
-**Failure mode**: If Condition 2 significantly underperforms Condition 1 (>10% payoff gap), it means the affective terminal value is not a good enough approximation of deep planning. This would require either (a) increasing τ to 3-4, or (b) enriching the affective state representation.
+**Failure mode**: If Condition 2 significantly underperforms Condition 1 (>10% payoff gap), it means the affective weighting is not a good enough approximation of deep planning. This would require either (a) increasing τ to 3-4, or (b) enriching the affective state representation.
 
 ### Hypothesis 2: Lesion Reproduces Damasio Pattern
 
@@ -236,13 +235,13 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Cumulative payoff (should be near Condition 4 level)
 - Performance gap between stable periods and post-switch periods
 
-**Expected outcome**: Lesioned agents "know" partner types but "can't use" that knowledge. During stable periods (types not switching), the lesion effect is moderate — shallow planning is adequate when nothing changes. During volatile periods, the lesion effect is large — without affective inertia to buffer noise and without terminal value to extend planning, the agent makes myopic, exploitable decisions.
+**Expected outcome**: Lesioned agents "know" partner types but "can't use" that knowledge. During stable periods (types not switching), the lesion effect is moderate — shallow planning is adequate when nothing changes. During volatile periods, the lesion effect is large — without affective inertia to buffer noise and without affective weighting to extend shallow evaluation, the agent makes myopic, exploitable decisions.
 
 **Failure mode**: If the lesioned agent performs as well as Condition 2, then affect isn't doing computational work — the architecture itself (having a level-3 state, even decoupled) provides some benefit, or the task is too easy for 2-step planning alone.
 
 ### Hypothesis 3: Precision Tracking Outperforms Reward Averaging
 
-**Prediction**: Condition 2 (precision-based affect) outperforms Condition 5 (reward-average terminal value), particularly in scenarios with:
+**Prediction**: Condition 2 (precision-based affect) outperforms Condition 5 (reward-average weighting), particularly in scenarios with:
 - Reliable adversaries (same average reward but different model precision)
 - Volatile periods (where uncertainty information matters most)
 - Mixed partner populations (where some partners are predictable and others aren't)
@@ -291,7 +290,7 @@ Operationally, inspect `betrayal_post_switch_window_1_5.csv`, `betrayal_post_swi
 
 ### 6.1 Framework
 
-Primary implementation is a custom **JAX-first** active inference stack in this repository. Generic active inference math and control live under `affect_aif/core`, trust-game-specific matrices and payoffs live under `affect_aif/generative_model`, and the affective state (level 3) is implemented as an auxiliary per-partner summary outside the core belief update loop, modulating policy evaluation through the terminal value mechanism.
+Primary implementation is a custom **JAX-first** active inference stack in this repository. Generic active inference math and control live under `affect_aif/core`, trust-game-specific matrices and payoffs live under `affect_aif/generative_model`, and the affective state (level 3) is implemented as an auxiliary per-partner summary outside the core belief update loop, modulating policy evaluation through shallow-EFE weighting.
 
 Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://github.com/CasperHesp/deeplyfeltaffect) for the single-agent affective architecture. This will be extended to the multi-partner setting.
 
@@ -305,7 +304,7 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 | Partner types | 4 (Cooperator, Reciprocator, Exploiter, Random) | Covers key strategic diversity |
 | Deep planning horizon ($T$) | 8 | Sufficient for ~optimal play in this game |
 | Shallow planning horizon ($\tau$) | 2 | Minimal deliberation |
-| Affective smoothing ($\lambda$) | 0.9 | 10× slower than belief updates |
+| Affective smoothing ($\lambda$) | 0.6 | Slower than belief updates while still moving over 5-10 interactions |
 | Affective scaling ($\mu$) | Derived from deep-planner mean absolute EFE per step | Calibrated from the explicit planning mass omitted by the shallow horizon, rather than tuned by grid search |
 | Replications per condition | 100 | Sufficient for reliable statistics |
 
@@ -331,7 +330,7 @@ Key figures for the paper:
 1. **Cumulative payoff curves** (all 5 conditions, averaged over 100 replications with confidence bands)
 2. **Affective state trajectories** for Condition 2: $\beta_k$ over time for each partner, with partner type switches marked as vertical lines. Should show slow tracking with inertial response to switches.
 3. **Knowledge-behavior dissociation plot** for Condition 3: level-2 posterior accuracy on x-axis, behavioral optimality on y-axis. Healthy conditions cluster in upper-right; lesioned condition clusters in right-center (high accuracy, medium-low optimality).
-4. **Planning depth × affect interaction**: 2×2 plot showing payoff as a function of planning depth (2 vs. 8) and affect (present vs. absent), demonstrating the interaction — affect helps shallow planners dramatically but helps deep planners only marginally.
+4. **Planning depth × affect interaction**: 2×2 plot showing payoff as a function of planning depth (2 vs. 8) and affect (present vs. absent), demonstrating whether affective weighting creates a benefit that depth alone does not in the current binary-action task.
 5. **Precision vs. reward-average response to Exploiter partner**: time series showing how $\beta_k$ (precision-based) and $\bar{R}_k$ (reward-average) diverge when an Exploiter transitions from cooperation to exploitation. Precision should drop before reward average does.
 6. **Computational cost comparison**: bar chart of mean policy-tree nodes per decision for Conditions 1 vs. 2.
 
@@ -340,13 +339,38 @@ Key figures for the paper:
 | Phase | Tasks | Duration |
 |---|---|---|
 | Phase 1 | Implement basic multi-partner POMDP in the repository's JAX-first stack (Conditions 1, 4) | 2 weeks |
-| Phase 2 | Implement affective state and terminal value mechanism (Condition 2) | 1-2 weeks |
+| Phase 2 | Implement affective state and shallow-EFE weighting mechanism (Condition 2) | 1-2 weeks |
 | Phase 3 | Implement lesion and reward-average conditions (Conditions 3, 5) | 1 week |
 | Phase 4 | Run primary simulations (Variant A, all conditions, 100 replications) | 1 week |
 | Phase 5 | Analysis and visualization of primary results | 1 week |
 | Phase 6 | Run Variants B, C, D | 2 weeks |
 | Phase 7 | Sensitivity analyses and parameter sweeps | 1 week |
 | Phase 8 | Write-up | 2-3 weeks |
+
+### 6.6 Current Empirical Status
+
+The current repo state is no longer pre-results. Two experiment families have already been run and interpreted:
+
+- `default`: 100 replications x 200 rounds, random partner assignment, conditions 1-5
+- `betrayal_stress`: 50 replications x 120 rounds, agent-choice with a scheduled betrayal switch, conditions 1-3 and 5
+
+Current scorecard:
+
+| Hypothesis | Status | Evidence summary |
+|---|---|---|
+| H1 affect > baseline | Supported | Condition 2 beats the non-affect controls in both completed runs, with the stronger effect in betrayal stress. |
+| H2 lesion dissociation | Supported | Condition 3 preserves knowledge-level accuracy but loses payoff relative to Condition 2. |
+| H3 precision > reward average | Informative null | Condition 2 and Condition 5 are effectively equivalent in the completed tasks. |
+| H4 post-switch robustness | Supported | Condition 2 improves post-switch behavior, including under scheduled betrayal. |
+| H5 partner selection | Supported | Agent-choice runs show a positive correlation between beta and partner selection. |
+
+Interpretation:
+
+- The current story is best described as "4 of 5 hypotheses supported, 1 informative null."
+- H3 failed because the existing tasks keep model accuracy and reward mostly monotonic.
+- The strongest remaining follow-up is `variant_d`, because correlated partners are the clearest shipped condition for decoupling prediction accuracy from reward history.
+
+For the rolling summary and next recommended run, see [docs/results_tracking.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/results_tracking.md).
 
 ---
 
@@ -360,21 +384,21 @@ Condition 2 matches Condition 1 at a fraction of the computational cost. Conditi
 
 **Next steps**: extend to more complex social scenarios (larger groups, more partner types, partial observability of actions), test whether affective states can trigger structural model revision (BMR bridge), explore developmental trajectories (how affective states bootstrap from scratch).
 
-### 7.2 Partial Success: Affect Helps but Doesn't Fully Compensate
+### 7.2 Partial Success: Affect Helps but Doesn't Produce a Pure Depth Advantage
 
-Condition 2 improves over Condition 4 but falls short of Condition 1 (e.g., 80% of deep-planner performance rather than 95%).
+Condition 2 improves over the non-affect controls, but Conditions 1, 3, and 4 remain tightly clustered because first-step marginalization makes raw planning depth weakly expressive in the current binary action space.
 
-**Interpretation**: affect provides genuine computational benefit but is not sufficient to fully replace deep planning. The agent needs some minimal planning depth plus affect.
+**Interpretation**: affect provides genuine computational benefit, but the default task does not support a strong "depth compensation" claim because depth alone is largely irrelevant here. The defensible result is that partner-specific weighting changes evaluation in a way that shallow non-affect planning does not.
 
-**Adjustment**: test intermediate planning depths ($\tau = 3, 4$) and find the depth at which affect bridges the remaining gap. The story becomes: "affect reduces the *required* planning depth from 8 to 3-4, providing a 2-4× computational savings." Less dramatic but still meaningful and publishable.
+**Adjustment**: shift the benchmark task toward conditions where depth should matter structurally, or add richer action spaces and partner-selection demands. In the current setup, emphasize post-switch recovery and partner-specific weighting rather than a strict shallow-versus-deep compensation story.
 
 ### 7.3 Precision ≈ Reward Average (Hypothesis 3 Fails)
 
 Conditions 2 and 5 perform comparably. The simpler reward-average account is sufficient.
 
-**Interpretation**: the planning-depth compensation result still holds, but the mechanism is simpler than proposed — any slow terminal value function works, not specifically precision-based. The precision interpretation loses support.
+**Interpretation**: affective weighting still improves behavior, but the precision-specific claim loses support. In that case the result is about slow partner-specific summarization rather than precision being uniquely necessary.
 
-**Adjustment**: pivot framing from "precision is the right compression" to "slow affective summarization enables depth compensation" and present the precision vs. reward-average as an open question. Look for specific scenarios (e.g., novel partner types, mixed cooperative/adversarial interactions) where precision tracking's advantage might emerge.
+**Adjustment**: pivot framing from "precision is the right compression" to "slow affective summarization improves shallow evaluation" and present the precision vs. reward-average distinction as an open question. Look for specific scenarios (e.g., betrayal, non-monotonic partner dynamics, mixed cooperative/adversarial interactions) where precision tracking's advantage might emerge.
 
 ### 7.4 The Lesion Doesn't Produce the Expected Dissociation
 
@@ -388,7 +412,7 @@ Condition 3 performs similarly to Condition 2, or its level-2 posteriors are als
 
 Conditions 2, 3, 4, 5 all perform comparably and all far below Condition 1. Only deep planning works.
 
-**Interpretation**: the affective terminal value is not a good approximation of the true value-to-go in this task. The social environment may be too volatile or too adversarial for a slow affective summary to track.
+**Interpretation**: the affective weighting is not a good approximation of the true value-to-go in this task. The social environment may be too volatile or too adversarial for a slow affective summary to track.
 
 **Adjustment**: this is a genuinely negative result. Consider whether (a) the affective update rule needs to be more sophisticated (perhaps a full Bayesian precision estimate rather than an EMA), (b) the timescale separation is wrong ($\lambda$ too high or too low), or (c) the theoretical framework needs revision — maybe affect helps in specific task niches rather than generally.
 

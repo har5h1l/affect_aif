@@ -32,7 +32,15 @@ def test_affective_terminal_value_deviates_from_initial():
     agent.pending_prediction_partner = 0
     agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
     agent.observe_outcome(partner_idx=0, observation=[0, 2], action_taken=0, partner_action=0, payoff=3.0)
-    assert not np.isclose(agent.get_betas()[0], 0.5)
+    assert agent.get_betas()[0] > 0.55
+
+
+def test_affective_state_moves_materially_on_large_prediction_error():
+    agent = make_agent(AffectiveAgent, num_partners=4, mu=1.0, initial_beta=0.5)
+    agent.pending_prediction_partner = 0
+    agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
+    agent.observe_outcome(partner_idx=0, observation=[1, 0], action_taken=0, partner_action=1, payoff=-1.0)
+    assert agent.get_betas()[0] < 0.4
 
 
 def test_lesion_freeze_constant_beta():
@@ -65,6 +73,29 @@ def test_affective_outperforms_shallow_baseline():
     c2 = float(summary.loc[summary["condition"] == 2, "mean_payoff"].iloc[0])
     c4 = float(summary.loc[summary["condition"] == 4, "mean_payoff"].iloc[0])
     assert c2 >= c4
+
+
+def test_betrayal_run_separates_deep_and_affective_actions():
+    cfg = ExperimentConfig(
+        num_rounds=40,
+        num_replications=1,
+        calibration_episodes=1,
+        random_seed=42,
+        conditions=[1, 2],
+        assignment_mode="agent_choice",
+        p_switch=0.0,
+        observation_noise=0.0,
+        initial_partner_types=["cooperator", "reciprocator", "random", "random"],
+        scheduled_type_switches=[{"round": 16, "partner_idx": 0, "to_type": "exploiter"}],
+    )
+    results = ExperimentRunner(cfg).run_all()
+    primary = results[results["run_mode"] == "primary"].copy()
+
+    c1 = primary[primary["condition"] == 1].sort_values("round")
+    c2 = primary[primary["condition"] == 2].sort_values("round")
+
+    assert c1["selected_action"].tolist() != c2["selected_action"].tolist()
+    assert float(c1["payoff"].sum()) != float(c2["payoff"].sum())
 
 
 def test_affect_tracks_precision_not_reward():

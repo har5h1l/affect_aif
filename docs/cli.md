@@ -214,6 +214,21 @@ python scripts/run_experiment.py --config affect_aif/configs/betrayal_stress.jso
 
 Then run analysis on the resulting CSVs (paths depend on `--batch-name` and config slug, e.g. `results/primary/default/results.csv`, `results/betrayal/betrayal_stress/results.csv`).
 
+## Current next run
+
+The default and betrayal-stress batches are already the interpreted baseline in this repo. If you are continuing from those results, the next run to prioritize is `variant_d` because it is the only shipped config likely to dissociate precision tracking from reward averaging.
+
+```bash
+python scripts/run_experiment.py --config affect_aif/configs/variant_d.json --output-dir results --batch-name correlated_followup --workers 12
+python scripts/run_analysis.py --results results/correlated_followup/variant_d/results.csv --output-dir results/correlated_followup/variant_d/figures
+```
+
+If you want a verification pass after the analysis, follow with:
+
+```bash
+pytest tests/
+```
+
 ---
 
 ## End-to-end workflow

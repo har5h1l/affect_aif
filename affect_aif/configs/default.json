@@ -19,8 +19,8 @@
   "deep_horizon": 8,
   "shallow_horizon": 2,
   "max_policies": 4096,
-  "lambda_smooth": 0.9,
-  "alpha_charge": 1.0,
+  "lambda_smooth": 0.6,
+  "alpha_charge": 3.0,
   "sigma_0_sq": 0.25,
   "mu": null,
   "initial_beta": 0.5,
@@ -33,7 +33,8 @@
   "run_sensitivity": false,
   "sensitivity_factors": {
     "mu": [0.5, 0.75, 1.0, 1.25, 1.5],
-    "lambda_smooth": [0.7, 0.8, 0.9, 0.95],
-    "alpha_charge": [0.5, 1.0, 2.0]
+    "lambda_smooth": [0.4, 0.6, 0.8, 0.9],
+    "alpha_charge": [1.0, 2.0, 3.0, 4.0],
+    "sigma_0_sq": [0.1, 0.25, 0.4]
   }
 }

@@ -15,7 +15,7 @@ class RewardAvgAgent(BaseAgent):
         self,
         *args,
         num_partners: int = 4,
-        lambda_smooth: float = 0.9,
+        lambda_smooth: float = 0.6,
         mu: float = 0.0,
         **kwargs,
     ):

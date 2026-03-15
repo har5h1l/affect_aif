@@ -61,7 +61,7 @@ What is absent across all of this work: a per-partner interoceptive/affective st
 
 ### 2.1 Core Claim
 
-Affect is computational infrastructure that makes tractable social inference possible under realistic resource constraints. Specifically, per-partner interoceptive states — slow-timescale hierarchical representations tracking the reliability of one's social model for each partner — function as learned terminal value approximations that allow shallow explicit planning to achieve the performance of deep explicit planning.
+Affect is computational infrastructure that makes tractable social inference possible under realistic resource constraints. Specifically, per-partner interoceptive states — slow-timescale hierarchical representations tracking the reliability of one's social model for each partner — function as learned precision weights that improve shallow explicit planning by adding partner-specific confidence information that shallow lookahead alone does not encode.
 
 ### 2.2 What the Affective State Tracks
 
@@ -92,25 +92,25 @@ Latent states encoding each partner's type/strategy (e.g., cooperator, reciproca
 **Level 3 — Per-partner affective state (slowest timescale: interoceptive integration)**
 A slow state for each partner summarizing the running quality of the agent's social model of that partner — operationalized as the expected precision of the level-2 action model with respect to that partner. Updated by an exponentially-weighted moving average of prediction error magnitudes from level 2, with a long time constant that makes it resistant to single-trial fluctuations.
 
-### 2.4 Mechanism: Affect as Terminal Value Function
+### 2.4 Mechanism: Affect as Precision Weighting
 
 In standard active inference, policy selection evaluates expected free energy over a planning horizon of depth T:
 
 $$G(\pi) = \sum_{t=1}^{T} G_t(\pi)$$
 
-The affective agent replaces depth-T planning with depth-τ planning (τ << T) plus an affective terminal value:
+The affective agent replaces depth-T planning with depth-τ planning (τ << T) plus affective precision weighting:
 
-$$G(\pi) \approx \sum_{t=1}^{\tau} G_t(\pi) + V_{\text{affect}}(s_\tau, \text{partner})$$
+$$G(\pi) \approx \left(\sum_{t=1}^{\tau} G_t(\pi)\right) \cdot \left(1 + \mu \beta_k\right)$$
 
-Where $V_{\text{affect}}$ is derived from the level-3 affective state. A partner with high affective precision contributes a favorable terminal value (policies engaging with this partner are expected to go well beyond the planning horizon). A partner with low affective precision contributes either an unfavorable terminal value (avoid) or a high epistemic term (investigate).
+Where $\beta_k$ is derived from the level-3 affective state. A partner with high affective precision increases the effective precision of the shallow-horizon estimate, making the agent more decisive when its model of that partner is calibrating well. A partner with low affective precision leaves the shallow rollout weakly weighted, preserving exploratory behavior when the partner model is unreliable.
 
-The vmPFC lesion maps to: remove $V_{\text{affect}}$ and force the agent to rely only on explicit planning up to horizon τ. With τ = 2 and no affective compensation, the agent can only see 2 steps ahead and has no summary of what lies beyond.
+The vmPFC lesion maps to: remove the affective weighting and force the agent to rely only on explicit planning up to horizon τ. With τ = 2 and no affective compensation, the agent can only see 2 steps ahead and has no summary of what lies beyond.
 
 ### 2.5 The Three Novel Components
 
 1. **Per-partner interoceptive state in multi-agent AIF.** Not a global mood, not a shared precision parameter — a learned affective state for each social partner that compresses that specific interaction history into a precision signal. No existing AIF model has this.
 
-2. **Explicit planning-depth vs. performance tradeoff.** The model demonstrates that affect is the specific mechanism that shifts the cost-performance curve — allowing a 1-2 step planner to match a 5-10 step planner. Existing planning-depth optimization literature does not use affect as the mechanism.
+2. **Explicit planning-depth vs. performance tradeoff.** The model demonstrates that affect is a specific mechanism that shifts the cost-performance curve by changing how shallow plans are evaluated, even when planning depth alone does not separate conditions in the current binary-action task. Existing planning-depth optimization literature does not use affect as the mechanism.
 
 3. **Computational vmPFC lesion in a social context.** The IGT literature shows the behavioral syndrome in single-agent gambling tasks. This model reproduces it computationally in a multi-agent setting by decoupling the affective state from policy selection.
 
@@ -136,6 +136,8 @@ $$s_t = (s_t^{(1)}, s_t^{(2)}, s_t^{(3)})$$
 - $s^{(1)}$ — current trial-level state (action on this round)
 - $s^{(2)}$ — partner type/strategy (stable over blocks of trials)
 - $s^{(3)}_k$ — affective state for partner $k$ (stable over longer blocks)
+
+**State inference and variational free energy.** Belief updating over partner type (level-2 hidden state) follows the variational free energy principle. For a categorical variational distribution $q(s)$ over discrete states, the VFE-minimizing posterior is the Bayesian posterior $q^*(s) \propto P(o \mid s) P(s)$. The implementation therefore uses the **analytical solution** to VFE minimization: one-step Bayes with the likelihood matrix $A$ and transition matrix $B$, i.e. posterior = normalize(likelihood × prior), then predictive next prior = $B \times$ posterior. No iterative optimization is required because the optimum is closed-form under this generative model.
 
 ### 3.2 Expected Free Energy Decomposition
 
@@ -168,33 +170,27 @@ The affective state $\beta_k$ for partner $k$ is updated from a signed affective
 $$\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \cdot \sigma(\phi(\epsilon_k^{(t)}))$$
 
 Where:
-- $\lambda \in (0.8, 0.99)$ — smoothing parameter (controls timescale; high $\lambda$ = slow, inertial updates)
+- $\lambda \in (0.5, 0.9)$ — smoothing parameter (controls timescale; higher $\lambda$ = slower, more inertial updates)
 - $\epsilon_k^{(t)} = 1 - P(o_t = o_t^{\mathrm{obs}} \mid s^{(2)}_k)$ — unsigned surprise from the level-2 social model
 - $\phi(\epsilon)$ — a signed transformation that converts surprise magnitudes into affective charge:
   - Small $\epsilon$ → positive charge (model is calibrating well → increase $\beta_k$)
   - Large $\epsilon$ → negative charge (model is miscalibrating → decrease $\beta_k$)
 - $\sigma(\cdot)$ — a logistic squash that keeps the charge contribution in $[0, 1]$ before the moving average is applied
 
-The specific form of $\phi$ could be:
+The specific form of $\phi$ is:
 
 $$\phi(\epsilon) = \alpha \cdot (\sigma_0^2 - \epsilon^2)$$
 
-Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. When actual squared surprise is below baseline, affect increases; when above, it decreases. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
+Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. Defaults of `lambda_smooth = 0.6` and `alpha_charge = 3.0` keep affect slower than belief updates while still letting partner-specific precision estimates separate over roughly 5-10 interactions. When actual squared surprise is below baseline, affect increases; when above, it decreases. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
 Within-theory sensitivity analysis therefore varies not just $\mu$, $\lambda$, and $\alpha$, but also $\sigma_0^2$. That sweep asks whether the mechanism is under-expressed because the baseline surprise scale is badly calibrated, while keeping the update law itself fixed.
 
-### 3.5 Affect as Terminal Value
+### 3.5 Affect as Precision Weighting of Shallow EFE
 
-When planning with a shallow horizon τ, the affective terminal value approximation is:
+When planning with a shallow horizon τ, the affective approximation is:
 
-$$G(\pi) \approx \sum_{t=1}^{\tau} G_t(\pi) + V_k(\beta_k)$$
+$$G(\pi) \approx \left(\sum_{t=1}^{\tau} G_t(\pi)\right) \cdot \left(1 + \mu \beta_k\right)$$
 
-Where:
-
-$$V_k(\beta_k) = -\mu \cdot \beta_k \cdot \frac{\mathbb{E}[r \mid s^{\mathrm{terminal}}_k, a^{\mathrm{terminal}}]}{\max |r|}$$
-
-The negative sign ensures that high affective precision reduces expected free energy only when the predicted continuation is favorable. The parameter $\mu$ scales the influence of affect relative to explicit planning, while the normalized continuation payoff keeps the terminal contribution on the same scale as the pragmatic terms accumulated within the explicit horizon.
-
-This context-sensitive form is preferable to a flat scalar $-\mu \beta_k$ because the same partner-level affect should not blindly favor every policy involving that partner. In the implementation, affect gates the expected continuation value of the terminal action under the current belief state. High $\beta_k$ therefore amplifies credible good continuations, while low $\beta_k$ dampens them and leaves shallow planning closer to its explicit-horizon evidence.
+The parameter $\mu$ scales how strongly partner-specific affect changes the precision of the shallow estimate. In the implementation, the weighting is keyed to the first partner implicated by the policy rather than the terminal node of the rollout. This matters because action selection samples from first-action marginals: weighting the whole shallow-horizon EFE by the first partner's affective precision lets the partner-specific signal survive marginalization, whereas an additive scalar at the terminal node can cancel across policies that share the same first action.
 
 ### 3.6 The vmPFC Lesion
 
@@ -202,7 +198,7 @@ The computational lesion takes one of two forms:
 
 **Full lesion:** Set $\beta_k = \beta_0$ (a fixed neutral value) for all partners and all time. The affective state exists in the model architecture but is decoupled from experience. The agent retains its level-2 social model (it "knows" partner types) but cannot use affective precision to modulate policy selection or extend its effective planning horizon.
 
-**Precision ablation:** Set $\mu = 0$, removing the terminal value function while leaving affective state dynamics intact. The agent "feels" things about partners (the internal state updates) but these feelings have no effect on action selection. This models a disconnection between interoceptive representation and decision circuitry.
+**Precision ablation:** Set $\mu = 0$, removing the shallow-EFE weighting while leaving affective state dynamics intact. The agent "feels" things about partners (the internal state updates) but these feelings have no effect on action selection. This models a disconnection between interoceptive representation and decision circuitry.
 
 Both lesion types should produce the Damasio pattern: intact level-2 posteriors (correct identification of partner types) but impaired behavioral deployment (suboptimal choices, especially in volatile conditions).
 
@@ -261,6 +257,33 @@ The three-timescale architecture (fast observation inference, medium parameter l
 - Affective integration → vmPFC/insula, slow interoceptive dynamics
 
 The model predicts that disruption at each level produces qualitatively different behavioral deficits: level-1 damage impairs perception of social cues, level-2 damage impairs learning about partners, level-3 damage impairs efficient deployment of learned knowledge — each a distinct clinical presentation.
+
+### 4.5 When Precision Collapses to Reward
+
+The current experiments add an important boundary condition. In the default random-assignment task and the betrayal-stress task, Condition 2 (precision-based affect) and Condition 5 (reward-average weighting) are effectively indistinguishable on aggregate payoff and post-switch behavior. This is not evidence that the analysis failed; it is evidence that the task makes prediction accuracy and reward history largely monotonic.
+
+That collapse happens when identifying a partner's type also tells the agent how to harvest reward from that partner. In the current trust game, learning that a partner is exploitive quickly supports retaliatory defection, so higher model precision and higher realized reward re-align after a short adjustment period. Under those circumstances, a slow summary of model calibration and a slow summary of payoff history produce nearly identical action rankings.
+
+The theoretical distinction should only surface when model calibration and reward decouple. Three cases matter most:
+
+- reliable adversaries: high precision, low raw reward
+- volatile benefactors: low precision, high average reward
+- correlated partners: indirect information transfer makes one partner predictable for structural reasons that reward averaging alone cannot represent
+
+This is why the correlated-partner variant is the most informative remaining test in the current repo. It is the shipped condition most likely to produce a genuine divergence between precision-tracking and reward-averaging.
+
+### 4.6 Empirical Reframing After the Current Runs
+
+The completed default and betrayal-stress runs support a narrower but stronger claim than the original "depth compensation" framing. Affect is best interpreted here as **precision augmentation**: a partner-specific signal that changes shallow policy evaluation in ways that deeper planning alone does not recover in the current binary-action task.
+
+The key empirical pattern is:
+
+- affective weighting improves payoff over the non-affect controls
+- the lesion preserves partner knowledge while impairing payoff, reproducing the Damasio-style dissociation
+- partner selection covaries with beta in the agent-choice setup
+- raw planning depth alone is weakly expressive because first-action marginalization dominates in the current action space
+
+So the present theory should be read as: affect adds a dimension of evaluation orthogonal to horizon in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP.
 
 ---
 

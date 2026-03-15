@@ -170,7 +170,7 @@ def compute_efe_with_terminal_value(
     use_utility: bool = True,
     use_information_gain: bool = True,
 ) -> np.ndarray:
-    """Add terminal values to standard expected free energy."""
+    """Add a per-policy EFE adjustment to standard expected free energy."""
 
     del planning_horizon
     base = compute_efe_all_policies(
@@ -275,20 +275,12 @@ def _rollout_policy_trust_game(
         policy,
     )
 
-    terminal_partner = partner_indices[-1]
-    terminal_action = social_actions[-1]
-    terminal_action_probs, _ = _contextual_partner_prediction(
-        belief=beliefs_f[terminal_partner],
-        last_action=last_actions_f[terminal_partner],
-        interaction_count=counts_f[terminal_partner],
-        partner_action_prob_table=partner_action_prob_table,
-        switch_round=switch_round,
-    )
-    continuation_payoff = jnp.dot(terminal_action_probs, agent_payoff_table[terminal_action])
-    normalized_continuation = continuation_payoff / max_abs_payoff
-    terminal_value = -mu * terminal_signal[terminal_partner] * normalized_continuation
-    total = jnp.sum(step_costs) + terminal_value
     first_partner, _ = _decode_action_jax(policy[0], active_partner, assignment_mode_code)
+    total_step_cost = jnp.sum(step_costs)
+    precision_weight = 1.0 + mu * terminal_signal[first_partner]
+    total = total_step_cost * precision_weight
+    terminal_value = total - total_step_cost
+    del beliefs_f, last_actions_f, counts_f, agent_payoff_table, max_abs_payoff, social_actions
     return total, step_costs, terminal_value, first_partner
 
 

@@ -32,6 +32,13 @@ def load_results(path: str) -> pd.DataFrame:
     return pd.read_csv(source)
 
 
+def filter_primary_runs(results: pd.DataFrame) -> pd.DataFrame:
+    if "run_mode" not in results.columns:
+        return results
+    primary = results[results["run_mode"] == "primary"].copy()
+    return primary if not primary.empty else results
+
+
 def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
     rows = []
     for hypothesis_id, payload in results["tests"].items():
@@ -67,7 +74,7 @@ def main():
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    results = load_results(args.results)
+    results = filter_primary_runs(load_results(args.results))
 
     save_all_figures(results, str(output_dir))
     summary = final_round_summary(results)

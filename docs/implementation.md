@@ -29,16 +29,20 @@
 - When enabled, the current implementation multiplies policy precision by `1 + precision_signal`.
 - That means the optional precision path only boosts decisiveness above the base `gamma`; it does not suppress precision below baseline.
 
+## Belief updating (state inference)
+
+- Partner-type beliefs are updated by the **analytical solution** to variational free energy minimization: for a categorical $q(s)$, the VFE-minimizing posterior equals the Bayesian posterior. The code implements this as one-step Bayes using the likelihood tensor $A$ and transition matrix $B$ (see `infer_partner_state` in `affect_aif/agent/base_agent.py`). No gradient descent or iterative VFE minimization is used; the matrix-based update is the closed-form optimum.
+
 ## Trust vs Affect
 
 - `use_parameter_learning=True` enables standard Dirichlet updates to the likelihood model after each observed interaction.
 - This is an implementation of ordinary parameter learning over the observation model, not a separate trust variable matching the $\tau_k$ notation in [docs/theory.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/theory.md).
 - In other words:
   - learned likelihood parameters capture how the agent updates beliefs from evidence
-  - affective `beta_k` captures the slow per-partner summary used for terminal values (and optionally precision modulation)
+  - affective `beta_k` captures the slow per-partner summary used for shallow-EFE weighting (and optionally precision modulation)
 - The current code therefore keeps trust-like evidence accumulation and affective deployment distinct, rather than instantiating a dedicated trust scalar alongside `beta_k`.
 
-## Terminal Values
+## Precision-Weighted Shallow EFE
 
 - Affective and reward-average agents now both emit terminal signals on a comparable `[0, 1]` scale.
 - Affective agents use raw `beta_k`.
@@ -46,14 +50,16 @@
 - Full experiment runs enforce a minimum of `10` calibration episodes when deriving `mu`, even if the config requests fewer.
 - This guard exists because `mu` is shared across all affective and control conditions in a run, so calibrating from only `2-3` episodes makes downstream comparisons noisier than intended.
 - Direct calls to `ExperimentRunner.calibrate_mu()` can still use fewer episodes for fast unit tests or notebook demos.
-- The terminal value actually used in planning is context-sensitive:
+- The planning adjustment used in the JAX trust-game rollout is:
 
 ```text
-V = -mu * signal_k * normalized_continuation_payoff
+G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 ```
 
+- The `terminal_values` field logged per policy is the delta between weighted and unweighted shallow EFE, so diagnostics still expose how much the affect/reward signal changed evaluation.
+- The weight is keyed to the policy's first partner, not the terminal rollout node, because action sampling operates on first-action marginals.
 - `RewardAvgAgent` intentionally inherits the base `precision_signal()` implementation, which returns zeros for every partner.
-- That means the reward-average control only contributes through terminal values; it does not modulate policy precision even if precision modulation is enabled globally.
+- That means the reward-average control only contributes through shallow-EFE weighting; it does not modulate policy precision even if precision modulation is enabled globally.
 
 ## Affective Update Signal
 
@@ -100,6 +106,7 @@ V = -mu * signal_k * normalized_continuation_payoff
 - It also supports `scheduled_type_switches`, a list of `{round, partner_idx, to_type}` events.
 - Scheduled switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the switch as an unexpected behavioral change.
 - See `affect_aif/configs/betrayal_stress.json` for the reference setup.
+- When a config enables `run_sensitivity`, `results.csv` contains both `run_mode="primary"` rows and sensitivity rows. `scripts/run_analysis.py` filters to `run_mode == "primary"` before aggregating so post-hoc summaries do not double-count sensitivity sweeps that reuse the same `(condition, seed)` identifiers.
 - `scripts/run_analysis.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:
   - `betrayal_post_switch_window_1_5.csv`
   - `betrayal_post_switch_window_1_10.csv`

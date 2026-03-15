@@ -14,8 +14,8 @@ class AffectiveState:
     def __init__(
         self,
         num_partners: int,
-        lambda_smooth: float = 0.9,
-        alpha_charge: float = 1.0,
+        lambda_smooth: float = 0.6,
+        alpha_charge: float = 3.0,
         sigma_0_sq: float = 0.25,
         initial_beta: float = 0.5,
     ):
@@ -33,7 +33,7 @@ class AffectiveState:
         predicted_action_probs,
         observed_action: int,
     ) -> tuple[float, float]:
-        """Apply β <- λβ + (1 - λ) * sigmoid(alpha * (sigma_0_sq - epsilon^2))."""
+        """Apply a slow but responsive precision update from squared surprise."""
 
         probs = jnp.asarray(predicted_action_probs, dtype=jnp.float32)
         surprise = 1.0 - probs[int(observed_action)]

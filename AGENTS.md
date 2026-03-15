@@ -13,3 +13,11 @@
 - If experiment assumptions change, update both theory-facing and experiment-facing docs.
 - If configs or scripts change, update the README or implementation notes so the runnable workflow stays accurate.
 - If tests reveal a theory/code mismatch, fix both the implementation and the docs before closing the task.
+
+## Learned
+
+- Use `.venv` in project root; venv should auto-activate when in this folder (Cursor terminal setting and/or direnv with `.envrc`).
+- Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `run_analysis.py` on those paths after.
+- Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
+- Before updating result-interpretation docs (`docs/results_tracking.md`, theory/experiment summaries, README conclusions) from new experiment outputs, ask the user first so the repo does not silently overwrite the active narrative.
+- State inference (partner-type belief updating) is the analytical solution to VFE minimization (matrix-based Bayes with A and B), not iterative optimization; describe it that way in theory and implementation docs.

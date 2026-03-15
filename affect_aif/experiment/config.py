@@ -11,8 +11,8 @@ from affect_aif.generative_model.partner_types import PARTNER_TYPE_ORDER
 
 DEFAULT_SENSITIVITY_FACTORS = {
     "mu": [0.5, 0.75, 1.0, 1.25, 1.5],
-    "lambda_smooth": [0.7, 0.8, 0.9, 0.95],
-    "alpha_charge": [0.5, 1.0, 2.0],
+    "lambda_smooth": [0.4, 0.6, 0.8, 0.9],
+    "alpha_charge": [1.0, 2.0, 3.0, 4.0],
     "sigma_0_sq": [0.1, 0.25, 0.4],
 }
 
@@ -46,8 +46,8 @@ class ExperimentConfig:
     shallow_horizon: int = 2
     max_policies: int = 4096
 
-    lambda_smooth: float = 0.9
-    alpha_charge: float = 1.0
+    lambda_smooth: float = 0.6
+    alpha_charge: float = 3.0
     sigma_0_sq: float = 0.25
     mu: float | None = None
     initial_beta: float = 0.5

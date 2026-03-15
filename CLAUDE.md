@@ -6,3 +6,4 @@
 - For setup or usage changes, check `README.md` first.
 - Every meaningful code change should leave the docs more accurate than before.
 - Every behavior change should ship with tests or updated existing tests.
+- Before refreshing result-tracking or interpretation docs from new experiment outputs, ask the user first; do not silently rewrite the current narrative after a run completes.

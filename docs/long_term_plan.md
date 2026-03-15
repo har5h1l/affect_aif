@@ -21,9 +21,17 @@ Do not refactor toward N-agent support before the single-agent affect question i
 
 Get the main result tables and first-pass figures from the current codebase.
 
+### Status
+
+Completed for the current baseline:
+
+- `default` has been run and interpreted.
+- `betrayal_stress` has been run and interpreted.
+- Current headline: 4 of 5 hypotheses supported, with H3 currently an informative null.
+
 ### Runs
 
-Run both:
+Historical baseline runs:
 
 - `affect_aif/configs/default.json`
 - `affect_aif/configs/betrayal_stress.json`
@@ -78,6 +86,10 @@ Check these first:
 2. Whether `lambda_smooth = 0.9` is too inertial for beta to meaningfully separate partners over 200 rounds.
 3. Whether the derived `mu` is numerically plausible but behaviorally too weak.
 4. Whether beta and terminal-signal ranges are materially moving in `affective_movement_summary.csv`.
+
+### Current next step
+
+Do not spend more time on A, B, C, or `cautious_prior` unless the user explicitly asks. The only remaining high-value shipped experiment is `affect_aif/configs/variant_d.json`, because correlated partners are the best available test of whether precision tracking can separate from reward averaging.
 
 ### Recommended execution record
 

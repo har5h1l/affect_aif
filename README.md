@@ -11,6 +11,7 @@ JAX-first multi-agent active inference simulations for testing whether per-partn
 ## Quickstart
 
 See [docs/cli.md](docs/cli.md) for full CLI and experiment documentation.
+See [docs/results_tracking.md](docs/results_tracking.md) for the current hypothesis scorecard and recommended next run.
 
 ```bash
 python -m venv .venv
@@ -42,9 +43,12 @@ python scripts/run_visualization.py --results results/main_run/default/results.c
 - Default experiments use exact policy enumeration when tractable.
 - When the policy space explodes, the control layer can fall back to capped enumeration.
 - Full runs floor `calibration_episodes` at `10` when deriving `mu`, so affective comparisons do not hinge on a `2-3` episode calibration draw.
+- Default affect settings are `lambda_smooth=0.6`, `alpha_charge=3.0`, `sigma_0_sq=0.25`, which keeps beta slower than belief updates without leaving it effectively frozen.
 - The trust-game rollout uses context-conditioned likelihoods so reciprocators and exploiters are represented faithfully.
+- Affective and reward-average shallow agents weight shallow-horizon EFE by the first partner's signal rather than appending an additive terminal scalar, so condition differences survive first-action marginalization.
 - The current task is still single active agent plus scripted partners, but those partners now implement the same minimal `plan_and_act` / `observe_outcome` lifecycle as agents so the environment loop has a clean extension seam.
 - `affect_aif/configs/betrayal_stress.json` is a harder scheduled-switch scenario for separating precision tracking from reward averaging.
+- `affect_aif/configs/variant_d.json` is the current follow-up run to prioritize if you want one more experiment: it is the only shipped variant likely to separate precision tracking from reward averaging after the default plus betrayal results.
 - `scripts/run_preliminary.py` defaults to the harder `betrayal_stress` setup for a more informative directional smoke test, but accepts `--config` for other variants. It prints directional H1-H5 checks; `scripts/run_analysis.py` also saves `hypothesis_tests.json` alongside plots and summary tables.
 - `scripts/run_analysis.py` auto-emits betrayal-specific outputs when switch events are present, including `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, `betrayal_condition_comparison.csv`, `betrayal_detection_latency.csv`, `betrayal_trajectories.csv`, and `affective_movement_summary.csv`.
 - `scripts/run_experiment.py` supports multiple `--config` paths and `--workers` for parallel runs; with one config and `--workers 1`, `--verbose --verbosity-mode stage_stream` gives live per-round tracing; `--make-gifs` generates one GIF per primary condition/seed run after saving results; `scripts/run_visualization.py` can regenerate GIFs from an existing results file.
