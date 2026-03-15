@@ -216,7 +216,7 @@ Then run analysis on the resulting CSVs (paths depend on `--batch-name` and conf
 
 ## Current next run
 
-The default and betrayal-stress batches are already the interpreted baseline in this repo. If you are continuing from those results, the next run to prioritize is `variant_d` because it is the only shipped config likely to dissociate precision tracking from reward averaging.
+The default, betrayal-stress, and `variant_d` batches are now the interpreted baseline in this repo. `variant_d` was the last shipped attempt to dissociate precision tracking from reward averaging, and it remained null, so the experimental phase is complete.
 
 ```bash
 python scripts/run_experiment.py --config affect_aif/configs/variant_d.json --output-dir results --batch-name correlated_followup --workers 12

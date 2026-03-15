@@ -349,26 +349,28 @@ Key figures for the paper:
 
 ### 6.6 Current Empirical Status
 
-The current repo state is no longer pre-results. Two experiment families have already been run and interpreted:
+The current repo state is no longer pre-results. Three experiment families have been run and interpreted:
 
 - `default`: 100 replications x 200 rounds, random partner assignment, conditions 1-5
 - `betrayal_stress`: 50 replications x 120 rounds, agent-choice with a scheduled betrayal switch, conditions 1-3 and 5
+- `variant_d`: 100 replications x 200 rounds, random partner assignment with partners 1 and 2 correlated at `correlation_strength = 0.9`, conditions 1-5
 
 Current scorecard:
 
-| Hypothesis | Status | Evidence summary |
-|---|---|---|
-| H1 affect > baseline | Supported | Condition 2 beats the non-affect controls in both completed runs, with the stronger effect in betrayal stress. |
-| H2 lesion dissociation | Supported | Condition 3 preserves knowledge-level accuracy but loses payoff relative to Condition 2. |
-| H3 precision > reward average | Informative null | Condition 2 and Condition 5 are effectively equivalent in the completed tasks. |
-| H4 post-switch robustness | Supported | Condition 2 improves post-switch behavior, including under scheduled betrayal. |
-| H5 partner selection | Supported | Agent-choice runs show a positive correlation between beta and partner selection. |
+| Hypothesis | Default | Betrayal Stress | Variant D | Final reading |
+|---|---|---|---|---|
+| H1 affect > baseline | Supported (`d = 0.63`, `p = 1.3e-5`) | Supported (`d = 1.11`, `p = 4.1e-7`) | Supported (`d = 0.52`, `p = 3.0e-4`) | Strongly supported |
+| H2 lesion dissociation | Supported (`p = 1.3e-5`) | Supported (`p = 1.5e-5`) | Supported (`p = 3.0e-4`) | Strongly supported |
+| H3 precision > reward average | Null (`d = 0.01`, `p = 0.94`) | Null (`d = 0.01`, `p = 0.95`) | Null (`d = -0.001`, `p = 0.99`) | Confirmed null |
+| H4 post-switch robustness | Supported (`p = 4.3e-9`) | Supported (`p = 0.0056`) | Supported (`p = 1.7e-6`) | Supported |
+| H5 partner selection | N/A | Supported (`r = 0.42`, `p = 4.3e-6`) | N/A | Supported |
 
 Interpretation:
 
-- The current story is best described as "4 of 5 hypotheses supported, 1 informative null."
-- H3 failed because the existing tasks keep model accuracy and reward mostly monotonic.
-- The strongest remaining follow-up is `variant_d`, because correlated partners are the clearest shipped condition for decoupling prediction accuracy from reward history.
+- The current story is best described as "4 of 5 hypotheses supported, 1 confirmed null."
+- `variant_d` was the final shipped mechanism test for H3 and did not change the outcome: `C2 = 651.52`, `C5 = 651.64`, `d = -0.001`, `p = 0.99`.
+- The null is therefore substantive, not provisional. In the current trust-game family, model accuracy and reward history stay too aligned for precision tracking to outperform reward averaging.
+- The active framing should now be **precision augmentation** plus a clear H3 boundary condition, not an open search for one more disambiguating run.
 
 For the rolling summary and next recommended run, see [docs/results_tracking.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/results_tracking.md).
 

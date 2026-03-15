@@ -260,9 +260,11 @@ The model predicts that disruption at each level produces qualitatively differen
 
 ### 4.5 When Precision Collapses to Reward
 
-The current experiments add an important boundary condition. In the default random-assignment task and the betrayal-stress task, Condition 2 (precision-based affect) and Condition 5 (reward-average weighting) are effectively indistinguishable on aggregate payoff and post-switch behavior. This is not evidence that the analysis failed; it is evidence that the task makes prediction accuracy and reward history largely monotonic.
+The completed experiments add an important boundary condition. In the default random-assignment task, the betrayal-stress task, and the correlated-partner `variant_d` task, Condition 2 (precision-based affect) and Condition 5 (reward-average weighting) are effectively indistinguishable on aggregate payoff and post-switch behavior. This is not evidence that the analysis failed; it is evidence that the task makes prediction accuracy and reward history largely monotonic.
 
 That collapse happens when identifying a partner's type also tells the agent how to harvest reward from that partner. In the current trust game, learning that a partner is exploitive quickly supports retaliatory defection, so higher model precision and higher realized reward re-align after a short adjustment period. Under those circumstances, a slow summary of model calibration and a slow summary of payoff history produce nearly identical action rankings.
+
+`variant_d` was the strongest shipped rescue attempt for H3 because it introduced hidden correlation between partners 1 and 2 at 90 percent strength. Even there, the manipulation did not create a usable dissociation: Condition 2 and Condition 5 remained tied on payoff (`651.52` vs `651.64`, `d = -0.001`, `p = 0.99`) and matched exactly on exploitation rate (`0.481`). The most plausible interpretation is that the agent treats each partner independently, so correlation only smooths both signals rather than giving precision-tracking a unique advantage.
 
 The theoretical distinction should only surface when model calibration and reward decouple. Three cases matter most:
 
@@ -270,20 +272,21 @@ The theoretical distinction should only surface when model calibration and rewar
 - volatile benefactors: low precision, high average reward
 - correlated partners: indirect information transfer makes one partner predictable for structural reasons that reward averaging alone cannot represent
 
-This is why the correlated-partner variant is the most informative remaining test in the current repo. It is the shipped condition most likely to produce a genuine divergence between precision-tracking and reward-averaging.
+The current partner-type set does not actually instantiate those dissociations strongly enough. So the boundary condition is now sharper: without partner classes where prediction accuracy and reward genuinely come apart, precision-tracking collapses behaviorally to reward averaging even when affective beta moves materially.
 
 ### 4.6 Empirical Reframing After the Current Runs
 
-The completed default and betrayal-stress runs support a narrower but stronger claim than the original "depth compensation" framing. Affect is best interpreted here as **precision augmentation**: a partner-specific signal that changes shallow policy evaluation in ways that deeper planning alone does not recover in the current binary-action task.
+The completed `default`, `betrayal_stress`, and `variant_d` runs support a narrower but stronger claim than the original "depth compensation" framing. Affect is best interpreted here as **precision augmentation**: a partner-specific signal that changes shallow policy evaluation in ways that deeper planning alone does not recover in the current binary-action task.
 
 The key empirical pattern is:
 
 - affective weighting improves payoff over the non-affect controls
 - the lesion preserves partner knowledge while impairing payoff, reproducing the Damasio-style dissociation
 - partner selection covaries with beta in the agent-choice setup
+- the precision-versus-reward comparison stays null even after the correlated-partner stress test
 - raw planning depth alone is weakly expressive because first-action marginalization dominates in the current action space
 
-So the present theory should be read as: affect adds a dimension of evaluation orthogonal to horizon in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP.
+So the present theory should be read as: affect adds a dimension of evaluation orthogonal to horizon in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP. The landing position is therefore not "precision beats reward averaging in standard trust games," but "precision augmentation improves shallow social choice while H3 marks a real structural boundary of the current environment family."
 
 ---
 

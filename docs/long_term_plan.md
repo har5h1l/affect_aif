@@ -23,11 +23,12 @@ Get the main result tables and first-pass figures from the current codebase.
 
 ### Status
 
-Completed for the current baseline:
+Completed for the planned experiment set:
 
 - `default` has been run and interpreted.
 - `betrayal_stress` has been run and interpreted.
-- Current headline: 4 of 5 hypotheses supported, with H3 currently an informative null.
+- `variant_d` has been run and interpreted.
+- Current headline: 4 of 5 hypotheses supported, with H3 now a confirmed null across three runs.
 
 ### Runs
 
@@ -87,9 +88,17 @@ Check these first:
 3. Whether the derived `mu` is numerically plausible but behaviorally too weak.
 4. Whether beta and terminal-signal ranges are materially moving in `affective_movement_summary.csv`.
 
+### Outcome
+
+- H1 is replicated across `default`, `betrayal_stress`, and `variant_d`.
+- H2 is replicated across `default`, `betrayal_stress`, and `variant_d`.
+- H3 remains null across all three runs, including correlated partners at `correlation_strength = 0.9`.
+- H4 is supported in the volatile and post-switch analyses.
+- H5 is supported in the agent-choice betrayal setup.
+
 ### Current next step
 
-Do not spend more time on A, B, C, or `cautious_prior` unless the user explicitly asks. The only remaining high-value shipped experiment is `affect_aif/configs/variant_d.json`, because correlated partners are the best available test of whether precision tracking can separate from reward averaging.
+Do not spend more time on A, B, C, D, or `cautious_prior` unless the user explicitly asks. The shipped experimental phase is complete, and the active work is now theory tightening plus paper framing around the confirmed H3 boundary condition.
 
 ### Recommended execution record
 
@@ -107,6 +116,10 @@ For each Phase 1 run, save:
 ### Goal
 
 Use the betrayal-stress setup as the primary mechanism test. This is the cleanest diagnostic for whether precision tracking adds something beyond reward averaging.
+
+### Status
+
+Core empirical pass complete. `betrayal_stress` served as the primary mechanism diagnostic and established the strongest H1/H2/H4 evidence, but it did not separate Condition 2 from Condition 5.
 
 ### Focus
 
@@ -136,11 +149,17 @@ The figure should make it easy to see:
 
 Revise the paper-level theoretical framing only after the empirical pattern is known.
 
+### Status
+
+Active phase. The empirical pattern is stable enough to tighten the write-up without waiting on more runs.
+
 ### Priority items
 
 1. Empirically justify the terminal value approximation.
 2. Acknowledge the difference between the current implementation and the Hesp formulation.
 3. Expand the trust-versus-affect comparison into a clearer 2x2 table.
+4. Reframe H3 as a confirmed boundary condition: in the current trust-game family, precision and reward are behaviorally equivalent.
+5. Make `variant_d` explicit as the final failed rescue attempt for H3, including the implication that correlated partners do not help when partners are modeled independently.
 
 ### Required empirical support
 
@@ -177,7 +196,7 @@ This is a second-paper direction, not part of the first-paper critical path.
 
 ## Short Operational Summary
 
-- Now: run the main experiments with the current code.
-- Next: use betrayal stress as the mechanism deep-dive.
-- After results: tighten the theory around what the data actually shows.
+- Now: treat the experiment phase as closed.
+- Next: tighten the theory around the final scorecard and confirmed H3 null.
+- After that: draft the paper around precision augmentation, the Damasio-style dissociation, and the theory boundary condition.
 - Later: do the N-agent refactor only once the single-agent paper is in draft form.
