@@ -88,6 +88,12 @@ V = -mu * signal_k * normalized_continuation_payoff
 - The animation dashboard is intentionally task-facing rather than publication-facing. Each frame shows the current round, partner roster, selected/observed actions, payoff, inferred vs true type, cumulative payoff trajectory, and the per-partner beta or reward-average signal when that signal exists.
 - Non-affective conditions render a disabled signal panel instead of fabricating beta values.
 
+## Parallelism
+
+- `scripts/run_experiment.py` accepts multiple `--config` paths and a `--workers` count. With more than one config or `workers > 1`, it uses `BatchExperimentRunner` and a `ProcessPoolExecutor` from the standard library.
+- Work is parallelized at replication granularity: calibration episodes, then primary replications (and when `run_sensitivity` is true, sensitivity replications) are submitted to the pool. Each task runs a single replication in a worker process; config and calibration summaries are serialized and passed in. Results are collected in the main process and written per config under `<output-dir>/<batch_id>/<config_slug>/results.csv`.
+- Serial mode (exactly one config and `--workers 1`) runs in the main process and supports `--verbose` stage streaming and `--make-gifs`; batch mode disables per-round verbosity but can still use `--verbose` for completion messages and `--make-gifs` to build GIFs per config after all replications finish.
+
 ## Betrayal Stress Experiment
 
 - The environment supports `initial_partner_types` to seed a specific partner roster.

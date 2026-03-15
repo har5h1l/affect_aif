@@ -320,6 +320,10 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 - Noise robustness (Hypothesis 4): segmented analysis of performance in stable vs. post-switch windows
 - Sensitivity analysis: sweep over $\lambda$ (0.7-0.99), $\mu$ (0.5-5.0), $p_{\text{switch}}$ (0.01-0.1) to characterize robustness of results to parameter choices
 
+**Execution workflow note**:
+- `scripts/run_experiment.py` accepts repeated `--config` flags and a shared `--workers` pool so multiple experiment configs can be queued in one invocation.
+- Outputs are written per config under `<output-dir>/<batch-id>/<config-name>/results.csv`, which keeps each experiment variant isolated while still allowing the scheduler to share workers across all queued replications.
+
 ### 6.4 Visualizations
 
 Key figures for the paper:

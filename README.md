@@ -10,20 +10,22 @@ JAX-first multi-agent active inference simulations for testing whether per-partn
 
 ## Quickstart
 
+See [docs/cli.md](docs/cli.md) for full CLI and experiment documentation.
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python scripts/run_experiment.py --config affect_aif/configs/default.json --output results/default.csv
-python scripts/run_experiment.py --config affect_aif/configs/default.json --output results/default.csv --verbose --make-gifs --gif-output-dir results/default_gifs
+# primary + betrayal stress with 12 workers (results under results/main_run/<config>/)
+python scripts/run_experiment.py --config affect_aif/configs/default.json --config affect_aif/configs/betrayal_stress.json --output-dir results --batch-name main_run --workers 12
 python scripts/run_preliminary.py --replications 5 --output results/preliminary.csv
-python scripts/run_experiment.py --config affect_aif/configs/betrayal_stress.json --output results/betrayal_stress.csv
-python scripts/run_analysis.py --results results/default.csv --output-dir results/figures
-python scripts/run_analysis.py --results results/betrayal_stress.csv --output-dir results/betrayal_figures
-python scripts/run_visualization.py --results results/default.csv --output-dir results/default_gifs
+python scripts/run_analysis.py --results results/main_run/default/results.csv --output-dir results/main_run/default/figures
+python scripts/run_analysis.py --results results/main_run/betrayal_stress/results.csv --output-dir results/main_run/betrayal_stress/figures
+# optional: regenerate GIFs from saved results
+python scripts/run_visualization.py --results results/main_run/default/results.csv --output-dir results/main_run/default/gifs
 ```
 
-`results/` is reserved for local run outputs and analysis artifacts. The directory is kept in the repo via `results/.gitkeep`, but generated CSVs, plots, and summaries are ignored.
+`results/` is reserved for local run outputs and analysis artifacts. `scripts/run_experiment.py` writes each batch into `results/<batch>/<config>/`, including `results.csv`, a copied `config.json`, batch metadata, and optional `gifs/`. The directory is kept in the repo via `results/.gitkeep`, but generated CSVs, plots, GIFs, and summaries are ignored.
 
 ## Layout
 
@@ -45,6 +47,5 @@ python scripts/run_visualization.py --results results/default.csv --output-dir r
 - `affect_aif/configs/betrayal_stress.json` is a harder scheduled-switch scenario for separating precision tracking from reward averaging.
 - `scripts/run_preliminary.py` defaults to the harder `betrayal_stress` setup for a more informative directional smoke test, but accepts `--config` for other variants. It prints directional H1-H5 checks; `scripts/run_analysis.py` also saves `hypothesis_tests.json` alongside plots and summary tables.
 - `scripts/run_analysis.py` auto-emits betrayal-specific outputs when switch events are present, including `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, `betrayal_condition_comparison.csv`, `betrayal_detection_latency.csv`, `betrayal_trajectories.csv`, and `affective_movement_summary.csv`.
-- `scripts/run_experiment.py` supports `--verbose --verbosity-mode stage_stream` for live per-round stage tracing across planning, environment stepping, belief updates, and metric logging.
-- `scripts/run_experiment.py --make-gifs` generates one GIF per primary condition/seed run after saving results; `scripts/run_visualization.py` can regenerate the same GIFs later from an existing results file.
+- `scripts/run_experiment.py` supports multiple `--config` paths and `--workers` for parallel runs; with one config and `--workers 1`, `--verbose --verbosity-mode stage_stream` gives live per-round tracing; `--make-gifs` generates one GIF per primary condition/seed run after saving results; `scripts/run_visualization.py` can regenerate GIFs from an existing results file.
 - For the betrayal workflow, inspect `betrayal_condition_comparison.csv` and `affective_movement_summary.csv` first. A useful mechanism result means Condition 2 improves post-switch payoff and/or accuracy over Condition 5 while beta and terminal-signal ranges move materially; a flat comparison plus flat movement summary is a null mechanism result, not an analysis failure.

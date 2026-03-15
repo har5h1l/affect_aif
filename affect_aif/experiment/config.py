@@ -91,15 +91,22 @@ class ExperimentConfig:
         self.gif_output_dir = None if self.gif_output_dir is None else str(self.gif_output_dir)
 
     @classmethod
-    def from_json(cls, path: str) -> "ExperimentConfig":
-        """Load a configuration from disk."""
+    def from_dict(cls, data: dict) -> "ExperimentConfig":
+        """Build a configuration from a raw dictionary."""
 
-        data = json.loads(Path(path).read_text())
+        data = dict(data)
         tuple_fields = ("mutual_coop", "sucker", "temptation", "mutual_defect")
         for key in tuple_fields:
             if key in data:
                 data[key] = tuple(data[key])
         return cls(**data)
+
+    @classmethod
+    def from_json(cls, path: str) -> "ExperimentConfig":
+        """Load a configuration from disk."""
+
+        data = json.loads(Path(path).read_text())
+        return cls.from_dict(data)
 
     def to_json(self, path: str):
         """Serialize this configuration to disk."""

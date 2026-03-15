@@ -1,12 +1,15 @@
 import subprocess
 import sys
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from affect_aif.analysis.visualization import build_run_gifs, load_results
 from affect_aif.analysis.metrics import post_switch_window_summary
 from affect_aif.environment.trust_game import TrustGameEnv
+from affect_aif.experiment.batch import BatchExperimentRunner
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
 
@@ -152,3 +155,62 @@ def test_visualization_handles_non_affective_conditions(tmp_path, tiny_config):
 
     assert len(written) == 1
     assert written[0].exists()
+
+
+def test_run_experiment_parser_accepts_repeated_configs_and_workers():
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "run_experiment.py"
+    spec = spec_from_file_location("run_experiment_module", script_path)
+    module = module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    parser = module.build_parser()
+    args = parser.parse_args(
+        [
+            "--config",
+            "affect_aif/configs/default.json",
+            "--config",
+            "affect_aif/configs/betrayal_stress.json",
+            "--output-dir",
+            "results",
+            "--workers",
+            "3",
+        ]
+    )
+
+    assert args.config == ["affect_aif/configs/default.json", "affect_aif/configs/betrayal_stress.json"]
+    assert args.output_dir == "results"
+    assert args.workers == 3
+
+
+def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path, tiny_config):
+    cfg_a = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "run_sensitivity": False})
+    cfg_b = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1], "experiment_name": "secondary", "run_sensitivity": False})
+    config_a_path = tmp_path / "config_a.json"
+    config_b_path = tmp_path / "config_b.json"
+    cfg_a.to_json(str(config_a_path))
+    cfg_b.to_json(str(config_b_path))
+
+    batch = BatchExperimentRunner(
+        config_paths=[str(config_a_path), str(config_b_path)],
+        output_root=str(tmp_path / "results"),
+        batch_id="test_batch",
+        workers=2,
+        verbose=False,
+    )
+    result = batch.run_all()
+
+    config_dirs = {state.config_name: state.output_dir for state in result.config_states}
+    assert set(config_dirs) == {"config_a", "config_b"}
+
+    results_a = pd.read_csv(config_dirs["config_a"] / "results.csv")
+    results_b = pd.read_csv(config_dirs["config_b"] / "results.csv")
+
+    assert {"config_path", "config_name", "batch_id", "run_mode"}.issubset(results_a.columns)
+    assert {"config_path", "config_name", "batch_id", "run_mode"}.issubset(results_b.columns)
+    assert set(results_a["config_name"]) == {"config_a"}
+    assert set(results_b["config_name"]) == {"config_b"}
+    assert set(results_a["batch_id"]) == {"test_batch"}
+    assert set(results_b["batch_id"]) == {"test_batch"}
+    assert (config_dirs["config_a"] / "batch_metadata.json").exists()
+    assert (config_dirs["config_b"] / "batch_metadata.json").exists()

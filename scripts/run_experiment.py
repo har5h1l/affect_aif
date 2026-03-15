@@ -1,57 +1,126 @@
-"""CLI entry point for running the experiment."""
+"""CLI entry point for running batched experiments."""
 
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from affect_aif.analysis.visualization import build_run_gifs
+from affect_aif.experiment.batch import BatchExperimentRunner, default_batch_id
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Run the affect_aif experiment.")
-    parser.add_argument("--config", required=True, help="Path to a JSON config file.")
-    parser.add_argument("--output", required=True, help="Where to write the results table.")
-    parser.add_argument("--verbose", action="store_true", help="Print live stage-by-stage experiment progress.")
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Run one or more affect_aif experiments.")
+    parser.add_argument("--config", action="append", required=True, help="Path to a JSON config file. Repeat to queue multiple configs.")
+    parser.add_argument("--output-dir", default="results", help="Root directory for batch output folders.")
+    parser.add_argument("--batch-name", help="Stable name for the batch output subdirectory.")
+    parser.add_argument("--workers", type=int, default=os.cpu_count() or 1, help="Shared worker count across the whole batch.")
+    parser.add_argument("--verbose", action="store_true", help="Print experiment progress.")
     parser.add_argument(
         "--verbosity-mode",
         default="stage_stream",
         choices=["stage_stream"],
-        help="Structured progress output mode.",
+        help="Structured progress output mode for single-worker single-config runs.",
     )
     parser.add_argument(
         "--no-verbose-calibration",
         action="store_true",
-        help="Suppress calibration-stage messages when verbose output is enabled.",
+        help="Suppress calibration-stage messages when verbose output is enabled in serial mode.",
     )
     parser.add_argument("--make-gifs", action="store_true", help="Generate one GIF per primary condition-run after saving results.")
-    parser.add_argument("--gif-output-dir", help="Directory for generated experiment GIFs.")
-    args = parser.parse_args()
+    return parser
 
-    config = ExperimentConfig.from_json(args.config)
+
+def _slugify(text: str) -> str:
+    import re
+
+    slug = re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
+    return slug or "run"
+
+
+def _serial_single_config_run(args) -> int:
+    batch_id = args.batch_name or default_batch_id()
+    config_path = str(Path(args.config[0]).resolve())
+    config_name = _slugify(Path(config_path).stem)
+    batch_dir = Path(args.output_dir) / batch_id
+    config_dir = batch_dir / config_name
+    results_path = config_dir / "results.csv"
+    config_copy_path = config_dir / "config.json"
+    metadata_path = config_dir / "batch_metadata.json"
+
+    config = ExperimentConfig.from_json(config_path)
     config.verbose = bool(args.verbose)
     config.verbosity_mode = str(args.verbosity_mode)
     config.verbosity_include_calibration = not bool(args.no_verbose_calibration)
-    config.gif_after_run = bool(args.make_gifs)
-    config.gif_output_dir = args.gif_output_dir
+    config.gif_after_run = False
+    config.gif_output_dir = None
     runner = ExperimentRunner(config)
-    results = runner.run_all()
-    runner.save_results(results, args.output)
+    results = runner.run_all(config_path=config_path, config_name=config_name, batch_id=batch_id)
 
-    print(f"Saved {len(results)} rows to {Path(args.output)}")
+    config_dir.mkdir(parents=True, exist_ok=True)
+    runner.save_results(results, str(results_path))
+    config.to_json(str(config_copy_path))
+    metadata_path.write_text(
+        json.dumps(
+            {
+                "batch_id": batch_id,
+                "config_path": config_path,
+                "config_name": config_name,
+                "results_path": str(results_path),
+                "workers": 1,
+                "calibration_summary": runner.calibration_summary,
+            },
+            indent=2,
+        )
+    )
+
+    print(f"Saved {len(results)} rows to {results_path}")
     if runner.calibration_summary is not None:
         print(f"Derived mu: {runner.calibration_summary['derived_mu']:.6f}")
         print(f"Mean |EFE| per step: {runner.calibration_summary['mean_abs_efe_per_step']:.6f}")
-    if config.gif_after_run:
-        gif_output_dir = config.gif_output_dir or str(Path(args.output).with_suffix("")) + "_gifs"
-        written = build_run_gifs(results, gif_output_dir, reporter=runner.progress)
-        print(f"Saved {len(written)} GIFs to {Path(gif_output_dir)}")
+    if args.make_gifs:
+        gif_dir = config_dir / "gifs"
+        written = build_run_gifs(results, str(gif_dir), reporter=runner.progress)
+        print(f"Saved {len(written)} GIFs to {gif_dir}")
+    return 0
+
+
+def _batch_run(args) -> int:
+    batch_id = args.batch_name or default_batch_id()
+    runner = BatchExperimentRunner(
+        config_paths=args.config,
+        output_root=args.output_dir,
+        batch_id=batch_id,
+        workers=args.workers,
+        make_gifs=bool(args.make_gifs),
+        verbose=bool(args.verbose),
+    )
+    result = runner.run_all()
+    print(f"Saved batch outputs to {result.batch_dir}")
+    for state in result.config_states:
+        rows = len(state.primary_rows) + len(state.sensitivity_rows)
+        print(f"{state.config_name}: {rows} rows -> {state.output_dir / 'results.csv'}")
+        if state.calibration_summary is not None:
+            print(f"{state.config_name}: derived mu {float(state.calibration_summary['derived_mu']):.6f}")
+    return 0
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+    if args.workers < 1:
+        parser.error("--workers must be at least 1.")
+    if len(args.config) == 1 and int(args.workers) == 1:
+        return _serial_single_config_run(args)
+    return _batch_run(args)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
