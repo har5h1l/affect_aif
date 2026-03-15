@@ -1,0 +1,23 @@
+{
+  "experiment_name": "variant_c_noisy_observations",
+  "num_partners": 4,
+  "num_rounds": 200,
+  "p_switch": 0.05,
+  "assignment_mode": "random",
+  "observation_noise": 0.1,
+  "gamma": 1.0,
+  "deep_horizon": 8,
+  "shallow_horizon": 2,
+  "max_policies": 4096,
+  "lambda_smooth": 0.9,
+  "alpha_charge": 1.0,
+  "sigma_0_sq": 0.25,
+  "mu": null,
+  "initial_beta": 0.5,
+  "lesion_mode": "decouple",
+  "num_replications": 100,
+  "calibration_episodes": 20,
+  "random_seed": 42,
+  "conditions": [1, 2, 3, 4, 5],
+  "partner_types": ["cooperator", "reciprocator", "exploiter", "random"]
+}
