@@ -46,6 +46,14 @@ class Partner:
         self.last_agent_action = int(agent_action)
         self.interaction_count += 1
 
+    def force_type_switch(self, new_type: str):
+        """Apply a configured type change and reset local context."""
+
+        self.type_name = str(new_type)
+        self.interaction_count = 0
+        self.last_agent_action = COOPERATE
+        self.last_partner_action = COOPERATE
+
     def maybe_switch_type(self, available_types: list[str], p_switch: float) -> bool:
         """Stochastically switch to a different latent type."""
 
@@ -53,7 +61,5 @@ class Partner:
             return False
 
         candidates = [name for name in available_types if name != self.type_name]
-        self.type_name = str(self.rng.choice(candidates))
-        self.interaction_count = 0
-        self.last_agent_action = COOPERATE
+        self.force_type_switch(str(self.rng.choice(candidates)))
         return True

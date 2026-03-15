@@ -28,3 +28,24 @@ def test_environment_step_fields():
     assert "active_partner" in context
     result = env.step(0)
     assert {"partner_idx", "true_partner_type", "agent_payoff", "observation"}.issubset(result)
+
+
+def test_environment_applies_scheduled_type_switches():
+    cfg = ExperimentConfig(
+        num_partners=1,
+        num_rounds=2,
+        assignment_mode="random",
+        p_switch=0.0,
+        partner_types=["cooperator", "exploiter"],
+        initial_partner_types=["cooperator"],
+        scheduled_type_switches=[{"round": 2, "partner_idx": 0, "to_type": "exploiter"}],
+    )
+    env = TrustGameEnv(cfg, seed=0)
+    env.reset()
+
+    first = env.step(0)
+    second = env.step(0)
+
+    assert first["true_partner_type"] == "cooperator"
+    assert second["true_partner_type"] == "exploiter"
+    assert second["type_switched"] is True

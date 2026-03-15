@@ -198,6 +198,7 @@ def _contextual_partner_prediction(
     partner_action_prob_table,
     switch_round,
 ):
+    # `switch_round` is the exploiter's within-type phase boundary, not the stochastic p_switch over partner types.
     phase = jnp.where(interaction_count >= switch_round, 1, 0).astype(jnp.int32)
     p_coop_by_type = partner_action_prob_table[:, last_action, phase]
     p_coop = jnp.dot(belief, p_coop_by_type)
@@ -361,6 +362,7 @@ def decision_step_trust_game(
         use_utility_flag,
         use_information_gain_flag,
     )
+    # Optional precision modulation currently only boosts precision above the base gamma.
     precision_scale = jnp.where(modulate_precision_flag > 0, 1.0 + precision_signal[first_partners], 1.0)
     logits = -gamma * precision_scale * G
     q_pi = jax.nn.softmax(logits)

@@ -55,6 +55,8 @@ $$P(o_t | s^{(1)}_t, s^{(2)}_k) = \text{determined by type-specific cooperation 
 
 $$P(s^{(2)}_{k,t+1} | s^{(2)}_{k,t}) = (1 - p_{\text{switch}}) \cdot \mathbb{I}[s' = s] + p_{\text{switch}} \cdot \text{Uniform}(S^{(2)})$$
 
+Important implementation note: this stochastic type switching is separate from the exploiter's internal `switch_round`. `p_switch` governs when a partner changes latent type altogether; `switch_round` only governs when an **exploiter-type** partner changes from its early cooperative phase to its later exploitative phase after repeated interactions.
+
 **Level 3 transitions (affective state)**: governed by the exponential moving average update described in the theory document. Not a standard discrete POMDP transition — implemented as a continuous auxiliary variable updated outside the core POMDP loop (see Section 2.6).
 
 ### 2.4 Preference Model (C matrix)
@@ -90,11 +92,11 @@ After each trial with partner $k$, the affective state is updated:
 # After observing partner k's action at time t:
 prediction = E[o_t | current posterior over s^(2)_k]
 actual = o_t
-epsilon_k = actual - prediction                    # prediction error
-sq_error = epsilon_k^2
+surprise_k = 1 - prediction[actual]               # unsigned surprise of what happened
+sq_surprise = surprise_k^2
 
 # Affective charge: positive if model is accurate, negative if not
-charge = alpha * (sigma_0^2 - sq_error)
+charge = alpha * (sigma_0^2 - sq_surprise)
 
 # Exponential moving average update
 beta_k = lambda * beta_k + (1 - lambda) * sigmoid(charge)
@@ -103,7 +105,7 @@ beta_k = lambda * beta_k + (1 - lambda) * sigmoid(charge)
 Parameters:
 - $\lambda = 0.9$ — smoothing parameter (affective state is 10× slower than beliefs)
 - $\alpha = 1.0$ — charge sensitivity
-- $\sigma_0^2$ — baseline expected error (set to the variance of a uniform-random partner)
+- $\sigma_0^2$ — baseline expected squared surprise; default `0.25` matches a random binary partner because $(1 - 0.5)^2 = 0.25$
 - sigmoid clamps the charge contribution to $[0, 1]$
 
 The affective terminal value is then:
@@ -152,6 +154,9 @@ Partner actions are observed with 10% noise (cooperation misread as defection an
 
 **Variant D: Correlated partners (for structure learning extension)**
 Two of the four partners are secretly correlated — partner C copies partner B's action with 90% probability. This tests whether affective signals can detect structural relationships: the agent should notice that its model of C is suspiciously well-predicted by its model of B, signaling coalition structure. This variant connects to the BMR/structure learning direction.
+
+**Variant E: Betrayal stress test**
+Use agent-chosen partners, disable stochastic type switches (`p_switch = 0`), seed a clearly cooperative partner at the start of the episode, then force a scheduled switch from `cooperator` to `exploiter` mid-episode. The key readout is payoff, action choice, and inferred-type accuracy in the first 5-10 encounters after the betrayal event. This is the cleanest way to separate precision tracking from reward averaging, because the partner's past reward history remains attractive while the predictive model becomes sharply wrong.
 
 ---
 
@@ -243,6 +248,7 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Cumulative payoff (overall and broken down by partner type)
 - Performance in the first 10 rounds after a partner type switch (where uncertainty information is most valuable)
 - Exploitation rate by Exploiter-type partners
+- In the betrayal stress test, performance in the first 5-10 encounters after the forced cooperator→exploiter switch
 
 **Expected outcome**: The reward-average agent is exploited more by Exploiter types (who provide good initial rewards but then defect) because it confuses high past reward with high future reliability. The precision-based agent detects increasing prediction errors from the Exploiter earlier, even before average reward drops, because the Exploiter's transition from cooperation to defection produces model misfit that precision tracking catches but reward averaging misses.
 

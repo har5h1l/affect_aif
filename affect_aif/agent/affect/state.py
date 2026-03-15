@@ -22,6 +22,7 @@ class AffectiveState:
         self.num_partners = int(num_partners)
         self.lambda_smooth = float(lambda_smooth)
         self.alpha_charge = float(alpha_charge)
+        # (1 - 0.5)^2: expected squared surprise under a maximally uninformative binary partner.
         self.sigma_0_sq = float(sigma_0_sq)
         self.initial_beta = float(initial_beta)
         self.reset()
@@ -35,17 +36,17 @@ class AffectiveState:
         """Apply β <- λβ + (1 - λ) * sigmoid(alpha * (sigma_0_sq - epsilon^2))."""
 
         probs = jnp.asarray(predicted_action_probs, dtype=jnp.float32)
-        epsilon = 1.0 - probs[int(observed_action)]
-        charge = self.alpha_charge * (self.sigma_0_sq - epsilon**2)
+        surprise = 1.0 - probs[int(observed_action)]
+        charge = self.alpha_charge * (self.sigma_0_sq - surprise**2)
         current_beta = self.betas[int(partner_idx)]
         squashed = jax_sigmoid(charge)
         updated = self.lambda_smooth * current_beta + (1.0 - self.lambda_smooth) * squashed
 
         self.betas = self.betas.at[int(partner_idx)].set(updated)
-        self.prediction_errors = self.prediction_errors.at[int(partner_idx)].set(epsilon)
+        self.prediction_errors = self.prediction_errors.at[int(partner_idx)].set(surprise)
         self.beta_history.append(np.asarray(self.betas, dtype=float))
         self.prediction_error_history.append(np.asarray(self.prediction_errors, dtype=float))
-        return float(updated), float(epsilon)
+        return float(updated), float(surprise)
 
     def get_beta(self, partner_idx: int) -> float:
         return float(self.betas[int(partner_idx)])

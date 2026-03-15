@@ -167,17 +167,17 @@ $$\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \cdot \sigma(\phi(\eps
 
 Where:
 - $\lambda \in (0.8, 0.99)$ — smoothing parameter (controls timescale; high $\lambda$ = slow, inertial updates)
-- $\epsilon_k^{(t)} = o_t - \mathbb{E}[o_t | s^{(2)}_k]$ — prediction error from the level-2 social model
-- $\phi(\epsilon)$ — a signed transformation that converts prediction error magnitudes into affective charge:
-  - Small $|\epsilon|$ → positive charge (model is calibrating well → increase $\beta_k$)
-  - Large $|\epsilon|$ → negative charge (model is miscalibrating → decrease $\beta_k$)
+- $\epsilon_k^{(t)} = 1 - P(o_t = o_t^{\mathrm{obs}} \mid s^{(2)}_k)$ — unsigned surprise from the level-2 social model
+- $\phi(\epsilon)$ — a signed transformation that converts surprise magnitudes into affective charge:
+  - Small $\epsilon$ → positive charge (model is calibrating well → increase $\beta_k$)
+  - Large $\epsilon$ → negative charge (model is miscalibrating → decrease $\beta_k$)
 - $\sigma(\cdot)$ — a logistic squash that keeps the charge contribution in $[0, 1]$ before the moving average is applied
 
 The specific form of $\phi$ could be:
 
 $$\phi(\epsilon) = \alpha \cdot (\sigma_0^2 - \epsilon^2)$$
 
-Where $\sigma_0^2$ is a baseline expected prediction error variance and $\alpha$ is a learning rate. When actual squared error is below baseline, affect increases; when above, it decreases. This is a precision-tracking signal — the affective state literally estimates the inverse variance of the social model's prediction errors.
+Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. When actual squared surprise is below baseline, affect increases; when above, it decreases. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
 
 ### 3.5 Affect as Terminal Value
 

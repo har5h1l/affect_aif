@@ -97,3 +97,32 @@ def beta_reward_divergence(results: pd.DataFrame, partner_idx: int | None = None
     )
     merged["divergence"] = merged["beta_value"] - merged["reward_value"]
     return merged
+
+
+def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.DataFrame:
+    """Summarize payoff and inference quality in the rounds immediately after a switch."""
+
+    frame = results.sort_values(["condition", "seed", "partner_idx", "round"]).copy()
+    summaries: list[dict] = []
+    for (condition, condition_name, seed, partner_idx), group in frame.groupby(
+        ["condition", "condition_name", "seed", "partner_idx"],
+    ):
+        switch_rounds = group.loc[group["type_switched"].astype(bool), "round"].tolist()
+        for switch_round in switch_rounds:
+            window_frame = group[(group["round"] >= switch_round) & (group["round"] < switch_round + int(window))]
+            if window_frame.empty:
+                continue
+            summaries.append(
+                {
+                    "condition": int(condition),
+                    "condition_name": str(condition_name),
+                    "seed": int(seed),
+                    "partner_idx": int(partner_idx),
+                    "switch_round": int(switch_round),
+                    "window": int(window),
+                    "mean_payoff": float(window_frame["payoff"].mean()),
+                    "mean_accuracy": float(window_frame["inferred_type_correct"].mean()),
+                    "encounters": int(len(window_frame)),
+                }
+            )
+    return pd.DataFrame(summaries)

@@ -27,6 +27,8 @@ class ExperimentConfig:
     observation_noise: float = 0.0
     correlation_pairs: list[list[int]] = field(default_factory=list)
     correlation_strength: float = 0.9
+    initial_partner_types: list[str] | None = None
+    scheduled_type_switches: list[dict] = field(default_factory=list)
 
     mutual_coop: tuple[float, float] = (3.0, 3.0)
     sucker: tuple[float, float] = (-1.0, 5.0)

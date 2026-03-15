@@ -15,6 +15,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python scripts/run_experiment.py --config affect_aif/configs/default.json --output results/default.csv
+python scripts/run_experiment.py --config affect_aif/configs/betrayal_stress.json --output results/betrayal_stress.csv
 python scripts/run_analysis.py --results results/default.csv --output-dir results/figures
 ```
 
@@ -33,3 +34,4 @@ python scripts/run_analysis.py --results results/default.csv --output-dir result
 - Default experiments use exact policy enumeration when tractable.
 - When the policy space explodes, the control layer can fall back to capped enumeration.
 - The trust-game rollout uses context-conditioned likelihoods so reciprocators and exploiters are represented faithfully.
+- `affect_aif/configs/betrayal_stress.json` is a harder scheduled-switch scenario for separating precision tracking from reward averaging.

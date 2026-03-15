@@ -28,12 +28,25 @@ class TrustGameEnv:
         self.observation_noise = float(cfg.get("observation_noise", 0.0))
         self.correlation_pairs = [tuple(pair) for pair in cfg.get("correlation_pairs", [])]
         self.correlation_strength = float(cfg.get("correlation_strength", 0.9))
+        self.scheduled_type_switches = self._parse_scheduled_switches(cfg.get("scheduled_type_switches", []))
         self.available_types = list(cfg.get("partner_types", self.model.partner_type_names))
         self.type_lookup = {partner.type_name: partner for partner in self.model.partner_types}
         self.partners: list[Partner] = []
         self.active_partner: int | None = None
         self.round_idx = 0
         self.history: list[dict] = []
+
+    def _parse_scheduled_switches(self, events: list[dict]) -> dict[int, list[dict]]:
+        schedule: dict[int, list[dict]] = {}
+        for event in events:
+            round_number = int(event["round"])
+            schedule.setdefault(round_number, []).append(
+                {
+                    "partner_idx": int(event["partner_idx"]),
+                    "to_type": str(event["to_type"]),
+                }
+            )
+        return schedule
 
     def _initial_types(self) -> list[str]:
         specified = self.config.get("initial_partner_types")
@@ -55,6 +68,17 @@ class TrustGameEnv:
             if partner_idx == j and i < len(self.partners):
                 return self.partners[i].last_partner_action
         return None
+
+    def _apply_scheduled_switches(self, round_number: int) -> set[int]:
+        switched: set[int] = set()
+        for event in self.scheduled_type_switches.get(int(round_number), []):
+            partner_idx = int(event["partner_idx"])
+            new_type = str(event["to_type"])
+            if new_type not in self.type_lookup:
+                raise ValueError(f"Unknown scheduled partner type '{new_type}'.")
+            self.partners[partner_idx].force_type_switch(new_type)
+            switched.add(partner_idx)
+        return switched
 
     def reset(self) -> dict:
         """Reset the environment and return the initial control context."""
@@ -97,6 +121,7 @@ class TrustGameEnv:
                 active_partner=self.active_partner,
             )
 
+        scheduled_switched = self._apply_scheduled_switches(self.round_idx + 1)
         partner = self.partners[partner_idx]
         true_partner_type = partner.type_name
         correlated_action = self._correlated_action(partner_idx)
@@ -113,7 +138,8 @@ class TrustGameEnv:
         payoff_obs = payoff_to_index(agent_payoff, self.model.payoff_levels)
 
         partner.update_after_interaction(social_action)
-        type_switched = partner.maybe_switch_type(self.available_types, self.p_switch)
+        stochastic_switch = partner.maybe_switch_type(self.available_types, self.p_switch)
+        type_switched = (partner_idx in scheduled_switched) or stochastic_switch
 
         self.round_idx += 1
         self.active_partner = self._select_next_active_partner()
@@ -129,6 +155,7 @@ class TrustGameEnv:
             "active_partner": self.active_partner,
             "round": self.round_idx,
             "type_switched": bool(type_switched),
+            "scheduled_switch_partner_ids": sorted(int(idx) for idx in scheduled_switched),
             "true_partner_type": true_partner_type,
             "true_types": [item.type_name for item in self.partners],
         }
