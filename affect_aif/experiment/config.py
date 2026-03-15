@@ -9,6 +9,13 @@ from pathlib import Path
 from affect_aif.generative_model.partner_types import PARTNER_TYPE_ORDER
 
 
+DEFAULT_SENSITIVITY_FACTORS = {
+    "mu": [0.5, 0.75, 1.0, 1.25, 1.5],
+    "lambda_smooth": [0.7, 0.8, 0.9, 0.95],
+    "alpha_charge": [0.5, 1.0, 2.0],
+}
+
+
 @dataclass
 class ExperimentConfig:
     """All experiment hyperparameters in one place."""
@@ -30,6 +37,7 @@ class ExperimentConfig:
     lr: float = 0.1
     action_sampling: str = "marginal"
     affect_modulates_precision: bool = False
+    use_parameter_learning: bool = False
 
     deep_horizon: int = 8
     shallow_horizon: int = 2
@@ -50,8 +58,23 @@ class ExperimentConfig:
     partner_types: list[str] = field(default_factory=lambda: list(PARTNER_TYPE_ORDER))
 
     run_sensitivity: bool = False
-    sensitivity_factors: list[float] = field(default_factory=lambda: [0.5, 0.75, 1.0, 1.25, 1.5])
+    sensitivity_factors: dict[str, list[float]] | list[float] = field(
+        default_factory=lambda: {name: values[:] for name, values in DEFAULT_SENSITIVITY_FACTORS.items()}
+    )
     experiment_name: str = "primary"
+
+    def __post_init__(self):
+        if isinstance(self.sensitivity_factors, dict):
+            normalized = {}
+            for key, defaults in DEFAULT_SENSITIVITY_FACTORS.items():
+                normalized[key] = [float(value) for value in self.sensitivity_factors.get(key, defaults)]
+        else:
+            normalized = {
+                "mu": [float(value) for value in self.sensitivity_factors],
+                "lambda_smooth": DEFAULT_SENSITIVITY_FACTORS["lambda_smooth"][:],
+                "alpha_charge": DEFAULT_SENSITIVITY_FACTORS["alpha_charge"][:],
+            }
+        self.sensitivity_factors = normalized
 
     @classmethod
     def from_json(cls, path: str) -> "ExperimentConfig":

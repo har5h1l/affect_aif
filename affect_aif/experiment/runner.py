@@ -44,6 +44,7 @@ class ExperimentRunner:
             reference_horizon=self.config.deep_horizon,
             seed=seed,
             affect_modulates_precision=self.config.affect_modulates_precision,
+            use_parameter_learning=self.config.use_parameter_learning,
         )
         if condition == 1:
             return BaseAgent(planning_horizon=self.config.deep_horizon, **common)
@@ -173,7 +174,7 @@ class ExperimentRunner:
                     row["run_mode"] = "primary"
                     records.append(row)
         if self.config.run_sensitivity and self.calibration_summary is not None:
-            records.extend(self.run_mu_sensitivity().to_dict(orient="records"))
+            records.extend(self.run_parameter_sensitivity().to_dict(orient="records"))
         return pd.DataFrame(records)
 
     def save_results(self, results: pd.DataFrame, path: str):
@@ -187,20 +188,45 @@ class ExperimentRunner:
         results.to_csv(target, index=False)
 
     def run_mu_sensitivity(self) -> pd.DataFrame:
-        """Run a robustness sweep around the derived μ without changing the primary analysis."""
+        """Backward-compatible wrapper around the full parameter sensitivity sweep."""
+
+        return self.run_parameter_sensitivity()
+
+    def run_parameter_sensitivity(self) -> pd.DataFrame:
+        """Run one-at-a-time sensitivity sweeps for μ, λ, and affective charge gain."""
 
         if self.calibration_summary is None:
             self.calibrate_mu()
         base_mu = float(self.calibration_summary["derived_mu"])
         original_mu = self.config.mu
+        original_lambda = self.config.lambda_smooth
+        original_alpha = self.config.alpha_charge
         original_conditions = list(self.config.conditions)
         sensitivity_conditions = [condition for condition in original_conditions if condition in {2, 3, 5}]
         if not sensitivity_conditions:
             return pd.DataFrame()
 
         records: list[dict] = []
-        for factor in self.config.sensitivity_factors:
-            self.config.mu = base_mu * float(factor)
+        sweep_specs = []
+        for factor in self.config.sensitivity_factors["mu"]:
+            sweep_specs.append(("mu", float(factor)))
+        for value in self.config.sensitivity_factors["lambda_smooth"]:
+            sweep_specs.append(("lambda_smooth", float(value)))
+        for value in self.config.sensitivity_factors["alpha_charge"]:
+            sweep_specs.append(("alpha_charge", float(value)))
+
+        for parameter_name, parameter_value in sweep_specs:
+            self.config.mu = base_mu
+            self.config.lambda_smooth = original_lambda
+            self.config.alpha_charge = original_alpha
+            mu_factor = np.nan
+            if parameter_name == "mu":
+                mu_factor = float(parameter_value)
+                self.config.mu = base_mu * float(parameter_value)
+            elif parameter_name == "lambda_smooth":
+                self.config.lambda_smooth = float(parameter_value)
+            elif parameter_name == "alpha_charge":
+                self.config.alpha_charge = float(parameter_value)
             self.config.conditions = sensitivity_conditions
             for condition in sensitivity_conditions:
                 for replication in range(self.config.num_replications):
@@ -213,9 +239,15 @@ class ExperimentRunner:
                         row["mu_source"] = "sensitivity"
                         row["calibration_mean_abs_efe_per_step"] = self.calibration_summary["mean_abs_efe_per_step"]
                         row["derived_mu"] = base_mu
-                        row["mu_factor"] = float(factor)
+                        row["mu_factor"] = mu_factor
+                        row["sensitivity_parameter"] = parameter_name
+                        row["sensitivity_value"] = float(self.config.mu if parameter_name == "mu" else parameter_value)
+                        row["sensitivity_lambda_smooth"] = float(self.config.lambda_smooth)
+                        row["sensitivity_alpha_charge"] = float(self.config.alpha_charge)
                         row["run_mode"] = "sensitivity"
                         records.append(row)
         self.config.mu = original_mu
+        self.config.lambda_smooth = original_lambda
+        self.config.alpha_charge = original_alpha
         self.config.conditions = original_conditions
         return pd.DataFrame(records)

@@ -9,7 +9,7 @@ from affect_aif.agent.base_agent import BaseAgent
 
 
 class RewardAvgAgent(BaseAgent):
-    """Shallow planner with a slow reward-average continuation signal."""
+    """Shallow planner with a slow reward-average signal centered onto the beta scale."""
 
     def __init__(
         self,
@@ -33,7 +33,8 @@ class RewardAvgAgent(BaseAgent):
         return float(self.mu)
 
     def terminal_signal(self):
-        return jnp.tanh(self.reward_avgs / max(self.max_abs_payoff, 1e-6))
+        scale = max(self.max_abs_payoff, 1e-6)
+        return 0.5 * (1.0 + jnp.tanh(self.reward_avgs / scale))
 
     def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):
         del partner_action

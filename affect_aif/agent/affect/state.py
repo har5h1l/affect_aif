@@ -32,13 +32,13 @@ class AffectiveState:
         predicted_action_probs,
         observed_action: int,
     ) -> tuple[float, float]:
-        """Update one partner's affective state and return `(beta, raw_error)`."""
+        """Apply β <- λβ + (1 - λ) * sigmoid(alpha * (sigma_0_sq - epsilon^2))."""
 
         probs = jnp.asarray(predicted_action_probs, dtype=jnp.float32)
         epsilon = 1.0 - probs[int(observed_action)]
         charge = self.alpha_charge * (self.sigma_0_sq - epsilon**2)
         current_beta = self.betas[int(partner_idx)]
-        squashed = jax_sigmoid(current_beta + charge)
+        squashed = jax_sigmoid(charge)
         updated = self.lambda_smooth * current_beta + (1.0 - self.lambda_smooth) * squashed
 
         self.betas = self.betas.at[int(partner_idx)].set(updated)

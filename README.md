@@ -20,7 +20,7 @@ python scripts/run_analysis.py --results results/default.csv --output-dir result
 
 ## Layout
 
-- `affect_aif/core`: generic active inference math, inference, control, and learning helpers
+- `affect_aif/core`: generic active inference math, control, and learning helpers
 - `affect_aif/generative_model`: trust-game model, partner types, and payoffs
 - `affect_aif/agent`: vanilla, affective, lesioned, and reward-average agents
 - `affect_aif/environment`: multi-partner trust game environment

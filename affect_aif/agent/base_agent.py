@@ -7,6 +7,30 @@ import jax.numpy as jnp
 import numpy as np
 
 from affect_aif.core.control import construct_policies, decision_step_trust_game
+from affect_aif.core.learning import update_likelihood_dirichlet
+from affect_aif.core.maths import dirichlet_expected_value
+from affect_aif.core.utils import obj_array, onehot
+
+
+_LIKELIHOOD_PRIOR_STRENGTH = 10.0
+_LIKELIHOOD_EPS = 1e-3
+
+
+def _copy_model_array(array):
+    if isinstance(array, np.ndarray) and array.dtype == object:
+        copied = obj_array(len(array))
+        for idx, value in enumerate(array):
+            copied[idx] = np.asarray(value, dtype=float).copy()
+        return copied
+    return np.asarray(array, dtype=float).copy()
+
+
+def _init_likelihood_dirichlet(A):
+    qA = obj_array(len(A))
+    for modality, likelihood in enumerate(A):
+        probs = np.asarray(likelihood, dtype=float)
+        qA[modality] = _LIKELIHOOD_PRIOR_STRENGTH * probs + _LIKELIHOOD_EPS
+    return qA
 
 
 @jax.jit
@@ -50,11 +74,12 @@ class BaseAgent:
         reference_horizon: int | None = None,
         seed: int = 0,
         affect_modulates_precision: bool = False,
+        use_parameter_learning: bool = False,
     ):
-        self.A = A
-        self.B = B
-        self.C = C
-        self.D = D
+        self.A = _copy_model_array(A)
+        self.B = _copy_model_array(B)
+        self.C = _copy_model_array(C)
+        self.D = _copy_model_array(D)
         self.model = model
         self.planning_horizon = int(planning_horizon)
         self.gamma = float(gamma)
@@ -66,6 +91,7 @@ class BaseAgent:
         self.reference_horizon = int(reference_horizon if reference_horizon is not None else planning_horizon)
         self.seed = int(seed)
         self.affect_modulates_precision = bool(affect_modulates_precision)
+        self.use_parameter_learning = bool(use_parameter_learning)
 
         self.num_partners = int(model.num_partners)
         self.num_types = int(model.num_types)
@@ -78,20 +104,21 @@ class BaseAgent:
             construct_policies([self.num_actions], self.planning_horizon, max_policies=self.max_policies, rng=rng),
             dtype=jnp.int32,
         )
-        self.A_partner_action = jnp.asarray(self.A[0], dtype=jnp.float32)
         self.B_type = jnp.asarray(self.B[0][:, :, 0], dtype=jnp.float32)
-        self.partner_action_prob_table = jnp.asarray(self.model.partner_action_prob_table, dtype=jnp.float32)
         self.payoff_index_table = jnp.asarray(self.model.payoff_index_table, dtype=jnp.int32)
         self.agent_payoff_table = jnp.asarray(self.model.agent_payoff_table, dtype=jnp.float32)
         self.partner_action_preferences = jnp.asarray(self.C[0], dtype=jnp.float32)
         self.payoff_preferences = jnp.asarray(self.C[1], dtype=jnp.float32)
         self.max_abs_payoff = float(max(abs(level) for level in self.model.payoff_levels))
+        self._initial_A = _copy_model_array(self.A)
+        self._initial_qA = _init_likelihood_dirichlet(self._initial_A) if self.use_parameter_learning else None
 
         self.planning_cost = float((self.num_actions ** self.planning_horizon) * self.planning_horizon)
         self.planning_cost_ratio = float((self.num_actions ** self.reference_horizon) / (self.num_actions ** self.planning_horizon))
         self.reset()
 
     def reset(self):
+        self._reset_likelihood_model()
         prior = jnp.asarray(self.D[0], dtype=jnp.float32)
         self.partner_beliefs = jnp.tile(prior[None, :], (self.num_partners, 1))
         self.partner_posteriors = jnp.tile(prior[None, :], (self.num_partners, 1))
@@ -128,6 +155,68 @@ class BaseAgent:
 
     def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):
         del partner_idx, partner_action, payoff
+
+    def _reset_likelihood_model(self):
+        if self.use_parameter_learning:
+            self.qA = _copy_model_array(self._initial_qA)
+            self.A = obj_array(len(self.qA))
+            for modality, concentrations in enumerate(self.qA):
+                self.A[modality] = dirichlet_expected_value(concentrations, backend="numpy")
+        else:
+            self.qA = None
+            self.A = _copy_model_array(self._initial_A)
+        self._refresh_likelihood_views()
+
+    def _refresh_likelihood_views(self):
+        self.A_partner_action = jnp.asarray(self.A[0], dtype=jnp.float32)
+        self.partner_action_prob_table = jnp.asarray(self.A[0][0], dtype=jnp.float32)
+        self.model.A = self.A
+        self.model.partner_action_prob_table = np.asarray(self.A[0][0], dtype=float)
+
+    def _apply_parameter_learning(
+        self,
+        partner_idx: int,
+        observation: np.ndarray,
+        posterior: np.ndarray,
+        action_taken: int,
+        partner_action: int,
+    ):
+        if not self.use_parameter_learning:
+            return
+
+        last_action = int(self.partner_last_agent_actions[partner_idx])
+        phase = int(self.partner_interaction_counts[partner_idx] >= self.model.switch_round)
+
+        partner_qA = obj_array(1)
+        partner_qA[0] = np.asarray(self.qA[0], dtype=float)
+        partner_qs = obj_array(3)
+        partner_qs[0] = np.asarray(posterior, dtype=float)
+        partner_qs[1] = onehot(last_action, self.qA[0].shape[2])
+        partner_qs[2] = onehot(phase, self.qA[0].shape[3])
+        updated_partner_qA = update_likelihood_dirichlet(
+            qA=partner_qA,
+            obs=[int(observation[0])],
+            qs=partner_qs,
+            learning_rate=self.lr,
+        )
+        self.qA[0] = updated_partner_qA[0]
+
+        payoff_qA = obj_array(1)
+        payoff_qA[0] = np.asarray(self.qA[1], dtype=float)
+        payoff_qs = obj_array(2)
+        payoff_qs[0] = onehot(int(action_taken), self.qA[1].shape[1])
+        payoff_qs[1] = onehot(int(partner_action), self.qA[1].shape[2])
+        updated_payoff_qA = update_likelihood_dirichlet(
+            qA=payoff_qA,
+            obs=[int(observation[1])],
+            qs=payoff_qs,
+            learning_rate=self.lr,
+        )
+        self.qA[1] = updated_payoff_qA[0]
+
+        for modality, concentrations in enumerate(self.qA):
+            self.A[modality] = dirichlet_expected_value(concentrations, backend="numpy")
+        self._refresh_likelihood_views()
 
     def plan_and_act(self, active_partner: int | None) -> int:
         """Evaluate all policies and return the selected action."""
@@ -196,6 +285,13 @@ class BaseAgent:
             noisy_partner_action_likelihood=self.A_partner_action,
             B_type=self.B_type,
             switch_round=self.model.switch_round,
+        )
+        self._apply_parameter_learning(
+            partner_idx=partner_idx,
+            observation=np.asarray(observation_arr, dtype=int),
+            posterior=np.asarray(posterior, dtype=float),
+            action_taken=int(action_taken),
+            partner_action=int(partner_action),
         )
         self._update_auxiliary_states(partner_idx=partner_idx, partner_action=int(partner_action), payoff=float(payoff))
         self.partner_posteriors = self.partner_posteriors.at[partner_idx].set(posterior)

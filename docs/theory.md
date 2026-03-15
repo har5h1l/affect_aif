@@ -161,9 +161,9 @@ Where $\beta_k$ is the affective state for partner $k$ — the expected precisio
 
 ### 3.4 Affective State Dynamics
 
-The affective state $\beta_k$ for partner $k$ is updated based on the cumulative precision of predictions about $k$:
+The affective state $\beta_k$ for partner $k$ is updated from a signed affective charge derived from prediction error:
 
-$$\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \cdot \phi(\epsilon_k^{(t)})$$
+$$\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \cdot \sigma(\phi(\epsilon_k^{(t)}))$$
 
 Where:
 - $\lambda \in (0.8, 0.99)$ — smoothing parameter (controls timescale; high $\lambda$ = slow, inertial updates)
@@ -171,6 +171,7 @@ Where:
 - $\phi(\epsilon)$ — a signed transformation that converts prediction error magnitudes into affective charge:
   - Small $|\epsilon|$ → positive charge (model is calibrating well → increase $\beta_k$)
   - Large $|\epsilon|$ → negative charge (model is miscalibrating → decrease $\beta_k$)
+- $\sigma(\cdot)$ — a logistic squash that keeps the charge contribution in $[0, 1]$ before the moving average is applied
 
 The specific form of $\phi$ could be:
 
@@ -186,11 +187,11 @@ $$G(\pi) \approx \sum_{t=1}^{\tau} G_t(\pi) + V_k(\beta_k)$$
 
 Where:
 
-$$V_k(\beta_k) = -\mu \cdot \beta_k$$
+$$V_k(\beta_k) = -\mu \cdot \beta_k \cdot \frac{\mathbb{E}[r \mid s^{\mathrm{terminal}}_k, a^{\mathrm{terminal}}]}{\max |r|}$$
 
-The negative sign ensures that high affective precision (positive $\beta_k$) reduces expected free energy (makes policies involving partner $k$ more attractive). The parameter $\mu$ scales the influence of affect relative to explicit planning.
+The negative sign ensures that high affective precision reduces expected free energy only when the predicted continuation is favorable. The parameter $\mu$ scales the influence of affect relative to explicit planning, while the normalized continuation payoff keeps the terminal contribution on the same scale as the pragmatic terms accumulated within the explicit horizon.
 
-More precisely, $\beta_k$ modulates the *precision on the pragmatic value component* of the EFE for partner $k$. High $\beta_k$ means the agent trusts its preference predictions regarding $k$ and commits more deterministically to the preferred policy. Low $\beta_k$ means the agent discounts its preference predictions and up-weights epistemic value (information-seeking).
+This context-sensitive form is preferable to a flat scalar $-\mu \beta_k$ because the same partner-level affect should not blindly favor every policy involving that partner. In the implementation, affect gates the expected continuation value of the terminal action under the current belief state. High $\beta_k$ therefore amplifies credible good continuations, while low $\beta_k$ dampens them and leaves shallow planning closer to its explicit-horizon evidence.
 
 ### 3.6 The vmPFC Lesion
 

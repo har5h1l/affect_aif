@@ -109,10 +109,11 @@ Parameters:
 The affective terminal value is then:
 
 ```
-V_affect_k = -mu * beta_k    # added to EFE for policies involving partner k
+continuation_k = E[payoff | terminal_state_k, terminal_action] / max_abs_payoff
+V_affect_k = -mu * beta_k * continuation_k
 ```
 
-Where $\mu$ scales the influence of affect on policy selection. This is a hyperparameter to be tuned, but conceptually it should be large enough that affect meaningfully shifts policy selection while not so large that it overrides explicit planning entirely.
+Where $\mu$ scales the influence of affect on policy selection. This keeps the terminal contribution context-sensitive rather than treating every policy involving a partner as equally good or bad.
 
 ---
 
@@ -194,7 +195,8 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Planning horizon: $\tau = 2$
 - Instead of precision-based affect: a simple exponential moving average of reward per partner, used as terminal value
 - $\bar{R}_k^{(t+1)} = \lambda \bar{R}_k^{(t)} + (1 - \lambda) \cdot r_t$
-- Terminal value: $V_k = -\mu \cdot \bar{R}_k$
+- Terminal signal: $\tilde{R}_k = 0.5 \cdot (1 + \tanh(\bar{R}_k / \max |r|))$
+- Terminal value: $V_k = -\mu \cdot \tilde{R}_k \cdot \frac{\mathbb{E}[r \mid s^{\mathrm{terminal}}_k, a^{\mathrm{terminal}}]}{\max |r|}$
 - Purpose: distinguishes the precision-tracking account from a simpler "cached value" account. If Condition 2 outperforms Condition 5, it demonstrates that tracking model precision provides information that reward averaging does not (the uncertainty preservation argument).
 
 ---

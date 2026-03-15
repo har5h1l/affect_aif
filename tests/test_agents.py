@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 import numpy as np
 
 from affect_aif.agent.affective_agent import AffectiveAgent
@@ -51,3 +52,15 @@ def test_reward_avg_agent_updates_reward_signal():
     agent.plan_and_act(active_partner=0)
     agent.observe_outcome(partner_idx=0, observation=[0, 2], action_taken=0, partner_action=0, payoff=3.0)
     assert agent.get_reward_avgs()[0] > 0.0
+
+
+def test_reward_avg_terminal_signal_matches_beta_scale():
+    agent = make_agent(RewardAvgAgent, num_partners=4, mu=1.0)
+    assert np.allclose(np.asarray(agent.terminal_signal(), dtype=float), 0.5)
+    agent.reward_avgs = jnp.asarray(
+        [agent.max_abs_payoff, -agent.max_abs_payoff, 0.0, 10.0 * agent.max_abs_payoff],
+        dtype=jnp.float32,
+    )
+    signal = np.asarray(agent.terminal_signal(), dtype=float)
+    assert np.all((signal >= 0.0) & (signal <= 1.0))
+    assert signal[0] > 0.5 > signal[1]
