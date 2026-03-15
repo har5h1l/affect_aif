@@ -61,6 +61,33 @@ V = -mu * signal_k * normalized_continuation_payoff
 - Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
 
+## Verbose Execution Tracing
+
+- `ExperimentConfig` now includes execution-only controls for live tracing and post-run GIF generation:
+  - `verbose`
+  - `verbosity_mode`
+  - `verbosity_include_calibration`
+  - `gif_after_run`
+  - `gif_output_dir`
+- `scripts/run_experiment.py --verbose --verbosity-mode stage_stream` emits structured stage lines from `ExperimentRunner` rather than ad hoc prints.
+- The current stage stream reports:
+  - calibration episode start/end
+  - condition start/end
+  - replication start/end
+  - round start
+  - planning start/end
+  - environment step start/end
+  - belief update start/end
+  - metric logging end
+- These progress events are observational only. They do not change experiment dynamics, result rows, or analysis semantics.
+
+## GIF Generation
+
+- `affect_aif.analysis.visualization.build_run_gifs(...)` generates one GIF per primary `(condition, seed)` run from an in-memory or reloaded results table.
+- `scripts/run_experiment.py --make-gifs` calls that helper after writing the results file. `scripts/run_visualization.py` provides the same capability for an existing CSV/parquet file.
+- The animation dashboard is intentionally task-facing rather than publication-facing. Each frame shows the current round, partner roster, selected/observed actions, payoff, inferred vs true type, cumulative payoff trajectory, and the per-partner beta or reward-average signal when that signal exists.
+- Non-affective conditions render a disabled signal panel instead of fabricating beta values.
+
 ## Betrayal Stress Experiment
 
 - The environment supports `initial_partner_types` to seed a specific partner roster.
@@ -74,7 +101,7 @@ V = -mu * signal_k * normalized_continuation_payoff
   - `betrayal_detection_latency.csv`
   - `betrayal_trajectories.csv`
   - `affective_movement_summary.csv`
-- The round-level schema now logs the raw per-partner `terminal_signal` used for planning, plus `switch_kind`, `current_partner_switched`, `current_partner_scheduled_switch`, and `scheduled_switch_partner_ids`.
+- The round-level schema now logs the raw per-partner `terminal_signal` used for planning, plus `switch_kind`, `current_partner_switched`, `current_partner_scheduled_switch`, `scheduled_switch_partner_ids`, `active_partner`, `selected_partner`, `selected_action`, `best_policy_idx`, `partner_beliefs`, and `partner_posteriors`.
 - Detection latency is defined as encounters after the switch until inferred type becomes correct.
 - Payoff recovery latency is defined as encounters after the switch until payoff reaches at least `1.0`, meaning the agent is no longer taking sucker-level losses under the default matrix.
 - If the betrayal outputs remain flat, treat that as a mechanism null result: beta and terminal-signal dynamics did not move enough to separate precision tracking from reward averaging under the current task and hyperparameters.

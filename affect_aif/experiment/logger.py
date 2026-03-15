@@ -32,6 +32,9 @@ class MetricLogger:
             "seed": int(seed),
             "round": int(round_idx),
             "partner_idx": int(env_result["partner_idx"]),
+            "active_partner": (
+                -1 if env_result.get("active_partner_start", -1) is None else int(env_result.get("active_partner_start", -1))
+            ),
             "true_partner_type": str(env_result["true_partner_type"]),
             "agent_action": int(env_result["agent_action"]),
             "raw_action": int(env_result["raw_action"]),
@@ -47,6 +50,9 @@ class MetricLogger:
             "true_types": list(env_result["true_types"]),
             "inferred_type": str(agent_metrics["inferred_type"]),
             "inferred_type_correct": bool(agent_metrics["inferred_type_correct"]),
+            "selected_partner": int(agent_metrics["selected_partner"]),
+            "selected_action": int(agent_metrics["selected_action"]),
+            "best_policy_idx": int(agent_metrics["best_policy_idx"]),
             "q_pi_entropy": float(agent_metrics["q_pi_entropy"]),
             "mean_abs_step_efe": float(agent_metrics["mean_abs_step_efe"]),
             "planning_cost": float(agent_metrics["planning_cost"]),
@@ -60,6 +66,8 @@ class MetricLogger:
             "G": _to_float_list(agent_metrics["G"]),
             "q_pi": _to_float_list(agent_metrics["q_pi"]),
             "best_policy_step_costs": _to_float_list(agent_metrics["best_policy_step_costs"]),
+            "partner_beliefs": np.asarray(agent_metrics["partner_beliefs"], dtype=float).tolist(),
+            "partner_posteriors": np.asarray(agent_metrics["partner_posteriors"], dtype=float).tolist(),
         }
         self.records.append(record)
 

@@ -65,6 +65,11 @@ class ExperimentConfig:
         default_factory=lambda: {name: values[:] for name, values in DEFAULT_SENSITIVITY_FACTORS.items()}
     )
     experiment_name: str = "primary"
+    verbose: bool = False
+    verbosity_mode: str = "stage_stream"
+    verbosity_include_calibration: bool = True
+    gif_after_run: bool = False
+    gif_output_dir: str | None = None
 
     def __post_init__(self):
         if isinstance(self.sensitivity_factors, dict):
@@ -79,6 +84,11 @@ class ExperimentConfig:
                 "sigma_0_sq": DEFAULT_SENSITIVITY_FACTORS["sigma_0_sq"][:],
             }
         self.sensitivity_factors = normalized
+        self.verbose = bool(self.verbose)
+        self.verbosity_mode = str(self.verbosity_mode)
+        self.verbosity_include_calibration = bool(self.verbosity_include_calibration)
+        self.gif_after_run = bool(self.gif_after_run)
+        self.gif_output_dir = None if self.gif_output_dir is None else str(self.gif_output_dir)
 
     @classmethod
     def from_json(cls, path: str) -> "ExperimentConfig":

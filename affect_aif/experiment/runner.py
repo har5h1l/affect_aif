@@ -16,6 +16,7 @@ from affect_aif.environment.trust_game import TrustGameEnv
 from affect_aif.experiment.conditions import get_condition_name
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.logger import MetricLogger
+from affect_aif.experiment.progress import ProgressReporter, create_progress_reporter
 from affect_aif.generative_model.model import TrustGameModel
 
 
@@ -27,6 +28,11 @@ class ExperimentRunner:
     def __init__(self, config: ExperimentConfig):
         self.config = config
         self.calibration_summary: dict | None = None
+        self.progress: ProgressReporter = create_progress_reporter(
+            enabled=self.config.verbose,
+            mode=self.config.verbosity_mode,
+            include_calibration=self.config.verbosity_include_calibration,
+        )
 
     def _create_model(self) -> TrustGameModel:
         return TrustGameModel(asdict(self.config))
@@ -108,11 +114,26 @@ class ExperimentRunner:
         efe_values = []
         for offset in range(calibration_episodes):
             seed = self.config.random_seed + 10_000 + offset
+            self.progress.emit(
+                "calibration_episode_start",
+                episode_idx=offset,
+                episode_count=calibration_episodes,
+                seed=seed,
+            )
             model = self._create_model()
             env = TrustGameEnv(self.config, seed=seed)
             agent = self._create_agent(condition=1, model=model, seed=seed)
-            for record in self._run_episode(agent=agent, env=env, seed=seed, condition=1):
+            calibration_records = self._run_episode(agent=agent, env=env, seed=seed, condition=1, replication=offset)
+            for record in calibration_records:
                 efe_values.append(record["mean_abs_step_efe"])
+            mean_abs_step_efe = float(np.nanmean([row["mean_abs_step_efe"] for row in calibration_records]))
+            self.progress.emit(
+                "calibration_episode_end",
+                episode_idx=offset,
+                episode_count=calibration_episodes,
+                seed=seed,
+                mean_abs_step_efe=mean_abs_step_efe,
+            )
 
         mean_abs_efe = float(np.nanmean(np.asarray(efe_values, dtype=float))) if efe_values else 0.0
         derived_mu = float(mean_abs_efe * (self.config.deep_horizon - self.config.shallow_horizon))
@@ -125,13 +146,78 @@ class ExperimentRunner:
         }
         return derived_mu
 
-    def _run_episode(self, agent: BaseAgent, env: TrustGameEnv, seed: int, condition: int) -> list[dict]:
+    def _run_episode(
+        self,
+        agent: BaseAgent,
+        env: TrustGameEnv,
+        seed: int,
+        condition: int,
+        replication: int = 0,
+    ) -> list[dict]:
         logger = MetricLogger(num_rounds=self.config.num_rounds, num_partners=self.config.num_partners)
         context = env.reset()
 
         for round_idx in range(self.config.num_rounds):
-            action = agent.plan_and_act(active_partner=context["active_partner"])
+            active_partner = context["active_partner"]
+            self.progress.emit(
+                "round_start",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                active_partner=active_partner,
+            )
+            self.progress.emit(
+                "planning_start",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                active_partner=active_partner,
+            )
+            action = agent.plan_and_act(active_partner=active_partner)
+            planning_metrics = agent.get_metrics()
+            self.progress.emit(
+                "planning_end",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                selected_partner=planning_metrics["selected_partner"],
+                selected_action=planning_metrics["selected_action"],
+                raw_action=planning_metrics["raw_action"],
+                best_policy_idx=planning_metrics["best_policy_idx"],
+            )
+            self.progress.emit(
+                "environment_step_start",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                raw_action=action,
+            )
             result = env.step(action)
+            result["active_partner_start"] = active_partner
+            self.progress.emit(
+                "environment_step_end",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                partner_idx=result["partner_idx"],
+                agent_action=result["agent_action"],
+                partner_action=result["partner_action"],
+                payoff=result["agent_payoff"],
+                switch_kind=result.get("switch_kind", "none"),
+            )
+            self.progress.emit(
+                "belief_update_start",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                partner_idx=result["partner_idx"],
+            )
             agent.observe_outcome(
                 partner_idx=result["partner_idx"],
                 observation=result["observation"],
@@ -144,6 +230,16 @@ class ExperimentRunner:
             inferred_type_idx = int(np.argmax(partner_belief))
             inferred_type = agent.model.partner_type_names[inferred_type_idx]
             inferred_correct = inferred_type == result["true_partner_type"]
+            self.progress.emit(
+                "belief_update_end",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                partner_idx=result["partner_idx"],
+                inferred_type=inferred_type,
+                inferred_type_correct=inferred_correct,
+            )
 
             agent_metrics = agent.get_metrics()
             agent_metrics["inferred_type"] = inferred_type
@@ -154,6 +250,16 @@ class ExperimentRunner:
                 seed=seed,
                 agent_metrics=agent_metrics,
                 env_result=result,
+            )
+            self.progress.emit(
+                "metric_logging_end",
+                condition=condition,
+                replication=replication,
+                round_idx=round_idx,
+                round_count=self.config.num_rounds,
+                payoff=result["agent_payoff"],
+                inferred_type=inferred_type,
+                q_pi_entropy=agent_metrics["q_pi_entropy"],
             )
             context = {"active_partner": result["active_partner"]}
 
@@ -167,12 +273,31 @@ class ExperimentRunner:
 
         records: list[dict] = []
         for condition in self.config.conditions:
+            self.progress.emit(
+                "condition_start",
+                condition=condition,
+                replication=0,
+                condition_name=get_condition_name(condition),
+            )
             for replication in range(self.config.num_replications):
                 seed = self.config.random_seed + replication
+                self.progress.emit(
+                    "replication_start",
+                    condition=condition,
+                    replication=replication,
+                    seed=seed,
+                )
                 model = self._create_model()
                 env = TrustGameEnv(self.config, seed=seed)
                 agent = self._create_agent(condition=condition, model=model, seed=seed)
-                for row in self._run_episode(agent=agent, env=env, seed=seed, condition=condition):
+                episode_records = self._run_episode(
+                    agent=agent,
+                    env=env,
+                    seed=seed,
+                    condition=condition,
+                    replication=replication,
+                )
+                for row in episode_records:
                     row["condition_name"] = get_condition_name(condition)
                     if self.calibration_summary is not None:
                         row["mu_source"] = "derived"
@@ -184,6 +309,19 @@ class ExperimentRunner:
                         row["derived_mu"] = np.nan
                     row["run_mode"] = "primary"
                     records.append(row)
+                self.progress.emit(
+                    "replication_end",
+                    condition=condition,
+                    replication=replication,
+                    seed=seed,
+                    cumulative_payoff=sum(float(row["payoff"]) for row in episode_records),
+                )
+            self.progress.emit(
+                "condition_end",
+                condition=condition,
+                replication=self.config.num_replications - 1,
+                rows=len([row for row in records if row["condition"] == condition and row["run_mode"] == "primary"]),
+            )
         if self.config.run_sensitivity and self.calibration_summary is not None:
             records.extend(self.run_parameter_sensitivity().to_dict(orient="records"))
         return pd.DataFrame(records)

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
+from affect_aif.analysis.visualization import build_run_gifs, load_results
 from affect_aif.analysis.metrics import post_switch_window_summary
 from affect_aif.environment.trust_game import TrustGameEnv
 from affect_aif.experiment.config import ExperimentConfig
@@ -97,3 +98,57 @@ def test_betrayal_metrics_and_analysis_outputs(tmp_path, betrayal_config):
     assert (output_dir / "betrayal_post_switch_window_1_5.csv").exists()
     assert (output_dir / "betrayal_post_switch_window_1_10.csv").exists()
     assert (output_dir / "betrayal_detection_latency.csv").exists()
+
+
+def test_verbose_stage_stream_emits_progress_without_changing_results(tiny_config, capsys):
+    quiet_cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1], "verbose": False})
+    verbose_cfg = ExperimentConfig(
+        **{
+            **tiny_config.__dict__,
+            "conditions": [1],
+            "verbose": True,
+            "verbosity_mode": "stage_stream",
+        }
+    )
+
+    quiet_results = ExperimentRunner(quiet_cfg).run_all()
+    quiet_stdout = capsys.readouterr().out
+    verbose_results = ExperimentRunner(verbose_cfg).run_all()
+    verbose_stdout = capsys.readouterr().out
+
+    assert quiet_stdout == ""
+    assert len(quiet_results) == len(verbose_results)
+    assert quiet_results["payoff"].tolist() == verbose_results["payoff"].tolist()
+    assert "stage=planning_start" in verbose_stdout
+    assert "stage=logging_end" in verbose_stdout
+
+
+def test_build_run_gifs_writes_one_file_per_primary_run(tmp_path, tiny_config):
+    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2]})
+    results = ExperimentRunner(cfg).run_all()
+
+    written = build_run_gifs(results, str(tmp_path / "gifs"))
+
+    assert len(written) == 2
+    assert all(path.exists() for path in written)
+
+
+def test_visualization_handles_betrayal_switch_runs(tmp_path, betrayal_config):
+    results = ExperimentRunner(betrayal_config).run_all()
+    output_csv = tmp_path / "betrayal.csv"
+    results.to_csv(output_csv, index=False)
+    loaded = load_results(str(output_csv))
+    written = build_run_gifs(loaded, str(tmp_path / "gifs"))
+
+    assert any(bool(ids) for ids in loaded["scheduled_switch_partner_ids"].tolist())
+    assert len(written) == len(loaded[loaded["run_mode"] == "primary"].groupby(["condition", "seed"]))
+
+
+def test_visualization_handles_non_affective_conditions(tmp_path, tiny_config):
+    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1]})
+    results = ExperimentRunner(cfg).run_all()
+
+    written = build_run_gifs(results, str(tmp_path / "base_gifs"))
+
+    assert len(written) == 1
+    assert written[0].exists()
