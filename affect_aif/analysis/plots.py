@@ -8,7 +8,79 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from affect_aif.analysis.metrics import beta_reward_divergence, final_round_summary, payoff_by_partner_type
+from affect_aif.analysis.metrics import (
+    beta_reward_divergence,
+    betrayal_trajectory,
+    final_round_summary,
+    has_switch_events,
+    payoff_by_partner_type,
+)
+
+
+def _save_betrayal_figures(results: pd.DataFrame, out: Path):
+    trajectory = betrayal_trajectory(results, max_encounters=10)
+    if trajectory.empty:
+        return
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharex=True)
+    sns.lineplot(
+        data=trajectory,
+        x="encounters_since_switch",
+        y="beta",
+        hue="condition_name",
+        ax=axes[0],
+        errorbar="sd",
+    )
+    axes[0].set_title("Post-Switch Beta Trajectory")
+    axes[0].set_xlabel("Encounters Since Switch")
+    axes[0].set_ylabel("Beta")
+    sns.lineplot(
+        data=trajectory,
+        x="encounters_since_switch",
+        y="terminal_signal",
+        hue="condition_name",
+        ax=axes[1],
+        errorbar="sd",
+        legend=False,
+    )
+    axes[1].set_title("Post-Switch Terminal Signal")
+    axes[1].set_xlabel("Encounters Since Switch")
+    axes[1].set_ylabel("Terminal Signal")
+    fig.tight_layout()
+    fig.savefig(out / "figure_7_betrayal_signal_trajectories.png", dpi=180)
+    plt.close(fig)
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.lineplot(
+        data=trajectory,
+        x="encounters_since_switch",
+        y="divergence_beta_minus_reward",
+        hue="condition_name",
+        ax=ax,
+        errorbar="sd",
+    )
+    ax.set_title("Post-Switch Beta vs Reward Divergence")
+    ax.set_xlabel("Encounters Since Switch")
+    ax.set_ylabel("Beta - Reward Signal")
+    fig.tight_layout()
+    fig.savefig(out / "figure_8_betrayal_beta_reward_divergence.png", dpi=180)
+    plt.close(fig)
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.lineplot(
+        data=trajectory,
+        x="encounters_since_switch",
+        y="payoff",
+        hue="condition_name",
+        ax=ax,
+        errorbar="sd",
+    )
+    ax.set_title("Post-Switch Payoff Recovery")
+    ax.set_xlabel("Encounters Since Switch")
+    ax.set_ylabel("Payoff")
+    fig.tight_layout()
+    fig.savefig(out / "figure_9_betrayal_payoff_recovery.png", dpi=180)
+    plt.close(fig)
 
 
 def save_all_figures(results: pd.DataFrame, output_dir: str):
@@ -55,7 +127,7 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     divergence = beta_reward_divergence(results)
     fig, ax = plt.subplots(figsize=(8, 5))
     sns.lineplot(data=divergence, x="round", y="divergence", hue="condition_name", ax=ax, errorbar="sd")
-    ax.set_title("β vs Reward-Average Divergence")
+    ax.set_title("Beta vs Reward-Average Divergence")
     fig.tight_layout()
     fig.savefig(out / "figure_5_beta_reward_divergence.png", dpi=180)
     plt.close(fig)
@@ -67,3 +139,6 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     fig.tight_layout()
     fig.savefig(out / "figure_6_mean_abs_step_efe.png", dpi=180)
     plt.close(fig)
+
+    if has_switch_events(results):
+        _save_betrayal_figures(results, out)

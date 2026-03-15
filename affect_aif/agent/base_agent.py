@@ -328,6 +328,7 @@ class BaseAgent:
             "q_pi": q_pi_np,
             "G": np.asarray(self.last_G, dtype=float),
             "terminal_values": np.asarray(self.last_terminal_values, dtype=float),
+            "terminal_signal": np.asarray(self.terminal_signal(), dtype=float),
             "best_policy_step_costs": np.asarray(self.last_best_policy_step_costs, dtype=float),
             "mean_abs_step_efe": float(self.last_mean_abs_step_efe),
             "best_policy_idx": self.last_best_policy_idx,

@@ -159,6 +159,8 @@ $$\gamma_k = f(\beta_k)$$
 
 Where $\beta_k$ is the affective state for partner $k$ — the expected precision of the agent's model of partner $k$. When the agent is selecting policies involving partner $k$, the effective policy precision is $\gamma_k$, not a global $\gamma$.
 
+In the primary experiments in this repository, that precision-modulation path is disabled by default (`affect_modulates_precision=False`). The main empirical test therefore targets the terminal-value mechanism in Section 3.5, while per-partner $\gamma_k$ modulation remains an optional implementation path rather than the default experimental manipulation.
+
 ### 3.4 Affective State Dynamics
 
 The affective state $\beta_k$ for partner $k$ is updated from a signed affective charge derived from prediction error:
@@ -178,6 +180,7 @@ The specific form of $\phi$ could be:
 $$\phi(\epsilon) = \alpha \cdot (\sigma_0^2 - \epsilon^2)$$
 
 Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. When actual squared surprise is below baseline, affect increases; when above, it decreases. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
+Within-theory sensitivity analysis therefore varies not just $\mu$, $\lambda$, and $\alpha$, but also $\sigma_0^2$. That sweep asks whether the mechanism is under-expressed because the baseline surprise scale is badly calibrated, while keeping the update law itself fixed.
 
 ### 3.5 Affect as Terminal Value
 

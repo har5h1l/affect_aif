@@ -21,6 +21,15 @@
 - When enabled, the current implementation multiplies policy precision by `1 + precision_signal`.
 - That means the optional precision path only boosts decisiveness above the base `gamma`; it does not suppress precision below baseline.
 
+## Trust vs Affect
+
+- `use_parameter_learning=True` enables standard Dirichlet updates to the likelihood model after each observed interaction.
+- This is an implementation of ordinary parameter learning over the observation model, not a separate trust variable matching the $\tau_k$ notation in [docs/theory.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/theory.md).
+- In other words:
+  - learned likelihood parameters capture how the agent updates beliefs from evidence
+  - affective `beta_k` captures the slow per-partner summary used for terminal values (and optionally precision modulation)
+- The current code therefore keeps trust-like evidence accumulation and affective deployment distinct, rather than instantiating a dedicated trust scalar alongside `beta_k`.
+
 ## Terminal Values
 
 - Affective and reward-average agents now both emit terminal signals on a comparable `[0, 1]` scale.
@@ -31,6 +40,9 @@
 ```text
 V = -mu * signal_k * normalized_continuation_payoff
 ```
+
+- `RewardAvgAgent` intentionally inherits the base `precision_signal()` implementation, which returns zeros for every partner.
+- That means the reward-average control only contributes through terminal values; it does not modulate policy precision even if precision modulation is enabled globally.
 
 ## Affective Update Signal
 
@@ -44,3 +56,14 @@ V = -mu * signal_k * normalized_continuation_payoff
 - It also supports `scheduled_type_switches`, a list of `{round, partner_idx, to_type}` events.
 - Scheduled switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the switch as an unexpected behavioral change.
 - See `affect_aif/configs/betrayal_stress.json` for the reference setup.
+- `scripts/run_analysis.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:
+  - `betrayal_post_switch_window_1_5.csv`
+  - `betrayal_post_switch_window_1_10.csv`
+  - `betrayal_condition_comparison.csv`
+  - `betrayal_detection_latency.csv`
+  - `betrayal_trajectories.csv`
+  - `affective_movement_summary.csv`
+- The round-level schema now logs the raw per-partner `terminal_signal` used for planning, plus `switch_kind`, `current_partner_switched`, `current_partner_scheduled_switch`, and `scheduled_switch_partner_ids`.
+- Detection latency is defined as encounters after the switch until inferred type becomes correct.
+- Payoff recovery latency is defined as encounters after the switch until payoff reaches at least `1.0`, meaning the agent is no longer taking sucker-level losses under the default matrix.
+- If the betrayal outputs remain flat, treat that as a mechanism null result: beta and terminal-signal dynamics did not move enough to separate precision tracking from reward averaging under the current task and hyperparameters.

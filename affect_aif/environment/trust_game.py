@@ -140,6 +140,7 @@ class TrustGameEnv:
         partner.update_after_interaction(social_action)
         stochastic_switch = partner.maybe_switch_type(self.available_types, self.p_switch)
         type_switched = (partner_idx in scheduled_switched) or stochastic_switch
+        switch_kind = "scheduled" if partner_idx in scheduled_switched else "stochastic" if stochastic_switch else "none"
 
         self.round_idx += 1
         self.active_partner = self._select_next_active_partner()
@@ -155,6 +156,9 @@ class TrustGameEnv:
             "active_partner": self.active_partner,
             "round": self.round_idx,
             "type_switched": bool(type_switched),
+            "switch_kind": switch_kind,
+            "current_partner_switched": bool(type_switched),
+            "current_partner_scheduled_switch": bool(partner_idx in scheduled_switched),
             "scheduled_switch_partner_ids": sorted(int(idx) for idx in scheduled_switched),
             "true_partner_type": true_partner_type,
             "true_types": [item.type_name for item in self.partners],

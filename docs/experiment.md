@@ -30,7 +30,7 @@ Each partner's latent strategy type, drawn from:
 - **Exploiter**: cooperates initially (first 3-5 rounds) then defects with probability 0.85
 - **Random**: cooperates with probability 0.5
 
-Types are stable within blocks but switch at geometrically-distributed intervals (expected block length ~20 rounds, minimum 10). The agent does not observe type switches directly.
+Types are stable within blocks but switch at geometrically-distributed intervals (expected block length ~20 rounds). The agent does not observe type switches directly.
 
 **Level 3 — Affective State** $\beta_k$ (for affective agents only)
 A continuous-valued state per partner, bounded in $[0, 1]$, representing the agent's running estimate of social model precision for partner $k$. Initialized at $\beta_k = 0.5$ (neutral).
@@ -126,7 +126,7 @@ Where $\mu$ scales the influence of affect on policy selection. This keeps the t
 The agent interacts with $K = 4$ partners over $N = 200$ rounds. Each round:
 
 1. A partner is selected (either randomly assigned or agent-chosen — see Variant 3.4)
-2. The agent and partner simultaneously choose Cooperate or Defect
+2. The agent and partner choose Cooperate or Defect (the implementation evaluates the agent's action first inside the simulation loop, but because both actions are resolved against the same round payoff matrix with no within-round reaction term, this is strategically equivalent to simultaneous choice)
 3. Payoffs are determined by the Trust Game matrix
 4. The agent observes the partner's action and updates beliefs
 
@@ -157,6 +157,7 @@ Two of the four partners are secretly correlated — partner C copies partner B'
 
 **Variant E: Betrayal stress test**
 Use agent-chosen partners, disable stochastic type switches (`p_switch = 0`), seed a clearly cooperative partner at the start of the episode, then force a scheduled switch from `cooperator` to `exploiter` mid-episode. The key readout is payoff, action choice, and inferred-type accuracy in the first 5-10 encounters after the betrayal event. This is the cleanest way to separate precision tracking from reward averaging, because the partner's past reward history remains attractive while the predictive model becomes sharply wrong.
+The repository now treats this as the primary diagnostic benchmark for condition comparison because it is the most direct test of whether per-partner beta dynamics do computational work beyond cached value.
 
 ---
 
@@ -174,6 +175,7 @@ Use agent-chosen partners, disable stochastic type switches (`p_switch = 0`), se
 - Planning horizon: $\tau = 2$
 - Level 3 (affective state): active, per-partner, updated on slow timescale
 - Policy selection: EFE over 2-step horizon + affective terminal value $V_k(\beta_k)$
+- Precision modulation: off by default in the primary experiments (`affect_modulates_precision=False`), so Condition 2 tests the terminal-value mechanism rather than per-partner $\gamma_k$ modulation
 - Purpose: tests the core hypothesis — can affect compensate for reduced planning depth?
 
 ### 4.3 Condition 3: Lesioned Affective Agent (vmPFC Analog)
@@ -251,6 +253,7 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - In the betrayal stress test, performance in the first 5-10 encounters after the forced cooperator→exploiter switch
 
 **Expected outcome**: The reward-average agent is exploited more by Exploiter types (who provide good initial rewards but then defect) because it confuses high past reward with high future reliability. The precision-based agent detects increasing prediction errors from the Exploiter earlier, even before average reward drops, because the Exploiter's transition from cooperation to defection produces model misfit that precision tracking catches but reward averaging misses.
+Operationally, inspect `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, and `betrayal_condition_comparison.csv`. A successful mechanism result means Condition 2 beats Condition 5 on post-switch payoff and/or accuracy while `affective_movement_summary.csv` shows non-flat beta and terminal-signal ranges. If both the comparison tables and movement summary are flat, interpret the outcome as a null mechanism result rather than a broken analysis pipeline.
 
 **Failure mode**: If Conditions 2 and 5 perform comparably, then the simpler reward-average account is sufficient and the precision interpretation isn't necessary. This would weaken the theoretical contribution but not destroy the planning-depth result.
 
@@ -287,7 +290,7 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 
 ### 6.1 Framework
 
-Primary implementation in **pymdp** (Python library for active inference POMDPs). The basic POMDP structure (levels 1-2) uses standard pymdp machinery. The affective state (level 3) is implemented as an auxiliary variable outside the core POMDP loop, modulating the EFE computation through the terminal value mechanism.
+Primary implementation is a custom **JAX-first** active inference stack in this repository. Generic active inference math and control live under `affect_aif/core`, trust-game-specific matrices and payoffs live under `affect_aif/generative_model`, and the affective state (level 3) is implemented as an auxiliary per-partner summary outside the core belief update loop, modulating policy evaluation through the terminal value mechanism.
 
 Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://github.com/CasperHesp/deeplyfeltaffect) for the single-agent affective architecture. This will be extended to the multi-partner setting.
 
@@ -302,7 +305,7 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 | Deep planning horizon ($T$) | 8 | Sufficient for ~optimal play in this game |
 | Shallow planning horizon ($\tau$) | 2 | Minimal deliberation |
 | Affective smoothing ($\lambda$) | 0.9 | 10× slower than belief updates |
-| Affective scaling ($\mu$) | Tuned via grid search | Should be calibrated so affect meaningfully shifts policy selection |
+| Affective scaling ($\mu$) | Derived from deep-planner mean absolute EFE per step | Calibrated from the explicit planning mass omitted by the shallow horizon, rather than tuned by grid search |
 | Replications per condition | 100 | Sufficient for reliable statistics |
 
 ### 6.3 Analysis Plan
@@ -331,7 +334,7 @@ Key figures for the paper:
 
 | Phase | Tasks | Duration |
 |---|---|---|
-| Phase 1 | Implement basic multi-partner POMDP in pymdp (Conditions 1, 4) | 2 weeks |
+| Phase 1 | Implement basic multi-partner POMDP in the repository's JAX-first stack (Conditions 1, 4) | 2 weeks |
 | Phase 2 | Implement affective state and terminal value mechanism (Condition 2) | 1-2 weeks |
 | Phase 3 | Implement lesion and reward-average conditions (Conditions 3, 5) | 1 week |
 | Phase 4 | Run primary simulations (Variant A, all conditions, 100 replications) | 1 week |

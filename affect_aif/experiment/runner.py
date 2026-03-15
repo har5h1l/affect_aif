@@ -193,7 +193,7 @@ class ExperimentRunner:
         return self.run_parameter_sensitivity()
 
     def run_parameter_sensitivity(self) -> pd.DataFrame:
-        """Run one-at-a-time sensitivity sweeps for μ, λ, and affective charge gain."""
+        """Run one-at-a-time sensitivity sweeps for μ and affective state hyperparameters."""
 
         if self.calibration_summary is None:
             self.calibrate_mu()
@@ -201,6 +201,7 @@ class ExperimentRunner:
         original_mu = self.config.mu
         original_lambda = self.config.lambda_smooth
         original_alpha = self.config.alpha_charge
+        original_sigma = self.config.sigma_0_sq
         original_conditions = list(self.config.conditions)
         sensitivity_conditions = [condition for condition in original_conditions if condition in {2, 3, 5}]
         if not sensitivity_conditions:
@@ -214,11 +215,14 @@ class ExperimentRunner:
             sweep_specs.append(("lambda_smooth", float(value)))
         for value in self.config.sensitivity_factors["alpha_charge"]:
             sweep_specs.append(("alpha_charge", float(value)))
+        for value in self.config.sensitivity_factors["sigma_0_sq"]:
+            sweep_specs.append(("sigma_0_sq", float(value)))
 
         for parameter_name, parameter_value in sweep_specs:
             self.config.mu = base_mu
             self.config.lambda_smooth = original_lambda
             self.config.alpha_charge = original_alpha
+            self.config.sigma_0_sq = original_sigma
             mu_factor = np.nan
             if parameter_name == "mu":
                 mu_factor = float(parameter_value)
@@ -227,6 +231,8 @@ class ExperimentRunner:
                 self.config.lambda_smooth = float(parameter_value)
             elif parameter_name == "alpha_charge":
                 self.config.alpha_charge = float(parameter_value)
+            elif parameter_name == "sigma_0_sq":
+                self.config.sigma_0_sq = float(parameter_value)
             self.config.conditions = sensitivity_conditions
             for condition in sensitivity_conditions:
                 for replication in range(self.config.num_replications):
@@ -244,10 +250,12 @@ class ExperimentRunner:
                         row["sensitivity_value"] = float(self.config.mu if parameter_name == "mu" else parameter_value)
                         row["sensitivity_lambda_smooth"] = float(self.config.lambda_smooth)
                         row["sensitivity_alpha_charge"] = float(self.config.alpha_charge)
+                        row["sensitivity_sigma_0_sq"] = float(self.config.sigma_0_sq)
                         row["run_mode"] = "sensitivity"
                         records.append(row)
         self.config.mu = original_mu
         self.config.lambda_smooth = original_lambda
         self.config.alpha_charge = original_alpha
+        self.config.sigma_0_sq = original_sigma
         self.config.conditions = original_conditions
         return pd.DataFrame(records)

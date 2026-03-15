@@ -13,6 +13,7 @@ DEFAULT_SENSITIVITY_FACTORS = {
     "mu": [0.5, 0.75, 1.0, 1.25, 1.5],
     "lambda_smooth": [0.7, 0.8, 0.9, 0.95],
     "alpha_charge": [0.5, 1.0, 2.0],
+    "sigma_0_sq": [0.1, 0.25, 0.4],
 }
 
 
@@ -75,6 +76,7 @@ class ExperimentConfig:
                 "mu": [float(value) for value in self.sensitivity_factors],
                 "lambda_smooth": DEFAULT_SENSITIVITY_FACTORS["lambda_smooth"][:],
                 "alpha_charge": DEFAULT_SENSITIVITY_FACTORS["alpha_charge"][:],
+                "sigma_0_sq": DEFAULT_SENSITIVITY_FACTORS["sigma_0_sq"][:],
             }
         self.sensitivity_factors = normalized
 
