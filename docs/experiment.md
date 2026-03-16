@@ -82,7 +82,7 @@ This creates the standard tension: mutual cooperation is collectively optimal bu
 - Deep planner: $T = 8$ steps ahead
 - Shallow planner: $\tau = 2$ steps ahead
 
-**Policy evaluation**: standard expected free energy computation over the planning horizon. For affective agents, the shallow-horizon EFE is precision-weighted by the current partner-specific signal.
+**Policy evaluation**: standard expected free energy computation over the planning horizon, using sophisticated inference rather than a mean-field rollout. For each policy, the planner enumerates all future binary partner-action observation sequences, updates partner-type beliefs after each hypothetical observation via Bayes rule, and averages the pathwise EFE under the corresponding path probabilities. For affective agents, the shallow-horizon EFE is then precision-weighted by the current partner-specific signal. This is now the implemented planning method for all conditions, so horizon comparisons isolate explicit depth rather than mixing depth with different rollout approximations.
 
 ### 2.6 Affective State Update (Level 3 Implementation)
 
@@ -206,22 +206,43 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Weighted objective: $G(\pi) \approx \left(\sum_{t=1}^{\tau} G_t(\pi)\right) \cdot \left(1 + \mu \tilde{R}_k\right)$
 - Purpose: distinguishes the precision-tracking account from a simpler "cached value" account. If Condition 2 outperforms Condition 5, it demonstrates that tracking model precision provides information that reward averaging does not (the uncertainty preservation argument).
 
+### 4.6 Condition 6: Intermediate Planner, No Affect ($\tau = 3$)
+
+- Planning horizon: $3$
+- Level 3 (affective state): absent
+- Policy selection: sophisticated-inference EFE over 3-step horizon
+- Purpose: fills in the explicit-depth curve between Conditions 4 and 1.
+
+### 4.7 Condition 7: Intermediate Planner, No Affect ($\tau = 4$)
+
+- Planning horizon: $4$
+- Level 3 (affective state): absent
+- Policy selection: sophisticated-inference EFE over 4-step horizon
+- Purpose: tests whether the affective shallow agent matches one or two extra steps of explicit lookahead.
+
+### 4.8 Condition 8: Deep Planner With Affect
+
+- Planning horizon: $T = 8$
+- Level 3 (affective state): active
+- Policy selection: sophisticated-inference EFE over 8-step horizon, weighted by the first partner's affective signal
+- Purpose: tests whether affect adds anything once explicit planning is already deep.
+
 ---
 
 ## 5. Hypotheses and Predictions
 
-### Hypothesis 1: Affect Compensates for Planning Depth
+### Hypothesis 1: Affect Provides Value Beyond Planning Depth
 
-**Prediction**: Condition 2 (affective, shallow) achieves cumulative payoff within 5% of Condition 1 (deep, no affect), while using significantly fewer computational resources.
+**Prediction**: Condition 2 (affective, shallow) outperforms every non-affective planner, including Conditions 1, 4, 6, and 7, while using much less explicit computation than the deep planner.
 
 **Metrics**:
 - Cumulative payoff over 200 rounds (primary)
 - Number of policy-tree nodes expanded per decision (computational cost)
 - Per-round decision time (wall clock, if relevant)
 
-**Expected outcome**: Affective agents achieve ~95% of deep-planner performance at ~25% of computational cost (2-step horizon vs. 8-step = exponentially fewer branches).
+**Expected outcome**: Under sophisticated inference, the explicit-depth curve among non-affective agents is flat in this binary-action trust game, so Condition 2 should beat the whole no-affect family rather than merely matching Condition 1. This reframes the result from "affect approximates deep lookahead" to "affect adds a partner-specific evaluation signal that depth alone does not recover here."
 
-**Failure mode**: If Condition 2 significantly underperforms Condition 1 (>10% payoff gap), it means the affective weighting is not a good enough approximation of deep planning. This would require either (a) increasing τ to 3-4, or (b) enriching the affective state representation.
+**Failure mode**: If Conditions 1, 4, 6, and 7 form a rising depth-performance curve and Condition 2 only matches the shallow baseline, then the affective weighting is not adding information beyond explicit lookahead. That would push the interpretation back toward a standard planning-depth story.
 
 ### Hypothesis 2: Lesion Reproduces Damasio Pattern
 
@@ -252,10 +273,10 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Exploitation rate by Exploiter-type partners
 - In the betrayal stress test, performance in the first 5-10 encounters after the forced cooperator→exploiter switch
 
-**Expected outcome**: The reward-average agent is exploited more by Exploiter types (who provide good initial rewards but then defect) because it confuses high past reward with high future reliability. The precision-based agent detects increasing prediction errors from the Exploiter earlier, even before average reward drops, because the Exploiter's transition from cooperation to defection produces model misfit that precision tracking catches but reward averaging misses.
+**Expected outcome**: The result is now expected to be context-dependent rather than universal. In the default random-assignment task, Condition 2 and Condition 5 can remain effectively tied because prediction accuracy and reward history stay closely aligned. In the betrayal-stress task, the reward-average agent should be exploited more by the forced cooperator→exploiter switch because it confuses attractive recent reward with current reliability, whereas the precision-based agent reacts to the spike in surprise.
 Operationally, inspect `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, and `betrayal_condition_comparison.csv`. A successful mechanism result means Condition 2 beats Condition 5 on post-switch payoff and/or accuracy while `affective_movement_summary.csv` shows non-flat beta and terminal-signal ranges. If both the comparison tables and movement summary are flat, interpret the outcome as a null mechanism result rather than a broken analysis pipeline.
 
-**Failure mode**: If Conditions 2 and 5 perform comparably, then the simpler reward-average account is sufficient and the precision interpretation isn't necessary. This would weaken the theoretical contribution but not destroy the planning-depth result.
+**Failure mode**: If Conditions 2 and 5 perform comparably even in betrayal stress, then the simpler reward-average account is sufficient in the shipped environment family. That would weaken the precision-specific claim while leaving the broader affect-versus-no-affect result intact.
 
 ### Hypothesis 4: Affective Inertia Provides Noise Robustness
 
@@ -304,6 +325,7 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 | Partner types | 4 (Cooperator, Reciprocator, Exploiter, Random) | Covers key strategic diversity |
 | Deep planning horizon ($T$) | 8 | Sufficient for ~optimal play in this game |
 | Shallow planning horizon ($\tau$) | 2 | Minimal deliberation |
+| Intermediate planning horizons | 3, 4 | Additional depth-comparison points for Conditions 6 and 7 |
 | Affective smoothing ($\lambda$) | 0.6 | Slower than belief updates while still moving over 5-10 interactions |
 | Affective scaling ($\mu$) | Derived from deep-planner mean absolute EFE per step | Calibrated from the explicit planning mass omitted by the shallow horizon, rather than tuned by grid search |
 | Replications per condition | 100 | Sufficient for reliable statistics |
@@ -322,6 +344,8 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 **Execution workflow note**:
 - `scripts/run_experiment.py` accepts repeated `--config` flags and a shared `--workers` pool so multiple experiment configs can be queued in one invocation.
 - Outputs are written per config under `<output-dir>/<batch-id>/<config-name>/results.csv`, which keeps each experiment variant isolated while still allowing the scheduler to share workers across all queued replications.
+- `affect_aif/configs/horizon_sweep.json` is the reference config for Conditions 1, 2, 4, 6, and 7; analysis now emits a horizon-sweep figure so the affective shallow condition can be read directly against explicit depth.
+- `affect_aif/configs/deep_affect_test.json` is the targeted follow-up for Conditions 1, 2, and 8, isolating whether affect adds anything once explicit planning is already deep.
 
 ### 6.4 Visualizations
 
@@ -349,28 +373,28 @@ Key figures for the paper:
 
 ### 6.6 Current Empirical Status
 
-The current repo state is no longer pre-results. Three experiment families have been run and interpreted:
+The current repo state is no longer pre-results. The core sophisticated-inference experiment families have been run and interpreted:
 
 - `default`: 100 replications x 200 rounds, random partner assignment, conditions 1-5
 - `betrayal_stress`: 50 replications x 120 rounds, agent-choice with a scheduled betrayal switch, conditions 1-3 and 5
-- `variant_d`: 100 replications x 200 rounds, random partner assignment with partners 1 and 2 correlated at `correlation_strength = 0.9`, conditions 1-5
+- `horizon_sweep`: 100 replications x 200 rounds, random partner assignment, conditions 1, 2, 4, 6, and 7
 
 Current scorecard:
 
-| Hypothesis | Default | Betrayal Stress | Variant D | Final reading |
+| Hypothesis | Default | Betrayal Stress | Horizon Sweep / cross-run read | Final reading |
 |---|---|---|---|---|
-| H1 affect > baseline | Supported (`d = 0.63`, `p = 1.3e-5`) | Supported (`d = 1.11`, `p = 4.1e-7`) | Supported (`d = 0.52`, `p = 3.0e-4`) | Strongly supported |
-| H2 lesion dissociation | Supported (`p = 1.3e-5`) | Supported (`p = 1.5e-5`) | Supported (`p = 3.0e-4`) | Strongly supported |
-| H3 precision > reward average | Null (`d = 0.01`, `p = 0.94`) | Null (`d = 0.01`, `p = 0.95`) | Null (`d = -0.001`, `p = 0.99`) | Confirmed null |
-| H4 post-switch robustness | Supported (`p = 4.3e-9`) | Supported (`p = 0.0056`) | Supported (`p = 1.7e-6`) | Supported |
-| H5 partner selection | N/A | Supported (`r = 0.42`, `p = 4.3e-6`) | N/A | Supported |
+| H1 affect > baseline | Supported (`d = 0.64`, `p = 1.1e-5`) | Supported (`d = 1.30`, `p = 6.8e-9`) | Supported: all non-affective horizons are tied (`p > 0.93` pairwise) while `C2` exceeds each one (`p < 2e-5`) | Affect adds value orthogonal to explicit depth |
+| H2 lesion dissociation | Supported: accuracy match `p = 0.96`, payoff gap `p = 1.4e-5` | Supported: accuracy match `p = 0.55`, payoff gap `p = 9.6e-7` | `C3 = C4` exactly in `default`, confirming the lesion is a pure affect-to-action decoupling | Strongly supported |
+| H3 precision > reward average | Null (`d = 0.009`, `p = 0.95`) | Supported (`d = 0.59`, `p = 0.004`) | Context-dependent: default remains tied, betrayal stress separates them | Supported when prediction error and reward dissociate |
+| H4 post-switch robustness | Supported (`p = 2.8e-9` vs `C1`, `p = 5.4e-9` vs `C4`) | Supported (`p = 0.013` vs `C1`) | Consistent with affective inertia helping after switches | Supported |
+| H5 partner selection | N/A | Supported (`r = 0.51`, `p = 2.9e-9`) | N/A | Supported |
 
 Interpretation:
 
-- The current story is best described as "4 of 5 hypotheses supported, 1 confirmed null."
-- `variant_d` was the final shipped mechanism test for H3 and did not change the outcome: `C2 = 651.52`, `C5 = 651.64`, `d = -0.001`, `p = 0.99`.
-- The null is therefore substantive, not provisional. In the current trust-game family, model accuracy and reward history stay too aligned for precision tracking to outperform reward averaging.
-- The active framing should now be **precision augmentation** plus a clear H3 boundary condition, not an open search for one more disambiguating run.
+- The old "affect compensates for shallow depth" framing no longer fits the data. Under sophisticated inference, non-affective planners from `τ = 2` through `τ = 8` are statistically indistinguishable in the default task: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, with every pairwise `p > 0.93`.
+- The more defensible claim is **augmentation, not compensation**. Affect adds a partner-specific terminal signal that improves policy evaluation in a way explicit lookahead depth does not recover in the shipped binary-action task.
+- H3 is no longer a confirmed null. It is a boundary-condition result: null in `default`, but supported in `betrayal_stress` where the scheduled betrayal creates a temporary dissociation between recent reward and current predictive reliability (`C2 = 481.88` vs `C5 = 428.32`, `p = 0.004`, `d = 0.59`).
+- `C3` and `C4` are exactly identical in the default run, confirming that `mu = 0` removes the affective contribution cleanly without perturbing belief updating or other planning logic.
 
 For the rolling summary and next recommended run, see [docs/results_tracking.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/results_tracking.md).
 
@@ -378,29 +402,29 @@ For the rolling summary and next recommended run, see [docs/results_tracking.md]
 
 ## 7. Possible Outcomes and Their Interpretations
 
-### 7.1 Best Case: All Hypotheses Confirmed
+### 7.1 Strongest Supported Read
 
-Condition 2 matches Condition 1 at a fraction of the computational cost. Condition 3 reproduces the Damasio pattern. Condition 2 > Condition 5 on Exploiter detection. Affective inertia provides noise robustness.
+Condition 2 beats the full non-affective family, not just the shallow baseline. Condition 3 reproduces the Damasio-style knowledge/deployment dissociation. Condition 2 and Condition 5 separate only in betrayal-style environments where reward history and predictive reliability come apart. Affective inertia also improves post-switch robustness.
 
-**Interpretation**: affect is computational infrastructure for social inference. The per-partner precision-tracking account is supported over simpler alternatives. The model provides the first computational demonstration of the somatic marker hypothesis in a multi-agent setting.
+**Interpretation**: affect is computational infrastructure for social inference, but the strongest supported claim is narrower than the original plan. The current evidence supports a per-partner precision-augmentation account over a pure planning-depth account. In this task family, affect changes policy evaluation in a way deeper non-affective planning does not recover.
 
-**Next steps**: extend to more complex social scenarios (larger groups, more partner types, partial observability of actions), test whether affective states can trigger structural model revision (BMR bridge), explore developmental trajectories (how affective states bootstrap from scratch).
+**Next steps**: run the targeted `C8` comparison when needed, then move to richer task families if the goal is to test whether explicit depth matters again once the environment has more structural branching.
 
-### 7.2 Partial Success: Affect Helps but Doesn't Produce a Pure Depth Advantage
+### 7.2 Empirically Realized Outcome: Affect Helps but Depth Alone Does Not
 
-Condition 2 improves over the non-affect controls, but Conditions 1, 3, and 4 remain tightly clustered because first-step marginalization makes raw planning depth weakly expressive in the current binary action space.
+Condition 2 improves over the non-affect controls, but Conditions 1, 4, 6, and 7 remain tightly clustered because sophisticated inference removes the old mean-field bottleneck and the current binary action space gives extra explicit horizon very little marginal leverage.
 
-**Interpretation**: affect provides genuine computational benefit, but the default task does not support a strong "depth compensation" claim because depth alone is largely irrelevant here. The defensible result is that partner-specific weighting changes evaluation in a way that shallow non-affect planning does not.
+**Interpretation**: affect provides genuine computational benefit, but the default task does not support a strong "depth compensation" claim because depth alone is largely irrelevant here. The defensible result is that partner-specific weighting changes evaluation in a way that shallow and deep non-affect planners both miss.
 
-**Adjustment**: shift the benchmark task toward conditions where depth should matter structurally, or add richer action spaces and partner-selection demands. In the current setup, emphasize post-switch recovery and partner-specific weighting rather than a strict shallow-versus-deep compensation story.
+**Adjustment**: keep the benchmark claim focused on augmentation and post-switch robustness, and use richer action spaces or more structurally branching tasks if the goal is to recover a non-flat explicit-depth curve.
 
-### 7.3 Precision ≈ Reward Average (Hypothesis 3 Fails)
+### 7.3 Context Dependence in Precision vs Reward Average
 
-Conditions 2 and 5 perform comparably. The simpler reward-average account is sufficient.
+Conditions 2 and 5 perform comparably in `default`, but separate in `betrayal_stress`.
 
-**Interpretation**: affective weighting still improves behavior, but the precision-specific claim loses support. In that case the result is about slow partner-specific summarization rather than precision being uniquely necessary.
+**Interpretation**: the precision-specific claim is not a universal win, but it is not dead either. It becomes visible when the environment creates a genuine prediction-reward dissociation, such as a scheduled betrayal where cached reward remains attractive while surprise spikes.
 
-**Adjustment**: pivot framing from "precision is the right compression" to "slow affective summarization improves shallow evaluation" and present the precision vs. reward-average distinction as an open question. Look for specific scenarios (e.g., betrayal, non-monotonic partner dynamics, mixed cooperative/adversarial interactions) where precision tracking's advantage might emerge.
+**Adjustment**: frame H3 as a conditional hypothesis. Default-style tasks remain a null boundary condition; betrayal-style tasks are the positive mechanism test.
 
 ### 7.4 The Lesion Doesn't Produce the Expected Dissociation
 

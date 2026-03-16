@@ -83,6 +83,38 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
     plt.close(fig)
 
 
+def _save_horizon_sweep_figure(summary: pd.DataFrame, out: Path):
+    horizon_conditions = {4: 2, 6: 3, 7: 4, 1: 8}
+    sweep = summary[summary["condition"].isin(horizon_conditions)].copy()
+    if sweep["condition"].nunique() < 2:
+        return
+
+    sweep["planning_horizon"] = sweep["condition"].map(horizon_conditions)
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.lineplot(
+        data=sweep,
+        x="planning_horizon",
+        y="total_payoff",
+        marker="o",
+        estimator="mean",
+        errorbar="sd",
+        ax=ax,
+    )
+
+    affective = summary[summary["condition"] == 2]
+    if not affective.empty:
+        affective_mean = float(affective["total_payoff"].mean())
+        ax.axhline(affective_mean, color="black", linestyle="--", linewidth=1.2, label="affective_shallow")
+        ax.legend()
+
+    ax.set_title("Payoff vs Planning Horizon")
+    ax.set_xlabel("Planning Horizon")
+    ax.set_ylabel("Cumulative Payoff")
+    fig.tight_layout()
+    fig.savefig(out / "figure_10_horizon_sweep.png", dpi=180)
+    plt.close(fig)
+
+
 def save_all_figures(results: pd.DataFrame, output_dir: str):
     """Generate a compact figure set from the results table."""
 
@@ -139,6 +171,8 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     fig.tight_layout()
     fig.savefig(out / "figure_6_mean_abs_step_efe.png", dpi=180)
     plt.close(fig)
+
+    _save_horizon_sweep_figure(summary, out)
 
     if has_switch_events(results):
         _save_betrayal_figures(results, out)

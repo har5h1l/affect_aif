@@ -61,7 +61,7 @@ What is absent across all of this work: a per-partner interoceptive/affective st
 
 ### 2.1 Core Claim
 
-Affect is computational infrastructure that makes tractable social inference possible under realistic resource constraints. Specifically, per-partner interoceptive states — slow-timescale hierarchical representations tracking the reliability of one's social model for each partner — function as learned precision weights that improve shallow explicit planning by adding partner-specific confidence information that shallow lookahead alone does not encode.
+Affect is computational infrastructure that makes tractable social inference possible under realistic resource constraints. Specifically, per-partner interoceptive states — slow-timescale hierarchical representations tracking the reliability of one's social model for each partner — function as learned precision weights that improve policy evaluation by adding partner-specific confidence information that explicit lookahead alone does not encode in the current task.
 
 ### 2.2 What the Affective State Tracks
 
@@ -110,7 +110,7 @@ The vmPFC lesion maps to: remove the affective weighting and force the agent to 
 
 1. **Per-partner interoceptive state in multi-agent AIF.** Not a global mood, not a shared precision parameter — a learned affective state for each social partner that compresses that specific interaction history into a precision signal. No existing AIF model has this.
 
-2. **Explicit planning-depth vs. performance tradeoff.** The model demonstrates that affect is a specific mechanism that shifts the cost-performance curve by changing how shallow plans are evaluated, even when planning depth alone does not separate conditions in the current binary-action task. Existing planning-depth optimization literature does not use affect as the mechanism.
+2. **Explicit planning-depth vs. performance tradeoff.** The model demonstrates that affect is a specific mechanism that shifts the cost-performance curve by changing how plans are evaluated, even when explicit planning depth alone does not separate conditions in the current binary-action task under sophisticated inference. Existing planning-depth optimization literature does not use affect as the mechanism.
 
 3. **Computational vmPFC lesion in a social context.** The IGT literature shows the behavioral syndrome in single-agent gambling tasks. This model reproduces it computationally in a multi-agent setting by decoupling the affective state from policy selection.
 
@@ -183,6 +183,8 @@ $$\phi(\epsilon) = \alpha \cdot (\sigma_0^2 - \epsilon^2)$$
 
 Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. Defaults of `lambda_smooth = 0.6` and `alpha_charge = 3.0` keep affect slower than belief updates while still letting partner-specific precision estimates separate over roughly 5-10 interactions. When actual squared surprise is below baseline, affect increases; when above, it decreases. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
 Within-theory sensitivity analysis therefore varies not just $\mu$, $\lambda$, and $\alpha$, but also $\sigma_0^2$. That sweep asks whether the mechanism is under-expressed because the baseline surprise scale is badly calibrated, while keeping the update law itself fixed.
+
+This update law is intentionally a lightweight engineering approximation, not a fully derived variational identity. The important theoretical constraint is weaker: the signal should be consistent with active-inference intuitions about expected precision and model fitness. In the current implementation, it is. The surprise term is computed from the agent's own level-2 predictive beliefs about the observed partner action, so the affective update is belief-coupled rather than externally injected or decoupled from inference.
 
 ### 3.5 Affect as Precision Weighting of Shallow EFE
 
@@ -258,35 +260,49 @@ The three-timescale architecture (fast observation inference, medium parameter l
 
 The model predicts that disruption at each level produces qualitatively different behavioral deficits: level-1 damage impairs perception of social cues, level-2 damage impairs learning about partners, level-3 damage impairs efficient deployment of learned knowledge — each a distinct clinical presentation.
 
-### 4.5 When Precision Collapses to Reward
+### 4.5 Depth Irrelevance Under Sophisticated Inference
 
-The completed experiments add an important boundary condition. In the default random-assignment task, the betrayal-stress task, and the correlated-partner `variant_d` task, Condition 2 (precision-based affect) and Condition 5 (reward-average weighting) are effectively indistinguishable on aggregate payoff and post-switch behavior. This is not evidence that the analysis failed; it is evidence that the task makes prediction accuracy and reward history largely monotonic.
+The most important empirical update is that explicit planning depth is effectively irrelevant in the shipped binary-action trust game once all conditions use the same observation-branching sophisticated inference. In the `horizon_sweep` run, the non-affective planners are flat: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, and every pairwise comparison among those four conditions has `p > 0.93`.
 
-That collapse happens when identifying a partner's type also tells the agent how to harvest reward from that partner. In the current trust game, learning that a partner is exploitive quickly supports retaliatory defection, so higher model precision and higher realized reward re-align after a short adjustment period. Under those circumstances, a slow summary of model calibration and a slow summary of payoff history produce nearly identical action rankings.
+This sharply changes the theoretical reading of the earlier depth story. The old mean-field rollout was the practical bottleneck, not horizon length itself. Once hypothetical observations are integrated correctly and partner-type beliefs are updated pathwise, extending the explicit horizon from `τ = 2` to `τ = 8` yields no measurable payoff gain in this task. So the relevant comparison is no longer "can affect approximate a deep planner?" but "does affect add something that no amount of extra explicit lookahead recovers here?" The current answer is yes.
 
-`variant_d` was the strongest shipped rescue attempt for H3 because it introduced hidden correlation between partners 1 and 2 at 90 percent strength. Even there, the manipulation did not create a usable dissociation: Condition 2 and Condition 5 remained tied on payoff (`651.52` vs `651.64`, `d = -0.001`, `p = 0.99`) and matched exactly on exploitation rate (`0.481`). The most plausible interpretation is that the agent treats each partner independently, so correlation only smooths both signals rather than giving precision-tracking a unique advantage.
+That does not imply depth is universally irrelevant in active inference. It implies that in this particular task family, with binary actions and a small partner-type state space, sophisticated inference already captures the strategically relevant contingencies within a shallow horizon. Extra depth then mostly repeats the same local ranking rather than revealing qualitatively new futures.
 
-The theoretical distinction should only surface when model calibration and reward decouple. Three cases matter most:
+### 4.6 Affect as Augmentation, Not Compensation
+
+Under that flat depth curve, Condition 2 should not be read as a cheap approximation to Condition 1. It is better read as a planner with an additional evaluative factor: partner-specific precision weighting. Affect therefore acts as **augmentation**, not **compensation**. It changes how the shallow rollout is interpreted, rather than merely filling in missing future steps.
+
+This yields a stronger theoretical claim than the original one. If the non-affective depth curve were steep, an affective shallow planner beating a shallow baseline could still be dismissed as a crude proxy for deeper search. The new result rules that out for the shipped task: all non-affective depths are behaviorally identical, yet the affective condition still improves payoff. The added value must therefore come from the partner-specific precision signal, not from hidden effective depth.
+
+The lesion result reinforces this interpretation. In the `default` run, `C3` and `C4` are exactly identical in both payoff and inferred-type accuracy. That is the expected signature of a pure affect-to-action disconnection: belief updating remains intact, but removing the affective weighting collapses the agent back onto the non-affective planner.
+
+### 4.7 When Precision Diverges From Reward
+
+The precision-versus-reward story is now conditional rather than uniformly null. In the default random-assignment task, Condition 2 and Condition 5 remain tied (`575.06` vs `574.42`, `d = 0.009`, `p = 0.95`). There, identifying partner type quickly tells the agent how to act for reward, so predictive calibration and reward history mostly co-move.
+
+In `betrayal_stress`, however, the environment temporarily breaks that alignment. A previously cooperative partner switches to exploiter under scheduled betrayal, so recent reward still looks attractive while prediction error spikes. Under those conditions, Condition 2 outperforms Condition 5 (`481.88` vs `428.32`, `d = 0.59`, `p = 0.004`). This is exactly the regime where a precision-tracking signal should matter.
+
+The theoretical distinction should therefore surface when model calibration and reward decouple. Three cases matter most:
 
 - reliable adversaries: high precision, low raw reward
 - volatile benefactors: low precision, high average reward
-- correlated partners: indirect information transfer makes one partner predictable for structural reasons that reward averaging alone cannot represent
+- betrayal transitions: reward remains cached as attractive while surprise rises abruptly
 
-The current partner-type set does not actually instantiate those dissociations strongly enough. So the boundary condition is now sharper: without partner classes where prediction accuracy and reward genuinely come apart, precision-tracking collapses behaviorally to reward averaging even when affective beta moves materially.
+The current environment family instantiates that dissociation cleanly only in the betrayal-style setup. So H3 is best read as a boundary-condition claim: precision tracking is not a universal win, but it becomes behaviorally relevant when prediction error and reward point in different directions.
 
-### 4.6 Empirical Reframing After the Current Runs
+### 4.8 Empirical Reframing After the Current Runs
 
-The completed `default`, `betrayal_stress`, and `variant_d` runs support a narrower but stronger claim than the original "depth compensation" framing. Affect is best interpreted here as **precision augmentation**: a partner-specific signal that changes shallow policy evaluation in ways that deeper planning alone does not recover in the current binary-action task.
+The completed `default`, `betrayal_stress`, and `horizon_sweep` runs support a narrower but stronger claim than the original "depth compensation" framing. Affect is best interpreted here as **precision augmentation**: a partner-specific signal that changes policy evaluation in ways that deeper non-affective planning does not recover in the current binary-action task.
 
 The key empirical pattern is:
 
-- affective weighting improves payoff over the non-affect controls
+- affective weighting improves payoff over every non-affect condition
 - the lesion preserves partner knowledge while impairing payoff, reproducing the Damasio-style dissociation
 - partner selection covaries with beta in the agent-choice setup
-- the precision-versus-reward comparison stays null even after the correlated-partner stress test
-- raw planning depth alone is weakly expressive because first-action marginalization dominates in the current action space
+- the precision-versus-reward comparison is null in `default` but positive in `betrayal_stress`
+- raw planning depth alone is flat once sophisticated inference replaces the old mean-field approximation
 
-So the present theory should be read as: affect adds a dimension of evaluation orthogonal to horizon in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP. The landing position is therefore not "precision beats reward averaging in standard trust games," but "precision augmentation improves shallow social choice while H3 marks a real structural boundary of the current environment family."
+So the present theory should be read as: affect adds a partner-specific precision signal orthogonal to explicit depth in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP.
 
 ---
 

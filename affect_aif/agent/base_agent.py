@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from affect_aif.core.control import construct_policies, decision_step_trust_game
+from affect_aif.core.control import construct_policies, decision_step_trust_game, generate_observation_sequences
 from affect_aif.core.learning import update_likelihood_dirichlet
 from affect_aif.core.maths import dirichlet_expected_value
 from affect_aif.core.utils import obj_array, onehot
@@ -104,6 +104,7 @@ class BaseAgent:
             construct_policies([self.num_actions], self.planning_horizon, max_policies=self.max_policies, rng=rng),
             dtype=jnp.int32,
         )
+        self.observation_sequences = jnp.asarray(generate_observation_sequences(self.planning_horizon), dtype=jnp.int32)
         self.B_type = jnp.asarray(self.B[0][:, :, 0], dtype=jnp.float32)
         self.payoff_index_table = jnp.asarray(self.model.payoff_index_table, dtype=jnp.int32)
         self.agent_payoff_table = jnp.asarray(self.model.agent_payoff_table, dtype=jnp.float32)
@@ -228,6 +229,7 @@ class BaseAgent:
             counts=self.partner_interaction_counts,
             active_partner=jnp.int32(active_partner_idx),
             policies=self.policies,
+            observation_sequences=self.observation_sequences,
             key=self.key,
             B_type=self.B_type,
             partner_action_prob_table=self.partner_action_prob_table,

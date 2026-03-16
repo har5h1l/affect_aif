@@ -41,6 +41,7 @@ python scripts/run_visualization.py --results results/main_run/default/results.c
 ## Notes
 
 - Default experiments use exact policy enumeration when tractable.
+- Trust-game policy evaluation now uses observation-branching sophisticated inference rather than a mean-field rollout approximation.
 - When the policy space explodes, the control layer can fall back to capped enumeration.
 - Full runs floor `calibration_episodes` at `10` when deriving `mu`, so affective comparisons do not hinge on a `2-3` episode calibration draw.
 - Default affect settings are `lambda_smooth=0.6`, `alpha_charge=3.0`, `sigma_0_sq=0.25`, which keeps beta slower than belief updates without leaving it effectively frozen.
@@ -48,7 +49,9 @@ python scripts/run_visualization.py --results results/main_run/default/results.c
 - Affective and reward-average shallow agents weight shallow-horizon EFE by the first partner's signal rather than appending an additive terminal scalar, so condition differences survive first-action marginalization.
 - The current task is still single active agent plus scripted partners, but those partners now implement the same minimal `plan_and_act` / `observe_outcome` lifecycle as agents so the environment loop has a clean extension seam.
 - `affect_aif/configs/betrayal_stress.json` is a harder scheduled-switch scenario for separating precision tracking from reward averaging.
-- `affect_aif/configs/variant_d.json` is the completed correlated-partner follow-up run; it did not separate precision tracking from reward averaging, so the experimental phase is now closed on H3.
+- `affect_aif/configs/horizon_sweep.json` adds intermediate no-affect horizons (Conditions 6 and 7) so analysis can place the affective shallow agent on an explicit depth curve.
+- `affect_aif/configs/deep_affect_test.json` is the follow-up run for Conditions 1, 2, and 8, testing whether affect adds anything once planning is already deep.
+- `affect_aif/configs/variant_d.json` is the archived correlated-partner follow-up run; it remained a null on H3, but the active H3 read is now driven by the default-null versus betrayal-positive contrast.
 - `scripts/run_preliminary.py` defaults to the harder `betrayal_stress` setup for a more informative directional smoke test, but accepts `--config` for other variants. It prints directional H1-H5 checks; `scripts/run_analysis.py` also saves `hypothesis_tests.json` alongside plots and summary tables.
 - `scripts/run_analysis.py` auto-emits betrayal-specific outputs when switch events are present, including `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, `betrayal_condition_comparison.csv`, `betrayal_detection_latency.csv`, `betrayal_trajectories.csv`, and `affective_movement_summary.csv`.
 - `scripts/run_experiment.py` supports multiple `--config` paths and `--workers` for parallel runs; with one config and `--workers 1`, `--verbose --verbosity-mode stage_stream` gives live per-round tracing; `--make-gifs` generates one GIF per primary condition/seed run after saving results; `scripts/run_visualization.py` can regenerate GIFs from an existing results file.

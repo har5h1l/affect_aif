@@ -147,3 +147,24 @@ def test_full_run_enforces_minimum_calibration_episodes():
     assert runner.calibration_summary is not None
     assert runner.calibration_summary["requested_calibration_episodes"] == 2
     assert runner.calibration_summary["calibration_episodes"] == runner.MIN_FULL_RUN_CALIBRATION_EPISODES
+
+
+def test_horizon_override_and_deep_affective_conditions():
+    cfg = ExperimentConfig(
+        num_rounds=2,
+        num_replications=1,
+        calibration_episodes=1,
+        conditions=[6, 7, 8],
+        horizon_overrides={6: 3, 7: 4},
+    )
+    runner = ExperimentRunner(cfg)
+    model = TrustGameModel(cfg)
+
+    c6 = runner._create_agent(condition=6, model=model, seed=0)
+    c7 = runner._create_agent(condition=7, model=model, seed=0)
+    c8 = runner._create_agent(condition=8, model=model, seed=0)
+
+    assert c6.planning_horizon == 3
+    assert c7.planning_horizon == 4
+    assert c8.planning_horizon == cfg.deep_horizon
+    assert c8.current_mu() == 0.0

@@ -21,8 +21,8 @@ from affect_aif.experiment.progress import ProgressReporter, create_progress_rep
 from affect_aif.generative_model.model import TrustGameModel
 
 
-PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5}
-SENSITIVITY_CONDITIONS = {2, 3, 5}
+PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5, 6, 7, 8}
+SENSITIVITY_CONDITIONS = {2, 3, 5, 8}
 
 
 def _build_calibration_summary(config: ExperimentConfig, efe_values: list[float], calibration_episodes: int) -> dict[str, float | int]:
@@ -61,6 +61,9 @@ class ExperimentRunner:
     def _create_model(self) -> TrustGameModel:
         return TrustGameModel(asdict(self.config))
 
+    def _planning_horizon_for(self, condition: int, default_horizon: int) -> int:
+        return int(self.config.horizon_overrides.get(int(condition), default_horizon))
+
     def _create_agent(self, condition: int, model: TrustGameModel, seed: int) -> BaseAgent:
         matrices = model.get_matrices()
         common = dict(
@@ -79,10 +82,10 @@ class ExperimentRunner:
             use_parameter_learning=self.config.use_parameter_learning,
         )
         if condition == 1:
-            return BaseAgent(planning_horizon=self.config.deep_horizon, **common)
+            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, self.config.deep_horizon), **common)
         if condition == 2:
             return AffectiveAgent(
-                planning_horizon=self.config.shallow_horizon,
+                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
                 num_partners=self.config.num_partners,
                 lambda_smooth=self.config.lambda_smooth,
                 alpha_charge=self.config.alpha_charge,
@@ -93,7 +96,7 @@ class ExperimentRunner:
             )
         if condition == 3:
             return LesionedAgent(
-                planning_horizon=self.config.shallow_horizon,
+                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
                 num_partners=self.config.num_partners,
                 lambda_smooth=self.config.lambda_smooth,
                 alpha_charge=self.config.alpha_charge,
@@ -104,12 +107,27 @@ class ExperimentRunner:
                 **common,
             )
         if condition == 4:
-            return BaseAgent(planning_horizon=self.config.shallow_horizon, **common)
+            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon), **common)
         if condition == 5:
             return RewardAvgAgent(
-                planning_horizon=self.config.shallow_horizon,
+                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
                 num_partners=self.config.num_partners,
                 lambda_smooth=self.config.lambda_smooth,
+                mu=float(self.config.mu or 0.0),
+                **common,
+            )
+        if condition == 6:
+            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, 3), **common)
+        if condition == 7:
+            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, 4), **common)
+        if condition == 8:
+            return AffectiveAgent(
+                planning_horizon=self._planning_horizon_for(condition, self.config.deep_horizon),
+                num_partners=self.config.num_partners,
+                lambda_smooth=self.config.lambda_smooth,
+                alpha_charge=self.config.alpha_charge,
+                sigma_0_sq=self.config.sigma_0_sq,
+                initial_beta=self.config.initial_beta,
                 mu=float(self.config.mu or 0.0),
                 **common,
             )

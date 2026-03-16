@@ -1,0 +1,11 @@
+{
+  "experiment_name": "horizon_sweep",
+  "conditions": [1, 2, 4, 6, 7],
+  "horizon_overrides": {
+    "6": 3,
+    "7": 4
+  },
+  "num_replications": 100,
+  "calibration_episodes": 20,
+  "random_seed": 42
+}

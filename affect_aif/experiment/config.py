@@ -44,6 +44,7 @@ class ExperimentConfig:
 
     deep_horizon: int = 8
     shallow_horizon: int = 2
+    horizon_overrides: dict[int, int] = field(default_factory=dict)
     max_policies: int = 4096
 
     lambda_smooth: float = 0.6
@@ -89,6 +90,7 @@ class ExperimentConfig:
         self.verbosity_include_calibration = bool(self.verbosity_include_calibration)
         self.gif_after_run = bool(self.gif_after_run)
         self.gif_output_dir = None if self.gif_output_dir is None else str(self.gif_output_dir)
+        self.horizon_overrides = {int(key): int(value) for key, value in dict(self.horizon_overrides).items()}
 
     @classmethod
     def from_dict(cls, data: dict) -> "ExperimentConfig":

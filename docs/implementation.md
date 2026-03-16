@@ -33,6 +33,13 @@
 
 - Partner-type beliefs are updated by the **analytical solution** to variational free energy minimization: for a categorical $q(s)$, the VFE-minimizing posterior equals the Bayesian posterior. The code implements this as one-step Bayes using the likelihood tensor $A$ and transition matrix $B$ (see `infer_partner_state` in `affect_aif/agent/base_agent.py`). No gradient descent or iterative VFE minimization is used; the matrix-based update is the closed-form optimum.
 
+## Sophisticated rollout inference
+
+- The trust-game planner now uses observation-branching sophisticated inference for **all** conditions and horizons.
+- Implementation-wise, `affect_aif/core/control.py` precomputes all binary observation sequences of length `planning_horizon - 1`, evaluates each `(policy, observation-sequence)` path, updates the acted-on partner belief after each hypothetical observation by Bayes rule, and then sums the pathwise EFE under the path probabilities.
+- The old mean-field rollout is retained only as an internal comparison path for tests; it is no longer the default decision rule.
+- This keeps the planning-method axis controlled across Conditions 1-8, so horizon comparisons are not confounded with different rollout approximations.
+
 ## Trust vs Affect
 
 - `use_parameter_learning=True` enables standard Dirichlet updates to the likelihood model after each observed interaction.
@@ -60,6 +67,12 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 - The weight is keyed to the policy's first partner, not the terminal rollout node, because action sampling operates on first-action marginals.
 - `RewardAvgAgent` intentionally inherits the base `precision_signal()` implementation, which returns zeros for every partner.
 - That means the reward-average control only contributes through shallow-EFE weighting; it does not modulate policy precision even if precision modulation is enabled globally.
+
+## Condition-specific horizons
+
+- `ExperimentConfig.horizon_overrides` maps condition id to planning horizon.
+- This is used for the intermediate depth sweep (Conditions 6 and 7) without changing the global `deep_horizon` and `shallow_horizon` defaults.
+- Condition 8 reuses the affective mechanism at the deep horizon to test whether affect provides anything beyond explicit depth.
 
 ## Affective Update Signal
 
