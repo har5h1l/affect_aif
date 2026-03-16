@@ -3,6 +3,7 @@ import numpy as np
 from affect_aif.agent.affective_agent import AffectiveAgent
 from affect_aif.agent.lesioned_agent import LesionedAgent
 from affect_aif.agent.reward_avg_agent import RewardAvgAgent
+from affect_aif.experiment.conditions import get_condition_name
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
 from affect_aif.generative_model.model import TrustGameModel
@@ -168,3 +169,68 @@ def test_horizon_override_and_deep_affective_conditions():
     assert c7.planning_horizon == 4
     assert c8.planning_horizon == cfg.deep_horizon
     assert c8.current_mu() == 0.0
+
+
+def test_clinical_alexithymia_condition_9():
+    """Condition 9 (alexithymia) creates an AffectiveAgent with blunted alpha_charge."""
+    cfg = ExperimentConfig(
+        num_rounds=2,
+        num_replications=1,
+        calibration_episodes=1,
+        random_seed=0,
+        conditions=[9],
+        alpha_charge=0.1,
+    )
+    runner = ExperimentRunner(cfg)
+    model = TrustGameModel(cfg)
+    agent = runner._create_agent(condition=9, model=model, seed=0)
+    assert isinstance(agent, AffectiveAgent)
+    assert agent.affect.alpha_charge == 0.1
+    assert agent.planning_horizon == cfg.shallow_horizon
+
+
+def test_clinical_borderline_condition_10():
+    """Condition 10 (borderline) creates an AffectiveAgent with volatile affect parameters."""
+    cfg = ExperimentConfig(
+        num_rounds=2,
+        num_replications=1,
+        calibration_episodes=1,
+        random_seed=0,
+        conditions=[10],
+        alpha_charge=12.0,
+        lambda_smooth=0.5,
+    )
+    runner = ExperimentRunner(cfg)
+    model = TrustGameModel(cfg)
+    agent = runner._create_agent(condition=10, model=model, seed=0)
+    assert isinstance(agent, AffectiveAgent)
+    assert agent.affect.alpha_charge == 12.0
+    assert agent.affect.lambda_smooth == 0.5
+    assert agent.planning_horizon == cfg.shallow_horizon
+
+
+def test_clinical_depression_condition_11():
+    """Condition 11 (depression) creates an AffectiveAgent with low initial_beta."""
+    cfg = ExperimentConfig(
+        num_rounds=2,
+        num_replications=1,
+        calibration_episodes=1,
+        random_seed=0,
+        conditions=[11],
+        initial_beta=0.2,
+    )
+    runner = ExperimentRunner(cfg)
+    model = TrustGameModel(cfg)
+    agent = runner._create_agent(condition=11, model=model, seed=0)
+    assert isinstance(agent, AffectiveAgent)
+    assert agent.affect.initial_beta == 0.2
+    assert np.allclose(agent.get_betas(), 0.2)
+    assert agent.planning_horizon == cfg.shallow_horizon
+
+
+def test_get_condition_name_all_conditions():
+    """get_condition_name returns a non-empty string for every defined condition (1-11)."""
+    for condition_id in range(1, 12):
+        name = get_condition_name(condition_id)
+        assert isinstance(name, str)
+        assert len(name) > 0

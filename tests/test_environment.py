@@ -1,7 +1,8 @@
+from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
 from affect_aif.environment.partner import Partner
 from affect_aif.environment.trust_game import TrustGameEnv
 from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import TrustGameModel
+from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
 
 
 def test_cooperator_mostly_cooperates():
@@ -84,3 +85,53 @@ def test_environment_uses_partner_interface_methods():
 
     assert stub.plan_calls == [(None, cfg.correlation_strength)]
     assert stub.outcome_calls == [(0, 0, result["partner_payoff"], result["agent_payoff"])]
+
+
+def test_graded_environment_step():
+    cfg = ExperimentConfig(
+        payoff_mode="graded",
+        num_investment_levels=6,
+        num_partners=4,
+        num_rounds=10,
+        assignment_mode="agent_choice",
+        p_switch=0.0,
+    )
+    env = GradedTrustGameEnv(cfg, seed=0)
+    context = env.reset()
+    assert context["active_partner"] is None  # agent_choice mode
+
+    # Action 5 = partner 0, investment level 5 (6*0 + 5)
+    result = env.step(5)
+    assert result["partner_idx"] == 0
+    assert result["agent_action"] == 5
+    expected_payoff = env.model.payoff_matrix[5, result["partner_action"], 0]
+    assert result["agent_payoff"] == expected_payoff
+
+    # Action 6 = partner 1, investment level 0 (6*1 + 0)
+    result2 = env.step(6)
+    assert result2["partner_idx"] == 1
+    assert result2["agent_action"] == 0
+    expected_payoff2 = env.model.payoff_matrix[0, result2["partner_action"], 0]
+    assert result2["agent_payoff"] == expected_payoff2
+
+
+def test_graded_partner_sees_binary_action():
+    """Partners should see cooperate/defect, not the raw investment level."""
+    cfg = ExperimentConfig(
+        payoff_mode="graded",
+        num_investment_levels=6,
+        num_partners=1,
+        num_rounds=2,
+        assignment_mode="random",
+        p_switch=0.0,
+        partner_types=["reciprocator", "cooperator", "exploiter", "random"],
+        initial_partner_types=["reciprocator"],
+    )
+    env = GradedTrustGameEnv(cfg, seed=0)
+    env.reset()
+    # Investment level 3 should be seen as COOPERATE (0) by the partner
+    env.step(3)
+    assert env.partners[0].last_agent_action == 0  # COOPERATE
+    # Investment level 0 should be seen as DEFECT (1)
+    env.step(0)
+    assert env.partners[0].last_agent_action == 1  # DEFECT

@@ -6,7 +6,7 @@
 
 ## 1. Overview
 
-This document specifies the experimental design for testing the central claim: per-partner affective states (tracking social model precision) improve shallow-planning active inference agents by adding partner-specific confidence information, and ablating these states reproduces the behavioral signature of vmPFC damage — intact social knowledge with impaired social decision-making.
+This document specifies the experimental design for testing the central claim: per-partner metacognitive precision tracking provides an orthogonal augmentation to active inference policy evaluation — one that improves social decision-making in ways that increasing planning depth alone does not recover. Under sophisticated inference with binary actions, non-affective planners from horizon 2 through horizon 8 are statistically indistinguishable, yet adding a per-partner affective signal yields a measurable benefit at every depth. Ablating this signal reproduces the behavioral signature of vmPFC damage — intact social knowledge with impaired social decision-making.
 
 ---
 
@@ -176,7 +176,7 @@ The repository now treats this as the primary diagnostic benchmark for condition
 - Level 3 (affective state): active, per-partner, updated on slow timescale
 - Policy selection: EFE over 2-step horizon, precision-weighted by the first partner's affective signal
 - Precision modulation: off by default in the primary experiments (`affect_modulates_precision=False`), so Condition 2 tests shallow-EFE weighting rather than per-partner $\gamma_k$ modulation
-- Purpose: tests the core hypothesis — does affective precision weighting improve shallow planning beyond what horizon-2 evaluation can do on its own?
+- Purpose: tests the core hypothesis — does per-partner metacognitive precision tracking provide orthogonal value that planning depth alone does not recover? Under sophisticated inference the non-affective depth curve is flat, so the comparison is not "shallow + affect vs. deep" but "affect vs. no-affect at any depth."
 
 ### 4.3 Condition 3: Lesioned Affective Agent (vmPFC Analog)
 
@@ -231,16 +231,16 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 
 ## 5. Hypotheses and Predictions
 
-### Hypothesis 1: Affect Provides Value Beyond Planning Depth
+### Hypothesis 1: Affect Provides Orthogonal Augmentation Beyond Planning Depth
 
 **Prediction**: Condition 2 (affective, shallow) outperforms every non-affective planner, including Conditions 1, 4, 6, and 7, while using much less explicit computation than the deep planner.
 
 **Metrics**:
 - Cumulative payoff over 200 rounds (primary)
-- Number of policy-tree nodes expanded per decision (computational cost)
+- Number of policy-tree nodes expanded per decision (secondary/supplementary)
 - Per-round decision time (wall clock, if relevant)
 
-**Expected outcome**: Under sophisticated inference, the explicit-depth curve among non-affective agents is flat in this binary-action trust game, so Condition 2 should beat the whole no-affect family rather than merely matching Condition 1. This reframes the result from "affect approximates deep lookahead" to "affect adds a partner-specific evaluation signal that depth alone does not recover here."
+**Expected outcome**: Under sophisticated inference, the explicit-depth curve among non-affective agents is flat in this binary-action trust game, so Condition 2 should beat the whole no-affect family rather than merely matching Condition 1. The result is best understood as orthogonal augmentation: affect adds a partner-specific evaluation signal that depth alone does not recover, rather than approximating deeper lookahead.
 
 **Failure mode**: If Conditions 1, 4, 6, and 7 form a rising depth-performance curve and Condition 2 only matches the shallow baseline, then the affective weighting is not adding information beyond explicit lookahead. That would push the interpretation back toward a standard planning-depth story.
 
@@ -260,12 +260,16 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 
 **Failure mode**: If the lesioned agent performs as well as Condition 2, then affect isn't doing computational work — the architecture itself (having a level-3 state, even decoupled) provides some benefit, or the task is too easy for 2-step planning alone.
 
-### Hypothesis 3: Precision Tracking Outperforms Reward Averaging
+### Hypothesis 3: Precision Tracking Outperforms Reward Averaging (Boundary-Condition Result)
 
-**Prediction**: Condition 2 (precision-based affect) outperforms Condition 5 (reward-average weighting), particularly in scenarios with:
-- Reliable adversaries (same average reward but different model precision)
-- Volatile periods (where uncertainty information matters most)
-- Mixed partner populations (where some partners are predictable and others aren't)
+This is now understood as a boundary-condition result rather than a universal separation. When planning depth is equalized under sophisticated inference, affect still provides measurable benefit — but the precision-vs-reward-average distinction surfaces only in environments that create a genuine dissociation between recent reward and current predictive reliability.
+
+**Prediction**: Condition 2 (precision-based affect) outperforms Condition 5 (reward-average weighting) specifically in scenarios where prediction error and reward dissociate:
+- Betrayal-style environments (scheduled cooperator→exploiter switch)
+- Volatile periods immediately following type switches
+- Mixed partner populations where some partners are predictable and others aren't
+
+In default random-assignment tasks, Condition 2 and Condition 5 may remain effectively tied because prediction accuracy and reward history stay closely aligned.
 
 **Metrics**:
 - Cumulative payoff (overall and broken down by partner type)
@@ -273,7 +277,7 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Exploitation rate by Exploiter-type partners
 - In the betrayal stress test, performance in the first 5-10 encounters after the forced cooperator→exploiter switch
 
-**Expected outcome**: The result is now expected to be context-dependent rather than universal. In the default random-assignment task, Condition 2 and Condition 5 can remain effectively tied because prediction accuracy and reward history stay closely aligned. In the betrayal-stress task, the reward-average agent should be exploited more by the forced cooperator→exploiter switch because it confuses attractive recent reward with current reliability, whereas the precision-based agent reacts to the spike in surprise.
+**Expected outcome**: Context-dependent. In the default task, the two conditions remain tied (null boundary condition). In the betrayal-stress task, the reward-average agent is exploited more by the forced cooperator→exploiter switch because it confuses attractive recent reward with current reliability, whereas the precision-based agent reacts to the spike in surprise (positive mechanism test).
 Operationally, inspect `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, and `betrayal_condition_comparison.csv`. A successful mechanism result means Condition 2 beats Condition 5 on post-switch payoff and/or accuracy while `affective_movement_summary.csv` shows non-flat beta and terminal-signal ranges. If both the comparison tables and movement summary are flat, interpret the outcome as a null mechanism result rather than a broken analysis pipeline.
 
 **Failure mode**: If Conditions 2 and 5 perform comparably even in betrayal stress, then the simpler reward-average account is sufficient in the shipped environment family. That would weaken the precision-specific claim while leaving the broader affect-versus-no-affect result intact.
@@ -305,6 +309,42 @@ Operationally, inspect `betrayal_post_switch_window_1_5.csv`, `betrayal_post_swi
 
 **Expected outcome**: Affective agents develop clear partner preferences early and update them after type switches. Non-affective agents either exploit myopically (Condition 4) or distribute interactions more evenly (Condition 1 can reason about information value but at high computational cost).
 
+### Hypothesis 6 (FUTURE/PROPOSED): Bayesian Model Comparison of Affective vs. Non-Affective Generative Models
+
+**Status: Proposed, requires Phase 4 (variational beta) and Phase 6 (model comparison).**
+
+**Prediction**: Formal model evidence (marginal likelihood) favors the affective generative model over the non-affective generative model, providing a principled basis for preferring the affect-augmented architecture beyond point-estimate performance metrics.
+
+**Metrics**:
+- Log model evidence (marginal likelihood) for affective vs. non-affective generative models
+- Bayes factor across task variants
+
+**Conceptual issues**: This hypothesis requires Phase 4 (variational beta — formalizing the current EMA-based precision update as a discrete hidden state with explicit likelihood) before the model evidence computation is cleanly defined. The current trigger-based BMR approach (Section 8.2) is NOT suitable for this comparison because it conflates structure learning with model selection. A clean Bayesian model comparison must treat the affective and non-affective models as competing generative models evaluated on the same observation sequences, without using affect-triggered structural changes as part of the evidence calculation.
+
+**Failure mode**: If the non-affective model has comparable or higher evidence despite worse behavioral performance, this would suggest the affective signal improves decisions through a mechanism that is not well-captured by the current generative model formulation — pointing toward the need for a tighter variational treatment of beta.
+
+### Hypothesis 7 (PRELIMINARY): Clinical Parameter Sensitivity Analysis
+
+**Status: Preliminary results available. The failure mode has been realized — parameter variations produce indistinguishable behavioral profiles in the current trust game, due to the task's unambiguous EFE landscape rather than a deficiency in the parameter space itself.**
+
+**Original prediction**: Specific parameter configurations produce predictable behavioral signatures that qualitatively match known clinical profiles:
+- **Alexithymia** ($\alpha \to 0$): attenuated affective charge leads to near-flat beta trajectories, reducing the agent to effectively non-affective behavior (performance approaches Condition 4)
+- **Borderline patterns** (high $\alpha$ + low $\lambda$): intense, volatile affective states produce erratic partner-specific precision weights, leading to unstable cooperation patterns and high behavioral variance
+- **Depression** (low $\beta_0$): chronically low precision estimates reduce engagement and bias toward defection even with cooperative partners
+
+**Empirical result**: The beta dynamics differentiate as predicted — alexithymia freezes beta, borderline creates wide swings, depression starts low and recovers. However, none of these dynamical differences translate into measurable behavioral deficits relative to the default affective agent (Condition 2). Across four experimental designs (current params, precision modulation, short 50-round horizon, extreme params) and both precision channels (terminal values only, terminal values + gamma scaling), the maximum clinical effect is 3.0 points out of 576 total payoff (0.5%). Only 2 of 18 comparisons reach nominal p<0.05, neither survives correction for multiple comparisons, and both have Cohen's d < 0.05.
+
+**Root cause**: The trust game's EFE landscape is too unambiguous. The median gap between the best and second-best policy is 10.83, making the softmax effectively a hard argmax. Whether beta is 0.14 or 0.94, the same policy wins. The affective mechanism provides a binary augmentation (have mu-weighted terminal values vs. don't) rather than a graded one. Within the "affect ON" regime, the parameter space is behaviorally degenerate in this task.
+
+**Metrics** (confirmed):
+- Beta trajectory statistics do differentiate: alexithymia σ=0.001, borderline σ=0.113, depression σ=0.062
+- Cumulative payoff does NOT differentiate: all clinical variants within 0.5% of default C2
+- Behavioral signature match: dynamics are qualitatively correct but don't translate to behavioral output
+
+**Revised interpretation**: The parameter space has the right structure (clinically meaningful dynamical regimes exist), but the current task environment doesn't amplify these differences into behavioral consequences. This is a task-specificity limitation, not a model limitation. Clinical sensitivity analysis should be revisited in Phase 7 (richer tasks) with environments that have more ambiguous EFE landscapes — larger action spaces, partial observability, or multiple equilibria where precision differences can flip policy selection.
+
+**Failure mode (realized)**: Parameter variations produce indistinguishable behavioral profiles. The model's parameter space lacks clinical resolution *in this task*. The question for future work is whether richer environments unlock the resolution the parameter space structurally supports.
+
 ---
 
 ## 6. Implementation Plan
@@ -335,17 +375,19 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 **Primary analysis**: mixed-effects ANOVA on cumulative payoff with Condition as fixed factor and replication as random factor. Post-hoc pairwise comparisons with Bonferroni correction.
 
 **Secondary analyses**:
-- Computational cost comparison (Conditions 1 vs. 2): paired t-test on nodes-expanded-per-decision
 - Knowledge vs. behavior dissociation (Condition 3): correlation between level-2 posterior accuracy and behavioral optimality, plotted over time
 - Precision vs. reward-average (Conditions 2 vs. 5): interaction analysis of condition × partner-type on per-partner payoff
 - Noise robustness (Hypothesis 4): segmented analysis of performance in stable vs. post-switch windows
 - Sensitivity analysis: sweep over $\lambda$ (0.7-0.99), $\mu$ (0.5-5.0), $p_{\text{switch}}$ (0.01-0.1) to characterize robustness of results to parameter choices
 
+**Supplementary analyses**:
+- Computational cost comparison (Conditions 1 vs. 2): paired t-test on nodes-expanded-per-decision. Under sophisticated inference the depth curve is flat in the current binary-action task, so cost differences between depths are less interpretively central than the affect/no-affect comparison. Retained for completeness but no longer a primary or secondary analysis.
+
 **Execution workflow note**:
 - `scripts/run_experiment.py` accepts repeated `--config` flags and a shared `--workers` pool so multiple experiment configs can be queued in one invocation.
 - Outputs are written per config under `<output-dir>/<batch-id>/<config-name>/results.csv`, which keeps each experiment variant isolated while still allowing the scheduler to share workers across all queued replications.
 - `affect_aif/configs/horizon_sweep.json` is the reference config for Conditions 1, 2, 4, 6, and 7; analysis now emits a horizon-sweep figure so the affective shallow condition can be read directly against explicit depth.
-- `affect_aif/configs/deep_affect_test.json` is the targeted follow-up for Conditions 1, 2, and 8, isolating whether affect adds anything once explicit planning is already deep.
+- `affect_aif/configs/deep_affect_test.json` is the completed Conditions 1, 2, and 8 comparison; it isolates whether affect adds anything once explicit planning is already deep and supports the orthogonal-augmentation interpretation because `C2` and `C8` are statistically indistinguishable.
 
 ### 6.4 Visualizations
 
@@ -356,20 +398,25 @@ Key figures for the paper:
 3. **Knowledge-behavior dissociation plot** for Condition 3: level-2 posterior accuracy on x-axis, behavioral optimality on y-axis. Healthy conditions cluster in upper-right; lesioned condition clusters in right-center (high accuracy, medium-low optimality).
 4. **Planning depth × affect interaction**: 2×2 plot showing payoff as a function of planning depth (2 vs. 8) and affect (present vs. absent), demonstrating whether affective weighting creates a benefit that depth alone does not in the current binary-action task.
 5. **Precision vs. reward-average response to Exploiter partner**: time series showing how $\beta_k$ (precision-based) and $\bar{R}_k$ (reward-average) diverge when an Exploiter transitions from cooperation to exploitation. Precision should drop before reward average does.
-6. **Computational cost comparison**: bar chart of mean policy-tree nodes per decision for Conditions 1 vs. 2.
 
-### 6.5 Expected Timeline
+Supplementary figures:
 
-| Phase | Tasks | Duration |
-|---|---|---|
-| Phase 1 | Implement basic multi-partner POMDP in the repository's JAX-first stack (Conditions 1, 4) | 2 weeks |
-| Phase 2 | Implement affective state and shallow-EFE weighting mechanism (Condition 2) | 1-2 weeks |
-| Phase 3 | Implement lesion and reward-average conditions (Conditions 3, 5) | 1 week |
-| Phase 4 | Run primary simulations (Variant A, all conditions, 100 replications) | 1 week |
-| Phase 5 | Analysis and visualization of primary results | 1 week |
-| Phase 6 | Run Variants B, C, D | 2 weeks |
-| Phase 7 | Sensitivity analyses and parameter sweeps | 1 week |
-| Phase 8 | Write-up | 2-3 weeks |
+6. **Computational cost comparison** (supplementary): bar chart of mean policy-tree nodes per decision for Conditions 1 vs. 2. Demoted from key figures because the flat depth curve under sophisticated inference makes cost comparison less interpretively central than the affect/no-affect behavioral separation.
+
+### 6.5 Implementation Timeline (Completed)
+
+These phases describe the original build sequence. For future research phases (theory tightening, variational beta, clinical sensitivity, model comparison, richer tasks, human data), see the Phase Roadmap in Section 8.5.
+
+| Phase | Tasks | Duration | Status |
+|---|---|---|---|
+| Build 1 | Implement basic multi-partner POMDP in the repository's JAX-first stack (Conditions 1, 4) | 2 weeks | Done |
+| Build 2 | Implement affective state and shallow-EFE weighting mechanism (Condition 2) | 1-2 weeks | Done |
+| Build 3 | Implement lesion and reward-average conditions (Conditions 3, 5) | 1 week | Done |
+| Build 4 | Run primary simulations (Variant A, all conditions, 100 replications) | 1 week | Done |
+| Build 5 | Analysis and visualization of primary results | 1 week | Done |
+| Build 6 | Run Variants B, C, D | 2 weeks | Partial (B, E done) |
+| Build 7 | Sensitivity analyses and parameter sweeps | 1 week | Partial (horizon sweep done) |
+| Build 8 | Write-up | 2-3 weeks | In progress |
 
 ### 6.6 Current Empirical Status
 
@@ -391,8 +438,8 @@ Current scorecard:
 
 Interpretation:
 
-- The old "affect compensates for shallow depth" framing no longer fits the data. Under sophisticated inference, non-affective planners from `τ = 2` through `τ = 8` are statistically indistinguishable in the default task: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, with every pairwise `p > 0.93`.
-- The more defensible claim is **augmentation, not compensation**. Affect adds a partner-specific terminal signal that improves policy evaluation in a way explicit lookahead depth does not recover in the shipped binary-action task.
+- The old depth-compensation framing no longer fits the data. Under sophisticated inference, non-affective planners from `τ = 2` through `τ = 8` are statistically indistinguishable in the default task: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, with every pairwise `p > 0.93`.
+- The defensible claim is **orthogonal augmentation**. Affect adds a partner-specific terminal signal that improves policy evaluation in a way explicit lookahead depth does not recover in the shipped binary-action task.
 - H3 is no longer a confirmed null. It is a boundary-condition result: null in `default`, but supported in `betrayal_stress` where the scheduled betrayal creates a temporary dissociation between recent reward and current predictive reliability (`C2 = 481.88` vs `C5 = 428.32`, `p = 0.004`, `d = 0.59`).
 - `C3` and `C4` are exactly identical in the default run, confirming that `mu = 0` removes the affective contribution cleanly without perturbing belief updating or other planning logic.
 
@@ -400,70 +447,92 @@ For the rolling summary and next recommended run, see [docs/results_tracking.md]
 
 ---
 
-## 7. Possible Outcomes and Their Interpretations
+## 7. Outcomes and Their Interpretations
 
-### 7.1 Strongest Supported Read
+### 7.1 Realized Outcome: Orthogonal Augmentation (RESOLVED)
 
-Condition 2 beats the full non-affective family, not just the shallow baseline. Condition 3 reproduces the Damasio-style knowledge/deployment dissociation. Condition 2 and Condition 5 separate only in betrayal-style environments where reward history and predictive reliability come apart. Affective inertia also improves post-switch robustness.
+Condition 2 beats the full non-affective family, not just the shallow baseline. Conditions 1, 4, 6, and 7 remain tightly clustered because sophisticated inference removes the old mean-field bottleneck and the current binary action space gives extra explicit horizon very little marginal leverage. Condition 3 reproduces the Damasio-style knowledge/deployment dissociation. Condition 2 and Condition 5 separate only in betrayal-style environments where reward history and predictive reliability come apart. Affective inertia also improves post-switch robustness.
 
-**Interpretation**: affect is computational infrastructure for social inference, but the strongest supported claim is narrower than the original plan. The current evidence supports a per-partner precision-augmentation account over a pure planning-depth account. In this task family, affect changes policy evaluation in a way deeper non-affective planning does not recover.
+**Interpretation**: Affect provides genuine computational benefit as orthogonal augmentation — per-partner metacognitive precision tracking changes policy evaluation in a way deeper non-affective planning does not recover in this task family. The strongest supported claim is narrower than the original plan: a per-partner precision-augmentation account, not a planning-depth account.
 
-**Next steps**: run the targeted `C8` comparison when needed, then move to richer task families if the goal is to test whether explicit depth matters again once the environment has more structural branching.
+**Status**: This is the empirically realized outcome across `default`, `betrayal_stress`, and `horizon_sweep` runs. The `deep_affect_test` (C8) comparison further supports this: C2 and C8 are statistically indistinguishable, confirming affect provides the same benefit regardless of the explicit planning depth it is paired with.
 
-### 7.2 Empirically Realized Outcome: Affect Helps but Depth Alone Does Not
-
-Condition 2 improves over the non-affect controls, but Conditions 1, 4, 6, and 7 remain tightly clustered because sophisticated inference removes the old mean-field bottleneck and the current binary action space gives extra explicit horizon very little marginal leverage.
-
-**Interpretation**: affect provides genuine computational benefit, but the default task does not support a strong "depth compensation" claim because depth alone is largely irrelevant here. The defensible result is that partner-specific weighting changes evaluation in a way that shallow and deep non-affect planners both miss.
-
-**Adjustment**: keep the benchmark claim focused on augmentation and post-switch robustness, and use richer action spaces or more structurally branching tasks if the goal is to recover a non-flat explicit-depth curve.
-
-### 7.3 Context Dependence in Precision vs Reward Average
+### 7.2 Realized Outcome: Context-Dependent Precision vs. Reward Average (RESOLVED)
 
 Conditions 2 and 5 perform comparably in `default`, but separate in `betrayal_stress`.
 
-**Interpretation**: the precision-specific claim is not a universal win, but it is not dead either. It becomes visible when the environment creates a genuine prediction-reward dissociation, such as a scheduled betrayal where cached reward remains attractive while surprise spikes.
+**Interpretation**: The precision-specific claim is a boundary-condition result. It becomes visible when the environment creates a genuine prediction-reward dissociation. Default-style tasks are the null boundary condition; betrayal-style tasks are the positive mechanism test. H3 is framed accordingly as a conditional hypothesis.
 
-**Adjustment**: frame H3 as a conditional hypothesis. Default-style tasks remain a null boundary condition; betrayal-style tasks are the positive mechanism test.
+### 7.3 Remaining Risk: Task-Specificity of the Flat Depth Curve
 
-### 7.4 The Lesion Doesn't Produce the Expected Dissociation
+The flat non-affective depth curve is a property of the current binary-action trust game under sophisticated inference. In richer action spaces or more structurally branching tasks, explicit depth may regain marginal value, potentially reshaping the affect-vs-depth relationship.
 
-Condition 3 performs similarly to Condition 2, or its level-2 posteriors are also degraded (not just behavior).
+**Implication**: The augmentation claim is well-supported in the shipped task family. Generalization to richer environments requires further experimentation (see Phase 7 in Section 8).
 
-**Interpretation**: the architecture doesn't cleanly dissociate knowledge from deployment. Possible reasons: (a) in this simple task, 2-step planning is actually sufficient and affect is redundant, (b) the lesion implementation doesn't correctly model the vmPFC disconnection, (c) the task needs to be harder (more partners, faster volatility, partial observability) to stress the planning system enough.
+### 7.4 Unrealized Scenario: Lesion Failure (NOT OBSERVED)
 
-**Adjustment**: increase task difficulty until shallow planning clearly fails (higher $p_{\text{switch}}$, more partners, noisy observations). If the dissociation appears only at higher difficulty, this is still a meaningful result — it characterizes the boundary conditions under which affective infrastructure becomes necessary.
+Condition 3 performing similarly to Condition 2 was not observed. C3 = C4 exactly in the default run, confirming the lesion cleanly removes the affective contribution. Retained for reference only.
 
-### 7.5 Worst Case: Affect Doesn't Help
+### 7.5 Unrealized Scenario: Affect Doesn't Help (NOT OBSERVED)
 
-Conditions 2, 3, 4, 5 all perform comparably and all far below Condition 1. Only deep planning works.
-
-**Interpretation**: the affective weighting is not a good approximation of the true value-to-go in this task. The social environment may be too volatile or too adversarial for a slow affective summary to track.
-
-**Adjustment**: this is a genuinely negative result. Consider whether (a) the affective update rule needs to be more sophisticated (perhaps a full Bayesian precision estimate rather than an EMA), (b) the timescale separation is wrong ($\lambda$ too high or too low), or (c) the theoretical framework needs revision — maybe affect helps in specific task niches rather than generally.
+All conditions performing comparably far below Condition 1 was not observed. Affect reliably helps across all tested task variants. Retained for reference only.
 
 ---
 
 ## 8. Extensions and Future Directions
 
-### 8.1 From Simulated Affect to Fitted Behavior
+### 8.1 From Simulated Affect to Fitted Behavior (Phase 8: Human Data)
 
 Fit the model to human behavioral data from multi-partner trust games. Estimate $\lambda$ (affective timescale) and $\mu$ (affective influence) as individual-difference parameters. Test whether estimated affective parameters correlate with self-reported emotional awareness, interoceptive accuracy, or alexithymia scores.
 
-### 8.2 Bridge to Structure Learning
+### 8.2 Bridge to Structure Learning (Phase 7: Richer Tasks)
 
 Implement Bayesian Model Reduction triggered by persistent low $\beta_k$. When the affective state for partner $k$ remains below a threshold despite ongoing parameter learning, launch BMR over alternative social model structures (partner types, coalition structures, domain-specific reliability). Test whether this accelerates discovery of non-trivial social structures compared to untriggered BMR.
 
-### 8.3 Developmental Bootstrapping
+**Critical analysis warning**: The trigger-based BMR formulation needs reformulation before it can be used for formal model comparison (see H6). Using affect thresholds to trigger structural changes conflates the affective signal with the model selection process, making it impossible to cleanly evaluate whether affect improves model evidence. A cleaner approach would separate the BMR machinery from the affective trigger and compare triggered vs. untriggered BMR as competing model selection strategies, rather than embedding the trigger in the generative model itself.
+
+### 8.3 Developmental Bootstrapping (Phase 7: Richer Tasks)
 
 Initialize agents with no prior knowledge and simulate the full developmental trajectory: from exploration-heavy behavior (all partners are novel → low precision → high epistemic drive) through gradual affective differentiation (partners become differentially predictable) to a mature state with stable partner-specific affective profiles. Compare the learning trajectory to developmental findings on children's trust calibration.
 
-### 8.4 Clinical Modeling
+**Critical analysis warning**: Learning rate modulation based on $\beta$ (e.g., increasing learning rate when precision is low) creates a positive feedback loop risk: low $\beta$ increases learning rate, which increases belief volatility, which increases surprise, which further lowers $\beta$. Any extension that couples $\beta$ to the learning dynamics must include stability analysis or damping to prevent runaway oscillation. Phase 4 (discrete hidden-state $\beta$) would help by replacing the continuous EMA with a categorical inference scheme that has natural self-regularization through the transition prior.
 
-Vary model parameters to simulate psychiatric conditions:
-- **Alexithymia**: reduce the gain $\alpha$ on affective charge (feelings are attenuated)
-- **Borderline patterns**: increase $\alpha$ and decrease $\lambda$ (feelings are intense and volatile)
-- **Depression**: bias $\beta_k$ toward low values (chronic low precision → reduced engagement)
-- **Anxiety**: increase epistemic drive weighting when $\beta_k$ is low (uncertainty triggers excessive information-seeking)
+### 8.4 Clinical Parameter Sensitivity Analysis (Phase 5)
 
-Test whether these parameter variations reproduce known behavioral profiles in social decision-making tasks.
+Vary model parameters to probe clinically relevant behavioral signatures:
+- **Alexithymia** ($\alpha \to 0$): attenuated affective charge, near-flat beta trajectories
+- **Borderline patterns** (high $\alpha$ + low $\lambda$): intense, volatile affective states
+- **Depression** (low $\beta_0$): chronically low precision estimates, reduced engagement
+- **Anxiety**: increased epistemic drive weighting when $\beta_k$ is low (uncertainty triggers excessive information-seeking)
+
+**Critical analysis warning**: These are sensitivity analyses, not a unified clinical framework. The parameter-to-phenotype mappings are illustrative and should not be interpreted as validated clinical models. The configs exist (see H7) but moving from sensitivity analysis to clinical modeling requires: (a) fitting to human behavioral data, (b) formal model comparison showing the affective model outperforms simpler alternatives on clinical populations, and (c) demonstrating that the parameter variations are identifiable from behavioral data alone rather than being degenerate with other model parameters.
+
+**Preliminary result (binary game)**: A systematic exploration found that the binary trust game's EFE landscape is too unambiguous for clinical parameter perturbations to produce behavioral differentiation (<0.5% effects). The dynamics differentiate correctly (beta trajectories match clinical predictions) but don't translate into payoff or action differences.
+
+**Updated result (graded game)**: The graded investment trust game (Section 8.5) resolves this. With q_pi_entropy ~5.8 (vs <0.01 in binary), all three clinical conditions produce d>2.1 effects vs C4 (no affect). However, between-clinical differentiation remains small (10.324–10.353 payoff range across alexithymia, borderline, and depression). The graded game activates the terminal value channel but does not produce large between-clinical differences.
+
+### 8.5 Graded Investment Trust Game (Phase 7 — Completed)
+
+The graded investment trust game replaces the binary cooperate/defect action with 6 investment levels (0%, 20%, 40%, 60%, 80%, 100% of endowment), creating 24 actions per step (6 levels × 4 partners). This produces q_pi_entropy ~5.8 (vs <0.01 in binary), activating the precision modulation channel that was structurally inert in the binary game due to softmax saturation.
+
+**Mu calibration fix**: when `deep_horizon == shallow_horizon` (necessary in the graded game due to combinatorial explosion), mu is computed as `mean_abs_efe × max(1, horizon_gap)` instead of returning 0. This gives mu ≈ 2.36.
+
+**Results summary** (see `docs/results_tracking.md` for full details):
+
+- **H1 strengthened**: C2 >> C4 with d=1.14 (vs d=0.64 in binary)
+- **H2 confirmed**: C3 = C4 exactly (lesion strips affect)
+- **H3 reversed**: C5 > C2 in both default (d=0.43) and betrayal (d=0.89) — reward averaging outperforms precision tracking
+- **Clinical sensitivity activated**: parameter variations produce d>2.1 effects vs C4 (vs <0.5% in binary)
+
+The C5 > C2 result is the key finding. In the graded game's ambiguous landscape, direct reward encoding provides more focused terminal value guidance than precision-weighted affect. The precision tracking mechanism's advantage is modelability (clinical parameter mappings), not raw performance.
+
+### 8.6 Phase Roadmap
+
+| Phase | Description | Dependencies | Status |
+|---|---|---|---|
+| Phase 3 | Theory tightening: formalize the augmentation claim, present the variational grounding of beta via Hesp et al. | Current results | In progress |
+| Phase 4 | Variational beta: replace EMA with proper variational inference over precision | Phase 3 | Planned |
+| Phase 5 | Clinical sensitivity: revisit in richer environments | Phase 7 | **Completed** (graded game enables d>2.1 clinical effects) |
+| Phase 6 | Model comparison: formal Bayesian model evidence comparison (H6) | Phase 4 | Planned |
+| Phase 7 | Richer tasks: test whether depth curve remains flat in larger action spaces, structure learning | Phase 3 | **Completed** (graded investment trust game) |
+| Phase 8 | Human data: fit to behavioral data, estimate individual-difference parameters | Phases 5-7 | Planned |

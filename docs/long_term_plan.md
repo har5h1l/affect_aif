@@ -2,201 +2,116 @@
 
 ## Purpose
 
-This document turns the current project priorities into an execution sequence. The main constraint is simple: use the existing single-agent codebase to get the primary empirical result before spending time on architecture work for multi-agent or N-agent extensions.
+This document tracks the project roadmap from initial empirical validation through theory tightening, formal derivation, and eventual extensions. The core finding is that per-partner metacognitive precision tracking provides orthogonal augmentation to planning depth: under sophisticated inference, increasing the planning horizon from 2 to 8 does not change results, but adding affect improves social decision quality through a channel that planning depth alone cannot access.
 
-The order of work is:
+## Completed Phases
 
-1. Run the primary experiment now.
-2. Diagnose the Exploiter mechanism next.
-3. Tighten the theory after the result pattern is known.
-4. Defer the N-agent refactor until the first paper is drafted.
+### Phase 1: Primary Results (complete)
 
-## Guiding Rule
+Ran 100-seed experiments across default, betrayal-stress, and variant-D conditions. Established the main result: affect augments social inference orthogonally to planning depth. Four of five original hypotheses supported. H3 (affect beats reward-averaging on Exploiter detection) confirmed as a null across all conditions, including correlated partners at correlation strength 0.9. This null is now interpreted as a boundary condition of the trust-game family, not a model failure.
 
-Do not refactor toward N-agent support before the single-agent affect question is answered with full runs and analysis. If the current mechanism fails on the primary hypotheses, the next step is debugging and recalibration, not architecture expansion.
+### Phase 2: Exploiter Deep-Dive (complete)
 
-## Phase 1: Primary Results
+Used the betrayal-stress setup as the primary mechanism diagnostic. Established strongest H1/H2/H4 evidence. Confirmed that per-partner precision tracking responds to cooperation-to-defection transitions but does not separate from reward-averaging (Condition 5) on detection latency. This result motivated the reframing from "compensation" to "augmentation."
 
-### Goal
+## Current Phase
 
-Get the main result tables and first-pass figures from the current codebase.
+### Phase 3: Theory Tightening (near-complete)
 
-### Status
+**Goal:** Revise the theoretical framing and paper narrative around the confirmed empirical pattern.
 
-Completed for the planned experiment set:
+**Key tasks:**
 
-- `default` has been run and interpreted.
-- `betrayal_stress` has been run and interpreted.
-- `variant_d` has been run and interpreted.
-- Current headline: 4 of 5 hypotheses supported, with H3 now a confirmed null across three runs.
+1. ~~Reframe the contribution as orthogonal augmentation.~~ Done. See `docs/theory.md` §2.1, §4.5, §4.6.
+2. ~~Present the beta update rule as extending Hesp et al.~~ Done. See `docs/theory.md` §3.4.
+3. ~~Expand the condition comparison into a clear 2x2 (affect x planning-depth) table.~~ Done. See `docs/theory.md` §4.11.
+4. ~~Present H3 as a confirmed boundary condition.~~ Done. See `docs/theory.md` §4.7. H3 is now understood as context-dependent: null in default, supported in binary betrayal, reversed in graded game.
+5. ~~Document the variant-D result.~~ Done.
+6. ~~Add empirical support for the terminal value approximation (correlation between C2 beta/terminal signal and actual value-to-go from C1).~~ Done. Graded game analysis shows beta does NOT correlate with value-to-go (r ≈ 0), which is *predicted* by the theory: beta tracks precision, not value. This validates the orthogonal augmentation claim — beta contributes genuinely different information from reward history. See `docs/theory.md` §4.14.
+7. *(Added)* ~~Integrate graded trust game findings into theoretical framework.~~ Done. See `docs/theory.md` §4.11–4.13.
+8. *(Added)* ~~Explain C5 > C2 reversal in graded game and its theoretical implications.~~ Done. See `docs/theory.md` §4.12.
 
-### Runs
+**Known issues addressed in text:**
 
-Historical baseline runs:
+- Learning rate modulation positive feedback loop: documented in `docs/theory.md` §3.7.
+- "Interoceptive" framing replaced with per-partner metacognitive precision tracking throughout.
 
-- `affect_aif/configs/default.json`
-- `affect_aif/configs/betrayal_stress.json`
+**Phase 3 status: COMPLETE.** All tasks done. The theory document covers: orthogonal augmentation framing, Hesp et al. grounding, 2×2 orthogonality table, H3 boundary condition, graded game integration (§4.11–4.15), C5 > C2 explanation (§4.12), clinical sensitivity restoration (§4.13), beta-not-value validation (§4.14), and cross-game synthesis (§4.15). Ready for user decision on advancing to Phase 4.
 
-Target scale:
+## Planned Phases
 
-- 100 seeds / replications
-- 5 conditions
+### Phase 4: Variational Beta Extension
 
-Important current-code note:
+**Goal:** Formalize beta as a discrete hidden state within the generative model, extending the current continuous update (grounded in Hesp et al.'s variational precision dynamics) to a full Bayesian inference scheme.
 
-- `default.json` already uses `num_replications = 100` and conditions `[1, 2, 3, 4, 5]`.
-- `betrayal_stress.json` currently uses `num_replications = 50` and conditions `[1, 2, 3, 5]`.
-- To match the Phase 1 target, create a full-run betrayal config or update a copy of the existing one before launching the full pass.
+**Motivation:** The current EMA-based update extends Hesp et al.'s variational treatment of precision to the multi-partner social setting. Formalizing beta as a categorical hidden state with explicit likelihood and transition dynamics would make it a first-class component of the generative model, subject to the same inference machinery as every other hidden state.
 
-### Core questions
+**Scope:**
 
-- H1: Does Condition 2 approach Condition 1?
-- H2: Does Condition 3 show the knowledge-behavior dissociation?
-- H3: Does Condition 2 beat Condition 5 on Exploiter detection?
-- Is the derived `mu` reasonable relative to the scale of explicit EFE?
+- Discretize beta into a set of hidden-state levels with likelihood P(ε|β) and transition dynamics P(β_t|β_{t-1}).
+- Show formal correspondence between the current EMA update and the discrete hidden-state posterior.
+- Quantify any behavioral divergence between the continuous and discrete formulations in the trust-game setting.
 
-### Primary outputs to inspect
+**Entry condition:** Phase 3 paper draft is stable.
 
-For both runs:
+### Phase 5: Clinical Sensitivity Analysis
 
-- `hypothesis_summary.csv`
-- `hypothesis_tests.json`
-- `final_round_summary.csv`
-- `pairwise_payoff_tests.csv`
-- `statistics_summary.txt`
-- `affective_movement_summary.csv`
+**Goal:** Treat clinical phenotypes (vmPFC lesion, alexithymia, anxiety) as sensitivity analysis over model parameters, with clinical interpretation.
 
-For betrayal-focused runs:
+**Scope:**
 
-- `betrayal_condition_comparison.csv`
-- `betrayal_post_switch_window_1_5.csv`
-- `betrayal_post_switch_window_1_10.csv`
-- `betrayal_detection_latency.csv`
-- `betrayal_trajectories.csv`
+- vmPFC lesion: ablate affect entirely (Condition 3 is already this).
+- Alexithymia: reduce precision of the affective channel (high lambda, low responsiveness).
+- Anxiety: inflate negative prediction errors or bias beta downward.
+- Map parameter regimes to behavioral signatures and compare with clinical literature.
 
-### Stop/go criteria
+**Preliminary result:** A systematic exploration across four experimental designs found that the current trust game is too unambiguous for clinical differentiation. The EFE landscape has a median best-vs-second-best policy gap of 10.83 (softmax saturation), making parameter perturbations behaviorally inert. Beta dynamics differentiate correctly (alexithymia freezes, borderline oscillates, depression starts low and recovers) but don't translate to payoff or action differences. Max effect: 0.5% of total payoff. See `results/clinical_sensitivity_synthesis.md`.
 
-- If H1 is roughly confirmed, move to Phase 2.
-- If H1 fails badly, defined here as Condition 2 trailing Condition 1 by more than 15 percent on payoff, stop and debug before doing anything else.
+**Revised entry condition:** Phase 7 (richer tasks) must provide environments with more ambiguous EFE landscapes before clinical sensitivity can be meaningfully tested. The parameter space has the right structure; the task doesn't amplify it.
 
-### Debug order if H1 fails
+### Phase 6: Bayesian Model Comparison
 
-Check these first:
+**Goal:** Reformulate the current condition comparisons as proper Bayesian model comparison.
 
-1. Whether the terminal value term is on the right scale relative to explicit EFE.
-2. Whether `lambda_smooth = 0.9` is too inertial for beta to meaningfully separate partners over 200 rounds.
-3. Whether the derived `mu` is numerically plausible but behaviorally too weak.
-4. Whether beta and terminal-signal ranges are materially moving in `affective_movement_summary.csv`.
+**Scope:**
 
-### Outcome
+- Compute marginal likelihoods for each model variant (with/without affect, different planning depths).
+- Use Bayesian model reduction (BMR) or bridge sampling to compare nested models.
+- Replace the current frequentist hypothesis tests with Bayes factors where appropriate.
 
-- H1 is replicated across `default`, `betrayal_stress`, and `variant_d`.
-- H2 is replicated across `default`, `betrayal_stress`, and `variant_d`.
-- H3 remains null across all three runs, including correlated partners at `correlation_strength = 0.9`.
-- H4 is supported in the volatile and post-switch analyses.
-- H5 is supported in the agent-choice betrayal setup.
+**Note:** The current analysis uses frequentist pairwise tests. A proper Bayesian model comparison requires reformulating the question: not "do conditions differ?" but "which generative model best accounts for the observed behavior?"
 
-### Current next step
+**Entry condition:** Phase 3 analysis pipeline is mature enough to support likelihood computation.
 
-Do not spend more time on A, B, C, D, or `cautious_prior` unless the user explicitly asks. The shipped experimental phase is complete, and the active work is now theory tightening plus paper framing around the confirmed H3 boundary condition.
+### Phase 7: Richer Task Environments
 
-### Recommended execution record
+**Goal:** Test whether the orthogonal augmentation result generalizes beyond the trust game.
 
-For each Phase 1 run, save:
+**Scope:**
 
-- the exact config used
-- the CLI command used
-- the derived `mu`
-- the git commit hash
-- the output directory
-- a short note on whether H1-H3 passed, failed, or were ambiguous
+- Multi-round games with richer action spaces (e.g., public goods, ultimatum).
+- Environments where partner strategies are non-stationary in more complex ways.
+- Settings where planning depth should matter more (longer causal chains between action and outcome).
 
-## Phase 2: Exploiter Deep-Dive
+**Entry condition:** Single-agent paper is in draft or published.
 
-### Goal
+### Phase 8: Human Data
 
-Use the betrayal-stress setup as the primary mechanism test. This is the cleanest diagnostic for whether precision tracking adds something beyond reward averaging.
+**Goal:** Validate the model against human behavioral data.
 
-### Status
+**Scope:**
 
-Core empirical pass complete. `betrayal_stress` served as the primary mechanism diagnostic and established the strongest H1/H2/H4 evidence, but it did not separate Condition 2 from Condition 5.
-
-### Focus
-
-Run the betrayal-stress variant with fine-grained logging and center the analysis on the cooperation-to-defection transition of the scheduled Exploiter.
-
-### Required analysis
-
-- Plot beta trajectories through the switch window.
-- Plot reward-average trajectories through the same window.
-- Compare Condition 2 versus Condition 5 during the first 5 to 10 encounters after the switch.
-- Inspect detection latency and payoff recovery latency.
-
-### Figure target
-
-This should become Figure 5, the centerpiece mechanism figure.
-
-The figure should make it easy to see:
-
-- when the scheduled betrayal occurs
-- how quickly Condition 2 updates after the transition
-- whether Condition 5 lags because reward history stays attractive
-- whether the beta trajectory changes earlier or more cleanly than the reward-average control
-
-## Phase 3: Theory Tightening
-
-### Goal
-
-Revise the paper-level theoretical framing only after the empirical pattern is known.
-
-### Status
-
-Active phase. The empirical pattern is stable enough to tighten the write-up without waiting on more runs.
-
-### Priority items
-
-1. Empirically justify the terminal value approximation.
-2. Acknowledge the difference between the current implementation and the Hesp formulation.
-3. Expand the trust-versus-affect comparison into a clearer 2x2 table.
-4. Reframe H3 as a confirmed boundary condition: in the current trust-game family, precision and reward are behaviorally equivalent.
-5. Make `variant_d` explicit as the final failed rescue attempt for H3, including the implication that correlated partners do not help when partners are modeled independently.
-
-### Required empirical support
-
-For the terminal value claim, add an analysis showing the correlation between:
-
-- Condition 2 beta / terminal signal
-- actual value-to-go estimated from Condition 1
-
-The point of this section is not just to restate the theory. It is to show that the approximation tracks the deep-planning continuation value well enough to deserve the interpretation used in the paper.
-
-## Phase 4: N-Agent Extension
-
-### Goal
-
-Treat mutual affective inference as a separate project after the first paper is drafted.
-
-### Entry condition
-
-Do not start this phase until:
-
-- the single-agent paper story is stable
-- the primary figures are drafted
-- the Phase 1 and Phase 2 claims are either supported or clearly delimited
-
-### Scope
-
-1. Refactor `Partner` so it shares the agent interface cleanly.
-2. Build a two-agent setup where both agents are active inference agents with affect.
-3. Test whether mutual affect tracking produces cooperation dynamics that scripted partners cannot produce.
-
-### Project boundary
-
-This is a second-paper direction, not part of the first-paper critical path.
-
-## Short Operational Summary
-
-- Now: treat the experiment phase as closed.
-- Next: tighten the theory around the final scorecard and confirmed H3 null.
-- After that: draft the paper around precision augmentation, the Damasio-style dissociation, and the theory boundary condition.
-- Later: do the N-agent refactor only once the single-agent paper is in draft form.
+- Collect or obtain trust-game data from healthy participants and vmPFC-lesioned patients.
+- Fit the model to individual participant trajectories.
+- Test whether the affect-on/affect-off model distinction predicts the patient/control behavioral split.
+
+**Entry condition:** Phases 3-4 provide a model specification stable enough to fit to data.
+
+## Operational Summary
+
+- **Now:** Phase 3 (theory tightening) is complete. All tasks done including the terminal value correlation analysis (task 6), which confirmed that beta does not approximate value-to-go — consistent with the orthogonal augmentation claim.
+- **Decision needed:** Advance to Phase 4 (variational beta). Phase 4's entry condition ("Phase 3 paper draft is stable") is met.
+- **Next:** Variational derivation of beta (Phase 4), either as part of this paper or as immediate follow-up work.
+- **After that:** Richer task environments (Phase 7), now elevated to the critical path because clinical sensitivity requires more ambiguous EFE landscapes.
+- **Then:** Clinical sensitivity analysis (Phase 5) in richer environments, followed by Bayesian model comparison (Phase 6).
+- **Later:** Human data (Phase 8) once the theoretical and environmental foundations are solid.

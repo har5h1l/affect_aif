@@ -31,3 +31,15 @@ results/*
 !results/.gitkeep
 outputs/
 artifacts/
+
+# Claude Code local settings (not shared)
+.claude/settings.local.json
+
+# direnv
+.direnv/
+
+# Cloud credentials
+.env
+
+# Conductor session logs
+conductor/log/

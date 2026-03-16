@@ -9,7 +9,7 @@ from affect_aif.core.control import (
 )
 from affect_aif.core.maths import entropy, normalize, softmax
 from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import TrustGameModel
+from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
 
 
 def test_softmax_sums_to_one():
@@ -133,3 +133,14 @@ def test_rollout_gap_shrinks_when_belief_is_sharp():
     uniform_gap = abs(float(sophisticated_uniform[0]) - float(mean_uniform[0]))
     sharp_gap = abs(float(sophisticated_sharp[0]) - float(mean_sharp[0]))
     assert sharp_gap < uniform_gap
+
+
+def test_graded_construct_policies():
+    policies = construct_policies([24], planning_horizon=2)
+    assert policies.shape == (576, 2)  # 24^2 = 576
+
+
+def test_graded_construct_policies_with_sampling():
+    policies = construct_policies([24], planning_horizon=2, max_policies=100, rng=np.random.default_rng(0))
+    assert policies.shape == (100, 2)
+    assert policies.max() < 24

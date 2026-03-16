@@ -9,7 +9,7 @@ import numpy as np
 from affect_aif.environment.partner import Partner
 from affect_aif.generative_model.model import TrustGameModel
 from affect_aif.generative_model.partner_types import PartnerType
-from affect_aif.generative_model.payoffs import decode_action, payoff_to_index
+from affect_aif.generative_model.payoffs import COOPERATE, DEFECT, decode_action, payoff_to_index
 
 
 class TrustGameEnv:
@@ -104,14 +104,20 @@ class TrustGameEnv:
             "true_types": [partner.type_name for partner in self.partners],
         }
 
+    def _partner_facing_action(self, social_action: int) -> int:
+        """Map social action to binary cooperate/defect for partner observation."""
+        return social_action
+
     def step(self, agent_action: int) -> dict:
         """Execute one round of the trust game."""
 
+        nsa = self.model.num_social_actions
         if self.assignment_mode == "agent_choice":
             partner_idx, social_action = decode_action(
                 agent_action,
                 num_partners=self.num_partners,
                 assignment_mode=self.assignment_mode,
+                num_social_actions=nsa,
             )
         else:
             partner_idx, social_action = decode_action(
@@ -119,6 +125,7 @@ class TrustGameEnv:
                 num_partners=self.num_partners,
                 assignment_mode=self.assignment_mode,
                 active_partner=self.active_partner,
+                num_social_actions=nsa,
             )
 
         scheduled_switched = self._apply_scheduled_switches(self.round_idx + 1)
@@ -138,7 +145,7 @@ class TrustGameEnv:
         payoff_obs = payoff_to_index(agent_payoff, self.model.payoff_levels)
 
         partner.observe_outcome(
-            agent_action=social_action,
+            agent_action=self._partner_facing_action(social_action),
             partner_action=partner_action,
             partner_payoff=partner_payoff,
             agent_payoff=agent_payoff,

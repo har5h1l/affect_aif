@@ -31,6 +31,11 @@ class ExperimentConfig:
     initial_partner_types: list[str] | None = None
     scheduled_type_switches: list[dict] = field(default_factory=list)
 
+    payoff_mode: str = "binary"
+    num_investment_levels: int = 6
+    endowment: float = 10.0
+    multiplier: float = 3.0
+
     mutual_coop: tuple[float, float] = (3.0, 3.0)
     sucker: tuple[float, float] = (-1.0, 5.0)
     temptation: tuple[float, float] = (5.0, -1.0)

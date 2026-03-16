@@ -1,6 +1,6 @@
 # affect_aif
 
-JAX-first multi-agent active inference simulations for testing whether per-partner affective precision can let shallow-planning agents approach deep-planning performance in a volatile trust game.
+JAX-first multi-agent active inference simulations for testing whether per-partner metacognitive precision tracking provides orthogonal value beyond explicit planning depth in a volatile trust game.
 
 ## Design
 
@@ -50,7 +50,7 @@ python scripts/run_visualization.py --results results/main_run/default/results.c
 - The current task is still single active agent plus scripted partners, but those partners now implement the same minimal `plan_and_act` / `observe_outcome` lifecycle as agents so the environment loop has a clean extension seam.
 - `affect_aif/configs/betrayal_stress.json` is a harder scheduled-switch scenario for separating precision tracking from reward averaging.
 - `affect_aif/configs/horizon_sweep.json` adds intermediate no-affect horizons (Conditions 6 and 7) so analysis can place the affective shallow agent on an explicit depth curve.
-- `affect_aif/configs/deep_affect_test.json` is the follow-up run for Conditions 1, 2, and 8, testing whether affect adds anything once planning is already deep.
+- `affect_aif/configs/deep_affect_test.json` is the completed Conditions 1, 2, and 8 comparison, and it confirmed that affect adds the same payoff lift at deep and shallow horizons in the shipped task.
 - `affect_aif/configs/variant_d.json` is the archived correlated-partner follow-up run; it remained a null on H3, but the active H3 read is now driven by the default-null versus betrayal-positive contrast.
 - `scripts/run_preliminary.py` defaults to the harder `betrayal_stress` setup for a more informative directional smoke test, but accepts `--config` for other variants. It prints directional H1-H5 checks; `scripts/run_analysis.py` also saves `hypothesis_tests.json` alongside plots and summary tables.
 - `scripts/run_analysis.py` auto-emits betrayal-specific outputs when switch events are present, including `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, `betrayal_condition_comparison.csv`, `betrayal_detection_latency.csv`, `betrayal_trajectories.csv`, and `affective_movement_summary.csv`.

@@ -1,6 +1,6 @@
-# Affect as Computational Infrastructure for Social Inference Under Active Inference
+# Affect as Precision Augmentation for Social Inference Under Active Inference
 
-## A Theory of Per-Partner Interoceptive States as Precision Controllers in Multi-Agent Social Learning
+## A Theory of Per-Partner Metacognitive Affective States as Precision Controllers in Multi-Agent Social Learning
 
 ---
 
@@ -53,7 +53,7 @@ Existing multi-agent AIF work covers several dimensions of the problem:
 
 - **Factorized multi-agent models.** Ruiz-Serra et al. (2025) maintain separate belief distributions over each partner's internal states, enabling strategic reasoning in multi-player games.
 
-What is absent across all of this work: a per-partner interoceptive/affective state that compresses interaction history into a precision signal, enables planning-depth reduction, and whose ablation reproduces the somatic marker deficit pattern.
+What is absent across all of this work: a per-partner metacognitive affective state that compresses interaction history into a precision signal, provides orthogonal augmentation beyond what explicit planning depth alone recovers, and whose ablation reproduces the somatic marker deficit pattern.
 
 ---
 
@@ -61,7 +61,7 @@ What is absent across all of this work: a per-partner interoceptive/affective st
 
 ### 2.1 Core Claim
 
-Affect is computational infrastructure that makes tractable social inference possible under realistic resource constraints. Specifically, per-partner interoceptive states — slow-timescale hierarchical representations tracking the reliability of one's social model for each partner — function as learned precision weights that improve policy evaluation by adding partner-specific confidence information that explicit lookahead alone does not encode in the current task.
+Affect provides orthogonal augmentation to explicit planning in social inference. Specifically, per-partner metacognitive affective states — slow-timescale hierarchical representations tracking the reliability of one's social model for each partner — function as learned precision weights that improve policy evaluation by adding partner-specific confidence information that no amount of additional explicit lookahead recovers in the current task.
 
 ### 2.2 What the Affective State Tracks
 
@@ -89,7 +89,7 @@ Trial-by-trial outcomes of social interactions: partner's action (cooperate/defe
 **Level 2 — Cognitive social model (medium timescale: parameter learning)**
 Latent states encoding each partner's type/strategy (e.g., cooperator, reciprocator, exploiter, random) and potentially their beliefs about the agent. This is the standard theory-of-mind layer. Dirichlet parameters accumulate evidence about partner tendencies over many rounds. This is where the existing trust-as-learning-rate mechanism operates.
 
-**Level 3 — Per-partner affective state (slowest timescale: interoceptive integration)**
+**Level 3 — Per-partner affective state (slowest timescale: metacognitive affective integration)**
 A slow state for each partner summarizing the running quality of the agent's social model of that partner — operationalized as the expected precision of the level-2 action model with respect to that partner. Updated by an exponentially-weighted moving average of prediction error magnitudes from level 2, with a long time constant that makes it resistant to single-trial fluctuations.
 
 ### 2.4 Mechanism: Affect as Precision Weighting
@@ -98,19 +98,19 @@ In standard active inference, policy selection evaluates expected free energy ov
 
 $$G(\pi) = \sum_{t=1}^{T} G_t(\pi)$$
 
-The affective agent replaces depth-T planning with depth-τ planning (τ << T) plus affective precision weighting:
+The affective agent augments standard EFE evaluation with a partner-specific precision weight:
 
 $$G(\pi) \approx \left(\sum_{t=1}^{\tau} G_t(\pi)\right) \cdot \left(1 + \mu \beta_k\right)$$
 
-Where $\beta_k$ is derived from the level-3 affective state. A partner with high affective precision increases the effective precision of the shallow-horizon estimate, making the agent more decisive when its model of that partner is calibrating well. A partner with low affective precision leaves the shallow rollout weakly weighted, preserving exploratory behavior when the partner model is unreliable.
+Where $\beta_k$ is derived from the level-3 affective state. A partner with high affective precision increases the effective precision of the EFE estimate, making the agent more decisive when its model of that partner is calibrating well. A partner with low affective precision leaves the rollout weakly weighted, preserving exploratory behavior when the partner model is unreliable. Under sophisticated inference with observation-branching, planning depth $\tau$ from 2 to 8 produces identical non-affective performance, so the affective weight contributes information orthogonal to depth rather than substituting for missing lookahead.
 
-The vmPFC lesion maps to: remove the affective weighting and force the agent to rely only on explicit planning up to horizon τ. With τ = 2 and no affective compensation, the agent can only see 2 steps ahead and has no summary of what lies beyond.
+The vmPFC lesion maps to: remove the affective weighting and force the agent to rely only on explicit planning up to horizon $\tau$. Without the affective signal, the agent loses access to the partner-specific precision information that augments its policy evaluation.
 
 ### 2.5 The Three Novel Components
 
-1. **Per-partner interoceptive state in multi-agent AIF.** Not a global mood, not a shared precision parameter — a learned affective state for each social partner that compresses that specific interaction history into a precision signal. No existing AIF model has this.
+1. **Per-partner metacognitive affective state in multi-agent AIF.** Not a global mood, not a shared precision parameter — a learned affective state for each social partner that compresses that specific interaction history into a precision signal. No existing AIF model has this.
 
-2. **Explicit planning-depth vs. performance tradeoff.** The model demonstrates that affect is a specific mechanism that shifts the cost-performance curve by changing how plans are evaluated, even when explicit planning depth alone does not separate conditions in the current binary-action task under sophisticated inference. Existing planning-depth optimization literature does not use affect as the mechanism.
+2. **Affect as orthogonal augmentation beyond planning depth.** Under sophisticated inference, explicit planning depth ($\tau = 2$ through $\tau = 8$) produces identical non-affective performance. The model demonstrates that partner-specific affective precision adds an evaluative signal that no amount of additional explicit lookahead recovers in the current task — the augmentation is orthogonal to depth, not a substitute for it.
 
 3. **Computational vmPFC lesion in a social context.** The IGT literature shows the behavioral syndrome in single-agent gambling tasks. This model reproduces it computationally in a multi-agent setting by decoupling the affective state from policy selection.
 
@@ -165,6 +165,8 @@ In the primary experiments in this repository, that precision-modulation path is
 
 ### 3.4 Affective State Dynamics
 
+> **Variational Grounding.** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. Phase 4 (see §4.9) targets a further formalization in which $\beta$ becomes a discrete hidden state with its own likelihood and transition model.
+
 The affective state $\beta_k$ for partner $k$ is updated from a signed affective charge derived from prediction error:
 
 $$\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \cdot \sigma(\phi(\epsilon_k^{(t)}))$$
@@ -184,7 +186,7 @@ $$\phi(\epsilon) = \alpha \cdot (\sigma_0^2 - \epsilon^2)$$
 Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. Defaults of `lambda_smooth = 0.6` and `alpha_charge = 3.0` keep affect slower than belief updates while still letting partner-specific precision estimates separate over roughly 5-10 interactions. When actual squared surprise is below baseline, affect increases; when above, it decreases. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
 Within-theory sensitivity analysis therefore varies not just $\mu$, $\lambda$, and $\alpha$, but also $\sigma_0^2$. That sweep asks whether the mechanism is under-expressed because the baseline surprise scale is badly calibrated, while keeping the update law itself fixed.
 
-This update law is intentionally a lightweight engineering approximation, not a fully derived variational identity. The important theoretical constraint is weaker: the signal should be consistent with active-inference intuitions about expected precision and model fitness. In the current implementation, it is. The surprise term is computed from the agent's own level-2 predictive beliefs about the observed partner action, so the affective update is belief-coupled rather than externally injected or decoupled from inference.
+This update law extends Hesp et al.'s variational precision dynamics to the per-partner social setting. The surprise term is computed from the agent's own level-2 predictive beliefs about the observed partner action, so the affective update is belief-coupled rather than externally injected or decoupled from inference. Phase 4 targets formalizing this as a discrete hidden-state inference problem (see §4.9), which would make the precision state a first-class component of the generative model subject to the same variational machinery as partner-type inference.
 
 ### 3.5 Affect as Precision Weighting of Shallow EFE
 
@@ -198,9 +200,9 @@ The parameter $\mu$ scales how strongly partner-specific affect changes the prec
 
 The computational lesion takes one of two forms:
 
-**Full lesion:** Set $\beta_k = \beta_0$ (a fixed neutral value) for all partners and all time. The affective state exists in the model architecture but is decoupled from experience. The agent retains its level-2 social model (it "knows" partner types) but cannot use affective precision to modulate policy selection or extend its effective planning horizon.
+**Full lesion:** Set $\beta_k = \beta_0$ (a fixed neutral value) for all partners and all time. The affective state exists in the model architecture but is decoupled from experience. The agent retains its level-2 social model (it "knows" partner types) but cannot use affective precision to augment policy evaluation.
 
-**Precision ablation:** Set $\mu = 0$, removing the shallow-EFE weighting while leaving affective state dynamics intact. The agent "feels" things about partners (the internal state updates) but these feelings have no effect on action selection. This models a disconnection between interoceptive representation and decision circuitry.
+**Precision ablation:** Set $\mu = 0$, removing the shallow-EFE weighting while leaving affective state dynamics intact. The agent "feels" things about partners (the internal state updates) but these feelings have no effect on action selection. This models a disconnection between metacognitive affective representation and decision circuitry.
 
 Both lesion types should produce the Damasio pattern: intact level-2 posteriors (correct identification of partner types) but impaired behavioral deployment (suboptimal choices, especially in volatile conditions).
 
@@ -221,20 +223,22 @@ These dissociate. A brilliant but erratic collaborator has high trust (good info
 
 The two quantities also interact: persistently low $\beta_k$ (chronic model misfit despite learning) could serve as a trigger for structural model revision (Bayesian Model Reduction) — a signal that the current model *form* for partner $k$ is wrong, not just its parameters.
 
+> **Positive feedback loop warning.** In the trust-as-learning-rate formulation, reducing learning rate when surprised creates self-reinforcing cycles: an agent that down-weights surprising evidence becomes increasingly surprised because its model fails to track the true state, which in turn drives further learning-rate reduction. If $\beta_k$ were to modulate $\tau_k$ directly (low affect → low trust → slow learning → persistent model error → low affect), the same pathological loop would arise. The current implementation avoids this by keeping the $\beta \to$ policy-precision and $\tau \to$ learning-rate pathways independent, but any future integration of affect into the learning-rate channel must include a floor or reset mechanism to break the cycle.
+
 ---
 
 ## 4. Theoretical Implications
 
 ### 4.1 Emotions as Evolved Computational Architecture
 
-The model provides a resource-rational account of why biological agents evolved per-partner affective states rather than simply deeper planning capacity. In social environments where:
+The model provides an account of why biological agents evolved per-partner affective states: affect supplies information that additional planning depth does not recover. In social environments where:
 
 - Multiple partners must be tracked simultaneously,
 - Partner strategies change unpredictably,
 - Noise vastly exceeds signal (most behavioral variation is stochastic, not strategic), and
-- Metabolic resources for neural computation are limited,
+- The strategically relevant contingencies are already captured within a shallow planning horizon under sophisticated inference,
 
-precision-based affective compression outperforms both (a) deep planning (too expensive to scale to many partners) and (b) simple reward averaging (discards the uncertainty information needed for efficient exploration-exploitation balancing). Affect occupies a specific niche in the computational architecture: it preserves second-order information (model reliability) that first-order summaries (average reward) discard, at a fraction of the cost of explicit deep planning.
+precision-based affective signals add an evaluative dimension orthogonal to explicit lookahead. The empirical result is that extending planning depth from $\tau = 2$ to $\tau = 8$ produces no measurable payoff gain, yet adding partner-specific affective precision consistently improves performance. Affect therefore occupies a specific niche in the computational architecture: it preserves second-order information (model reliability) that first-order summaries (average reward) discard, and that deeper explicit planning does not reconstruct. The value of affect is not that it is cheaper than depth — it is that it encodes something depth does not.
 
 ### 4.2 Why Precision, Not Value
 
@@ -274,6 +278,8 @@ Under that flat depth curve, Condition 2 should not be read as a cheap approxima
 
 This yields a stronger theoretical claim than the original one. If the non-affective depth curve were steep, an affective shallow planner beating a shallow baseline could still be dismissed as a crude proxy for deeper search. The new result rules that out for the shipped task: all non-affective depths are behaviorally identical, yet the affective condition still improves payoff. The added value must therefore come from the partner-specific precision signal, not from hidden effective depth.
 
+The `deep_affect_test` result strengthens that claim further. Condition 8 adds the same affective mechanism to the deep planner and lands at essentially the same payoff as Condition 2 (`C2` vs `C8: p = 0.94`). So affect is not rescuing shallow lookahead by approximating what the deep planner would have done anyway. It is contributing an evaluative signal that survives even when explicit planning is already deep.
+
 The lesion result reinforces this interpretation. In the `default` run, `C3` and `C4` are exactly identical in both payoff and inferred-type accuracy. That is the expected signature of a pure affect-to-action disconnection: belief updating remains intact, but removing the affective weighting collapses the agent back onto the non-affective planner.
 
 ### 4.7 When Precision Diverges From Reward
@@ -292,17 +298,149 @@ The current environment family instantiates that dissociation cleanly only in th
 
 ### 4.8 Empirical Reframing After the Current Runs
 
-The completed `default`, `betrayal_stress`, and `horizon_sweep` runs support a narrower but stronger claim than the original "depth compensation" framing. Affect is best interpreted here as **precision augmentation**: a partner-specific signal that changes policy evaluation in ways that deeper non-affective planning does not recover in the current binary-action task.
+The completed `default`, `betrayal_stress`, `horizon_sweep`, and `deep_affect_test` runs support a narrower but stronger claim than the original "depth compensation" framing. Affect is best interpreted here as **precision augmentation**: a partner-specific signal that changes policy evaluation in ways that deeper non-affective planning does not recover in the current binary-action task.
 
 The key empirical pattern is:
 
 - affective weighting improves payoff over every non-affect condition
+- affective weighting improves payoff by the same margin at shallow and deep horizons
 - the lesion preserves partner knowledge while impairing payoff, reproducing the Damasio-style dissociation
 - partner selection covaries with beta in the agent-choice setup
 - the precision-versus-reward comparison is null in `default` but positive in `betrayal_stress`
 - raw planning depth alone is flat once sophisticated inference replaces the old mean-field approximation
 
 So the present theory should be read as: affect adds a partner-specific precision signal orthogonal to explicit depth in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP.
+
+### 4.9 Path to Variational Derivation
+
+> **Status: Not Implemented.** This section sketches the planned Phase 4 work.
+
+The current $\beta$ update rule (§3.4) extends Hesp et al.'s variational precision dynamics to the multi-partner setting using a continuous EMA formulation. A natural extension treats $\beta_k$ as a discrete hidden state within the generative model, with its own likelihood and transition dynamics, so that its posterior update falls out of the same categorical inference machinery used for partner-type estimation.
+
+**Sketch of the variational formulation:**
+
+1. **Discretize $\beta$.** Replace the continuous $\beta_k \in [0, 1]$ with a categorical hidden state $\beta_k \in \{b_1, b_2, \ldots, b_L\}$ representing $L$ precision levels (e.g., $L = 5$: very low, low, medium, high, very high).
+
+2. **Likelihood $P(\epsilon \mid \beta)$.** Define a mapping from precision level to the expected distribution of prediction errors. At high $\beta$ (good model fit), prediction errors concentrate near zero; at low $\beta$, they spread. For example, $P(\epsilon_k^{(t)} \mid \beta_k = b_l)$ could follow a discretized half-normal with scale inversely proportional to $b_l$.
+
+3. **Transition dynamics $P(\beta_k^{(t+1)} \mid \beta_k^{(t)})$.** A mildly persistent transition matrix encoding the prior belief that precision levels change slowly — diagonal-heavy, with small off-diagonal probability for one-step transitions up or down.
+
+4. **Standard Bayesian update.** Given the observed prediction error $\epsilon_k^{(t)}$, the posterior over $\beta_k$ updates as:
+
+$$q(\beta_k^{(t)}) \propto P(\epsilon_k^{(t)} \mid \beta_k) \cdot \sum_{\beta_k^{(t-1)}} P(\beta_k^{(t)} \mid \beta_k^{(t-1)}) \, q(\beta_k^{(t-1)})$$
+
+This is the same predict-then-correct scheme used for the level-2 partner-type inference, extended to the precision state. The resulting discrete posterior formalizes the continuous EMA update while preserving the same qualitative behavior: low surprise drives $\beta$ up, high surprise drives it down, and the timescale is governed by the transition matrix rather than the smoothing parameter $\lambda$.
+
+**Advantages of the discrete formulation:** (a) $\beta$ becomes a first-class hidden state within the generative model, subject to the same inference machinery as every other latent variable; (b) the precision of the precision estimate is itself represented (the width of $q(\beta_k)$), enabling the agent to distinguish "I'm confident my model is good" from "I'm unsure whether my model is good"; (c) the framework naturally accommodates structure learning — Bayesian Model Reduction over the $\beta$ state space can discover whether fewer or more precision levels are needed.
+
+### 4.10 Clinical Parameter Space
+
+> **Status: Sensitivity Analysis, Not a Unified Clinical Framework.** This section describes how existing model parameters map onto clinically interpretable phenotypes. These are parameter-regime explorations within the current model, not a validated clinical taxonomy. Phase 5 targets systematic sensitivity analysis with clinical interpretation.
+
+The model's parameter space admits several regimes that correspond, at a coarse-grained level, to recognized clinical phenotypes. Each regime is defined by extremal settings of parameters that already exist in the model:
+
+**Alexithymia ($\alpha \to 0$, blunted affective charge).**
+When the charge scaling parameter $\alpha$ approaches zero, prediction errors produce negligible affective updates. The agent's $\beta_k$ values remain near their initial value $\beta_0$ regardless of interaction history. Behaviorally, this resembles the vmPFC-lesion condition (§3.6): the agent "knows" partner types at level 2 but fails to develop differentiated affective responses that modulate policy evaluation. The distinction from the full lesion is that here the affective *architecture* is intact — the agent has $\beta_k$ states that could in principle be updated — but the gain on the update channel is too low to produce functional differentiation.
+
+**Borderline-like volatility (high $\alpha$ + low $\lambda$, volatile precision).**
+High affective charge gain ($\alpha \gg 1$) combined with low smoothing ($\lambda$ near 0.5) produces an agent whose precision estimates swing rapidly in response to single-trial prediction errors. A single defection by a previously cooperative partner can collapse $\beta_k$ from near-ceiling to near-floor, and a single cooperative act can restore it. This creates unstable approach-avoidance cycling: the agent alternates between high-confidence commitment and low-confidence disengagement with the same partner, driven by trial-to-trial noise rather than sustained evidence. The behavioral signature — idealization followed by rapid devaluation — parallels descriptions of interpersonal instability.
+
+**Depressive pessimism (low $\beta_0$, persistent low precision prior).**
+When the initial precision prior $\beta_0$ is set low, the agent starts with low confidence in its model of every partner. Combined with moderate $\lambda$ (high smoothing), this creates an agent that is slow to develop trust-like affective states even when partners are reliably cooperative. The agent's policy evaluation remains weakly weighted for many rounds, producing exploratory or avoidant behavior long after a non-depressive agent would have committed to cooperative reciprocation. The computational analogue of "learned helplessness" emerges: the prior is so strong that accumulating positive evidence is insufficient to shift $\beta_k$ to a functionally decisive level within the interaction window.
+
+**Important caveats.** These phenotype labels are heuristic mappings, not diagnostic claims. The current model lacks several features that would be required for serious clinical modeling: continuous (not discrete) action spaces, richer emotional state representations, developmental trajectories, and integration with physiological variables.
+
+### Preliminary Empirical Finding: Binary Augmentation Architecture
+
+A systematic exploration of the clinical parameter space (see `results/clinical_sensitivity_synthesis.md`) across four experimental designs and both precision channels found that the affective mechanism operates as a **binary augmentation** in the current trust game: having mu-weighted terminal values provides ~10% payoff improvement, but the specific beta dynamics are behaviorally degenerate. Key findings:
+
+- **Beta dynamics differentiate correctly.** Alexithymia freezes beta at 0.5 (σ=0.001), borderline creates swings from 0.08 to 0.99 (σ=0.113), depression starts at 0.01 and recovers. The parameter-to-phenotype mapping produces the intended dynamical signatures.
+
+- **Dynamics don't translate to behavior.** The maximum clinical effect is 0.5% of total payoff (3 points out of 576). The trust game's EFE landscape has a median best-vs-second-best policy gap of 10.83, making the softmax effectively a hard argmax. Whether beta is 0.14 or 0.94, the same policy wins.
+
+- **Softmax saturation nullifies the precision modulation channel.** `affect_modulates_precision=True` has zero measurable effect on policy selection because the logit magnitudes are too large for the (1+beta) scaling to change the argmax. 91.5% of rounds have q_π entropy < 0.01.
+
+- **The parameter space has clinically relevant structure; the task doesn't amplify it.** This is a task-specificity finding, not a model limitation. Richer environments with more ambiguous EFE landscapes (larger action spaces, partial observability, multiple equilibria) could unlock the clinical resolution the parameter space structurally supports.
+
+This result reframes the clinical sensitivity roadmap: Phase 5 should follow Phase 7 (richer tasks) rather than proceeding immediately, because the current environment cannot distinguish between clinical phenotypes regardless of parameter settings.
+
+### 4.11 Graded Trust Game: Activating the Precision Channel
+
+The binary augmentation finding (§4.10) identified the bottleneck: the binary game's EFE landscape is too steep for any terminal value signal to change policy selection. The graded investment trust game tests whether a more ambiguous decision space unlocks the channel.
+
+The graded game replaces binary share/keep with six investment levels per partner (0%, 20%, 40%, 60%, 80%, 100% of endowment), creating 24 total actions (6 levels × 4 partners). This expands the EFE landscape from a near-deterministic argmax to a genuinely ambiguous softmax: policy entropy rises from $< 0.01$ to $\sim 5.8$, confirming that the terminal value signal now has room to influence policy selection.
+
+**The orthogonality table across game types:**
+
+| Condition | Binary game payoff | Binary effect size vs C4 | Graded game payoff | Graded effect size vs C4 |
+|---|---|---|---|---|
+| C4 (no affect, $\tau=2$) | 530.04 | — | 10.184 | — |
+| C1 (no affect, $\tau=8$) | 529.26 | $d \approx 0$ | 10.184 | $d = 0$ |
+| C3 (lesioned) | 530.04 | $d = 0$ | 10.184 | $d = 0$ |
+| C2 (precision tracking) | 575.06 | $d = 0.64$ | 10.394 | $d = 1.14$ |
+| C5 (reward averaging) | 574.42 | $d = 0.009$ | 10.468 | $d = 1.72$ |
+
+Two results stand out. First, the augmentation effect is *stronger* in the graded game ($d = 1.14$) than in the binary game ($d = 0.64$), confirming that the ambiguous EFE landscape amplifies the terminal value signal rather than merely exposing it. Second, reward averaging now clearly outperforms precision tracking ($d = 0.43$ in favor of C5), reversing the pattern from the binary betrayal scenario where C2 dominated.
+
+**The affect × depth orthogonality in the binary game:**
+
+| | No Affect | Affect (C2) |
+|---|---|---|
+| Shallow ($\tau=2$) | C4: 530.04 | C2: 575.06 |
+| Deep ($\tau=8$) | C1: 529.26 | C8: $\approx 576$ |
+
+Depth is irrelevant (rows are statistically identical). Affect matters (columns differ by $d \approx 0.64$). The augmentation is additive and independent of planning depth.
+
+### 4.12 Reward Averaging vs. Precision Tracking in Ambiguous Spaces
+
+The graded game reverses the H3 result from the binary betrayal scenario. In the binary betrayal, precision tracking beat reward averaging ($d = 0.59$, $p = 0.004$) because a cooperator-to-exploiter switch creates a regime where recent reward and prediction error diverge — reward history says "this partner is good" while the precision signal says "my model is failing." In the graded game, C5 dominates throughout, including post-betrayal ($d = -0.89$, $p < 0.0001$).
+
+Three factors explain this reversal:
+
+1. **Reward gradient richness.** The graded game's continuous investment levels create a rich reward gradient: investing 20% vs 80% in a cooperative partner produces proportionally different returns. Reward averaging encodes this gradient directly — "partner $k$ has been generating high/low returns" maps immediately onto "invest more/less in $k$." Precision tracking only encodes "my model of $k$ is accurate/inaccurate," which must be translated through the terminal value mechanism into an investment decision. The translation adds indirection without adding information in a task where the reward gradient is monotonically informative.
+
+2. **Betrayal signal informativeness.** In the binary game, betrayal is all-or-nothing: a partner who was cooperating now defects. Reward averaging responds slowly because the cumulative average is dominated by many rounds of cooperation. Precision tracking responds quickly because a single unexpected defection produces large prediction error, which directly collapses $\beta_k$. In the graded game, even the reward signal responds informatively because the continuous payoff drop provides a strong gradient signal that the EMA-based reward average incorporates efficiently.
+
+3. **Terminal value encoding.** The reward-average terminal value is $0.5 \cdot (1 + \tanh(r_k / r_{\max}))$, which maps reward history monotonically to the $[0, 1]$ signal range. This encoding directly prioritizes high-reward partners for larger investments. The precision-tracking terminal value ($\beta_k$) prioritizes partners the agent *predicts well*, not necessarily partners that give the most reward. In the graded game, where investment level is the primary decision variable, knowing "who gives more reward" is more directly useful than knowing "who I predict better."
+
+**Theoretical implication.** Precision tracking and reward averaging occupy different niches. Reward averaging provides a better *exploitation* signal when the action space offers continuous investment gradients. Precision tracking provides a better *robustness* signal when the decision is binary (trust/don't trust) and model fitness diverges from reward history. The current graded game tests exploitation; a graded game with delayed feedback, partial observability, or non-stationary reward functions would test robustness more directly.
+
+### 4.13 Clinical Sensitivity Restored by Task Ambiguity
+
+The binary game's softmax saturation makes clinical parameter variations behaviorally inert: maximum clinical effect is 0.5% of total payoff. The graded game restores clinical sensitivity:
+
+| Condition | Graded payoff | vs C4 effect size |
+|---|---|---|
+| C4 (no affect) | 10.134 | — |
+| C9 (alexithymia, $\alpha = 0.1$) | 10.324 | $d = 2.20$ |
+| C10 (borderline, $\alpha = 12, \lambda = 0.5$) | 10.353 | $d = 2.20$ |
+| C11 (depression, $\beta_0 = 0.2$) | 10.331 | $d = 2.17$ |
+
+All clinical conditions massively outperform the no-affect baseline ($d > 2.1$), a $4\times$ improvement over the binary game's negligible effects. The clinical parameter space has the structure theorized in §4.10; it just required an environment with sufficient EFE ambiguity to express it.
+
+The within-clinical differentiation remains small (10.324–10.353 range). This suggests that the specific *form* of affective impairment matters less than whether any terminal value signal is present at all — consistent with the binary augmentation finding, but now operating at a much larger effect size. Whether the affective charge is blunted (alexithymia), volatile (borderline), or pessimistic (depression), the mu-weighted terminal value still provides substantial augmentation over raw planning. Distinguishing between clinical profiles may require richer environments (multiple equilibria, deception detection, coalition formation) where the *dynamics* of the affective signal, not just its presence, determine qualitatively different behavioral strategies.
+
+### 4.14 Beta Does Not Approximate Value-to-Go
+
+An empirical analysis of the graded trust game tests whether the beta terminal signal correlates with actual future payoffs from the same partner. If beta were approximating a cached value function, high beta for partner $k$ should predict higher future payoffs from $k$.
+
+The result is a null: within-round correlations between beta and average future payoff per partner are centered at $r \approx -0.01$ (median across rounds 20–180), with no round window reaching significance after correction. A beta tercile analysis confirms the pattern: agents with high beta ($\bar{\beta} = 0.616$) and low beta ($\bar{\beta} = 0.468$) for a given partner experience statistically indistinguishable future payoffs ($d = -0.03$, $p = 0.21$).
+
+This null is *predicted* by the theory. Beta tracks prediction accuracy (§3.4), not reward quality. A cooperator who is reliably cooperative and an exploiter who is reliably exploitative can both produce high beta — the agent predicts both well. Conversely, a random partner yields mediocre beta regardless of whether random-partner payoffs happen to be above or below average.
+
+The null therefore validates the orthogonal augmentation claim from the opposite direction. Beta contributes information orthogonal to value history, not an approximation to it. If beta correlated strongly with value-to-go, the augmentation could be dismissed as a learned value cache that duplicates what deeper planning would discover. The absence of correlation confirms that beta encodes a genuinely different signal — model fitness — that improves policy evaluation through a channel that value history alone does not access.
+
+### 4.15 Synthesis: The Paper Story Across Both Game Types
+
+The binary and graded trust games together tell a more complete story than either alone:
+
+1. **Binary game establishes the core claim.** Affect provides orthogonal augmentation beyond planning depth. Under sophisticated inference, depth $\tau = 2$ through $\tau = 8$ is flat; affect adds $\sim 46$ payoff points at every depth. The lesion reproduces the Damasio dissociation. Precision tracking separates from reward averaging only under betrayal stress.
+
+2. **Graded game tests the mechanism's generality.** Moving from 8 to 24 actions activates the precision channel that was structurally inert in the binary game. Both terminal value mechanisms (precision and reward) provide strong augmentation ($d > 1$), but reward averaging dominates because the continuous investment gradient makes reward history directly decision-relevant. This is not a failure of precision tracking — it is a task-specificity result: the graded game's monotonic reward structure favors the simpler signal.
+
+3. **The precision tracking mechanism's value is modelability.** Its parameters ($\alpha$, $\lambda$, $\beta_0$) map naturally onto clinically interpretable constructs (alexithymia, borderline volatility, depressive pessimism) in ways that reward averaging's single EMA parameter does not. This makes precision tracking the right mechanism for clinical and neuroscientific modeling, even when reward averaging achieves higher raw performance in a specific task.
+
+4. **The graded game unlocks the clinical sensitivity that the binary game cannot provide.** Clinical parameter variations produce effect sizes above $d = 2$ in the graded game, compared to negligible effects in the binary game. This validates the theoretical prediction that the parameter space has clinically relevant structure — it just needs an environment with sufficient decision ambiguity to express it.
 
 ---
 

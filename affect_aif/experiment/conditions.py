@@ -12,6 +12,9 @@ CONDITIONS = {
     6: {"name": "intermediate_3_no_affect", "description": "Intermediate planner baseline at horizon 3"},
     7: {"name": "intermediate_4_no_affect", "description": "Intermediate planner baseline at horizon 4"},
     8: {"name": "deep_affective", "description": "Deep planner with affective terminal values"},
+    9: {"name": "alexithymia", "description": "Blunted affective charging (alpha_charge=0.1)"},
+    10: {"name": "borderline", "description": "Volatile affect (alpha_charge=12.0, lambda_smooth=0.5)"},
+    11: {"name": "depression", "description": "Persistently low baseline precision (initial_beta=0.2)"},
 }
 
 

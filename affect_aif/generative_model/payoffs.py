@@ -29,10 +29,29 @@ def build_payoff_matrix(
     return matrix
 
 
+def build_graded_payoff_matrix(
+    num_levels: int = 6,
+    endowment: float = 10.0,
+    multiplier: float = 3.0,
+) -> np.ndarray:
+    """Return a (num_levels, 2, 2) payoff tensor for graded investment trust game.
+
+    Indexed by (investment_level, partner_action, player).
+    """
+
+    matrix = np.zeros((num_levels, 2, 2), dtype=float)
+    for i in range(num_levels):
+        matrix[i, COOPERATE, 0] = endowment - i + multiplier * i / 2
+        matrix[i, DEFECT, 0] = endowment - i
+        matrix[i, COOPERATE, 1] = multiplier * i / 2
+        matrix[i, DEFECT, 1] = multiplier * i
+    return matrix
+
+
 def infer_payoff_levels(payoff_matrix: np.ndarray) -> tuple[float, ...]:
     """Extract sorted unique agent payoff levels from a payoff tensor."""
 
-    levels = sorted({float(payoff_matrix[a, p, 0]) for a in range(2) for p in range(2)})
+    levels = sorted({float(payoff_matrix[a, p, 0]) for a in range(payoff_matrix.shape[0]) for p in range(2)})
     return tuple(levels)
 
 
@@ -74,19 +93,25 @@ def expected_agent_payoff(
     return float(np.dot(probs, payoffs))
 
 
-def num_actions(num_partners: int, assignment_mode: str) -> int:
+def num_actions(num_partners: int, assignment_mode: str, num_social_actions: int = 2) -> int:
     """Number of available actions under the current task variant."""
 
     if assignment_mode == "agent_choice":
-        return 2 * num_partners
-    return 2
+        return num_social_actions * num_partners
+    return num_social_actions
 
 
-def encode_action(partner_idx: int, social_action: int, num_partners: int, assignment_mode: str) -> int:
+def encode_action(
+    partner_idx: int,
+    social_action: int,
+    num_partners: int,
+    assignment_mode: str,
+    num_social_actions: int = 2,
+) -> int:
     """Encode a partner-selection plus social action into a flat action index."""
 
     if assignment_mode == "agent_choice":
-        return 2 * partner_idx + social_action
+        return num_social_actions * partner_idx + social_action
     return social_action
 
 
@@ -95,11 +120,12 @@ def decode_action(
     num_partners: int,
     assignment_mode: str,
     active_partner: int | None = None,
+    num_social_actions: int = 2,
 ) -> tuple[int, int]:
     """Decode a flat action into partner index and social action."""
 
     if assignment_mode == "agent_choice":
-        return action // 2, action % 2
+        return action // num_social_actions, action % num_social_actions
     if active_partner is None:
         raise ValueError("active_partner is required when assignment_mode is not 'agent_choice'.")
     return active_partner, action

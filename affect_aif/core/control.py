@@ -185,10 +185,15 @@ def compute_efe_with_terminal_value(
     return base + np.asarray(terminal_values, dtype=float)
 
 
-def _decode_action_jax(action, active_partner, assignment_mode_code):
-    partner_idx = jnp.where(assignment_mode_code == 1, action // 2, active_partner)
-    social_action = jnp.where(assignment_mode_code == 1, action % 2, action)
+def _decode_action_jax(action, active_partner, assignment_mode_code, num_social_actions=2):
+    partner_idx = jnp.where(assignment_mode_code == 1, action // num_social_actions, active_partner)
+    social_action = jnp.where(assignment_mode_code == 1, action % num_social_actions, action)
     return partner_idx.astype(jnp.int32), social_action.astype(jnp.int32)
+
+
+def _to_binary_action_jax(social_action, num_social_actions):
+    """Map graded investment level to binary cooperate/defect for partner prediction."""
+    return jnp.where(num_social_actions <= 2, social_action, jnp.where(social_action > 0, 0, 1))
 
 
 def _contextual_partner_prediction(
@@ -278,10 +283,11 @@ def _rollout_policy_trust_game_mean_field(
     max_abs_payoff,
     use_utility_flag,
     use_information_gain_flag,
+    num_social_actions=2,
 ):
     def scan_step(carry, raw_action):
         beliefs_t, last_actions_t, counts_t = carry
-        partner_idx, social_action = _decode_action_jax(raw_action, active_partner, assignment_mode_code)
+        partner_idx, social_action = _decode_action_jax(raw_action, active_partner, assignment_mode_code, num_social_actions)
         belief = beliefs_t[partner_idx]
         last_action = last_actions_t[partner_idx]
         count = counts_t[partner_idx]
@@ -303,7 +309,8 @@ def _rollout_policy_trust_game_mean_field(
         step_cost = use_utility_flag * pragmatic + use_information_gain_flag * epistemic
 
         beliefs_tp1 = beliefs_t.at[partner_idx].set(B_type @ belief)
-        last_actions_tp1 = last_actions_t.at[partner_idx].set(social_action)
+        binary_action = _to_binary_action_jax(social_action, num_social_actions)
+        last_actions_tp1 = last_actions_t.at[partner_idx].set(binary_action)
         counts_tp1 = counts_t.at[partner_idx].set(count + 1)
         aux = (step_cost, partner_idx, social_action)
         return (beliefs_tp1, last_actions_tp1, counts_tp1), aux
@@ -314,7 +321,7 @@ def _rollout_policy_trust_game_mean_field(
         policy,
     )
 
-    first_partner, _ = _decode_action_jax(policy[0], active_partner, assignment_mode_code)
+    first_partner, _ = _decode_action_jax(policy[0], active_partner, assignment_mode_code, num_social_actions)
     total_step_cost = jnp.sum(step_costs)
     precision_weight = 1.0 + mu * terminal_signal[first_partner]
     total = total_step_cost * precision_weight
@@ -343,6 +350,7 @@ def _eval_single_path(
     max_abs_payoff,
     use_utility_flag,
     use_information_gain_flag,
+    num_social_actions=2,
 ):
     del agent_payoff_table, max_abs_payoff
 
@@ -351,7 +359,7 @@ def _eval_single_path(
     def scan_step(carry, step_inputs):
         beliefs_t, last_actions_t, counts_t, path_log_prob = carry
         t, raw_action = step_inputs
-        partner_idx, social_action = _decode_action_jax(raw_action, active_partner, assignment_mode_code)
+        partner_idx, social_action = _decode_action_jax(raw_action, active_partner, assignment_mode_code, num_social_actions)
         belief = beliefs_t[partner_idx]
         last_action = last_actions_t[partner_idx]
         count = counts_t[partner_idx]
@@ -389,7 +397,8 @@ def _eval_single_path(
         next_belief = jnp.where(has_observation, predictive_next, _normalize_jax(B_type @ belief))
 
         beliefs_tp1 = beliefs_t.at[partner_idx].set(next_belief)
-        last_actions_tp1 = last_actions_t.at[partner_idx].set(social_action)
+        binary_action = _to_binary_action_jax(social_action, num_social_actions)
+        last_actions_tp1 = last_actions_t.at[partner_idx].set(binary_action)
         counts_tp1 = counts_t.at[partner_idx].set(count + 1)
         path_log_prob_tp1 = path_log_prob + jnp.where(has_observation, jnp.log(obs_prob + 1e-16), 0.0)
         return (beliefs_tp1, last_actions_tp1, counts_tp1, path_log_prob_tp1), step_cost
@@ -400,7 +409,7 @@ def _eval_single_path(
         init,
         (jnp.arange(horizon, dtype=jnp.int32), policy),
     )
-    first_partner, _ = _decode_action_jax(policy[0], active_partner, assignment_mode_code)
+    first_partner, _ = _decode_action_jax(policy[0], active_partner, assignment_mode_code, num_social_actions)
     total_step_cost = jnp.sum(step_costs)
     precision_weight = 1.0 + mu * terminal_signal[first_partner]
     total = total_step_cost * precision_weight
@@ -428,10 +437,11 @@ def _rollout_policy_trust_game_sophisticated(
     max_abs_payoff,
     use_utility_flag,
     use_information_gain_flag,
+    num_social_actions=2,
 ):
     path_rollout = jax.vmap(
         _eval_single_path,
-        in_axes=(None, 0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None),
+        in_axes=(None, 0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None),
     )
     weighted_totals, weighted_step_costs, weighted_terminal_values, first_partners = path_rollout(
         policy,
@@ -453,6 +463,7 @@ def _rollout_policy_trust_game_sophisticated(
         max_abs_payoff,
         use_utility_flag,
         use_information_gain_flag,
+        num_social_actions,
     )
     return (
         jnp.sum(weighted_totals, axis=0),
@@ -462,7 +473,7 @@ def _rollout_policy_trust_game_sophisticated(
     )
 
 
-@partial(jax.jit, static_argnames=("num_actions",))
+@partial(jax.jit, static_argnames=("num_actions", "num_social_actions"))
 def decision_step_trust_game(
     beliefs,
     last_actions,
@@ -489,10 +500,11 @@ def decision_step_trust_game(
     use_information_gain_flag,
     modulate_precision_flag,
     max_abs_payoff,
+    num_social_actions=2,
 ):
     rollout = jax.vmap(
         _rollout_policy_trust_game_sophisticated,
-        in_axes=(0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None),
+        in_axes=(0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None),
     )
     G, step_costs, terminal_values, first_partners = rollout(
         policies,
@@ -514,6 +526,7 @@ def decision_step_trust_game(
         max_abs_payoff,
         use_utility_flag,
         use_information_gain_flag,
+        num_social_actions,
     )
     # Optional precision modulation currently only boosts precision above the base gamma.
     precision_scale = jnp.where(modulate_precision_flag > 0, 1.0 + precision_signal[first_partners], 1.0)
@@ -540,7 +553,7 @@ def decision_step_trust_game(
         sample_full,
         (q_pi, key),
     )
-    selected_partner, selected_social_action = _decode_action_jax(action, active_partner, assignment_mode_code)
+    selected_partner, selected_social_action = _decode_action_jax(action, active_partner, assignment_mode_code, num_social_actions)
     predicted_partner_action_probs, _ = _contextual_partner_prediction(
         belief=beliefs[selected_partner],
         last_action=last_actions[selected_partner],

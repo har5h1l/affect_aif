@@ -13,21 +13,23 @@ from affect_aif.agent.affective_agent import AffectiveAgent
 from affect_aif.agent.base_agent import BaseAgent
 from affect_aif.agent.lesioned_agent import LesionedAgent
 from affect_aif.agent.reward_avg_agent import RewardAvgAgent
+from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
 from affect_aif.environment.trust_game import TrustGameEnv
 from affect_aif.experiment.conditions import get_condition_name
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.logger import MetricLogger
 from affect_aif.experiment.progress import ProgressReporter, create_progress_reporter
-from affect_aif.generative_model.model import TrustGameModel
+from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
 
 
-PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5, 6, 7, 8}
+PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 SENSITIVITY_CONDITIONS = {2, 3, 5, 8}
 
 
 def _build_calibration_summary(config: ExperimentConfig, efe_values: list[float], calibration_episodes: int) -> dict[str, float | int]:
     mean_abs_efe = float(np.nanmean(np.asarray(efe_values, dtype=float))) if efe_values else 0.0
-    derived_mu = float(mean_abs_efe * (config.deep_horizon - config.shallow_horizon))
+    horizon_gap = max(1, config.deep_horizon - config.shallow_horizon)
+    derived_mu = float(mean_abs_efe * horizon_gap)
     return {
         "requested_calibration_episodes": int(config.calibration_episodes),
         "calibration_episodes": int(calibration_episodes),
@@ -59,7 +61,14 @@ class ExperimentRunner:
         )
 
     def _create_model(self) -> TrustGameModel:
+        if self.config.payoff_mode == "graded":
+            return GradedTrustGameModel(asdict(self.config))
         return TrustGameModel(asdict(self.config))
+
+    def _create_env(self, seed: int) -> TrustGameEnv:
+        if self.config.payoff_mode == "graded":
+            return GradedTrustGameEnv(self.config, seed=seed)
+        return TrustGameEnv(self.config, seed=seed)
 
     def _planning_horizon_for(self, condition: int, default_horizon: int) -> int:
         return int(self.config.horizon_overrides.get(int(condition), default_horizon))
@@ -123,6 +132,17 @@ class ExperimentRunner:
         if condition == 8:
             return AffectiveAgent(
                 planning_horizon=self._planning_horizon_for(condition, self.config.deep_horizon),
+                num_partners=self.config.num_partners,
+                lambda_smooth=self.config.lambda_smooth,
+                alpha_charge=self.config.alpha_charge,
+                sigma_0_sq=self.config.sigma_0_sq,
+                initial_beta=self.config.initial_beta,
+                mu=float(self.config.mu or 0.0),
+                **common,
+            )
+        if condition in (9, 10, 11):
+            return AffectiveAgent(
+                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
                 num_partners=self.config.num_partners,
                 lambda_smooth=self.config.lambda_smooth,
                 alpha_charge=self.config.alpha_charge,
@@ -302,7 +322,7 @@ class ExperimentRunner:
             seed=seed,
         )
         model = self._create_model()
-        env = TrustGameEnv(self.config, seed=seed)
+        env = self._create_env(seed=seed)
         agent = self._create_agent(condition=1, model=model, seed=seed)
         calibration_records = self._run_episode(agent=agent, env=env, seed=seed, condition=1, replication=episode_idx)
         mean_abs_step_efe = float(np.nanmean([row["mean_abs_step_efe"] for row in calibration_records])) if calibration_records else 0.0
@@ -321,11 +341,6 @@ class ExperimentRunner:
 
     def calibrate_mu(self, enforce_minimum: bool = False) -> float:
         """Derive μ from deep-planner EFE mass instead of tuning it."""
-
-        if self.config.deep_horizon <= self.config.shallow_horizon:
-            self.config.mu = 0.0
-            self.calibration_summary = self.build_zero_calibration_summary()
-            return 0.0
 
         calibration_episodes = self._resolve_calibration_episodes(enforce_minimum=enforce_minimum)
         efe_values: list[float] = []
@@ -355,7 +370,7 @@ class ExperimentRunner:
             seed=seed,
         )
         model = self._create_model()
-        env = TrustGameEnv(self.config, seed=seed)
+        env = self._create_env(seed=seed)
         agent = self._create_agent(condition=condition, model=model, seed=seed)
         episode_records = self._run_episode(
             agent=agent,
@@ -491,7 +506,7 @@ class ExperimentRunner:
         try:
             mu_factor = self._apply_sensitivity_override(parameter_name, float(parameter_value), base_mu)
             model = self._create_model()
-            env = TrustGameEnv(self.config, seed=seed)
+            env = self._create_env(seed=seed)
             agent = self._create_agent(condition=condition, model=model, seed=seed)
             rows = self._run_episode(agent=agent, env=env, seed=seed, condition=condition, replication=replication)
             for row in rows:

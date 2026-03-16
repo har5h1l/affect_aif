@@ -131,3 +131,8 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 - Detection latency is defined as encounters after the switch until inferred type becomes correct.
 - Payoff recovery latency is defined as encounters after the switch until payoff reaches at least `1.0`, meaning the agent is no longer taking sucker-level losses under the default matrix.
 - If the betrayal outputs remain flat, treat that as a mechanism null result: beta and terminal-signal dynamics did not move enough to separate precision tracking from reward averaging under the current task and hyperparameters.
+
+## Future Directions
+
+- **Phase 4 (variational beta):** The current beta update rule extends Hesp et al.'s variational precision dynamics to the multi-partner setting. Phase 4 will formalize beta as a discrete hidden state within the generative model, with explicit likelihood and transition dynamics.
+- **Phase 5 (clinical sensitivity):** Clinical personality variants (e.g., high-anxiety, low-interoceptive-precision profiles) are config-level parameter changes to the existing affective hyperparameters; no new agent classes are needed.

@@ -1,0 +1,18 @@
+[Unit]
+Description=Research Conductor - affect_aif (Claude + Codex)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/affect_aif
+ExecStart=/home/ubuntu/affect_aif/conductor/conductor.sh --loop 30m --max-turns 50
+Restart=on-failure
+RestartSec=120
+Environment="PATH=/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="HOME=/home/ubuntu"
+Environment="CONDUCTOR_MAX_TURNS=50"
+
+[Install]
+WantedBy=multi-user.target

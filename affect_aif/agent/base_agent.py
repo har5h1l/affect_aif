@@ -96,6 +96,7 @@ class BaseAgent:
         self.num_partners = int(model.num_partners)
         self.num_types = int(model.num_types)
         self.num_actions = int(model.num_controls[0])
+        self.num_social_actions = int(getattr(model, 'num_social_actions', 2))
         self.assignment_mode_code = 1 if model.assignment_mode == "agent_choice" else 0
         self.sampling_mode_code = 0 if self.action_sampling == "marginal" else 1
 
@@ -249,6 +250,7 @@ class BaseAgent:
             use_information_gain_flag=jnp.float32(1.0 if self.use_information_gain else 0.0),
             modulate_precision_flag=jnp.int32(1 if self.affect_modulates_precision else 0),
             max_abs_payoff=jnp.float32(self.max_abs_payoff),
+            num_social_actions=self.num_social_actions,
         )
         self.key = decision["key"]
         self.last_q_pi = decision["q_pi"]
@@ -298,7 +300,8 @@ class BaseAgent:
         self._update_auxiliary_states(partner_idx=partner_idx, partner_action=int(partner_action), payoff=float(payoff))
         self.partner_posteriors = self.partner_posteriors.at[partner_idx].set(posterior)
         self.partner_beliefs = self.partner_beliefs.at[partner_idx].set(predictive_next)
-        self.partner_last_agent_actions = self.partner_last_agent_actions.at[partner_idx].set(int(action_taken))
+        action_for_model = int(action_taken) if self.num_social_actions <= 2 else (0 if action_taken > 0 else 1)
+        self.partner_last_agent_actions = self.partner_last_agent_actions.at[partner_idx].set(action_for_model)
         self.partner_interaction_counts = self.partner_interaction_counts.at[partner_idx].set(
             self.partner_interaction_counts[partner_idx] + 1
         )
