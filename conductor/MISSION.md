@@ -42,4 +42,4 @@ Between experiment launches, CHECK partial results periodically:
 Edit this file to change what the conductor does. Set status to PAUSED to stop.
 
 ## Status
-PAUSED — Phase 3 is complete per docs/long_term_plan.md. Awaiting user decision on Phase 4.
+ACTIVE
