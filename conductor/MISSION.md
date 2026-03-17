@@ -17,6 +17,19 @@ Phase 3: Theory tightening — clarify the mechanism and boundary conditions.
 6. Update docs/results_tracking.md with findings
 7. Commit at each checkpoint
 
+## Resource Allocation
+This project is LOWER PRIORITY. Use at most 2-3 workers for experiments.
+The VM has 12 cores — the social_learning project gets 8, this project gets the rest.
+Avoid running heavy parallel experiments simultaneously.
+
+## Experiment Monitoring
+Between experiment launches, CHECK partial results periodically:
+- After launching an experiment, wait for a few seeds to complete
+- Check if early results look reasonable (no NaN, no degenerate behavior)
+- If something looks wrong, STOP the experiment immediately and report
+- Update STATE.md with partial findings even before experiment finishes
+- This prevents wasting hours on a bad configuration
+
 ## Constraints
 - Follow all safety invariants from CLAUDE.md
 - Tests must pass before any experiment
@@ -29,4 +42,4 @@ Phase 3: Theory tightening — clarify the mechanism and boundary conditions.
 Edit this file to change what the conductor does. Set status to PAUSED to stop.
 
 ## Status
-ACTIVE
+PAUSED — Phase 3 is complete per docs/long_term_plan.md. Awaiting user decision on Phase 4.

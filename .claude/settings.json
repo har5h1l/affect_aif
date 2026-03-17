@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-context.sh"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -7,6 +17,10 @@
           {
             "type": "command",
             "command": ".claude/hooks/validate-bash.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-experiment-validate.sh"
           }
         ]
       }
@@ -18,6 +32,15 @@
           {
             "type": "command",
             "command": ".claude/hooks/post-edit-lint.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/post-pytest-marker.sh"
           }
         ]
       }

@@ -43,3 +43,6 @@ artifacts/
 
 # Conductor session logs
 conductor/log/
+
+# Hook state files
+.pytest_last_run
