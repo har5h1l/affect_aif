@@ -1,10 +1,15 @@
 # Mission
 
 ## Objective
-Continue research through Phases 5–8. Run experiments, update docs, and commit at checkpoints. Stop only when a phase requires a big user decision (new architecture, paper draft, human data, or fundamental reframing).
+Continue research through Phases 5–8. Run experiments, update docs, and commit at checkpoints. Make decisions autonomously. Ground all work in variational principles (VFE minimization, generative models, belief updating, precision dynamics) and the project's theoretical framework (per-partner metacognitive precision, orthogonal augmentation, Hesp et al. grounding). New environments or tasks that fit this scope—stretching or pivoting within the framework—are fine to pursue. Stop only for a massive shift: human data collection, or a direction that fundamentally departs from the current variational active-inference paradigm.
+
+## Guiding Principles
+- Variational principles and docs/theory.md are the north star
+- Stretch scope (richer games, new partner types, new inference schemes) as long as it stays within the variational-AIF framework
+- Pivot within the paradigm when results suggest it; do not stop for normal extensions
 
 ## Current Phase
-Phase 6: Bayesian Model Comparison (Phase 5 is blocked by Phase 7; Phase 7 is a stop point)
+Phase 6: Bayesian Model Comparison (Phase 5 is blocked by task ambiguity; Phase 7 can proceed if environments fit principles)
 
 ## Tasks
 
@@ -17,17 +22,14 @@ Phase 6: Bayesian Model Comparison (Phase 5 is blocked by Phase 7; Phase 7 is a 
 6. Document findings in docs/results_tracking.md and docs/theory.md
 7. Commit at each checkpoint
 
-### Phase 5 (after Phase 7)
-- Blocked: current trust game has softmax saturation; clinical sensitivity needs richer tasks first
+### Phase 5 (clinical sensitivity)
+- Blocked by softmax saturation in binary game; richer tasks first
 
-### Phase 7 (stop point)
-- Do not start Phase 7 autonomously. It requires:
-  - New environments (public goods, ultimatum) = fundamental architecture
-  - Entry condition: single-agent paper in draft or published
-- When Phase 6 is complete, STOP and report. User decides whether to proceed to Phase 7.
+### Phase 7 (richer environments)
+- Proceed autonomously if new environments (public goods, ultimatum, etc.) fit variational principles and extend the current generative-model framework. No stop unless the change is a massive architectural shift.
 
 ### Phase 8 (stop point)
-- Human data: always requires user. Do not start Phase 8 autonomously.
+- Human data collection always requires user. Do not start Phase 8 autonomously. STOP.
 
 ## Constraints
 - Follow all safety invariants from CLAUDE.md
@@ -36,11 +38,11 @@ Phase 6: Bayesian Model Comparison (Phase 5 is blocked by Phase 7; Phase 7 is a 
 - Never delete result files
 - If results contradict expectations, STOP and describe findings
 - Max 4 experiment workers (HARD LIMIT)
-- STOP when: Phase 6 complete (user decides Phase 7 vs 6 extension), Phase 7 start (user decision), Phase 8 (user decision), or results demand reframing
+- STOP only when: human data collection (Phase 8), or a proposed direction is a massive shift away from the variational-AIF paradigm
 
 ## Notes
 Edit this file to change what the conductor does. Set status to PAUSED to stop.
-Phase 4 complete. Phase 6 can proceed autonomously. Phases 7–8 need user decisions.
+Phase 4 complete. Agent proceeds through Phase 6 and 7 autonomously as long as work stays within scope. Only Phase 8 and massive shifts require user decision.
 
 ## Status
-RUNNING — Phase 6 in progress. Autonomously continue until Phase 6 complete, then STOP for user decision on Phase 7.
+RUNNING — Phase 6 in progress. Autonomously continue through Phase 6 and 7 as long as work stays within variational-AIF scope.
