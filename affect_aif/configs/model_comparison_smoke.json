@@ -1,0 +1,10 @@
+{
+    "conditions": [1, 2, 3, 4, 5],
+    "num_replications": 5,
+    "num_rounds": 100,
+    "payoff_mode": "binary",
+    "assignment_mode": "random",
+    "num_partners": 4,
+    "deep_horizon": 4,
+    "shallow_horizon": 2
+}
