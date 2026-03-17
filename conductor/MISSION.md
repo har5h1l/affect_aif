@@ -1,42 +1,33 @@
 # Mission
 
 ## Objective
-Advance Phase 3 (theory tightening) of the affect_aif project. Test whether
-per-partner metacognitive precision tracking provides orthogonal value beyond
-explicit planning depth in volatile trust games.
+Begin Phase 4 (Variational Beta Extension). Formalize beta as a discrete hidden
+state within the generative model, extending the current continuous EMA update.
 
 ## Current Phase
-Phase 3: Theory tightening — clarify the mechanism and boundary conditions.
+Phase 4: Variational Beta Extension
 
 ## Tasks
 1. Run pytest to confirm codebase is clean
 2. Read docs/long_term_plan.md and docs/results_tracking.md for current state
-3. Identify the next incomplete task in Phase 3
-4. Execute it: code changes -> tests -> small experiment (5 seeds) -> analysis
-5. If small experiment looks good, run confirmation (50 seeds)
-6. Update docs/results_tracking.md with findings
-7. Commit at each checkpoint
+3. Read docs/theory.md for the current beta formulation
+4. Design the discrete beta hidden state: define state levels, likelihood P(e|beta), transition dynamics P(beta_t|beta_{t-1})
+5. Show formal correspondence between current EMA update and discrete hidden-state posterior
+6. Implement the discrete beta formulation alongside the existing continuous one
+7. Run small experiments (5 seeds) comparing continuous vs discrete beta
+8. If results look good, run confirmation (50 seeds)
+9. Update docs with findings
+10. Commit at each checkpoint
 
 ## Resource Allocation
-This project is LOWER PRIORITY. Use at most 2-3 workers for experiments.
-The VM has 12 cores — the social_learning project gets 8, this project gets the rest.
-Avoid running heavy parallel experiments simultaneously.
-
-## Experiment Monitoring
-Between experiment launches, CHECK partial results periodically:
-- After launching an experiment, wait for a few seeds to complete
-- Check if early results look reasonable (no NaN, no degenerate behavior)
-- If something looks wrong, STOP the experiment immediately and report
-- Update STATE.md with partial findings even before experiment finishes
-- This prevents wasting hours on a bad configuration
+This project uses 1 worker for experiments. Be conservative with compute.
 
 ## Constraints
 - Follow all safety invariants from CLAUDE.md
 - Tests must pass before any experiment
 - Small replications (5 seeds) before full runs (50-100 seeds)
 - Never delete result files
-- If results contradict the current hypothesis, STOP and describe findings
-- Do not advance to Phase 4 without user approval
+- Save results incrementally (partial CSVs during long runs)
 
 ## Notes
 Edit this file to change what the conductor does. Set status to PAUSED to stop.
