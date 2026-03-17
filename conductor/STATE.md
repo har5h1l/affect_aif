@@ -14,5 +14,5 @@ existing results from manual sessions.
 None.
 
 ## Next Session Should
-Read docs/long_term_plan.md and docs/results_tracking.md, then identify and
-execute the next Phase 3 task.
+Begin Phase 4 (variational beta extension). Read docs/theory.md for current
+beta formulation, then design the discrete hidden-state version.
