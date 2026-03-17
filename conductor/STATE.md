@@ -1,7 +1,7 @@
 # Research State
 
 ## Last Updated
-2026-03-17T20:24:00Z
+2026-03-17
 
 ## Session Count
 3
@@ -21,11 +21,8 @@ Phase 4 is fully complete. All mission tasks accomplished:
 - **Betrayal condition**: Discrete beta underperforms continuous by moderate effect (d=0.41, p=0.04) due to transition matrix persistence constraining single-step posterior shifts
 - Both formulations outperform no-affect baseline
 
-## Decision Needed
-Phase 4 complete. User should decide next phase:
-- Phase 5 (clinical sensitivity) — blocked by softmax saturation, needs Phase 7 first
-- Phase 6 (Bayesian model comparison)
-- Phase 7 (richer task environments) — on critical path for clinical sensitivity
+## Autonomous Continuation
+Merged to master. Conductor will now advance through Phase 6 → Phase 5 (or skip if still blocked) → STOP before Phase 7. Only pause when a big user decision is required: new environments (Phase 7), human data (Phase 8), or fundamental reframing.
 
 ## Status
-DONE
+ACTIVE — Phase 6 next. Run experiments, commit at checkpoints. STOP before Phase 7 (new environments require user approval).
