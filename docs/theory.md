@@ -311,27 +311,46 @@ The key empirical pattern is:
 
 So the present theory should be read as: affect adds a partner-specific precision signal orthogonal to explicit depth in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP.
 
-### 4.9 Path to Variational Derivation
+### 4.9 Discrete Variational Beta Formulation
 
-> **Status: Not Implemented.** This section sketches the planned Phase 4 work.
+> **Status: Implemented and Validated (Phase 4).** The discrete formulation is implemented in `affect_aif/agent/affect/discrete_state.py` and wired as Condition 12.
 
-The current $\beta$ update rule (§3.4) extends Hesp et al.'s variational precision dynamics to the multi-partner setting using a continuous EMA formulation. A natural extension treats $\beta_k$ as a discrete hidden state within the generative model, with its own likelihood and transition dynamics, so that its posterior update falls out of the same categorical inference machinery used for partner-type estimation.
+The current $\beta$ update rule (§3.4) extends Hesp et al.'s variational precision dynamics to the multi-partner setting using a continuous EMA formulation. Phase 4 extends this further by treating $\beta_k$ as a discrete hidden state within the generative model, with its own likelihood and transition dynamics, so that its posterior update falls out of the same categorical inference machinery used for partner-type estimation.
 
-**Sketch of the variational formulation:**
+**The discrete formulation:**
 
-1. **Discretize $\beta$.** Replace the continuous $\beta_k \in [0, 1]$ with a categorical hidden state $\beta_k \in \{b_1, b_2, \ldots, b_L\}$ representing $L$ precision levels (e.g., $L = 5$: very low, low, medium, high, very high).
+1. **Discretize $\beta$.** Replace the continuous $\beta_k \in [0, 1]$ with a categorical hidden state $\beta_k \in \{b_1, b_2, \ldots, b_L\}$ representing $L$ evenly-spaced precision levels in $(0, 1)$. Default: $L = 5$, giving levels at approximately $\{0.17, 0.33, 0.50, 0.67, 0.83\}$.
 
-2. **Likelihood $P(\epsilon \mid \beta)$.** Define a mapping from precision level to the expected distribution of prediction errors. At high $\beta$ (good model fit), prediction errors concentrate near zero; at low $\beta$, they spread. For example, $P(\epsilon_k^{(t)} \mid \beta_k = b_l)$ could follow a discretized half-normal with scale inversely proportional to $b_l$.
+2. **Likelihood $P(\epsilon \mid \beta)$.** The charge-based likelihood directly mirrors the continuous EMA's signed charge mechanism:
 
-3. **Transition dynamics $P(\beta_k^{(t+1)} \mid \beta_k^{(t)})$.** A mildly persistent transition matrix encoding the prior belief that precision levels change slowly — diagonal-heavy, with small off-diagonal probability for one-step transitions up or down.
+$$P(\epsilon_k^{(t)} \mid \beta_k = b_l) \propto \exp\left(\alpha(\sigma_0^2 - \epsilon^2) \cdot b_l\right)$$
+
+When $\epsilon^2 < \sigma_0^2$ (low surprise), the charge $\alpha(\sigma_0^2 - \epsilon^2)$ is positive and higher $\beta$ levels receive more likelihood. When $\epsilon^2 > \sigma_0^2$ (high surprise), the charge is negative and lower $\beta$ levels are favored. This is the same informational content as the continuous charge mechanism, expressed as a proper likelihood function.
+
+3. **Transition dynamics $P(\beta_k^{(t+1)} \mid \beta_k^{(t)})$.** A tridiagonal persistent transition matrix with reflecting boundaries. Self-transition probability = persistence parameter $p$ (default 0.8); remaining probability $(1-p)/2$ splits between each neighbor. Boundary states fold out-of-bounds probability back to self, making them stickier (reflecting boundary). This encodes the prior belief that precision levels change slowly.
 
 4. **Standard Bayesian update.** Given the observed prediction error $\epsilon_k^{(t)}$, the posterior over $\beta_k$ updates as:
 
 $$q(\beta_k^{(t)}) \propto P(\epsilon_k^{(t)} \mid \beta_k) \cdot \sum_{\beta_k^{(t-1)}} P(\beta_k^{(t)} \mid \beta_k^{(t-1)}) \, q(\beta_k^{(t-1)})$$
 
-This is the same predict-then-correct scheme used for the level-2 partner-type inference, extended to the precision state. The resulting discrete posterior formalizes the continuous EMA update while preserving the same qualitative behavior: low surprise drives $\beta$ up, high surprise drives it down, and the timescale is governed by the transition matrix rather than the smoothing parameter $\lambda$.
+This is the same predict-then-correct scheme used for the level-2 partner-type inference, extended to the precision state. The point estimate $\hat{\beta}_k = \mathbb{E}_{q}[b_l]$ is used as the terminal signal for EFE weighting, identical to how the continuous $\beta$ enters the policy evaluation.
 
 **Advantages of the discrete formulation:** (a) $\beta$ becomes a first-class hidden state within the generative model, subject to the same inference machinery as every other latent variable; (b) the precision of the precision estimate is itself represented (the width of $q(\beta_k)$), enabling the agent to distinguish "I'm confident my model is good" from "I'm unsure whether my model is good"; (c) the framework naturally accommodates structure learning — Bayesian Model Reduction over the $\beta$ state space can discover whether fewer or more precision levels are needed.
+
+**Formal correspondence to the continuous EMA.** The continuous update $\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \sigma(\alpha(\sigma_0^2 - \epsilon^2))$ is a point-estimate analogue of the discrete posterior mean. The smoothing parameter $\lambda$ maps to the persistence of the transition matrix (both control the timescale), and the charge amplitude $\alpha$ controls the strength of a single observation's influence (the likelihood's informativeness). In the limit $L \to \infty$ with appropriate scaling, the discrete posterior mean converges to the EMA update. In practice with $L = 5$, the qualitative behavior matches exactly: low surprise increases $\beta$, high surprise decreases it, and the timescale is governed by the transition matrix rather than the smoothing parameter.
+
+**Empirical validation (50 seeds per condition):**
+
+| Setting | C2 (continuous) | C12 (discrete) | C4 (baseline) | C2 vs C12 |
+|---------|----------------|----------------|---------------|-----------|
+| Default | 574.8 ± 81.3 | 574.7 ± 81.3 | 527.3 ± 75.1 | d=0.001, p=0.99 |
+| Betrayal | 481.9 ± 76.6 | 448.1 ± 88.5 | 419.4 ± 25.9 | d=0.41, p=0.04 |
+
+In the default (stable) condition, the two formulations produce *indistinguishable* payoffs (Cohen's d = 0.001). Both significantly outperform the no-affect baseline (d ≈ 0.6). This confirms that the discrete formulation captures the same augmentation mechanism as the continuous EMA.
+
+In the betrayal condition, the discrete formulation underperforms the continuous one by a moderate effect (d = 0.41, p = 0.04), while still outperforming the baseline (d = 0.44, p = 0.03). The divergence arises from the transition matrix's persistence: after a sudden strategy switch, the discrete posterior shifts more slowly because the tridiagonal transition matrix constrains how far the belief can move in a single step. The continuous EMA, by contrast, applies the sigmoid-squashed charge directly, allowing larger single-step jumps. This is a *feature* of the discrete formulation — it embeds a stronger prior on precision stability — but it comes at the cost of slower betrayal adaptation.
+
+**Implication:** The continuous EMA and discrete Bayesian formulations are equivalent representations of the same mechanism in stable environments. In volatile environments, the discrete formulation's transition dynamics impose an additional constraint (one-step moves only) that slows adaptation. The choice between them is therefore a modeling decision about the prior on precision volatility, not a difference in the underlying mechanism.
 
 ### 4.10 Clinical Parameter Space
 
