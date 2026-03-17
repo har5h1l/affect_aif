@@ -33,4 +33,4 @@ Edit this file to change what the conductor does. Set status to PAUSED to stop.
 Phase 3 is complete — all theory tightening done. See docs/long_term_plan.md.
 
 ## Status
-ACTIVE
+PAUSED — Phase 4 complete. Awaiting user decision on next phase (5/6/7).
