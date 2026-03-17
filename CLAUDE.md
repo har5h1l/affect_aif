@@ -175,10 +175,16 @@ See `conductor/USAGE.md` for full documentation.
 
 ## Cloud Deployment
 
-The `cloud/` directory supports Oracle and GCP VM deployment:
+Cloud VM management is centralized in `~/Desktop/research-infra/` (not in this repo).
 
-- `cloud/menu.sh` — interactive CLI for VM operations (ssh, fetch/push results, setup)
-- `cloud/vm/setup_oracle.sh` — one-command VM setup (conda, JAX, claude-code, codex, systemd)
-- `.env.example` — copy to `.env` and fill in your cloud credentials
+```bash
+research cloud setup                    # base VM setup
+research cloud push-infra               # sync infra tools to VM
+research cloud clone affect_aif         # clone this project on VM
+research cloud sync fetch affect_aif    # fetch experiment results from VM
+research cloud sync push affect_aif     # push code to VM
+research run affect_aif --mode research --cloud vm1  # run on VM
+research logs affect_aif --remote       # tail remote session logs
+```
 
-See `cloud/vm/setup_oracle.sh` for the systemd service that runs conductor autonomously.
+See `~/Desktop/research-infra/` for full CLI documentation.
