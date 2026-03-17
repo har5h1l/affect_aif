@@ -279,6 +279,7 @@ class ExperimentRunner:
                 round_count=self.config.num_rounds,
                 partner_idx=result["partner_idx"],
             )
+            predictive_log_lik = agent.get_predictive_log_likelihood(result["partner_action"])
             agent.observe_outcome(
                 partner_idx=result["partner_idx"],
                 observation=result["observation"],
@@ -305,6 +306,7 @@ class ExperimentRunner:
             agent_metrics = agent.get_metrics()
             agent_metrics["inferred_type"] = inferred_type
             agent_metrics["inferred_type_correct"] = inferred_correct
+            agent_metrics["predictive_log_lik"] = predictive_log_lik
             logger.log_round(
                 round_idx=round_idx,
                 condition=condition,
