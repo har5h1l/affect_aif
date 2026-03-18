@@ -73,12 +73,15 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 - `ExperimentConfig.horizon_overrides` maps condition id to planning horizon.
 - This is used for the intermediate depth sweep (Conditions 6 and 7) without changing the global `deep_horizon` and `shallow_horizon` defaults.
 - Condition 8 reuses the affective mechanism at the deep horizon to test whether affect provides anything beyond explicit depth.
+- Condition 12 reuses the shallow affective planner with `beta_mode="variational"` so the discrete beta state can be compared against the default continuous update without adding a new agent class.
 
 ## Affective Update Signal
 
 - The current code tracks unsigned surprise, not signed residual error.
 - Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
+- `ExperimentConfig.beta_mode` defaults to `"continuous"` and preserves the existing EMA-based `AffectiveState`.
+- Setting `beta_mode="variational"` switches `AffectiveAgent` to `VariationalAffectiveState`, with `beta_num_levels` discrete levels and `beta_persistence` controlling the beta-state transition kernel.
 
 ## Verbose Execution Tracing
 
@@ -134,5 +137,5 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 
 ## Future Directions
 
-- **Phase 4 (variational beta):** The current beta update rule extends Hesp et al.'s variational precision dynamics to the multi-partner setting. Phase 4 will formalize beta as a discrete hidden state within the generative model, with explicit likelihood and transition dynamics.
+- **Phase 4 (variational beta):** The repository now exposes an optional discrete variational beta state in `AffectiveAgent`, but beta still remains an auxiliary state rather than a full hidden-state factor in the main generative model.
 - **Phase 5 (clinical sensitivity):** Clinical personality variants (e.g., high-anxiety, low-interoceptive-precision profiles) are config-level parameter changes to the existing affective hyperparameters; no new agent classes are needed.

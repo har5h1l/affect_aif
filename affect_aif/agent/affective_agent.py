@@ -6,6 +6,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from affect_aif.agent.affect.state import AffectiveState
+from affect_aif.agent.affect.variational_state import VariationalAffectiveState
 from affect_aif.agent.base_agent import BaseAgent
 
 
@@ -27,6 +28,9 @@ class AffectiveAgent(BaseAgent):
         alpha_charge: float = 3.0,
         sigma_0_sq: float = 0.25,
         initial_beta: float = 0.5,
+        beta_mode: str = "continuous",
+        num_levels: int = 5,
+        persistence: float = 0.8,
         mu: float = 0.0,
         **kwargs,
     ):
@@ -42,13 +46,23 @@ class AffectiveAgent(BaseAgent):
             **kwargs,
         )
         self.mu = float(mu)
-        self.affect = AffectiveState(
-            num_partners=num_partners,
-            lambda_smooth=lambda_smooth,
-            alpha_charge=alpha_charge,
-            sigma_0_sq=sigma_0_sq,
-            initial_beta=initial_beta,
-        )
+        self.beta_mode = str(beta_mode)
+        if self.beta_mode == "variational":
+            self.affect = VariationalAffectiveState(
+                num_partners=num_partners,
+                num_levels=num_levels,
+                persistence=persistence,
+                sigma_sq_max=sigma_0_sq,
+                initial_beta=initial_beta,
+            )
+        else:
+            self.affect = AffectiveState(
+                num_partners=num_partners,
+                lambda_smooth=lambda_smooth,
+                alpha_charge=alpha_charge,
+                sigma_0_sq=sigma_0_sq,
+                initial_beta=initial_beta,
+            )
 
     def reset(self):
         super().reset()
@@ -59,10 +73,10 @@ class AffectiveAgent(BaseAgent):
         return float(self.mu)
 
     def terminal_signal(self):
-        return jnp.asarray(self.affect.betas, dtype=jnp.float32)
+        return jnp.asarray(self.affect.get_all_betas(), dtype=jnp.float32)
 
     def precision_signal(self):
-        return jnp.asarray(self.affect.betas, dtype=jnp.float32)
+        return jnp.asarray(self.affect.get_all_betas(), dtype=jnp.float32)
 
     def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):
         del payoff

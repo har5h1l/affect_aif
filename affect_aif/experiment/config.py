@@ -57,6 +57,9 @@ class ExperimentConfig:
     sigma_0_sq: float = 0.25
     mu: float | None = None
     initial_beta: float = 0.5
+    beta_mode: str = "continuous"
+    beta_num_levels: int = 5
+    beta_persistence: float = 0.8
 
     lesion_mode: str = "decouple"
 
