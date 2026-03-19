@@ -145,6 +145,8 @@ class BaseAgent:
         self.last_true_partner_type: str | None = None
         self.last_partner_action: int | None = None
         self.last_payoff: float = np.nan
+        self.last_round_log_evidence: float = np.nan
+        self.cumulative_log_evidence: float = 0.0
 
     def current_mu(self) -> float:
         return 0.0
@@ -267,6 +269,17 @@ class BaseAgent:
         self.last_selected_action = self.pending_social_action
         return self.last_raw_action
 
+    def _compute_round_log_evidence(self, partner_action: int) -> float:
+        """Compute log p(partner_action | model) from the agent's predictive distribution.
+
+        This is the per-round contribution to the model's marginal log-likelihood,
+        used for Bayesian model comparison between agent variants.
+        """
+        probs = self.pending_prediction_probs
+        p_obs = float(probs[int(partner_action)])
+        p_obs = max(p_obs, 1e-16)
+        return float(np.log(p_obs))
+
     def observe_outcome(
         self,
         partner_idx: int,
@@ -279,6 +292,10 @@ class BaseAgent:
         """Update beliefs and auxiliary state summaries from a realized interaction."""
 
         partner_idx = int(partner_idx)
+        round_log_ev = self._compute_round_log_evidence(partner_action)
+        self.last_round_log_evidence = round_log_ev
+        self.cumulative_log_evidence += round_log_ev
+
         observation_arr = jnp.asarray(observation, dtype=jnp.int32)
         prior = self.partner_beliefs[partner_idx]
         posterior, predictive_next = infer_partner_state(
@@ -349,4 +366,6 @@ class BaseAgent:
             "planning_cost": self.planning_cost,
             "planning_cost_ratio": self.planning_cost_ratio,
             "mu": self.current_mu(),
+            "round_log_evidence": self.last_round_log_evidence,
+            "cumulative_log_evidence": self.cumulative_log_evidence,
         }
