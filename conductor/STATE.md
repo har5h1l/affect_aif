@@ -55,4 +55,4 @@ Cross-game generalization tested with Stag Hunt and Chicken (zero code changes, 
 Model-Hint: opus
 
 ## Status
-DONE — Phases 6 and 7 complete. Phase 5 blocked, Phase 8 requires user. Awaiting user decision.
+DONE — Phases 6 and 7 complete. Phase 5 can proceed autonomously; Phase 8 requires user.

@@ -9,7 +9,7 @@ Continue research through Phases 5–8. Run experiments, update docs, and commit
 - Pivot within the paradigm when results suggest it; do not stop for normal extensions
 
 ## Current Phase
-Phase 6: Bayesian Model Comparison (Phase 5 is blocked by task ambiguity; Phase 7 can proceed if environments fit principles)
+Phase 6: Bayesian Model Comparison (Phase 5 clinical sensitivity can proceed autonomously; Phase 7 can proceed if environments fit principles)
 
 ## Tasks
 
@@ -23,7 +23,7 @@ Phase 6: Bayesian Model Comparison (Phase 5 is blocked by task ambiguity; Phase 
 7. Commit at each checkpoint
 
 ### Phase 5 (clinical sensitivity)
-- Blocked by softmax saturation in binary game; richer tasks first
+- proceed autonomously with clinical-sensitivity sweeps on the graded/SH variants (or any richer environment that fits variational-aif principles); adapt away from binary softmax saturation if it makes bayes-factor discrimination uninformative
 
 ### Phase 7 (richer environments)
 - Proceed autonomously if new environments (public goods, ultimatum, etc.) fit variational principles and extend the current generative-model framework. No stop unless the change is a massive architectural shift.
@@ -42,7 +42,7 @@ Phase 6: Bayesian Model Comparison (Phase 5 is blocked by task ambiguity; Phase 
 
 ## Notes
 Edit this file to change what the conductor does. Set status to PAUSED to stop.
-Phase 4 complete. Agent proceeds through Phase 6 and 7 autonomously as long as work stays within scope. Only Phase 8 and massive shifts require user decision.
+Phase 4 complete. Agent proceeds through Phase 5–7 autonomously as long as work stays within scope. Only Phase 8 and massive shifts require user decision.
 
 ## Status
-PAUSED — Phases 6 and 7 complete. Awaiting user decision on next steps (Phase 5 clinical sensitivity in graded/SH game, or Phase 8 human data).
+RUNNING — proceed to Phase 5 clinical sensitivity autonomously; then stop at Phase 8 (human data collection requires user).
