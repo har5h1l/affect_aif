@@ -442,6 +442,36 @@ The binary and graded trust games together tell a more complete story than eithe
 
 4. **The graded game unlocks the clinical sensitivity that the binary game cannot provide.** Clinical parameter variations produce effect sizes above $d = 2$ in the graded game, compared to negligible effects in the binary game. This validates the theoretical prediction that the parameter space has clinically relevant structure — it just needs an environment with sufficient decision ambiguity to express it.
 
+### 4.16 Bayesian Model Comparison: From Frequentist to Evidence-Based Inference
+
+The preceding results sections relied on frequentist statistics (Welch's t-tests, Cohen's d effect sizes) to compare conditions. Phase 6 introduces formal Bayesian model comparison, treating each agent variant as a generative model and asking: *which model best predicts the observed environment?*
+
+**Approach.** Each agent condition constitutes a generative model of the trust game environment. At each round, the agent produces a predictive distribution over the partner's action, $p(\text{partner\_action}_t \mid \text{model}, \text{history}_{<t})$. The log-probability of the actually observed partner action under this predictive distribution is the per-round log-evidence:
+
+$$\ell_t = \log p(o_t \mid m, h_{<t})$$
+
+Summing across all $T$ rounds gives the cumulative log-evidence for model $m$ on seed $s$:
+
+$$\mathcal{L}_{m,s} = \sum_{t=1}^{T} \ell_t$$
+
+This is the natural metric for Bayesian model comparison in the active inference framework: each agent already computes $p(o_t \mid m)$ as part of its inference, so the log-evidence falls out with no additional computational overhead. The model with higher cumulative log-evidence is the better predictor of the social environment.
+
+**Pairwise Bayes factors.** For two models $m_A$ and $m_B$, the log Bayes factor is:
+
+$$\log \text{BF}_{AB} = \mathcal{L}_A - \mathcal{L}_B$$
+
+We report these on the $\log_{10}$ scale using the Kass & Raftery (1995) interpretation: $|\log_{10} \text{BF}| < 0.5$ is negligible, $0.5$–$1$ is substantial, $1$–$2$ is strong, $> 2$ is decisive.
+
+**Random-effects Bayesian model selection.** Following Stephan et al. (2009), we treat each seed as a "subject" and estimate the population-level model frequencies using variational Bayes on a Dirichlet-multinomial model. This yields:
+
+- **Expected model frequencies** $E[r_k]$: the proportion of the population best described by model $k$
+- **Exceedance probabilities** $P(r_k > r_j \;\forall\; j \neq k)$: the probability that model $k$ is the most frequent in the population
+- **Protected exceedance probabilities** (Rigoux et al., 2014): adjusted for the Bayesian omnibus risk (BOR), the probability that the data do not discriminate between models at all
+
+**Why this matters.** Frequentist tests answer "do conditions differ?" but cannot answer "which model best explains the data?" or "how much evidence favors one model over another?" Bayesian model comparison provides both. It also naturally penalizes model complexity through the Occam factor implicit in predictive likelihood — a model with more parameters must predict more precisely to achieve the same evidence.
+
+*Results for this section are documented in §Hypothesis Scorecard of `docs/results_tracking.md` and in the model comparison output files.*
+
 ---
 
 ## 5. Key References
@@ -461,3 +491,6 @@ The binary and graded trust games together tell a more complete story than eithe
 - Smith, R., Schwartenbeck, P., Parr, T., & Friston, K. J. (2020). An active inference approach to modeling structure learning. *Frontiers in Computational Neuroscience*, 14, 5.
 - Smith, R., et al. (2021). A Bayesian computational model reveals a failure to adapt interoceptive precision estimates across depression, anxiety, eating, and substance use disorders. *PLoS Computational Biology*, 17(3), e1008484.
 - Yoshida, W., Dolan, R. J., & Friston, K. J. (2008). Game theory of mind. *PLoS Computational Biology*, 4(12), e1000254.
+- Kass, R. E., & Raftery, A. E. (1995). Bayes factors. *Journal of the American Statistical Association*, 90(430), 773-795.
+- Stephan, K. E., Penny, W. D., Daunizeau, J., Moran, R. J., & Friston, K. J. (2009). Bayesian model selection for group studies. *NeuroImage*, 46(4), 1004-1017.
+- Rigoux, L., Stephan, K. E., Friston, K. J., & Daunizeau, J. (2014). Bayesian model selection for group studies—revisited. *NeuroImage*, 84, 971-985.
