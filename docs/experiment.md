@@ -174,6 +174,7 @@ The repository now treats this as the primary diagnostic benchmark for condition
 
 - Planning horizon: $\tau = 2$
 - Level 3 (affective state): active, per-partner, updated on slow timescale
+- Beta implementation: continuous EMA by default; config can instead select a discrete variational beta state
 - Policy selection: EFE over 2-step horizon, precision-weighted by the first partner's affective signal
 - Precision modulation: off by default in the primary experiments (`affect_modulates_precision=False`), so Condition 2 tests shallow-EFE weighting rather than per-partner $\gamma_k$ modulation
 - Purpose: tests the core hypothesis — does per-partner metacognitive precision tracking provide orthogonal value that planning depth alone does not recover? Under sophisticated inference the non-affective depth curve is flat, so the comparison is not "shallow + affect vs. deep" but "affect vs. no-affect at any depth."
@@ -226,6 +227,13 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Level 3 (affective state): active
 - Policy selection: sophisticated-inference EFE over 8-step horizon, weighted by the first partner's affective signal
 - Purpose: tests whether affect adds anything once explicit planning is already deep.
+
+### 4.9 Condition 12: Variational Affective Agent
+
+- Planning horizon: $\tau = 2$
+- Level 3 (affective state): active, per-partner, represented as a discrete variational posterior over beta levels
+- Policy selection: same shallow EFE weighting as Condition 2
+- Purpose: isolates the effect of switching from the default continuous beta update to the discrete variational beta formulation.
 
 ---
 

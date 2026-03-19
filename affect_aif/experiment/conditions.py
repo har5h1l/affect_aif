@@ -15,7 +15,7 @@ CONDITIONS = {
     9: {"name": "alexithymia", "description": "Blunted affective charging (alpha_charge=0.1)"},
     10: {"name": "borderline", "description": "Volatile affect (alpha_charge=12.0, lambda_smooth=0.5)"},
     11: {"name": "depression", "description": "Persistently low baseline precision (initial_beta=0.2)"},
-    12: {"name": "discrete_affective_shallow", "description": "Shallow planner with discrete Bayesian beta inference"},
+    12: {"name": "variational_affective", "description": "Shallow planner with variational discrete beta"},
 }
 
 

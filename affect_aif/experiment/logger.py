@@ -69,6 +69,8 @@ class MetricLogger:
             "predictive_log_lik": float(agent_metrics.get("predictive_log_lik", float("nan"))),
             "partner_beliefs": np.asarray(agent_metrics["partner_beliefs"], dtype=float).tolist(),
             "partner_posteriors": np.asarray(agent_metrics["partner_posteriors"], dtype=float).tolist(),
+            "round_log_evidence": float(agent_metrics.get("round_log_evidence", float("nan"))),
+            "cumulative_log_evidence": float(agent_metrics.get("cumulative_log_evidence", 0.0)),
         }
         self.records.append(record)
 

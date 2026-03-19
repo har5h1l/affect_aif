@@ -50,15 +50,20 @@ def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
     """Aggregate final cumulative payoff and identification accuracy per seed and condition."""
 
     frame = results.sort_values(["condition", "seed", "round"]).copy()
-    grouped = frame.groupby(["condition", "condition_name", "seed"], as_index=False).agg(
-        total_payoff=("payoff", "sum"),
-        mean_accuracy=("inferred_type_correct", "mean"),
-        mean_q_pi_entropy=("q_pi_entropy", "mean"),
-        mean_abs_step_efe=("mean_abs_step_efe", "mean"),
-        planning_cost=("planning_cost", "first"),
-        planning_cost_ratio=("planning_cost_ratio", "first"),
-        mu=("mu", "first"),
-    )
+    agg_dict = {
+        "total_payoff": ("payoff", "sum"),
+        "mean_accuracy": ("inferred_type_correct", "mean"),
+        "mean_q_pi_entropy": ("q_pi_entropy", "mean"),
+        "mean_abs_step_efe": ("mean_abs_step_efe", "mean"),
+        "planning_cost": ("planning_cost", "first"),
+        "planning_cost_ratio": ("planning_cost_ratio", "first"),
+        "mu": ("mu", "first"),
+    }
+    if "cumulative_log_evidence" in frame.columns:
+        agg_dict["total_log_evidence"] = ("cumulative_log_evidence", "last")
+    if "round_log_evidence" in frame.columns:
+        agg_dict["mean_round_log_evidence"] = ("round_log_evidence", "mean")
+    grouped = frame.groupby(["condition", "condition_name", "seed"], as_index=False).agg(**agg_dict)
     return grouped
 
 

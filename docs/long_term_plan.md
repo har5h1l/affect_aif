@@ -54,8 +54,6 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 **Entry condition:** Phase 3 paper draft is stable.
 
-**Phase 4 status: COMPLETE.** Discrete Bayesian beta implemented (Condition 12, `discrete_state.py`), formal correspondence documented (§4.9 of theory.md), 50-seed experiments confirm equivalence in default (d=0.001) and moderate divergence in betrayal (d=0.41) due to transition persistence. All tasks done.
-
 ### Phase 5: Clinical Sensitivity Analysis
 
 **Goal:** Treat clinical phenotypes (vmPFC lesion, alexithymia, anxiety) as sensitivity analysis over model parameters, with clinical interpretation.
@@ -71,31 +69,49 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 **Revised entry condition:** Phase 7 (richer tasks) must provide environments with more ambiguous EFE landscapes before clinical sensitivity can be meaningfully tested. The parameter space has the right structure; the task doesn't amplify it.
 
-### Phase 6: Bayesian Model Comparison
+### Phase 6: Bayesian Model Comparison (in progress)
 
 **Goal:** Reformulate the current condition comparisons as proper Bayesian model comparison.
 
 **Scope:**
 
 - Compute marginal likelihoods for each model variant (with/without affect, different planning depths).
-- Use Bayesian model reduction (BMR) or bridge sampling to compare nested models.
-- Replace the current frequentist hypothesis tests with Bayes factors where appropriate.
+- Use random-effects Bayesian model selection (Stephan et al., 2009) with protected exceedance probabilities.
+- Complement the current frequentist hypothesis tests with Bayes factors where appropriate.
 
-**Note:** The current analysis uses frequentist pairwise tests. A proper Bayesian model comparison requires reformulating the question: not "do conditions differ?" but "which generative model best accounts for the observed behavior?"
+**Implementation (complete):**
 
-**Entry condition:** Phase 3 analysis pipeline is mature enough to support likelihood computation.
+- Per-round log-evidence computation added to all agent types via `_compute_round_log_evidence()` in `BaseAgent`
+- Log-evidence logged per round and accumulated per episode in experiment CSV output
+- `affect_aif/analysis/model_comparison.py` implements: log-evidence summaries, pairwise Bayes factors (Kass & Raftery, 1995), random-effects BMS with protected exceedance (Rigoux et al., 2014)
+- `scripts/run_model_comparison.py` provides CLI for model comparison analysis
+- 8 unit tests covering all components, full test suite passes (77 tests)
+- Theory documented in `docs/theory.md` §4.16
 
-### Phase 7: Richer Task Environments
+**Confirmation results (50 seeds):**
+
+- Default: C2/C5 substantially preferred over C1/C3/C4 (log10 BF ≈ 0.7–0.9). RFX-BMS: C5 wins (exceedance 1.000), C2 second (frequency 0.177).
+- Betrayal: C2 **decisively** preferred — log10 BF = 3.00 vs C1, 2.70 vs C5, 2.51 vs C3. RFX-BMS: C2 wins (exceedance 0.998).
+- Key finding: precision tracking is the best *predictive* model under volatility, not just the best payoff achiever. C5 wins on payoff in default but C2 wins on model quality under betrayal.
+
+**Phase 6 status: COMPLETE.** All tasks done. Implementation, experiments, analysis, and documentation finished. See `docs/results_tracking.md` §Phase 6 and `docs/theory.md` §4.16.
+
+**Entry condition:** Phase 3 analysis pipeline is mature enough to support likelihood computation. ✓ Met.
+
+### Phase 7: Richer Task Environments (complete)
 
 **Goal:** Test whether the orthogonal augmentation result generalizes beyond the trust game.
 
-**Scope:**
+**Approach:** Tested three 2×2 symmetric games (Prisoner's Dilemma, Stag Hunt, Chicken) with zero code changes — only payoff matrix differs. Each game creates fundamentally different strategic dynamics.
 
-- Multi-round games with richer action spaces (e.g., public goods, ultimatum).
-- Environments where partner strategies are non-stationary in more complex ways.
-- Settings where planning depth should matter more (longer causal chains between action and outcome).
+**Key results (50 seeds each):**
 
-**Entry condition:** Single-agent paper is in draft or published.
+- **Augmentation generalizes under volatility.** H1 (d > 1.0) holds across all three games in betrayal conditions. Not trust-game-specific.
+- **Augmentation is game-dependent in stable conditions.** Strong in PD/Stag Hunt (d ≈ 0.5–0.6), negligible in Chicken (d = 0.05).
+- **Stag Hunt is the precision tracking game.** C2 wins RFX-BMS in both default (exceedance 0.992) and betrayal (0.954). The severe miscoordination penalty makes prediction accuracy critical.
+- **Chicken is the reward averaging game.** C5 wins RFX-BMS under betrayal (exceedance 0.931). The reward gradient is more directly informative in anti-coordination settings.
+
+**Phase 7 status: COMPLETE.** Three games tested, cross-game comparison documented. See `docs/results_tracking.md` §Phase 7 and `docs/theory.md` §4.17.
 
 ### Phase 8: Human Data
 
@@ -111,9 +127,8 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 ## Operational Summary
 
-- **Now:** Phase 3 (theory tightening) is complete. All tasks done including the terminal value correlation analysis (task 6), which confirmed that beta does not approximate value-to-go — consistent with the orthogonal augmentation claim.
-- **Phase 4 is complete.** Discrete beta formulation implemented and validated. See §4.9 of theory.md and Phase 4 section of results_tracking.md.
-- **Decision needed:** Advance to Phase 5 (clinical sensitivity) or Phase 6 (model comparison). Phase 5 may require Phase 7 (richer tasks) first due to softmax saturation in the current trust game.
-- **After that:** Richer task environments (Phase 7), now elevated to the critical path because clinical sensitivity requires more ambiguous EFE landscapes.
-- **Then:** Clinical sensitivity analysis (Phase 5) in richer environments, followed by Bayesian model comparison (Phase 6).
-- **Later:** Human data (Phase 8) once the theoretical and environmental foundations are solid.
+- **Completed:** Phases 1–4 (primary results, exploiter deep-dive, theory tightening, variational beta), Phase 6 (Bayesian model comparison), and Phase 7 (cross-game generalization).
+- **Phase 6 key finding:** C2 is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5).
+- **Phase 7 key finding:** Augmentation generalizes across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
+- **Remaining:** Phase 5 (clinical sensitivity) is blocked by binary-game softmax saturation — needs graded or richer game. Phase 8 (human data) requires user approval.
+- **Stop point:** Phase 8 (human data) requires user approval. All other phases complete or blocked.
