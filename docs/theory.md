@@ -472,6 +472,28 @@ We report these on the $\log_{10}$ scale using the Kass & Raftery (1995) interpr
 
 *Results for this section are documented in §Hypothesis Scorecard of `docs/results_tracking.md` and in the model comparison output files.*
 
+### 4.17 Cross-Game Generalization
+
+A fundamental question for any computational model is whether its predictions generalize beyond the specific task used to develop it. Sections 4.1–4.16 established the orthogonal augmentation claim within the Prisoner's Dilemma trust game. Phase 7 tests this claim across three fundamentally different 2×2 symmetric games:
+
+1. **Prisoner's Dilemma** (PD): defection-dominated; cooperation requires trust
+2. **Stag Hunt** (SH): coordination game; cooperation is risky but Pareto-optimal
+3. **Chicken**: anti-coordination; mutual defection is catastrophic
+
+These games create qualitatively different strategic landscapes while sharing the same agent architecture, partner types, and inference machinery. Only the payoff matrix differs.
+
+**Main result:** Affect augmentation generalizes robustly under volatility. All three games show strong augmentation (Cohen's d > 1.0) in betrayal conditions. This establishes that the orthogonal augmentation result is not specific to the Prisoner's Dilemma.
+
+**Game-dependent findings:** In stable (default) conditions, augmentation is game-dependent. PD and Stag Hunt show substantial effects (d = 0.5–0.6) because both games reward accurate partner prediction. Chicken shows negligible augmentation (d = 0.05) because its anti-coordination structure makes partner prediction less decision-relevant.
+
+**The Stag Hunt as the precision tracking game.** The Stag Hunt uniquely favors precision tracking (C2) over reward averaging (C5) in both default and betrayal conditions (RFX-BMS exceedance > 0.95 in both). Theoretically, this follows from the Stag Hunt's severe miscoordination penalty: getting the sucker payoff (0) when cooperating with a defecting partner makes the *accuracy* of partner prediction more important than the *average reward* from that partner. This is exactly the informational niche that per-partner precision tracking fills.
+
+**Chicken as the reward averaging game.** Under betrayal stress in Chicken, C5 (reward averaging) wins RFX-BMS (exceedance 0.931), reversing the PD and Stag Hunt pattern. The reward gradient in Chicken is more directly informative of optimal play than precision accuracy, because the catastrophic mutual-defection payoff (0) means the agent's best response depends more on expected reward level than on prediction confidence.
+
+**Theoretical implication:** Per-partner metacognitive precision tracking is not a universal improvement but a *mechanism matched to specific informational niches*. It excels when: (a) partner behavior is volatile, (b) miscoordination is costly, and (c) prediction accuracy is more decision-relevant than reward history. These conditions are common in human social environments, which is why the mechanism has adaptive value despite not being universally superior.
+
+*Full results in `docs/results_tracking.md` §Phase 7.*
+
 ---
 
 ## 5. Key References

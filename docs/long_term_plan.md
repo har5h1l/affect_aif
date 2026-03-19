@@ -98,17 +98,20 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 **Entry condition:** Phase 3 analysis pipeline is mature enough to support likelihood computation. ✓ Met.
 
-### Phase 7: Richer Task Environments
+### Phase 7: Richer Task Environments (complete)
 
 **Goal:** Test whether the orthogonal augmentation result generalizes beyond the trust game.
 
-**Scope:**
+**Approach:** Tested three 2×2 symmetric games (Prisoner's Dilemma, Stag Hunt, Chicken) with zero code changes — only payoff matrix differs. Each game creates fundamentally different strategic dynamics.
 
-- Multi-round games with richer action spaces (e.g., public goods, ultimatum).
-- Environments where partner strategies are non-stationary in more complex ways.
-- Settings where planning depth should matter more (longer causal chains between action and outcome).
+**Key results (50 seeds each):**
 
-**Entry condition:** Single-agent paper is in draft or published.
+- **Augmentation generalizes under volatility.** H1 (d > 1.0) holds across all three games in betrayal conditions. Not trust-game-specific.
+- **Augmentation is game-dependent in stable conditions.** Strong in PD/Stag Hunt (d ≈ 0.5–0.6), negligible in Chicken (d = 0.05).
+- **Stag Hunt is the precision tracking game.** C2 wins RFX-BMS in both default (exceedance 0.992) and betrayal (0.954). The severe miscoordination penalty makes prediction accuracy critical.
+- **Chicken is the reward averaging game.** C5 wins RFX-BMS under betrayal (exceedance 0.931). The reward gradient is more directly informative in anti-coordination settings.
+
+**Phase 7 status: COMPLETE.** Three games tested, cross-game comparison documented. See `docs/results_tracking.md` §Phase 7 and `docs/theory.md` §4.17.
 
 ### Phase 8: Human Data
 
@@ -124,7 +127,8 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 ## Operational Summary
 
-- **Completed:** Phases 1–4 (primary results, exploiter deep-dive, theory tightening, variational beta) and Phase 6 (Bayesian model comparison).
-- **Phase 6 key finding:** Affective model (C2) is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5). In default conditions, C5 edges C2 at population level. Precision tracking's advantage is in volatile environments, not stable ones.
-- **Next:** Phase 7 (richer environments) — new environments (public goods, ultimatum) to test generalization. Phase 5 (clinical sensitivity) is blocked until richer environments provide more ambiguous EFE landscapes.
-- **Stop point:** Phase 8 (human data) requires user approval.
+- **Completed:** Phases 1–4 (primary results, exploiter deep-dive, theory tightening, variational beta), Phase 6 (Bayesian model comparison), and Phase 7 (cross-game generalization).
+- **Phase 6 key finding:** C2 is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5).
+- **Phase 7 key finding:** Augmentation generalizes across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
+- **Remaining:** Phase 5 (clinical sensitivity) is blocked by binary-game softmax saturation — needs graded or richer game. Phase 8 (human data) requires user approval.
+- **Stop point:** Phase 8 (human data) requires user approval. All other phases complete or blocked.
