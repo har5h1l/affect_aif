@@ -46,3 +46,10 @@ conductor/log/
 
 # Hook state files
 .pytest_last_run
+# Mango orchestration (lives in mango repo, not here)
+cloud/
+conductor/conductor.sh
+conductor/conductor.service
+conductor/USAGE.md
+start_research.sh
+run.sh
