@@ -69,19 +69,34 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 **Revised entry condition:** Phase 7 (richer tasks) must provide environments with more ambiguous EFE landscapes before clinical sensitivity can be meaningfully tested. The parameter space has the right structure; the task doesn't amplify it.
 
-### Phase 6: Bayesian Model Comparison
+### Phase 6: Bayesian Model Comparison (in progress)
 
 **Goal:** Reformulate the current condition comparisons as proper Bayesian model comparison.
 
 **Scope:**
 
 - Compute marginal likelihoods for each model variant (with/without affect, different planning depths).
-- Use Bayesian model reduction (BMR) or bridge sampling to compare nested models.
-- Replace the current frequentist hypothesis tests with Bayes factors where appropriate.
+- Use random-effects Bayesian model selection (Stephan et al., 2009) with protected exceedance probabilities.
+- Complement the current frequentist hypothesis tests with Bayes factors where appropriate.
 
-**Note:** The current analysis uses frequentist pairwise tests. A proper Bayesian model comparison requires reformulating the question: not "do conditions differ?" but "which generative model best accounts for the observed behavior?"
+**Implementation (complete):**
 
-**Entry condition:** Phase 3 analysis pipeline is mature enough to support likelihood computation.
+- Per-round log-evidence computation added to all agent types via `_compute_round_log_evidence()` in `BaseAgent`
+- Log-evidence logged per round and accumulated per episode in experiment CSV output
+- `affect_aif/analysis/model_comparison.py` implements: log-evidence summaries, pairwise Bayes factors (Kass & Raftery, 1995), random-effects BMS with protected exceedance (Rigoux et al., 2014)
+- `scripts/run_model_comparison.py` provides CLI for model comparison analysis
+- 8 unit tests covering all components, full test suite passes (77 tests)
+- Theory documented in `docs/theory.md` §4.16
+
+**Confirmation results (50 seeds):**
+
+- Default: C2/C5 substantially preferred over C1/C3/C4 (log10 BF ≈ 0.7–0.9). RFX-BMS: C5 wins (exceedance 1.000), C2 second (frequency 0.177).
+- Betrayal: C2 **decisively** preferred — log10 BF = 3.00 vs C1, 2.70 vs C5, 2.51 vs C3. RFX-BMS: C2 wins (exceedance 0.998).
+- Key finding: precision tracking is the best *predictive* model under volatility, not just the best payoff achiever. C5 wins on payoff in default but C2 wins on model quality under betrayal.
+
+**Phase 6 status: COMPLETE.** All tasks done. Implementation, experiments, analysis, and documentation finished. See `docs/results_tracking.md` §Phase 6 and `docs/theory.md` §4.16.
+
+**Entry condition:** Phase 3 analysis pipeline is mature enough to support likelihood computation. ✓ Met.
 
 ### Phase 7: Richer Task Environments
 
@@ -109,9 +124,7 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 ## Operational Summary
 
-- **Now:** Phase 3 (theory tightening) is complete. All tasks done including the terminal value correlation analysis (task 6), which confirmed that beta does not approximate value-to-go — consistent with the orthogonal augmentation claim.
-- **Decision needed:** Advance to Phase 4 (variational beta). Phase 4's entry condition ("Phase 3 paper draft is stable") is met.
-- **Next:** Variational derivation of beta (Phase 4), either as part of this paper or as immediate follow-up work.
-- **After that:** Richer task environments (Phase 7), now elevated to the critical path because clinical sensitivity requires more ambiguous EFE landscapes.
-- **Then:** Clinical sensitivity analysis (Phase 5) in richer environments, followed by Bayesian model comparison (Phase 6).
-- **Later:** Human data (Phase 8) once the theoretical and environmental foundations are solid.
+- **Completed:** Phases 1–4 (primary results, exploiter deep-dive, theory tightening, variational beta) and Phase 6 (Bayesian model comparison).
+- **Phase 6 key finding:** Affective model (C2) is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5). In default conditions, C5 edges C2 at population level. Precision tracking's advantage is in volatile environments, not stable ones.
+- **Next:** Phase 7 (richer environments) — new environments (public goods, ultimatum) to test generalization. Phase 5 (clinical sensitivity) is blocked until richer environments provide more ambiguous EFE landscapes.
+- **Stop point:** Phase 8 (human data) requires user approval.

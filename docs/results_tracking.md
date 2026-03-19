@@ -212,6 +212,79 @@ The paper story becomes:
 
 The precision tracking mechanism's advantage is *modelability* — its parameters map naturally to clinical constructs (alexithymia, borderline, depression) in ways that simple reward averaging does not. The performance advantage, however, lies with C5.
 
+## Phase 6: Bayesian Model Comparison
+
+### Approach
+
+Each agent condition is treated as a generative model. Per-round log-evidence is computed as `log p(partner_action | agent's predictive distribution)`. Cumulative log-evidence across all rounds gives the total model evidence per seed. Pairwise Bayes factors and random-effects BMS (Stephan et al., 2009) with protected exceedance probabilities (Rigoux et al., 2014) are used for formal comparison.
+
+### Default Condition (50 seeds × 200 rounds × 5 conditions)
+
+| Condition | Mean log-evidence | SE |
+|---|---|---|
+| C1 deep_no_affect | -117.69 | 1.55 |
+| C2 affective_shallow | -115.89 | 1.56 |
+| C3 lesioned_shallow | -117.55 | 1.56 |
+| C4 shallow_no_affect | -117.55 | 1.56 |
+| C5 reward_avg_shallow | -115.62 | 1.53 |
+
+**Pairwise Bayes factors (log10 scale):**
+
+| Comparison | log10 BF | Interpretation |
+|---|---|---|
+| C2 vs C1 | +0.78 | substantial, favors C2 |
+| C5 vs C1 | +0.90 | substantial, favors C5 |
+| C2 vs C4 | +0.72 | substantial, favors C2 |
+| C5 vs C4 | +0.84 | substantial, favors C5 |
+| C2 vs C5 | -0.12 | negligible |
+| C3 vs C4 | 0.00 | identical |
+
+**RFX-BMS:** C5 wins decisively — expected frequency 0.623, protected exceedance probability **1.000**. C2 second at 0.177. BOR ≈ 0. The data strongly discriminate: affect-augmented models (C2 and C5) are better predictors of the environment than non-affect models, and at the population level C5 is the most frequent best model.
+
+### Betrayal Stress Condition (50 seeds × 120 rounds × 4 conditions)
+
+| Condition | Mean log-evidence | SE |
+|---|---|---|
+| C1 deep_no_affect | -63.91 | 1.33 |
+| C2 affective_shallow | -57.01 | 2.04 |
+| C3 lesioned_shallow | -62.80 | 1.04 |
+| C5 reward_avg_shallow | -63.23 | 2.24 |
+
+**Pairwise Bayes factors (log10 scale):**
+
+| Comparison | log10 BF | Interpretation |
+|---|---|---|
+| C2 vs C1 | +3.00 | **decisive**, favors C2 |
+| C2 vs C3 | +2.51 | **decisive**, favors C2 |
+| C2 vs C5 | +2.70 | **decisive**, favors C2 |
+| C1 vs C3 | -0.48 | negligible |
+| C1 vs C5 | -0.30 | negligible |
+| C3 vs C5 | +0.18 | negligible |
+
+**RFX-BMS:** C2 wins decisively — expected frequency 0.566, protected exceedance probability **0.998**. BOR ≈ 0. Under betrayal stress, the affective model is overwhelmingly the best predictor of partner behavior.
+
+### Interpretation
+
+The Bayesian model comparison adds a qualitatively new layer to the existing frequentist results:
+
+1. **Default condition:** Both affect-augmented models (C2, C5) are substantially better predictors than non-affect models, confirming H1 with Bayesian evidence. C5 slightly edges C2 at the population level, consistent with the frequentist finding that reward averaging performs as well or slightly better in the default task.
+
+2. **Betrayal condition:** This is the strongest finding. C2 (precision tracking) is **decisively** the best predictive model — not just higher payoff, but fundamentally better at predicting what partners will do. The log10 BF of 3.0 against C1 and 2.7 against C5 are far above the "decisive" threshold. This means:
+   - Precision tracking produces systematically better partner predictions under volatility
+   - The affective signal is not just a terminal value hack that improves action selection — it genuinely improves the agent's world model
+   - Reward averaging (C5) provides no predictive advantage over non-affect models under betrayal, despite performing better on payoff. This dissociation between predictive accuracy and payoff suggests C5's payoff advantage comes from action selection, not from better environmental modeling
+
+3. **The modelability argument is strengthened.** Not only does precision tracking have interpretable clinical parameters, it also produces the best generative model of volatile social environments. C5 may win on payoff in stable conditions, but C2 wins on model quality when it matters most — under betrayal stress.
+
+### Updated Hypothesis Scorecard (Bayesian)
+
+| Hypothesis | Frequentist | Bayesian model comparison |
+|---|---|---|
+| H1 affect > non-affect | d=0.64, p<0.001 | Substantial BF (default), decisive BF (betrayal) |
+| H2 lesion dissociation | C3=C4 | C3=C4 (identical log-evidence, BF=1.00) |
+| H3 precision > reward avg | Task-dependent | C5 ≈ C2 in default; C2 **decisively** > C5 in betrayal (log10 BF=2.70) |
+| H4 post-switch robustness | C2 > C1 post-switch | C2 best predictor overall in betrayal (log10 BF=3.00 vs C1) |
+
 ## Execution Record Template
 
 When the user asks to refresh this file after a run, append:
