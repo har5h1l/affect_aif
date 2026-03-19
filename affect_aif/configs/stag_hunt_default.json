@@ -25,7 +25,7 @@
   "mu": null,
   "initial_beta": 0.5,
   "lesion_mode": "decouple",
-  "num_replications": 5,
+  "num_replications": 50,
   "calibration_episodes": 20,
   "random_seed": 42,
   "conditions": [1, 2, 3, 4, 5],
