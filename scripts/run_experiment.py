@@ -35,6 +35,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Suppress calibration-stage messages when verbose output is enabled in serial mode.",
     )
     parser.add_argument("--make-gifs", action="store_true", help="Generate one GIF per primary condition-run after saving results.")
+    parser.add_argument(
+        "--checkpoint-interval",
+        type=int,
+        default=1,
+        help="Save partial results every N replications (default: 1 = after every replication).",
+    )
     return parser
 
 
@@ -62,9 +68,16 @@ def _serial_single_config_run(args) -> int:
     config.gif_after_run = False
     config.gif_output_dir = None
     runner = ExperimentRunner(config)
-    results = runner.run_all(config_path=config_path, config_name=config_name, batch_id=batch_id)
-
     config_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_path = str(config_dir / "results_partial.csv")
+    results = runner.run_all(
+        config_path=config_path,
+        config_name=config_name,
+        batch_id=batch_id,
+        checkpoint_path=checkpoint_path,
+        checkpoint_interval=int(args.checkpoint_interval),
+    )
+
     runner.save_results(results, str(results_path))
     config.to_json(str(config_copy_path))
     metadata_path.write_text(
@@ -101,6 +114,7 @@ def _batch_run(args) -> int:
         workers=args.workers,
         make_gifs=bool(args.make_gifs),
         verbose=bool(args.verbose),
+        checkpoint_interval=int(args.checkpoint_interval),
     )
     result = runner.run_all()
     print(f"Saved batch outputs to {result.batch_dir}")
