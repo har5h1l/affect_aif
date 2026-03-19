@@ -1,15 +1,13 @@
 ---
 paths:
   - "scripts/run_*.py"
-  - "affect_aif/experiment/**"
-  - "affect_aif/configs/**"
+  - "**/configs/**"
+  - "**/experiment/**"
 ---
 
-# Experiment Rules
-
-- Always run `python -m pytest tests/ -v` before any experiment
-- Smoke test (5 seeds) before full runs (50-100 seeds)
-- Never overwrite existing result files — use unique batch names
-- Config changes should be in JSON files, not hardcoded
-- Log all experiment parameters for reproducibility
-- If an experiment will take >30 minutes, warn the user before starting
+When editing experiment scripts or configs:
+- Always run pytest before any experiment
+- Use small replications (5 seeds) for smoke tests
+- Never hardcode seeds — use config files
+- Save all results to results/ directory
+- Never overwrite existing result files

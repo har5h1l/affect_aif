@@ -1,36 +1,48 @@
 # Mission
 
 ## Objective
-Begin Phase 4 (Variational Beta Extension). Formalize beta as a discrete hidden
-state within the generative model, extending the current continuous EMA update.
+Continue research through Phases 5–8. Run experiments, update docs, and commit at checkpoints. Make decisions autonomously. Ground all work in variational principles (VFE minimization, generative models, belief updating, precision dynamics) and the project's theoretical framework (per-partner metacognitive precision, orthogonal augmentation, Hesp et al. grounding). New environments or tasks that fit this scope—stretching or pivoting within the framework—are fine to pursue. Stop only for a massive shift: human data collection, or a direction that fundamentally departs from the current variational active-inference paradigm.
+
+## Guiding Principles
+- Variational principles and docs/theory.md are the north star
+- Stretch scope (richer games, new partner types, new inference schemes) as long as it stays within the variational-AIF framework
+- Pivot within the paradigm when results suggest it; do not stop for normal extensions
 
 ## Current Phase
-Phase 4: Variational Beta Extension
+Phase 6: Bayesian Model Comparison (Phase 5 is blocked by task ambiguity; Phase 7 can proceed if environments fit principles)
 
 ## Tasks
-1. Run pytest to confirm codebase is clean
-2. Read docs/long_term_plan.md and docs/results_tracking.md for current state
-3. Read docs/theory.md for the current beta formulation
-4. Design the discrete beta hidden state: define state levels, likelihood P(e|beta), transition dynamics P(beta_t|beta_{t-1})
-5. Show formal correspondence between current EMA update and discrete hidden-state posterior
-6. Implement the discrete beta formulation alongside the existing continuous one
-7. Run small experiments (5 seeds) comparing continuous vs discrete beta
-8. If results look good, run confirmation (50 seeds)
-9. Update docs with findings
-10. Commit at each checkpoint
 
-## Resource Allocation
-This project uses 1 worker for experiments. Be conservative with compute.
+### Phase 6 (do now)
+1. Run pytest to confirm codebase is clean
+2. Read docs/long_term_plan.md and analysis/hypotheses.py for current frequentist pipeline
+3. Add likelihood computation for model variants (with/without affect, different depths)
+4. Implement BMR or bridge sampling for marginal likelihood / Bayes factors
+5. Run model comparison on existing results (default, betrayal_stress)
+6. Document findings in docs/results_tracking.md and docs/theory.md
+7. Commit at each checkpoint
+
+### Phase 5 (clinical sensitivity)
+- Blocked by softmax saturation in binary game; richer tasks first
+
+### Phase 7 (richer environments)
+- Proceed autonomously if new environments (public goods, ultimatum, etc.) fit variational principles and extend the current generative-model framework. No stop unless the change is a massive architectural shift.
+
+### Phase 8 (stop point)
+- Human data collection always requires user. Do not start Phase 8 autonomously. STOP.
 
 ## Constraints
 - Follow all safety invariants from CLAUDE.md
 - Tests must pass before any experiment
-- Small replications (5 seeds) before full runs (50-100 seeds)
+- Small replications (5 seeds) before full runs (50–100 seeds)
 - Never delete result files
-- Save results incrementally (partial CSVs during long runs)
+- If results contradict expectations, STOP and describe findings
+- Max 4 experiment workers (HARD LIMIT)
+- STOP only when: human data collection (Phase 8), or a proposed direction is a massive shift away from the variational-AIF paradigm
 
 ## Notes
 Edit this file to change what the conductor does. Set status to PAUSED to stop.
+Phase 4 complete. Agent proceeds through Phase 6 and 7 autonomously as long as work stays within scope. Only Phase 8 and massive shifts require user decision.
 
 ## Status
-ACTIVE
+RUNNING — Phase 6 in progress. Autonomously continue through Phase 6 and 7 as long as work stays within variational-AIF scope.

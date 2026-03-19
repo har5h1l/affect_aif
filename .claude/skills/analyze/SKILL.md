@@ -1,43 +1,12 @@
 ---
 name: analyze
-description: Analyze experiment results and compare against hypotheses. Use after running experiments or to understand existing results.
-user-invocable: true
-argument-hint: "[results_path_or_batch_name]"
+description: Analyze experiment results and compare against hypotheses.
 allowed-tools: Read, Grep, Glob, Bash, Agent
 ---
 
-# Analyze Experiment Results
+Analyze experiment results at the specified path.
 
-## Task
-
-Analyze the experiment results at `$ARGUMENTS` and provide an interpretation.
-
-## Steps
-
-1. **Find results**: If a path was given, use it. Otherwise search `results/` for the most recent CSV files:
-   ```
-   ls -lt results/*/results.csv | head -5
-   ```
-
-2. **Run analysis script**:
-   ```
-   python scripts/run_analysis.py --results <path>/results.csv --output-dir <path>/figures
-   ```
-
-3. **Read the hypothesis scorecard**: Read `docs/results_tracking.md` to understand what we're testing
-
-4. **Launch results-analyzer agent** to do the detailed analysis
-
-5. **Summarize for the user**:
-   - What conditions were tested
-   - Key quantitative results (with numbers)
-   - Which hypotheses are supported/contradicted
-   - Recommended next steps
-   - Any surprises worth investigating
-
-## If no arguments given
-
-List available result directories and ask which to analyze:
-```
-ls -d results/*/
-```
+1. Find result files: `$ARGUMENTS` (or latest in results/)
+2. If an analysis script exists (scripts/run_analysis.py), run it
+3. Launch the results-analyzer agent for detailed analysis
+4. Summarize findings and hypothesis status

@@ -54,6 +54,8 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 **Entry condition:** Phase 3 paper draft is stable.
 
+**Phase 4 status: COMPLETE.** Discrete Bayesian beta implemented (Condition 12, `discrete_state.py`), formal correspondence documented (§4.9 of theory.md), 50-seed experiments confirm equivalence in default (d=0.001) and moderate divergence in betrayal (d=0.41) due to transition persistence. All tasks done.
+
 ### Phase 5: Clinical Sensitivity Analysis
 
 **Goal:** Treat clinical phenotypes (vmPFC lesion, alexithymia, anxiety) as sensitivity analysis over model parameters, with clinical interpretation.
@@ -110,8 +112,8 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 ## Operational Summary
 
 - **Now:** Phase 3 (theory tightening) is complete. All tasks done including the terminal value correlation analysis (task 6), which confirmed that beta does not approximate value-to-go — consistent with the orthogonal augmentation claim.
-- **Decision needed:** Advance to Phase 4 (variational beta). Phase 4's entry condition ("Phase 3 paper draft is stable") is met.
-- **Next:** Variational derivation of beta (Phase 4), either as part of this paper or as immediate follow-up work.
+- **Phase 4 is complete.** Discrete beta formulation implemented and validated. See §4.9 of theory.md and Phase 4 section of results_tracking.md.
+- **Decision needed:** Advance to Phase 5 (clinical sensitivity) or Phase 6 (model comparison). Phase 5 may require Phase 7 (richer tasks) first due to softmax saturation in the current trust game.
 - **After that:** Richer task environments (Phase 7), now elevated to the critical path because clinical sensitivity requires more ambiguous EFE landscapes.
 - **Then:** Clinical sensitivity analysis (Phase 5) in richer environments, followed by Bayesian model comparison (Phase 6).
 - **Later:** Human data (Phase 8) once the theoretical and environmental foundations are solid.

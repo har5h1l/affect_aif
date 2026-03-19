@@ -58,6 +58,10 @@ class ExperimentConfig:
     mu: float | None = None
     initial_beta: float = 0.5
 
+    # Discrete beta parameters (Phase 4)
+    num_beta_levels: int = 5
+    beta_persistence: float = 0.8
+
     lesion_mode: str = "decouple"
 
     num_replications: int = 100

@@ -4,6 +4,17 @@ This document tracks the current empirical status of the project and the next re
 
 ## Current Status
 
+As of 2026-03-17, the core sophisticated-inference experiment families and Phase 4 discrete beta validation have been completed:
+
+### Phase 4: Discrete Beta Comparison (new)
+
+- `discrete_beta_confirm_default`: 50 replications × 200 rounds, random assignment, conditions 2, 4, 12
+- `discrete_beta_confirm_betrayal`: 50 replications × 120 rounds, agent-chosen partner, scheduled betrayal, conditions 2, 4, 12
+
+**Key finding:** The discrete Bayesian beta formulation (Condition 12) is behaviorally equivalent to the continuous EMA (Condition 2) in stable environments (d = 0.001, p = 0.99) and both outperform the baseline (d ≈ 0.6, p = 0.003). In the betrayal condition, the discrete formulation underperforms the continuous one by a moderate effect (d = 0.41, p = 0.04) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperform the no-affect baseline. This divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
+
+### Prior experiment families (Phases 1-3)
+
 As of 2026-03-15, the core sophisticated-inference experiment families have been completed and interpreted:
 
 - `default`: 100 replications x 200 rounds, random partner assignment, conditions 1-5

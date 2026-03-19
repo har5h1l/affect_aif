@@ -12,6 +12,7 @@ import pandas as pd
 from affect_aif.agent.affective_agent import AffectiveAgent
 from affect_aif.agent.base_agent import BaseAgent
 from affect_aif.agent.lesioned_agent import LesionedAgent
+from affect_aif.agent.discrete_affective_agent import DiscreteAffectiveAgent
 from affect_aif.agent.reward_avg_agent import RewardAvgAgent
 from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
 from affect_aif.environment.trust_game import TrustGameEnv
@@ -22,7 +23,7 @@ from affect_aif.experiment.progress import ProgressReporter, create_progress_rep
 from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
 
 
-PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
 SENSITIVITY_CONDITIONS = {2, 3, 5, 8}
 
 
@@ -151,6 +152,17 @@ class ExperimentRunner:
                 mu=float(self.config.mu or 0.0),
                 **common,
             )
+        if condition == 12:
+            return DiscreteAffectiveAgent(
+                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
+                num_partners=self.config.num_partners,
+                num_beta_levels=self.config.num_beta_levels,
+                beta_persistence=self.config.beta_persistence,
+                sigma_0_sq=self.config.sigma_0_sq,
+                initial_beta=self.config.initial_beta,
+                mu=float(self.config.mu or 0.0),
+                **common,
+            )
         raise ValueError(f"Unknown condition '{condition}'.")
 
     def _resolve_calibration_episodes(self, enforce_minimum: bool) -> int:
@@ -267,6 +279,7 @@ class ExperimentRunner:
                 round_count=self.config.num_rounds,
                 partner_idx=result["partner_idx"],
             )
+            predictive_log_lik = agent.get_predictive_log_likelihood(result["partner_action"])
             agent.observe_outcome(
                 partner_idx=result["partner_idx"],
                 observation=result["observation"],
@@ -293,6 +306,7 @@ class ExperimentRunner:
             agent_metrics = agent.get_metrics()
             agent_metrics["inferred_type"] = inferred_type
             agent_metrics["inferred_type_correct"] = inferred_correct
+            agent_metrics["predictive_log_lik"] = predictive_log_lik
             logger.log_round(
                 round_idx=round_idx,
                 condition=condition,

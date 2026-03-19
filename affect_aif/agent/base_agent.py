@@ -315,6 +315,15 @@ class BaseAgent:
 
         return np.asarray(self.partner_posteriors[int(partner_idx)], dtype=float)
 
+    def get_predictive_log_likelihood(self, partner_action: int) -> float:
+        """Log probability of the observed partner action under the agent's current prediction."""
+        probs = np.asarray(self.pending_prediction_probs, dtype=float)
+        idx = int(partner_action)
+        if idx < 0 or idx >= len(probs):
+            return float("nan")
+        p = float(probs[idx])
+        return float(np.log(max(p, 1e-16)))
+
     def get_reward_avgs(self) -> np.ndarray:
         return np.full((self.num_partners,), np.nan, dtype=float)
 

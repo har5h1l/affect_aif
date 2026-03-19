@@ -66,6 +66,7 @@ class MetricLogger:
             "G": _to_float_list(agent_metrics["G"]),
             "q_pi": _to_float_list(agent_metrics["q_pi"]),
             "best_policy_step_costs": _to_float_list(agent_metrics["best_policy_step_costs"]),
+            "predictive_log_lik": float(agent_metrics.get("predictive_log_lik", float("nan"))),
             "partner_beliefs": np.asarray(agent_metrics["partner_beliefs"], dtype=float).tolist(),
             "partner_posteriors": np.asarray(agent_metrics["partner_posteriors"], dtype=float).tolist(),
         }
