@@ -383,6 +383,63 @@ The cross-game analysis reveals a richer picture than any single game could prov
 | RFX-BMS default | C5 wins | **C2 wins** | C2 wins (weak) |
 | RFX-BMS betrayal | **C2 wins** | **C2 wins** | C5 wins |
 
+## Phase 5: Clinical Sensitivity (Graded Betrayal)
+
+### Context
+
+Prior clinical sensitivity attempts failed due to binary-game softmax saturation (EFE gap ~10.83 makes clinical parameter perturbations behaviorally inert). The graded default game improved sensitivity (d>2.1 vs C4) but between-clinical differentiation was minimal (~0.03 point spread). The Stag Hunt was tested but also saturated in binary form.
+
+The breakthrough came from combining the graded game's ambiguous EFE landscape (q_pi_entropy ~5.8) with betrayal stress (cooperator→exploiter switch at round 31). This environment maximally stresses the precision tracking mechanism, amplifying differences between clinical parameter regimes.
+
+### Design
+
+- Graded trust game, 6 investment levels, betrayal at round 31
+- 50 seeds × 120 rounds, agent_choice assignment
+- Clinical variants compared against C2 (normal affect, alpha=3.0, lambda=0.6, beta0=0.5) and C4 (no affect)
+- Three clinical phenotypes: alexithymia (alpha=0.1), borderline (alpha=12, lambda=0.5), depression (beta0=0.2)
+
+### Overall Results (50 seeds)
+
+| Condition | Mean payoff | vs C2 diff | Cohen's d | p |
+|---|---|---|---|---|
+| C4 (no affect) | 1242.4 | -16.1 | — | — |
+| C2 (normal affect) | 1258.5 | — | — | — |
+| C9 alexithymia (alpha=0.1) | 1288.3 | **+29.8** | **+0.80** | **<0.0001** |
+| C10 borderline (alpha=12, lambda=0.5) | 1207.8 | **-50.7** | **-1.14** | **<0.0001** |
+| C11 depression (beta0=0.2) | 1261.6 | +3.1 | +0.08 | 0.562 |
+
+**Between-clinical spread: 80.5 points** (vs ~0.03 in graded default — 2700x improvement).
+
+### Window Analysis (Clinical vs C2 Normal)
+
+| Variant | Pre (20-29) | Betrayal (30-39) | Impact (40-49) | Recovery (60-69) | Late (100-109) |
+|---|---|---|---|---|---|
+| C9 alexithymia | d=+0.32* | d=+0.12 | d=+0.03 | **d=+0.37** | d=+0.23 |
+| C10 borderline | d=-0.30* | d=-0.19 | d=-0.02 | **d=-0.54***| **d=-0.83****|
+| C11 depression | **d=+0.47**| d=+0.07 | d=+0.04 | d=+0.13 | d=+0.02 |
+
+\* p<0.05, \*\* p<0.01, \*\*\* p<0.001, \*\*\*\* p<0.0001
+
+### Key Findings
+
+1. **Alexithymia is paradoxically protective under acute volatility.** The blunted affective response (alpha=0.1) prevents the overreaction to betrayal that the normal agent exhibits. The alexithymic agent maintains more stable investment levels, avoiding the costly oscillation that normal precision tracking produces when a trusted partner suddenly defects. This is clinically consistent: alexithymic individuals may show resilience to acute social volatility precisely because they under-respond to affective signals. The advantage is strongest in the recovery window (d=+0.37, p=0.013).
+
+2. **Borderline shows progressive deterioration.** The volatile affective dynamics (alpha=12, lambda=0.5) create increasingly poor decisions over time. The deficit is negligible during the impact window (d=-0.02) but grows to d=-0.54 (p=0.0004) during recovery and d=-0.83 (p<0.0001) in the late game. This temporal profile is clinically meaningful: borderline phenotypes are characterized not by acute failure but by accumulating instability — the noisy precision updates compound over rounds, degrading partner models. Even before betrayal, the pre-betrayal deficit (d=-0.30, p=0.04) suggests that volatile affect hurts even in stable environments.
+
+3. **Depression is behaviorally equivalent to normal.** The pessimistic initial beta (beta0=0.2) creates a brief pre-betrayal advantage (d=+0.47, p=0.002) — the agent starts cautious, investing less in uncertain partners — but this advantage dissipates completely by the impact window. The depressive prior is corrected by evidence accumulation within ~30 rounds. This suggests that pessimistic initial precision is a self-correcting perturbation in the current model, unlike the ongoing perturbations created by alexithymia (attenuated learning rate) and borderline (amplified, noisy learning).
+
+4. **The graded betrayal environment is the critical test bed for clinical sensitivity.** Neither binary games (softmax saturation) nor graded default (insufficient stress) produce meaningful between-clinical differentiation. The combination of ambiguous EFE landscape + precision-stressing volatility is necessary and sufficient.
+
+### Interpretation
+
+The clinical sensitivity analysis reveals that the affect parameters map to distinct behavioral phenotypes **only under the right environmental conditions**. The mapping is:
+
+- **alpha_charge controls the gain of the affective channel.** Too low (alexithymia): stable but under-responsive. Too high (borderline): responsive but noisy. The optimal regime is in between.
+- **lambda_smooth controls temporal integration.** Low lambda (borderline) creates noisy updates that compound into progressive deterioration.
+- **initial_beta controls the prior.** This is the weakest parameter — evidence quickly corrects the initial pessimism, making depression a transient rather than persistent perturbation.
+
+The theoretical implication is that the per-partner metacognitive precision tracking mechanism has a **sweet spot**: enough responsiveness to track genuine changes in partner reliability, but enough smoothing to avoid noise amplification. Clinical phenotypes represent systematic deviations from this sweet spot, and the graded betrayal environment makes these deviations behaviorally visible.
+
 ## Execution Record Template
 
 When the user asks to refresh this file after a run, append:

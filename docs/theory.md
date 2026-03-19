@@ -513,6 +513,22 @@ These games create qualitatively different strategic landscapes while sharing th
 
 *Full results in `docs/results_tracking.md` §Phase 7.*
 
+### 4.18 Clinical Sensitivity: Environment-Dependent Phenotype Expression
+
+Sections 4.13 and 4.15 established that clinical parameter perturbations (alexithymia, borderline, depression) produce measurable behavioral effects in the graded game but not in binary games due to softmax saturation. However, between-clinical differentiation in the graded default condition was minimal (~0.03 point spread). Phase 5 resolves this by identifying the environmental conditions necessary for clinical phenotype expression.
+
+**The critical environment: graded betrayal.** Combining the graded game's ambiguous EFE landscape ($H_{q_\pi} \approx 5.8$) with betrayal stress (cooperator $\to$ exploiter switch at round 31) produces massive between-clinical differentiation. The between-clinical payoff spread is 80.5 points, a 2700$\times$ improvement over the graded default spread.
+
+**Alexithymia ($\alpha = 0.1$): paradoxical protection.** The blunted affective charging rate prevents the overreaction to betrayal that the normal agent exhibits. When partner 0 switches from cooperator to exploiter at round 31, the normal agent (C2) rapidly adjusts precision downward, which transiently overshoots — reducing investment in ALL partners, not just the betrayer. The alexithymic agent adjusts more slowly, maintaining stable investment levels and avoiding this costly overshoot. Effect: $d = +0.80$, $p < 0.0001$ vs C2. This finding is clinically consistent with observations that alexithymic individuals may show resilience to acute social stress precisely because they under-respond to affective signals (Taylor et al., 1997).
+
+**Borderline ($\alpha = 12$, $\lambda = 0.5$): progressive deterioration.** The high charging rate combined with low smoothing creates noisy precision updates that compound over time. The beta signal oscillates between extremes, producing unstable terminal values that degrade policy selection. The deficit is negligible during the acute impact window ($d = -0.02$) but grows progressively: recovery window $d = -0.54$ ($p = 0.0004$), late window $d = -0.83$ ($p < 0.0001$). This temporal signature — not acute failure but accumulating instability — matches the clinical characterization of borderline personality: functional under low stress but deteriorating under sustained emotional demand.
+
+**Depression ($\beta_0 = 0.2$): self-correcting perturbation.** The pessimistic initial precision prior creates a brief pre-betrayal advantage ($d = +0.47$, $p = 0.002$) — the agent starts cautious, investing less in uncertain partners — but the advantage dissipates completely by the impact window. Evidence accumulation corrects the pessimistic prior within $\sim$30 rounds. This reveals an important structural distinction: $\beta_0$ is an initial condition while $\alpha$ and $\lambda$ are dynamical parameters. Initial conditions are corrected by inference; dynamical parameters create persistent perturbations to the inference process itself.
+
+**Theoretical implication: the precision sweet spot.** The affect parameters define a two-dimensional space of $(\alpha, \lambda)$ regimes. The normal agent occupies a "sweet spot" — enough responsiveness ($\alpha = 3.0$) to track genuine partner changes but enough smoothing ($\lambda = 0.6$) to reject noise. Clinical phenotypes represent systematic deviations from this sweet spot, and the graded betrayal environment makes these deviations behaviorally visible. This suggests that the clinical utility of precision-tracking models lies not in the absolute performance of any single parameter regime but in the geometry of the $(\alpha, \lambda)$ landscape and how different clinical populations navigate it.
+
+*Full results in `docs/results_tracking.md` §Phase 5.*
+
 ---
 
 ## 5. Key References
