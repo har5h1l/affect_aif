@@ -9,59 +9,50 @@
 ## Current Findings
 
 ### Phase 6 (COMPLETE)
-Bayesian model comparison implemented and run. Key findings:
+Bayesian model comparison. Per-round log-evidence computed for all agent variants, pairwise Bayes factors and RFX-BMS (Stephan et al. 2009) implemented.
 
-- **Default (50 seeds):** C2/C5 substantially preferred over non-affect (log10 BF ≈ 0.7–0.9). RFX-BMS: C5 wins (exceedance 1.000), C2 second.
-- **Betrayal (50 seeds):** C2 **decisively** best — log10 BF = 3.00 vs C1, 2.70 vs C5. RFX-BMS: C2 wins (exceedance 0.998).
-- Precision tracking is the best predictive model under volatility; reward averaging wins in stable conditions.
+- **Default (PD, 50 seeds):** C5 wins RFX-BMS (exceedance 1.000). C2/C5 substantially better than non-affect (log10 BF ≈ 0.7–0.9).
+- **Betrayal (PD, 50 seeds):** C2 wins **decisively** — log10 BF = 3.00 vs C1, 2.70 vs C5. Exceedance 0.998.
 
-### Phase 7 (IN PROGRESS)
-Testing generalization across game types. Two new games implemented via config-only changes (zero code changes):
+### Phase 7 (COMPLETE)
+Cross-game generalization tested with Stag Hunt and Chicken (zero code changes, config-only).
 
-- **Stag Hunt** — coordination game: mutual_coop=[5,5], sucker=[0,2], temptation=[2,0], mutual_defect=[2,2]
-- **Chicken** — anti-coordination game: mutual_coop=[3,3], sucker=[1,5], temptation=[5,1], mutual_defect=[0,0]
+**Default conditions:**
+| Game | H1 d | H1 p | RFX-BMS winner |
+|---|---|---|---|
+| PD | 0.62 | 0.003 | C5 (exc=1.000) |
+| Stag Hunt | 0.50 | 0.015 | C2 (exc=0.992) |
+| Chicken | 0.05 | 0.795 | C2 (exc=0.710) |
 
-**Smoke results (5 seeds):**
-- Stag Hunt: C2=601.4, C5=603.8, C1=579.8, C3=C4=575.6 — same affect augmentation pattern as PD
-- Chicken: C2=482.8, C5=482.0, C1=468.8, C3=C4=470.6 — augmentation present
-- Chicken shows interesting dissociation: C2 higher payoff but C1 better log-evidence (needs confirmation with 50 seeds)
+**Betrayal conditions:**
+| Game | H1 d | H1 p | C2 vs C5 BF | RFX-BMS winner |
+|---|---|---|---|---|
+| PD | 1.30 | <0.001 | +2.70 decisive C2 | C2 (0.998) |
+| Stag Hunt | 1.60 | <0.001 | +1.08 strong C2 | C2 (0.954) |
+| Chicken | 1.12 | <0.001 | -1.07 strong C5 | C5 (0.931) |
 
-**Confirmation experiments (50 seeds) RUNNING:**
-- Stag Hunt default + betrayal: task b42v6f240
-- Chicken default + betrayal: task b8h66w0z4
-- Results will be in `results/phase7_full/`
+**Key insights:**
+1. Augmentation generalizes under volatility (d > 1.0 in ALL games)
+2. Game-dependent in stable conditions (PD/SH strong, Chicken negligible)
+3. Stag Hunt uniquely favors precision tracking (C2 wins both conditions)
+4. Chicken favors reward averaging under betrayal
+5. Precision tracking excels where miscoordination penalty is severe
 
-## What's Been Implemented This Session
-
-### Phase 6
+### Implementation Delivered This Session
 1. `BaseAgent._compute_round_log_evidence()` — per-round log p(partner_action | model)
-2. `cumulative_log_evidence` tracking in agent metrics and CSV output
-3. `affect_aif/analysis/model_comparison.py` — log-evidence summaries, pairwise BFs, RFX-BMS
-4. `scripts/run_model_comparison.py` — CLI
-5. 8 new tests (77 total pass)
-6. `docs/theory.md` §4.16 — theory section on Bayesian model comparison
-7. `docs/results_tracking.md` — Phase 6 results section with full tables
-8. `docs/long_term_plan.md` — Phase 6 marked complete
-
-### Phase 7
-1. 4 new configs: stag_hunt_default, stag_hunt_betrayal, chicken_default, chicken_betrayal
-2. `scripts/run_cross_game_comparison.py` — cross-game analysis
-3. Smoke experiments completed (5 seeds)
-4. 50-seed confirmation experiments launched (still running)
+2. `affect_aif/analysis/model_comparison.py` — BFs, RFX-BMS, protected exceedance
+3. `scripts/run_model_comparison.py`, `scripts/run_cross_game_comparison.py` — CLIs
+4. 8 new tests (77 total pass)
+5. Stag Hunt + Chicken configs (default + betrayal, 4 configs)
+6. Theory: §4.16 (Bayesian model comparison), §4.17 (cross-game generalization)
+7. Full documentation in results_tracking.md and long_term_plan.md
 
 ## Auto Handoff
-- **What changed:** Phase 6 fully complete. Phase 7 started with Stag Hunt and Chicken games.
-- **What is still in flight:** Two experiment batches running (stag hunt 50-seed, chicken 50-seed). Check `results/phase7_full/` for output CSVs.
-- **What next session should do:**
-  1. Check if experiments finished (look for results CSVs in `results/phase7_full/`)
-  2. If finished: run analysis (`scripts/run_analysis.py` and `scripts/run_model_comparison.py`) on each game
-  3. Run cross-game comparison (`scripts/run_cross_game_comparison.py`)
-  4. If experiments crashed or stalled: rerun with the same configs
-  5. Document findings in `docs/results_tracking.md` and `docs/theory.md`
-  6. Update `docs/long_term_plan.md` with Phase 7 status
-  7. If results are clean, mark Phase 7 as complete and update MISSION status
+- **What changed:** Phases 6 and 7 complete in a single session. All code, experiments, analysis, and documentation delivered.
+- **What is still in flight:** Nothing.
+- **What next session should do:** Phase 5 (clinical sensitivity) could be revisited using the graded game or Stag Hunt (both have more ambiguous EFE landscapes). Phase 8 (human data) requires user decision. No other autonomous work remains.
 
 Model-Hint: opus
 
 ## Status
-CONTINUE — Phase 7 experiments running. Next session should analyze results.
+DONE — Phases 6 and 7 complete. Phase 5 blocked, Phase 8 requires user. Awaiting user decision.

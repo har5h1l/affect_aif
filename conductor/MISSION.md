@@ -45,4 +45,4 @@ Edit this file to change what the conductor does. Set status to PAUSED to stop.
 Phase 4 complete. Agent proceeds through Phase 6 and 7 autonomously as long as work stays within scope. Only Phase 8 and massive shifts require user decision.
 
 ## Status
-RUNNING — Phase 6 in progress. Autonomously continue through Phase 6 and 7 as long as work stays within variational-AIF scope.
+PAUSED — Phases 6 and 7 complete. Awaiting user decision on next steps (Phase 5 clinical sensitivity in graded/SH game, or Phase 8 human data).
