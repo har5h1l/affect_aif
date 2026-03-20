@@ -4,55 +4,45 @@
 2026-03-19
 
 ## Session Count
-4
+5
 
 ## Current Findings
 
-### Phase 6 (COMPLETE)
-Bayesian model comparison. Per-round log-evidence computed for all agent variants, pairwise Bayes factors and RFX-BMS (Stephan et al. 2009) implemented.
+### Phase 5 (COMPLETE) — Clinical Sensitivity
 
-- **Default (PD, 50 seeds):** C5 wins RFX-BMS (exceedance 1.000). C2/C5 substantially better than non-affect (log10 BF ≈ 0.7–0.9).
-- **Betrayal (PD, 50 seeds):** C2 wins **decisively** — log10 BF = 3.00 vs C1, 2.70 vs C5. Exceedance 0.998.
+**Binary Stag Hunt clinical: FAILED** — Same softmax saturation as binary PD.
+
+**Graded betrayal clinical: SUCCESS (50 seeds)**
+
+Between-clinical spread: **80.5 points** (vs ~0.03 in graded default — 2700x improvement).
+
+| Variant | vs C2 diff | Cohen's d | p |
+|---|---|---|---|
+| C9 alexithymia (alpha=0.1) | +29.8 | +0.80 | <0.0001 |
+| C10 borderline (alpha=12, lambda=0.5) | -50.7 | -1.14 | <0.0001 |
+| C11 depression (beta0=0.2) | +3.1 | +0.08 | 0.562 |
+
+Key findings:
+1. Alexithymia paradoxically protective under acute volatility (blunted response prevents overreaction)
+2. Borderline shows progressive deterioration (d=-0.83 in late game, noisy precision compounds)
+3. Depression self-corrects within ~30 rounds (initial condition, not dynamical perturbation)
+4. The (alpha, lambda) parameter space has a "sweet spot" — clinical phenotypes are deviations
+
+### Phase 6 (COMPLETE)
+Bayesian model comparison. C2 decisive winner under betrayal (log10 BF=3.0).
 
 ### Phase 7 (COMPLETE)
-Cross-game generalization tested with Stag Hunt and Chicken (zero code changes, config-only).
+Cross-game generalization. Augmentation generalizes under volatility across PD, Stag Hunt, Chicken.
 
-**Default conditions:**
-| Game | H1 d | H1 p | RFX-BMS winner |
-|---|---|---|---|
-| PD | 0.62 | 0.003 | C5 (exc=1.000) |
-| Stag Hunt | 0.50 | 0.015 | C2 (exc=0.992) |
-| Chicken | 0.05 | 0.795 | C2 (exc=0.710) |
-
-**Betrayal conditions:**
-| Game | H1 d | H1 p | C2 vs C5 BF | RFX-BMS winner |
-|---|---|---|---|---|
-| PD | 1.30 | <0.001 | +2.70 decisive C2 | C2 (0.998) |
-| Stag Hunt | 1.60 | <0.001 | +1.08 strong C2 | C2 (0.954) |
-| Chicken | 1.12 | <0.001 | -1.07 strong C5 | C5 (0.931) |
-
-**Key insights:**
-1. Augmentation generalizes under volatility (d > 1.0 in ALL games)
-2. Game-dependent in stable conditions (PD/SH strong, Chicken negligible)
-3. Stag Hunt uniquely favors precision tracking (C2 wins both conditions)
-4. Chicken favors reward averaging under betrayal
-5. Precision tracking excels where miscoordination penalty is severe
-
-### Implementation Delivered This Session
-1. `BaseAgent._compute_round_log_evidence()` — per-round log p(partner_action | model)
-2. `affect_aif/analysis/model_comparison.py` — BFs, RFX-BMS, protected exceedance
-3. `scripts/run_model_comparison.py`, `scripts/run_cross_game_comparison.py` — CLIs
-4. 8 new tests (77 total pass)
-5. Stag Hunt + Chicken configs (default + betrayal, 4 configs)
-6. Theory: §4.16 (Bayesian model comparison), §4.17 (cross-game generalization)
-7. Full documentation in results_tracking.md and long_term_plan.md
+### Infrastructure
+- Added incremental checkpoint saving to experiment runner (serial + batch)
+- `--checkpoint-interval` CLI flag for `run_experiment.py`
+- Stag Hunt clinical configs (3), graded betrayal clinical configs (3), analysis scripts (2)
 
 ## Auto Handoff
-- **What changed:** Phases 6 and 7 complete in a single session. All code, experiments, analysis, and documentation delivered.
+- **What changed:** Phase 5 complete. Graded betrayal identified as the critical environment for clinical sensitivity. All three phenotypes characterized with 50-seed confirmation runs. Documentation updated across theory.md, results_tracking.md, and long_term_plan.md.
 - **What is still in flight:** Nothing.
-- **What next session should do:** Phase 5 (clinical sensitivity) could be revisited using the graded game or Stag Hunt (both have more ambiguous EFE landscapes). Phase 8 (human data) requires user decision. No other autonomous work remains.
-
-Model-Hint: opus
+- **What next session should do:** Phase 8 (human data) requires user decision. All autonomous phases complete.
 
 ## Status
-DONE — Phases 6 and 7 complete. Phase 5 can proceed autonomously; Phase 8 requires user.
+DONE — Phases 5, 6, 7 complete. Phase 8 requires user decision.

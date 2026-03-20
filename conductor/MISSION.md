@@ -45,4 +45,4 @@ Edit this file to change what the conductor does. Set status to PAUSED to stop.
 Phase 4 complete. Agent proceeds through Phase 5–7 autonomously as long as work stays within scope. Only Phase 8 and massive shifts require user decision.
 
 ## Status
-RUNNING — proceed to Phase 5 clinical sensitivity autonomously; then stop at Phase 8 (human data collection requires user).
+PAUSED — Phases 5, 6, 7 complete. Phase 8 (human data collection) requires user decision.

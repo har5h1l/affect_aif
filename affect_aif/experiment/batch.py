@@ -80,6 +80,7 @@ class BatchExperimentRunner:
         workers: int | None = None,
         make_gifs: bool = False,
         verbose: bool = False,
+        checkpoint_interval: int = 1,
     ):
         self.config_paths = [str(Path(path)) for path in config_paths]
         self.output_root = Path(output_root)
@@ -88,6 +89,7 @@ class BatchExperimentRunner:
         self.workers = max(1, int(workers or os.cpu_count() or 1))
         self.make_gifs = bool(make_gifs)
         self.verbose = bool(verbose)
+        self.checkpoint_interval = max(1, int(checkpoint_interval))
         self.completion_log: list[dict[str, Any]] = []
 
     def _emit(self, message: str):
@@ -184,6 +186,17 @@ class BatchExperimentRunner:
                             },
                         )
 
+    def _write_checkpoint(self, state: ConfigBatchState):
+        """Save partial results for a config so progress survives crashes."""
+        state.output_dir.mkdir(parents=True, exist_ok=True)
+        partial = state.all_rows()
+        if not partial.empty:
+            partial.to_csv(state.output_dir / "results_partial.csv", index=False)
+            self._emit(
+                f"[batch={self.batch_id}] checkpoint config={state.config_name} "
+                f"{state.completed_primary}/{state.submitted_primary} primary"
+            )
+
     def _write_config_outputs(self, state: ConfigBatchState):
         state.output_dir.mkdir(parents=True, exist_ok=True)
         results = state.all_rows()
@@ -272,6 +285,8 @@ class BatchExperimentRunner:
                             f"condition={payload['condition']} replication={int(payload['replication']) + 1}/"
                             f"{state.config.num_replications}"
                         )
+                        if state.completed_primary % self.checkpoint_interval == 0:
+                            self._write_checkpoint(state)
                     elif task_kind == "sensitivity":
                         state.completed_sensitivity += 1
                         state.sensitivity_rows.extend(payload["records"])
