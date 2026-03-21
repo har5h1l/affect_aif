@@ -1,0 +1,6 @@
+"""Experiment-wide condition sets and stable IDs."""
+
+PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+SENSITIVITY_CONDITIONS = {2, 3, 5, 8}
+
+__all__ = ["PRIMARY_CONDITIONS_REQUIRING_MU", "SENSITIVITY_CONDITIONS"]

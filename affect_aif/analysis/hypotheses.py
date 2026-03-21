@@ -79,7 +79,9 @@ def test_h1_depth_compensation(results: pd.DataFrame) -> dict:
         "available": True,
         "condition_1_mean_payoff": mean_c1,
         "condition_2_mean_payoff": mean_c2,
-        "payoff_ratio_c2_over_c1": float(mean_c2 / mean_c1) if np.isfinite(mean_c1) and mean_c1 != 0.0 else float("nan"),
+        "payoff_ratio_c2_over_c1": float(mean_c2 / mean_c1)
+        if np.isfinite(mean_c1) and mean_c1 != 0.0
+        else float("nan"),
         "welch_t_stat": test["t_stat"],
         "welch_p_value": test["p_value"],
         "cohens_d": _cohen_d(c2, c1),

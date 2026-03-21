@@ -10,7 +10,6 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-
 DEFAULT_FLOAT_DTYPE = jnp.float32
 
 

@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from affect_aif.analysis.visualization import build_run_gifs, load_results
 from affect_aif.analysis.metrics import post_switch_window_summary
+from affect_aif.analysis.visualization import build_run_gifs, load_results
 from affect_aif.environment.trust_game import TrustGameEnv
 from affect_aif.experiment.batch import BatchExperimentRunner
 from affect_aif.experiment.config import ExperimentConfig
@@ -187,7 +187,9 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
 
 def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path, tiny_config):
     cfg_a = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "run_sensitivity": False})
-    cfg_b = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1], "experiment_name": "secondary", "run_sensitivity": False})
+    cfg_b = ExperimentConfig(
+        **{**tiny_config.__dict__, "conditions": [1], "experiment_name": "secondary", "run_sensitivity": False}
+    )
     config_a_path = tmp_path / "config_a.json"
     config_b_path = tmp_path / "config_b.json"
     cfg_a.to_json(str(config_a_path))

@@ -1,5 +1,5 @@
-import numpy as np
 import jax.numpy as jnp
+import numpy as np
 
 from affect_aif.core.control import (
     _rollout_policy_trust_game_mean_field,
@@ -9,7 +9,7 @@ from affect_aif.core.control import (
 )
 from affect_aif.core.maths import entropy, normalize, softmax
 from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
+from affect_aif.generative_model.model import TrustGameModel
 
 
 def test_softmax_sums_to_one():

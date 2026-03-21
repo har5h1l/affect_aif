@@ -313,7 +313,7 @@ So the present theory should be read as: affect adds a partner-specific precisio
 
 ### 4.9 Discrete Variational Beta Formulation
 
-> **Status: Implemented and Validated (Phase 4).** The discrete formulation is implemented in `affect_aif/agent/affect/discrete_state.py` and wired as Condition 12.
+> **Status: Implemented (supported path) and archived (prototype path).** Condition 12 now uses the supported variational affective state in `affect_aif/agent/affect/variational_state.py`. The earlier standalone discrete-beta prototype is preserved in `archive/legacy_discrete_beta/`.
 
 The current $\beta$ update rule (§3.4) extends Hesp et al.'s variational precision dynamics to the multi-partner setting using a continuous EMA formulation. Phase 4 extends this further by treating $\beta_k$ as a discrete hidden state within the generative model, with its own likelihood and transition dynamics, so that its posterior update falls out of the same categorical inference machinery used for partner-type estimation.
 

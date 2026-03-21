@@ -1,6 +1,7 @@
 import jax.numpy as jnp
 import numpy as np
 
+
 def test_base_agent_plan_returns_valid_action(representative_agents):
     agent = representative_agents["base"]
     action = agent.plan_and_act(active_partner=0)

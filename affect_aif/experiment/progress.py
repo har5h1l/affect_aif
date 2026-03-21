@@ -64,7 +64,10 @@ class StageStreamProgressReporter(ProgressReporter):
         if event == "calibration_episode_end":
             return (
                 f"[calibration] [episode={int(payload['episode_idx']) + 1}/{_fmt_int(payload.get('episode_count'))}]"
-                f" seed={_fmt_int(payload.get('seed'))} end mean_abs_step_efe={_fmt_float(payload.get('mean_abs_step_efe'))}"
+                " seed="
+                f"{_fmt_int(payload.get('seed'))} end "
+                "mean_abs_step_efe="
+                f"{_fmt_float(payload.get('mean_abs_step_efe'))}"
             )
         if event == "condition_start":
             return f"{prefix} start name={payload.get('condition_name', 'unknown')}"

@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-
 LIST_LIKE_COLUMNS = (
     "true_types",
     "betas",
@@ -115,7 +114,9 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
     active_partner = int(row["active_partner"])
     selected_partner = int(row["selected_partner"])
     summary_lines = [
-        f"Active partner at start: P{active_partner}" if active_partner >= 0 else "Active partner at start: agent choice",
+        f"Active partner at start: P{active_partner}"
+        if active_partner >= 0
+        else "Active partner at start: agent choice",
         f"Selected partner/action: P{selected_partner} / {int(row['selected_action'])}",
         f"Observed current partner: P{current_partner}",
         f"True type: {row['true_partner_type']}",
@@ -128,7 +129,8 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
     ax_summary.axis("off")
     ax_summary.text(0.0, 0.98, "\n".join(summary_lines), va="top", ha="left", fontsize=11, family="monospace")
     partner_roster = "\n".join(
-        f"P{idx}: {partner_type}{' <=' if idx == current_partner else ''}" for idx, partner_type in enumerate(true_types)
+        f"P{idx}: {partner_type}{' <=' if idx == current_partner else ''}"
+        for idx, partner_type in enumerate(true_types)
     )
     ax_summary.text(0.62, 0.98, partner_roster, va="top", ha="left", fontsize=11, family="monospace")
 

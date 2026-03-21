@@ -6,8 +6,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from affect_aif.generative_model.payoffs import COOPERATE, DEFECT
-
+from affect_aif.generative_model.payoffs import COOPERATE
 
 PARTNER_TYPE_ORDER = ("cooperator", "reciprocator", "exploiter", "random")
 

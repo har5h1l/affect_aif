@@ -1,15 +1,11 @@
 """Tests for Bayesian model comparison (Phase 6)."""
 
 import numpy as np
-import pandas as pd
-import pytest
 
 from affect_aif.analysis.model_comparison import (
     _spm_bms,
-    log_evidence_summary,
     model_comparison_report,
     pairwise_bayes_factors,
-    random_effects_bms,
 )
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
@@ -88,9 +84,7 @@ def test_final_round_summary_includes_log_evidence(tiny_config):
 
 def test_pairwise_bayes_factors_runs(tiny_config):
     """pairwise_bayes_factors should produce valid output."""
-    cfg = ExperimentConfig(
-        **{**tiny_config.__dict__, "conditions": [1, 2, 4], "num_replications": 3, "num_rounds": 10}
-    )
+    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2, 4], "num_replications": 3, "num_rounds": 10})
     runner = ExperimentRunner(cfg)
     results = runner.run_all()
     bf_table = pairwise_bayes_factors(results)
@@ -106,10 +100,12 @@ def test_spm_bms_recovers_strong_model():
     rng = np.random.default_rng(42)
     n_subjects = 50
     # Model 0 is clearly better (higher log-evidence)
-    le_matrix = np.column_stack([
-        rng.normal(-50, 5, n_subjects),   # good model
-        rng.normal(-100, 5, n_subjects),  # bad model
-    ])
+    le_matrix = np.column_stack(
+        [
+            rng.normal(-50, 5, n_subjects),  # good model
+            rng.normal(-100, 5, n_subjects),  # bad model
+        ]
+    )
     result = _spm_bms(le_matrix)
     assert result["expected_frequency"][0] > 0.9
     assert result["exceedance_probability"][0] > 0.99
@@ -131,9 +127,7 @@ def test_spm_bms_indistinguishable_models():
 
 def test_model_comparison_report_structure(tiny_config):
     """model_comparison_report should return the expected structure."""
-    cfg = ExperimentConfig(
-        **{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 5, "num_rounds": 10}
-    )
+    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 5, "num_rounds": 10})
     runner = ExperimentRunner(cfg)
     results = runner.run_all()
     report = model_comparison_report(results)

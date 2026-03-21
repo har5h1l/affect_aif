@@ -8,7 +8,6 @@ from pathlib import Path
 
 from affect_aif.generative_model.partner_types import PARTNER_TYPE_ORDER
 
-
 DEFAULT_SENSITIVITY_FACTORS = {
     "mu": [0.5, 0.75, 1.0, 1.25, 1.5],
     "lambda_smooth": [0.4, 0.6, 0.8, 0.9],
@@ -61,10 +60,6 @@ class ExperimentConfig:
     beta_num_levels: int = 5
     beta_persistence: float = 0.8
 
-    # Discrete beta parameters (Phase 4)
-    num_beta_levels: int = 5
-    beta_persistence: float = 0.8
-
     lesion_mode: str = "decouple"
 
     num_replications: int = 100
@@ -105,10 +100,14 @@ class ExperimentConfig:
         self.horizon_overrides = {int(key): int(value) for key, value in dict(self.horizon_overrides).items()}
 
     @classmethod
-    def from_dict(cls, data: dict) -> "ExperimentConfig":
+    def from_dict(cls, data: dict) -> ExperimentConfig:
         """Build a configuration from a raw dictionary."""
 
         data = dict(data)
+        if "num_beta_levels" in data and "beta_num_levels" not in data:
+            data["beta_num_levels"] = data.pop("num_beta_levels")
+        else:
+            data.pop("num_beta_levels", None)
         tuple_fields = ("mutual_coop", "sucker", "temptation", "mutual_defect")
         for key in tuple_fields:
             if key in data:
@@ -116,7 +115,7 @@ class ExperimentConfig:
         return cls(**data)
 
     @classmethod
-    def from_json(cls, path: str) -> "ExperimentConfig":
+    def from_json(cls, path: str) -> ExperimentConfig:
         """Load a configuration from disk."""
 
         data = json.loads(Path(path).read_text())
