@@ -1,0 +1,33 @@
+{
+  "backends": ["cvc_local"],
+  "agents": [
+    {
+      "name": "teammate_reliability",
+      "backend": "cvc_local",
+      "kind": "policy_spec",
+      "policy_spec": "class=affect_aif.benchmark.cvc_policy.TeammateReliabilityPolicy"
+    },
+    {
+      "name": "starter",
+      "backend": "cvc_local",
+      "kind": "policy_spec",
+      "policy_spec": "class=cogames.policy.starter_agent.StarterPolicy"
+    }
+  ],
+  "num_replications": 1,
+  "num_rounds": 100,
+  "output_dir": "results/benchmark_cvc_local",
+  "random_seed": 42,
+  "backend_configs": {
+    "cvc_local": {
+      "mission": "machina_1",
+      "num_agents": 8,
+      "max_steps": 250,
+      "python_bin": "python3.12"
+    }
+  },
+  "observatory": {
+    "season": "default",
+    "pool": "competition"
+  }
+}

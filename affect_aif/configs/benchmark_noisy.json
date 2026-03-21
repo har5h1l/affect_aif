@@ -1,0 +1,23 @@
+{
+  "backends": ["trust"],
+  "agents": [
+    {"name": "affective_shallow", "backend": "trust", "kind": "registry", "implementation": "affective_shallow"},
+    {"name": "shallow_no_affect", "backend": "trust", "kind": "registry", "implementation": "shallow_no_affect"},
+    {"name": "reward_avg_shallow", "backend": "trust", "kind": "registry", "implementation": "reward_avg_shallow"},
+    {"name": "lesioned_shallow", "backend": "trust", "kind": "registry", "implementation": "lesioned_shallow"},
+    {"name": "random", "backend": "trust", "kind": "registry", "implementation": "random"},
+    {"name": "tit_for_tat", "backend": "trust", "kind": "registry", "implementation": "tit_for_tat"},
+    {"name": "q_learning", "backend": "trust", "kind": "registry", "implementation": "q_learning"}
+  ],
+  "num_replications": 50,
+  "num_rounds": 200,
+  "output_dir": "results/benchmark_noisy",
+  "random_seed": 42,
+  "backend_configs": {
+    "trust": {
+      "scenario": "resource_sharing",
+      "observation_noise": 0.15,
+      "num_rounds": 200
+    }
+  }
+}

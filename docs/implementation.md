@@ -115,6 +115,12 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
   - metric logging end
 - These progress events are observational only. They do not change experiment dynamics, result rows, or analysis semantics.
 
+## Benchmark Observation Classification
+
+- In the benchmark trust adapter, one interaction window can contain both the focal agent's outward act (`share` / `attack`) and the partner's response (`receive` / `steal` / related partner-only events).
+- `InteractionTracker.classify_partner_behavior(...)` therefore treats only partner-originated events as evidence about the partner's action, while `classify_focal_behavior(...)` treats only focal-originated events as evidence about the focal action.
+- This keeps `RoundSummary.partner_action` aligned with the adapter's returned `partner_action` and with `observation[0]`, preventing asymmetric rounds from being mis-encoded as partner cooperation by tie-breaking over mixed-direction events.
+
 ## GIF Generation
 
 - `affect_aif.analysis.visualization.build_run_gifs(...)` generates one GIF per primary `(condition, seed)` run from an in-memory or reloaded results table.

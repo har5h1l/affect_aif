@@ -197,7 +197,7 @@ class TestDiscreteAffectiveAgent:
 
     def test_condition_12_creates_discrete_agent(self):
         from affect_aif.experiment.conditions import get_condition_name
-        assert get_condition_name(12) == "discrete_affective_shallow"
+        assert get_condition_name(12) == "variational_affective"
 
     def test_discrete_agent_instantiation(self):
         from affect_aif.agent.discrete_affective_agent import DiscreteAffectiveAgent
