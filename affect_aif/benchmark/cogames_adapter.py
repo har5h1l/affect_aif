@@ -39,6 +39,7 @@ class CoGamesTrustAdapter:
         self,
         scenario: BenchmarkScenario | str,
         seed: int | None = None,
+        ticks_per_round: int | None = None,
         payoff_levels: list[float] | None = None,
         observation_noise: float = 0.0,
     ):
@@ -50,7 +51,7 @@ class CoGamesTrustAdapter:
         self.rng = np.random.default_rng(self.seed)
         self.num_partners = scenario.num_partners
         self.num_rounds = scenario.num_rounds
-        self.ticks_per_round = scenario.ticks_per_round
+        self.ticks_per_round = ticks_per_round if ticks_per_round is not None else scenario.ticks_per_round
 
         self.tracker = InteractionTracker(
             num_partners=self.num_partners,
@@ -156,6 +157,11 @@ class CoGamesTrustAdapter:
 
         summary = self.tracker.summarize_round(primary_partner=partner_idx)
 
+        # Keep encoded payoff observation consistent with returned scalar payoff.
+        # The tracker summary captures raw resource delta over events, while the
+        # trust-game interface (and agent.observe_outcome) uses agent_payoff.
+        # We encode from the same scalar used in results to avoid mismatches.
+        summary.resource_delta = agent_payoff
         observation = self.encoder.encode(summary)
 
         return {
