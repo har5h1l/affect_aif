@@ -21,6 +21,11 @@ from affect_aif.benchmark.scripted_partners import (
 
 
 class TestInteractionTracker:
+    def test_record_event_ignores_negative_partner_idx(self):
+        tracker = InteractionTracker(num_partners=4, ticks_per_round=1)
+        tracker.record_event(InteractionEvent(tick=0, partner_idx=-1, event_type="share", resource_delta=1.0))
+        assert all(len(events) == 0 for events in tracker._round_events.values())
+
     def test_classify_cooperative_behavior(self):
         tracker = InteractionTracker(num_partners=4, ticks_per_round=1)
         tracker.record_event(InteractionEvent(tick=0, partner_idx=0, event_type="share", resource_delta=1.0))
@@ -156,6 +161,13 @@ class TestCoGamesTrustAdapter:
         adapter.reset()
         result = adapter.step(0)
         assert result["agent_payoff"] in {-1.0, 1.0, 3.0, 5.0}
+
+    def test_step_observation_payoff_matches_agent_payoff(self):
+        adapter = CoGamesTrustAdapter(scenario="resource_sharing", seed=7)
+        adapter.reset()
+        result = adapter.step(agent_action=0)
+        expected_idx = adapter.encoder.payoff_to_index(result["agent_payoff"])
+        assert result["observation"][1] == expected_idx
 
     def test_full_episode(self):
         adapter = CoGamesTrustAdapter(scenario="resource_sharing", seed=42)

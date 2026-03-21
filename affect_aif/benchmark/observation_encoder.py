@@ -66,8 +66,8 @@ class ObservationEncoder:
         if self.noise_prob > 0 and self.rng.random() < self.noise_prob:
             partner_action = 1 - partner_action
 
-        # Map resource delta to payoff index
-        payoff_idx = self.payoff_to_index(summary.resource_delta)
+        # Map scalar payoff signal to payoff index
+        payoff_idx = self.payoff_to_index(self.encode_payoff(summary))
 
         return [int(partner_action), int(payoff_idx)]
 

@@ -74,7 +74,7 @@ class InteractionTracker:
 
     def record_event(self, event: InteractionEvent):
         """Record a single interaction event."""
-        if event.partner_idx < self.num_partners:
+        if 0 <= event.partner_idx < self.num_partners:
             self._round_events[event.partner_idx].append(event)
 
     def record_events(self, events: list[InteractionEvent]):
