@@ -1,151 +1,99 @@
-# Future Work: Phases 4–8
+# Future Work
 
-Phase 3 (theory tightening) is the current focus: revising the narrative around orthogonal augmentation, documenting the confirmed H3 boundary condition, and flagging the engineering-approximation status of the current beta update rule. The phases below outline the research trajectory once Phase 3 stabilizes.
-
----
-
-## §1: Phase 4 — Variational β Reformulation
-
-**Goal:** Formalize β as a discrete hidden state within the generative model, extending the current continuous EMA update (grounded in Hesp et al.'s variational precision dynamics) to a full Bayesian inference scheme where β is subject to the same categorical inference machinery as partner-type estimation.
-
-**Approach:**
-
-1. Discretize β into a set of hidden-state levels (e.g., β ∈ {0.1, 0.3, 0.5, 0.7, 0.9}).
-2. Define a likelihood function P(ε|β) mapping prediction-error magnitudes to β levels — high β predicts small errors; low β predicts large errors.
-3. Define transition dynamics P(β_t|β_{t-1}) encoding the prior expectation that precision changes smoothly across trials.
-4. Apply standard Bayesian hidden-state update: the agent infers β at each trial the same way it infers partner type.
-
-This makes β a first-class hidden state within the generative model, formalizing the continuous EMA dynamics of Hesp et al. into a discrete inference scheme subject to the same variational machinery as every other hidden state.
-
-**Key challenge:** Choosing the discretization granularity and likelihood parameterization that recovers the qualitative behavior of the current EMA rule (smooth tracking, appropriate responsiveness to betrayal events) without introducing pathological inference artifacts.
-
-**Entry condition:** Phase 3 paper draft is stable.
-
-**Status: Not Implemented.**
+This document tracks remaining work and future directions. Phases 1-7 of the trust-game research are complete. The current focus is on the CoGames/CvC benchmark and paper preparation.
 
 ---
 
-## §2: Phase 5 — Clinical Parameter Sensitivity Analysis
+## §1: CoGames/CvC Benchmark — AIF Affect Model (active)
 
-**Goal:** Systematic sensitivity analysis of affective parameters, interpreted through a clinical lens. This is an exploration of the existing parameter space, not a unified clinical framework.
+**Goal:** Adapt our affect-augmented active inference model to the CoGames (CvC) environment and benchmark it. This demonstrates that the architecture generalizes beyond the trust-game family to a real multi-agent spatial domain.
 
-**Approach:** Define parameter configurations that map onto clinically relevant profiles, run each against the standard trust-game conditions, and compare behavioral signatures against predictions.
+**Why this matters for the paper:** The trust-game results (Phases 1-7) establish the orthogonal augmentation claim within social dilemmas. Showing the same AIF affect mechanism working in CvC — a partially-observed, tick-level, multi-agent territory-control game — would demonstrate architectural generality. Built-in cogames policies are comparison baselines only; the point is our model's performance.
 
-**Parameter configurations:**
+**Current status:** Benchmark pipeline complete and tested. All current policies (rule-based) score 0 reward due to navigation failures in wall-heavy maps.
 
-| Profile | Parameters | Prediction |
-|---|---|---|
-| **Alexithymia** | α_charge = 0.1 (blunted affective charging, slow precision updates) | Minimal behavioral difference from non-affective baseline — the affective channel is present but functionally inert. |
-| **Borderline** | α_charge = 12.0, λ_smooth = 0.5 (rapid, volatile precision swings) | Over-reactive to single betrayals, unstable partner preferences, oscillating cooperation patterns. |
-| **Depression** | initial_β = 0.2 (persistently low precision on social outcomes) | Under-weighting social information, slow to capitalize on cooperative partners, flattened preference structure. |
+**Design challenges:**
 
-**Analysis design:** Each configuration is compared against the non-affect baseline (Condition 4) for within-config comparison, and cross-compared against the default affective agent (Condition 2) to assess whether the parameter manipulation shifts behavior in the predicted direction.
+1. **CvC generative model.** The trust game has a compact state space (partner types, cooperation history). CvC has spatial observations (local grid view), resource states, agent positions, and role assignments. A CvC generative model must map these observations into hidden states the AIF agent can do inference over.
 
-**Falsification criteria:** If parameter changes do not produce the predicted behavioral signatures, the affective mechanism lacks the claimed sensitivity to these parameter dimensions. This would narrow the scope of clinical interpretation the model can support.
+2. **Affect mechanism adaptation.** Per-partner precision tracking (beta) should modulate how the agent weighs teammate observations. High-beta teammates get trusted for coordination tasks; low-beta teammates get deprioritized. The mapping is natural: teammate reliability in CvC (do they show up where expected? do they complete their role?) parallels partner reliability in the trust game.
 
-**Entry condition:** Phase 4 preferred (principled parameter space) but can proceed with Phase 3 parameters as a preliminary pass.
+3. **Navigation as EFE planning.** Rather than bolting on heuristic pathfinding, the generative model should predict movement outcomes — will a move hit a wall, reach a resource, or bring the agent closer to a teammate? Expected free energy over the 5 CvC actions then implicitly handles navigation through the planning mechanism.
 
-**Status: Preliminary Analysis Complete. Current trust game is too unambiguous for clinical differentiation.**
+4. **Action space.** CvC has only 5 actions (noop + 4 cardinal directions). All object interaction is proximity-based. The generative model needs to encode the sequential structure: navigate to X, then proximity-interact, then navigate to Y.
 
-### Preliminary Empirical Findings
+**Practical approach:**
+- Start with simpler/more open missions to get non-zero baseline scores
+- Add wall-avoidance to existing policies as a comparison baseline
+- Build the AIF generative model incrementally: start with spatial navigation only, then add teammate tracking, then add the affect mechanism
+- Compare AIF policy against built-in cogames baselines
 
-A systematic exploration across four experimental designs (current params, precision modulation, short horizon, extreme params) with both `affect_modulates_precision` ON and OFF found that:
-
-1. **The affective mechanism is a binary augmentation.** Having mu-weighted terminal values provides ~10% payoff improvement over no-affect baselines, but the benefit is invariant to the specific beta dynamics. Whether beta is frozen at 0.5 (alexithymia), swings from 0.08–0.99 (extreme borderline), or starts at 0.01 (extreme depression), the aggregate payoff difference from default C2 is at most 0.5% (3 points out of 576).
-
-2. **Softmax saturation nullifies precision modulation.** The median EFE gap between the best and second-best policy is 10.83, making the softmax effectively a hard argmax. Policy precision scaling via `gamma * (1 + beta)` is structurally inert at these magnitudes — 91.5% of rounds have q_π entropy < 0.01.
-
-3. **Beta recovery is too fast for persistent deficits.** Depression (β₀=0.01) recovers to default levels by round 25. The deficit is entirely early-game and does not accumulate enough to produce a meaningful total-payoff difference.
-
-4. **Only two conditions reach statistical significance** (out of 18 comparisons): extreme depression with precision OFF (t=-2.67, p<0.01) and extreme borderline with precision ON (t=-2.75, p<0.01). Neither survives Bonferroni correction, and both have negligible effect sizes (Cohen's d < 0.05).
-
-Full results: `results/clinical_sensitivity_synthesis.md`.
-
-### Revised Path Forward
-
-For clinical sensitivity analysis to produce meaningful differentiation, the analysis needs at least one of:
-
-1. **More ambiguous environments (Phase 7 prerequisite).** The current trust game with 4 partners and binary actions creates an EFE landscape where the optimal policy is almost always unambiguous. Larger action spaces, multiple equilibria, or partial observability would create decision points where precision differences can flip policy selection.
-
-2. **Observation-level precision modulation.** Beta currently affects terminal values and (optionally) policy sharpness. Neither channel produces differentiation because the EFE landscape is too steep. An alternative where beta modulates the *observation model precision* — affecting how the agent learns about partners, not just how it acts — could make beta dynamics functionally relevant at the belief-update level.
-
-3. **Slower recovery dynamics (Phase 4 prerequisite).** The current EMA rule allows rapid beta recovery. A variational β formulation with appropriate transition dynamics could enforce slower timescale recovery, making clinical initial conditions persist longer.
-
-The implication is that Phase 5 should be **deferred until Phase 7 (richer tasks)** provides an environment where clinical differentiation is architecturally possible, rather than attempting further parameter sweeps in the current task.
+**Dependencies:** cogames >= 0.19.2, mettagrid >= 0.19.3, Python 3.12 for execution.
 
 ---
 
-## §3: Phase 6 — Bayesian Model Comparison
+## §2: Phase 4 — Variational Beta Reformulation (complete)
 
-**Goal:** Formal model evidence comparison between affective and non-affective generative models using Bayes factors.
-
-**Approach:** Compute marginal likelihood (model evidence) for affective vs. non-affective models given observed partner behavior sequences, then compare using Bayes factors. This replaces the current frequentist pairwise tests with a question better suited to the problem: not "do conditions differ?" but "which generative model best accounts for the data?"
-
-**Why not Bayesian Model Reduction (BMR)?** The original BMR proposal for this project was conceptually broken — it conflated model selection with parameter estimation. BMR works by starting with a full model and testing whether reduced (nested) models explain the data equally well. In this context, the affective and non-affective models are not cleanly nested in a way that makes trigger-based BMR coherent. Marginal likelihood comparison is the correct tool.
-
-**Key challenge:** Ensuring fair comparison. The affective model has additional parameters (α, λ, β₀), so it must be penalized for complexity. Marginal likelihood naturally incorporates an Occam factor, but the computation must be done carefully — approximation quality matters.
-
-**Entry condition:** Phase 4 (variational β) is a prerequisite. Model comparison is most meaningful when β is formalized as a discrete hidden state with an explicit likelihood contribution, enabling clean computation of marginal model evidence.
-
-**Status: Not Implemented, requires Phase 4.**
+**Status: COMPLETE.** Discrete Bayesian beta formulation implemented and validated. Behaviorally equivalent to continuous EMA in stable environments (d = 0.001). Moderate divergence under betrayal (d = 0.41) due to transition matrix persistence — a difference in the prior on precision volatility, not mechanism.
 
 ---
 
-## §4: Phase 7 — Richer Task Environments
+## §3: Phase 5 — Clinical Parameter Sensitivity (complete)
 
-**Goal:** Test whether per-partner metacognitive precision tracking provides orthogonal augmentation in more complex social settings, beyond the current trust game.
-
-**Extensions:**
-
-- **Larger action spaces.** Move beyond binary share/keep to graded investment decisions, testing whether precision tracking scales to continuous or multi-level actions.
-- **More partners.** Scale from 3 to N partners, testing whether the per-partner tracking mechanism degrades gracefully or hits capacity limits.
-- **Partial observability.** Add observation noise (misreading partner actions), testing whether precision tracking aids robustness to sensory uncertainty in addition to social uncertainty.
-- **Richer temporal structure.** Multi-round games with longer causal chains between action and outcome, where planning depth should matter more and the augmentation claim faces a harder test.
-
-Each extension targets a specific dimension of generalizability. The central question is whether the orthogonal-augmentation result (affect helps at every planning depth, planning depth alone does not recover the benefit) holds outside the trust-game family.
-
-**Entry condition:** Single-agent paper is in draft or published.
-
-**Status: Not Implemented.**
+**Status: COMPLETE.** Graded betrayal environment identified as the critical test bed. Between-clinical spread: 80.5 points (2700x improvement over graded default). Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects within ~30 rounds.
 
 ---
 
-## §5: Phase 8 — Human Data Fitting
+## §4: Phase 6 — Bayesian Model Comparison (complete)
 
-**Goal:** Fit model parameters to individual human participants' trust game behavior, validating whether the model's parameter space maps onto real human variation.
-
-**Approach:**
-
-1. Obtain trust-game behavioral data from healthy participants and (ideally) vmPFC-lesioned patients.
-2. Estimate individual-difference parameters (α_charge, λ_smooth, β₀) from each participant's action sequences using maximum-likelihood or variational Bayesian fitting.
-3. Test whether the affect-on/affect-off model distinction predicts the patient/control behavioral split.
-4. Examine whether fitted parameter values cluster in ways that correspond to known individual differences (e.g., trait empathy, interoceptive accuracy scores).
-
-**Key challenge:** The model must be computationally efficient enough to run many fitting iterations per participant, and the parameter space must be identifiable — distinct parameter settings must produce distinguishably different behavior.
-
-**Entry condition:** Phases 4–5 at minimum. Fitting requires a principled parameter space (Phase 4) and confidence that the parameter space is behaviorally sensitive (Phase 5).
-
-**Status: Not Implemented.**
+**Status: COMPLETE.** C2 (precision tracking) is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5). In stable conditions, C5 wins at the population level.
 
 ---
 
-## Cross-Phase Dependencies
+## §5: Phase 7 — Cross-Game Generalization (complete)
+
+**Status: COMPLETE.** Augmentation generalizes under volatility across PD, Stag Hunt, and Chicken (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
+
+---
+
+## §6: Phase 8 — Human Data Fitting (future, requires user decision)
+
+**Goal:** Fit model parameters to individual human participants' trust game behavior.
+
+**Scope:**
+- Obtain trust-game behavioral data from healthy participants and vmPFC-lesioned patients
+- Estimate individual-difference parameters (alpha_charge, lambda_smooth, beta_0) from action sequences
+- Test whether the affect-on/affect-off distinction predicts patient/control behavioral split
+- Examine whether fitted parameters cluster with known individual differences (trait empathy, interoceptive accuracy)
+
+**Entry condition:** Paper draft stable. User approval required — do not start autonomously.
+
+**Status: NOT STARTED.**
+
+---
+
+## §7: Trust-Game Gaps and Paper Preparation (active)
+
+**Goal:** Identify and fill any remaining gaps in the trust-game results before paper submission.
+
+**Checklist:**
+- Verify all claimed statistical results match saved data in results/
+- Check consistency across theory.md, results_tracking.md, experiment.md
+- Ensure all benchmark configs are documented and reproducible
+- Full test suite passes (currently 178 tests)
+- Spot-check key results reproduce with saved configs
+
+---
+
+## Dependency Graph
 
 ```
-Phase 3 (theory tightening) ← current
+Trust Game (Phases 1-7) ← COMPLETE
     │
-    ▼
-Phase 4 (variational β)
+    ├──► Paper Preparation (§7) ← ACTIVE
     │
-    ├──▶ Phase 7 (richer tasks)  ← can begin after Phase 4
-    │        │
-    │        ▼
-    │    Phase 5 (clinical sensitivity) ← requires Phase 7 environments
-    │        │
-    │        ▼
-    │    Phase 6 (model comparison) ← requires Phase 4
+    ├──► CoGames/CvC Benchmark (§1) ← ACTIVE
+    │       Goal: AIF affect model in CvC
     │
-    └──▶ Phase 8 (human data)    ← requires Phases 5–7
+    └──► Phase 8: Human Data (§6) ← FUTURE (requires user)
 ```
-
-**Updated dependency rationale:** The preliminary clinical sensitivity analysis (Phase 5 preliminary pass) demonstrated that the current trust game's EFE landscape is too unambiguous for clinical parameter perturbations to produce behavioral differentiation. Phase 5 therefore now depends on Phase 7 (richer tasks) providing environments where the EFE landscape has enough ambiguity for precision differences to flip policy selection. Phase 7 has been elevated to the critical path.

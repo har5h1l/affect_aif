@@ -440,6 +440,59 @@ The clinical sensitivity analysis reveals that the affect parameters map to dist
 
 The theoretical implication is that the per-partner metacognitive precision tracking mechanism has a **sweet spot**: enough responsiveness to track genuine changes in partner reliability, but enough smoothing to avoid noise amplification. Clinical phenotypes represent systematic deviations from this sweet spot, and the graded betrayal environment makes these deviations behaviorally visible.
 
+## CoGames/CvC Benchmark Results (2026-03-21)
+
+### Context
+
+CoGames (Cogs vs Clips) is a real multi-agent territory-control game from Softmax Research, running on the mettagrid simulation framework. Unlike the trust game (repeated social dilemma with binary/graded actions), CvC is a partially-observed, tick-level, multi-agent game with spatial navigation, role specialization, shared reward, and token-based observations. The benchmark integration tests whether our architecture can operate in this fundamentally different domain.
+
+### Pipeline
+
+The CvC benchmark pipeline runs end-to-end:
+- Python 3.10 orchestrator (`run_benchmark.py`) loads config and dispatches
+- `CvCLocalBackend` spawns `python3.12 -m affect_aif.benchmark.cvc_local_worker` subprocess
+- Worker imports cogames/mettagrid, resolves mission, runs episode, extracts metrics
+- Results flow back as JSON -> DataFrame -> CSV -> comparison report
+
+Config: `affect_aif/configs/benchmark_cvc_full.json`
+Output: `results/benchmark_cvc_full/`
+
+### Results (6 policies x 10 seeds x 10,000 steps, machina_1 mission)
+
+| Policy | Source | Hearts Gained | Aligned Junctions | Reward |
+|--------|--------|--------------|-------------------|--------|
+| TeammateReliabilityPolicy | custom | 6.7 | 0.0 | 0.0 |
+| StarterPolicy | cogames built-in | 7.0 | 0.0 | 0.0 |
+| MinerRolePolicy | cogames built-in | 6.9 | 0.0 | 0.0 |
+| AlignerRolePolicy | cogames built-in | 7.1 | 0.0 | 0.0 |
+| ScramblerRolePolicy | cogames built-in | 7.1 | 0.0 | 0.0 |
+| ScoutRolePolicy | cogames built-in | 6.9 | 0.0 | 0.0 |
+
+Role-specialized policies do acquire their target roles (e.g., MinerRolePolicy gets 3.1 miner gains, AlignerRolePolicy gets 2.2 aligner gains), confirming the role-assignment logic works. But no policy completes the full scoring loop to produce aligned junctions or reward.
+
+### Diagnosis
+
+All policies score 0 reward because no policy successfully aligns junctions. The CvC scoring loop requires: get gear -> mine ore -> deposit at base -> collect hearts -> align junction. This chain requires effective spatial navigation, but:
+
+1. **CvC has only 5 actions** (noop, move_north/south/east/west). All object interaction is proximity-based.
+2. **~80% of move actions fail** because simple directional heuristics walk into walls in the machina_1 map.
+3. **This affects ALL policies** including cogames' own built-in ones. No rule-based policy in cogames 0.19.2 completes the full scoring loop.
+4. **Hearts are gained passively** (proximity-based pickup), explaining why all policies get 6-7 hearts despite 0 reward.
+
+### Interpretation
+
+The CvC benchmark integration is technically complete and correct. The zero-reward result is not a code bug — it reflects a fundamental limitation of rule-based navigation in wall-heavy maps.
+
+The core goal for the CvC benchmark is to adapt our affect-augmented AIF model to the CvC domain and show how it scores. Built-in cogames policies (StarterPolicy, role policies) serve only as comparison baselines — the other trust-game experiments already handle model comparisons. The CvC benchmark is purely about demonstrating our AIF affect architecture in a real multi-agent environment.
+
+**What's needed:**
+
+1. **AIF-based CvC policy** — adapt the generative model + per-partner precision tracking to CvC's state space. The agent should use EFE-based planning over the 5 CvC actions, with teammate reliability tracked via the same beta/precision mechanism used in the trust game.
+2. **Navigation via planning** — rather than heuristic pathfinding, the generative model should predict movement outcomes (wall collisions, resource proximity), letting EFE naturally handle navigation.
+3. **Simpler missions as stepping stones** — try more open maps while the full AIF policy is developed, to get baseline non-zero scores.
+
+The trust-game results (Phases 1-7) are the primary evidence for the paper. CvC results would demonstrate the architecture's generality in a fundamentally different domain.
+
 ## Execution Record Template
 
 When the user asks to refresh this file after a run, append:

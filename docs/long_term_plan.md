@@ -138,11 +138,39 @@ Between-clinical spread: 80.5 points (2700x improvement over graded default).
 
 **Entry condition:** Phases 3-4 provide a model specification stable enough to fit to data.
 
+## Current Focus: CoGames/CvC Benchmark + Paper Preparation
+
+### CoGames Benchmark Integration (2026-03-21)
+
+**Goal:** Adapt our affect-augmented AIF model to the CoGames/CvC environment and benchmark it. The point is showing how well our AIF affect architecture performs in a real multi-agent domain — built-in cogames policies are comparison baselines only.
+
+**Status:** Pipeline complete. AIF-based CvC policy is the main deliverable.
+
+The CvC benchmark pipeline runs end-to-end: Python 3.10 orchestrator dispatches to a Python 3.12 worker subprocess that runs real CoGames episodes via mettagrid. Results flow back as JSON records with CvC-specific metrics (aligned junctions, hearts, role gains). Full benchmark run completed: 6 policies x 10 seeds x 10,000 steps on machina_1 mission. All current policies score 0 reward due to navigation limitations (see `docs/benchmarking_integration.md`).
+
+**Core challenge:** Build a CvC policy powered by our AIF generative model with per-partner metacognitive precision tracking:
+
+1. Design a CvC generative model mapping observations to beliefs about teammates, resources, and spatial layout
+2. Integrate the affect mechanism (beta/precision tracking) for teammate reliability assessment
+3. Use expected free energy over the 5 CvC actions for planning (implicitly solving navigation)
+4. Bootstrap with simpler missions and wall-avoidance while the full AIF policy is developed
+
+See `docs/benchmarking_integration.md` for full architecture and status details.
+
+### Paper Preparation
+
+The trust-game story (Phases 1-7) is complete. Current focus:
+
+1. Investigate any gaps in existing results
+2. Get meaningful CvC benchmark results
+3. Ensure all claims are backed by reproducible experiments
+
 ## Operational Summary
 
-- **Completed:** Phases 1–7 (primary results, exploiter deep-dive, theory tightening, variational beta, clinical sensitivity, Bayesian model comparison, cross-game generalization).
+- **Completed:** Phases 1-7 (primary results, exploiter deep-dive, theory tightening, variational beta, clinical sensitivity, Bayesian model comparison, cross-game generalization).
 - **Phase 5 key finding:** Graded betrayal environment produces massive between-clinical differentiation (80.5 point spread). Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
 - **Phase 6 key finding:** C2 is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5).
 - **Phase 7 key finding:** Augmentation generalizes across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **Remaining:** Phase 8 (human data) requires user approval.
-- **Stop point:** Phase 8 (human data) requires user approval. All other phases complete.
+- **In progress:** CoGames/CvC benchmark — pipeline complete, working on non-zero policy scores.
+- **Remaining:** Phase 8 (human data) requires user approval. CoGames results needed for paper.
+- **Stop point:** Phase 8 (human data) requires user approval.
