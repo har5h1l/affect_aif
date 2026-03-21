@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "affect_aif"
+version = "0.1.0"
+description = "JAX-first multi-agent active inference trust-game simulations"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "jax>=0.4.28",
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+  "pandas>=2.0",
+  "pillow>=10.0",
+  "scipy>=1.11",
+  "seaborn>=0.13",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10",
+  "pre-commit>=3.7",
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["affect_aif*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["archive"]
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+  "UP",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.10"
+files = [
+  "affect_aif/cli",
+  "affect_aif/experiment/calibration.py",
+  "affect_aif/experiment/conditions.py",
+  "affect_aif/experiment/config.py",
+  "affect_aif/experiment/constants.py",
+  "affect_aif/experiment/persistence.py",
+  "scripts/run_analysis.py",
+  "scripts/run_experiment.py",
+  "scripts/run_model_comparison.py",
+  "scripts/run_preliminary.py",
+  "scripts/run_visualization.py",
+]
+exclude = ["^archive/"]
+ignore_missing_imports = true
+follow_imports = "silent"
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true

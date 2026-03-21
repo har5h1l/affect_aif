@@ -1,6 +1,6 @@
 # CLI and experiments
 
-How to run the affect_aif experiments from the command line. All commands assume the repo root as the working directory and an activated virtualenv with dependencies installed (`pip install -r requirements.txt`).
+How to run the supported affect_aif workflows from the command line. All commands assume the repo root as the working directory and an activated virtualenv with dependencies installed (`pip install -e ".[dev]"`).
 
 ---
 
@@ -12,6 +12,7 @@ How to run the affect_aif experiments from the command line. All commands assume
 | `scripts/run_preliminary.py` | Short run with directional H1–H5 checks; good for smoke tests. |
 | `scripts/run_analysis.py` | Post-hoc analysis: figures, hypothesis tests, betrayal artifacts. |
 | `scripts/run_visualization.py` | Regenerate run GIFs from an existing results file. |
+| `scripts/run_model_comparison.py` | Bayesian model comparison over saved run outputs. |
 
 ---
 
@@ -165,6 +166,18 @@ python scripts/run_visualization.py --results results/default.csv --output-dir r
 
 ---
 
+## 5. Run model comparison
+
+Compares agent conditions as competing models using saved per-round predictive log-evidence.
+
+```bash
+python scripts/run_model_comparison.py --results <path-to-csv-or-parquet> --output-dir <directory>
+```
+
+The script writes `log_evidence_summary.csv`, `pairwise_bayes_factors.csv`, and `model_comparison_report.json`.
+
+---
+
 ## Config files
 
 Configs live under `affect_aif/configs/`. Key fields are documented in `affect_aif/experiment/config.py`; the following list summarizes the main experiment configs.
@@ -178,6 +191,8 @@ Configs live under `affect_aif/configs/`. Key fields are documented in `affect_a
 | `variant_c.json` | Noisy observations (e.g. 10% observation noise). |
 | `variant_d.json` | Correlated partners (structure-learning variant). |
 | `cautious_prior.json` | Alternative priors for sensitivity. |
+
+Exploratory and historical configs remain available under `archive/configs/` and are intentionally not part of the default supported workflow.
 
 To run a different scenario, pass the config and optional `--batch-name`; results go under `results/<batch_id>/<config_slug>/results.csv`:
 
@@ -214,50 +229,16 @@ python scripts/run_experiment.py --config affect_aif/configs/betrayal_stress.jso
 
 Then run analysis on the resulting CSVs (paths depend on `--batch-name` and config slug, e.g. `results/primary/default/results.csv`, `results/betrayal/betrayal_stress/results.csv`).
 
-## Current next run
+## Verification
 
-The default, betrayal-stress, and `variant_d` batches are now the interpreted baseline in this repo. `variant_d` was the last shipped attempt to dissociate precision tracking from reward averaging, and it remained null, so the experimental phase is complete.
-
-```bash
-python scripts/run_experiment.py --config affect_aif/configs/variant_d.json --output-dir results --batch-name correlated_followup --workers 12
-python scripts/run_analysis.py --results results/correlated_followup/variant_d/results.csv --output-dir results/correlated_followup/variant_d/figures
-```
-
-If you want a verification pass after the analysis, follow with:
+If you want a local verification pass after analysis:
 
 ```bash
-pytest tests/
+ruff check .
+ruff format --check .
+python -m pytest
+python -m mypy
 ```
-
----
-
-## End-to-end workflow
-
-1. **Quick check**
-   ```bash
-   python scripts/run_preliminary.py --replications 5 --output results/preliminary.csv
-   ```
-   Inspect the printed summary and directional H1–H5 checks.
-
-2. **Full default experiment (parallel, 12 workers)**
-   ```bash
-   python scripts/run_experiment.py --config affect_aif/configs/default.json --output-dir results --batch-name primary --workers 12
-   python scripts/run_analysis.py --results results/primary/default/results.csv --output-dir results/primary/figures
-   ```
-
-3. **Betrayal stress experiment (parallel, 12 workers)**
-   ```bash
-   python scripts/run_experiment.py --config affect_aif/configs/betrayal_stress.json --output-dir results --batch-name betrayal --workers 12
-   python scripts/run_analysis.py --results results/betrayal/betrayal_stress/results.csv --output-dir results/betrayal/figures
-   ```
-   Then inspect `betrayal_condition_comparison.csv` and `affective_movement_summary.csv` in the figures dir.
-
-4. **Primary + betrayal in one batch (12 workers)**
-   ```bash
-   python scripts/run_experiment.py --config affect_aif/configs/default.json --config affect_aif/configs/betrayal_stress.json --output-dir results --batch-name main_run --workers 12
-   python scripts/run_analysis.py --results results/main_run/default/results.csv --output-dir results/main_run/default/figures
-   python scripts/run_analysis.py --results results/main_run/betrayal_stress/results.csv --output-dir results/main_run/betrayal_stress/figures
-   ```
 
 5. **With GIFs (serial or batch)**
    ```bash

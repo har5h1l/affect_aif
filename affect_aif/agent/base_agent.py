@@ -11,7 +11,6 @@ from affect_aif.core.learning import update_likelihood_dirichlet
 from affect_aif.core.maths import dirichlet_expected_value
 from affect_aif.core.utils import obj_array, onehot
 
-
 _LIKELIHOOD_PRIOR_STRENGTH = 10.0
 _LIKELIHOOD_EPS = 1e-3
 
@@ -96,7 +95,7 @@ class BaseAgent:
         self.num_partners = int(model.num_partners)
         self.num_types = int(model.num_types)
         self.num_actions = int(model.num_controls[0])
-        self.num_social_actions = int(getattr(model, 'num_social_actions', 2))
+        self.num_social_actions = int(getattr(model, "num_social_actions", 2))
         self.assignment_mode_code = 1 if model.assignment_mode == "agent_choice" else 0
         self.sampling_mode_code = 0 if self.action_sampling == "marginal" else 1
 
@@ -115,8 +114,10 @@ class BaseAgent:
         self._initial_A = _copy_model_array(self.A)
         self._initial_qA = _init_likelihood_dirichlet(self._initial_A) if self.use_parameter_learning else None
 
-        self.planning_cost = float((self.num_actions ** self.planning_horizon) * self.planning_horizon)
-        self.planning_cost_ratio = float((self.num_actions ** self.reference_horizon) / (self.num_actions ** self.planning_horizon))
+        self.planning_cost = float((self.num_actions**self.planning_horizon) * self.planning_horizon)
+        self.planning_cost_ratio = float(
+            (self.num_actions**self.reference_horizon) / (self.num_actions**self.planning_horizon)
+        )
         self.reset()
 
     def reset(self):

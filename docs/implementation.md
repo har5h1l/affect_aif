@@ -36,7 +36,7 @@
 ## Sophisticated rollout inference
 
 - The trust-game planner now uses observation-branching sophisticated inference for **all** conditions and horizons.
-- Implementation-wise, `affect_aif/core/control.py` precomputes all binary observation sequences of length `planning_horizon - 1`, evaluates each `(policy, observation-sequence)` path, updates the acted-on partner belief after each hypothetical observation by Bayes rule, and then sums the pathwise EFE under the path probabilities.
+- Implementation-wise, the supported control surface is split across `affect_aif/core/policies.py`, `affect_aif/core/efe.py`, and `affect_aif/core/rollout.py`, with `affect_aif/core/control.py` kept as a compatibility facade. The rollout path precomputes all binary observation sequences of length `planning_horizon - 1`, evaluates each `(policy, observation-sequence)` path, updates the acted-on partner belief after each hypothetical observation by Bayes rule, and then sums the pathwise EFE under the path probabilities.
 - The old mean-field rollout is retained only as an internal comparison path for tests; it is no longer the default decision rule.
 - This keeps the planning-method axis controlled across Conditions 1-8, so horizon comparisons are not confounded with different rollout approximations.
 
@@ -73,7 +73,7 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 - `ExperimentConfig.horizon_overrides` maps condition id to planning horizon.
 - This is used for the intermediate depth sweep (Conditions 6 and 7) without changing the global `deep_horizon` and `shallow_horizon` defaults.
 - Condition 8 reuses the affective mechanism at the deep horizon to test whether affect provides anything beyond explicit depth.
-- Condition 12 reuses the shallow affective planner with `beta_mode="variational"` so the discrete beta state can be compared against the default continuous update without adding a new agent class.
+- Condition 12 reuses the shallow affective planner with `beta_mode="variational"` so the supported variational beta state can be compared against the default continuous update without adding a new agent class.
 
 ## Affective Update Signal
 
@@ -82,6 +82,18 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
 - `ExperimentConfig.beta_mode` defaults to `"continuous"` and preserves the existing EMA-based `AffectiveState`.
 - Setting `beta_mode="variational"` switches `AffectiveAgent` to `VariationalAffectiveState`, with `beta_num_levels` discrete levels and `beta_persistence` controlling the beta-state transition kernel.
+- `num_beta_levels` is accepted only as a legacy config input alias; serialized configs now emit `beta_num_levels`.
+
+## Supported vs archived surface
+
+- The supported CLI wrappers are:
+  - `scripts/run_experiment.py`
+  - `scripts/run_preliminary.py`
+  - `scripts/run_analysis.py`
+  - `scripts/run_visualization.py`
+  - `scripts/run_model_comparison.py`
+- Historical one-off scripts, archived configs, and the earlier standalone discrete-beta prototype live under `archive/`.
+- `archive/` is intentionally excluded from the default lint/type/test surface.
 
 ## Verbose Execution Tracing
 

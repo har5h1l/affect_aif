@@ -63,7 +63,11 @@ def _directional_checks(hypotheses: dict) -> pd.DataFrame:
             "hypothesis": "H4",
             "status": "N/A"
             if not h4.get("available", False)
-            else ("PASS" if h4["payoff_difference_c2_minus_c4"] > 0.0 and h4["payoff_difference_c2_minus_c1"] >= -0.25 else "FAIL"),
+            else (
+                "PASS"
+                if h4["payoff_difference_c2_minus_c4"] > 0.0 and h4["payoff_difference_c2_minus_c1"] >= -0.25
+                else "FAIL"
+            ),
             "criterion": "C2 post-switch payoff > C4 and not much worse than C1",
             "value": h4.get("payoff_difference_c2_minus_c4"),
         },
@@ -71,7 +75,11 @@ def _directional_checks(hypotheses: dict) -> pd.DataFrame:
             "hypothesis": "H5",
             "status": "N/A"
             if not h5.get("available", False)
-            else ("PASS" if h5["mean_beta_selection_correlation"] > 0.0 and h5["positive_seed_fraction"] >= 0.60 else "FAIL"),
+            else (
+                "PASS"
+                if h5["mean_beta_selection_correlation"] > 0.0 and h5["positive_seed_fraction"] >= 0.60
+                else "FAIL"
+            ),
             "criterion": "Positive beta-selection correlation in an agent-choice run",
             "value": h5.get("mean_beta_selection_correlation"),
         },
@@ -79,12 +87,14 @@ def _directional_checks(hypotheses: dict) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def main():
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a small preliminary affect_aif experiment.")
     parser.add_argument(
         "--config",
         default="affect_aif/configs/betrayal_stress.json",
-        help="Path to a JSON config file. Agent-choice configs such as betrayal_stress.json or variant_b.json enable H5.",
+        help=(
+            "Path to a JSON config file. Agent-choice configs such as betrayal_stress.json or variant_b.json enable H5."
+        ),
     )
     parser.add_argument("--replications", type=int, default=5, help="Number of replications per condition.")
     parser.add_argument("--rounds", type=int, default=200, help="Rounds per replication.")
@@ -93,7 +103,12 @@ def main():
         default="results/preliminary.csv",
         help="Where to write the preliminary results table.",
     )
-    args = parser.parse_args()
+    return parser
+
+
+def main(argv: list[str] | None = None):
+    parser = build_parser()
+    args = parser.parse_args(argv)
 
     config = ExperimentConfig.from_json(args.config)
     config.num_replications = int(args.replications)
@@ -119,7 +134,8 @@ def main():
 
     print("\nDirectional hypothesis checks")
     print(directional.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

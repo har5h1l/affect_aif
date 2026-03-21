@@ -8,8 +8,7 @@ import numpy as np
 
 from affect_aif.environment.partner import Partner
 from affect_aif.generative_model.model import TrustGameModel
-from affect_aif.generative_model.partner_types import PartnerType
-from affect_aif.generative_model.payoffs import COOPERATE, DEFECT, decode_action, payoff_to_index
+from affect_aif.generative_model.payoffs import decode_action, payoff_to_index
 
 
 class TrustGameEnv:
@@ -152,7 +151,9 @@ class TrustGameEnv:
         )
         stochastic_switch = partner.maybe_switch_type(self.available_types, self.p_switch)
         type_switched = (partner_idx in scheduled_switched) or stochastic_switch
-        switch_kind = "scheduled" if partner_idx in scheduled_switched else "stochastic" if stochastic_switch else "none"
+        switch_kind = (
+            "scheduled" if partner_idx in scheduled_switched else "stochastic" if stochastic_switch else "none"
+        )
 
         self.round_idx += 1
         self.active_partner = self._select_next_active_partner()
@@ -186,7 +187,9 @@ class TrustGameEnv:
     def get_episode_summary(self) -> dict:
         """Return coarse summary statistics for the current episode."""
 
-        payoffs = np.asarray([row["agent_payoff"] for row in self.history], dtype=float) if self.history else np.asarray([])
+        payoffs = (
+            np.asarray([row["agent_payoff"] for row in self.history], dtype=float) if self.history else np.asarray([])
+        )
         return {
             "num_rounds": len(self.history),
             "cumulative_payoff": float(payoffs.sum()) if len(payoffs) else 0.0,

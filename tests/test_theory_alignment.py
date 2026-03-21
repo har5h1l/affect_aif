@@ -127,7 +127,9 @@ def test_affect_tracks_precision_not_reward():
 
 
 def test_mu_calibration_positive():
-    cfg = ExperimentConfig(num_rounds=5, num_replications=1, calibration_episodes=1, random_seed=0, deep_horizon=4, shallow_horizon=2)
+    cfg = ExperimentConfig(
+        num_rounds=5, num_replications=1, calibration_episodes=1, random_seed=0, deep_horizon=4, shallow_horizon=2
+    )
     runner = ExperimentRunner(cfg)
     mu = runner.calibrate_mu()
     assert mu > 0.0

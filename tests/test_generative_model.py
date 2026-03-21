@@ -54,7 +54,9 @@ def test_graded_payoff_matrix_shape():
 def test_graded_encode_decode_roundtrip():
     for partner in range(4):
         for action in range(6):
-            encoded = encode_action(partner, action, num_partners=4, assignment_mode="agent_choice", num_social_actions=6)
+            encoded = encode_action(
+                partner, action, num_partners=4, assignment_mode="agent_choice", num_social_actions=6
+            )
             p, a = decode_action(encoded, num_partners=4, assignment_mode="agent_choice", num_social_actions=6)
             assert p == partner
             assert a == action
