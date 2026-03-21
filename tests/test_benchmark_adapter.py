@@ -10,7 +10,7 @@ import pytest
 from affect_aif.benchmark.interaction_tracker import InteractionEvent, InteractionTracker
 from affect_aif.benchmark.observation_encoder import ObservationEncoder
 from affect_aif.benchmark.cogames_adapter import CoGamesTrustAdapter
-from affect_aif.benchmark.scenarios import RESOURCE_SHARING, get_scenario, list_scenarios
+from affect_aif.benchmark.scenarios import BenchmarkScenario, RESOURCE_SHARING, get_scenario, list_scenarios
 from affect_aif.benchmark.scripted_partners import (
     CooperatorPartner,
     ExploiterPartner,
@@ -41,6 +41,14 @@ class TestInteractionTracker:
         action, confidence = tracker.classify_partner_behavior(0)
         assert action == 1  # defect
 
+    def test_classify_partner_behavior_ignores_focal_events(self):
+        tracker = InteractionTracker(num_partners=4, ticks_per_round=1)
+        tracker.record_event(InteractionEvent(tick=0, partner_idx=0, event_type="share", resource_delta=-1.0))
+        tracker.record_event(InteractionEvent(tick=0, partner_idx=0, event_type="steal", resource_delta=-1.0))
+        action, confidence = tracker.classify_partner_behavior(0)
+        assert action == 1
+        assert confidence == 1.0
+
     def test_no_events_defaults_to_defect(self):
         tracker = InteractionTracker(num_partners=4, ticks_per_round=1)
         action, confidence = tracker.classify_partner_behavior(0)
@@ -56,9 +64,9 @@ class TestInteractionTracker:
 
     def test_cumulative_history(self):
         tracker = InteractionTracker(num_partners=4, ticks_per_round=1)
-        tracker.record_event(InteractionEvent(tick=0, partner_idx=0, event_type="share"))
+        tracker.record_event(InteractionEvent(tick=0, partner_idx=0, event_type="receive"))
         tracker.summarize_round(primary_partner=0)
-        tracker.record_event(InteractionEvent(tick=1, partner_idx=0, event_type="share"))
+        tracker.record_event(InteractionEvent(tick=1, partner_idx=0, event_type="receive"))
         tracker.summarize_round(primary_partner=0)
         assert tracker.get_partner_cooperation_history(0) == 1.0
 
@@ -169,6 +177,16 @@ class TestCoGamesTrustAdapter:
         expected_idx = adapter.encoder.payoff_to_index(result["agent_payoff"])
         assert result["observation"][1] == expected_idx
 
+    def test_step_observation_partner_action_matches_returned_partner_action_on_mixed_round(self):
+        adapter = CoGamesTrustAdapter(scenario="resource_sharing", seed=0)
+        adapter.reset()
+        adapter.partners[adapter.active_partner].decide = lambda: "attack"
+
+        result = adapter.step(agent_action=0)
+
+        assert result["partner_action"] == 1
+        assert result["observation"][0] == result["partner_action"]
+
     def test_full_episode(self):
         adapter = CoGamesTrustAdapter(scenario="resource_sharing", seed=42)
         context = adapter.reset()
@@ -192,3 +210,27 @@ class TestCoGamesTrustAdapter:
             r2 = adapter2.step(0)
             assert r1["partner_action"] == r2["partner_action"]
             assert r1["agent_payoff"] == r2["agent_payoff"]
+
+    def test_applies_scheduled_type_switches_from_scenario(self):
+        scenario = BenchmarkScenario(
+            name="test_betrayal",
+            description="Single partner switches from cooperator to exploiter.",
+            num_partners=1,
+            num_rounds=4,
+            partner_types=["cooperator", "exploiter"],
+            initial_partner_types=["cooperator"],
+            scheduled_type_switches=[{"round": 2, "partner_idx": 0, "to_type": "exploiter"}],
+        )
+        adapter = CoGamesTrustAdapter(scenario=scenario, seed=0)
+        adapter.reset()
+
+        first = adapter.step(agent_action=0)
+        second = adapter.step(agent_action=0)
+
+        assert first["true_partner_type"] == "cooperator"
+        assert second["true_partner_type"] == "exploiter"
+        assert second["type_switched"] is True
+        assert second["switch_kind"] == "scheduled"
+        assert second["current_partner_switched"] is True
+        assert second["current_partner_scheduled_switch"] is True
+        assert second["scheduled_switch_partner_ids"] == [0]

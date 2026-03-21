@@ -1,5 +1,9 @@
 """Tests for benchmark runner output schema and calibration behavior."""
 
+import builtins
+import importlib
+import sys
+
 import numpy as np
 
 from affect_aif.benchmark.benchmark_config import BenchmarkConfig
@@ -44,3 +48,22 @@ def test_runner_sets_nan_type_accuracy_for_baselines():
     )
     results = BenchmarkRunner(config).run_all()
     assert results["inferred_type_correct"].isna().all()
+
+
+def test_runner_module_imports_when_optional_backend_module_is_missing(monkeypatch):
+    module_name = "affect_aif.benchmark.benchmark_runner"
+    sys.modules.pop(module_name, None)
+
+    real_import = builtins.__import__
+
+    def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "affect_aif.benchmark.toy_gridworld_backend":
+            raise ModuleNotFoundError("No module named 'affect_aif.benchmark.toy_gridworld_backend'")
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", guarded_import)
+
+    module = importlib.import_module(module_name)
+
+    assert module.BenchmarkRunner is not None
+    assert "toy_gridworld" in module.BACKEND_REGISTRY

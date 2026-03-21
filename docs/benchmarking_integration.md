@@ -95,6 +95,15 @@ Recommended trust configs:
 - `affect_aif/configs/benchmark_betrayal.json`
 - `affect_aif/configs/benchmark_full.json`
 
+Scenario defaults now matter for the trust benchmark rather than serving as
+labels only. In particular, `betrayal_arena` now carries its own trust-game
+setup: `assignment_mode="agent_choice"`, `p_switch=0`, an initial roster of
+`["cooperator", "random"]`, and a scheduled `partner 0 -> exploiter` switch
+at round 50 unless a benchmark config overrides those values.
+
+The legacy `toy_gridworld` adapter now applies the same scenario-level switch
+events, so both benchmark paths expose the same betrayal event by default.
+
 ## Real CvC Backend
 
 ### Runtime split

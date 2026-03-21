@@ -6,6 +6,7 @@ cooperation dynamics comparable to the trust game.
 
 from __future__ import annotations
 
+from typing import Any
 from dataclasses import dataclass, field
 
 
@@ -23,8 +24,27 @@ class BenchmarkScenario:
     partner_types: list[str] = field(default_factory=lambda: [
         "cooperator", "reciprocator", "exploiter", "random"
     ])
+    assignment_mode: str = "random"
+    p_switch: float = 0.05
+    initial_partner_types: list[str] | None = None
+    scheduled_type_switches: list[dict[str, Any]] = field(default_factory=list)
     resource_spawn_rate: float = 0.1
     episode_length: int = 1000
+
+    def trust_game_defaults(self) -> dict[str, Any]:
+        """Return trust-game-compatible defaults for this scenario."""
+
+        defaults: dict[str, Any] = {
+            "num_partners": int(self.num_partners),
+            "assignment_mode": str(self.assignment_mode),
+            "p_switch": float(self.p_switch),
+            "partner_types": [str(name) for name in self.partner_types],
+        }
+        if self.initial_partner_types is not None:
+            defaults["initial_partner_types"] = [str(name) for name in self.initial_partner_types]
+        if self.scheduled_type_switches:
+            defaults["scheduled_type_switches"] = [dict(event) for event in self.scheduled_type_switches]
+        return defaults
 
 
 # Pre-defined scenarios
@@ -57,7 +77,10 @@ BETRAYAL_ARENA = BenchmarkScenario(
     num_partners=2,
     num_rounds=100,
     ticks_per_round=10,
-    partner_types=["cooperator", "random"],
+    assignment_mode="agent_choice",
+    p_switch=0.0,
+    initial_partner_types=["cooperator", "random"],
+    scheduled_type_switches=[{"partner_idx": 0, "round": 50, "to_type": "exploiter"}],
 )
 
 LARGE_GROUP = BenchmarkScenario(

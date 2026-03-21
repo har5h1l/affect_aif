@@ -8,8 +8,18 @@ import pandas as pd
 
 from affect_aif.benchmark.backend import BenchmarkBackendContext
 from affect_aif.benchmark.benchmark_config import BenchmarkConfig
-from affect_aif.benchmark.toy_gridworld_backend import ToyGridworldBackend
-from affect_aif.benchmark.trust_backend import TrustBackend
+
+
+def _load_trust_backend():
+    from affect_aif.benchmark.trust_backend import TrustBackend
+
+    return TrustBackend
+
+
+def _load_toy_gridworld_backend():
+    from affect_aif.benchmark.toy_gridworld_backend import ToyGridworldBackend
+
+    return ToyGridworldBackend
 
 
 def _load_cvc_backend():
@@ -19,8 +29,8 @@ def _load_cvc_backend():
 
 
 BACKEND_REGISTRY = {
-    "trust": TrustBackend,
-    "toy_gridworld": ToyGridworldBackend,
+    "trust": _load_trust_backend,
+    "toy_gridworld": _load_toy_gridworld_backend,
     "cvc_local": _load_cvc_backend,
 }
 

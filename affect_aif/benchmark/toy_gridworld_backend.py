@@ -55,12 +55,12 @@ class ToyGridworldBackend(BenchmarkBackend):
         self._shared_trust_config = context.shared.get("trust_experiment_config")
         if self._shared_trust_config is None:
             overrides = {
-                "num_partners": self.scenario.num_partners,
                 "num_rounds": config.num_rounds,
                 "num_replications": 1,
                 "calibration_episodes": 5,
                 "random_seed": config.random_seed,
             }
+            overrides.update(self.scenario.trust_game_defaults())
             overrides.update(dict(self.backend_config.get("trust_game_overrides", {})))
             self._shared_trust_config = ExperimentConfig(**overrides)
             context.shared["trust_experiment_config"] = self._shared_trust_config

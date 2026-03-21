@@ -77,12 +77,12 @@ class TrustBackend(BenchmarkBackend):
 
     def _make_experiment_config(self, config: BenchmarkConfig) -> ExperimentConfig:
         overrides = {
-            "num_partners": self.scenario.num_partners,
             "num_rounds": config.num_rounds,
             "num_replications": 1,
             "calibration_episodes": 5,
             "random_seed": config.random_seed,
         }
+        overrides.update(self.scenario.trust_game_defaults())
         direct_overrides = {
             key: value
             for key, value in self.backend_config.items()

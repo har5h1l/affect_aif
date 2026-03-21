@@ -43,8 +43,10 @@ class InteractionTracker:
     interaction as cooperate or defect.
     """
 
-    COOPERATIVE_EVENTS = {"share", "receive", "heal"}
-    HOSTILE_EVENTS = {"attack", "steal", "freeze"}
+    FOCAL_COOPERATIVE_EVENTS = {"share"}
+    FOCAL_HOSTILE_EVENTS = {"attack"}
+    PARTNER_COOPERATIVE_EVENTS = {"receive", "heal"}
+    PARTNER_HOSTILE_EVENTS = {"steal", "freeze"}
 
     def __init__(
         self,
@@ -101,8 +103,8 @@ class InteractionTracker:
             # No interaction: default to defect (no cooperation observed)
             return 1, 0.0
 
-        cooperative = sum(1 for e in events if e.event_type in self.COOPERATIVE_EVENTS)
-        hostile = sum(1 for e in events if e.event_type in self.HOSTILE_EVENTS)
+        cooperative = sum(1 for e in events if e.event_type in self.PARTNER_COOPERATIVE_EVENTS)
+        hostile = sum(1 for e in events if e.event_type in self.PARTNER_HOSTILE_EVENTS)
         total = cooperative + hostile
 
         if total == 0:
@@ -120,8 +122,8 @@ class InteractionTracker:
         If we attacked, that's defection.
         """
         events = self._round_events[partner_idx]
-        shares = sum(1 for e in events if e.event_type == "share")
-        attacks = sum(1 for e in events if e.event_type == "attack")
+        shares = sum(1 for e in events if e.event_type in self.FOCAL_COOPERATIVE_EVENTS)
+        attacks = sum(1 for e in events if e.event_type in self.FOCAL_HOSTILE_EVENTS)
 
         if shares > attacks:
             return 0
@@ -151,8 +153,8 @@ class InteractionTracker:
         resource_delta = self.compute_resource_delta(partner_idx)
 
         events = self._round_events[partner_idx]
-        cooperative = sum(1 for e in events if e.event_type in self.COOPERATIVE_EVENTS)
-        hostile = sum(1 for e in events if e.event_type in self.HOSTILE_EVENTS)
+        cooperative = sum(1 for e in events if e.event_type in self.PARTNER_COOPERATIVE_EVENTS)
+        hostile = sum(1 for e in events if e.event_type in self.PARTNER_HOSTILE_EVENTS)
 
         # Update cumulative counts
         self._cumulative_interactions[partner_idx]["cooperative"] += cooperative
