@@ -30,6 +30,7 @@ dist/
 # Local experiment outputs
 results/*
 !results/.gitkeep
+!results/README.md
 outputs/
 artifacts/
 

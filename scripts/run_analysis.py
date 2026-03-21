@@ -23,20 +23,7 @@ from affect_aif.analysis.metrics import (
 )
 from affect_aif.analysis.plots import save_all_figures
 from affect_aif.analysis.statistics import cumulative_payoff_anova, pairwise_payoff_tests
-
-
-def load_results(path: str) -> pd.DataFrame:
-    source = Path(path)
-    if source.suffix == ".parquet":
-        return pd.read_parquet(source)
-    return pd.read_csv(source)
-
-
-def filter_primary_runs(results: pd.DataFrame) -> pd.DataFrame:
-    if "run_mode" not in results.columns:
-        return results
-    primary = results[results["run_mode"] == "primary"].copy()
-    return primary if not primary.empty else results
+from affect_aif.cli.common import filter_primary_runs, load_results_table
 
 
 def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
@@ -66,15 +53,20 @@ def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def main():
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Analyze affect_aif results.")
     parser.add_argument("--results", required=True, help="Path to the results CSV or parquet.")
     parser.add_argument("--output-dir", required=True, help="Directory for figures and summary tables.")
-    args = parser.parse_args()
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    results = filter_primary_runs(load_results(args.results))
+    results = filter_primary_runs(load_results_table(args.results))
 
     save_all_figures(results, str(output_dir))
     summary = final_round_summary(results)
@@ -133,9 +125,7 @@ def main():
     summary_path.write_text(
         "Cumulative payoff ANOVA\n"
         f"F = {anova['f_stat']:.6f}\n"
-        f"p = {anova['p_value']:.6g}\n"
-        + "".join(movement_lines)
-        + "".join(betrayal_lines)
+        f"p = {anova['p_value']:.6g}\n" + "".join(movement_lines) + "".join(betrayal_lines)
     )
     print("Per-condition final summary")
     print(
@@ -174,7 +164,8 @@ def main():
                 .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
             )
     print(f"\nSaved figures and statistics to {output_dir}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

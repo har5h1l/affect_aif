@@ -70,13 +70,10 @@ def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
 def payoff_by_partner_type(results: pd.DataFrame) -> pd.DataFrame:
     """Mean payoff and accuracy sliced by ground-truth partner type."""
 
-    return (
-        results.groupby(["condition", "condition_name", "true_partner_type"], as_index=False)
-        .agg(
-            mean_payoff=("payoff", "mean"),
-            mean_accuracy=("inferred_type_correct", "mean"),
-            n=("payoff", "size"),
-        )
+    return results.groupby(["condition", "condition_name", "true_partner_type"], as_index=False).agg(
+        mean_payoff=("payoff", "mean"),
+        mean_accuracy=("inferred_type_correct", "mean"),
+        n=("payoff", "size"),
     )
 
 
@@ -107,7 +104,9 @@ def beta_reward_divergence(results: pd.DataFrame, partner_idx: int | None = None
 
     betas["partner_idx"] = int(partner_idx)
     rewards["partner_idx"] = int(partner_idx)
-    betas["beta_value"] = betas["betas"].apply(lambda arr: float(arr[partner_idx]) if len(arr) > partner_idx else np.nan)
+    betas["beta_value"] = betas["betas"].apply(
+        lambda arr: float(arr[partner_idx]) if len(arr) > partner_idx else np.nan
+    )
     rewards["reward_value"] = rewards["reward_avgs"].apply(
         lambda arr: float(arr[partner_idx]) if len(arr) > partner_idx else np.nan
     )
@@ -231,8 +230,12 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
                         "payoff": float(row["payoff"]),
                         "inferred_type_correct": float(row["inferred_type_correct"]),
                         "beta": float(beta_arr[int(partner_idx)]) if len(beta_arr) > partner_idx else np.nan,
-                        "reward_signal": float(reward_arr[int(partner_idx)]) if len(reward_arr) > partner_idx else np.nan,
-                        "terminal_signal": float(terminal_arr[int(partner_idx)]) if len(terminal_arr) > partner_idx else np.nan,
+                        "reward_signal": float(reward_arr[int(partner_idx)])
+                        if len(reward_arr) > partner_idx
+                        else np.nan,
+                        "terminal_signal": float(terminal_arr[int(partner_idx)])
+                        if len(terminal_arr) > partner_idx
+                        else np.nan,
                         "divergence_beta_minus_reward": (
                             float(beta_arr[int(partner_idx)] - reward_arr[int(partner_idx)])
                             if len(beta_arr) > partner_idx and len(reward_arr) > partner_idx
@@ -252,20 +255,23 @@ def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
 
     frame["betas"] = frame["betas"].apply(_ensure_array)
     frame["terminal_signal"] = frame["terminal_signal"].apply(_ensure_array)
-    per_seed = (
-        frame.groupby(["condition", "condition_name", "seed"], as_index=False)
-        .agg(
-            beta_range=("betas", lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float))),
-            terminal_signal_range=(
-                "terminal_signal",
-                lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float)),
-            ),
-            beta_mean=("betas", lambda series: _safe_nanmean(np.asarray([_safe_nanmean(arr) for arr in series], dtype=float))),
-            terminal_signal_mean=(
-                "terminal_signal",
-                lambda series: _safe_nanmean(np.asarray([_safe_nanmean(arr) for arr in series], dtype=float)),
-            ),
-        )
+    per_seed = frame.groupby(["condition", "condition_name", "seed"], as_index=False).agg(
+        beta_range=(
+            "betas",
+            lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float)),
+        ),
+        terminal_signal_range=(
+            "terminal_signal",
+            lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float)),
+        ),
+        beta_mean=(
+            "betas",
+            lambda series: _safe_nanmean(np.asarray([_safe_nanmean(arr) for arr in series], dtype=float)),
+        ),
+        terminal_signal_mean=(
+            "terminal_signal",
+            lambda series: _safe_nanmean(np.asarray([_safe_nanmean(arr) for arr in series], dtype=float)),
+        ),
     )
     if per_seed.empty:
         return per_seed
@@ -294,7 +300,9 @@ def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, 
         pivot = pivot.reset_index()
         pivot["window"] = int(window)
         pivot["window_label"] = f"1-{int(window)}"
-        pivot["payoff_difference_c2_minus_c5"] = pivot.get("mean_payoff_c2", np.nan) - pivot.get("mean_payoff_c5", np.nan)
+        pivot["payoff_difference_c2_minus_c5"] = pivot.get("mean_payoff_c2", np.nan) - pivot.get(
+            "mean_payoff_c5", np.nan
+        )
         pivot["accuracy_difference_c2_minus_c5"] = pivot.get("mean_accuracy_c2", np.nan) - pivot.get(
             "mean_accuracy_c5",
             np.nan,

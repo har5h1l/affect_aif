@@ -6,7 +6,7 @@ from dataclasses import asdict, is_dataclass
 
 import numpy as np
 
-from affect_aif.core.maths import entropy, log_stable, normalize, softmax
+from affect_aif.core.maths import entropy, log_stable, softmax
 from affect_aif.core.utils import obj_array
 from affect_aif.generative_model.partner_types import (
     PARTNER_TYPE_ORDER,
@@ -14,13 +14,11 @@ from affect_aif.generative_model.partner_types import (
     default_partner_type_params,
 )
 from affect_aif.generative_model.payoffs import (
-    ACTION_NAMES,
     COOPERATE,
     DEFECT,
     build_graded_payoff_matrix,
     build_payoff_matrix,
     decode_action,
-    encode_action,
     expected_agent_payoff,
     infer_payoff_levels,
     num_actions,
@@ -108,7 +106,9 @@ class TrustGameModel:
         payoff_obs = np.zeros((len(self.payoff_levels), 2, 2), dtype=float)
         for agent_action in (COOPERATE, DEFECT):
             for partner_action_idx in (COOPERATE, DEFECT):
-                payoff_obs[self.payoff_index_table[agent_action, partner_action_idx], agent_action, partner_action_idx] = 1.0
+                payoff_obs[
+                    self.payoff_index_table[agent_action, partner_action_idx], agent_action, partner_action_idx
+                ] = 1.0
 
         A[0] = partner_action
         A[1] = payoff_obs
@@ -119,7 +119,9 @@ class TrustGameModel:
 
         B = obj_array(2)
         num_actions_total = self.num_controls[0]
-        type_transition = np.full((self.num_types, self.num_types), self.p_switch / max(self.num_types - 1, 1), dtype=float)
+        type_transition = np.full(
+            (self.num_types, self.num_types), self.p_switch / max(self.num_types - 1, 1), dtype=float
+        )
         np.fill_diagonal(type_transition, 1.0 - self.p_switch)
         B_type = np.repeat(type_transition[:, :, None], num_actions_total, axis=2)
 
@@ -129,7 +131,9 @@ class TrustGameModel:
                 partner_idx, _ = decode_action(action, self.num_partners, self.assignment_mode)
                 context[partner_idx, :, action] = 1.0
         else:
-            context = np.full((self.num_partners, self.num_partners, num_actions_total), 1.0 / self.num_partners, dtype=float)
+            context = np.full(
+                (self.num_partners, self.num_partners, num_actions_total), 1.0 / self.num_partners, dtype=float
+            )
 
         B[0] = B_type
         B[1] = context
@@ -295,7 +299,9 @@ class GradedTrustGameModel:
         payoff_obs = np.zeros((len(self.payoff_levels), self.num_social_actions, 2), dtype=float)
         for agent_action in range(self.num_social_actions):
             for partner_action_idx in (COOPERATE, DEFECT):
-                payoff_obs[self.payoff_index_table[agent_action, partner_action_idx], agent_action, partner_action_idx] = 1.0
+                payoff_obs[
+                    self.payoff_index_table[agent_action, partner_action_idx], agent_action, partner_action_idx
+                ] = 1.0
 
         A[0] = partner_action
         A[1] = payoff_obs
@@ -304,7 +310,9 @@ class GradedTrustGameModel:
     def build_B(self) -> np.ndarray:
         B = obj_array(2)
         num_actions_total = self.num_controls[0]
-        type_transition = np.full((self.num_types, self.num_types), self.p_switch / max(self.num_types - 1, 1), dtype=float)
+        type_transition = np.full(
+            (self.num_types, self.num_types), self.p_switch / max(self.num_types - 1, 1), dtype=float
+        )
         np.fill_diagonal(type_transition, 1.0 - self.p_switch)
         B_type = np.repeat(type_transition[:, :, None], num_actions_total, axis=2)
 
@@ -312,12 +320,16 @@ class GradedTrustGameModel:
             context = np.zeros((self.num_partners, self.num_partners, num_actions_total), dtype=float)
             for action in range(num_actions_total):
                 partner_idx, _ = decode_action(
-                    action, self.num_partners, self.assignment_mode,
+                    action,
+                    self.num_partners,
+                    self.assignment_mode,
                     num_social_actions=self.num_social_actions,
                 )
                 context[partner_idx, :, action] = 1.0
         else:
-            context = np.full((self.num_partners, self.num_partners, num_actions_total), 1.0 / self.num_partners, dtype=float)
+            context = np.full(
+                (self.num_partners, self.num_partners, num_actions_total), 1.0 / self.num_partners, dtype=float
+            )
 
         B[0] = B_type
         B[1] = context

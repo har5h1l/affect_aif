@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -14,22 +13,16 @@ from typing import Any
 import pandas as pd
 
 from affect_aif.analysis.visualization import build_run_gifs
+from affect_aif.cli.common import slugify_name
+from affect_aif.experiment.calibration import build_calibration_summary, serialize_config
 from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import (
-    ExperimentRunner,
-    PRIMARY_CONDITIONS_REQUIRING_MU,
-    SENSITIVITY_CONDITIONS,
-    _build_calibration_summary,
-    _serialize_config,
+from affect_aif.experiment.constants import PRIMARY_CONDITIONS_REQUIRING_MU, SENSITIVITY_CONDITIONS
+from affect_aif.experiment.runner import ExperimentRunner
+from affect_aif.experiment.tasks import (
     run_calibration_episode_task,
     run_primary_replication_task,
     run_sensitivity_replication_task,
 )
-
-
-def _slugify(text: str) -> str:
-    slug = re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
-    return slug or "run"
 
 
 def default_batch_id(now: datetime | None = None) -> str:
@@ -100,7 +93,7 @@ class BatchExperimentRunner:
         seen: dict[str, int] = {}
         resolved: list[tuple[str, Path]] = []
         for config_path in self.config_paths:
-            stem = _slugify(Path(config_path).stem)
+            stem = slugify_name(Path(config_path).stem)
             count = seen.get(stem, 0)
             seen[stem] = count + 1
             name = stem if count == 0 else f"{stem}_{count + 1}"
@@ -109,7 +102,11 @@ class BatchExperimentRunner:
 
     def _load_states(self) -> list[ConfigBatchState]:
         states: list[ConfigBatchState] = []
-        for config_path, (config_name, output_dir) in zip(self.config_paths, self._unique_config_dirs()):
+        for config_path, (config_name, output_dir) in zip(
+            self.config_paths,
+            self._unique_config_dirs(),
+            strict=True,
+        ):
             config = ExperimentConfig.from_json(config_path)
             config.verbose = False
             config.gif_after_run = False
@@ -123,7 +120,7 @@ class BatchExperimentRunner:
                     config_name=config_name,
                     output_dir=output_dir,
                     config=config,
-                    config_payload=_serialize_config(config),
+                    config_payload=serialize_config(config),
                     calibration_episodes=calibration_episodes,
                     needs_calibration=needs_calibration,
                 )
@@ -152,9 +149,15 @@ class BatchExperimentRunner:
                     batch_id=self.batch_id,
                 )
                 state.submitted_primary += 1
-                future_map[future] = ("primary", state, {"condition": condition, "replication": replication, "seed": seed})
+                future_map[future] = (
+                    "primary",
+                    state,
+                    {"condition": condition, "replication": replication, "seed": seed},
+                )
         if state.config.run_sensitivity and calibration_summary is not None:
-            sensitivity_conditions = [condition for condition in state.config.conditions if condition in SENSITIVITY_CONDITIONS]
+            sensitivity_conditions = [
+                condition for condition in state.config.conditions if condition in SENSITIVITY_CONDITIONS
+            ]
             probe = ExperimentRunner(state.config)
             for parameter_name, parameter_value in probe._sensitivity_specs():
                 for condition in sensitivity_conditions:
@@ -260,10 +263,12 @@ class BatchExperimentRunner:
                         )
                         self._emit(
                             f"[batch={self.batch_id}] calibration complete "
-                            f"config={state.config_name} episode={int(metadata['episode_idx']) + 1}/{state.calibration_episodes}"
+                            "config="
+                            f"{state.config_name} episode="
+                            f"{int(metadata['episode_idx']) + 1}/{state.calibration_episodes}"
                         )
                         if state.calibration_completed == state.calibration_episodes:
-                            state.calibration_summary = _build_calibration_summary(
+                            state.calibration_summary = build_calibration_summary(
                                 state.config,
                                 state.calibration_efe_values,
                                 state.calibration_episodes,

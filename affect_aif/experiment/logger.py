@@ -33,7 +33,9 @@ class MetricLogger:
             "round": int(round_idx),
             "partner_idx": int(env_result["partner_idx"]),
             "active_partner": (
-                -1 if env_result.get("active_partner_start", -1) is None else int(env_result.get("active_partner_start", -1))
+                -1
+                if env_result.get("active_partner_start", -1) is None
+                else int(env_result.get("active_partner_start", -1))
             ),
             "true_partner_type": str(env_result["true_partner_type"]),
             "agent_action": int(env_result["agent_action"]),

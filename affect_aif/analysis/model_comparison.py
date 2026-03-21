@@ -12,7 +12,6 @@ assignments may vary.
 
 from __future__ import annotations
 
-import math
 from itertools import combinations
 
 import numpy as np
@@ -31,23 +30,22 @@ def log_evidence_summary(results: pd.DataFrame) -> pd.DataFrame:
     """
     summary = final_round_summary(results)
     if "total_log_evidence" not in summary.columns:
-        raise ValueError(
-            "Results do not contain log-evidence data. "
-            "Re-run experiments with the updated agent code."
-        )
+        raise ValueError("Results do not contain log-evidence data. Re-run experiments with the updated agent code.")
 
     records = []
     for (cond, cond_name), grp in summary.groupby(["condition", "condition_name"]):
         le = grp["total_log_evidence"].to_numpy()
         le = le[np.isfinite(le)]
-        records.append({
-            "condition": int(cond),
-            "condition_name": str(cond_name),
-            "n_seeds": len(le),
-            "mean_log_evidence": float(le.mean()) if len(le) > 0 else float("nan"),
-            "se_log_evidence": float(le.std(ddof=1) / np.sqrt(len(le))) if len(le) > 1 else float("nan"),
-            "median_log_evidence": float(np.median(le)) if len(le) > 0 else float("nan"),
-        })
+        records.append(
+            {
+                "condition": int(cond),
+                "condition_name": str(cond_name),
+                "n_seeds": len(le),
+                "mean_log_evidence": float(le.mean()) if len(le) > 0 else float("nan"),
+                "se_log_evidence": float(le.std(ddof=1) / np.sqrt(len(le))) if len(le) > 1 else float("nan"),
+                "median_log_evidence": float(np.median(le)) if len(le) > 0 else float("nan"),
+            }
+        )
     return pd.DataFrame(records)
 
 
@@ -69,25 +67,25 @@ def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Results do not contain log-evidence data.")
 
     records = []
-    for (cond_a, frame_a), (cond_b, frame_b) in combinations(
-        summary.groupby("condition"), 2
-    ):
+    for (cond_a, frame_a), (cond_b, frame_b) in combinations(summary.groupby("condition"), 2):
         le_a = frame_a["total_log_evidence"].to_numpy()
         le_b = frame_b["total_log_evidence"].to_numpy()
         le_a = le_a[np.isfinite(le_a)]
         le_b = le_b[np.isfinite(le_b)]
 
         if len(le_a) < 2 or len(le_b) < 2:
-            records.append({
-                "condition_a": int(cond_a),
-                "condition_b": int(cond_b),
-                "mean_log_bf": float("nan"),
-                "log10_bf": float("nan"),
-                "se_log_bf": float("nan"),
-                "prop_a_preferred": float("nan"),
-                "t_stat": float("nan"),
-                "p_value": float("nan"),
-            })
+            records.append(
+                {
+                    "condition_a": int(cond_a),
+                    "condition_b": int(cond_b),
+                    "mean_log_bf": float("nan"),
+                    "log10_bf": float("nan"),
+                    "se_log_bf": float("nan"),
+                    "prop_a_preferred": float("nan"),
+                    "t_stat": float("nan"),
+                    "p_value": float("nan"),
+                }
+            )
             continue
 
         mean_diff = float(le_a.mean() - le_b.mean())
@@ -100,16 +98,18 @@ def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
         n_min = min(len(le_a), len(le_b))
         prop_a = float((le_a[:n_min] > le_b[:n_min]).mean()) if n_min > 0 else float("nan")
 
-        records.append({
-            "condition_a": int(cond_a),
-            "condition_b": int(cond_b),
-            "mean_log_bf": mean_diff,
-            "log10_bf": float(mean_diff / np.log(10)),
-            "se_log_bf": se_diff,
-            "prop_a_preferred": prop_a,
-            "t_stat": float(t_stat),
-            "p_value": float(p_value),
-        })
+        records.append(
+            {
+                "condition_a": int(cond_a),
+                "condition_b": int(cond_b),
+                "mean_log_bf": mean_diff,
+                "log10_bf": float(mean_diff / np.log(10)),
+                "se_log_bf": se_diff,
+                "prop_a_preferred": prop_a,
+                "t_stat": float(t_stat),
+                "p_value": float(p_value),
+            }
+        )
 
     return pd.DataFrame(records)
 
@@ -210,8 +210,10 @@ def _dirichlet_log_evidence(log_evidence_matrix: np.ndarray, alpha0: np.ndarray)
     # Approximate log-evidence: sum of log-normalizers
     alpha_post = alpha0 + resp.sum(axis=0)
     log_ev = (
-        gammaln(alpha0.sum()) - gammaln(alpha_post.sum())
-        + gammaln(alpha_post).sum() - gammaln(alpha0).sum()
+        gammaln(alpha0.sum())
+        - gammaln(alpha_post.sum())
+        + gammaln(alpha_post).sum()
+        - gammaln(alpha0).sum()
         + np.sum(log_u_max)
         + np.sum(np.log(u.sum(axis=1, keepdims=True)))
     )

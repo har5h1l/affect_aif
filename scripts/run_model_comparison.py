@@ -7,8 +7,6 @@ import json
 import sys
 from pathlib import Path
 
-import pandas as pd
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from affect_aif.analysis.model_comparison import (
@@ -16,36 +14,28 @@ from affect_aif.analysis.model_comparison import (
     model_comparison_report,
     pairwise_bayes_factors,
 )
+from affect_aif.cli.common import filter_primary_runs, load_results_table
 
 
-def load_results(path: str) -> pd.DataFrame:
-    source = Path(path)
-    if source.suffix == ".parquet":
-        return pd.read_parquet(source)
-    return pd.read_csv(source)
-
-
-def filter_primary_runs(results: pd.DataFrame) -> pd.DataFrame:
-    if "run_mode" not in results.columns:
-        return results
-    primary = results[results["run_mode"] == "primary"].copy()
-    return primary if not primary.empty else results
-
-
-def main():
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Bayesian model comparison for affect_aif.")
     parser.add_argument("--results", required=True, help="Path to results CSV or parquet.")
     parser.add_argument("--output-dir", required=True, help="Directory for model comparison outputs.")
-    args = parser.parse_args()
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    results = filter_primary_runs(load_results(args.results))
+    results = filter_primary_runs(load_results_table(args.results))
 
     if "cumulative_log_evidence" not in results.columns:
         print("ERROR: Results do not contain log-evidence data.")
         print("Re-run experiments with the updated agent code.")
-        sys.exit(1)
+        return 1
 
     # Log-evidence summary
     le_summary = log_evidence_summary(results)
@@ -73,8 +63,10 @@ def main():
         else:
             strength = "decisive"
         favored = int(row["condition_a"]) if row["log10_bf"] > 0 else int(row["condition_b"])
-        print(f"  C{int(row['condition_a'])} vs C{int(row['condition_b'])}: "
-              f"|log10 BF| = {abs_bf:.2f} ({strength}), favors C{favored}")
+        print(
+            f"  C{int(row['condition_a'])} vs C{int(row['condition_b'])}: "
+            f"|log10 BF| = {abs_bf:.2f} ({strength}), favors C{favored}"
+        )
 
     # Full report with RFX-BMS
     report = model_comparison_report(results)
@@ -91,7 +83,8 @@ def main():
         print(f"\nRFX-BMS: {bms['error']}")
 
     print(f"\nSaved model comparison outputs to {output_dir}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
