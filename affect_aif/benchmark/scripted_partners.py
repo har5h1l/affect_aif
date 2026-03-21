@@ -9,9 +9,6 @@ from __future__ import annotations
 
 import numpy as np
 
-from affect_aif.benchmark.interaction_tracker import InteractionEvent
-
-
 class ScriptedPartner:
     """Base class for scripted gridworld partner policies."""
 

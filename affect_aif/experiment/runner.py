@@ -162,20 +162,6 @@ class ExperimentRunner:
                 **common,
             )
         if condition == 12:
-            return AffectiveAgent(
-                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
-                num_partners=self.config.num_partners,
-                lambda_smooth=self.config.lambda_smooth,
-                alpha_charge=self.config.alpha_charge,
-                sigma_0_sq=self.config.sigma_0_sq,
-                initial_beta=self.config.initial_beta,
-                beta_mode="variational",
-                num_levels=self.config.beta_num_levels,
-                persistence=self.config.beta_persistence,
-                mu=float(self.config.mu or 0.0),
-                **common,
-            )
-        if condition == 12:
             return DiscreteAffectiveAgent(
                 planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
                 num_partners=self.config.num_partners,
