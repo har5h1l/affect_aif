@@ -114,8 +114,14 @@ class CvCLocalBackend(BenchmarkBackend):
                 ]
             )
 
+        timeout_s = int(self.backend_config.get("timeout_s", 600))
         try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True)
+            subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=timeout_s)
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError(
+                f"CvC local worker timed out after {timeout_s}s.\n"
+                f"Command: {' '.join(cmd)}"
+            ) from exc
         except subprocess.CalledProcessError as exc:
             raise RuntimeError(
                 "CvC local worker failed.\n"

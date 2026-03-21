@@ -169,6 +169,65 @@ Outputs are written next to the CSV by default:
 - `benchmark_cvc_summary.csv`
 - `benchmark_report.txt`
 
+## CvC Integration Status (2026-03-21)
+
+### What works end-to-end
+
+The full CvC pipeline runs cleanly:
+
+1. **Python 3.10 orchestrator** (`run_benchmark.py`) loads config and dispatches
+2. **CvC local backend** spawns `python3.12 -m affect_aif.benchmark.cvc_local_worker` subprocess
+3. **Worker** imports cogames/mettagrid, resolves mission, runs episode, extracts metrics
+4. **Results** flow back as JSON → DataFrame → CSV → comparison report
+5. **Analysis** pipeline (`analyze_benchmark.py`) computes CvC-specific summaries
+
+Verified with: `benchmark_cvc_full.json` (6 policies × 10 seeds × 10,000 steps = 60 episodes).
+
+Available CvC policies tested:
+
+| Policy | Source | Role gains | Hearts |
+|--------|--------|-----------|--------|
+| `TeammateReliabilityPolicy` | custom | mixed | 6.7 |
+| `StarterPolicy` | cogames built-in | mixed | 7.0 |
+| `MinerRolePolicy` | cogames built-in | miner-heavy | 6.9 |
+| `AlignerRolePolicy` | cogames built-in | aligner-heavy | 7.1 |
+| `ScramblerRolePolicy` | cogames built-in | scrambler-heavy | 7.1 |
+| `ScoutRolePolicy` | cogames built-in | scout-heavy | 6.9 |
+
+### Known limitations
+
+1. **All policies score 0 reward and 0 aligned junctions.** The CvC game loop
+   (get gear → mine → deposit → get hearts → align junction) requires effective
+   navigation, but both built-in and custom rule-based policies have ~80% failed
+   moves (walking into walls). No rule-based policy in cogames 0.19.2 completes
+   the full scoring loop.
+
+2. **CvC has only 5 actions** (`noop`, `move_north/south/east/west`). All object
+   interaction is proximity-based. Scoring requires effective pathfinding which
+   the simple “move toward nearest tag” heuristic cannot provide.
+
+3. **The `cogames_adapter.py` `_run_cogames_round()` method is a stub.** It falls
+   back to simulated trust-game rounds. This adapter is only used by the legacy
+   `toy_gridworld` backend, not by the real `cvc_local` backend. Not a blocker.
+
+4. **No direct Python 3.10 tests for `cvc_policy.py`** since it requires
+   mettagrid (Python 3.12 only). The CvC worker subprocess is tested via mock.
+
+### What's needed to get meaningful CvC results
+
+- **Better navigation**: A* pathfinding or wall-avoidance to replace the simple
+  directional move heuristic. Currently ~80% of move actions fail.
+- **Or trained policies**: The cogames `PufferlibCogsPolicy` supports RL-trained
+  agents. A trained policy would likely score non-zero.
+- **Or a simpler mission**: The `machina_1` mission has a complex map with walls.
+  A more open map might let rule-based policies succeed.
+
+### Dependencies
+
+- `cogames>=0.19.2` — installed via `python3.12 -m pip install cogames`
+- `mettagrid>=0.19.3` — pulled in as cogames dependency
+- Both require Python `>=3.12,<3.13`
+
 ## Notes
 
 - Do not claim cross-environment “transfer” based on `toy_gridworld`.
