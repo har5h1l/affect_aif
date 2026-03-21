@@ -1,4 +1,4 @@
-"""Cross-environment comparison analysis and plotting."""
+"""Backend-aware benchmark analysis and reporting."""
 
 from __future__ import annotations
 
@@ -14,24 +14,44 @@ from affect_aif.benchmark.common_metrics import (
 )
 
 
-def compute_comparison_table(results: pd.DataFrame) -> pd.DataFrame:
-    """Compute a summary table comparing agents across environments.
+def compute_shared_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate reward-centric metrics that are comparable across backends."""
+    if results.empty:
+        return pd.DataFrame()
 
-    Parameters
-    ----------
-    results : pd.DataFrame
-        Combined results with 'environment' and 'agent_name' columns.
+    episode_rewards = (
+        results.groupby(["backend", "agent_name", "seed", "episode_id"], as_index=False)
+        .agg(
+            episode_reward=("reward", "sum"),
+            scenario=("scenario", "first"),
+            episode_runtime_s=("episode_runtime_s", "max") if "episode_runtime_s" in results.columns else ("reward", lambda s: np.nan),
+        )
+    )
 
-    Returns
-    -------
-    pd.DataFrame
-        Summary with one row per (agent_name, environment) combination.
-    """
+    return (
+        episode_rewards.groupby(["backend", "agent_name"], as_index=False)
+        .agg(
+            scenario=("scenario", "first"),
+            num_episodes=("episode_id", "nunique"),
+            mean_episode_reward=("episode_reward", "mean"),
+            std_episode_reward=("episode_reward", "std"),
+            reward_variance=("episode_reward", "var"),
+            mean_episode_runtime_s=("episode_runtime_s", "mean"),
+        )
+        .fillna({"std_episode_reward": 0.0, "reward_variance": 0.0})
+    )
+
+
+def compute_trust_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Summarize trust-only metrics."""
+    trust = results[results["backend"] == "trust"]
+    if trust.empty:
+        return pd.DataFrame()
+
     rows = []
-    for (agent_name, env), group in results.groupby(["agent_name", "environment"]):
+    for agent_name, group in trust.groupby("agent_name"):
         row = {
             "agent_name": agent_name,
-            "environment": env,
             "cooperation_rate": cooperation_rate(group),
             "mean_payoff": mean_payoff(group),
             "cumulative_payoff": cumulative_payoff(group),
@@ -45,70 +65,58 @@ def compute_comparison_table(results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def compute_transfer_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Compute how each agent's performance transfers between environments.
-
-    Returns a DataFrame with columns: agent_name, trust_payoff, grid_payoff,
-    transfer_gap, trust_coop, grid_coop.
-    """
-    trust = results[results["environment"] == "trust_game"]
-    grid = results[results["environment"].isin(["gridworld", "cogames", "simulated_gridworld"])]
-
-    if trust.empty or grid.empty:
+def compute_cvc_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Summarize CvC-local metrics from episode-level records."""
+    cvc = results[results["backend"] == "cvc_local"]
+    if cvc.empty:
         return pd.DataFrame()
 
-    rows = []
-    for agent_name in results["agent_name"].unique():
-        t = trust[trust["agent_name"] == agent_name]
-        g = grid[grid["agent_name"] == agent_name]
-        if t.empty or g.empty:
-            continue
-        rows.append({
-            "agent_name": agent_name,
-            "trust_payoff": mean_payoff(t),
-            "grid_payoff": mean_payoff(g),
-            "transfer_gap": mean_payoff(t) - mean_payoff(g),
-            "trust_coop": cooperation_rate(t),
-            "grid_coop": cooperation_rate(g),
-        })
+    aggregate_fields = {
+        "reward": "mean",
+        "team_reward_sum": "mean",
+        "team_reward_var": "mean",
+        "aligned_junctions": "mean",
+        "scrambled_junctions": "mean",
+        "hearts_gained": "mean",
+        "miner_role_gains": "mean",
+        "aligner_role_gains": "mean",
+        "scrambler_role_gains": "mean",
+        "scout_role_gains": "mean",
+    }
+    available = {key: value for key, value in aggregate_fields.items() if key in cvc.columns}
+    if not available:
+        return cvc.groupby("agent_name", as_index=False).agg(mean_episode_reward=("reward", "mean"))
 
-    return pd.DataFrame(rows)
+    return cvc.groupby("agent_name", as_index=False).agg(**{f"mean_{k}": (k, v) for k, v in available.items()})
 
 
 def format_comparison_report(results: pd.DataFrame) -> str:
-    """Generate a human-readable comparison report."""
-    comparison = compute_comparison_table(results)
-    transfer = compute_transfer_summary(results)
+    """Generate a backend-aware benchmark report."""
+    shared = compute_shared_summary(results)
+    trust = compute_trust_summary(results)
+    cvc = compute_cvc_summary(results)
 
     lines = ["# Benchmark Comparison Report", ""]
-
-    lines.append("## Per-Environment Summary")
+    lines.append("## Shared Summary")
     lines.append("")
-    if not comparison.empty:
-        lines.append(comparison.to_string(index=False))
-    else:
-        lines.append("No data available.")
+    lines.append(shared.to_string(index=False) if not shared.empty else "No data available.")
 
     lines.append("")
-    lines.append("## Transfer Analysis")
+    lines.append("## Trust Backend")
     lines.append("")
-    if not transfer.empty:
-        lines.append(transfer.to_string(index=False))
+    lines.append(trust.to_string(index=False) if not trust.empty else "No trust backend data.")
 
-        # Highlight key findings
-        lines.append("")
-        lines.append("### Key Findings")
-        best_transfer = transfer.loc[transfer["transfer_gap"].abs().idxmin()]
-        worst_transfer = transfer.loc[transfer["transfer_gap"].abs().idxmax()]
-        lines.append(
-            f"- Best transfer: {best_transfer['agent_name']} "
-            f"(gap: {best_transfer['transfer_gap']:.3f})"
-        )
-        lines.append(
-            f"- Worst transfer: {worst_transfer['agent_name']} "
-            f"(gap: {worst_transfer['transfer_gap']:.3f})"
-        )
-    else:
-        lines.append("Need both trust_game and gridworld results for transfer analysis.")
+    lines.append("")
+    lines.append("## CvC Backend")
+    lines.append("")
+    lines.append(cvc.to_string(index=False) if not cvc.empty else "No CvC backend data.")
+
+    lines.append("")
+    lines.append("## Notes")
+    lines.append("")
+    lines.append(
+        "Cross-backend comparison uses shared reward summaries only. Trust-specific and CvC-specific metrics are "
+        "reported separately rather than forcing action semantics into a fake shared environment model."
+    )
 
     return "\n".join(lines)

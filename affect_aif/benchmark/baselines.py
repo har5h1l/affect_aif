@@ -156,6 +156,105 @@ class WinStayLoseShiftAgent:
         }
 
 
+class PavlovAgent:
+    """Outcome-based win-stay/lose-shift using joint action coordination.
+
+    Cooperate after CC, defect after DD, and switch after CD/DC.
+    Memory is tracked per partner.
+    """
+
+    def __init__(self, num_partners: int = 4, seed: int = 0):
+        self.num_partners = num_partners
+        self.seed = seed
+        self._partner_last_actions = np.zeros(num_partners, dtype=int)
+        self._partner_last_partner_actions = np.zeros(num_partners, dtype=int)
+        self._partner_has_history = np.zeros(num_partners, dtype=bool)
+        self._last_action: int | None = None
+        self._last_payoff: float = np.nan
+
+    def reset(self):
+        self._partner_last_actions = np.zeros(self.num_partners, dtype=int)
+        self._partner_last_partner_actions = np.zeros(self.num_partners, dtype=int)
+        self._partner_has_history = np.zeros(self.num_partners, dtype=bool)
+        self._last_action = None
+        self._last_payoff = np.nan
+
+    def plan_and_act(self, active_partner: int | None) -> int:
+        if active_partner is None or not self._partner_has_history[active_partner]:
+            self._last_action = 0
+            return self._last_action
+
+        last_my_action = int(self._partner_last_actions[active_partner])
+        last_partner_action = int(self._partner_last_partner_actions[active_partner])
+        self._last_action = last_my_action if last_my_action == last_partner_action else 1 - last_my_action
+        return self._last_action
+
+    def observe_outcome(
+        self,
+        partner_idx: int,
+        observation: list[int],
+        action_taken: int,
+        partner_action: int,
+        payoff: float,
+        true_partner_type: str | None = None,
+    ):
+        self._partner_last_actions[partner_idx] = int(action_taken)
+        self._partner_last_partner_actions[partner_idx] = int(partner_action)
+        self._partner_has_history[partner_idx] = True
+        self._last_payoff = float(payoff)
+
+    def get_metrics(self) -> dict:
+        return {
+            "agent_type": "pavlov",
+            "last_action": self._last_action,
+            "last_payoff": self._last_payoff,
+        }
+
+
+class GrimTriggerAgent:
+    """Cooperate until a partner defects, then defect forever against that partner."""
+
+    def __init__(self, num_partners: int = 4, seed: int = 0):
+        self.num_partners = num_partners
+        self.seed = seed
+        self._triggered = np.zeros(num_partners, dtype=bool)
+        self._last_action: int | None = None
+        self._last_payoff: float = np.nan
+
+    def reset(self):
+        self._triggered = np.zeros(self.num_partners, dtype=bool)
+        self._last_action = None
+        self._last_payoff = np.nan
+
+    def plan_and_act(self, active_partner: int | None) -> int:
+        if active_partner is None:
+            self._last_action = 0
+            return self._last_action
+
+        self._last_action = 1 if self._triggered[active_partner] else 0
+        return self._last_action
+
+    def observe_outcome(
+        self,
+        partner_idx: int,
+        observation: list[int],
+        action_taken: int,
+        partner_action: int,
+        payoff: float,
+        true_partner_type: str | None = None,
+    ):
+        if int(partner_action) == 1:
+            self._triggered[partner_idx] = True
+        self._last_payoff = float(payoff)
+
+    def get_metrics(self) -> dict:
+        return {
+            "agent_type": "grim_trigger",
+            "last_action": self._last_action,
+            "last_payoff": self._last_payoff,
+        }
+
+
 class QLearningAgent:
     """Tabular Q-learner with per-partner Q-tables.
 

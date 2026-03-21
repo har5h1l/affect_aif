@@ -102,11 +102,9 @@ class AIFPolicy:
         CoGames environments. The default implementation handles the
         basic resource-sharing scenario.
         """
-        events = []
-        # Placeholder: actual implementation depends on CoGames observation format
-        # The observation dict from CoGames contains local tile information,
-        # resource quantities, agent positions, etc.
-        return events
+        raise NotImplementedError(
+            "Requires real CoGames environment — see the cvc_local backend integration."
+        )
 
     def _translate_action(self, trust_action: int) -> dict:
         """Map a trust game action to a CoGames action dict.
@@ -122,10 +120,9 @@ class AIFPolicy:
             CoGames-compatible action. Structure depends on the specific
             environment.
         """
-        # Placeholder: actual mapping depends on CoGames action space
-        # For Cogs vs Clips: cooperate might map to "mine + share",
-        # defect might map to "attack" or "hoard"
-        return {"action": trust_action}
+        raise NotImplementedError(
+            "Requires real CoGames environment — see the cvc_local backend integration."
+        )
 
     def get_metrics(self) -> dict:
         """Return the underlying agent's metrics."""

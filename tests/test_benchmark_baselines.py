@@ -7,6 +7,8 @@ import numpy as np
 import pytest
 
 from affect_aif.benchmark.baselines import (
+    GrimTriggerAgent,
+    PavlovAgent,
     QLearningAgent,
     RandomAgent,
     TitForTatAgent,
@@ -115,12 +117,69 @@ class TestQLearningAgent:
         assert np.allclose(agent._q_tables, 0.0)
 
 
+class TestPavlovAgent:
+    def test_cooperates_initially(self):
+        agent = PavlovAgent(num_partners=4, seed=0)
+        assert agent.plan_and_act(0) == 0
+
+    def test_stays_on_mutual_cooperation(self):
+        agent = PavlovAgent(num_partners=4, seed=0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [0, 2], 0, 0, 3.0)
+        assert agent.plan_and_act(0) == 0
+
+    def test_stays_on_mutual_defection(self):
+        agent = PavlovAgent(num_partners=4, seed=0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [1, 0], 0, 1, -1.0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [1, 1], 1, 1, 1.0)
+        assert agent.plan_and_act(0) == 1
+
+    def test_shifts_when_suckered(self):
+        agent = PavlovAgent(num_partners=4, seed=0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [1, 0], 0, 1, -1.0)
+        assert agent.plan_and_act(0) == 1
+
+    def test_shifts_on_temptation(self):
+        agent = PavlovAgent(num_partners=4, seed=0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [1, 0], 0, 1, -1.0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [0, 3], 1, 0, 5.0)
+        assert agent.plan_and_act(0) == 0
+
+
+class TestGrimTriggerAgent:
+    def test_cooperates_initially(self):
+        agent = GrimTriggerAgent(num_partners=4, seed=0)
+        assert agent.plan_and_act(0) == 0
+
+    def test_defects_forever_after_partner_defects(self):
+        agent = GrimTriggerAgent(num_partners=4, seed=0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [1, 0], 0, 1, -1.0)
+        for _ in range(10):
+            assert agent.plan_and_act(0) == 1
+            agent.observe_outcome(0, [0, 2], 1, 0, 5.0)
+
+    def test_per_partner_triggers(self):
+        agent = GrimTriggerAgent(num_partners=4, seed=0)
+        agent.plan_and_act(0)
+        agent.observe_outcome(0, [1, 0], 0, 1, -1.0)
+        assert agent.plan_and_act(0) == 1
+        assert agent.plan_and_act(1) == 0
+
+
 def test_all_baselines_share_protocol():
     """All baseline agents implement the same protocol."""
     agents = [
         RandomAgent(num_partners=4, seed=0),
         TitForTatAgent(num_partners=4, seed=0),
         WinStayLoseShiftAgent(num_partners=4, seed=0),
+        PavlovAgent(num_partners=4, seed=0),
+        GrimTriggerAgent(num_partners=4, seed=0),
         QLearningAgent(num_partners=4, seed=0),
     ]
     for agent in agents:

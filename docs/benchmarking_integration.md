@@ -1,284 +1,169 @@
-# Benchmarking Integration: Softmax & MettaGrid
+# Benchmarking Integration: Trust Backend + Real CvC
 
-## Investigation Summary
+## Status
 
-> **Key finding**: Softmax co-founder Adam Goldstein published active inference papers (with Chris Fields and Lars Sandved Smith: "Making the Thermodynamic Cost of Active Inference Explicit") and worked in Michael Levin's lab on active inference agents. The intellectual overlap with affect_aif is direct, not incidental.
->
-> **Integration target**: CoGames (`pip install cogames`) is Softmax's high-level benchmark platform — the "Alignment League Benchmark" (ALB). It has a Python env API, CLI tools, tournament leaderboard, and policy submission. This is the right integration point, not raw MettaGrid.
+The benchmark layer is now organized around explicit backends rather than a
+trust-game runner with a fake `gridworld` toggle.
 
-### Softmax (softmax.com)
+- `trust` is the canonical production backend for the current affect_aif agents.
+- `cvc_local` is the real CoGames/CvC backend. It runs through a Python 3.12
+  worker and uses the same policy class path / policy spec shape that can later
+  be packaged for submission.
+- `toy_gridworld` remains only as a backward-compatible scripted adapter around
+  the old trust-like fallback. It is not a real CoGames integration and should
+  not be used for transfer claims.
 
-Softmax is an AI alignment research lab co-founded by Emmett Shear (Twitch), David Bloomin, and Adam Goldstein, focused on **"organic alignment"** — studying how agents learn to cooperate, specialize, and form collectively intelligent systems through multi-agent reinforcement learning.
+## Why the Split Exists
 
-Key relevance to affect_aif:
-- They study **cooperation emergence** in multi-agent settings — directly overlapping with our trust game research
-- Their research direction (how agents develop trust, betrayal, loyalty) maps closely to our per-partner metacognitive precision tracking
-- David Bloomin is the creator of MettaGrid and co-authored "Neural MMO 2.0" (NeurIPS 2023)
-- Funded by a16z, Lionheart Ventures, and Plural
+The trust game and CvC are not the same task with a different state list.
 
-### MettaGrid (github.com/Metta-AI/mettagrid)
+- Trust game: repeated single-focal-agent social dilemma with explicit partner
+  identity and hidden partner type.
+- CvC: partially observed, tick-level, multi-agent territory control with role
+  specialization, shared reward, and token observations.
 
-MettaGrid is a high-performance C++ gridworld environment with Python bindings for studying emergent cooperation and social behaviors in multi-agent RL. Key specs:
+Because of that mismatch:
 
-- **Language**: C++ core with pybind11 Python bindings
-- **APIs**: PufferLib adapter (`MettaGridPufferEnv`) and PettingZoo adapter (`MettaGridPettingZooEnv`)
-- **Dependencies**: Python 3.12, Bazel 9.0+, C++20 compiler
-- **License**: MIT
-- **Author**: David Bloomin / Softmax organization
+- shared analysis only compares reward-centric summaries across backends
+- trust-specific and CvC-specific metrics are reported separately
+- we do not map CvC actions into fake `cooperate/defect` labels
 
-**Environment features**:
-- Gridworld with agents, walls, resources, custom objects
-- Resource management (energy, harvesting, capacity limits)
-- Combat system (weapon/armor/defense, freeze mechanics, loot transfer)
-- "Vibe" system — behavioral modes that determine interaction patterns
-- Configurable via Pydantic-based YAML configs
-- Procedural map generation (BSP, maze, spiral, wave function collapse)
-- Handler-based event system for composable game logic
+## Current Architecture
 
-### CoGames (github.com/Metta-AI/cogames)
+### Config model
 
-CoGames is Softmax's high-level benchmark platform built on MettaGrid. It provides the **Alignment League Benchmark (ALB)** — a tournament system for evaluating multi-agent cooperation.
+`affect_aif/benchmark/benchmark_config.py` now uses:
 
-- **Install**: `pip install cogames`
-- **CLI**: `cogames play`, `cogames missions`, `cogames upload`, `cogames login`
-- **API**: `CogVsClipsEnv(mission, num_agents)` with standard `reset()/step()`
-- **Flagship game**: "Cogs vs Clips" — cooperative territory control with role specialization (miner, aligner, scrambler, scout)
-- **Variant system**: Composable game rules that modify mechanics, victory conditions, etc.
-- **Policies**: URI-based system (`class=lstm`, `class=random`, custom policy classes)
-- **Tournament**: Season-based play-ins, team stages, leaderboard rankings
-- **Built-in baselines**: random, LSTM, starter_agent, plus scripted policies in cogames-agents
+- `backends: list[str]`
+- `agents: list[AgentSpec]`
+- `backend_configs: dict[str, dict]`
+- `observatory: dict | None`
 
-### cogames-agents (github.com/Metta-AI/cogames-agents)
+`AgentSpec` is backend-specific:
 
-Scripted baseline policies for CoGames: role-based (miner, scout, aligner, scrambler), CogsGuard variants, teacher policies. 85% Python / 12% Nim.
+- trust and toy-gridworld use registry-backed agents such as
+  `affective_shallow`, `random`, `pavlov`, `grim_trigger`
+- CvC uses explicit policy specs such as
+  `class=affect_aif.benchmark.cvc_policy.TeammateReliabilityPolicy`
 
-### Active Inference Connection
+Legacy config booleans (`run_trust_game`, `run_gridworld`) are still parsed for
+compatibility, but they are converted immediately into backend selections.
 
-Adam Goldstein (Softmax co-founder) published "Making the Thermodynamic Cost of Active Inference Explicit" with Chris Fields and Lars Sandved Smith. He worked in Michael Levin's lab on active inference agents before co-founding Softmax. The intellectual lineage from active inference to Softmax's "organic alignment" is direct.
+### Backends
 
-### Cortex (github.com/Metta-AI/cortex)
+- `affect_aif/benchmark/trust_backend.py`
+  Canonical trust benchmark backend. Reuses the current `ExperimentRunner`,
+  `TrustGameEnv`, and benchmark baseline agents.
+- `affect_aif/benchmark/cvc_local_backend.py`
+  Real local CvC backend. Launches `python3.12 -m affect_aif.benchmark.cvc_local_worker`.
+- `affect_aif/benchmark/toy_gridworld_backend.py`
+  Deprecated scripted adapter for old experiments only.
 
-Modular library for building recurrent backbones and agent memory systems. Relevant for understanding Softmax's agent architecture.
+### Shared record schema
 
-**Key difference from our trust game**: MettaGrid is a spatially-embedded, resource-management gridworld with continuous agent movement, combat, and open-ended dynamics. Our trust game is a structured repeated game with discrete actions (cooperate/defect) and explicit partner type inference. These are fundamentally different environment paradigms.
+All backends emit records with the shared fields:
 
----
+- `schema_version`
+- `backend`
+- `scenario`
+- `agent_name`
+- `seed`
+- `episode_id`
+- `step`
+- `reward`
 
-## Integration Options
+Backends may add extra columns:
 
-### Option A: MettaGrid as a Benchmark Environment (Full Integration)
+- trust: `payoff`, `partner_action`, `true_partner_type`, `type_switched`, etc.
+- CvC: `team_reward_mean`, `aligned_junctions`, `hearts_gained`,
+  role-specific gains, and other episode summaries
 
-**What**: Wrap our active inference agents to operate in MettaGrid, replacing the trust game environment entirely for benchmarking.
+## Trust Backend
 
-**Approach**:
-- Create an adapter layer in `affect_aif/environment/mettagrid_adapter.py` that translates MettaGrid observations/actions into our agent's expected interface
-- Map MettaGrid's resource-sharing and combat interactions to cooperation/defection signals
-- Run our agents (vanilla, affective, lesioned) in MettaGrid alongside RL baselines
+The trust backend is the main benchmark for the existing active-inference
+theory. It now includes:
 
-**Pros**:
-- Tests our agents in a richer, spatially-embedded environment
-- Enables direct comparison with RL agents trained in the same environment
-- MettaGrid's "vibe" system has conceptual overlap with our affect/precision tracking
-- Publication potential: "Active inference agents in multi-agent gridworlds"
+- Pavlov baseline
+- Grim Trigger baseline
+- benchmark JSON configs under `affect_aif/configs/`
+- scheduled-switch propagation through benchmark results
+- hard failure for the old `AIFPolicy` stubs instead of silently wrong behavior
 
-**Cons**:
-- **Major engineering lift**: Our agents expect structured POMDP observations (partner type beliefs, discrete actions); MettaGrid provides pixel/feature grid observations
-- Requires fundamentally rethinking the generative model — current A/B/C/D matrices don't map to gridworld dynamics
-- MettaGrid requires Bazel 9.0+, C++20, Python 3.12 — heavy dependency chain
-- Risk of scope creep: this is essentially a new research project, not a benchmark of the existing system
+Recommended trust configs:
 
-**Estimated effort**: 4-8 weeks of development
+- `affect_aif/configs/benchmark_default.json`
+- `affect_aif/configs/benchmark_betrayal.json`
+- `affect_aif/configs/benchmark_full.json`
 
-### Option B: MettaGrid-Inspired Trust Game Extension
+## Real CvC Backend
 
-**What**: Extract design patterns from MettaGrid to enrich our existing trust game environment while keeping our agent architecture intact.
+### Runtime split
 
-**Approach**:
-- Add resource management dynamics to the trust game (agents have "energy" budgets)
-- Add spatial partner selection (agents choose who to interact with based on proximity/history)
-- Add a "vibe" mechanism as an observable signal that maps to partner type
-- Implement as a new environment class `affect_aif/environment/enriched_trust_game.py`
+The main repo stays on Python 3.10. Real CoGames execution happens in Python
+3.12 because `cogames` requires `>=3.12,<3.13`.
 
-**Pros**:
-- Maintains our existing agent architecture and generative model
-- Adds ecological validity without breaking the POMDP structure
-- Incremental: can add features one at a time
-- Tests whether our findings generalize to richer dynamics
+The intended workflow is:
 
-**Cons**:
-- Not a direct benchmark against MettaGrid/Softmax's work
-- Still a custom environment, not a standard benchmark
+1. keep normal trust-game work in the project venv
+2. create a separate Python 3.12 environment for CoGames
+3. run the canonical benchmark CLI from the repo root
+4. let the `cvc_local` backend dispatch the worker process
 
-**Estimated effort**: 2-3 weeks
+### Policy shape
 
-### Option C: Parallel Benchmark Track (Recommended)
+The first real local CvC policy is:
 
-**What**: Create a clean benchmarking module that runs our agents in both our trust game and a simplified MettaGrid scenario, with a common metrics framework for comparison.
+- `affect_aif.benchmark.cvc_policy.TeammateReliabilityPolicy`
 
-**Approach**:
-1. Create `affect_aif/benchmark/` module with:
-   - `benchmark_runner.py` — orchestrates runs across environments
-   - `mettagrid_wrapper.py` — wraps MettaGrid's PettingZoo API into our agent interface
-   - `metrics.py` — common metrics (cooperation rate, partner inference accuracy, cumulative reward, social welfare)
-   - `baselines.py` — simple RL baselines (random, tit-for-tat, Q-learning) for comparison
+This is deliberately not called an active-inference policy. It is a rule-based
+team policy with shared per-teammate reliability tracking and role allocation.
 
-2. Design a **simplified MettaGrid scenario** focused on cooperation:
-   - Small grid, 4-8 agents, resource sharing task
-   - Map MettaGrid actions to {cooperate, defect, neutral}
-   - Track partner-specific interaction histories
+### Submission-compatible packaging
 
-3. Run our agent suite (C1-C12) in both environments, compare:
-   - Does per-partner precision tracking help in spatially-embedded settings?
-   - Does the affect advantage persist outside structured trust games?
-   - How do our agents compare to RL baselines on cooperation metrics?
+`affect_aif/benchmark/cvc_packaging.py` writes `policy_spec.json` bundles using
+the same class-path format the local backend already consumes. The goal is to
+avoid maintaining a separate “submission version” of the policy.
 
-**Pros**:
-- Clean separation: benchmarking code doesn't pollute core research code
-- Answers the generalizability question directly
-- Provides comparison against RL baselines
-- MettaGrid's PettingZoo API is the standard multi-agent interface
-- Publishable: "Does metacognitive precision tracking generalize beyond trust games?"
+## Observatory Integration
 
-**Cons**:
-- Still requires mapping between paradigms (gridworld → POMDP)
-- MettaGrid dependency adds build complexity
-- Simplified MettaGrid scenario may not capture full environment richness
+`affect_aif/benchmark/observatory.py` is a read-only client for:
 
-**Estimated effort**: 3-5 weeks
+- season discovery
+- season detail
+- leaderboard fetches
+- pool config fetches
+- compat-version validation
 
-### Option D: Evaluation-Only (Lightest Touch)
+This is intended for metadata, local validation, and future packaging checks.
+It does not log in, upload, or submit policies.
 
-**What**: Don't integrate MettaGrid into the codebase. Instead, document a comparison framework and run our agents against published MettaGrid baselines on shared metrics.
+## CLI
 
-**Approach**:
-- Use MettaGrid's published baseline results (Hugging Face: metta-ai/baseline.v0.5.2)
-- Define shared cooperation/social welfare metrics
-- Run our agents in our trust game, extract comparable metrics
-- Write a comparison analysis without code integration
-
-**Pros**:
-- No new dependencies
-- No engineering risk
-- Can be done immediately
-- Focuses effort on the current phase (Phase 3/4)
-
-**Cons**:
-- Not a direct comparison (different environments)
-- Less compelling than running in the same environment
-- Doesn't test generalizability
-
-**Estimated effort**: 1 week
-
----
-
-## Recommendation
-
-**Option C (Parallel Benchmark Track)** balances rigor with feasibility. It:
-- Keeps the core codebase clean (new `benchmark/` module)
-- Actually tests generalizability in MettaGrid
-- Provides RL baselines for comparison
-- Doesn't require rearchitecting the generative model
-- Produces a clear publishable result
-
-However, this should be **Phase 5+ work** — after the current theory tightening (Phase 3) and variational beta extension (Phase 4) are complete. The current trust game results are the foundation; MettaGrid benchmarking extends the story.
-
-If you want something sooner, **Option D** can be done in parallel with current phase work as a documentation exercise.
-
----
-
-## Implementation Status (Option C Selected)
-
-The parallel benchmark track has been implemented in `affect_aif/benchmark/`. All components work without CoGames/MettaGrid installed (optional dependencies).
-
-### Module Structure
-
-```
-affect_aif/benchmark/
-    __init__.py                  # Lazy imports, availability checks
-    compat.py                    # Optional dependency guards
-    baselines.py                 # RandomAgent, TitForTatAgent, WinStayLoseShiftAgent, QLearningAgent
-    common_metrics.py            # cooperation_rate, cumulative_payoff, type_id_accuracy, etc.
-    interaction_tracker.py       # Classifies gridworld events as cooperate/defect
-    observation_encoder.py       # Gridworld state -> POMDP observation
-    cogames_adapter.py           # CoGamesTrustAdapter: gridworld -> trust game interface
-    scenarios.py                 # Predefined cooperation scenarios
-    scripted_partners.py         # Cooperator/reciprocator/exploiter gridworld policies
-    aif_policy.py                # Wraps AIF agents as CoGames-compatible policies
-    benchmark_config.py          # BenchmarkConfig + agent registry
-    benchmark_runner.py          # Orchestrates cross-environment runs
-    comparison.py                # Transfer analysis and reporting
-
-scripts/run_benchmark.py         # CLI entry point
-```
-
-### Usage
+### Run benchmarks
 
 ```bash
-# Run with baselines only (no external deps needed)
-python scripts/run_benchmark.py --agents random tit_for_tat --replications 5 --rounds 50
-
-# Compare AIF agents against baselines in both environments
-python scripts/run_benchmark.py --agents affective_shallow shallow_no_affect random tit_for_tat \
-    --replications 10 --rounds 100 --output-dir results/benchmark
-
-# Trust game only
-python scripts/run_benchmark.py --trust-game-only --agents affective_shallow random
-
-# From config file
-python scripts/run_benchmark.py --config benchmark_config.json
+python scripts/run_benchmark.py --backend trust --config affect_aif/configs/benchmark_default.json
+python scripts/run_benchmark.py --backend trust --agents affective_shallow random tit_for_tat --rounds 50 --replications 3
+python scripts/run_benchmark.py --backend cvc_local --agents teammate_reliability starter --mission machina_1 --max-steps 250 --python-bin python3.12
 ```
 
-### Available Agents
+### Analyze benchmark results
 
-| Name | Type | Description |
-|------|------|-------------|
-| `deep_no_affect` | AIF (C1) | Deep planner, no affect |
-| `affective_shallow` | AIF (C2) | Shallow + per-partner precision tracking |
-| `lesioned_shallow` | AIF (C3) | Shallow + affect but decoupled |
-| `shallow_no_affect` | AIF (C4) | Shallow baseline |
-| `reward_avg_shallow` | AIF (C5) | Shallow + reward averaging |
-| `alexithymia` | AIF (C9) | Blunted affect pathology |
-| `borderline` | AIF (C10) | Volatile affect pathology |
-| `depression` | AIF (C11) | Low baseline beta pathology |
-| `random` | Baseline | Uniform random |
-| `tit_for_tat` | Baseline | Mirror partner's last action |
-| `win_stay_lose_shift` | Baseline | Repeat on win, switch on loss |
-| `q_learning` | Baseline | Per-partner tabular Q-learner |
+```bash
+python scripts/analyze_benchmark.py --results results/benchmark/benchmark_results.csv
+```
 
-### Scenarios
+Outputs are written next to the CSV by default:
 
-| Name | Grid | Partners | Description |
-|------|------|----------|-------------|
-| `resource_sharing` | 16x16 | 4 | Standard cooperation test |
-| `betrayal_arena` | 16x16 | 2 | Partner switches from cooperator to exploiter |
-| `large_group` | 32x32 | 8 | Scaling test |
+- `benchmark_shared_summary.csv`
+- `benchmark_trust_summary.csv`
+- `benchmark_cvc_summary.csv`
+- `benchmark_report.txt`
 
-### Next Steps
+## Notes
 
-1. **Install CoGames**: `pip install cogames` and test full gridworld integration
-2. **Run first benchmark**: Compare C1/C2/C4 against baselines in both environments
-3. **Tune ticks_per_round**: Sensitivity analysis of temporal bridging parameter
-4. **Submit to Alignment League**: Wrap AIF policy for leaderboard submission
-5. **Publish comparison**: "Does metacognitive precision tracking generalize beyond trust games?"
-
----
-
-## Decision Points
-
-1. **Which option?** A (full), B (inspired extension), C (parallel benchmark), or D (evaluation-only)
-2. **When?** Now (pausing current phase work) or later (Phase 5+)
-3. **MettaGrid scenario design**: If C, what cooperation scenario should we design in MettaGrid?
-4. **RL baselines**: Which baselines to include for comparison?
-
----
-
-## Sources
-
-- [Softmax — Scaling Alignment](https://softmax.com/)
-- [Softmax, Emmett Shear's new AI startup (LessWrong)](https://www.lesswrong.com/posts/QGQiCuE33iHFv9jkv/softmax-emmett-shear-s-new-ai-startup-focused-on-organic)
-- [Core Memory: Emmett Shear Is Back](https://www.corememory.com/p/exclusive-emmett-shear-is-back-with-softmax)
-- [MettaGrid on PyPI](https://pypi.org/project/mettagrid/)
-- [Metta-AI/mettagrid on GitHub](https://github.com/Metta-AI/mettagrid)
-- [David Bloomin's site](https://daveey.github.io/)
-- [Crunchy AI: Softmax's organic alignment](https://getcoai.com/news/crunchy-ai-softmaxs-organic-alignment-approach-draws-from-nature-to-reimagine-ai-human-collaboration/)
-- [Emmett Shear on AI Alignment (ODSC)](https://odsc.medium.com/emmett-shear-on-ai-alignment-agency-and-raising-a-new-intelligence-f72d9f0f106b)
+- Do not claim cross-environment “transfer” based on `toy_gridworld`.
+- Do not reinterpret the CvC policy as an AIF agent unless a real generative
+  model and inference loop are added later.
+- Keep trust-specific hypothesis reads in trust analyses and use reward /
+  coordination summaries for cross-backend comparisons.

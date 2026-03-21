@@ -25,8 +25,8 @@ def require_cogames():
     """Raise ImportError with install instructions if cogames is missing."""
     if not cogames_available():
         raise ImportError(
-            "cogames is required for benchmark mode. "
-            "Install with: pip install cogames"
+            "cogames is required for the real cvc_local backend and needs Python 3.12. "
+            "Install with a Python 3.12 environment, for example: python3.12 -m pip install cogames"
         )
 
 

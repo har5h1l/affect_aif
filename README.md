@@ -24,6 +24,10 @@ python scripts/run_analysis.py --results results/main_run/default/results.csv --
 python scripts/run_analysis.py --results results/main_run/betrayal_stress/results.csv --output-dir results/main_run/betrayal_stress/figures
 # optional: regenerate GIFs from saved results
 python scripts/run_visualization.py --results results/main_run/default/results.csv --output-dir results/main_run/default/gifs
+# benchmark trust backend
+python scripts/run_benchmark.py --config affect_aif/configs/benchmark_default.json
+# benchmark analysis
+python scripts/analyze_benchmark.py --results results/benchmark/benchmark_results.csv
 ```
 
 `results/` is reserved for local run outputs and analysis artifacts. `scripts/run_experiment.py` writes each batch into `results/<batch>/<config>/`, including `results.csv`, a copied `config.json`, batch metadata, and optional `gifs/`. The directory is kept in the repo via `results/.gitkeep`, but generated CSVs, plots, GIFs, and summaries are ignored.
@@ -37,10 +41,12 @@ python scripts/run_visualization.py --results results/main_run/default/results.c
 - `affect_aif/experiment`: configs, condition factory, logging, and runner
 - `affect_aif/analysis`: metrics, statistics, and plotting
 - `tests`: unit and integration coverage
+- `affect_aif/benchmark`: backend-aware benchmark runners, baselines, and CvC integration helpers
 
 ## Notes
 
 - Default experiments use exact policy enumeration when tractable.
+- Benchmarks now run through explicit backends. `trust` is the canonical benchmark for current AIF claims; `cvc_local` is the real CoGames/CvC path and requires Python 3.12 for `cogames`.
 - Trust-game policy evaluation now uses observation-branching sophisticated inference rather than a mean-field rollout approximation.
 - When the policy space explodes, the control layer can fall back to capped enumeration.
 - Full runs floor `calibration_episodes` at `10` when deriving `mu`, so affective comparisons do not hinge on a `2-3` episode calibration draw.
