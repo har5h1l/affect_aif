@@ -127,6 +127,7 @@ These are absolute rules that never bend:
 6. **Commit at checkpoints**: After any working code change + passing tests, commit. After any completed experiment + analysis, commit
 7. **Preserve the hypothesis scorecard**: The scorecard in `docs/results_tracking.md` is the ground truth. Update it with evidence, not speculation
 8. **Save results incrementally**: When running experiments, use partial saves (e.g., `_partial.csv`) during long runs so that a crash or OOM doesn't lose all progress. Scripts like `run_clinical_incremental.py` and `run_comparison.py` already do this — follow the same pattern for any new experiment scripts
+9. **No orchestration infrastructure in this repo.** Syncing, deployment, conductor scripts, and cloud operations belong in the mango repo only. This repo contains only project code, configs, tests, and results.
 
 ### When to Stop and Ask
 
