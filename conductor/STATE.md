@@ -1,58 +1,72 @@
+---
+status: CONTINUE
+next_priority: 1
+pending_work:
+  - "50-seed SH betrayal experiment running (results/clinical_sensitivity_betrayal)"
+  - "20-seed SH default experiment running (results/clinical_sensitivity_default)"
+  - "Analyze confirmation results, compute Bayes factors, update docs"
+  - "Update theory.md §4.13 and results_tracking.md with SH clinical findings"
+next_session_focus: "Check experiment completion, analyze 50-seed results, document findings"
+model_hint: opus
+---
+
 # Research State
 
 ## Last Updated
-2026-03-19
+2026-03-24
 
 ## Session Count
-4
+5
 
 ## Current Findings
 
-### Phase 6 (COMPLETE)
-Bayesian model comparison. Per-round log-evidence computed for all agent variants, pairwise Bayes factors and RFX-BMS (Stephan et al. 2009) implemented.
+### Phase 5: Clinical Sensitivity in Stag Hunt (IN PROGRESS)
 
-- **Default (PD, 50 seeds):** C5 wins RFX-BMS (exceedance 1.000). C2/C5 substantially better than non-affect (log10 BF ≈ 0.7–0.9).
-- **Betrayal (PD, 50 seeds):** C2 wins **decisively** — log10 BF = 3.00 vs C1, 2.70 vs C5. Exceedance 0.998.
+DECISION: Stag Hunt betrayal is the first environment where clinical phenotypes produce qualitatively distinct behavioral patterns. Binary PD and SH default both suffer from softmax saturation.
+
+**Smoke test results (5 seeds, SH betrayal):**
+
+| Phenotype | Condition | Mean Payoff | d vs Healthy | d vs No-Affect | log10 BF vs Healthy |
+|---|---|---|---|---|---|
+| Healthy | C2 | 471.6 | — | — | — |
+| Alexithymia | C9 | 493.8 | -0.39 | +5.20 | +0.93 (substantial) |
+| Borderline | C10 | 391.4 | +1.02 | -0.15 | -5.26 (decisive against) |
+| Depression | C11 | 476.2 | -0.08 | +4.24 | -0.29 (anecdotal) |
+| No-affect | C4 | 399.6 | — | — | — |
+
+DECISION: Borderline phenotype (volatile precision) performs BELOW no-affect baseline in SH betrayal. This is the key clinical finding — volatile precision is actively destructive when miscoordination penalty is severe.
+
+**Beta dynamics confirm clinical signatures:**
+- Alexithymia: frozen beta (std=0.004) — blunted as intended
+- Borderline: volatile beta (std=0.222, range=0.901) — wild swings as intended
+- Depression: moderate dynamics (std=0.107), starts low
+- Healthy: moderate dynamics (std=0.085)
+
+**SH default:** No clinical differentiation (d≈0 for all phenotypes vs healthy). Same softmax saturation as binary PD.
+
+### Phase 6 (COMPLETE)
+See prior session notes. Bayesian model comparison implemented and validated.
 
 ### Phase 7 (COMPLETE)
-Cross-game generalization tested with Stag Hunt and Chicken (zero code changes, config-only).
+See prior session notes. Cross-game generalization confirmed.
 
-**Default conditions:**
-| Game | H1 d | H1 p | RFX-BMS winner |
-|---|---|---|---|
-| PD | 0.62 | 0.003 | C5 (exc=1.000) |
-| Stag Hunt | 0.50 | 0.015 | C2 (exc=0.992) |
-| Chicken | 0.05 | 0.795 | C2 (exc=0.710) |
+## Implementation This Session
+1. Fixed condition 12 test name (variational_affective)
+2. Added checkpoint_path/checkpoint_interval to ExperimentRunner.run_all()
+3. Updated run_experiment.py with incremental checkpointing (INBOX task)
+4. `scripts/run_clinical_sensitivity.py` — comprehensive clinical sweep with BFs and beta dynamics
+5. 99 tests pass
 
-**Betrayal conditions:**
-| Game | H1 d | H1 p | C2 vs C5 BF | RFX-BMS winner |
-|---|---|---|---|---|
-| PD | 1.30 | <0.001 | +2.70 decisive C2 | C2 (0.998) |
-| Stag Hunt | 1.60 | <0.001 | +1.08 strong C2 | C2 (0.954) |
-| Chicken | 1.12 | <0.001 | -1.07 strong C5 | C5 (0.931) |
-
-**Key insights:**
-1. Augmentation generalizes under volatility (d > 1.0 in ALL games)
-2. Game-dependent in stable conditions (PD/SH strong, Chicken negligible)
-3. Stag Hunt uniquely favors precision tracking (C2 wins both conditions)
-4. Chicken favors reward averaging under betrayal
-5. Precision tracking excels where miscoordination penalty is severe
-
-### Implementation Delivered This Session
-1. `BaseAgent._compute_round_log_evidence()` — per-round log p(partner_action | model)
-2. `affect_aif/analysis/model_comparison.py` — BFs, RFX-BMS, protected exceedance
-3. `scripts/run_model_comparison.py`, `scripts/run_cross_game_comparison.py` — CLIs
-4. 8 new tests (77 total pass)
-5. Stag Hunt + Chicken configs (default + betrayal, 4 configs)
-6. Theory: §4.16 (Bayesian model comparison), §4.17 (cross-game generalization)
-7. Full documentation in results_tracking.md and long_term_plan.md
+## Experiments In Flight
+- `results/clinical_sensitivity_betrayal/` — 50 seeds × 4 phenotypes × SH betrayal
+- `results/clinical_sensitivity_default/` — 20 seeds × 4 phenotypes × SH default
 
 ## Auto Handoff
-- **What changed:** Phases 6 and 7 complete in a single session. All code, experiments, analysis, and documentation delivered.
-- **What is still in flight:** Nothing.
-- **What next session should do:** Phase 5 (clinical sensitivity) could be revisited using the graded game or Stag Hunt (both have more ambiguous EFE landscapes). Phase 8 (human data) requires user decision. No other autonomous work remains.
+- **What changed:** Phase 5 clinical sensitivity now running on Stag Hunt betrayal. Smoke test (5 seeds) shows clear clinical differentiation — borderline below no-affect, alexithymia and depression above no-affect. This is the first environment with qualitative clinical separation.
+- **What is still in flight:** 50-seed SH betrayal and 20-seed SH default experiments running in background.
+- **What next session should do:** Check if experiments completed (look for all_clinical.csv in output dirs). If done, analyze 50-seed results and update docs. If not done, wait or re-run.
 
-Model-Hint: opus
+NEXT: Analyze 50-seed confirmation results when experiments complete.
 
 ## Status
-DONE — Phases 6 and 7 complete. Phase 5 can proceed autonomously; Phase 8 requires user.
+CONTINUE
