@@ -62,9 +62,16 @@ def _serial_single_config_run(args) -> int:
     config.gif_after_run = False
     config.gif_output_dir = None
     runner = ExperimentRunner(config)
-    results = runner.run_all(config_path=config_path, config_name=config_name, batch_id=batch_id)
-
     config_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_path = str(config_dir / "results_partial.csv")
+    results = runner.run_all(
+        config_path=config_path,
+        config_name=config_name,
+        batch_id=batch_id,
+        checkpoint_path=checkpoint_path,
+        checkpoint_interval=1,
+    )
+
     runner.save_results(results, str(results_path))
     config.to_json(str(config_copy_path))
     metadata_path.write_text(

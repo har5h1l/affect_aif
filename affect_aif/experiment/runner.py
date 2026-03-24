@@ -438,13 +438,23 @@ class ExperimentRunner:
         config_path: str | None = None,
         config_name: str | None = None,
         batch_id: str | None = None,
+        checkpoint_path: str | None = None,
+        checkpoint_interval: int = 1,
     ) -> pd.DataFrame:
-        """Run all configured conditions across all seeds."""
+        """Run all configured conditions across all seeds.
+
+        Args:
+            checkpoint_path: If set, save partial results to this path after every
+                ``checkpoint_interval`` replications per condition.
+            checkpoint_interval: How often (in replications) to write a checkpoint.
+                Defaults to 1 (save after every replication).
+        """
 
         if self.needs_mu_calibration():
             self.calibrate_mu(enforce_minimum=True)
 
         records: list[dict] = []
+        reps_since_checkpoint = 0
         for condition in self.config.conditions:
             self.progress.emit(
                 "condition_start",
@@ -464,6 +474,10 @@ class ExperimentRunner:
                         batch_id=batch_id,
                     )
                 )
+                reps_since_checkpoint += 1
+                if checkpoint_path and reps_since_checkpoint >= checkpoint_interval:
+                    self.save_results(pd.DataFrame(records), checkpoint_path)
+                    reps_since_checkpoint = 0
             self.progress.emit(
                 "condition_end",
                 condition=condition,
