@@ -256,6 +256,85 @@ def analyze_results(combined: pd.DataFrame, output_dir: Path):
     return results_df
 
 
+def analyze_betrayal_windows(combined: pd.DataFrame, output_dir: Path):
+    """Analyze clinical phenotype differences across betrayal windows.
+
+    Windows: pre-betrayal (20-29), impact (30-39), early-recovery (40-49),
+    late-recovery (60-79), late (90-119).
+    """
+    from scipy import stats
+
+    betrayal_data = combined[combined["scenario"].str.contains("betrayal")]
+    if len(betrayal_data) == 0:
+        print("No betrayal data — skipping window analysis.")
+        return None
+
+    windows = {
+        "pre_betrayal": (20, 29),
+        "impact": (30, 39),
+        "early_recovery": (40, 49),
+        "late_recovery": (60, 79),
+        "late": (90, 119),
+    }
+
+    results = []
+    for window_name, (start, end) in windows.items():
+        window_data = betrayal_data[
+            (betrayal_data["round"] >= start) & (betrayal_data["round"] <= end)
+        ]
+        if len(window_data) == 0:
+            continue
+
+        window_payoffs = (
+            window_data.groupby(["phenotype", "condition", "seed"])["payoff"]
+            .mean()
+            .reset_index()
+        )
+
+        healthy_c2 = window_payoffs[
+            (window_payoffs["phenotype"] == "healthy") & (window_payoffs["condition"] == 2)
+        ]["payoff"].values
+
+        for phenotype in ["alexithymia", "borderline", "depression"]:
+            cond = {"alexithymia": 9, "borderline": 10, "depression": 11}[phenotype]
+            clinical = window_payoffs[
+                (window_payoffs["phenotype"] == phenotype) & (window_payoffs["condition"] == cond)
+            ]["payoff"].values
+
+            if len(clinical) < 2 or len(healthy_c2) < 2:
+                continue
+
+            pooled_std = np.sqrt((healthy_c2.std() ** 2 + clinical.std() ** 2) / 2)
+            d = (healthy_c2.mean() - clinical.mean()) / pooled_std if pooled_std > 0 else 0
+            _, p = stats.ttest_ind(clinical, healthy_c2)
+
+            results.append({
+                "window": window_name,
+                "phenotype": phenotype,
+                "condition": cond,
+                "clinical_mean": clinical.mean(),
+                "healthy_mean": healthy_c2.mean(),
+                "d_vs_healthy": d,
+                "p_vs_healthy": p,
+            })
+
+    if results:
+        df = pd.DataFrame(results)
+        df.to_csv(output_dir / "clinical_betrayal_windows.csv", index=False)
+        print("\nBetrayal window analysis (d vs healthy C2):")
+        for window_name in windows:
+            wdf = df[df["window"] == window_name]
+            if len(wdf) == 0:
+                continue
+            parts = []
+            for _, row in wdf.iterrows():
+                sig = "*" if row["p_vs_healthy"] < 0.05 else ""
+                parts.append(f"{row['phenotype']}={row['d_vs_healthy']:+.2f}{sig}")
+            print(f"  {window_name}: {', '.join(parts)}")
+        return df
+    return None
+
+
 def compute_clinical_bayes_factors(combined: pd.DataFrame, output_dir: Path):
     """Compute Bayes factors: each clinical phenotype vs healthy C2."""
     if "cumulative_log_evidence" not in combined.columns:
@@ -429,6 +508,7 @@ def main():
 
         stats_df = analyze_results(combined, output_dir)
         compute_clinical_bayes_factors(combined, output_dir)
+        analyze_betrayal_windows(combined, output_dir)
         compute_beta_dynamics(combined, output_dir)
 
         metadata["end_time"] = time.strftime("%Y-%m-%d %H:%M:%S")
