@@ -54,20 +54,29 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 **Entry condition:** Phase 3 paper draft is stable.
 
-### Phase 5: Clinical Sensitivity Analysis
+### Phase 5: Clinical Sensitivity Analysis (complete)
 
-**Goal:** Treat clinical phenotypes (vmPFC lesion, alexithymia, anxiety) as sensitivity analysis over model parameters, with clinical interpretation.
+**Goal:** Treat clinical phenotypes (vmPFC lesion, alexithymia, borderline, depression) as sensitivity analysis over model parameters, with clinical interpretation.
 
 **Scope:**
 
 - vmPFC lesion: ablate affect entirely (Condition 3 is already this).
-- Alexithymia: reduce precision of the affective channel (high lambda, low responsiveness).
-- Anxiety: inflate negative prediction errors or bias beta downward.
+- Alexithymia: reduce precision of the affective channel (alpha_charge=0.1, blunted responsiveness).
+- Borderline: volatile affective dynamics (alpha_charge=12.0, lambda_smooth=0.5).
+- Depression: persistently low baseline precision (initial_beta=0.2).
 - Map parameter regimes to behavioral signatures and compare with clinical literature.
 
-**Preliminary result:** A systematic exploration across four experimental designs found that the current trust game is too unambiguous for clinical differentiation. The EFE landscape has a median best-vs-second-best policy gap of 10.83 (softmax saturation), making parameter perturbations behaviorally inert. Beta dynamics differentiate correctly (alexithymia freezes, borderline oscillates, depression starts low and recovers) but don't translate to payoff or action differences. Max effect: 0.5% of total payoff. See `results/clinical_sensitivity_synthesis.md`.
+**Preliminary result (binary PD):** Softmax saturation (EFE gap ~10.83) made clinical parameter variations behaviorally inert. Beta dynamics differentiated correctly but max effect was 0.5% of total payoff.
 
-**Revised entry condition:** Phase 7 (richer tasks) must provide environments with more ambiguous EFE landscapes before clinical sensitivity can be meaningfully tested. The parameter space has the right structure; the task doesn't amplify it.
+**Resolution (Stag Hunt betrayal, 50 seeds):** The Stag Hunt's severe miscoordination penalty makes precision accuracy maximally decision-relevant, amplifying clinical parameter effects:
+
+- **Borderline: significantly impaired** (d=0.72 vs healthy, p<0.001, log10 BF=-2.89 decisive). Volatile precision tracking produces noisy partner predictions → frequent miscoordination. First statistically significant clinical differentiation.
+- **Alexithymia: ≈ healthy** (d=-0.20, p=0.32). Frozen beta is paradoxically protective — stable (if flat) partner predictions avoid miscoordination.
+- **Depression: mild impairment** (BF=-0.66 substantial, p=0.51 frequentist null). Low initial beta creates transient vulnerability that washes out.
+
+**Key insight:** Miscoordination cost amplifies the consequences of precision volatility. The same clinical parameter regime produces different behavioral signatures in different game environments — the model predicts task-dependent clinical presentations.
+
+**Phase 5 status: COMPLETE.** See `docs/theory.md` §4.18 and `docs/results_tracking.md` §Phase 5.
 
 ### Phase 6: Bayesian Model Comparison (in progress)
 
@@ -127,8 +136,9 @@ Used the betrayal-stress setup as the primary mechanism diagnostic. Established 
 
 ## Operational Summary
 
-- **Completed:** Phases 1–4 (primary results, exploiter deep-dive, theory tightening, variational beta), Phase 6 (Bayesian model comparison), and Phase 7 (cross-game generalization).
+- **Completed:** Phases 1–7 (primary results, exploiter deep-dive, theory tightening, variational beta, clinical sensitivity, Bayesian model comparison, cross-game generalization).
+- **Phase 5 key finding:** Stag Hunt betrayal produces first qualitative clinical differentiation. Borderline significantly impaired (d=0.72, BF=-2.89 decisive), alexithymia ≈ healthy (frozen precision is protective), depression mildly impaired. Miscoordination cost amplifies precision volatility effects.
 - **Phase 6 key finding:** C2 is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5).
 - **Phase 7 key finding:** Augmentation generalizes across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **Remaining:** Phase 5 (clinical sensitivity) is blocked by binary-game softmax saturation — needs graded or richer game. Phase 8 (human data) requires user approval.
-- **Stop point:** Phase 8 (human data) requires user approval. All other phases complete or blocked.
+- **Remaining:** Phase 8 (human data) requires user approval.
+- **Stop point:** Phase 8 (human data) requires user approval. All other phases complete.
