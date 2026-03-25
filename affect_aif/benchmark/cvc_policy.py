@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Iterable, Optional
 
 from mettagrid.policy.policy import MultiAgentPolicy, StatefulAgentPolicy, StatefulPolicyImpl
 from mettagrid.policy.policy_env_interface import PolicyEnvInterface
 from mettagrid.simulator import Action
 from mettagrid.simulator.interface import AgentObservation
+
+from affect_aif.benchmark.cvc_navigation import NavigationHelper, NavigationState
 
 GEAR = ("aligner", "scrambler", "miner", "scout")
 ELEMENTS = ("carbon", "oxygen", "germanium", "silicon")
@@ -20,6 +22,7 @@ WANDER_STEPS = 8
 class ReliabilityCogState:
     wander_direction_index: int = 0
     wander_steps_remaining: int = WANDER_STEPS
+    nav: NavigationState = field(default_factory=NavigationState)
 
 
 class TeamReliabilityCoordinator:
@@ -66,6 +69,7 @@ class TeammateReliabilityPolicyImpl(StatefulPolicyImpl[ReliabilityCogState]):
         self._action_name_set = set(self._action_names)
         self._fallback_action_name = "noop" if "noop" in self._action_name_set else self._action_names[0]
         self._center = (policy_env_info.obs_height // 2, policy_env_info.obs_width // 2)
+        self._nav = NavigationHelper(policy_env_info.obs_height, policy_env_info.obs_width, self._center)
         self._tag_name_to_id = {name: idx for idx, name in enumerate(policy_env_info.tags)}
         self._gear_station_tags_by_gear = {gear: self._resolve_tag_ids([f"c:{gear}"]) for gear in GEAR}
         self._gear_station_tags = set().union(*self._gear_station_tags_by_gear.values())
@@ -175,6 +179,9 @@ class TeammateReliabilityPolicyImpl(StatefulPolicyImpl[ReliabilityCogState]):
         episode_pct = self._global_value(obs, "episode_completion_pct", default=0.0)
         self._coordinator.update(self._agent_id, reward_signal=reward_signal, moved=moved)
 
+        # Update navigation state from movement result
+        state.nav = self._nav.update_position(state.nav, moved)
+
         desired_role = self._coordinator.desired_role(self._agent_id, episode_pct=episode_pct)
         gear = self._current_gear(items)
         cargo = sum(items.get(element, 0) for element in ELEMENTS)
@@ -194,10 +201,28 @@ class TeammateReliabilityPolicyImpl(StatefulPolicyImpl[ReliabilityCogState]):
             target_tags = self._gear_station_tags_by_gear.get(desired_role, self._gear_station_tags)
 
         target_location = self._closest_tag_location(obs, target_tags)
-        return self._move_toward(state, target_location)
+
+        # Try BFS pathfinding first
+        action_name = self._nav.pathfind_toward(obs, state.nav, target_location)
+
+        # Fall back to exploration if no path or no target
+        if action_name is None:
+            action_name = self._nav.explore_action(obs, state.nav)
+
+        # Fall back to greedy movement if pathfinding/exploration both fail
+        if action_name is None:
+            action, state = self._move_toward(state, target_location)
+            state.nav.last_action_name = action.name if hasattr(action, "name") else None
+            return action, state
+
+        state.nav.last_action_name = action_name
+        return self._action(action_name), state
 
     def initial_agent_state(self) -> ReliabilityCogState:
-        return ReliabilityCogState(wander_direction_index=self._agent_id % len(WANDER_DIRECTIONS))
+        return ReliabilityCogState(
+            wander_direction_index=self._agent_id % len(WANDER_DIRECTIONS),
+            nav=self._nav.initial_state(),
+        )
 
 
 class TeammateReliabilityPolicy(MultiAgentPolicy):
