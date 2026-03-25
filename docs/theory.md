@@ -53,7 +53,15 @@ Existing multi-agent AIF work covers several dimensions of the problem:
 
 - **Factorized multi-agent models.** Ruiz-Serra et al. (2025) maintain separate belief distributions over each partner's internal states, enabling strategic reasoning in multi-player games.
 
-What is absent across all of this work: a per-partner metacognitive affective state that compresses interaction history into a precision signal, provides orthogonal augmentation beyond what explicit planning depth alone recovers, and whose ablation reproduces the somatic marker deficit pattern.
+These approaches define three distinct computational strategies for social cognition that form a triple dissociation:
+
+1. **Outside-in empathy** (Pitliya et al., 2025; Matsumura et al., 2024): Agents couple their generative models so that one agent's affective or perceptual states directly inform another's inference. The computational direction flows from partner to self.
+
+2. **Cognitive theory of mind** (Yoshida et al., 2008; Friston & Frith, 2015): Agents maintain an explicit model of the partner's inference process, recursively simulating their beliefs and policies.
+
+3. **Inside-out metacognitive monitoring** (this work): The agent tracks the reliability of its own predictive model for each partner, without modeling the partner's internal states or coupling to their generative process.
+
+This triple dissociation — outside-in empathy, cognitive ToM, and inside-out precision monitoring — carves the space of social inference mechanisms at its computational joints. What is absent across the existing approaches: a per-partner metacognitive affective state that compresses interaction history into a precision signal, provides orthogonal augmentation beyond what explicit planning depth alone recovers, and whose ablation reproduces the somatic marker deficit pattern.
 
 ---
 
