@@ -1,10 +1,10 @@
 # Research State
 
 ## Last Updated
-2026-03-24
+2026-03-25
 
 ## Session Count
-7
+8 (session 8 discarded — ran stale mission due to server master not being updated before mango run)
 
 ## Current Findings
 
@@ -19,9 +19,9 @@ All trust-game phases are complete with publication-quality results:
 
 ### Session 7 Output: Stag Hunt Clinical Sensitivity (2026-03-24)
 
-**Note:** Session 7 ran the OLD mission (Phase 5 autonomous) because the four-track MISSION.md was not committed before `mango run` synced to the server. The session produced useful new data but needs to be merged.
+**Note:** Session 7 ran the OLD mission (Phase 5 autonomous) because the four-track MISSION.md was not committed before `mango run` synced to the server. Session 8 (`mango/affect_aif/20260324-212712`) duplicated this work because the server's local master was stale — discarded.
 
-**Branch:** `origin/mango/affect_aif/20260324-143607` (9 commits, NOT merged to master)
+**Branch:** `origin/mango/affect_aif/20260324-143607` — MERGED to master at `ba42b00`.
 
 **Stag Hunt betrayal results (50 seeds x 120 rounds) — first env with stat-sig between-clinical differentiation:**
 
@@ -43,16 +43,7 @@ Key findings:
 
 Beta dynamics: alexithymia frozen (vol=0.003), borderline volatile (vol=0.185), depression moderate (vol=0.103), healthy moderate (vol=0.085)
 
-**Branch contents (to merge):**
-- `scripts/run_clinical_sensitivity.py` (520 lines) — comprehensive clinical sweep with BFs, beta dynamics, window analysis
-- `scripts/analyze_clinical_results.py` — standalone post-hoc analysis
-- `affect_aif/experiment/runner.py` — refactored (inlined factory, improved checkpointing)
-- `tests/test_discrete_beta.py` — 244 lines of Phase 4 tests
-- `docs/theory.md` §4.18 — clinical sensitivity in coordination games
-- `docs/results_tracking.md` — Phase 5 SH results
-- Results CSVs in worktree on server: `/private/tmp/mango-worktree-affect_aif-20260324_143607-12360/results/`
-
-**Merge plan:** Cherry-pick code/doc changes from branch. Keep our MISSION/STATE/future_work/long_term_plan (four-track plan). Conflicts expected in conductor/ and docs/long_term_plan.md only.
+**Merged contents:** scripts/run_clinical_sensitivity.py, scripts/analyze_clinical_results.py, runner.py refactor, discrete_state.py, discrete_affective_agent.py, tests/test_discrete_beta.py, theory.md §4.19 (SH coordination games), results_tracking.md Phase 5. 183 tests pass.
 
 ### CoGames/CvC Benchmark Integration (IN PROGRESS)
 
@@ -139,8 +130,11 @@ Identified issues for the user to handle separately:
 8. No mechanism for marking known/authored papers (Pitliya 2025 surfaced as new)
 9. Context assembly step invisible — no logging of what was included in sweep context
 
+## Mango Sync Lesson
+`mango run --cloud server` does NOT update the server's local master from origin. Must run `ssh server 'cd <repo> && git fetch origin && git merge origin/master --ff-only'` before launching, or the session will branch from stale state. Server master updated to `63d221c` on 2026-03-25.
+
 ## Auto Handoff
-- **What changed:** Session 7 branch merged into master. SH clinical sensitivity results (theory §4.19, results_tracking Phase 5), runner refactor, discrete beta module, new scripts, 183 tests passing. Four-track plan is now the active mission.
+- **What changed:** Sessions 7+8 both ran stale mission. Session 7 merged (SH clinical results). Session 8 discarded (duplicate). Server master now synced. Four-track plan is the active mission. 183 tests pass.
 - **What is still in flight:** All four tracks. No merge debt.
 - **What next session should do:**
   1. Start Track 2.1: examine CvC observation format (`affect_aif/benchmark/cvc_policy.py`, cogames docs), implement `PathfindingMixin` in `affect_aif/benchmark/cvc_navigation.py`, wire into `TeammateReliabilityPolicy`, smoke-test (3 seeds, 1000 steps, target >0 aligned junctions)
