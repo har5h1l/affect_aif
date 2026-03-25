@@ -16,13 +16,20 @@ This document provides comprehensive system documentation for AI agents operatin
 - If configs or scripts change, update the README or implementation notes so the runnable workflow stays accurate.
 - If tests reveal a theory/code mismatch, fix both the implementation and the docs before closing the task.
 
-## Learned
+## Learned User Preferences
+
+- Before updating result-interpretation docs from new experiment outputs, ask the user first.
+- When the user asks about branch state, merge readiness, or pruning stale remote branches, run git (fetch or prune as needed) and summarise concrete outputs instead of only listing commands.
+- For conductor-driven research, treat the active mission file as the source of truth for phase autonomy; do not default to “blocked” framing when the mission tells the agent to proceed or to choose the next phase.
+
+## Learned Workspace Facts
 
 - Use `.venv` in project root; venv should auto-activate when in this folder (direnv with `.envrc`).
 - Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `run_analysis.py` on those paths after.
 - Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
-- Before updating result-interpretation docs from new experiment outputs, ask the user first.
 - State inference (partner-type belief updating) is the analytical solution to VFE minimization (matrix-based Bayes with A and B), not iterative optimization.
+- Benchmark runs use `scripts/run_benchmark.py` plus `docs/benchmarking_integration.md` for backends, configs (for example `affect_aif/configs/benchmark_default.json` and `benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
+- Remote VMs, sync, and merge flows for this project are described under Cloud Deployment in `CLAUDE.md` and `~/Desktop/research-infra`; do not add orchestration or deployment scripts to this repo.
 
 ---
 
