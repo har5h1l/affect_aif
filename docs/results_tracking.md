@@ -62,6 +62,7 @@ So the current evidence is stronger than "affect beats shallow non-affect." It i
 | H3 precision > reward average | Task-dependent | Binary default: null (`d = 0.009`). Binary betrayal: C2 wins (`d = 0.59`, `p = 0.004`). Graded default: C5 wins (`d = 0.43`). Graded betrayal: C5 wins (`d = −0.89`). Precision tracking helps when decisions are binary and model fitness diverges from reward; reward averaging dominates in continuous-investment settings where the reward gradient is directly decision-relevant. |
 | H4 post-switch robustness | Supported | `default`: `C2` beats `C1` (`p = 2.8e-9`) and `C4` (`p = 5.4e-9`) in the post-switch window. `betrayal_stress`: `C2` beats `C1` (`p = 0.013`). |
 | H5 partner selection | Supported | In `betrayal_stress`, beta correlates with partner selection frequency (`r = 0.51`, `p = 2.9e-9`). |
+| Clinical sensitivity | Task-dependent | Binary PD: inert (<0.5% effect). Graded: all clinical d>2.1 vs C4 but no between-clinical separation. **SH betrayal: borderline impaired (d=0.72, p<0.001, BF=-2.89 decisive), alexithymia ≈ healthy, depression mild BF impairment.** First qualitative clinical differentiation. |
 
 ## Interpretation
 
@@ -95,16 +96,81 @@ Within-C2 analysis in the graded game: does beta predict future payoffs from the
 
 This null is predicted by the theory: beta tracks prediction accuracy, not reward quality. A cooperator and an exploiter can both produce high beta if the agent predicts them well. The null validates that beta contributes orthogonal information rather than approximating a value cache.
 
+## Phase 5: Clinical Sensitivity in Stag Hunt
+
+### Design
+
+Previous clinical sensitivity analysis (binary PD, graded trust game) showed:
+- Binary PD: EFE softmax saturation makes clinical parameter variations behaviorally inert (<0.5% payoff effect)
+- Graded game: restores clinical sensitivity (d ≈ 2.2 vs no-affect) but within-clinical differentiation is small
+
+Phase 7 established that Stag Hunt uniquely favors precision tracking (C2 wins RFX-BMS in both default and betrayal). The severe miscoordination penalty (sucker=0 vs mutual defect=2) makes prediction accuracy maximally decision-relevant — exactly the informational niche where clinical perturbations to precision tracking should be most visible.
+
+**Approach:** Run all clinical phenotypes (C9 alexithymia, C10 borderline, C11 depression) alongside healthy C2 and no-affect C4 in Stag Hunt default (20 seeds) and betrayal (50 seeds).
+
+### Results
+
+**Stag Hunt Default (20 seeds × 200 rounds):** No clinical differentiation (d ≈ 0 for all phenotypes vs healthy). Identical to binary PD finding — the default EFE landscape is too deterministic.
+
+**Stag Hunt Betrayal (50 seeds × 120 rounds):**
+
+| Phenotype | Mean payoff | d vs healthy | p vs healthy | log10 BF vs healthy |
+|---|---|---|---|---|
+| Healthy (C2) | 489.7 | — | — | — |
+| Alexithymia (C9) | 497.1 | -0.20 | 0.318 | +0.12 anecdotal |
+| Depression (C11) | 484.6 | +0.13 | 0.510 | -0.66 substantial |
+| Borderline (C10) | 439.8 | **+0.72** | **0.0005** | **-2.89 decisive** |
+| No-affect (C4) | 402.7 | — | — | — |
+
+**Key findings:**
+1. Borderline is significantly impaired (d=0.72, p<0.001, decisive BF). First environment with statistically significant clinical differentiation from healthy affect.
+2. Borderline is still above no-affect (d=0.57, p=0.006) — volatile affect is worse than stable but better than none.
+3. Alexithymia is statistically indistinguishable from healthy — frozen precision is protective in high-miscoordination environments.
+4. Depression shows mild Bayesian impairment (BF=-0.66) but frequentist null (p=0.51).
+
+**Beta dynamics (50 seeds):**
+
+| Phenotype | Beta mean | Beta volatility | Beta range |
+|---|---|---|---|
+| Alexithymia | 0.503 | 0.003 | 0.016 |
+| Depression | 0.561 | 0.103 | 0.440 |
+| Healthy | 0.579 | 0.085 | 0.441 |
+| Borderline | 0.688 | 0.185 | 0.928 |
+
+**Betrayal window analysis (d vs healthy C2):**
+
+| Window | Alexithymia | Borderline | Depression |
+|---|---|---|---|
+| Pre-betrayal (20-29) | -0.36 | +0.82* | -0.05 |
+| Impact (30-39) | +0.40 | +0.12 | +0.27 |
+| Early recovery (40-49) | +0.04 | +0.10 | +0.10 |
+| Late recovery (60-79) | -0.09 | +0.68* | +0.14 |
+| Late (90-119) | -0.12 | +0.67* | +0.14 |
+
+### Interpretation
+
+This is the first environment where clinical phenotype dynamics determine qualitatively different behavioral outcomes. The key principle: **miscoordination cost amplifies the consequences of precision volatility**.
+
+- **Borderline**: Volatile precision → noisy partner predictions → frequent miscoordination at sucker payoff. Impaired even in pre-betrayal and late-game windows (not just during betrayal).
+- **Alexithymia**: Frozen precision → stable partner predictions → paradoxically protective in high-stakes coordination. The inability to revise precision estimates prevents overreaction to noisy evidence.
+- **Depression**: Low baseline precision recovers within the episode; transient vulnerability only.
+
+The model predicts task-dependent clinical presentations: alexithymia is harmless in coordination games but would impair deception detection; borderline is catastrophic in coordination but may perform better in rapidly changing environments where extreme precision revision is adaptive.
+
+*Theory documented in `docs/theory.md` §4.18.*
+
 ## Experimental Phase
 
-Phase 3 (theory tightening) is complete. All tasks done including the terminal value analysis, graded game integration, and C5 > C2 explanation.
+Phases 1–7 complete. Phase 5 clinical sensitivity now resolved via Stag Hunt betrayal.
 
 Current read:
 
 - Binary game establishes the core orthogonal augmentation claim
-- Graded game activates the precision channel, reveals C5 > C2 as a task-specificity result, and restores clinical sensitivity
+- Graded game activates the precision channel, reveals C5 > C2 as a task-specificity result, and restores some clinical sensitivity
+- Stag Hunt betrayal produces the first qualitative clinical differentiation (borderline impaired, alexithymia protected)
 - Beta does not approximate value-to-go, confirming orthogonality
-- Phase 4 (variational beta) is the next step
+- Cross-game generalization confirms augmentation under volatility in all games tested
+- Phase 8 (human data) is the next step and requires user decision
 
 ## Execution Record
 

@@ -527,6 +527,47 @@ Sections 4.13 and 4.15 established that clinical parameter perturbations (alexit
 
 **Theoretical implication: the precision sweet spot.** The affect parameters define a two-dimensional space of $(\alpha, \lambda)$ regimes. The normal agent occupies a "sweet spot" — enough responsiveness ($\alpha = 3.0$) to track genuine partner changes but enough smoothing ($\lambda = 0.6$) to reject noise. Clinical phenotypes represent systematic deviations from this sweet spot, and the graded betrayal environment makes these deviations behaviorally visible. This suggests that the clinical utility of precision-tracking models lies not in the absolute performance of any single parameter regime but in the geometry of the $(\alpha, \lambda)$ landscape and how different clinical populations navigate it.
 
+### 4.19 Clinical Sensitivity in Coordination Games
+
+Section 4.13 showed that the graded trust game restores clinical sensitivity lost to binary softmax saturation, but between-clinical differentiation remained small (all phenotypes ≈ $d \approx 2.2$ vs no-affect, with payoffs in the range 10.32–10.35). The Stag Hunt's severe miscoordination penalty provides a stronger test: precision tracking is maximally decision-relevant here (§4.17), so perturbations to the affective mechanism should produce maximal behavioral differentiation.
+
+**Result: Stag Hunt betrayal produces qualitative clinical separation (50 seeds × 120 rounds).**
+
+| Phenotype | Mean payoff | $d$ vs healthy | $p$ vs healthy | log$_{10}$ BF vs healthy |
+|---|---|---|---|---|
+| Healthy (C2) | 489.7 | — | — | — |
+| Alexithymia (C9, $\alpha = 0.1$) | 497.1 | $-0.20$ | 0.318 | $+0.12$ anecdotal |
+| Depression (C11, $\beta_0 = 0.2$) | 484.6 | $+0.13$ | 0.510 | $-0.66$ substantial |
+| Borderline (C10, $\alpha = 12$, $\lambda = 0.5$) | 439.8 | $+0.72$ | $< 0.001$ | $-2.89$ **decisive** |
+| No-affect (C4) | 402.7 | — | — | — |
+
+**The borderline phenotype is significantly impaired** ($d = 0.72$, $p < 0.001$, decisive Bayes factor against), losing approximately 50 payoff points relative to healthy affect. Crucially, borderline still outperforms no-affect ($d = 0.57$, $p = 0.006$): volatile precision tracking is worse than stable tracking but better than none.
+
+**Alexithymia is not impaired.** Blunted affective charge ($\alpha = 0.1$) produces frozen beta (volatility = 0.003, range = 0.016) but does not degrade payoff. This makes theoretical sense: in the Stag Hunt, stable (even if flat) partner predictions are better than volatile ones. Alexithymia's insensitivity to prediction errors is protective — the agent maintains consistent partner models rather than overreacting to noisy evidence.
+
+**Depression shows mild impairment** detectable by Bayes factor ($-0.66$, substantial) but not by frequentist test ($p = 0.51$). The low initial beta requires several rounds to calibrate, creating a transient vulnerability that washes out over the full episode.
+
+**Stag Hunt default shows no clinical differentiation** ($d \approx 0$ for all phenotypes, 20 seeds). The stable environment's EFE landscape is as saturated as the binary PD — clinical parameter perturbations do not change the argmax of the softmax-transformed policy distribution.
+
+**Beta dynamics confirm clinical signatures.** All phenotypes produce the dynamical patterns predicted by §4.10:
+
+| Phenotype | $\beta$ mean | $\beta$ volatility | $\beta$ range |
+|---|---|---|---|
+| Alexithymia | 0.503 | 0.003 | 0.016 |
+| Depression | 0.561 | 0.103 | 0.440 |
+| Healthy | 0.579 | 0.085 | 0.441 |
+| Borderline | 0.688 | 0.185 | 0.928 |
+
+**Window analysis reveals temporal dynamics of impairment.** Borderline is impaired in pre-betrayal ($d = 0.82$, significant) and late game ($d = 0.67$, significant) windows — the volatility hurts coordination even outside the betrayal event. Alexithymia shows a different temporal pattern: mild advantage in pre-betrayal (stable predictions), mild disadvantage during impact (cannot adjust to betrayal), then recovery.
+
+**Theoretical interpretation.** The Stag Hunt betrayal condition creates the first environment where clinical phenotype *dynamics*, not just their presence/absence, determine qualitatively different behavioral outcomes. The key principle is that miscoordination cost amplifies the consequences of precision volatility:
+
+1. **High miscoordination cost + volatile precision = catastrophic.** The borderline agent's rapidly oscillating beta produces noisy partner predictions, leading to frequent miscoordination at the sucker payoff (0). This maps to the clinical observation that emotional volatility in BPD disrupts social coordination, not just social perception.
+
+2. **High miscoordination cost + frozen precision = protective.** The alexithymic agent's inability to revise precision estimates paradoxically stabilizes partner predictions. This is consistent with findings that reduced emotional reactivity can be locally adaptive in high-stakes coordination settings, even when it represents a global impairment in affective processing.
+
+3. **The task determines whether a clinical phenotype is harmful.** Alexithymia is harmless in Stag Hunt but would be expected to impair performance in environments requiring rapid affective adaptation (e.g., detecting deception in iterated games with changing partners). The model predicts task-dependent clinical presentations — the same parameter regime produces different behavioral signatures in different environmental niches.
+
 *Full results in `docs/results_tracking.md` §Phase 5.*
 
 ---

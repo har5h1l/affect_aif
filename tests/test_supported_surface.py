@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 from affect_aif.agent.affective_agent import AffectiveAgent
@@ -73,21 +74,18 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
     assert run_model_comparison.build_parser().parse_args(["--results", "x.csv", "--output-dir", "out"])
 
     batch_name = "smoke_batch"
-    assert (
-        run_experiment.main(
-            [
-                "--config",
-                str(config_path),
-                "--output-dir",
-                str(tmp_path / "results"),
-                "--batch-name",
-                batch_name,
-                "--workers",
-                "1",
-            ]
-        )
-        == 0
-    )
+    sys.argv = [
+        "run_experiment.py",
+        "--config",
+        str(config_path),
+        "--output-dir",
+        str(tmp_path / "results"),
+        "--batch-name",
+        batch_name,
+        "--workers",
+        "1",
+    ]
+    assert run_experiment.main() == 0
 
     results_path = tmp_path / "results" / batch_name / "tiny" / "results.csv"
     figures_dir = tmp_path / "figures"
@@ -106,7 +104,12 @@ def test_archive_boundary_is_explicit():
     cli_doc = (REPO_ROOT / "docs" / "cli.md").read_text()
 
     assert supported_scripts == {
+        "analyze_benchmark.py",
+        "analyze_benchmark_paper.py",
+        "analyze_clinical_results.py",
         "run_analysis.py",
+        "run_benchmark.py",
+        "run_clinical_sensitivity.py",
         "run_experiment.py",
         "run_model_comparison.py",
         "run_preliminary.py",
