@@ -63,7 +63,7 @@ Phase 5 graded-game results showed d > 2.1 vs C4 but small between-profile payof
 
 The paper should now lead with SH betrayal as the primary clinical story: (a) miscoordination cost amplifies precision volatility effects; (b) alexithymia protective / borderline deteriorating / depression self-correcting as qualitatively distinct computational impairments; (c) the structural distinction (beta_0 correctable by inference, alpha/lambda create persistent perturbations); (d) graded-game results as a contrast case showing environment-dependence.
 
-**Prerequisite:** Merge session 7 branch (`origin/mango/affect_aif/20260324-143607`) which contains the SH results, theory §4.18, and updated results_tracking.md.
+**Data available:** Session 7 SH results merged (theory §4.19, results_tracking.md updated). Results CSVs on server at `/private/tmp/mango-worktree-affect_aif-20260324_143607-12360/results/`.
 
 ### Track 2: CoGames/CvC Benchmark (Priority: HIGH)
 
@@ -155,8 +155,5 @@ Do NOT implement these. Document identified issues in STATE.md only. The user wi
 ## Notes
 Edit this file to change what the conductor does. Set status to PAUSED to stop.
 
-## Pending Merge
-Session 7 branch `origin/mango/affect_aif/20260324-143607` contains SH clinical sensitivity results, scripts, theory §4.18, and runner refactor. Must be merged before advancing. Cherry-pick code/doc changes; keep our MISSION/STATE (four-track plan). Conflicts expected in conductor/ and docs/long_term_plan.md — prefer our versions.
-
 ## Status
-ACTIVE — Track 1 (paper theory gaps) and Track 2 (CvC benchmark) are co-priority. Track 3 depends on Tracks 1-2. Track 4 is document-only. Session 7 branch awaiting merge.
+ACTIVE — Track 1 (paper theory gaps) and Track 2 (CvC benchmark) are co-priority. Track 3 depends on Tracks 1-2. Track 4 is document-only.

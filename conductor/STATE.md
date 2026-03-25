@@ -105,7 +105,7 @@ A thorough review of the project and the research-brain literature vault has ide
 | 1.2 | Precision modulation: test or cut (ASK USER) | NOT STARTED | — |
 | 1.3 | vmPFC neuro-architectural argument (Bancee + Baram + Damasio) | NOT STARTED | — |
 | 1.4 | BMR trigger framing with neuroscience refs | NOT STARTED | — |
-| 1.5 | Between-clinical differentiation framing | PARTIALLY ADDRESSED | — (SH data from session 7 provides the strong story; needs merge + paper integration) |
+| 1.5 | Between-clinical differentiation framing | PARTIALLY ADDRESSED | — (SH data merged in theory §4.19; needs paper integration) |
 
 ### Track 2: CvC Benchmark (HIGH priority)
 
@@ -140,12 +140,12 @@ Identified issues for the user to handle separately:
 9. Context assembly step invisible — no logging of what was included in sweep context
 
 ## Auto Handoff
-- **What changed:** Session 7 ran old mission (Phase 5 SH clinical sensitivity) due to sync issue. Produced valuable SH betrayal results (borderline d=0.72 decisive — first stat-sig clinical differentiation). Branch `origin/mango/affect_aif/20260324-143607` needs merge. Four-track plan was written locally but not yet committed before session started.
-- **What is still in flight:** Branch merge. All four tracks from the plan.
+- **What changed:** Session 7 branch merged into master. SH clinical sensitivity results (theory §4.19, results_tracking Phase 5), runner refactor, discrete beta module, new scripts, 183 tests passing. Four-track plan is now the active mission.
+- **What is still in flight:** All four tracks. No merge debt.
 - **What next session should do:**
-  1. **First: merge session 7 branch.** Cherry-pick code/doc changes from `origin/mango/affect_aif/20260324-143607` into master. Keep our MISSION/STATE (four-track plan). Resolve conflicts in conductor/ and docs/long_term_plan.md by preferring our versions. Copy results CSVs from server worktree.
-  2. Then start Track 2.1 (CvC navigation) and Track 1.1 (literature positioning) in parallel
-  3. Present Track 1.2 options (precision modulation: test or cut) to user
+  1. Start Track 2.1: examine CvC observation format (`affect_aif/benchmark/cvc_policy.py`, cogames docs), implement `PathfindingMixin` in `affect_aif/benchmark/cvc_navigation.py`, wire into `TeammateReliabilityPolicy`, smoke-test (3 seeds, 1000 steps, target >0 aligned junctions)
+  2. In parallel, start Track 1.1: literature positioning paragraph (Yoshida + Pitliya + this work triple dissociation)
+  3. Present Track 1.2 options (precision modulation: test or cut) to user before proceeding
 
 ## Status
-ACTIVE — four-track plan, Tracks 1-2 co-priority. Session 7 branch awaiting merge.
+ACTIVE — four-track plan, Tracks 1-2 co-priority.
