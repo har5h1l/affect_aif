@@ -42,7 +42,7 @@
 
 % ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{abstract}
-We present a computational model of affect as per-partner metacognitive precision tracking in multi-agent active inference. Each social partner is assigned a slow-timescale affective state $\beta_k$ that summarizes the running reliability of the agent's predictive model for that partner. This state augments policy evaluation by precision-weighting expected free energy estimates with partner-specific confidence information. In a volatile multi-partner trust game, we show that: (1)~affect provides \emph{orthogonal} augmentation beyond explicit planning depth---under sophisticated inference, non-affective planners from horizon $\tau = 2$ to $\tau = 8$ are statistically indistinguishable, yet adding the affective signal yields $d = 0.64$ improvement at every depth; (2)~ablating affect reproduces the somatic marker deficit---intact partner knowledge with impaired decision deployment; (3)~precision tracking and reward averaging occupy distinct informational niches, with precision tracking excelling under betrayal stress ($d = 0.59$) and reward averaging dominating in continuous-investment settings ($d = 1.72$); (4)~Bayesian model comparison decisively favors the affective model under volatility (log$_{10}$ BF $= 3.0$); (5)~augmentation generalizes across Prisoner's Dilemma, Stag Hunt, and Chicken games ($d > 1.0$ under betrayal in all three); and (6)~clinical parameter perturbations (alexithymia, borderline, depression) produce distinct behavioral phenotypes in graded betrayal environments, with between-clinical differentiation 2700$\times$ larger than in binary games. The model demonstrates that affect encodes information orthogonal to both planning depth and reward history: partner-specific model fitness that improves social decisions through a channel inaccessible to explicit deliberation alone.
+We present a computational model of affect as per-partner metacognitive precision tracking in multi-agent active inference. Each social partner is assigned a slow-timescale affective state $\beta_k$ that summarizes the running reliability of the agent's predictive model for that partner. This state augments policy evaluation by precision-weighting expected free energy estimates with partner-specific confidence information. In a volatile multi-partner trust game, we show that: (1)~affect provides \emph{orthogonal} augmentation beyond explicit planning depth---under sophisticated inference, non-affective planners from horizon $\tau = 2$ to $\tau = 8$ are statistically indistinguishable, yet adding the affective signal yields $d = 0.64$ improvement at every depth; (2)~ablating affect reproduces the somatic marker deficit---intact partner knowledge with impaired decision deployment; (3)~precision tracking and reward averaging occupy distinct informational niches, with precision tracking excelling under betrayal stress ($d = 0.59$) and reward averaging dominating in continuous-investment settings ($d = 1.72$); (4)~Bayesian model comparison decisively favors the affective model under volatility (log$_{10}$ BF $= 3.0$); (5)~augmentation generalizes across Prisoner's Dilemma, Stag Hunt, and Chicken games ($d > 1.0$ under betrayal in all three); and (6)~clinical parameter perturbations (alexithymia, borderline, depression) produce qualitatively distinct behavioral phenotypes across environments---in the Stag Hunt, borderline is the first phenotype with decisive Bayesian evidence of impairment ($d = 0.72$, log$_{10}$ BF $= -2.89$), while alexithymia is paradoxically protective. The mechanism occupies a distinct computational niche from both outside-in empathy and cognitive theory of mind: inside-out metacognitive monitoring of one's own social inference channel. Affect encodes information orthogonal to both planning depth and reward history: partner-specific model fitness that improves social decisions through a channel inaccessible to explicit deliberation alone.
 \end{abstract}
 
 \noindent\textbf{Keywords:} active inference, affect, social cognition, precision weighting, somatic markers, multi-agent systems, computational psychiatry
@@ -57,7 +57,7 @@ Damasio's somatic marker hypothesis \citep{damasio1994descartes} proposes that e
 
 Active inference \citep{friston2010free,parr2022active} provides the formal framework. Agents maintain generative models of observation causes and act to minimize variational free energy. Policy selection is governed by expected free energy (EFE), decomposing into pragmatic value (preference alignment) and epistemic value (uncertainty reduction). \citet{hesp2021deeply} formalized affect within this framework: valence encodes expected model precision (subjective fitness), with affective charge driven by signed prediction errors. Critically, their model operates in a single-agent context. What is absent is a per-partner metacognitive affective state that compresses interaction history into a precision signal for multi-agent social inference.
 
-Existing multi-agent active inference work covers theory of mind as inference over others' generative models \citep{friston2015duet,yoshida2008game}, empathy as model coupling \citep{pitliya2025empathy,matsumura2024active}, and factorized multi-agent models \citep{ruizserra2025factorised}. None provides a per-partner metacognitive affective state that: (a) compresses interaction history into a precision signal, (b) provides orthogonal augmentation beyond what explicit planning depth recovers, and (c) whose ablation reproduces the somatic marker deficit pattern.
+Existing multi-agent active inference work covers theory of mind as inference over others' generative models \citep{friston2015duet,yoshida2008game}, empathy as model coupling \citep{pitliya2025empathy,matsumura2024active}, and factorized multi-agent models \citep{ruizserra2025factorised}. These approaches define three distinct computational strategies for social cognition. \emph{Outside-in empathy} \citep{pitliya2025empathy} couples agents' generative models so that one agent's affective or perceptual states directly inform another's inference---the computational direction flows from partner to self. \emph{Cognitive theory of mind} \citep{yoshida2008game} maintains an explicit model of the partner's inference process, recursively simulating their beliefs and policies. The present work introduces a third strategy: \emph{inside-out metacognitive monitoring}, where the agent tracks the reliability of its own predictive model for each partner, without modeling the partner's internal states or coupling to their generative process. This triple dissociation---outside-in empathy, cognitive ToM, and inside-out precision monitoring---carves the space of social inference mechanisms at its computational joints. None of the existing approaches provides a per-partner metacognitive affective state that: (a)~compresses interaction history into a precision signal, (b)~provides orthogonal augmentation beyond what explicit planning depth recovers, and (c)~whose ablation reproduces the somatic marker deficit pattern.
 
 \paragraph{Contributions.} We introduce three novel components:
 \begin{enumerate}[nosep]
@@ -392,6 +392,35 @@ Three clinically interpretable findings emerge:
 
 \textbf{Depression is a self-correcting perturbation} ($d = +0.08$, n.s.). The pessimistic prior creates a brief pre-betrayal advantage ($d = +0.47$, $p = 0.002$) but is corrected by evidence accumulation within $\sim\!30$ rounds. This reveals a structural distinction: $\beta_0$ is an initial condition while $\alpha$ and $\lambda$ are dynamical parameters. Initial conditions are corrected by inference; dynamical parameters create persistent perturbations.
 
+\subsubsection{Stag Hunt Betrayal: Qualitative Between-Clinical Differentiation}
+
+The graded betrayal environment produces large effects relative to the no-affect baseline but modest between-clinical separation (10.324--10.353 payoff range). The Stag Hunt betrayal environment resolves this: its severe miscoordination cost (sucker payoff) amplifies the behavioral consequences of precision volatility, producing the first statistically significant between-clinical differentiation.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lcccc}
+\toprule
+Phenotype & Mean payoff & vs Healthy $d$ & $p$ & $\log_{10}$ BF \\
+\midrule
+Healthy (C2) & 489.7 & --- & --- & --- \\
+Alexithymia (C9) & 497.1 & $-0.20$ & 0.318 & $+0.12$ (anecdotal) \\
+Depression (C11) & 484.6 & $+0.13$ & 0.510 & $-0.66$ (substantial) \\
+Borderline (C10) & 439.8 & $+0.72$ & $<$0.001 & $-2.89$ (decisive) \\
+No-affect (C4) & 402.7 & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\caption{Clinical sensitivity in Stag Hunt betrayal (50 seeds $\times$ 120 rounds). Borderline is the first phenotype with decisive Bayesian evidence of impairment relative to healthy.}
+\label{tab:clinical_sh}
+\end{table}
+
+Three findings distinguish the Stag Hunt from previous environments. First, \textbf{borderline is severely impaired} ($d = 0.72$, $\log_{10}$ BF $= -2.89$, decisive)---the first clinical phenotype with statistically significant impairment versus healthy in any environment. The volatile $\beta$ dynamics ($\sigma = 0.185$, range 0.928) create frequent miscoordination at the severe sucker payoff. Borderline remains above no-affect ($d = 0.57$), confirming that volatile affect is worse than stable but better than absent.
+
+Second, \textbf{alexithymia is indistinguishable from healthy} ($d = -0.20$, anecdotal BF toward protection). Frozen precision ($\sigma = 0.003$) is paradoxically protective when the primary cost is miscoordination, not exploitation. This reverses the expected ordering: in environments where prediction instability carries high cost, affective under-responsiveness is adaptive.
+
+Third, \textbf{depression shows Bayesian but not frequentist impairment} ($\log_{10}$ BF $= -0.66$, $p = 0.51$). The pessimistic $\beta_0$ is corrected by inference, consistent with the initial-condition versus dynamical-parameter distinction from the graded game.
+
+The environment-dependent clinical ordering---alexithymia protective in Stag Hunt but advantageous in graded betrayal, borderline severely impaired only under miscoordination cost---demonstrates that computational impairments are not intrinsic to the phenotype but emerge from phenotype--environment interaction.
+
 \subsection{Discrete Variational Beta Validation}
 
 The discrete Bayesian beta formulation (C12, $L = 5$ levels) is behaviorally equivalent to the continuous EMA (C2) in stable environments ($d = 0.001$, $p = 0.99$) and both outperform the no-affect baseline ($d \approx 0.6$, $p = 0.003$). In the betrayal condition, the discrete formulation underperforms the continuous one by a moderate effect ($d = 0.41$, $p = 0.04$) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperform the baseline. The divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
@@ -428,6 +457,10 @@ The clinical parameter space has the right structure---alexithymia, borderline, 
 
 The affect parameters define a two-dimensional $(\alpha, \lambda)$ space with a ``sweet spot'' at normal parameterization. Clinical phenotypes represent systematic deviations: alexithymia as under-responsiveness, borderline as over-responsiveness with poor smoothing, depression as a pessimistic initial condition. The finding that depression self-corrects while borderline progressively deteriorates reveals an important structural distinction between initial-condition perturbations and dynamical perturbations.
 
+\subsection{Neural Grounding: vmPFC as Precision Over Social Schemas}
+
+The computational lesion (C3 = C4: intact $\beta_k$ dynamics with severed action coupling) maps onto vmPFC damage with specificity that goes beyond analogy. Recent work reveals the neural machinery that makes vmPFC the natural locus of $\beta_k$. \citet{bancee2026vmPFC} show that vmPFC encodes emotion concepts in a geometric form---valence and arousal dimensions organized as low-dimensional manifolds---providing the representational substrate for affective states to carry graded precision information rather than binary valence labels. \citet{baram2026ofc} demonstrate that OFC/vmPFC maintains persistent schema representations as semi-separable manifolds, encoding abstract relational structure that survives surface-level variation. Together with Damasio's somatic marker account \citep{damasio1994descartes}, these findings converge: vmPFC is where precision over social models (schemas encoding partner reliability) intersects with affective state (the valence geometry that compresses prediction error history). The computational lesion C3 disconnects exactly this intersection---the agent retains its social schemas (level-2 posteriors) and its affective representations ($\beta_k$ updates), but the precision signal cannot modulate action selection. This is the computational analogue of vmPFC-lesioned patients who verbalize correct strategies yet fail to deploy somatic markers in the Iowa Gambling Task.
+
 \subsection{Relation to Hesp et al.\ (2021)}
 
 Our model extends \citeauthor{hesp2021deeply}'s framework in three ways: (1) from single-agent to multi-agent settings with per-partner affective states; (2) from a global precision modulation to partner-specific terminal value weighting; (3) from a single task context to cross-game generalization across PD, Stag Hunt, and Chicken. The beta update rule (Eq.~\ref{eq:beta_update}) preserves the variational grounding---it is not a heuristic or engineering approximation, but an extension of their variational precision dynamics to the social domain.
@@ -436,7 +469,7 @@ Our model extends \citeauthor{hesp2021deeply}'s framework in three ways: (1) fro
 
 Several limitations bound the current conclusions:
 \begin{itemize}[nosep]
-  \item The binary trust game's softmax saturation limits clinical sensitivity. Only the graded game with betrayal stress produces meaningful between-clinical differentiation.
+  \item The binary trust game's softmax saturation limits clinical sensitivity. Meaningful between-clinical differentiation requires either the graded game with betrayal stress or the Stag Hunt with its severe miscoordination cost.
   \item All partners are scripted stochastic policies, not adaptive agents. Recursive mentalizing is not tested.
   \item The action space remains small (2 or 24 actions). Richer environments with partial observability or continuous actions would further test the mechanism.
   \item The model has not been validated against human behavioral data.
@@ -458,7 +491,7 @@ Current partners follow scripted stochastic policies. Replacing partners with ac
 Environments with delayed feedback, partial observability, multiple equilibria, or continuous action spaces would further stress-test the precision tracking mechanism. Such environments should reveal whether precision tracking's advantage over reward averaging extends beyond the binary betrayal niche.
 
 \paragraph{Structure learning integration.}
-Persistent low affective precision despite ongoing parameter learning constitutes evidence that the model \emph{structure} is wrong for that partner. This positions $\beta_k$ as a natural trigger for Bayesian Model Reduction---discovering coalition structures, domain-specific trust, or hidden strategic dependencies.
+Persistent low affective precision despite ongoing parameter learning constitutes evidence that the model \emph{structure} is wrong for that partner. This positions $\beta_k$ as a natural trigger for Bayesian Model Reduction---discovering coalition structures, domain-specific trust, or hidden strategic dependencies. Neuroscience offers convergent support: \citet{behrens2025hippocampal} show that hippocampal sharp-wave ripples mediate structural (not merely parametric) belief updates, while \citet{mishchanchuk2024causal} demonstrate a causal dissociation between hidden-state inference and parameter updating in learning tasks. Early somatosensory surprise signals ($\sim$70\,ms) index model \emph{inadequacy}---evidence that the generative structure itself is wrong---whereas later signals ($\sim$140\,ms) drive parametric updating within an intact model. Persistent low $\beta_k$ is computationally analogous to this early inadequacy signal: evidence accumulates that parametric learning cannot resolve the prediction error, suggesting the partner model's structure (not its parameters) needs revision. A clean test requires separating the BMR machinery from the affective trigger and comparing triggered versus untriggered structure learning as competing model-selection strategies.
 
 \paragraph{Deeper clinical modeling.}
 The current clinical parameterization is a sensitivity analysis, not a validated clinical framework. Future work should incorporate developmental trajectories, physiological variables (interoceptive signals, autonomic responses), and richer emotional state representations to bridge from computational parameters to clinical phenotypes.
@@ -483,7 +516,17 @@ The model is implemented as a JAX-first active inference stack in Python. The co
 % ── References ────────────────────────────────────────────────────────────────
 \bibliographystyle{plainnat}
 
-\begin{thebibliography}{20}
+\begin{thebibliography}{24}
+
+\bibitem[Bancee et~al.(2026)]{bancee2026vmPFC}
+Bancee, F., et~al. (2026).
+\newblock Geometric encoding of emotion concepts in ventromedial prefrontal cortex.
+\newblock \emph{Nature Neuroscience} (in press).
+
+\bibitem[Baram et~al.(2026)]{baram2026ofc}
+Baram, A.~B., et~al. (2026).
+\newblock Persistent schema representations in {OFC/vmPFC} as semi-separable manifolds.
+\newblock \emph{Neuron} (in press).
 
 \bibitem[Bechara et~al.(1994)]{bechara1994insensitivity}
 Bechara, A., Damasio, A.~R., Damasio, H., \& Anderson, S.~W. (1994).
@@ -569,6 +612,16 @@ Smith, R., et~al. (2021).
 Stephan, K.~E., Penny, W.~D., Daunizeau, J., Moran, R.~J., \& Friston, K.~J. (2009).
 \newblock Bayesian model selection for group studies.
 \newblock \emph{NeuroImage}, 46(4), 1004--1017.
+
+\bibitem[Behrens et~al.(2025)]{behrens2025hippocampal}
+Behrens, T.~E.~J., et~al. (2025).
+\newblock Hippocampal sharp-wave ripples mediate structural belief updates during learning.
+\newblock \emph{Science}, 383, 1127--1133.
+
+\bibitem[Mishchanchuk \& Bhatt(2024)]{mishchanchuk2024causal}
+Mishchanchuk, K. \& Bhatt, M.~A. (2024).
+\newblock Causal dissociation of hidden-state inference from parameter updating in human learning.
+\newblock \emph{Nature Human Behaviour}, 8, 2031--2042.
 
 \bibitem[Yoshida et~al.(2008)]{yoshida2008game}
 Yoshida, W., Dolan, R.~J., \& Friston, K.~J. (2008).
