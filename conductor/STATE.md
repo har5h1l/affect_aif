@@ -2,20 +2,20 @@
 status: CONTINUE
 next_priority: 2
 pending_work:
-  - "Run cvc_obs_diagnostic.py on server (Python 3.12) to discover wall encoding format"
-  - "Smoke-test ScoringLoopPolicy + pathfinding on server (3 seeds, 1000 steps)"
+  - "Run cvc_obs_diagnostic.py on server (Python 3.12) to discover wall encoding"
+  - "Smoke-test ScoringLoopPolicy on server (benchmark_cvc_scoring_smoke.json)"
   - "Track 2.3: Build AffectCvCPolicy with per-partner beta tracking"
-  - "Track 2.5: Try simpler CvC missions in parallel"
-  - "Track 3.2: Results reproducibility spot-check"
+  - "Track 2.5: Try simpler CvC missions"
   - "Track 1.2: Awaiting user decision on precision modulation (test or cut)"
-next_session_focus: "Run obs diagnostic and smoke-test on server, then iterate on navigation"
+  - "Track 3.3-3.4: Add CvC results to paper, final LaTeX polish"
+next_session_focus: "Run obs diagnostic and CvC smoke-test on server, iterate on navigation"
 model_hint: opus
 ---
 
 # Research State
 
 ## Last Updated
-2026-03-25 (Session 9)
+2026-03-25 (Session 9, final update)
 
 ## Session Count
 9
@@ -24,117 +24,75 @@ model_hint: opus
 
 ### Trust-Game Results (Phases 1-7: COMPLETE)
 
-All trust-game phases are complete with publication-quality results:
-- Orthogonal augmentation confirmed across binary and graded games
-- Clinical sensitivity validated in graded betrayal environment
-- Bayesian model comparison shows C2 decisive under volatility
-- Cross-game generalization across PD, Stag Hunt, Chicken
-- Full results in docs/results_tracking.md
+All trust-game phases are complete with publication-quality results. Full results in docs/results_tracking.md.
 
-### Session 7 Output: Stag Hunt Clinical Sensitivity (2026-03-24)
+### Session 9: Paper Theory Gaps + CvC Navigation + Spot-Checks (2026-03-25)
 
-**Branch:** `origin/mango/affect_aif/20260324-143607` — MERGED to master at `ba42b00`.
-
-SH betrayal (50 seeds x 120 rounds): borderline d=0.72 (decisive BF=-2.89), alexithymia protective, depression self-correcting. First env with stat-sig between-clinical differentiation.
-
-### Session 9 Output: Paper Theory Gaps + CvC Navigation (2026-03-25)
-
-**Branch:** `mango/affect_aif/20260325-135703` (this session)
-
-DECISION: Track 1 paper theory gaps substantially addressed. Track 2 navigation infrastructure built. Track 3.1 consistency check complete.
+**Branch:** `mango/affect_aif/20260325-135703` — 5 commits
 
 #### Track 1: Paper Theory Gaps — DONE (except 1.2 awaiting user)
 
-**1.1 Triple dissociation framing: COMPLETE.**
-Added paragraph in Introduction (main.tex) explicitly framing outside-in empathy (Pitliya) / cognitive ToM (Yoshida) / inside-out precision monitoring (this work) as three distinct computational strategies for social cognition. Updated abstract to include this framing. Updated theory.md Section 1.5 to match.
+| Step | Status | What was done |
+|------|--------|--------------|
+| 1.1 | COMPLETE | Triple dissociation paragraph in Introduction: outside-in empathy / cognitive ToM / inside-out precision monitoring. Updated abstract and theory.md §1.5. |
+| 1.2 | AWAITING USER | Presented options: test gamma modulation in graded game or cut from paper. Recommended Option B (cut). |
+| 1.3 | COMPLETE | vmPFC neuroscience Discussion subsection: Bancee (vmPFC emotion geometry) + Baram (OFC schema manifolds) + Damasio. |
+| 1.4 | COMPLETE | BMR Future Work expansion: Behrens (hippocampal ripples) + Mishchanchuk (causal dissociation). Preserves clean-test caveat. |
+| 1.5 | COMPLETE | SH betrayal clinical results in Results section (Table 2: borderline d=0.72). Updated abstract, Limitations. |
 
-**1.2 Precision modulation: AWAITING USER DECISION.**
-Presented options (test in graded game or cut from paper). Recommendation: Option B (cut). The paper is cleaner with one well-tested pathway. The Future Work paragraph already notes it as an open direction.
+Bibliography: Added Bancee 2026, Baram 2026, Behrens 2025, Mishchanchuk 2024.
 
-**1.3 vmPFC neuroscience: COMPLETE.**
-Added Discussion subsection "Neural Grounding: vmPFC as Precision Over Social Schemas" connecting Bancee (2026, vmPFC emotion geometry) + Baram (2026, OFC schema manifolds) + Damasio. Shows vmPFC is where precision over social schemas intersects with affective state.
+#### Track 2: CvC Benchmark — Infrastructure Built, Needs Server Testing
 
-**1.4 BMR trigger framing: COMPLETE.**
-Expanded Future Work structure-learning paragraph with Behrens (2025, hippocampal ripples for structural updates) + Mishchanchuk (2024, causal dissociation). Preserves the clean-test caveat from experiment.md Section 8.2.
+| Step | Status | Details |
+|------|--------|---------|
+| 2.1 | IMPLEMENTED | `cvc_navigation.py`: BFS pathfinding with movement-failure wall learning, global position tracking. Wired into TeammateReliabilityPolicy. |
+| 2.2 | IMPLEMENTED | `cvc_scoring_policy.py`: state-machine scoring loop (GET_GEAR→MINE_ORE→DEPOSIT→ALIGN_JUNCTION). Config: `benchmark_cvc_scoring_smoke.json`. |
+| 2.1 diagnostic | IMPLEMENTED | `scripts/cvc_obs_diagnostic.py`: dumps all observation features to discover wall encoding. Needs Python 3.12 on server. |
+| 2.3-2.5 | NOT STARTED | Depend on server testing of 2.1/2.2. |
 
-**1.5 SH clinical results in paper: COMPLETE.**
-Added new Results subsubsection "Stag Hunt Betrayal: Qualitative Between-Clinical Differentiation" with Table 2 (borderline d=0.72, decisive BF). Updated abstract, Limitations. Paper now leads with SH as primary clinical story.
-
-**Bibliography:** Added Bancee 2026, Baram 2026, Behrens 2025, Mishchanchuk 2024.
-
-#### Track 2: CvC Benchmark — Navigation Built, Needs Server Testing
-
-**2.1 BFS pathfinding: IMPLEMENTED.**
-- `affect_aif/benchmark/cvc_navigation.py`: NavigationHelper with BFS pathfinding, movement-failure wall learning, global position tracking, exploration mode
-- Wired into TeammateReliabilityPolicy (cvc_policy.py)
-- Navigation state tracks global position, known walls, visited cells
-- `scripts/cvc_obs_diagnostic.py`: diagnostic to discover wall encoding (run on server with Python 3.12)
-
-NEXT: Run diagnostic on server to determine how walls are encoded in observations. The movement-failure approach works regardless, but observation-based wall detection would be much faster.
-
-**2.2 ScoringLoopPolicy: IMPLEMENTED.**
-- `affect_aif/benchmark/cvc_scoring_policy.py`: state-machine that follows GET_GEAR -> MINE_ORE -> DEPOSIT -> ALIGN_JUNCTION loop with BFS navigation
-- `affect_aif/configs/benchmark_cvc_scoring_smoke.json`: smoke test config (3 seeds, 1000 steps)
-- Role assignment: 5 miners + 3 aligners (8 agents)
-
-NEXT: Smoke-test on server to see if BFS pathfinding produces >0 aligned junctions.
-
-**2.3-2.5: NOT STARTED.** Depend on 2.1/2.2 server testing.
+DECISION: The navigation pathfinding currently uses movement-failure learning (tracks which moves hit walls). If the diagnostic reveals an observation feature for walls (e.g., "wall", "obstacle"), we can add direct wall detection for much faster pathfinding.
 
 #### Track 3: Paper Preparation
 
-**3.1 Docs consistency check: COMPLETE.**
-All docs (main.tex, theory.md, results_tracking.md, experiment.md) are numerically consistent. Zero disagreements on condition definitions, effect sizes, p-values, Bayes factors, or payoff values. Fixed one stale phase number in CLAUDE.md.
-
-**3.2-3.4: NOT STARTED.**
+| Step | Status | Details |
+|------|--------|---------|
+| 3.1 | COMPLETE | All docs numerically consistent. Fixed stale CLAUDE.md phase number. |
+| 3.2 | COMPLETE | Spot-checks with 5 seeds confirm: default C2>C4 by ~44pts (expected ~45); horizon curve flat (C1≈C4≈C6≈C7); betrayal C2>C4 in right direction. |
+| 3.3-3.4 | NOT STARTED | Depend on Track 2 CvC results. No TODOs/FIXMEs in LaTeX. |
 
 #### Track 4: Research-Brain Improvements
-Documented in previous state. No changes.
+Documented in previous session. No changes needed — user handles separately.
 
 ## Known Gaps / Next Steps
 
-### Track 1: Paper Theory Gaps (HIGH priority)
+### Track 1: Paper Theory Gaps
 
-| Step | Description | Status | Depends on |
-|------|-------------|--------|------------|
-| 1.1 | Inside-out literature positioning | COMPLETE | — |
-| 1.2 | Precision modulation: test or cut | AWAITING USER | — |
-| 1.3 | vmPFC neuro-architectural argument | COMPLETE | — |
-| 1.4 | BMR trigger framing | COMPLETE | — |
-| 1.5 | Between-clinical SH results in paper | COMPLETE | — |
+All complete except 1.2 (precision modulation — test or cut). BLOCKER: need user decision.
 
-### Track 2: CvC Benchmark (HIGH priority)
+### Track 2: CvC Benchmark (HIGH priority — needs server)
 
-| Step | Description | Status | Depends on |
-|------|-------------|--------|------------|
-| 2.1 | BFS pathfinding layer | IMPLEMENTED (needs server test) | — |
-| 2.2 | ScoringLoopPolicy baseline | IMPLEMENTED (needs server test) | 2.1 |
-| 2.3 | Add affect mechanism (AffectCvCPolicy) | NOT STARTED | 2.2 server test |
-| 2.4 | Benchmark + Observatory submission | NOT STARTED | 2.3 |
-| 2.5 | Try simpler missions (parallel) | NOT STARTED | — |
+1. Run `python3.12 scripts/cvc_obs_diagnostic.py --steps 50 --output /tmp/obs_features.json` on server
+2. Run smoke-test: `python scripts/run_benchmark.py --config affect_aif/configs/benchmark_cvc_scoring_smoke.json`
+3. If >0 aligned junctions: build AffectCvCPolicy (Track 2.3)
+4. If still 0: use diagnostic output to improve wall detection, or try simpler missions
 
-### Track 3: Paper Preparation (MEDIUM priority)
+### Track 3: Paper Preparation
 
-| Step | Description | Status | Depends on |
-|------|-------------|--------|------------|
-| 3.1 | Docs consistency check | COMPLETE | — |
-| 3.2 | Results reproducibility spot-check | NOT STARTED | — |
-| 3.3 | Add CvC results to paper | NOT STARTED | Track 2 |
-| 3.4 | Final LaTeX polish | NOT STARTED | 3.1, 3.3 |
+3.3 (CvC results in paper) and 3.4 (final polish) depend on Track 2 producing results.
 
 ## Mango Sync Lesson
-`mango run --cloud server` does NOT update the server's local master from origin. Must run `ssh server 'cd <repo> && git fetch origin && git merge origin/master --ff-only'` before launching, or the session will branch from stale state.
+`mango run --cloud server` does NOT update the server's local master from origin. Must `ssh server 'cd <repo> && git fetch origin && git merge origin/master --ff-only'` first.
 
 ## Auto Handoff
-- **What changed:** Session 9 completed Track 1 (paper theory gaps: triple dissociation, vmPFC, BMR, SH clinical results all added to main.tex). Built CvC navigation infrastructure (BFS pathfinding + ScoringLoopPolicy). Ran docs consistency check (all clean). Fixed stale CLAUDE.md phase number. 183 tests pass. 4 commits on branch.
-- **What is still in flight:** Track 2 navigation needs server testing (Python 3.12 required). Track 1.2 awaits user decision. Track 3.2-3.4 not started.
+- **What changed:** Session 9 completed Track 1 paper theory gaps (triple dissociation, vmPFC, BMR, SH clinical — all in main.tex with 4 new bib entries). Built CvC navigation (BFS pathfinding + ScoringLoopPolicy + diagnostic script). Ran docs consistency check (all clean) and reproducibility spot-checks (3/3 patterns confirmed with 5 seeds). Fixed CLAUDE.md phase number. 5 commits, 183 tests pass.
+- **What is still in flight:** Track 2 navigation needs server testing (Python 3.12). Track 1.2 awaits user decision (precision modulation).
 - **What next session should do:**
-  1. Run `scripts/cvc_obs_diagnostic.py` on server to discover wall encoding format
-  2. Run smoke test: `python scripts/run_benchmark.py --config affect_aif/configs/benchmark_cvc_scoring_smoke.json`
-  3. If navigation works (>0 aligned junctions): proceed to Track 2.3 (AffectCvCPolicy)
-  4. If navigation still fails: iterate on wall detection using diagnostic output
-  5. Track 3.2: spot-check reproducibility (default.json, betrayal_stress.json, 5 seeds each)
-- **BLOCKER for Track 1.2:** Need user to decide: test precision modulation in graded game or cut from paper
+  1. Run obs diagnostic on server to discover wall encoding format
+  2. Run CvC smoke-test on server
+  3. If navigation works → Track 2.3 (AffectCvCPolicy)
+  4. If not → iterate using diagnostic output
+  5. Present Track 1.2 decision to user if not yet resolved
 
 ## Status
 CONTINUE — Track 2 needs server testing, Track 1.2 awaits user decision
