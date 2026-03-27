@@ -6,8 +6,9 @@ heuristic in CvC policies.
 
 The observation format (mettagrid AgentObservation) provides a local grid
 centered on the agent. Target entities appear as tokens with feature.name
-== "tag". Wall detection uses movement-failure feedback: if the agent
-tried to move but last_action_move == 0, the target cell is a wall.
+== "tag". Walkable cells are identified by the presence of an "aoe_mask"
+token — cells without aoe_mask are walls or outside the field of view.
+Movement failures are also tracked to learn walls beyond the current view.
 
 Usage:
     # In policy __init__:
@@ -39,8 +40,9 @@ DIR_NAME_TO_DELTA: dict[str, tuple[int, int]] = {
     "move_west": (0, -1),
 }
 
-# Feature names that indicate impassable cells (will be populated by diagnostic)
-WALL_FEATURE_NAMES: set[str] = {"wall", "obstacle", "blocked"}
+# Feature name that indicates a walkable cell in mettagrid observations.
+# Cells WITH aoe_mask are passable; cells WITHOUT are walls/out-of-view.
+AOE_MASK_FEATURE: str = "aoe_mask"
 
 # Movement-failure walls expire after this many steps (handles agent-blocking)
 WALL_EXPIRY_STEPS: int = 15
@@ -108,18 +110,18 @@ class NavigationHelper:
 
         return state
 
-    def _detect_obs_walls(self, obs) -> set[tuple[int, int]]:
-        """Detect walls from observation features (if encoded).
+    def _detect_walkable_cells(self, obs) -> set[tuple[int, int]]:
+        """Detect walkable cells from aoe_mask feature.
 
-        Returns set of LOCAL grid positions that are walls.
+        In mettagrid, cells with aoe_mask=1 are visible/passable.
+        Cells without aoe_mask are walls or outside the field of view.
+        Returns set of LOCAL grid positions that are walkable.
         """
-        walls: set[tuple[int, int]] = set()
+        walkable: set[tuple[int, int]] = set()
         for token in obs.tokens:
-            if token.feature.name in WALL_FEATURE_NAMES:
-                loc = token.location
-                if loc is not None:
-                    walls.add((loc[0], loc[1]))
-        return walls
+            if token.feature.name == AOE_MASK_FEATURE and token.location is not None:
+                walkable.add((token.location[0], token.location[1]))
+        return walkable
 
     def _local_to_global(self, local_row: int, local_col: int, state: NavigationState) -> tuple[int, int]:
         """Convert local observation coords to global coords."""
@@ -143,27 +145,26 @@ class NavigationHelper:
     ) -> list[list[bool]]:
         """Build a walkability grid for the local observation area.
 
-        Cells are walkable unless:
-        1. They are in the known global wall map
-        2. They have a wall feature in the observation
+        Cells are walkable if they have an aoe_mask token AND are not in
+        the known global wall map. In mettagrid, walls and out-of-view
+        cells simply lack the aoe_mask feature — they are never explicitly
+        encoded as wall tokens.
         """
-        grid = [[True] * self._obs_width for _ in range(self._obs_height)]
+        # Start with all cells unwalkable
+        grid = [[False] * self._obs_width for _ in range(self._obs_height)]
 
-        # Mark known walls from global wall map
+        # Mark cells with aoe_mask as walkable
+        walkable = self._detect_walkable_cells(obs)
+        for r, c in walkable:
+            if self._is_in_local_grid(r, c):
+                grid[r][c] = True
+
+        # Override with known global walls (from movement failures)
         for r in range(self._obs_height):
             for c in range(self._obs_width):
                 gr, gc = self._local_to_global(r, c, state)
                 if (gr, gc) in state.walls:
                     grid[r][c] = False
-
-        # Mark walls detected from observation features
-        obs_walls = self._detect_obs_walls(obs)
-        for r, c in obs_walls:
-            if self._is_in_local_grid(r, c):
-                grid[r][c] = False
-                # Obs-detected walls re-confirm with current step
-                gr, gc = self._local_to_global(r, c, state)
-                state.walls[(gr, gc)] = state.step_count
 
         return grid
 

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """List available CvC missions from cogames.
 
-Run with Python 3.12:
-    python3.12 scripts/cvc_list_missions.py
+Run with Python 3.12 (or conda env with cogames):
+    conda run -n cvc python scripts/cvc_list_missions.py
 
-Tries known mission names against resolve_mission() and reports which ones work.
-Also inspects the cogames mission registry if accessible.
+Probes all available missions and reports their properties.
 """
 
 from __future__ import annotations
@@ -20,55 +19,53 @@ def main():
         print("ERROR: cogames not available. Needs Python 3.12 + cogames.", file=sys.stderr)
         sys.exit(1)
 
+    from cogames.cli.mission import resolve_mission
+    from mettagrid import Simulation
+
     game = get_game("cogs_vs_clips")
 
-    # Try to find mission registry
-    print("=== Game info ===")
-    print(f"  Game: {game}")
-    if hasattr(game, "missions"):
-        print(f"  Missions attr: {game.missions}")
-    if hasattr(game, "list_missions"):
-        print(f"  list_missions(): {game.list_missions()}")
+    # Get the full list by triggering the error message
+    try:
+        resolve_mission(game, "INVALID_PROBE_NAME", variants_arg=None, cogs=8)
+    except Exception as e:
+        msg = str(e)
+        if "Available:" in msg:
+            names = msg.split("Available:")[1].strip().split(", ")
+            print(f"=== Available missions ({len(names)}) ===")
+        else:
+            print(f"Could not extract mission list: {msg}")
+            names = ["machina_1"]
 
-    # Inspect game module for mission data
-    game_module = type(game).__module__
-    print(f"  Module: {game_module}")
-    for attr in sorted(dir(game)):
-        if "mission" in attr.lower() or "map" in attr.lower() or "level" in attr.lower():
-            print(f"  {attr}: {getattr(game, attr, '?')}")
+    print()
+    print(f"{'Mission':<40s}  {'Map Size':>10s}  {'Max Steps':>10s}  {'Agents':>7s}  Notes")
+    print("-" * 90)
 
-    # Try known and guessed mission names
-    from cogames.cli.mission import resolve_mission
-
-    candidates = [
-        "machina_1", "machina_2", "machina_3",
-        "tutorial", "tutorial_1", "tutorial_2",
-        "simple", "basic", "test",
-        "open", "arena", "flat",
-        "sandbox", "playground",
-        "starter", "demo",
-    ]
-
-    print("\n=== Mission probe ===")
-    for name in candidates:
+    for name in names:
         try:
             _, env_cfg, _ = resolve_mission(game, name, variants_arg=None, cogs=8)
-            map_size = getattr(env_cfg.game, "map_width", "?")
-            max_steps = getattr(env_cfg.game, "max_steps", "?")
-            print(f"  OK: {name:20s}  map_width={map_size}  max_steps={max_steps}")
-        except Exception as e:
-            err_msg = str(e)[:80]
-            print(f"  FAIL: {name:20s}  {err_msg}")
+            env_cfg.game.max_steps = 100  # cap for probing
 
-    # Try to find mission directory in cogames package
-    import cogames
-    import os
-    pkg_dir = os.path.dirname(cogames.__file__)
-    for root, dirs, files in os.walk(pkg_dir):
-        for f in files:
-            if "mission" in f.lower() or f.endswith(".yaml") or f.endswith(".yml"):
-                rel = os.path.relpath(os.path.join(root, f), pkg_dir)
-                print(f"  File: cogames/{rel}")
+            sim = Simulation(env_cfg)
+            w, h = sim.map_width, sim.map_height
+            na = sim.num_agents
+            ms = env_cfg.game.max_steps
+
+            # Check observation to count walkable cells
+            obs = sim.observations()
+            ao = obs[0]
+            aoe_count = sum(1 for t in ao.tokens if t.feature.name == "aoe_mask")
+            tag_types = set()
+            for t in ao.tokens:
+                if t.feature.name == "tag" and t.value < len(sim.object_type_names):
+                    otype = sim.object_type_names[t.value]
+                    if otype:
+                        tag_types.add(otype)
+
+            notes = f"walkable={aoe_count}, objects={','.join(sorted(tag_types))}"
+            print(f"  {name:<38s}  {w}x{h:>5d}  {ms:>10d}  {na:>7d}  {notes}")
+            sim.end_episode()
+        except Exception as e:
+            print(f"  {name:<38s}  ERROR: {str(e)[:60]}")
 
     print("\nDone.")
 
