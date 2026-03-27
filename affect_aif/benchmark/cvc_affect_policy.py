@@ -42,7 +42,9 @@ from affect_aif.benchmark.cvc_navigation import NavigationHelper, NavigationStat
 GEAR = ("aligner", "scrambler", "miner", "scout")
 ELEMENTS = ("carbon", "oxygen", "germanium", "silicon")
 
-CARGO_THRESHOLD = 8
+CARGO_THRESHOLD_DEFAULT = 8
+CARGO_THRESHOLD_COOPERATIVE = 5   # deposit sooner when teammates are reliable
+CARGO_THRESHOLD_INDEPENDENT = 12  # stockpile when teammates are unreliable
 
 ROLE_PLAN = ("miner", "miner", "miner", "aligner", "aligner", "miner", "miner", "aligner")
 
@@ -98,12 +100,6 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
         self._junction_tags = self._resolve_tag_ids(["junction"])
         self._heart_source_tags = self._resolve_tag_ids(["hub", "chest"])
 
-        # All known structure tag ids (used to identify teammates by exclusion)
-        self._structure_tag_ids: set[int] = set()
-        self._structure_tag_ids.update(self._gear_station_tags)
-        self._structure_tag_ids.update(self._extractor_tags)
-        self._structure_tag_ids.update(self._junction_tags)
-        self._structure_tag_ids.update(self._heart_source_tags)
 
     # ---- helpers --------------------------------------------------------
 
@@ -190,24 +186,23 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
     # ---- teammate tracking ----------------------------------------------
 
     def _detect_teammates(self, obs: AgentObservation) -> dict[int, tuple[int, int]]:
-        """Detect teammate positions from observation tags.
+        """Detect teammate positions from agent_id observation feature.
 
-        Teammates are identified as tag tokens at non-center locations whose
-        tag-id is not a known structure. The tag value is used as a proxy
-        teammate id.
+        Each agent in the observation has an 'agent_id' feature at their
+        location. We identify teammates as agent_id tokens at non-center
+        locations (center = self).
         """
         teammates: dict[int, tuple[int, int]] = {}
         for token in obs.tokens:
-            if token.feature.name != "tag":
+            if token.feature.name != "agent_id":
                 continue
             loc = token.location
-            if loc is None or loc == self._center:
+            if loc is None or (loc[0], loc[1]) == self._center:
                 continue
-            tag_id = int(token.value)
-            if tag_id in self._structure_tag_ids:
+            agent_id = int(token.value)
+            if agent_id == self._agent_id:
                 continue
-            # Use tag_id as teammate identifier
-            teammates[tag_id] = (loc[0], loc[1])
+            teammates[agent_id] = (loc[0], loc[1])
         return teammates
 
     def _update_teammate_tracking(
@@ -277,11 +272,21 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
         else:
             state.stuck_steps = 0
 
+        # ---- Beta-modulated cargo threshold ----
+        # High team_beta → deposit sooner (teammates reliably coordinate)
+        # Low team_beta → stockpile more (need self-sufficiency)
+        if state.team_beta_ema > COOPERATE_THRESHOLD:
+            cargo_threshold = CARGO_THRESHOLD_COOPERATIVE
+        elif state.team_beta_ema < INDEPENDENT_THRESHOLD:
+            cargo_threshold = CARGO_THRESHOLD_INDEPENDENT
+        else:
+            cargo_threshold = CARGO_THRESHOLD_DEFAULT
+
         # Determine phase from inventory
         if gear is None:
             state.phase = ScoringPhase.GET_GEAR
         elif gear == "miner":
-            state.phase = ScoringPhase.DEPOSIT if cargo >= CARGO_THRESHOLD else ScoringPhase.MINE_ORE
+            state.phase = ScoringPhase.DEPOSIT if cargo >= cargo_threshold else ScoringPhase.MINE_ORE
         elif gear in ("aligner", "scrambler"):
             state.phase = ScoringPhase.ALIGN_JUNCTION if has_heart else ScoringPhase.DEPOSIT
         elif gear == "scout":
@@ -290,10 +295,6 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
             state.phase = ScoringPhase.GET_GEAR
 
         # ---- Policy modulation based on team beta ----
-        # High team_beta: coordinate — miners go to extractors near teammates,
-        #   aligners prioritise junctions.
-        # Low team_beta: go solo — miners avoid teammates, aligners get hearts first.
-        # Middle: default scoring loop.
 
         if state.phase == ScoringPhase.GET_GEAR:
             target_tags = self._gear_station_tags_by_gear.get(state.assigned_role, self._gear_station_tags)
@@ -306,16 +307,10 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
             return self._navigate_to(obs, state, self._heart_source_tags)
 
         if state.phase == ScoringPhase.ALIGN_JUNCTION:
-            if state.team_beta_ema > COOPERATE_THRESHOLD:
-                # High coordination: go straight for junctions (teammates are reliable)
-                return self._navigate_to(obs, state, self._junction_tags)
-            elif state.team_beta_ema < INDEPENDENT_THRESHOLD:
-                # Low coordination: ensure we have hearts before attempting junctions
-                if not has_heart:
-                    return self._navigate_to(obs, state, self._heart_source_tags)
-                return self._navigate_to(obs, state, self._junction_tags)
-            else:
-                return self._navigate_to(obs, state, self._junction_tags)
+            if state.team_beta_ema < INDEPENDENT_THRESHOLD and not has_heart:
+                # Low coordination + no hearts: get hearts first (self-sufficient)
+                return self._navigate_to(obs, state, self._heart_source_tags)
+            return self._navigate_to(obs, state, self._junction_tags)
 
         state.nav.last_action_name = self._fallback_action_name
         return self._action(self._fallback_action_name), state
