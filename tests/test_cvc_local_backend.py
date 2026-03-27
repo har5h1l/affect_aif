@@ -35,7 +35,7 @@ def test_cvc_local_backend_runs_python_worker_and_reads_standardized_records(mon
     backend = CvCLocalBackend(config.backend_configs["cvc_local"])
     context = BenchmarkBackendContext(shared={})
 
-    def fake_run(cmd, check, capture_output, text, timeout=None):
+    def fake_run(cmd, check, capture_output, text, timeout=None, env=None):
         output_path = Path(cmd[cmd.index("--output") + 1])
         output_path.write_text(
             json.dumps(

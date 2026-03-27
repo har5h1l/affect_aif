@@ -224,13 +224,14 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
 
             if tid in state.teammate_positions:
                 prev_pos = state.teammate_positions[tid]
-                # Compute velocity
-                vel = (global_pos[0] - prev_pos[0], global_pos[1] - prev_pos[1])
-                state.teammate_velocities[tid] = vel
 
-                # Predict where we expected them to be
+                # Predict where we expected them using PREVIOUS velocity
                 prev_vel = state.teammate_velocities.get(tid, (0, 0))
                 predicted = (prev_pos[0] + prev_vel[0], prev_pos[1] + prev_vel[1])
+
+                # NOW compute and store current velocity (after prediction)
+                vel = (global_pos[0] - prev_pos[0], global_pos[1] - prev_pos[1])
+                state.teammate_velocities[tid] = vel
 
                 # Update beta
                 prev_beta = state.teammate_betas.get(tid, INITIAL_BETA)

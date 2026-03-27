@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -115,8 +116,12 @@ class CvCLocalBackend(BenchmarkBackend):
             )
 
         timeout_s = int(self.backend_config.get("timeout_s", 600))
+        # Ensure the repo root is on PYTHONPATH so the worker can import affect_aif
+        repo_root = str(Path(__file__).resolve().parent.parent.parent)
+        env = os.environ.copy()
+        env["PYTHONPATH"] = repo_root + os.pathsep + env.get("PYTHONPATH", "")
         try:
-            subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=timeout_s)
+            subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=timeout_s, env=env)
         except subprocess.TimeoutExpired as exc:
             raise RuntimeError(
                 f"CvC local worker timed out after {timeout_s}s.\n"
