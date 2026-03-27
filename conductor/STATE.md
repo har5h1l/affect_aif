@@ -2,10 +2,9 @@
 status: CONTINUE
 next_priority: 1
 pending_work:
-  - "Track 1.2: Awaiting user decision on precision modulation (test or cut)"
-  - "Track 2.3: Beta parameter calibration for spatial domain (optional — current results sufficient)"
+  - "Track 1.2: RUN precision modulation experiment (user decided: test it)"
   - "Track 3.4: Remaining LaTeX placeholders (table data, figures)"
-next_session_focus: "Present Track 1.2 to user, consider beta recalibration, finalize remaining paper items"
+next_session_focus: "Execute Track 1.2 precision modulation experiment in graded betrayal environment, then finalize Track 3.4 LaTeX placeholders"
 model_hint: sonnet
 ---
 
@@ -72,7 +71,7 @@ Added CvC section to docs/paper/main.tex:
 | Track | Status | Details |
 |-------|--------|---------|
 | 1.1 | COMPLETE | Inside-out framing in paper |
-| 1.2 | AWAITING USER | Precision modulation: test or cut? |
+| 1.2 | **DO NOW** | Precision modulation: user says TEST — run graded betrayal experiment |
 | 1.3 | COMPLETE | vmPFC neural grounding |
 | 1.4 | COMPLETE | BMR trigger framing |
 | 1.5 | COMPLETE | Between-clinical differentiation |
@@ -90,10 +89,9 @@ Added CvC section to docs/paper/main.tex:
 - **What changed:** Session 12: Set up cogames env, discovered wall encoding (aoe_mask), fixed wall detection + teammate detection, ran full 10-seed benchmark. Both policies score non-zero (reward ~0.07) and massively outperform cogames starter. AffectCvC shows robustness benefit (3x fewer stuck steps). Paper CvC section written with table and analysis. 7 commits total.
 - **What is still in flight:** Track 1.2 (precision modulation decision) awaits user. Track 3.4 has remaining LaTeX placeholders.
 - **What next session should do:**
-  1. Present Track 1.2 decision to user (precision modulation: test or cut?)
-  2. Optional: try beta parameter recalibration (larger alpha, lower sigma_0_sq) for spatial domain differentiation
-  3. Track 3.4: fill remaining table placeholders if data available
-  4. Consider Observatory submission if CvC packaging is ready
+  1. Track 1.2: Run precision modulation (gamma_k = f(beta_k)) experiment — user decision is TEST, not cut. Smoke test 5 seeds, then full 50-100 seeds in graded betrayal. Compare with and without gamma-modulation.
+  2. Track 3.4: fill remaining table placeholders if data available
+  3. Consider Observatory submission if CvC packaging is ready
 
 ## Status
 CONTINUE — Track 2 complete (non-zero CvC scores + paper section), Track 1.2 awaits user, Track 3.4 partial

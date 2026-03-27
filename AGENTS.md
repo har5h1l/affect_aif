@@ -29,7 +29,7 @@ This document provides comprehensive system documentation for AI agents operatin
 - Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
 - State inference (partner-type belief updating) is the analytical solution to VFE minimization (matrix-based Bayes with A and B), not iterative optimization.
 - Benchmark runs use `scripts/run_benchmark.py` plus `docs/benchmarking_integration.md` for backends, configs (for example `affect_aif/configs/benchmark_default.json` and `benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
-- Remote VMs, sync, and merge flows for this project are described under Cloud Deployment in `CLAUDE.md` and `~/Desktop/research-infra`; do not add orchestration or deployment scripts to this repo.
+- Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results. Do not add orchestration or deployment scripts to this repo.
 
 ---
 

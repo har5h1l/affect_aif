@@ -175,18 +175,42 @@ Launch with `./start_research.sh --loop 30m` (runs tests first, then starts cond
 
 See `conductor/USAGE.md` for full documentation.
 
-## Cloud Deployment
+## Mango (Session & Cloud Management)
 
-Cloud VM management is centralized in `~/Desktop/research-infra/` (not in this repo).
+`mango` is the CLI for managing autonomous research sessions, both locally and on cloud VMs. It lives at `~/Desktop/mango/` and is available globally.
+
+### Common Commands
 
 ```bash
-research cloud setup                    # base VM setup
-research cloud push-infra               # sync infra tools to VM
-research cloud clone affect_aif         # clone this project on VM
-research cloud sync fetch affect_aif    # fetch experiment results from VM
-research cloud sync push affect_aif     # push code to VM
-research run affect_aif --mode research --cloud vm1  # run on VM
-research logs affect_aif --remote       # tail remote session logs
+# Session lifecycle
+mango run affect_aif --cloud              # Launch autonomous session on server
+mango run affect_aif --cloud --mode hybrid # Hybrid: compute on server, monitor locally
+mango status --remote                      # Check running sessions on server
+mango logs affect_aif --remote --lines 50  # Tail remote session logs
+mango stop affect_aif --remote             # Stop remote session
+mango attach affect_aif                    # SSH+tmux attach to cloud session
+
+# Branch management
+mango review affect_aif                    # Review latest session branch
+mango merge affect_aif                     # Merge session branch to main
+
+# Cloud operations
+mango cloud sync push affect_aif           # Push code to server
+mango cloud sync fetch affect_aif          # Fetch results from server
+mango cloud ssh                            # SSH into server
+mango cloud push-infra                     # Sync mango itself to server
+
+# Steering a running session
+mango task affect_aif "try X" --now        # Send instruction to running session via INBOX.md
+mango agent mission affect_aif             # View current mission
+mango agent state affect_aif               # View current state
 ```
 
-See `~/Desktop/research-infra/` for full CLI documentation.
+### Key Behaviors
+
+- `mango run --cloud` creates a git worktree on the server, checks out the current branch, and launches a Claude Code conductor session
+- Sessions continue on the **same branch** they were launched on — push your branch to origin before launching
+- When a session stops (even via SIGKILL), mango **automatically removes the worktree**
+- Server's local master is NOT auto-updated by `mango run --cloud`. To sync: `mango cloud sync push affect_aif` or manually pull on server
+- Session logs are in `conductor/log/` on the server
+- Results from experiments land in `results/` within the worktree — use `mango cloud sync fetch` to pull them back
