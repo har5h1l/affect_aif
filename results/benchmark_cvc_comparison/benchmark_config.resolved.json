@@ -1,0 +1,44 @@
+{
+  "backends": [
+    "cvc_local"
+  ],
+  "agents": [
+    {
+      "name": "scoring_loop",
+      "backend": "cvc_local",
+      "kind": "policy_spec",
+      "implementation": null,
+      "policy_spec": "class=affect_aif.benchmark.cvc_scoring_policy.ScoringLoopPolicy",
+      "config": {}
+    },
+    {
+      "name": "affect_cvc",
+      "backend": "cvc_local",
+      "kind": "policy_spec",
+      "implementation": null,
+      "policy_spec": "class=affect_aif.benchmark.cvc_affect_policy.AffectCvCPolicy",
+      "config": {}
+    },
+    {
+      "name": "starter",
+      "backend": "cvc_local",
+      "kind": "policy_spec",
+      "implementation": null,
+      "policy_spec": "class=cogames.policy.starter_agent.StarterPolicy",
+      "config": {}
+    }
+  ],
+  "num_replications": 10,
+  "num_rounds": 1,
+  "output_dir": "results/benchmark_cvc_comparison",
+  "random_seed": 42,
+  "backend_configs": {
+    "cvc_local": {
+      "mission": "machina_1",
+      "num_agents": 8,
+      "max_steps": 1000,
+      "python_bin": "/Users/server/miniforge3/envs/cvc/bin/python"
+    }
+  },
+  "observatory": null
+}
