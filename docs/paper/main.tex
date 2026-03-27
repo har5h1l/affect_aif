@@ -53,7 +53,7 @@ We present a computational model of affect as per-partner metacognitive precisio
 
 Social cognition presents a fundamental computational bottleneck. When an agent interacts with multiple social partners whose strategies may change unpredictably, optimal decision-making requires maintaining probabilistic models of each partner's hidden states, simulating forward through multiple rounds of interaction, and evaluating expected outcomes under candidate policies. The computational cost grows exponentially with planning horizon, yet humans navigate these environments fluently---suggesting they employ computational shortcuts that preserve decision quality without exhaustive forward planning.
 
-Damasio's somatic marker hypothesis \citep{damasio1994descartes} proposes that emotional signals provide exactly this shortcut. Through the ventromedial prefrontal cortex (vmPFC) and its connections to the amygdala and insula, the brain generates rapid affective evaluations that bias decision-making before and below deliberate reasoning. The Iowa Gambling Task \citep{bechara1997deciding} provides the key evidence: vmPFC-lesioned patients can verbally identify risky options but fail to develop the anticipatory somatic markers that healthy participants use to guide advantageous choices. The dissociation---intact knowledge but impaired deployment---is the behavioral signature our model aims to reproduce computationally in a social context.
+Damasio's somatic marker hypothesis \citep{damasio1994descartes} proposes that emotional signals provide exactly this shortcut. Through the ventromedial prefrontal cortex (vmPFC) and its connections to the amygdala and insula, the brain generates rapid affective evaluations that bias decision-making before and below deliberate reasoning. The Iowa Gambling Task \citep{bechara1994insensitivity,bechara1997deciding} provides the key evidence: vmPFC-lesioned patients can verbally identify risky options but fail to develop the anticipatory somatic markers that healthy participants use to guide advantageous choices. The dissociation---intact knowledge but impaired deployment---is the behavioral signature our model aims to reproduce computationally in a social context.
 
 Active inference \citep{friston2010free,parr2022active} provides the formal framework. Agents maintain generative models of observation causes and act to minimize variational free energy. Policy selection is governed by expected free energy (EFE), decomposing into pragmatic value (preference alignment) and epistemic value (uncertainty reduction). \citet{hesp2021deeply} formalized affect within this framework: valence encodes expected model precision (subjective fitness), with affective charge driven by signed prediction errors. Critically, their model operates in a single-agent context. What is absent is a per-partner metacognitive affective state that compresses interaction history into a precision signal for multi-agent social inference.
 
@@ -108,7 +108,7 @@ The affective state $\beta_k$ for partner $k$ is updated from a signed affective
 \end{equation}
 where $\lambda \in (0.5, 0.9)$ is a smoothing parameter, $\epsilon_k^{(t)} = 1 - P(o_t^{\mathrm{obs}} \mid s_k^{(2)})$ is the unsigned surprise from the level-2 model, and $\phi(\epsilon) = \alpha(\sigma_0^2 - \epsilon^2)$ converts surprise into affective charge. When actual squared surprise is below baseline $\sigma_0^2$, affect increases (model is accurate); when above, it decreases (model is failing).
 
-This update extends \citeauthor{hesp2021deeply}'s variational treatment of precision dynamics to the per-partner social setting. The surprise term is computed from the agent's own level-2 predictive beliefs, making the affective update belief-coupled rather than externally injected.
+This update extends \citeauthor{hesp2021deeply}'s variational treatment of precision dynamics to the per-partner social setting, building on the free-energy formalization of emotional valence by \citet{joffily2013emotional} and the interoceptive inference framework of \citet{seth2013interoceptive}. The surprise term is computed from the agent's own level-2 predictive beliefs, making the affective update belief-coupled rather than externally injected.
 
 \subsection{Affect as Precision Weighting}
 
@@ -156,7 +156,7 @@ To test precision modulation in ambiguous decision spaces, we introduce a graded
 
 We test three 2$\times$2 symmetric games with zero code changes---only the payoff matrix differs:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccccc}
 \toprule
@@ -173,7 +173,7 @@ Chicken & (3,3) & (1,5) & (5,1) & (0,0) & Anti-coordination \\
 
 \subsection{Experimental Conditions}
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{clccc}
 \toprule
@@ -200,7 +200,7 @@ To test robustness under volatility, we use an agent-chosen partner assignment w
 
 \subsection{Clinical Parameter Regimes}
 
-Three clinical phenotypes are modeled as parameter perturbations:
+Three clinical phenotypes are modeled as parameter perturbations, following the computational psychiatry framework of \citet{smith2021bayesian}:
 \begin{itemize}[nosep]
   \item \textbf{Alexithymia} (C9): $\alpha = 0.1$ (blunted affective charge)
   \item \textbf{Borderline} (C10): $\alpha = 12$, $\lambda = 0.5$ (volatile, poorly smoothed precision)
@@ -211,11 +211,11 @@ Three clinical phenotypes are modeled as parameter perturbations:
 \section{Results}
 \label{sec:results}
 
-\subsection{Orthogonal Augmentation Beyond Planning Depth}
+\subsection{Orthogonal Augmentation Beyond Planning Depth (Hypothesis 1)}
 
 The central result: under sophisticated inference, explicit planning depth is irrelevant in the binary trust game, but affect provides consistent augmentation.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccccc}
 \toprule
@@ -236,7 +236,7 @@ C8 (affective, deep) & 8 & $\approx 576$ & 0.64 & --- \\
 
 The non-affective depth curve is flat: every pairwise comparison among C1, C4, C6, C7 has $p > 0.93$. Adding affect at depth $\tau = 2$ (C2) or $\tau = 8$ (C8) produces $\sim\!46$-point improvement, confirming the augmentation is orthogonal to depth. The affect $\times$ depth interaction (Table~\ref{tab:orthogonality}) shows the effect is additive and depth-independent.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{lcc}
 \toprule
@@ -258,7 +258,7 @@ In the default condition, C3 (lesioned) and C4 (no affect) are \emph{exactly} id
 
 This comparison is task-dependent:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccc}
 \toprule
@@ -292,7 +292,7 @@ The beta dynamics remain active in all conditions: mean beta range $= 0.164$ (de
 
 Each agent condition is treated as a generative model, with per-round log-evidence $\ell_t = \log p(o_t \mid m, h_{<t})$ accumulated over all rounds. Pairwise Bayes factors and random-effects BMS \citep{stephan2009bayesian} with protected exceedance probabilities \citep{rigoux2014bayesian} provide formal model comparison.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccc}
 \toprule
@@ -314,7 +314,7 @@ The betrayal result is particularly strong: precision tracking produces the best
 
 Affect augmentation generalizes across game types, with game-dependent patterns:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccccc}
 \toprule
@@ -337,7 +337,7 @@ Key findings: (1) augmentation generalizes broadly under volatility ($d > 1.0$ i
 
 The graded game confirms that the precision channel was structurally inert in binary games (policy entropy $< 0.01$) and activates it ($H_{q_\pi} \approx 5.8$):
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccc}
 \toprule
@@ -367,7 +367,7 @@ In the binary trust game, clinical parameter perturbations produce $< 0.5\%$ beh
 
 Combining the graded game with betrayal stress produces massive between-clinical differentiation:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccc}
 \toprule
@@ -396,7 +396,7 @@ Three clinically interpretable findings emerge:
 
 The graded betrayal environment produces large effects relative to the no-affect baseline but modest between-clinical separation (10.324--10.353 payoff range). The Stag Hunt betrayal environment resolves this: its severe miscoordination cost (sucker payoff) amplifies the behavioral consequences of precision volatility, producing the first statistically significant between-clinical differentiation.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccc}
 \toprule
@@ -491,7 +491,7 @@ Current partners follow scripted stochastic policies. Replacing partners with ac
 Environments with delayed feedback, partial observability, multiple equilibria, or continuous action spaces would further stress-test the precision tracking mechanism. Such environments should reveal whether precision tracking's advantage over reward averaging extends beyond the binary betrayal niche.
 
 \paragraph{Structure learning integration.}
-Persistent low affective precision despite ongoing parameter learning constitutes evidence that the model \emph{structure} is wrong for that partner. This positions $\beta_k$ as a natural trigger for Bayesian Model Reduction---discovering coalition structures, domain-specific trust, or hidden strategic dependencies. Neuroscience offers convergent support: \citet{behrens2025hippocampal} show that hippocampal sharp-wave ripples mediate structural (not merely parametric) belief updates, while \citet{mishchanchuk2024causal} demonstrate a causal dissociation between hidden-state inference and parameter updating in learning tasks. Early somatosensory surprise signals ($\sim$70\,ms) index model \emph{inadequacy}---evidence that the generative structure itself is wrong---whereas later signals ($\sim$140\,ms) drive parametric updating within an intact model. Persistent low $\beta_k$ is computationally analogous to this early inadequacy signal: evidence accumulates that parametric learning cannot resolve the prediction error, suggesting the partner model's structure (not its parameters) needs revision. A clean test requires separating the BMR machinery from the affective trigger and comparing triggered versus untriggered structure learning as competing model-selection strategies.
+Persistent low affective precision despite ongoing parameter learning constitutes evidence that the model \emph{structure} is wrong for that partner. This positions $\beta_k$ as a natural trigger for Bayesian Model Reduction \citep{smith2020structure}---discovering coalition structures, domain-specific trust, or hidden strategic dependencies. Neuroscience offers convergent support: \citet{behrens2025hippocampal} show that hippocampal sharp-wave ripples mediate structural (not merely parametric) belief updates, while \citet{mishchanchuk2024causal} demonstrate a causal dissociation between hidden-state inference and parameter updating in learning tasks. Early somatosensory surprise signals ($\sim$70\,ms) index model \emph{inadequacy}---evidence that the generative structure itself is wrong---whereas later signals ($\sim$140\,ms) drive parametric updating within an intact model. Persistent low $\beta_k$ is computationally analogous to this early inadequacy signal: evidence accumulates that parametric learning cannot resolve the prediction error, suggesting the partner model's structure (not its parameters) needs revision. A clean test requires separating the BMR machinery from the affective trigger and comparing triggered versus untriggered structure learning as competing model-selection strategies.
 
 \paragraph{Deeper clinical modeling.}
 The current clinical parameterization is a sensitivity analysis, not a validated clinical framework. Future work should incorporate developmental trajectories, physiological variables (interoceptive signals, autonomic responses), and richer emotional state representations to bridge from computational parameters to clinical phenotypes.
