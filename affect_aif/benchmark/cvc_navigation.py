@@ -42,6 +42,9 @@ DIR_NAME_TO_DELTA: dict[str, tuple[int, int]] = {
 # Feature names that indicate impassable cells (will be populated by diagnostic)
 WALL_FEATURE_NAMES: set[str] = {"wall", "obstacle", "blocked"}
 
+# Movement-failure walls expire after this many steps (handles agent-blocking)
+WALL_EXPIRY_STEPS: int = 15
+
 
 @dataclass
 class NavigationState:
@@ -50,9 +53,10 @@ class NavigationState:
     global_row: int = 0
     global_col: int = 0
     last_action_name: Optional[str] = None
-    walls: set[tuple[int, int]] = field(default_factory=set)
+    walls: dict[tuple[int, int], int] = field(default_factory=dict)  # coord -> step_added
     visited: set[tuple[int, int]] = field(default_factory=set)
     stuck_counter: int = 0
+    step_count: int = 0
 
 
 class NavigationHelper:
@@ -74,6 +78,13 @@ class NavigationHelper:
         moved: bool,
     ) -> NavigationState:
         """Update global position and wall map from movement result."""
+        state.step_count += 1
+
+        # Expire old movement-failure walls (handles agent-blocking)
+        if state.walls:
+            cutoff = state.step_count - WALL_EXPIRY_STEPS
+            state.walls = {k: v for k, v in state.walls.items() if v > cutoff}
+
         if state.last_action_name is None:
             return state
 
@@ -89,8 +100,10 @@ class NavigationHelper:
             state.global_col = target_c
             state.visited.add((target_r, target_c))
             state.stuck_counter = 0
+            # If we successfully moved to a cell, it's not a wall
+            state.walls.pop((target_r, target_c), None)
         else:
-            state.walls.add((target_r, target_c))
+            state.walls[(target_r, target_c)] = state.step_count
             state.stuck_counter += 1
 
         return state
@@ -148,9 +161,9 @@ class NavigationHelper:
         for r, c in obs_walls:
             if self._is_in_local_grid(r, c):
                 grid[r][c] = False
-                # Also add to global wall map for persistence
+                # Obs-detected walls re-confirm with current step
                 gr, gc = self._local_to_global(r, c, state)
-                state.walls.add((gr, gc))
+                state.walls[(gr, gc)] = state.step_count
 
         return grid
 
