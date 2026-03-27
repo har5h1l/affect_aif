@@ -107,6 +107,7 @@ def test_archive_boundary_is_explicit():
         "analyze_benchmark.py",
         "analyze_benchmark_paper.py",
         "analyze_clinical_results.py",
+        "cvc_list_missions.py",
         "cvc_obs_diagnostic.py",
         "run_analysis.py",
         "run_benchmark.py",
