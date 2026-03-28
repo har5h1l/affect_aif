@@ -126,7 +126,7 @@ Five specific gaps identified in the theory and framing:
 
 1. **Inside-out literature positioning (1.1):** Position beta-as-metacognitive-precision against Yoshida (2024, outside-in empathy) and Pitliya et al. (2025, cognitive ToM). Triple dissociation: outside-in / cognitive ToM / inside-out precision monitoring.
 
-2. **Precision modulation pathway (1.2):** gamma_k = f(beta_k) is described but untested. Decision needed: run in graded game (where softmax isn't saturated) or cut from paper. Requires user input.
+2. **Precision modulation pathway (1.2): COMPLETE.** Tested in graded betrayal (50 seeds × 120 rounds). Mechanism confirmed: entropy reduction of 0.44 nats, payoff d=0.21 (directionally positive, non-significant). Results added to paper.
 
 3. **vmPFC neuro-architectural argument (1.3):** Connect Bancee et al. (2026, vmPFC emotion geometry) + Baram et al. (2026, OFC/vmPFC schema manifolds) + Damasio to ground beta in vmPFC. Discussion-level only.
 
@@ -145,7 +145,7 @@ Five specific gaps identified in the theory and framing:
 4. Benchmark and package for Observatory submission
 5. In parallel, try simpler missions as stepping stones
 
-**Current status:** Pipeline complete. All policies score 0 reward due to navigation failures. See `docs/benchmarking_integration.md`.
+**Current status: COMPLETE.** Navigation solved via BFS + aoe_mask wall detection (84-91% move success). ScoringLoopPolicy: 0.072 reward, 2.5 junctions. AffectCvCPolicy: 0.071 reward, 3x fewer stuck steps. StarterPolicy: 0.000 (baseline). Full benchmark: 3 policies × 10 seeds on machina_1. Results in `results/benchmark_cvc_comparison/` and paper Section 4.10.
 
 ### Track 3: Paper Preparation (MEDIUM priority — depends on Tracks 1-2)
 
@@ -178,6 +178,7 @@ Nine identified issues with the agentic literature sweep system. Not blocking th
 - **Phase 5 key finding:** Graded betrayal environment produces massive between-clinical differentiation (80.5 point spread). Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
 - **Phase 6 key finding:** C2 is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5).
 - **Phase 7 key finding:** Augmentation generalizes across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **In progress:** Four-track plan for paper submission. Track 1 (theory gaps) and Track 2 (CvC benchmark) are co-priority.
+- **Tracks 1-3: COMPLETE.** All theory gaps addressed, CvC benchmark done, paper prepared. See review findings below.
+- **Paper polish needed:** Fix clinical d sign convention, add figures, add missing somatosensory citation, cross-reference tables, fill author affiliation.
 - **Remaining:** Phase 8 (human data) requires user approval.
 - **Stop point:** Phase 8 (human data) requires user approval.

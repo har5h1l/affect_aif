@@ -17,6 +17,10 @@ from affect_aif.benchmark.comparison import format_comparison_report
 
 CVC_POLICY_ALIASES = {
     "teammate_reliability": "class=affect_aif.benchmark.cvc_policy.TeammateReliabilityPolicy",
+    "scoring_loop": "class=affect_aif.benchmark.cvc_scoring_policy.ScoringLoopPolicy",
+    "scoring": "class=affect_aif.benchmark.cvc_scoring_policy.ScoringLoopPolicy",
+    "affect_cvc": "class=affect_aif.benchmark.cvc_affect_policy.AffectCvCPolicy",
+    "affect": "class=affect_aif.benchmark.cvc_affect_policy.AffectCvCPolicy",
     "starter": "class=cogames.policy.starter_agent.StarterPolicy",
     "miner": "class=cogames.policy.role_policies.MinerRolePolicy",
     "aligner": "class=cogames.policy.role_policies.AlignerRolePolicy",

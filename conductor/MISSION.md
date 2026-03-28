@@ -34,14 +34,17 @@ Add a related-work paragraph triangulating three approaches:
 
 This triple dissociation (outside-in empathy / cognitive ToM / inside-out precision monitoring) is the cleanest way to position the contribution. Action: add/update a Discussion subsection in `docs/paper/main.tex` and update `docs/theory.md` Section 4 accordingly.
 
-#### 1.2 Precision Modulation Pathway: Test or Cut
-The paper mentions per-partner policy precision modulation (gamma_k = f(beta_k)) as an alternative to terminal-value weighting — but it's implemented and never tested in production experiments. Described-but-untested mechanisms weaken the contribution.
+#### 1.2 Precision Modulation Pathway: TEST IT
+**User decision (2026-03-27): Run it.** The graded game (q_pi entropy ~5.8) is exactly where precision modulation should matter because softmax isn't saturated.
 
-**STOP and present options to the user:**
-- **Option A: Run it.** The graded game (q_pi entropy ~5.8) is exactly where precision modulation should matter because softmax isn't saturated. Run C2 with gamma-modulation in the graded betrayal environment (50-100 seeds). If it works, add to results. If not, report as a clean negative result.
-- **Option B: Cut it.** Remove all mention from the paper. Keep the code, don't claim it. Move to future_work.md explicitly.
+**Plan:**
+1. Identify or create a config that enables gamma-modulation (gamma_k = f(beta_k)) for C2 (AffectiveAgent, shallow horizon) in the graded betrayal environment
+2. Smoke test: 5 seeds, graded betrayal with gamma-modulation enabled — verify it runs and gamma values actually vary
+3. Full run: 50-100 seeds, compare C2-with-gamma vs C2-without-gamma in graded betrayal
+4. Analyze: does gamma-modulation improve payoff, recovery speed, or partner discrimination?
+5. If positive → add to results section. If negative → report as clean negative result (still informative for the paper)
 
-Do NOT run experiments or cut content without user approval.
+Do NOT cut this mechanism. Test it.
 
 #### 1.3 Neuro-Architectural Argument for vmPFC as Beta
 The vmPFC lesion analogy (C3 = C4 reproducing Damasio's somatic marker deficit) is in the paper but lacks neural grounding. Two papers provide the missing argument:
@@ -149,7 +152,7 @@ Do NOT implement these. Document identified issues in STATE.md only. The user wi
 - Never delete result files
 - Max 4 experiment workers
 - CvC experiments run in Python 3.12 subprocess — use python3.12 binary
-- STOP and present options for section 1.2 (precision modulation: test or cut) before proceeding
+- Track 1.2: user has decided to TEST precision modulation — proceed with experiments
 - STOP and describe findings if: results contradict expectations, a proposed direction is a massive shift from the variational-AIF paradigm, or Phase 8 (human data) is being considered
 
 ## Notes

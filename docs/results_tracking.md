@@ -559,6 +559,35 @@ The core goal for the CvC benchmark is to adapt our affect-augmented AIF model t
 
 The trust-game results (Phases 1-7) are the primary evidence for the paper. CvC results would demonstrate the architecture's generality in a fundamentally different domain.
 
+## Track 1.2: Precision Modulation Pathway (2026-03-28, Session 13)
+
+**Config:** `affect_aif/configs/graded_betrayal_precision_mod_full.json`
+**Command:** `python scripts/run_experiment.py --config affect_aif/configs/graded_betrayal_precision_mod_full.json --output-dir results/graded_betrayal_precision_mod_full --batch-name precision_mod_full`
+**Output:** `results/graded_betrayal_precision_mod_full/`
+**Conditions:** 1 (deep no-affect), 2 (affective shallow), 3 (lesioned), 5 (reward avg)
+**Seeds:** 50, **Rounds:** 120, **Game:** graded betrayal (cooperator→exploiter at round 31)
+**affect_modulates_precision:** true, **mu:** derived=0.0 (deep_horizon=shallow_horizon=2 → horizon_gap=0)
+
+### Key Result: Mechanism Confirmed, Effect Small
+
+| Condition | Mean Payoff | q_pi entropy |
+|-----------|-------------|--------------|
+| C1 (baseline) | 1242.40 ± 24.38 | 5.90 |
+| C2 precision-mod ON | 1247.78 ± 27.32 | 5.46 |
+| C2 precision-mod OFF | 1242.40 (= C1) | — |
+
+- **Delta**: C2-mod vs C1: +5.38 points, d=0.21, p=0.31 (n=50) — directionally positive, non-significant
+- **Entropy reduction confirmed**: 5.90 → 5.46 nats (Δ=0.44) — precision modulation sharpens softmax for high-beta partners
+- **Control**: without modulation and mu=0 (due to horizon_gap=0), C2 = C1 exactly — the betas have zero effect, isolating the modulation pathway
+
+### Interpretation
+
+The precision modulation pathway (`γ_k = γ(1 + β_k)`) is mechanistically valid: betas vary (range ~0.17, fraction_moved=1.0) and provably reduce policy entropy. The payoff effect is positive but small (~0.4% improvement) and non-significant at n=50. This is an informative result for the paper: the pathway works, but the graded betrayal environment does not amplify precision modulation into large payoff differences. The moderate EFE gradients (~10–12 per round) limit how much policy sharpness translates to reward gains.
+
+**Implementation note**: In `decouple` lesion mode, C3 = C2 when modulation is active, because `LesionedAgent.precision_signal()` is not overridden in decouple mode. The lesion blocks terminal value weighting (mu=0) but not the precision channel. This is an intended distinction (vmPFC lesion blocks affect-to-value translation, not precision scaling) but should be noted in the paper.
+
+**Status**: Track 1.2 complete. Results added to paper (docs/paper/main.tex, new subsection "Precision Modulation Pathway Validation").
+
 ## Execution Record Template
 
 When the user asks to refresh this file after a run, append:

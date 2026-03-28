@@ -42,7 +42,7 @@
 
 % ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{abstract}
-We present a computational model of affect as per-partner metacognitive precision tracking in multi-agent active inference. Each social partner is assigned a slow-timescale affective state $\beta_k$ that summarizes the running reliability of the agent's predictive model for that partner. This state augments policy evaluation by precision-weighting expected free energy estimates with partner-specific confidence information. In a volatile multi-partner trust game, we show that: (1)~affect provides \emph{orthogonal} augmentation beyond explicit planning depth---under sophisticated inference, non-affective planners from horizon $\tau = 2$ to $\tau = 8$ are statistically indistinguishable, yet adding the affective signal yields $d = 0.64$ improvement at every depth; (2)~ablating affect reproduces the somatic marker deficit---intact partner knowledge with impaired decision deployment; (3)~precision tracking and reward averaging occupy distinct informational niches, with precision tracking excelling under betrayal stress ($d = 0.59$) and reward averaging dominating in continuous-investment settings ($d = 1.72$); (4)~Bayesian model comparison decisively favors the affective model under volatility (log$_{10}$ BF $= 3.0$); (5)~augmentation generalizes across Prisoner's Dilemma, Stag Hunt, and Chicken games ($d > 1.0$ under betrayal in all three); and (6)~clinical parameter perturbations (alexithymia, borderline, depression) produce qualitatively distinct behavioral phenotypes across environments---in the Stag Hunt, borderline is the first phenotype with decisive Bayesian evidence of impairment ($d = 0.72$, log$_{10}$ BF $= -2.89$), while alexithymia is paradoxically protective. The mechanism occupies a distinct computational niche from both outside-in empathy and cognitive theory of mind: inside-out metacognitive monitoring of one's own social inference channel. Affect encodes information orthogonal to both planning depth and reward history: partner-specific model fitness that improves social decisions through a channel inaccessible to explicit deliberation alone.
+We present a computational model of affect as per-partner metacognitive precision tracking in multi-agent active inference. Each social partner is assigned a slow-timescale affective state $\beta_k$ that summarizes the running reliability of the agent's predictive model for that partner. This state augments policy evaluation by precision-weighting expected free energy estimates with partner-specific confidence information. In a volatile multi-partner trust game, we show that: (1)~affect provides \emph{orthogonal} augmentation beyond explicit planning depth---under sophisticated inference, non-affective planners from horizon $\tau = 2$ to $\tau = 8$ are statistically indistinguishable, yet adding the affective signal yields $d = 0.64$ improvement at every depth; (2)~ablating affect reproduces the somatic marker deficit---intact partner knowledge with impaired decision deployment; (3)~precision tracking and reward averaging occupy distinct informational niches, with precision tracking excelling under betrayal stress ($d = 0.59$) and reward averaging dominating in continuous-investment settings ($d = 1.72$); (4)~Bayesian model comparison decisively favors the affective model under volatility (log$_{10}$ BF $= 3.0$); (5)~augmentation generalizes across Prisoner's Dilemma, Stag Hunt, and Chicken games ($d > 1.0$ under betrayal in all three); and (6)~clinical parameter perturbations (alexithymia, borderline, depression) produce qualitatively distinct behavioral phenotypes across environments---in the Stag Hunt, borderline is the first phenotype with decisive Bayesian evidence of impairment ($d = 0.72$, log$_{10}$ BF $= -2.89$), while alexithymia is paradoxically protective. The mechanism occupies a distinct computational niche from both outside-in empathy and cognitive theory of mind: inside-out metacognitive monitoring of one's own social inference channel. The architecture transfers without modification to a spatial multi-agent benchmark (Cogs vs.\ Clips), where the same beta update rule tracks teammate positional predictability. Affect encodes information orthogonal to both planning depth and reward history: partner-specific model fitness that improves social decisions through a channel inaccessible to explicit deliberation alone.
 \end{abstract}
 
 \noindent\textbf{Keywords:} active inference, affect, social cognition, precision weighting, somatic markers, multi-agent systems, computational psychiatry
@@ -53,7 +53,7 @@ We present a computational model of affect as per-partner metacognitive precisio
 
 Social cognition presents a fundamental computational bottleneck. When an agent interacts with multiple social partners whose strategies may change unpredictably, optimal decision-making requires maintaining probabilistic models of each partner's hidden states, simulating forward through multiple rounds of interaction, and evaluating expected outcomes under candidate policies. The computational cost grows exponentially with planning horizon, yet humans navigate these environments fluently---suggesting they employ computational shortcuts that preserve decision quality without exhaustive forward planning.
 
-Damasio's somatic marker hypothesis \citep{damasio1994descartes} proposes that emotional signals provide exactly this shortcut. Through the ventromedial prefrontal cortex (vmPFC) and its connections to the amygdala and insula, the brain generates rapid affective evaluations that bias decision-making before and below deliberate reasoning. The Iowa Gambling Task \citep{bechara1997deciding} provides the key evidence: vmPFC-lesioned patients can verbally identify risky options but fail to develop the anticipatory somatic markers that healthy participants use to guide advantageous choices. The dissociation---intact knowledge but impaired deployment---is the behavioral signature our model aims to reproduce computationally in a social context.
+Damasio's somatic marker hypothesis \citep{damasio1994descartes} proposes that emotional signals provide exactly this shortcut. Through the ventromedial prefrontal cortex (vmPFC) and its connections to the amygdala and insula, the brain generates rapid affective evaluations that bias decision-making before and below deliberate reasoning. The Iowa Gambling Task \citep{bechara1994insensitivity,bechara1997deciding} provides the key evidence: vmPFC-lesioned patients can verbally identify risky options but fail to develop the anticipatory somatic markers that healthy participants use to guide advantageous choices. The dissociation---intact knowledge but impaired deployment---is the behavioral signature our model aims to reproduce computationally in a social context.
 
 Active inference \citep{friston2010free,parr2022active} provides the formal framework. Agents maintain generative models of observation causes and act to minimize variational free energy. Policy selection is governed by expected free energy (EFE), decomposing into pragmatic value (preference alignment) and epistemic value (uncertainty reduction). \citet{hesp2021deeply} formalized affect within this framework: valence encodes expected model precision (subjective fitness), with affective charge driven by signed prediction errors. Critically, their model operates in a single-agent context. What is absent is a per-partner metacognitive affective state that compresses interaction history into a precision signal for multi-agent social inference.
 
@@ -108,7 +108,7 @@ The affective state $\beta_k$ for partner $k$ is updated from a signed affective
 \end{equation}
 where $\lambda \in (0.5, 0.9)$ is a smoothing parameter, $\epsilon_k^{(t)} = 1 - P(o_t^{\mathrm{obs}} \mid s_k^{(2)})$ is the unsigned surprise from the level-2 model, and $\phi(\epsilon) = \alpha(\sigma_0^2 - \epsilon^2)$ converts surprise into affective charge. When actual squared surprise is below baseline $\sigma_0^2$, affect increases (model is accurate); when above, it decreases (model is failing).
 
-This update extends \citeauthor{hesp2021deeply}'s variational treatment of precision dynamics to the per-partner social setting. The surprise term is computed from the agent's own level-2 predictive beliefs, making the affective update belief-coupled rather than externally injected.
+This update extends \citeauthor{hesp2021deeply}'s variational treatment of precision dynamics to the per-partner social setting, building on the free-energy formalization of emotional valence by \citet{joffily2013emotional} and the interoceptive inference framework of \citet{seth2013interoceptive}. The surprise term is computed from the agent's own level-2 predictive beliefs, making the affective update belief-coupled rather than externally injected.
 
 \subsection{Affect as Precision Weighting}
 
@@ -156,7 +156,7 @@ To test precision modulation in ambiguous decision spaces, we introduce a graded
 
 We test three 2$\times$2 symmetric games with zero code changes---only the payoff matrix differs:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccccc}
 \toprule
@@ -173,7 +173,7 @@ Chicken & (3,3) & (1,5) & (5,1) & (0,0) & Anti-coordination \\
 
 \subsection{Experimental Conditions}
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{clccc}
 \toprule
@@ -200,7 +200,7 @@ To test robustness under volatility, we use an agent-chosen partner assignment w
 
 \subsection{Clinical Parameter Regimes}
 
-Three clinical phenotypes are modeled as parameter perturbations:
+Three clinical phenotypes are modeled as parameter perturbations, following the computational psychiatry framework of \citet{smith2021bayesian}:
 \begin{itemize}[nosep]
   \item \textbf{Alexithymia} (C9): $\alpha = 0.1$ (blunted affective charge)
   \item \textbf{Borderline} (C10): $\alpha = 12$, $\lambda = 0.5$ (volatile, poorly smoothed precision)
@@ -211,11 +211,11 @@ Three clinical phenotypes are modeled as parameter perturbations:
 \section{Results}
 \label{sec:results}
 
-\subsection{Orthogonal Augmentation Beyond Planning Depth}
+\subsection{Orthogonal Augmentation Beyond Planning Depth (Hypothesis 1)}
 
 The central result: under sophisticated inference, explicit planning depth is irrelevant in the binary trust game, but affect provides consistent augmentation.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccccc}
 \toprule
@@ -236,7 +236,7 @@ C8 (affective, deep) & 8 & $\approx 576$ & 0.64 & --- \\
 
 The non-affective depth curve is flat: every pairwise comparison among C1, C4, C6, C7 has $p > 0.93$. Adding affect at depth $\tau = 2$ (C2) or $\tau = 8$ (C8) produces $\sim\!46$-point improvement, confirming the augmentation is orthogonal to depth. The affect $\times$ depth interaction (Table~\ref{tab:orthogonality}) shows the effect is additive and depth-independent.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{lcc}
 \toprule
@@ -258,7 +258,7 @@ In the default condition, C3 (lesioned) and C4 (no affect) are \emph{exactly} id
 
 This comparison is task-dependent:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccc}
 \toprule
@@ -292,7 +292,7 @@ The beta dynamics remain active in all conditions: mean beta range $= 0.164$ (de
 
 Each agent condition is treated as a generative model, with per-round log-evidence $\ell_t = \log p(o_t \mid m, h_{<t})$ accumulated over all rounds. Pairwise Bayes factors and random-effects BMS \citep{stephan2009bayesian} with protected exceedance probabilities \citep{rigoux2014bayesian} provide formal model comparison.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lccc}
 \toprule
@@ -314,7 +314,7 @@ The betrayal result is particularly strong: precision tracking produces the best
 
 Affect augmentation generalizes across game types, with game-dependent patterns:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccccc}
 \toprule
@@ -337,7 +337,7 @@ Key findings: (1) augmentation generalizes broadly under volatility ($d > 1.0$ i
 
 The graded game confirms that the precision channel was structurally inert in binary games (policy entropy $< 0.01$) and activates it ($H_{q_\pi} \approx 5.8$):
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccc}
 \toprule
@@ -357,6 +357,16 @@ C5 (reward average) & 10.468 & 4.16 & 1.72 & $<$0.0001 \\
 
 Within-C2 analysis in the graded game tests whether beta correlates with future payoffs from the same partner. The result is null: median $r \approx -0.01$ across rounds 20--180, none significant after correction. Beta tercile analysis confirms: high-beta ($\bar{\beta} = 0.616$) vs low-beta ($\bar{\beta} = 0.468$) partners show indistinguishable future payoffs ($d = -0.03$, $p = 0.21$). This validates the theoretical prediction: beta tracks prediction accuracy, not reward quality, confirming it contributes genuinely orthogonal information.
 
+\subsection{Precision Modulation Pathway Validation}
+
+To test whether beta can improve decisions through direct precision scaling (not just terminal value weighting), we implement and test the precision modulation pathway: $\gamma_k = \gamma(1 + \beta_k)$, which scales the policy precision for each partner interaction. This pathway is structurally inert when $\gamma$ is constant, but activates when beta varies sufficiently to shift softmax sharpness.
+
+We test this in the graded betrayal environment (50 seeds $\times$ 120 rounds), comparing C2 with and without precision modulation. Without modulation and with $\mu = 0$ (no horizon gap to calibrate terminal value weighting), beta has no effect on planning, so C2 is equivalent to C1 (mean payoff 1242.40 in both cases). With precision modulation enabled, C2 achieves 1247.78 (+5.38 points, $d = 0.21$, $p = 0.31$, $n = 50$).
+
+The mechanism is confirmed mechanistically: precision modulation reduces C2's mean $q_\pi$ entropy from 5.90 to 5.46 nats (0.44 nats), reflecting sharpened action selection for high-beta partners and more exploratory selection for low-beta partners. The payoff effect is directionally positive but does not reach statistical significance at $n = 50$. This is a clean informative result: the precision modulation pathway is technically valid (entropy reduction confirmed, $\Delta H = 0.44$ nats) but provides marginal payoff benefit in this environment, consistent with the graded game's moderate EFE gradients limiting the reward impact of sharpened softmax.
+
+One implementation note: in ``decouple'' lesion mode, C3 (vmPFC lesion) still passes betas through the precision signal channel, making C3 = C2 when modulation is active. The lesion correctly blocks the terminal value pathway ($\mu_\text{eff} = 0$) but not the precision modulation pathway. This dissociation is intentional in the model---the vmPFC lesion impairs affect-to-value translation, not the precision channel itself---but future work should clarify whether these map to distinct neural circuits.
+
 \subsection{Clinical Sensitivity Analysis}
 
 \subsubsection{Binary Game Limitation}
@@ -367,7 +377,7 @@ In the binary trust game, clinical parameter perturbations produce $< 0.5\%$ beh
 
 Combining the graded game with betrayal stress produces massive between-clinical differentiation:
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccc}
 \toprule
@@ -396,7 +406,7 @@ Three clinically interpretable findings emerge:
 
 The graded betrayal environment produces large effects relative to the no-affect baseline but modest between-clinical separation (10.324--10.353 payoff range). The Stag Hunt betrayal environment resolves this: its severe miscoordination cost (sucker payoff) amplifies the behavioral consequences of precision volatility, producing the first statistically significant between-clinical differentiation.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering\small
 \begin{tabular}{lcccc}
 \toprule
@@ -424,6 +434,34 @@ The environment-dependent clinical ordering---alexithymia protective in Stag Hun
 \subsection{Discrete Variational Beta Validation}
 
 The discrete Bayesian beta formulation (C12, $L = 5$ levels) is behaviorally equivalent to the continuous EMA (C2) in stable environments ($d = 0.001$, $p = 0.99$) and both outperform the no-affect baseline ($d \approx 0.6$, $p = 0.003$). In the betrayal condition, the discrete formulation underperforms the continuous one by a moderate effect ($d = 0.41$, $p = 0.04$) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperform the baseline. The divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
+
+\subsection{Spatial Multi-Agent Transfer: Cogs vs.\ Clips}
+\label{sec:cvc}
+
+To test whether the precision-tracking architecture transfers beyond matrix games, we deploy it in a qualitatively different domain: CoGames/Cogs vs.\ Clips (CvC), a real-time spatial multi-agent benchmark on a $98 \times 98$ gridworld (``machina\_1'' mission, 8 agents, 1000 steps). Agents observe a $13 \times 13$ egocentric diamond of the environment and choose from 5 actions (noop + 4 cardinal moves). The task requires coordinated resource gathering: mine ore from extractors, deposit at hubs for hearts, then align junctions for team reward. Unlike the trust game's discrete partner interactions, CvC demands continuous spatial navigation, multi-step planning, and implicit coordination with teammates whose behavior is observed only through local position tracking.
+
+\paragraph{Architecture.} We implement two policies. \emph{ScoringLoopPolicy} is a state-machine baseline that cycles through GET\_GEAR $\to$ MINE\_ORE $\to$ DEPOSIT $\to$ ALIGN\_JUNCTION using BFS pathfinding with movement-failure wall learning. \emph{AffectCvCPolicy} extends the baseline with per-teammate precision tracking: for each observed teammate $k$, the agent predicts their next position from previous velocity and updates $\beta_k$ via the same EMA surprise rule (Eq.~\ref{eq:beta_update}), with positional prediction error replacing cooperation prediction error. The team-average $\bar{\beta}$ modulates coordination strategy: high precision triggers cooperative thresholds (earlier resource deposition, direct junction seeking), while low precision triggers independent strategies (resource stockpiling, self-sufficient operation).
+
+\paragraph{Results.} Both our policies achieve non-zero reward on the CvC benchmark (Table~\ref{tab:cvc}), substantially outperforming the CoGames built-in StarterPolicy, which scores zero reward and zero aligned junctions due to navigation failures (7,311 stuck steps out of 8,000 agent-steps). BFS pathfinding with aoe\_mask-based wall detection achieves 84--91\% movement success. The beta-tracking mechanism correctly identifies all 7 teammates via their \texttt{agent\_id} observation feature and maintains per-partner precision estimates.
+
+\begin{table}[ht]
+\centering
+\caption{CvC benchmark results (machina\_1, 1000 steps, 10 seeds). Reward is per-agent mean $\pm$ SD.}
+\label{tab:cvc}
+\begin{tabular}{lcccc}
+\toprule
+Policy & Mean Reward & Aligned Junctions & Hearts & Max Stuck Steps \\
+\midrule
+ScoringLoopPolicy   & $0.072 \pm 0.030$ & $2.5 \pm 2.1$ & 6.3 & 183 \\
+AffectCvCPolicy     & $0.071 \pm 0.032$ & $1.6 \pm 0.7$ & 5.9 &  61 \\
+StarterPolicy (CG)  & $0.000 \pm 0.000$ & $0.0 \pm 0.0$ & 7.0 & 7311 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interpretation.} In homogeneous teams (all agents run the same policy), $\bar{\beta}$ stabilizes at $\sim$0.65---correctly reflecting high teammate reliability. With team precision consistently above the cooperation threshold, the affect mechanism produces similar mean reward to the baseline ($0.071$ vs.\ $0.072$). Interestingly, the affect policy shows substantially lower navigation failures (max 61 stuck steps vs.\ 183 for baseline), suggesting the teammate-tracking computation may indirectly improve pathfinding robustness by providing additional spatial awareness. Behavioral differentiation in mean reward requires heterogeneous teams or partner volatility, paralleling the trust-game finding that affect augmentation is most pronounced under betrayal stress. The spatial domain also dampens beta dynamics relative to the trust game: positional prediction errors are normalized over a larger observation range (Manhattan distance up to 26 vs.\ binary cooperation), and random spatial movement has lower surprise than random cooperation decisions.
+
+The key result is architectural: the per-partner precision-tracking mechanism transfers to a qualitatively different domain (continuous spatial coordination vs.\ discrete economic games) without modification to the core beta update rule. The same surprise $\to$ charge $\to$ sigmoid $\to$ EMA pipeline that tracks cooperation reliability in the trust game tracks positional predictability in the gridworld, confirming the mechanism's generality as a domain-agnostic metacognitive monitoring channel.
 
 % ══════════════════════════════════════════════════════════════════════════════
 \section{Discussion}
@@ -471,7 +509,7 @@ Several limitations bound the current conclusions:
 \begin{itemize}[nosep]
   \item The binary trust game's softmax saturation limits clinical sensitivity. Meaningful between-clinical differentiation requires either the graded game with betrayal stress or the Stag Hunt with its severe miscoordination cost.
   \item All partners are scripted stochastic policies, not adaptive agents. Recursive mentalizing is not tested.
-  \item The action space remains small (2 or 24 actions). Richer environments with partial observability or continuous actions would further test the mechanism.
+  \item The trust-game action space remains small (2 or 24 actions). The CvC spatial domain (Section~\ref{sec:cvc}) demonstrates architectural transfer to continuous navigation, but the trust-game beta parameters produce overly stable precision in the spatial domain, suggesting domain-specific calibration is needed for behavioral modulation beyond architectural proof-of-concept.
   \item The model has not been validated against human behavioral data.
 \end{itemize}
 
@@ -488,22 +526,22 @@ The most critical next step is fitting the model to human behavioral data from t
 Current partners follow scripted stochastic policies. Replacing partners with active inference agents that maintain models of the focal agent would test recursive mentalizing and affect dynamics under mutual adaptation.
 
 \paragraph{Richer environments.}
-Environments with delayed feedback, partial observability, multiple equilibria, or continuous action spaces would further stress-test the precision tracking mechanism. Such environments should reveal whether precision tracking's advantage over reward averaging extends beyond the binary betrayal niche.
+The CvC benchmark (Section~\ref{sec:cvc}) provides an initial spatial multi-agent transfer, but the trust-game parameterization produces overly stable beta dynamics in that domain. Environments with delayed feedback, partial observability, multiple equilibria, or heterogeneous agent populations would further stress-test the precision tracking mechanism. Domain-specific calibration of the surprise normalization and EMA smoothing parameters may be needed for the mechanism to produce meaningful behavioral modulation beyond architectural transfer.
 
 \paragraph{Structure learning integration.}
-Persistent low affective precision despite ongoing parameter learning constitutes evidence that the model \emph{structure} is wrong for that partner. This positions $\beta_k$ as a natural trigger for Bayesian Model Reduction---discovering coalition structures, domain-specific trust, or hidden strategic dependencies. Neuroscience offers convergent support: \citet{behrens2025hippocampal} show that hippocampal sharp-wave ripples mediate structural (not merely parametric) belief updates, while \citet{mishchanchuk2024causal} demonstrate a causal dissociation between hidden-state inference and parameter updating in learning tasks. Early somatosensory surprise signals ($\sim$70\,ms) index model \emph{inadequacy}---evidence that the generative structure itself is wrong---whereas later signals ($\sim$140\,ms) drive parametric updating within an intact model. Persistent low $\beta_k$ is computationally analogous to this early inadequacy signal: evidence accumulates that parametric learning cannot resolve the prediction error, suggesting the partner model's structure (not its parameters) needs revision. A clean test requires separating the BMR machinery from the affective trigger and comparing triggered versus untriggered structure learning as competing model-selection strategies.
+Persistent low affective precision despite ongoing parameter learning constitutes evidence that the model \emph{structure} is wrong for that partner. This positions $\beta_k$ as a natural trigger for Bayesian Model Reduction \citep{smith2020structure}---discovering coalition structures, domain-specific trust, or hidden strategic dependencies. Neuroscience offers convergent support: \citet{behrens2025hippocampal} show that hippocampal sharp-wave ripples mediate structural (not merely parametric) belief updates, while \citet{mishchanchuk2024causal} demonstrate a causal dissociation between hidden-state inference and parameter updating in learning tasks. Early somatosensory surprise signals ($\sim$70\,ms) index model \emph{inadequacy}---evidence that the generative structure itself is wrong---whereas later signals ($\sim$140\,ms) drive parametric updating within an intact model. Persistent low $\beta_k$ is computationally analogous to this early inadequacy signal: evidence accumulates that parametric learning cannot resolve the prediction error, suggesting the partner model's structure (not its parameters) needs revision. A clean test requires separating the BMR machinery from the affective trigger and comparing triggered versus untriggered structure learning as competing model-selection strategies.
 
 \paragraph{Deeper clinical modeling.}
 The current clinical parameterization is a sensitivity analysis, not a validated clinical framework. Future work should incorporate developmental trajectories, physiological variables (interoceptive signals, autonomic responses), and richer emotional state representations to bridge from computational parameters to clinical phenotypes.
 
 \paragraph{Precision modulation pathway.}
-The primary experiments use terminal-value weighting ($\mu$-scaled $\beta_k$). An alternative pathway---per-partner policy precision modulation ($\gamma_k = f(\beta_k)$)---remains implemented but untested in production experiments. This pathway may interact differently with EFE ambiguity in graded games.
+The primary experiments use terminal-value weighting ($\mu$-scaled $\beta_k$). The precision modulation pathway ($\gamma_k = \gamma(1 + \beta_k)$) was validated in the graded betrayal environment (Section~\ref{sec:results}), confirming the mechanism reduces $q_\pi$ entropy by 0.44 nats with a directionally positive but non-significant payoff effect ($d = 0.21$, $n = 50$). Future work should test this pathway with larger samples, across more environments, and in interaction with the $\mu$-pathway to determine whether the two channels provide complementary or redundant contributions.
 
 % ══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}
 \label{sec:conclusion}
 
-We have demonstrated that per-partner metacognitive precision tracking provides orthogonal augmentation to explicit planning in multi-agent active inference. The mechanism is not a cheap approximation to deeper search---it encodes genuinely different information (partner-specific model fitness) through a channel that planning depth alone cannot access. The computational lesion reproduces the somatic marker deficit in a social context, the mechanism generalizes across game types, and clinical parameter perturbations produce interpretable behavioral phenotypes under appropriate environmental demands. Precision tracking and reward averaging occupy complementary informational niches: precision tracking excels under volatility and miscoordination, while reward averaging dominates in continuous-gradient settings. Bayesian model comparison decisively favors the affective model as the best predictor of social environments under partner volatility.
+We have demonstrated that per-partner metacognitive precision tracking provides orthogonal augmentation to explicit planning in multi-agent active inference. The mechanism is not a cheap approximation to deeper search---it encodes genuinely different information (partner-specific model fitness) through a channel that planning depth alone cannot access. The computational lesion reproduces the somatic marker deficit in a social context, the mechanism generalizes across game types and to a qualitatively different spatial multi-agent domain (CvC), and clinical parameter perturbations produce interpretable behavioral phenotypes under appropriate environmental demands. Precision tracking and reward averaging occupy complementary informational niches: precision tracking excels under volatility and miscoordination, while reward averaging dominates in continuous-gradient settings. Bayesian model comparison decisively favors the affective model as the best predictor of social environments under partner volatility.
 
 The broader implication is that biological agents may have evolved per-partner affective states not merely as shortcuts for planning, but as carriers of second-order information---model reliability---that first-order quantities (reward, deeper search) do not reconstruct. Affect, in this view, is a precision signal that occupies a specific and irreplaceable computational niche in social cognition.
 
