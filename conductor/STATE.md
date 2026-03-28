@@ -1,20 +1,23 @@
 ---
-status: DONE
-next_priority: 3
+status: ACTIVE
+next_priority: 1
 pending_work:
-  - "Track 3.4: Remaining LaTeX placeholders if any (no TODOs found in paper)"
-  - "Consider Observatory submission if CvC packaging is complete"
-next_session_focus: "All primary tracks (1.2, 2.x, 3.x) complete. Review paper for final polish, check bibliography completeness."
+  - "P1: Fix clinical d sign convention (CRITICAL)"
+  - "P2: Add missing somatosensory citation (CRITICAL)"
+  - "P3-P8: Paper polish (IMPORTANT)"
+  - "C1-C4: Code cleanup (LOW)"
+  - "D1-D2: Docs cleanup (LOW)"
+next_session_focus: "Fix P1 (clinical d sign convention) and P2 (somatosensory citation), then work through P3-P8."
 model_hint: opus
 ---
 
 # Research State
 
 ## Last Updated
-2026-03-28 (Session 13)
+2026-03-28 (Session 14 — review and merge)
 
 ## Session Count
-13
+14
 
 ## Current Findings
 
@@ -22,104 +25,60 @@ model_hint: opus
 
 All trust-game phases are complete with publication-quality results. Full results in docs/results_tracking.md.
 
-### Session 12: CvC Breakthrough + Full Benchmark (2026-03-27)
+### Sessions 10-13 Summary (merged to master)
 
-**Branch:** `mango/affect_aif/20260326-211344` — 7 commits this session
+- **CvC Benchmark (Track 2):** Navigation solved via BFS + aoe_mask. ScoringLoopPolicy: 0.072 reward, AffectCvCPolicy: 0.071 (3x fewer stuck steps), StarterPolicy: 0.000. Full results in results/benchmark_cvc_comparison/.
+- **Precision Modulation (Track 1.2):** Tested in graded betrayal, 50 seeds. Mechanism confirmed: entropy Δ=0.44 nats, payoff d=0.21 (non-significant). Results in paper.
+- **Paper (Track 3):** CvC section, precision modulation section, inside-out framing, vmPFC grounding, BMR framing, clinical narrative — all added.
+- **All 197 tests pass. Paper compiles with zero warnings.**
 
-#### Environment Setup
+### Session 14: Branch Review, Merge, and Cleanup (2026-03-28)
 
-Created conda env `cvc` with Python 3.12 + cogames 0.21.1 + mettagrid 0.21.1. CvC worker uses `/Users/server/miniforge3/envs/cvc/bin/python`.
+**Actions taken:**
+1. Reviewed all mango branches vs master (5 branches + master)
+2. Identified 4 superseded branches, deleted them (local + remote)
+3. Launched 3 parallel reviewer subagents (paper, code, docs consistency)
+4. Fixed critical paper self-contradiction (Future Work said precision modulation "untested" — contradicted Results section)
+5. Updated stale long_term_plan.md (Track 1.2 "needs decision" → complete, Track 2 "score 0" → complete)
+6. Fixed STATE.md session count 12→13
+7. Merged current branch to master (18 commits, sessions 10-13 + review fixes)
+8. Pushed master to origin
+9. Rewrote conductor MISSION.md and STATE.md for paper polish phase
 
-#### Key Bug Fixes
+**Review findings (from 3 parallel reviewer agents):**
 
-| Fix | Impact |
-|-----|--------|
-| **Wall detection: aoe_mask** | Cells WITH aoe_mask=1 are walkable; cells WITHOUT are walls/OOV. Previous approach guessed feature names that never matched → all cells appeared walkable → 80%+ wall collisions. Now: 84-91% move success. |
-| **Teammate detection: agent_id** | Observation tag values use object_type_names indices (hub=7, junction=8) not PEI indices (hub=15, junction=16). _structure_tag_ids used PEI indices → structures misidentified as teammates → frozen beta values. Now: agent_id feature reliably identifies all 7 real teammates. |
-| **Beta-modulated cargo threshold** | Added cooperative (5), default (8), independent (12) thresholds. In practice, ore comes in bursts of 10+ so thresholds never trigger at different steps. |
-
-#### CvC Diagnostic Results
-
-- 28 available missions (machina_1 98x98, arena 60x60, tutorial 45x45)
-- Observation: 13x13 diamond, 121 walkable cells, 48 wall/OOV
-- API: Simulation class, set_action(string), step()
-- Tags: entities emit both object_type_names indices AND PEI "type:" indices
-- Diagnostic scripts updated to current mettagrid API
-
-#### Full Benchmark Results (10 seeds, machina_1, 1000 steps)
-
-| Policy | Mean Reward | Aligned Junctions | Hearts | Max Stuck |
-|--------|-------------|-------------------|--------|-----------|
-| ScoringLoopPolicy | 0.072 ± 0.030 | 2.5 ± 2.1 | 6.3 | 183 |
-| AffectCvCPolicy | 0.071 ± 0.032 | 1.6 ± 0.7 | 5.9 | 61 |
-| StarterPolicy (CG) | 0.000 ± 0.000 | 0.0 ± 0.0 | 7.0 | 7311 |
-
-DECISION: Both our policies massively outperform cogames starter (which scores zero). AffectCvC shows 3x fewer stuck steps, suggesting robustness benefit from teammate tracking. Results are in `results/benchmark_cvc_comparison/`.
-
-DECISION: Beta dynamics are too stable (~0.65) in homogeneous teams for cargo-threshold modulation to trigger. This is the correct adaptive response — stable teams shouldn't be modulated. Differentiation needs heterogeneous teams or domain-specific calibration.
-
-#### Paper Updates (Track 3.3)
-
-Added CvC section to docs/paper/main.tex:
-- New subsection "Spatial Multi-Agent Transfer: Cogs vs. Clips" with table
-- Updated abstract to mention CvC transfer
-- Updated Limitations and Future Work
-- Updated Conclusion
+| ID | Priority | Issue |
+|----|----------|-------|
+| P1 | CRITICAL | Clinical d sign convention flips between Tables 6 and 7 |
+| P2 | CRITICAL | Missing somatosensory citation for 70ms/140ms timing claims |
+| P3 | IMPORTANT | No figures in paper (10 tables, 0 figures) |
+| P4 | IMPORTANT | Tables/equations never cross-referenced in prose |
+| P5 | IMPORTANT | Empty author affiliation |
+| P6 | IMPORTANT | Approximate C8 values |
+| P7 | IMPORTANT | Abstract d=1.72 may cite wrong comparison |
+| P8 | IMPORTANT | Bibliography not alphabetically sorted |
+| P9 | SUGGESTION | "Phase 4" internal terminology leak |
+| P10 | SUGGESTION | Sparse Implementation section |
+| P11 | SUGGESTION | Missing Sennesh/Ramstead reference |
+| C1 | LOW | Dead stuck_steps state in CvC policies |
+| C2 | LOW | Docstring mismatch in cvc_navigation.py |
+| C3 | LOW | Hardcoded server path in benchmark config |
+| C4 | LOW | No navigation unit tests |
+| D1 | LOW | C9-C11 missing from experiment.md |
+| D2 | LOW | Track 1.2 result CSVs not fetched from server |
 
 ### Track Status Summary
 
 | Track | Status | Details |
 |-------|--------|---------|
-| 1.1 | COMPLETE | Inside-out framing in paper |
-| 1.2 | **DO NOW** | Precision modulation: user says TEST — run graded betrayal experiment |
-| 1.3 | COMPLETE | vmPFC neural grounding |
-| 1.4 | COMPLETE | BMR trigger framing |
-| 1.5 | COMPLETE | Between-clinical differentiation |
-| 2.1 | **COMPLETE** | Navigation with aoe_mask wall detection |
-| 2.2 | **COMPLETE** | ScoringLoopPolicy: 0.072 reward, 2.5 junctions |
-| 2.3 | **COMPLETE** | AffectCvCPolicy: working beta, 0.071 reward |
-| 2.4 | **COMPLETE** | Full benchmark: 3 policies × 10 seeds |
-| 2.5 | **COMPLETE** | 28 missions discovered |
-| 3.1 | COMPLETE | Docs consistency check |
-| 3.2 | COMPLETE | Results reproducibility spot-check |
-| 3.3 | **COMPLETE** | CvC results in paper |
-| 3.4 | COMPLETE | No TODO/FIXME markers found in main.tex |
-
-### Session 13: Track 1.2 Precision Modulation (2026-03-28)
-
-**Branch:** `mango/affect_aif/20260328-010246` — 1 commit this session
-
-#### Experiment
-
-Config: `graded_betrayal_precision_mod_full.json`, 50 seeds × 120 rounds, conditions [1,2,3,5], graded betrayal (cooperator→exploiter at round 31), `affect_modulates_precision: true`.
-
-The mechanism: `γ_k = γ(1 + β_k)` scales softmax precision per partner based on beta values.
-
-#### Results
-
-| Condition | Mean Payoff | q_pi entropy |
-|-----------|-------------|--------------|
-| C1 (baseline) | 1242.40 ± 24.38 | 5.90 |
-| C2 precision-mod ON | 1247.78 ± 27.32 | 5.46 |
-| C2 precision-mod OFF | 1242.40 (= C1) | — |
-
-DECISION: Mechanism confirmed (ΔH=0.44 nats entropy reduction), payoff effect +5.38 (d=0.21, p=0.31, n=50). Directionally positive, non-significant. Clean informative result.
-
-DECISION: Without modulation and mu=0 (horizon_gap=0 with deep=shallow=2), C2 betas are completely inert — C2=C1. This isolates the modulation pathway cleanly.
-
-DECISION: LesionedAgent decouple mode does NOT block precision_signal() — only blocks mu. So C3=C2 when modulation is on. This is intentional in the model architecture (vmPFC blocks affect-to-value, not precision channel) but needs documentation.
-
-#### Paper Updates
-
-Added new subsection "Precision Modulation Pathway Validation" to Results section of docs/paper/main.tex, with quantitative results and entropy interpretation.
+| 1.1-1.5 | COMPLETE | All theory gaps addressed in paper |
+| 2.1-2.5 | COMPLETE | CvC benchmark complete |
+| 3.1-3.4 | COMPLETE (pending polish) | Paper written, needs reviewer-identified fixes |
 
 ## Auto Handoff
-- **What changed:** Session 13: Ran Track 1.2 precision modulation experiment (smoke 5 seeds + full 50 seeds). Mechanism confirmed. Results added to paper as new subsection.
-- **What is still in flight:** Sensitivity run (graded_betrayal_stress.json) still running in background with 274K+ rows — that's the sensitivity analysis. Main results already extracted.
-- **What next session should do:**
-  1. Check paper for final polish — LaTeX scan showed NO TODO/FIXME markers. Paper looks complete.
-  2. Consider Observatory CvC submission if packaging script is ready.
-  3. Consider whether to increase precision modulation sample size (n=100) for a stronger statement.
+- **What changed:** Session 14 merged sessions 10-13 to master, cleaned up all stale branches, ran 3 parallel reviews, fixed critical paper self-contradiction and stale docs.
+- **What is still in flight:** Nothing — clean slate.
+- **What next session should do:** Work through the paper polish items in MISSION.md, starting with P1 (clinical d sign convention) and P2 (somatosensory citation).
 
 ## Status
-DONE — Track 1.2 complete. All tracks (1.1-1.5, 2.1-2.5, 3.1-3.4) now complete. Paper ready for final review.
+ACTIVE — Paper polish phase. All research and code is done. Remaining work is publication-quality fixes.

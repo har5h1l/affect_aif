@@ -1,162 +1,100 @@
 # Mission
 
 ## Objective
-Prepare the affect-augmented AIF paper for submission by closing theory gaps, getting non-zero CvC benchmark scores, and ensuring all claims are backed by reproducible results. Four tracks: (1) paper theory gaps, (2) CvC benchmark with actual Observatory submission, (3) paper preparation, (4) research-brain improvements (document only).
+Polish the affect-augmented AIF paper for submission. All research tracks (theory, CvC benchmark, experiments) are complete. The remaining work is paper-level fixes identified by systematic review.
 
 ## Guiding Principles
 - Variational principles and docs/theory.md are the north star
-- Trust-game results (Phases 1-7) are complete and should not be re-run unless a gap is found
-- Navigation is engineering, not theory — solve it pragmatically so the AIF mechanism can be evaluated
-- Ground all work in the active-inference framework; CvC policies should eventually reflect AIF principles, not just rule-based heuristics
-- When exploring CvC, iterate quickly: try an approach, measure, adjust
-- The CvC work targets ACTUAL benchmark submission (Observatory beta-cvc season, compat 0.19), not just a local demo
+- Trust-game results (Phases 1-7) and CvC benchmark are complete — do not re-run experiments
+- The paper compiles clean (zero LaTeX warnings). Keep it that way.
+- Prioritize issues that a reviewer would flag over cosmetic improvements
 
-## Completed Work (Phases 1-7)
-- Phase 1: Primary results (orthogonal augmentation, H1-H5)
-- Phase 2: Exploiter deep-dive (betrayal stress diagnostics)
-- Phase 3: Theory tightening (graded game, cross-game synthesis)
-- Phase 4: Variational beta (discrete Bayesian formulation validated)
-- Phase 5: Clinical sensitivity (graded betrayal: alexithymia protective, borderline deterioration, depression self-corrects)
-- Phase 6: Bayesian model comparison (C2 decisive winner under betrayal, log10 BF=3.0)
-- Phase 7: Cross-game generalization (PD, Stag Hunt, Chicken — augmentation generalizes under volatility)
+## Completed Work
+- Phases 1-7: All research phases complete with publication-quality results
+- Track 1: All 5 paper theory gaps addressed (inside-out framing, precision modulation tested, vmPFC grounding, BMR framing, clinical differentiation)
+- Track 2: CvC benchmark complete (ScoringLoopPolicy 0.072, AffectCvCPolicy 0.071, StarterPolicy 0.000)
+- Track 3: Paper updated with all results, CvC section, precision modulation section
+- All 197 tests pass, paper compiles clean
 
-## Current Focus
+## Current Focus: Paper Polish
 
-### Track 1: Paper Theory Gaps (Priority: HIGH)
+Issues found by systematic review (3 parallel reviewer agents + independent checks):
 
-Specific gaps in theory, related work, and empirical story that must be addressed before submission.
+### CRITICAL (must fix)
 
-#### 1.1 Inside-Out Framing: Position in Literature
-Add a related-work paragraph triangulating three approaches:
-- **Yoshida (2024)** — empathic coupling = outside-in (model partner's internal states)
-- **Pitliya et al. (2025)** — ToM = cognitive model of other's inference
-- **This work** — inside-out metacognitive monitoring of one's own social inference channel
+#### P1. Clinical d sign convention inconsistency
+Tables 6 (graded betrayal, ~line 384) and 7 (Stag Hunt, ~line 413) use opposite sign conventions for Cohen's d:
+- Table 6: d = (phenotype - healthy), so alexithymia d=+0.80 means *outperforms*
+- Table 7: d = (healthy - phenotype), so borderline d=+0.72 means *impaired*
 
-This triple dissociation (outside-in empathy / cognitive ToM / inside-out precision monitoring) is the cleanest way to position the contribution. Action: add/update a Discussion subsection in `docs/paper/main.tex` and update `docs/theory.md` Section 4 accordingly.
+Pick one convention and apply consistently. Natural choice: d = (phenotype - reference), positive = better. Add a footnote or column annotation.
 
-#### 1.2 Precision Modulation Pathway: TEST IT
-**User decision (2026-03-27): Run it.** The graded game (q_pi entropy ~5.8) is exactly where precision modulation should matter because softmax isn't saturated.
+#### P2. Missing somatosensory citation (~line 532)
+Future Work BMR paragraph cites specific timing claims (70ms, 140ms) with no citation. The "Neural surprise somatosensory paper" referenced in MISSION Track 1.4 was never actually added to the bibliography. Either find and add the citation, or remove the specific timing claims.
 
-**Plan:**
-1. Identify or create a config that enables gamma-modulation (gamma_k = f(beta_k)) for C2 (AffectiveAgent, shallow horizon) in the graded betrayal environment
-2. Smoke test: 5 seeds, graded betrayal with gamma-modulation enabled — verify it runs and gamma values actually vary
-3. Full run: 50-100 seeds, compare C2-with-gamma vs C2-without-gamma in graded betrayal
-4. Analyze: does gamma-modulation improve payoff, recovery speed, or partner discrimination?
-5. If positive → add to results section. If negative → report as clean negative result (still informative for the paper)
+### IMPORTANT (should fix)
 
-Do NOT cut this mechanism. Test it.
+#### P3. No figures in the paper
+The paper has 10 tables but zero figures. Unused packages: `graphicx`, `subcaption`. At minimum add:
+1. Beta trajectory plot showing betrayal response (the key mechanism visualization)
+2. Clinical phenotype comparison (borderline progressive deterioration vs depression self-correction)
+3. Optionally: architecture schematic
 
-#### 1.3 Neuro-Architectural Argument for vmPFC as Beta
-The vmPFC lesion analogy (C3 = C4 reproducing Damasio's somatic marker deficit) is in the paper but lacks neural grounding. Two papers provide the missing argument:
-- **Bancee et al. (2026)** — vmPFC encodes emotion concepts in geometric form (valence/arousal maps)
-- **Baram et al. (2026)** — OFC/vmPFC maintains persistent schema representations as semi-separable manifolds
+#### P4. Tables and equations never cross-referenced in prose
+`eq:precision_weight` (the core equation) and most result tables are defined with `\label{}` but never referenced via `\ref{}`. Add "as shown in Table X" style references throughout.
 
-Together with Damasio: vmPFC is where precision over social models (schemas) intersects with affective state (valence geometry). This makes vmPFC the natural biological locus of beta. Action: add a Discussion paragraph in `docs/paper/main.tex` connecting Bancee + Baram + Damasio to the beta construct.
+#### P5. Empty author affiliation (~line 35)
+`\affil[1]{}` is blank — visible placeholder.
 
-#### 1.4 BMR Trigger Framing (Theory Only — No Implementation)
-Strengthen the Future Work paragraph on BMR with neuroscience grounding:
-- **Behrens (2025)** — hippocampal ripples mediate structural (not parametric) belief updates
-- **Mishchanchuk (2024)** — causal dissociation of hidden-state inference from parameter updating
-- **Neural surprise somatosensory paper** — early ~70ms signal = model inadequacy, late ~140ms = parameter update
+#### P6. Approximate C8 values
+C8 results reported as "≈576" with no p-value in Tables 3 and 4. Every other condition has exact values. Report exact C8 mean or explain why only approximate value is available.
 
-These support the argument: persistent low beta is computationally analogous to the "model inadequacy" signal — evidence that the structure is wrong, not just the parameters. Do NOT implement BMR. Preserve the conflation warning in `docs/experiment.md` Section 8.2.
+#### P7. Abstract d=1.72 comparison may be misleading (~line 45)
+The abstract says "reward averaging dominating in continuous-investment settings (d=1.72)". This d=1.72 is C5 vs C4 (reward-avg vs no-affect baseline), NOT C5 vs C2 head-to-head. The "dominating" framing implies C5 vs C2, which is d=0.43/0.89. Clarify or use the head-to-head effect size.
 
-#### 1.5 Between-Clinical Differentiation Framing
-Phase 5 graded-game results showed d > 2.1 vs C4 but small between-profile payoff differences (10.324-10.353). **Session 7 produced SH betrayal results that resolve this:** borderline d=0.72 (decisive BF=-2.89), alexithymia protective, depression self-correcting. This is the first env with stat-sig between-clinical differentiation.
+#### P8. Bibliography not alphabetically sorted
+Behrens, Mishchanchuk, Yoshida appended at end out of order (lines 654-668). Re-sort.
 
-The paper should now lead with SH betrayal as the primary clinical story: (a) miscoordination cost amplifies precision volatility effects; (b) alexithymia protective / borderline deteriorating / depression self-correcting as qualitatively distinct computational impairments; (c) the structural distinction (beta_0 correctable by inference, alpha/lambda create persistent perturbations); (d) graded-game results as a contrast case showing environment-dependence.
+### SUGGESTIONS
 
-**Data available:** Session 7 SH results merged (theory §4.19, results_tracking.md updated). Results CSVs on server at `/private/tmp/mango-worktree-affect_aif-20260324_143607-12360/results/`.
+#### P9. "Phase 4" terminology leak (line 137)
+Internal project terminology. Replace with content description.
 
-### Track 2: CoGames/CvC Benchmark (Priority: HIGH)
+#### P10. Sparse Implementation section (lines 549-553)
+No repo URL, no JAX version, no hardware info, no runtime. Either expand or convert to a "Code Availability" paragraph.
 
-**Goal:** Get a submission-ready policy onto the actual CvC benchmark (beta-cvc Observatory season, compat_version 0.19). The policy needs to score non-zero reward and be packaged for submission via `cvc_packaging.py`.
+#### P11. Missing Sennesh/Ramstead reference
+MISSION Track 3.4 requested it but it was never added. Check if the paper needs it or if it's no longer relevant.
 
-**The navigation problem is the fundamental blocker.** All policies (including cogames built-in) score 0 because ~80% of moves hit walls.
+### CODE CLEANUP (low priority)
 
-#### 2.1 Solve Navigation First
-Implement an A* pathfinding layer. The CvC action space is only 5 actions (noop + 4 cardinal). The observation includes a local grid view.
+#### C1. Dead `stuck_steps` state in CvC policies
+`stuck_steps` and `stuck_counter` in cvc_affect_policy.py and cvc_navigation.py are tracked but never read. Remove or use.
 
-1. Parse the local grid observation to build a walkability map
-2. Use A* (or BFS — the grid is small) to find a path to the target
-3. Return the next cardinal action along the path
-4. Fall back to random valid moves if no path exists
+#### C2. Docstring mismatch in cvc_navigation.py (line 18)
+Example shows `update_position(nav_state, moved, last_action)` but actual API is `update_position(state, moved)`.
 
-Implementation: `PathfindingMixin` or utility in `affect_aif/benchmark/cvc_navigation.py`. Wire into `TeammateReliabilityPolicy` first. Smoke-test: 3 seeds, 1000 steps — target: >0 aligned junctions.
+#### C3. Hardcoded server path in benchmark_cvc_comparison.json (line 32)
+`python_bin` is `/Users/server/miniforge3/envs/cvc/bin/python`. Should be `python3.12` for portability.
 
-Start by examining CvC observation format in `affect_aif/benchmark/cvc_policy.py` and cogames docs.
+#### C4. No navigation unit tests
+NavigationHelper received significant changes (wall expiry, aoe_mask) but has no dedicated tests.
 
-#### 2.2 Build a Working Baseline Policy
-Once navigation works, build `ScoringLoopPolicy` — a simple state-machine that completes the CvC scoring loop:
-1. Get gear (navigate to gear location)
-2. Mine ore (navigate to ore, proximity-interact)
-3. Deposit at base (navigate to base)
-4. Collect hearts (proximity pickup)
-5. Align junction (navigate to junction)
+### DOCS CLEANUP
 
-Test with 10 seeds, confirm non-zero reward.
+#### D1. C9-C11 missing from experiment.md
+Clinical conditions are defined in theory.md and the paper but not in the canonical experiment design document.
 
-#### 2.3 Add Affect Mechanism to CvC Policy
-Once baseline scores non-zero, layer in per-partner precision tracking as `AffectCvCPolicy`:
-1. **Teammate observation model:** For each teammate k, predict position/behavior based on role and recent trajectory
-2. **Beta_k update:** Compare predicted vs actual teammate behavior, update via EMA rule (or discrete Bayesian)
-3. **Policy modulation:** High-beta_k teammates -> prioritize coordination. Low-beta_k -> work independently
-
-Uses same `PathfindingMixin` as baseline. Test each layer incrementally: (a) teammate tracking alone, (b) beta updates, (c) policy modulation. Compare against `ScoringLoopPolicy`.
-
-#### 2.4 Benchmark and Package for Submission
-1. Full benchmark: `AffectCvCPolicy` vs `ScoringLoopPolicy` vs built-in cogames policies, 10,000 steps, machina_1
-2. Analyze with `scripts/analyze_benchmark.py`
-3. Package via `affect_aif/benchmark/cvc_packaging.py` for Observatory submission
-4. Validate compat_version matches season (0.19)
-
-The paper claim is "the architecture transfers to a spatial multi-agent domain" — even modest performance gains from the affect mechanism over the baseline are meaningful.
-
-#### 2.5 Try Simpler Missions (Parallel Track)
-In parallel with 2.1-2.4, check if simpler/more-open CvC missions exist where navigation is easier. Provides a stepping stone if machina_1 proves too hard for rule-based pathfinding.
-
-### Track 3: Paper Preparation (Priority: MEDIUM — depends on Tracks 1-2)
-
-#### 3.1 Docs Consistency Check
-Verify that `docs/theory.md`, `docs/results_tracking.md`, `docs/experiment.md`, and `docs/paper/main.tex` all agree on: condition numbering/descriptions, key numbers (effect sizes, p-values, BFs), hypothesis status, phase descriptions and completion status. Flag any inconsistencies.
-
-#### 3.2 Results Reproducibility Spot-Check
-Spot-check 2-3 key configs (5 seeds each):
-- `default.json` -> C2 = 575.06
-- `betrayal_stress.json` -> C2 = 481.88
-- `horizon_sweep.json` -> flat non-affect depth curve
-
-Confirm numbers are in the right ballpark (patterns should hold, exact values may differ with different seeds).
-
-#### 3.3 Add CvC Results to Paper
-Once Track 2 produces results, add a section to `docs/paper/main.tex`:
-- Describe CvC environment and why it tests generality
-- Report benchmark results (reward, aligned junctions, hearts)
-- Show beta dynamics over teammates (if affect mechanism is wired)
-- Frame as "architectural generality" demonstration
-
-#### 3.4 Final LaTeX Polish
-- Ensure all references are in the bibliography
-- Check figure/table numbering and equation references
-- Add Yoshida, Sennesh/Ramstead, Bancee, Baram to bibliography
-- Check for TODO/FIXME markers in the LaTeX
-
-### Track 4: Research-Brain Improvements (Priority: LOW — background)
-
-Do NOT implement these. Document identified issues in STATE.md only. The user will handle research-brain changes separately.
+#### D2. Track 1.2 result CSVs not on local machine
+The precision modulation experiment ran on the server; raw CSVs were not fetched. Consider re-running locally (50 seeds × 120 rounds, ~10 min) for reproducibility.
 
 ## Constraints
 - Follow all safety invariants from CLAUDE.md
-- Tests must pass before any experiment
-- Small replications (3-5 seeds) before full runs (10+ seeds)
-- Never delete result files
-- Max 4 experiment workers
-- CvC experiments run in Python 3.12 subprocess — use python3.12 binary
-- Track 1.2: user has decided to TEST precision modulation — proceed with experiments
-- STOP and describe findings if: results contradict expectations, a proposed direction is a massive shift from the variational-AIF paradigm, or Phase 8 (human data) is being considered
-
-## Notes
-Edit this file to change what the conductor does. Set status to PAUSED to stop.
+- Tests must pass before any changes
+- Paper must compile clean (zero warnings) after every change
+- Do NOT re-run experiments unless specifically needed for D2
+- Do NOT change condition numbering, effect sizes, or hypothesis status
+- STOP and ask if any change would alter the scientific narrative
 
 ## Status
-ACTIVE — Track 1 (paper theory gaps) and Track 2 (CvC benchmark) are co-priority. Track 3 depends on Tracks 1-2. Track 4 is document-only.
+ACTIVE — Paper polish phase. Focus on P1-P2 (critical), then P3-P8 (important), then the rest.
