@@ -535,7 +535,7 @@ Persistent low affective precision despite ongoing parameter learning constitute
 The current clinical parameterization is a sensitivity analysis, not a validated clinical framework. Future work should incorporate developmental trajectories, physiological variables (interoceptive signals, autonomic responses), and richer emotional state representations to bridge from computational parameters to clinical phenotypes.
 
 \paragraph{Precision modulation pathway.}
-The primary experiments use terminal-value weighting ($\mu$-scaled $\beta_k$). An alternative pathway---per-partner policy precision modulation ($\gamma_k = f(\beta_k)$)---remains implemented but untested in production experiments. This pathway may interact differently with EFE ambiguity in graded games.
+The primary experiments use terminal-value weighting ($\mu$-scaled $\beta_k$). The precision modulation pathway ($\gamma_k = \gamma(1 + \beta_k)$) was validated in the graded betrayal environment (Section~\ref{sec:results}), confirming the mechanism reduces $q_\pi$ entropy by 0.44 nats with a directionally positive but non-significant payoff effect ($d = 0.21$, $n = 50$). Future work should test this pathway with larger samples, across more environments, and in interaction with the $\mu$-pathway to determine whether the two channels provide complementary or redundant contributions.
 
 % ══════════════════════════════════════════════════════════════════════════════
 \section{Conclusion}
