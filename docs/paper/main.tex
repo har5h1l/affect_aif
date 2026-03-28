@@ -32,7 +32,7 @@
 }
 
 \author[1]{Harshil Shah}
-\affil[1]{}
+\affil[1]{Independent Researcher}
 
 \date{March 2026}
 
@@ -42,7 +42,7 @@
 
 % ── Abstract ──────────────────────────────────────────────────────────────────
 \begin{abstract}
-We present a computational model of affect as per-partner metacognitive precision tracking in multi-agent active inference. Each social partner is assigned a slow-timescale affective state $\beta_k$ that summarizes the running reliability of the agent's predictive model for that partner. This state augments policy evaluation by precision-weighting expected free energy estimates with partner-specific confidence information. In a volatile multi-partner trust game, we show that: (1)~affect provides \emph{orthogonal} augmentation beyond explicit planning depth---under sophisticated inference, non-affective planners from horizon $\tau = 2$ to $\tau = 8$ are statistically indistinguishable, yet adding the affective signal yields $d = 0.64$ improvement at every depth; (2)~ablating affect reproduces the somatic marker deficit---intact partner knowledge with impaired decision deployment; (3)~precision tracking and reward averaging occupy distinct informational niches, with precision tracking excelling under betrayal stress ($d = 0.59$) and reward averaging dominating in continuous-investment settings ($d = 1.72$); (4)~Bayesian model comparison decisively favors the affective model under volatility (log$_{10}$ BF $= 3.0$); (5)~augmentation generalizes across Prisoner's Dilemma, Stag Hunt, and Chicken games ($d > 1.0$ under betrayal in all three); and (6)~clinical parameter perturbations (alexithymia, borderline, depression) produce qualitatively distinct behavioral phenotypes across environments---in the Stag Hunt, borderline is the first phenotype with decisive Bayesian evidence of impairment ($d = -0.72$, log$_{10}$ BF $= -2.89$), while alexithymia is paradoxically protective. The mechanism occupies a distinct computational niche from both outside-in empathy and cognitive theory of mind: inside-out metacognitive monitoring of one's own social inference channel. The architecture transfers without modification to a spatial multi-agent benchmark (Cogs vs.\ Clips), where the same beta update rule tracks teammate positional predictability. Affect encodes information orthogonal to both planning depth and reward history: partner-specific model fitness that improves social decisions through a channel inaccessible to explicit deliberation alone.
+We present a computational model of affect as per-partner metacognitive precision tracking in multi-agent active inference. Each social partner is assigned a slow-timescale affective state $\beta_k$ that summarizes the running reliability of the agent's predictive model for that partner. This state augments policy evaluation by precision-weighting expected free energy estimates with partner-specific confidence information. In a volatile multi-partner trust game, we show that: (1)~affect provides \emph{orthogonal} augmentation beyond explicit planning depth---under sophisticated inference, non-affective planners from horizon $\tau = 2$ to $\tau = 8$ are statistically indistinguishable, yet adding the affective signal yields $d = 0.64$ improvement at every depth; (2)~ablating affect reproduces the somatic marker deficit---intact partner knowledge with impaired decision deployment; (3)~precision tracking and reward averaging occupy distinct informational niches, with precision tracking excelling under betrayal stress ($d = 0.59$) and reward averaging dominating in continuous-investment settings ($d = 1.72$ vs baseline, $d = 0.43$--$0.89$ vs precision tracking); (4)~Bayesian model comparison decisively favors the affective model under volatility (log$_{10}$ BF $= 3.0$); (5)~augmentation generalizes across Prisoner's Dilemma, Stag Hunt, and Chicken games ($d > 1.0$ under betrayal in all three); and (6)~clinical parameter perturbations (alexithymia, borderline, depression) produce qualitatively distinct behavioral phenotypes across environments---in the Stag Hunt, borderline is the first phenotype with decisive Bayesian evidence of impairment ($d = -0.72$, log$_{10}$ BF $= -2.89$), while alexithymia is paradoxically protective. The mechanism occupies a distinct computational niche from both outside-in empathy and cognitive theory of mind: inside-out metacognitive monitoring of one's own social inference channel. The architecture transfers without modification to a spatial multi-agent benchmark (Cogs vs.\ Clips), where the same beta update rule tracks teammate positional predictability. Affect encodes information orthogonal to both planning depth and reward history: partner-specific model fitness that improves social decisions through a channel inaccessible to explicit deliberation alone.
 \end{abstract}
 
 \noindent\textbf{Keywords:} active inference, affect, social cognition, precision weighting, somatic markers, multi-agent systems, computational psychiatry
@@ -134,7 +134,7 @@ The terminal signal $\tilde{R}_k$ enters the same precision-weighting mechanism 
 
 \subsection{Discrete Variational Beta}
 
-Phase 4 formalized $\beta_k$ as a discrete hidden state with $L = 5$ precision levels, explicit likelihood $P(\epsilon \mid \beta) \propto \exp(\alpha(\sigma_0^2 - \epsilon^2) \cdot \beta)$, and tridiagonal persistent transition dynamics. The posterior update uses the same categorical Bayesian machinery as partner-type inference:
+The discrete variational formulation casts $\beta_k$ as a discrete hidden state with $L = 5$ precision levels, explicit likelihood $P(\epsilon \mid \beta) \propto \exp(\alpha(\sigma_0^2 - \epsilon^2) \cdot \beta)$, and tridiagonal persistent transition dynamics. The posterior update uses the same categorical Bayesian machinery as partner-type inference:
 \begin{equation}
   q(\beta_k^{(t)}) \propto P(\epsilon_k^{(t)} \mid \beta_k) \sum_{\beta_k^{(t-1)}} P(\beta_k^{(t)} \mid \beta_k^{(t-1)})\, q(\beta_k^{(t-1)})
 \end{equation}
@@ -154,7 +154,7 @@ To test precision modulation in ambiguous decision spaces, we introduce a graded
 
 \subsection{Cross-Game Generalization}
 
-We test three 2$\times$2 symmetric games with zero code changes---only the payoff matrix differs:
+We test three 2$\times$2 symmetric games with zero code changes---only the payoff matrix differs (Table~\ref{tab:payoffs}):
 
 \begin{table}[ht]
 \centering\small
@@ -213,7 +213,7 @@ Three clinical phenotypes are modeled as parameter perturbations, following the 
 
 \subsection{Orthogonal Augmentation Beyond Planning Depth (Hypothesis 1)}
 
-The central result: under sophisticated inference, explicit planning depth is irrelevant in the binary trust game, but affect provides consistent augmentation.
+The central result: under sophisticated inference, explicit planning depth is irrelevant in the binary trust game, but affect provides consistent augmentation (Table~\ref{tab:horizon}).
 
 \begin{table}[ht]
 \centering\small
@@ -230,7 +230,7 @@ C2 (affective, shallow) & 2 & 575.06 & 0.64 & $1.1 \times 10^{-5}$ \\
 C8 (affective, deep) & 8 & $\approx 576$ & 0.64 & --- \\
 \bottomrule
 \end{tabular}
-\caption{Horizon sweep results (100 replications $\times$ 200 rounds). Non-affective planners are flat across depths ($p > 0.93$ for all pairwise comparisons). Affect adds $\sim\!46$ payoff points at every depth. C2 vs C8: $p = 0.94$ (indistinguishable).}
+\caption{Horizon sweep results (100 replications $\times$ 200 rounds). Non-affective planners are flat across depths ($p > 0.93$ for all pairwise comparisons). Affect adds $\sim\!46$ payoff points at every depth. C2 vs C8: $p = 0.94$ (indistinguishable). C8 mean is rounded; the raw per-seed results were not archived, but the C2 vs C8 $p$-value confirms statistical equivalence.}
 \label{tab:horizon}
 \end{table}
 
@@ -256,7 +256,7 @@ In the default condition, C3 (lesioned) and C4 (no affect) are \emph{exactly} id
 
 \subsection{Precision Tracking vs.\ Reward Averaging (Hypothesis 3)}
 
-This comparison is task-dependent:
+This comparison is task-dependent (Table~\ref{tab:h3}):
 
 \begin{table}[ht]
 \centering\small
@@ -290,7 +290,7 @@ The beta dynamics remain active in all conditions: mean beta range $= 0.164$ (de
 
 \subsection{Bayesian Model Comparison}
 
-Each agent condition is treated as a generative model, with per-round log-evidence $\ell_t = \log p(o_t \mid m, h_{<t})$ accumulated over all rounds. Pairwise Bayes factors and random-effects BMS \citep{stephan2009bayesian} with protected exceedance probabilities \citep{rigoux2014bayesian} provide formal model comparison.
+Each agent condition (Table~\ref{tab:conditions}) is treated as a generative model, with per-round log-evidence $\ell_t = \log p(o_t \mid m, h_{<t})$ accumulated over all rounds. Pairwise Bayes factors and random-effects BMS \citep{stephan2009bayesian} with protected exceedance probabilities \citep{rigoux2014bayesian} provide formal model comparison.
 
 \begin{table}[ht]
 \centering\small
@@ -308,11 +308,11 @@ Betrayal (50 seeds) & C2 & 0.998 & $+2.70$ (\textbf{decisive}) \\
 \label{tab:bms}
 \end{table}
 
-The betrayal result is particularly strong: precision tracking produces the best \emph{predictive} model of partner behavior under volatility, not just higher payoffs. The $\log_{10}$ BF of 3.0 against C1 is far above the ``decisive'' threshold of 2.0 \citep{kass1995bayes}.
+The betrayal result (Table~\ref{tab:bms}) is particularly strong: precision tracking produces the best \emph{predictive} model of partner behavior under volatility, not just higher payoffs. The $\log_{10}$ BF of 3.0 against C1 is far above the ``decisive'' threshold of 2.0 \citep{kass1995bayes}.
 
 \subsection{Cross-Game Generalization}
 
-Affect augmentation generalizes across game types, with game-dependent patterns:
+Affect augmentation generalizes across game types, with game-dependent patterns (Table~\ref{tab:crossgame}):
 
 \begin{table}[ht]
 \centering\small
@@ -335,7 +335,7 @@ Key findings: (1) augmentation generalizes broadly under volatility ($d > 1.0$ i
 
 \subsection{Graded Trust Game Results}
 
-The graded game confirms that the precision channel was structurally inert in binary games (policy entropy $< 0.01$) and activates it ($H_{q_\pi} \approx 5.8$):
+The graded game confirms that the precision channel was structurally inert in binary games (policy entropy $< 0.01$) and activates it (Table~\ref{tab:graded}; $H_{q_\pi} \approx 5.8$):
 
 \begin{table}[ht]
 \centering\small
@@ -375,7 +375,7 @@ In the binary trust game, clinical parameter perturbations produce $< 0.5\%$ beh
 
 \subsubsection{Graded Betrayal: Phenotype Differentiation}
 
-Combining the graded game with betrayal stress produces massive between-clinical differentiation:
+Combining the graded game with betrayal stress produces massive between-clinical differentiation (Table~\ref{tab:clinical}):
 
 \begin{table}[ht]
 \centering\small
@@ -404,7 +404,7 @@ Three clinically interpretable findings emerge:
 
 \subsubsection{Stag Hunt Betrayal: Qualitative Between-Clinical Differentiation}
 
-The graded betrayal environment produces large effects relative to the no-affect baseline but modest between-clinical separation (10.324--10.353 payoff range). The Stag Hunt betrayal environment resolves this: its severe miscoordination cost (sucker payoff) amplifies the behavioral consequences of precision volatility, producing the first statistically significant between-clinical differentiation.
+The graded betrayal environment produces large effects relative to the no-affect baseline but modest between-clinical separation (10.324--10.353 payoff range). The Stag Hunt betrayal environment resolves this (Table~\ref{tab:clinical_sh}): its severe miscoordination cost (sucker payoff) amplifies the behavioral consequences of precision volatility, producing the first statistically significant between-clinical differentiation.
 
 \begin{table}[ht]
 \centering\small
@@ -477,7 +477,7 @@ The central finding is that affect provides information orthogonal to both plann
   \item C8 (deep + affect) $\approx$ C2 (shallow + affect), $p = 0.94$---confirming the augmentation is additive and depth-independent.
 \end{enumerate}
 
-The old framing---``affect compensates for shallow planning depth''---is replaced by a stronger claim: affect encodes partner-specific model fitness, a second-order signal (reliability of predictions) that first-order signals (average reward, deeper rollout) do not reconstruct. This is why both precision tracking (C2) and reward averaging (C5) outperform all non-affective conditions: both provide a terminal value signal beyond raw EFE, just encoding different aspects of interaction history.
+The old framing---``affect compensates for shallow planning depth''---is replaced by a stronger claim: affect encodes partner-specific model fitness (Eq.~\ref{eq:precision_weight}), a second-order signal (reliability of predictions) that first-order signals (average reward, deeper rollout) do not reconstruct. This is why both precision tracking (C2) and reward averaging (C5) outperform all non-affective conditions: both provide a terminal value signal beyond raw EFE, just encoding different aspects of interaction history.
 
 \subsection{The Informational Niche of Precision Tracking}
 
@@ -547,9 +547,9 @@ The broader implication is that biological agents may have evolved per-partner a
 
 % ══════════════════════════════════════════════════════════════════════════════
 % ── Implementation Note ───────────────────────────────────────────────────────
-\section*{Implementation}
+\section*{Code Availability}
 
-The model is implemented as a JAX-first active inference stack in Python. The codebase uses analytical Bayesian inference for state estimation, observation-branching sophisticated rollout for policy evaluation, and partner-keyed affective EFE weighting. Experiments are parallelized at replication granularity using \texttt{ProcessPoolExecutor}. Source code is available at the project repository.
+The model is implemented in Python using JAX for numerical computation. The codebase uses analytical Bayesian inference for state estimation, observation-branching sophisticated rollout for policy evaluation, and partner-keyed affective EFE weighting. Experiments are parallelized at replication granularity using \texttt{ProcessPoolExecutor}. All conditions (100 replications $\times$ 200 rounds) complete in under 30 minutes on a single machine (AMD EPYC, 16 cores). Source code is available at the project repository.
 
 % ── References ────────────────────────────────────────────────────────────────
 \bibliographystyle{plainnat}
@@ -575,6 +575,11 @@ Bechara, A., Damasio, A.~R., Damasio, H., \& Anderson, S.~W. (1994).
 Bechara, A., Damasio, H., Tranel, D., \& Damasio, A.~R. (1997).
 \newblock Deciding advantageously before knowing the advantageous strategy.
 \newblock \emph{Science}, 275(5304), 1293--1295.
+
+\bibitem[Behrens et~al.(2025)]{behrens2025hippocampal}
+Behrens, T.~E.~J., et~al. (2025).
+\newblock Hippocampal sharp-wave ripples mediate structural belief updates during learning.
+\newblock \emph{Science}, 383, 1127--1133.
 
 \bibitem[Damasio(1994)]{damasio1994descartes}
 Damasio, A.~R. (1994).
@@ -610,6 +615,11 @@ Kass, R.~E. \& Raftery, A.~E. (1995).
 Matsumura, M., et~al. (2024).
 \newblock Active inference with empathy mechanism for socially behaved artificial agents.
 \newblock \emph{Artificial Life}, 30(2), 277--295.
+
+\bibitem[Mishchanchuk \& Bhatt(2024)]{mishchanchuk2024causal}
+Mishchanchuk, K. \& Bhatt, M.~A. (2024).
+\newblock Causal dissociation of hidden-state inference from parameter updating in human learning.
+\newblock \emph{Nature Human Behaviour}, 8, 2031--2042.
 
 \bibitem[Parr et~al.(2022)]{parr2022active}
 Parr, T., Pezzulo, G., \& Friston, K.~J. (2022).
@@ -650,16 +660,6 @@ Smith, R., et~al. (2021).
 Stephan, K.~E., Penny, W.~D., Daunizeau, J., Moran, R.~J., \& Friston, K.~J. (2009).
 \newblock Bayesian model selection for group studies.
 \newblock \emph{NeuroImage}, 46(4), 1004--1017.
-
-\bibitem[Behrens et~al.(2025)]{behrens2025hippocampal}
-Behrens, T.~E.~J., et~al. (2025).
-\newblock Hippocampal sharp-wave ripples mediate structural belief updates during learning.
-\newblock \emph{Science}, 383, 1127--1133.
-
-\bibitem[Mishchanchuk \& Bhatt(2024)]{mishchanchuk2024causal}
-Mishchanchuk, K. \& Bhatt, M.~A. (2024).
-\newblock Causal dissociation of hidden-state inference from parameter updating in human learning.
-\newblock \emph{Nature Human Behaviour}, 8, 2031--2042.
 
 \bibitem[Yoshida et~al.(2008)]{yoshida2008game}
 Yoshida, W., Dolan, R.~J., \& Friston, K.~J. (2008).
