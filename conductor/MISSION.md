@@ -97,4 +97,4 @@ The precision modulation experiment ran on the server; raw CSVs were not fetched
 - STOP and ask if any change would alter the scientific narrative
 
 ## Status
-ACTIVE — Paper polish phase. Focus on P1-P2 (critical), then P3-P8 (important), then the rest.
+PAUSED — Paper polish complete. Awaiting user decision on remaining low-priority items (C4 nav tests, D2 CSV fetch) and paper review.
