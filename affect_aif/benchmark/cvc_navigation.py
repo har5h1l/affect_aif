@@ -15,7 +15,7 @@ Usage:
     self._nav = NavigationHelper(obs_height, obs_width, center)
 
     # In step_with_state:
-    nav_state = self._nav.update_position(nav_state, moved, last_action)
+    nav_state = self._nav.update_position(nav_state, moved)
     action_name = self._nav.pathfind_toward(obs, nav_state, target_loc)
 """
 
@@ -57,7 +57,6 @@ class NavigationState:
     last_action_name: Optional[str] = None
     walls: dict[tuple[int, int], int] = field(default_factory=dict)  # coord -> step_added
     visited: set[tuple[int, int]] = field(default_factory=set)
-    stuck_counter: int = 0
     step_count: int = 0
 
 
@@ -101,12 +100,10 @@ class NavigationHelper:
             state.global_row = target_r
             state.global_col = target_c
             state.visited.add((target_r, target_c))
-            state.stuck_counter = 0
             # If we successfully moved to a cell, it's not a wall
             state.walls.pop((target_r, target_c), None)
         else:
             state.walls[(target_r, target_c)] = state.step_count
-            state.stuck_counter += 1
 
         return state
 

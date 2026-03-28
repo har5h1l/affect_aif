@@ -65,7 +65,6 @@ class AffectScoringState:
     phase: ScoringPhase = ScoringPhase.GET_GEAR
     assigned_role: str = "miner"
     nav: NavigationState = field(default_factory=NavigationState)
-    stuck_steps: int = 0
     # Per-teammate tracking
     teammate_positions: dict[int, tuple[int, int]] = field(default_factory=dict)
     teammate_velocities: dict[int, tuple[int, int]] = field(default_factory=dict)
@@ -265,12 +264,6 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
         gear = self._current_gear(items)
         cargo = sum(items.get(element, 0) for element in ELEMENTS)
         has_heart = items.get("heart", 0) > 0
-
-        # Track stuck-ness
-        if not moved and state.nav.last_action_name is not None:
-            state.stuck_steps += 1
-        else:
-            state.stuck_steps = 0
 
         # ---- Beta-modulated cargo threshold ----
         # High team_beta → deposit sooner (teammates reliably coordinate)

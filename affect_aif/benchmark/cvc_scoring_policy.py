@@ -47,7 +47,6 @@ class ScoringState:
     phase: ScoringPhase = ScoringPhase.GET_GEAR
     assigned_role: str = "miner"
     nav: NavigationState = field(default_factory=NavigationState)
-    stuck_steps: int = 0
 
 
 class ScoringLoopPolicyImpl(StatefulPolicyImpl[ScoringState]):
@@ -164,12 +163,6 @@ class ScoringLoopPolicyImpl(StatefulPolicyImpl[ScoringState]):
         gear = self._current_gear(items)
         cargo = sum(items.get(element, 0) for element in ELEMENTS)
         has_heart = items.get("heart", 0) > 0
-
-        # Track stuck-ness for phase transitions
-        if not moved and state.nav.last_action_name is not None:
-            state.stuck_steps += 1
-        else:
-            state.stuck_steps = 0
 
         # State machine: determine phase based on actual inventory
         if gear is None:

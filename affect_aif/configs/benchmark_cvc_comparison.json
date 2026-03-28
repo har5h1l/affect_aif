@@ -29,7 +29,7 @@
       "mission": "machina_1",
       "num_agents": 8,
       "max_steps": 1000,
-      "python_bin": "/Users/server/miniforge3/envs/cvc/bin/python"
+      "python_bin": "python3"
     }
   }
 }
