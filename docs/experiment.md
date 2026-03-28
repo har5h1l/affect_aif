@@ -235,6 +235,27 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 - Policy selection: same shallow EFE weighting as Condition 2
 - Purpose: isolates the effect of switching from the default continuous beta update to the discrete variational beta formulation.
 
+### 4.10 Condition 9: Alexithymia (Clinical)
+
+- Planning horizon: $\tau = 2$
+- Level 3 (affective state): active, per-partner, with blunted affective charging ($\alpha = 0.1$ vs default $\alpha = 3.0$)
+- Policy selection: same as Condition 2
+- Purpose: models alexithymia as reduced affective responsiveness. The low $\alpha$ dampens the surprise-to-charge conversion, producing near-frozen beta trajectories.
+
+### 4.11 Condition 10: Borderline (Clinical)
+
+- Planning horizon: $\tau = 2$
+- Level 3 (affective state): active, per-partner, with volatile affect ($\alpha = 12.0$, $\lambda = 0.5$ vs defaults $\alpha = 3.0$, $\lambda = 0.6$)
+- Policy selection: same as Condition 2
+- Purpose: models borderline personality as over-reactive, poorly smoothed precision dynamics. High $\alpha$ amplifies charge; low $\lambda$ reduces temporal smoothing, producing noisy beta oscillations.
+
+### 4.12 Condition 11: Depression (Clinical)
+
+- Planning horizon: $\tau = 2$
+- Level 3 (affective state): active, per-partner, with pessimistic initial precision ($\beta_0 = 0.2$ vs default $\beta_0 = 0.5$)
+- Policy selection: same as Condition 2
+- Purpose: models depression as a pessimistic prior on model reliability. Unlike C9 and C10, this is an initial-condition perturbation (not a dynamical parameter change), so it self-corrects through evidence accumulation.
+
 ---
 
 ## 5. Hypotheses and Predictions
