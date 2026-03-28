@@ -288,6 +288,13 @@ Under betrayal stress (50 replications, 120 rounds, scheduled cooperator$\to$exp
 
 The beta dynamics remain active in all conditions: mean beta range $= 0.164$ (default) and $0.134$ (betrayal), with 100\% of seeds showing material movement.
 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/beta_trajectory.pdf}
+\caption{Beta trajectory for the betraying partner (partner 0) under the scheduled cooperator$\to$exploiter switch at round 31. The affective state drops sharply after the switch as prediction errors increase, then stabilizes at a low-precision regime reflecting the agent's updated assessment of model reliability. Shaded region: $\pm$1\,SE across seeds.}
+\label{fig:beta_trajectory}
+\end{figure}
+
 \subsection{Bayesian Model Comparison}
 
 Each agent condition (Table~\ref{tab:conditions}) is treated as a generative model, with per-round log-evidence $\ell_t = \log p(o_t \mid m, h_{<t})$ accumulated over all rounds. Pairwise Bayes factors and random-effects BMS \citep{stephan2009bayesian} with protected exceedance probabilities \citep{rigoux2014bayesian} provide formal model comparison.
@@ -430,6 +437,13 @@ Second, \textbf{alexithymia is indistinguishable from healthy} ($d = +0.20$, ane
 Third, \textbf{depression shows Bayesian but not frequentist impairment} ($\log_{10}$ BF $= -0.66$, $p = 0.51$). The pessimistic $\beta_0$ is corrected by inference, consistent with the initial-condition versus dynamical-parameter distinction from the graded game.
 
 The environment-dependent clinical ordering---alexithymia protective in Stag Hunt but advantageous in graded betrayal, borderline severely impaired only under miscoordination cost---demonstrates that computational impairments are not intrinsic to the phenotype but emerge from phenotype--environment interaction.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/clinical_beta.pdf}
+\caption{Beta trajectories for the betraying partner across clinical phenotypes under the PD betrayal protocol. Borderline (C10) shows high-amplitude oscillations that compound into progressive deterioration; alexithymia (C9) shows blunted response, paradoxically protective under acute volatility; depression (C11) starts low but self-corrects via evidence accumulation, converging with healthy (C2) within $\sim$30 rounds. Shaded regions: $\pm$1\,SE.}
+\label{fig:clinical_beta}
+\end{figure}
 
 \subsection{Discrete Variational Beta Validation}
 
