@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  20 MAR 2026 09:18
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) (preloaded format=pdflatex 2025.3.8)  30 MAR 2026 10:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -540,57 +540,73 @@ al/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}]
 
 [3]
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-
 [4]
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
 
 [5{/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
 }]
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-
 [6]
+<figures/beta_trajectory.pdf, id=294, 496.76215pt x 244.617pt>
+File: figures/beta_trajectory.pdf Graphic file (type pdf)
+<use figures/beta_trajectory.pdf>
+Package pdftex.def Info: figures/beta_trajectory.pdf  used on input line 293.
+(pdftex.def)             Requested size: 385.02547pt x 189.5986pt.
 
-[7]
+Underfull \hbox (badness 1215) in paragraph at lines 294--294
+[]\T1/cmr/m/n/10.95 Figure 1: |Beta tra-jec-tory for the be-tray-ing part-ner (
+part-ner 0) un-der the sched-uled
+ []
+
+
+
+[7 <./figures/beta_trajectory.pdf>]
 
 [8]
-Overfull \hbox (6.18576pt too wide) in paragraph at lines 421--422
+
+[9]
+<figures/clinical_beta.pdf, id=377, 496.76215pt x 244.617pt>
+File: figures/clinical_beta.pdf Graphic file (type pdf)
+<use figures/clinical_beta.pdf>
+Package pdftex.def Info: figures/clinical_beta.pdf  used on input line 443.
+(pdftex.def)             Requested size: 385.02547pt x 189.5986pt.
+
+
+[10]
+
+[11 <./figures/clinical_beta.pdf>]
+
+[12]
+Overfull \hbox (6.18576pt too wide) in paragraph at lines 502--503
 []\T1/cmr/bx/n/10.95 Reward av-er-ag-ing ex-cels when the re-ward gra-di-ent is
  di-rectly decision-relevant\T1/cmr/m/n/10.95 ---
  []
 
 
 
-[9]
+[13]
 
-[10]
+[14]
 
-[11]
+[15]
 
-[12] (./main.aux)
+[16]
+
+[17] (./main.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: D92D1495D6B60B40DA2EDABC5B07BE12;7346.
+(rerunfilecheck)             Checksum: 4126A9C341C26D58F8E00ED6EC9A7A6B;8758.
  ) 
 Here is how much of TeX's memory you used:
- 14065 strings out of 473190
- 218558 string characters out of 5715801
- 636640 words of memory out of 5000000
- 37030 multiletter control sequences out of 15000+600000
+ 14124 strings out of 473190
+ 219908 string characters out of 5715801
+ 637390 words of memory out of 5000000
+ 37069 multiletter control sequences out of 15000+600000
  579087 words of font info for 89 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,11n,79p,1853b,569s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,2330b,599s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
 </usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
@@ -618,10 +634,10 @@ onts/type1/public/cm-super/sfrm1728.pfb></usr/local/texlive/2025/texmf-dist/fon
 ts/type1/public/cm-super/sfti1000.pfb></usr/local/texlive/2025/texmf-dist/fonts
 /type1/public/cm-super/sfti1095.pfb></usr/local/texlive/2025/texmf-dist/fonts/t
 ype1/public/cm-super/sftt1095.pfb>
-Output written on main.pdf (12 pages, 437896 bytes).
+Output written on main.pdf (17 pages, 496534 bytes).
 PDF statistics:
- 456 PDF objects out of 1000 (max. 8388607)
- 383 compressed objects within 4 object streams
- 99 named destinations out of 1000 (max. 500000)
- 305 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 648 PDF objects out of 1000 (max. 8388607)
+ 488 compressed objects within 5 object streams
+ 119 named destinations out of 1000 (max. 500000)
+ 347 words of extra memory for PDF output out of 10000 (max. 10000000)
 
