@@ -2,23 +2,30 @@
 status: DONE
 next_priority: 0
 pending_work: []
-next_session_focus: "Paper polish complete. Next: user review of figures and remaining low-priority items (C4 navigation tests, D2 CSV fetch)."
+next_session_focus: "All paper polish complete. Remaining: C4 (navigation tests), D2 (Track 1.2 CSVs). Phase 8 (human data) requires user approval."
 model_hint: opus
 ---
 
 # Research State
 
 ## Last Updated
-2026-03-28 (Session 15 — paper polish)
+2026-03-30 (Session 16 — merge + final cleanup)
 
 ## Session Count
-15
+16
 
 ## Current Findings
 
 ### Trust-Game Results (Phases 1-7: COMPLETE)
 
 All trust-game phases are complete with publication-quality results. Full results in docs/results_tracking.md.
+
+### Session 16: Merge + Final Cleanup (2026-03-30)
+
+Merged paper-polish branch to master. Final fixes applied:
+- Fixed abstract P7 phrasing (reward-averaging effect size clarification)
+- Unified clinical table headers for consistent formatting
+- Deleted all mango session branches
 
 ### Session 15: Paper Polish (2026-03-28)
 
@@ -64,9 +71,9 @@ DECISION: All critical and important paper issues have been fixed. The paper now
 | Paper Polish | COMPLETE | All critical/important issues resolved |
 
 ## Auto Handoff
-- **What changed:** Session 15 fixed all critical and important paper polish issues (P1-P10), added two figures, cleaned up CvC dead code (C1-C3), and documented clinical conditions in experiment.md (D1).
+- **What changed:** Session 16 merged the paper-polish branch to master, fixed abstract P7 phrasing, unified clinical table headers, and deleted all mango session branches.
 - **What is still in flight:** Nothing.
-- **What next session should do:** User review. The paper is ready for submission-quality review. Remaining low-priority items (C4 nav tests, D2 CSV fetch) can be addressed if desired.
+- **What next session should do:** Remaining low-priority items: C4 (navigation unit tests), D2 (Track 1.2 result CSVs). Phase 8 (human data) requires user approval before starting.
 
 ## Status
-DONE — Paper polish phase complete. All critical and important issues resolved.
+DONE — Paper polish phase complete. All critical and important issues resolved. Merged to master.

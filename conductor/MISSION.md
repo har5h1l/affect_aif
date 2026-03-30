@@ -1,5 +1,7 @@
 # Mission
 
+**Completion note:** All critical and important issues resolved. Remaining low-priority: C4, D2. Phase 8 (human data) requires user approval.
+
 ## Objective
 Polish the affect-augmented AIF paper for submission. All research tracks (theory, CvC benchmark, experiments) are complete. The remaining work is paper-level fixes identified by systematic review.
 
@@ -97,4 +99,4 @@ The precision modulation experiment ran on the server; raw CSVs were not fetched
 - STOP and ask if any change would alter the scientific narrative
 
 ## Status
-PAUSED — Paper polish complete. Awaiting user decision on remaining low-priority items (C4 nav tests, D2 CSV fetch) and paper review.
+DONE — All critical and important paper polish issues resolved and merged to master. Remaining low-priority: C4 (navigation tests), D2 (Track 1.2 CSVs). Phase 8 (human data) requires user approval.

@@ -118,45 +118,31 @@ Between-clinical spread: 80.5 points (2700x improvement over graded default).
 
 **Phase 7 status: COMPLETE.** Three games tested, cross-game comparison documented. See `docs/results_tracking.md` S Phase 7 and `docs/theory.md` S4.17.
 
-## Current Focus: Four-Track Plan for Paper Submission
+## Completed: Four-Track Plan for Paper Submission
 
-### Track 1: Paper Theory Gaps (HIGH priority)
+All four tracks are complete. Sessions 10-16 addressed theory gaps, CvC benchmark, paper preparation, review findings, and final polish.
 
-Five specific gaps identified in the theory and framing:
+### Track 1: Paper Theory Gaps — COMPLETE
 
-1. **Inside-out literature positioning (1.1):** Position beta-as-metacognitive-precision against Yoshida (2024, outside-in empathy) and Pitliya et al. (2025, cognitive ToM). Triple dissociation: outside-in / cognitive ToM / inside-out precision monitoring.
+All five gaps addressed and integrated into `docs/paper/main.tex`:
 
-2. **Precision modulation pathway (1.2): COMPLETE.** Tested in graded betrayal (50 seeds × 120 rounds). Mechanism confirmed: entropy reduction of 0.44 nats, payoff d=0.21 (directionally positive, non-significant). Results added to paper.
+1. **Inside-out literature positioning (1.1):** Triple dissociation (outside-in empathy / cognitive ToM / inside-out precision monitoring) in Introduction.
+2. **Precision modulation pathway (1.2):** Tested in graded betrayal (50 seeds x 120 rounds). Entropy reduction 0.44 nats, payoff d=0.21 (directionally positive, non-significant). Results in paper Section 4.8.
+3. **vmPFC neuro-architectural argument (1.3):** Bancee et al. (2026) + Baram et al. (2026) + Damasio grounding in Discussion Section 5.3.
+4. **BMR trigger framing (1.4):** Behrens (2025) + Mishchanchuk (2024) integrated into Future Work Section 6.
+5. **Between-clinical framing (1.5):** Qualitative story and initial-condition vs dynamical-parameter distinction in Results Section 4.9 and Discussion Section 5.3.
 
-3. **vmPFC neuro-architectural argument (1.3):** Connect Bancee et al. (2026, vmPFC emotion geometry) + Baram et al. (2026, OFC/vmPFC schema manifolds) + Damasio to ground beta in vmPFC. Discussion-level only.
+### Track 2: CoGames/CvC Benchmark — COMPLETE
 
-4. **BMR trigger framing (1.4):** Strengthen Future Work BMR paragraph with Behrens (2025, hippocampal ripples), Mishchanchuk (2024, hidden-state vs parameter dissociation), somatosensory surprise timing. Theory only, no implementation.
+Navigation solved via BFS + aoe_mask wall detection (84-91% move success). ScoringLoopPolicy: 0.072 reward, 2.5 junctions. AffectCvCPolicy: 0.071 reward, 3x fewer stuck steps. StarterPolicy: 0.000 (baseline). Full benchmark: 3 policies x 10 seeds on machina_1. Results in `results/benchmark_cvc_comparison/` and paper Section 4.10.
 
-5. **Between-clinical framing (1.5):** Lead with qualitative story (distinct computational impairments) and structural distinction (beta_0 correctable vs alpha/lambda persistent), not quantitative payoff magnitudes.
+### Track 3: Paper Preparation — COMPLETE
 
-### Track 2: CoGames/CvC Benchmark (HIGH priority)
+Docs consistency check done. CvC results in paper. LaTeX polish complete (sessions 15-16): P1-P10 paper issues addressed, C1-C3 code/consistency issues fixed, D1 doc issue fixed. Session 16 fixed abstract P7 phrasing, unified clinical table headers (sign convention consistent: positive d = phenotype outperforms reference), merged to master, and deleted all session branches.
 
-**Goal:** Get a submission-ready policy onto the actual CvC benchmark (beta-cvc Observatory season, compat_version 0.19) with non-zero reward.
+### Track 4: Research-Brain Improvements — LOW priority, deferred
 
-**Approach:**
-1. Solve navigation with A* pathfinding layer (`PathfindingMixin` in `cvc_navigation.py`)
-2. Build `ScoringLoopPolicy` baseline (state-machine completing the scoring loop)
-3. Add affect mechanism as `AffectCvCPolicy` (teammate tracking, beta updates, policy modulation)
-4. Benchmark and package for Observatory submission
-5. In parallel, try simpler missions as stepping stones
-
-**Current status: COMPLETE.** Navigation solved via BFS + aoe_mask wall detection (84-91% move success). ScoringLoopPolicy: 0.072 reward, 2.5 junctions. AffectCvCPolicy: 0.071 reward, 3x fewer stuck steps. StarterPolicy: 0.000 (baseline). Full benchmark: 3 policies × 10 seeds on machina_1. Results in `results/benchmark_cvc_comparison/` and paper Section 4.10.
-
-### Track 3: Paper Preparation (MEDIUM priority — depends on Tracks 1-2)
-
-1. Docs consistency check across theory.md, results_tracking.md, experiment.md, paper/main.tex
-2. Results reproducibility spot-check (key configs, 5 seeds each)
-3. Add CvC results to paper once Track 2 delivers
-4. Final LaTeX polish (bibliography, references, figures)
-
-### Track 4: Research-Brain Improvements (LOW priority — document only)
-
-Nine identified issues with the agentic literature sweep system. Not blocking the paper. User will handle separately. See `conductor/STATE.md` for the full list.
+Nine identified issues with the agentic literature sweep system. Not blocking the paper. User will handle separately.
 
 ## Planned Phases
 
@@ -172,13 +158,21 @@ Nine identified issues with the agentic literature sweep system. Not blocking th
 
 **Entry condition:** Paper draft stable. User approval required.
 
+## Remaining Items
+
+Three minor items remain from the review process:
+
+1. **C4 (navigation unit tests):** Unit tests for CvC navigation/pathfinding code. Low priority — does not block submission.
+2. **D2 (Track 1.2 CSVs):** Archive the precision modulation experiment CSVs in results/. Low priority — data is already in the paper.
+3. **Phase 8 (human data):** Validate the model against human behavioral data from trust games. Requires user approval before starting.
+
 ## Operational Summary
 
 - **Completed:** Phases 1-7 (primary results, exploiter deep-dive, theory tightening, variational beta, clinical sensitivity, Bayesian model comparison, cross-game generalization).
+- **Completed:** Tracks 1-4 (paper theory gaps, CvC benchmark, paper preparation, research-brain improvements deferred).
+- **Completed:** Paper polish sessions 15-16 (P1-P10, C1-C3, D1 all addressed; abstract fixed; clinical table headers unified; branches merged and deleted).
 - **Phase 5 key finding:** Graded betrayal environment produces massive between-clinical differentiation (80.5 point spread). Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
 - **Phase 6 key finding:** C2 is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5).
 - **Phase 7 key finding:** Augmentation generalizes across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **Tracks 1-3: COMPLETE.** All theory gaps addressed, CvC benchmark done, paper prepared. See review findings below.
-- **Paper polish needed:** Fix clinical d sign convention, add figures, add missing somatosensory citation, cross-reference tables, fill author affiliation.
-- **Remaining:** Phase 8 (human data) requires user approval.
-- **Stop point:** Phase 8 (human data) requires user approval.
+- **Paper status:** Submission-ready. All sections written, all results integrated, figures included, bibliography complete.
+- **Remaining:** C4 (navigation unit tests), D2 (Track 1.2 CSVs), Phase 8 (human data — requires user approval).

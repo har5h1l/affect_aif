@@ -62,7 +62,7 @@ So the current evidence is stronger than "affect beats shallow non-affect." It i
 | H3 precision > reward average | Task-dependent | Binary default: null (`d = 0.009`). Binary betrayal: C2 wins (`d = 0.59`, `p = 0.004`). Graded default: C5 wins (`d = 0.43`). Graded betrayal: C5 wins (`d = −0.89`). Precision tracking helps when decisions are binary and model fitness diverges from reward; reward averaging dominates in continuous-investment settings where the reward gradient is directly decision-relevant. |
 | H4 post-switch robustness | Supported | `default`: `C2` beats `C1` (`p = 2.8e-9`) and `C4` (`p = 5.4e-9`) in the post-switch window. `betrayal_stress`: `C2` beats `C1` (`p = 0.013`). |
 | H5 partner selection | Supported | In `betrayal_stress`, beta correlates with partner selection frequency (`r = 0.51`, `p = 2.9e-9`). |
-| Clinical sensitivity | Task-dependent | Binary PD: inert (<0.5% effect). Graded: all clinical d>2.1 vs C4 but no between-clinical separation. **SH betrayal: borderline impaired (d=0.72, p<0.001, BF=-2.89 decisive), alexithymia ≈ healthy, depression mild BF impairment.** First qualitative clinical differentiation. |
+| Clinical sensitivity | Task-dependent | Binary PD: inert (<0.5% effect). Graded: all clinical d>2.1 vs C4 but no between-clinical separation. **SH betrayal: borderline impaired (d=-0.72, p<0.001, BF=-2.89 decisive), alexithymia ≈ healthy, depression mild BF impairment.** First qualitative clinical differentiation. |
 
 ## Interpretation
 
@@ -114,16 +114,16 @@ Phase 7 established that Stag Hunt uniquely favors precision tracking (C2 wins R
 
 **Stag Hunt Betrayal (50 seeds × 120 rounds):**
 
-| Phenotype | Mean payoff | d vs healthy | p vs healthy | log10 BF vs healthy |
+| Phenotype | Mean payoff | vs C2 d | p | log10 BF |
 |---|---|---|---|---|
 | Healthy (C2) | 489.7 | — | — | — |
-| Alexithymia (C9) | 497.1 | -0.20 | 0.318 | +0.12 anecdotal |
-| Depression (C11) | 484.6 | +0.13 | 0.510 | -0.66 substantial |
-| Borderline (C10) | 439.8 | **+0.72** | **0.0005** | **-2.89 decisive** |
+| Alexithymia (C9) | 497.1 | +0.20 | 0.318 | +0.12 anecdotal |
+| Depression (C11) | 484.6 | -0.13 | 0.510 | -0.66 substantial |
+| Borderline (C10) | 439.8 | **-0.72** | **0.0005** | **-2.89 decisive** |
 | No-affect (C4) | 402.7 | — | — | — |
 
 **Key findings:**
-1. Borderline is significantly impaired (d=0.72, p<0.001, decisive BF). First environment with statistically significant clinical differentiation from healthy affect.
+1. Borderline is significantly impaired (d=-0.72, p<0.001, decisive BF). First environment with statistically significant clinical differentiation from healthy affect.
 2. Borderline is still above no-affect (d=0.57, p=0.006) — volatile affect is worse than stable but better than none.
 3. Alexithymia is statistically indistinguishable from healthy — frozen precision is protective in high-miscoordination environments.
 4. Depression shows mild Bayesian impairment (BF=-0.66) but frequentist null (p=0.51).
