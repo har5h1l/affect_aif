@@ -1,17 +1,18 @@
-# Benchmarking Integration: Trust Backend + Real CvC
+# Benchmarking Integration: Trust Backend + Experimental CvC
 
 ## Status
 
-The benchmark layer is now organized around explicit backends rather than a
+The benchmark layer is organized around explicit backends rather than a
 trust-game runner with a fake `gridworld` toggle.
 
-- `trust` is the canonical production backend for the current affect_aif agents.
-- `cvc_local` is the real CoGames/CvC backend. It runs through a Python 3.12
-  worker and uses the same policy class path / policy spec shape that can later
-  be packaged for submission.
+- `trust` is the canonical, supported benchmark backend for the current
+  affect_aif agents and theory-facing evaluation.
+- `cvc_local` is a real CoGames/CvC backend, but it is still proof-of-concept
+  / WIP. It runs through a Python 3.12 worker and uses the same policy class
+  path / policy spec shape that can later be packaged for submission.
 - `toy_gridworld` remains only as a backward-compatible scripted adapter around
-  the old trust-like fallback. It is not a real CoGames integration and should
-  not be used for transfer claims.
+  the old trust-like fallback. It is not a real CoGames integration, is not a
+  peer of `trust`, and should not be used for transfer claims.
 
 ## Why the Split Exists
 
@@ -153,8 +154,13 @@ It does not log in, upload, or submit policies.
 ```bash
 python scripts/run_benchmark.py --backend trust --config affect_aif/configs/benchmark_default.json
 python scripts/run_benchmark.py --backend trust --agents affective_shallow random tit_for_tat --rounds 50 --replications 3
+# Experimental / WIP: requires Python 3.12 and uses the real CvC local worker.
 python scripts/run_benchmark.py --backend cvc_local --agents teammate_reliability starter --mission machina_1 --max-steps 250 --python-bin python3.12
 ```
+
+For day-to-day benchmark work, prefer the trust backend. The `cvc_local`
+example is included to document the current experimental surface, not to imply
+parity with the supported trust benchmark.
 
 ### Analyze benchmark results
 
@@ -170,6 +176,10 @@ Outputs are written next to the CSV by default:
 - `benchmark_report.txt`
 
 ## CvC Integration Status (2026-03-21)
+
+This section tracks the experimental local CvC backend. It is useful for
+validation and packaging work, but it should be treated as WIP rather than the
+primary benchmark surface.
 
 ### What works end-to-end
 

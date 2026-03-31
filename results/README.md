@@ -1,19 +1,21 @@
 # Results Directory
 
-`results/` is reserved for local experiment outputs and analysis artifacts.
+`results/` is reserved for local experiment outputs and analysis artifacts from the supported CLI workflows.
 
-Supported workflows write batch outputs under:
+Supported experiment runs write batch outputs under:
 
 ```text
 results/<batch_name>/<config_slug>/
 ```
 
-Typical contents include:
+Typical experiment outputs include:
 
 - `results.csv`
+- `results_partial.csv`
 - `config.json`
 - `batch_metadata.json`
-- `figures/`
-- `gifs/`
+- `gifs/` when `--make-gifs` is used
+
+The supported experiment CLI writes CSV results. Downstream analysis commands may read CSV or parquet, but parquet is not emitted by `run_experiment.py` or `run_preliminary.py`.
 
 This repository tracks only scaffolding for the directory. Generated outputs remain untracked.

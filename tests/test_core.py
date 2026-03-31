@@ -2,14 +2,14 @@ import jax.numpy as jnp
 import numpy as np
 
 from affect_aif.core.control import (
+    compute_efe_with_terminal_value,
+    compute_expected_free_energy,
     _rollout_policy_trust_game_mean_field,
     _rollout_policy_trust_game_sophisticated,
     construct_policies,
     generate_observation_sequences,
 )
 from affect_aif.core.maths import entropy, normalize, softmax
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import TrustGameModel
 
 
 def test_softmax_sums_to_one():
@@ -45,94 +45,195 @@ def test_generate_observation_sequences_binary_horizon_three():
     assert {tuple(row) for row in sequences.tolist()} == {(0, 0), (0, 1), (1, 0), (1, 1)}
 
 
+def _toy_efe_inputs():
+    A = np.empty(2, dtype=object)
+    A[0] = np.eye(2, dtype=float)
+    A[1] = np.eye(2, dtype=float)
+
+    B = np.empty(1, dtype=object)
+    B[0] = np.zeros((2, 2, 1), dtype=float)
+    B[0][:, :, 0] = np.eye(2, dtype=float)
+
+    qs = np.array([np.array([1.0, 0.0], dtype=float)], dtype=object)
+    policy = np.array([0], dtype=np.int32)
+    policies = np.array([[0], [0]], dtype=np.int32)
+    terminal_values = np.array([0.25, -0.5], dtype=float)
+    return A, B, qs, policy, policies, terminal_values
+
+
 def _rollout_inputs():
-    cfg = ExperimentConfig(num_rounds=2, num_replications=1, calibration_episodes=1, random_seed=0)
-    model = TrustGameModel(cfg)
-    A, B, C, D = model.get_matrices()
-    beliefs = jnp.tile(jnp.asarray(D[0], dtype=jnp.float32)[None, :], (cfg.num_partners, 1))
-    sharp_beliefs = beliefs.at[0].set(jnp.asarray([0.999, 0.0005, 0.00025, 0.00025], dtype=jnp.float32))
+    beliefs = jnp.asarray([[0.5, 0.5]], dtype=jnp.float32)
+    one_hot_beliefs = jnp.asarray([[1.0, 0.0]], dtype=jnp.float32)
     common = dict(
         active_partner=jnp.int32(0),
         assignment_mode_code=jnp.int32(0),
-        B_type=jnp.asarray(B[0][:, :, 0], dtype=jnp.float32),
-        partner_action_prob_table=jnp.asarray(A[0][0], dtype=jnp.float32),
-        payoff_index_table=jnp.asarray(model.payoff_index_table, dtype=jnp.int32),
-        agent_payoff_table=jnp.asarray(model.agent_payoff_table, dtype=jnp.float32),
-        payoff_preferences=jnp.asarray(C[1], dtype=jnp.float32),
-        partner_action_preferences=jnp.asarray(C[0], dtype=jnp.float32),
-        terminal_signal=jnp.zeros((cfg.num_partners,), dtype=jnp.float32),
-        switch_round=jnp.int32(model.switch_round),
+        B_type=jnp.asarray(np.eye(2), dtype=jnp.float32),
+        partner_action_prob_table=jnp.asarray(
+            [
+                [[0.999, 0.999], [0.999, 0.999]],
+                [[0.001, 0.001], [0.001, 0.001]],
+            ],
+            dtype=jnp.float32,
+        ),
+        payoff_index_table=jnp.asarray([[0, 1], [1, 0]], dtype=jnp.int32),
+        agent_payoff_table=jnp.zeros((2, 2), dtype=jnp.float32),
+        payoff_preferences=jnp.asarray([0.0, 0.0], dtype=jnp.float32),
+        partner_action_preferences=jnp.asarray([0.0, 0.0], dtype=jnp.float32),
+        terminal_signal=jnp.zeros((1,), dtype=jnp.float32),
+        switch_round=jnp.int32(999),
         mu=jnp.float32(0.0),
-        max_abs_payoff=jnp.float32(max(abs(level) for level in model.payoff_levels)),
-        use_utility_flag=jnp.float32(1.0),
-        use_information_gain_flag=jnp.float32(1.0),
+        max_abs_payoff=jnp.float32(1.0),
     )
     return {
         "policy": jnp.asarray([0, 0, 0], dtype=jnp.int32),
         "observation_sequences": jnp.asarray(generate_observation_sequences(3), dtype=jnp.int32),
         "beliefs": beliefs,
-        "sharp_beliefs": sharp_beliefs,
-        "last_actions": jnp.zeros((cfg.num_partners,), dtype=jnp.int32),
-        "counts": jnp.zeros((cfg.num_partners,), dtype=jnp.int32),
+        "one_hot_beliefs": one_hot_beliefs,
+        "last_actions": jnp.zeros((1,), dtype=jnp.int32),
+        "counts": jnp.zeros((1,), dtype=jnp.int32),
         "common": common,
     }
 
 
-def test_sophisticated_rollout_differs_from_mean_field_for_uniform_belief():
-    inputs = _rollout_inputs()
-    mean_field = _rollout_policy_trust_game_mean_field(
-        inputs["policy"],
-        inputs["beliefs"],
-        inputs["last_actions"],
-        inputs["counts"],
-        **inputs["common"],
+def test_expected_free_energy_is_negative_for_preferred_outcome():
+    A, B, qs, policy, _, _ = _toy_efe_inputs()
+    C = np.empty(2, dtype=object)
+    C[0] = np.zeros(2, dtype=float)
+    C[1] = np.array([1.0, 0.0], dtype=float)
+
+    efe = compute_expected_free_energy(A, B, C, qs, policy, use_utility=True, use_information_gain=False)
+
+    assert efe < 0.0
+
+
+def test_expected_free_energy_is_positive_for_dispreferred_outcome():
+    A, B, qs, policy, _, _ = _toy_efe_inputs()
+    C = np.empty(2, dtype=object)
+    C[0] = np.zeros(2, dtype=float)
+    C[1] = np.array([-1.0, 0.0], dtype=float)
+
+    efe = compute_expected_free_energy(A, B, C, qs, policy, use_utility=True, use_information_gain=False)
+
+    assert efe > 0.0
+
+
+def test_expected_free_energy_with_terminal_value_is_additive():
+    A, B, qs, _, policies, terminal_values = _toy_efe_inputs()
+    C = np.empty(2, dtype=object)
+    C[0] = np.zeros(2, dtype=float)
+    C[1] = np.array([1.0, 0.0], dtype=float)
+
+    base = np.array(
+        [
+            compute_expected_free_energy(A, B, C, qs, policy, use_utility=True, use_information_gain=False)
+            for policy in policies
+        ],
+        dtype=float,
     )
+    adjusted = compute_efe_with_terminal_value(
+        A,
+        B,
+        C,
+        qs,
+        policies,
+        terminal_values,
+        planning_horizon=1,
+        use_utility=True,
+        use_information_gain=False,
+    )
+
+    assert np.allclose(adjusted, base + terminal_values)
+
+
+def test_rollout_epistemic_value_is_positive_for_uncertain_beliefs():
+    inputs = _rollout_inputs()
     sophisticated = _rollout_policy_trust_game_sophisticated(
         inputs["policy"],
         inputs["observation_sequences"],
         inputs["beliefs"],
         inputs["last_actions"],
         inputs["counts"],
+        use_utility_flag=jnp.float32(0.0),
+        use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
     )
-    assert not np.isclose(float(mean_field[0]), float(sophisticated[0]))
+
+    assert float(sophisticated[0]) < 0.0
+    assert -float(sophisticated[0]) > 0.0
 
 
-def test_rollout_gap_shrinks_when_belief_is_sharp():
+def test_rollout_epistemic_value_approaches_zero_for_sharp_beliefs():
     inputs = _rollout_inputs()
-    mean_uniform = _rollout_policy_trust_game_mean_field(
+    sophisticated = _rollout_policy_trust_game_sophisticated(
+        inputs["policy"],
+        inputs["observation_sequences"],
+        inputs["one_hot_beliefs"],
+        inputs["last_actions"],
+        inputs["counts"],
+        use_utility_flag=jnp.float32(0.0),
+        use_information_gain_flag=jnp.float32(1.0),
+        **inputs["common"],
+    )
+
+    assert abs(float(sophisticated[0])) < 1e-6
+
+
+def test_rollout_terminal_value_adjustment_works_correctly():
+    inputs = _rollout_inputs()
+    weighted_common = {
+        **inputs["common"],
+        "terminal_signal": jnp.asarray([0.25], dtype=jnp.float32),
+        "mu": jnp.float32(2.0),
+    }
+    base_total, base_step_costs, _, _ = _rollout_policy_trust_game_mean_field(
         inputs["policy"],
         inputs["beliefs"],
         inputs["last_actions"],
         inputs["counts"],
+        use_utility_flag=jnp.float32(0.0),
+        use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
     )
-    sophisticated_uniform = _rollout_policy_trust_game_sophisticated(
+    weighted_total, _, terminal_value, _ = _rollout_policy_trust_game_mean_field(
         inputs["policy"],
-        inputs["observation_sequences"],
         inputs["beliefs"],
         inputs["last_actions"],
         inputs["counts"],
-        **inputs["common"],
+        use_utility_flag=jnp.float32(0.0),
+        use_information_gain_flag=jnp.float32(1.0),
+        **weighted_common,
     )
-    mean_sharp = _rollout_policy_trust_game_mean_field(
+
+    expected_step_sum = float(jnp.sum(base_step_costs))
+    expected_weight = 1.0 + float(jnp.float32(2.0) * jnp.float32(0.25))
+    assert np.isclose(float(base_total), expected_step_sum, atol=1e-6)
+    assert np.isclose(float(weighted_total), expected_step_sum * expected_weight, atol=1e-6)
+    assert np.isclose(float(terminal_value), expected_step_sum * (expected_weight - 1.0), atol=1e-6)
+
+
+def test_sophisticated_and_mean_field_rollouts_agree_for_sharp_beliefs():
+    inputs = _rollout_inputs()
+    mean_field = _rollout_policy_trust_game_mean_field(
         inputs["policy"],
-        inputs["sharp_beliefs"],
+        inputs["one_hot_beliefs"],
         inputs["last_actions"],
         inputs["counts"],
+        use_utility_flag=jnp.float32(0.0),
+        use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
     )
-    sophisticated_sharp = _rollout_policy_trust_game_sophisticated(
+    sophisticated = _rollout_policy_trust_game_sophisticated(
         inputs["policy"],
         inputs["observation_sequences"],
-        inputs["sharp_beliefs"],
+        inputs["one_hot_beliefs"],
         inputs["last_actions"],
         inputs["counts"],
+        use_utility_flag=jnp.float32(0.0),
+        use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
     )
-    uniform_gap = abs(float(sophisticated_uniform[0]) - float(mean_uniform[0]))
-    sharp_gap = abs(float(sophisticated_sharp[0]) - float(mean_sharp[0]))
-    assert sharp_gap < uniform_gap
+
+    assert np.isclose(float(mean_field[0]), float(sophisticated[0]), atol=1e-6)
 
 
 def test_graded_construct_policies():

@@ -1,11 +1,15 @@
 """Backend-aware benchmarking for trust-game and CvC evaluation.
 
-The trust backend is the canonical production benchmark for affect_aif's
-current active-inference agents. A real local CvC backend exists separately and
-is executed via Python 3.12 so the main project can remain on Python 3.10.
+The trust backend is the canonical supported benchmark surface for
+affect_aif's current active-inference agents.
 
-The legacy scripted gridworld adapter remains available only as a toy backend
-for backward compatibility; it is not treated as a real CoGames integration.
+The local CvC backend exists as an experimental proof-of-concept path. It is
+kept separate so the main project can remain on Python 3.10 while that work
+matures on Python 3.12.
+
+The legacy scripted gridworld adapter remains available only as a backward-
+compatibility shim; it is not treated as a real CoGames integration or a peer
+of the trust benchmark.
 """
 
 from __future__ import annotations

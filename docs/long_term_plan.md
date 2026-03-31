@@ -2,177 +2,127 @@
 
 ## Purpose
 
-This document tracks the project roadmap from initial empirical validation through theory tightening, formal derivation, and eventual extensions. The core finding is that per-partner metacognitive precision tracking provides orthogonal augmentation to planning depth: under sophisticated inference, increasing the planning horizon from 2 to 8 does not change results, but adding affect improves social decision quality through a channel that planning depth alone cannot access.
+This document tracks the project roadmap for the affect_aif system: per-partner metacognitive precision tracking as orthogonal augmentation to active inference planning in multi-agent social inference. The first MVP (Phases 1-7, paper draft) is complete. The current focus is tightening the architecture, addressing departures from standard active inference, and re-running experiments before the next paper.
 
-## Completed Phases
+## MVP Summary (Complete)
 
-### Phase 1: Primary Results (complete)
+The first major iteration established the core finding and produced a paper draft. Key results:
 
-Ran 100-seed experiments across default, betrayal-stress, and variant-D conditions. Established the main result: affect augments social inference orthogonally to planning depth. Four of five original hypotheses supported. H3 (affect beats reward-averaging on Exploiter detection) confirmed as a null across all conditions, including correlated partners at correlation strength 0.9. This null is now interpreted as a boundary condition of the trust-game family, not a model failure.
+- **Core finding:** Per-partner affective precision tracking provides orthogonal augmentation to planning depth. Under sophisticated inference, planning horizon τ=2 through τ=8 produces identical non-affective performance, yet adding affect yields ~+46 payoff points at any depth.
+- **Hypothesis scorecard:** H1 (affect > baselines) strongly supported (d=0.64 default, d=1.30 betrayal). H2 (lesion dissociation / Damasio pattern) strongly supported. H3 (precision > reward averaging) context-dependent — supported only when prediction error and reward diverge (binary betrayal). H4 (post-switch robustness) supported. H5 (partner selection) supported.
+- **Cross-game generalization:** Augmentation holds across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions.
+- **Clinical sensitivity:** Requires graded/betrayal environments (binary games saturate softmax). Graded betrayal produces 80.5-point between-clinical spread. Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
+- **Bayesian model comparison:** C2 decisively preferred under betrayal stress (log10 BF = 3.0 vs C1). Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
+- **Variational beta:** Discrete Bayesian beta formulation behaviorally equivalent to continuous EMA in stable environments (d=0.001). Moderate divergence under betrayal (d=0.41).
+- **CvC benchmark:** Early WIP / proof-of-concept. Navigation works (BFS + wall detection, 84-91% move success). Reward results minimal. Not publication-ready.
+- **Paper:** Draft complete (theory gaps addressed, results integrated, figures included). Architecture needs justification of departures from standard AIF before submission.
 
-### Phase 2: Exploiter Deep-Dive (complete)
+Detailed phase-by-phase history is in git commits and prior versions of this document.
 
-Used the betrayal-stress setup as the primary mechanism diagnostic. Established strongest H1/H2/H4 evidence. Confirmed that per-partner precision tracking responds to cooperation-to-defection transitions but does not separate from reward-averaging (Condition 5) on detection latency. This result motivated the reframing from "compensation" to "augmentation."
+---
 
-### Phase 3: Theory Tightening (complete)
+## Current Direction: Architectural Tightening
 
-**Goal:** Revise the theoretical framing and paper narrative around the confirmed empirical pattern.
+Prompted by external review (Andrew Pashea, 2026-03-30) and internal three-agent codebase audit. The goal is to align the implementation with standard active inference conventions, fix known issues, and re-run experiments on a cleaner foundation before the next paper.
 
-**Key tasks:**
+### Open Decisions
 
-1. ~~Reframe the contribution as orthogonal augmentation.~~ Done. See `docs/theory.md` S2.1, S4.5, S4.6.
-2. ~~Present the beta update rule as extending Hesp et al.~~ Done. See `docs/theory.md` S3.4.
-3. ~~Expand the condition comparison into a clear 2x2 (affect x planning-depth) table.~~ Done. See `docs/theory.md` S4.11.
-4. ~~Present H3 as a confirmed boundary condition.~~ Done. See `docs/theory.md` S4.7. H3 is now understood as context-dependent: null in default, supported in binary betrayal, reversed in graded game.
-5. ~~Document the variant-D result.~~ Done.
-6. ~~Add empirical support for the terminal value approximation (correlation between C2 beta/terminal signal and actual value-to-go from C1).~~ Done. Graded game analysis shows beta does NOT correlate with value-to-go (r ~ 0), which is *predicted* by the theory: beta tracks precision, not value. This validates the orthogonal augmentation claim — beta contributes genuinely different information from reward history. See `docs/theory.md` S4.14.
-7. *(Added)* ~~Integrate graded trust game findings into theoretical framework.~~ Done. See `docs/theory.md` S4.11-4.13.
-8. *(Added)* ~~Explain C5 > C2 reversal in graded game and its theoretical implications.~~ Done. See `docs/theory.md` S4.12.
+These require the user's thinking before implementation can proceed.
 
-**Known issues addressed in text:**
+#### Decision 1: The B matrix question (most important)
 
-- Learning rate modulation positive feedback loop: documented in `docs/theory.md` S3.7.
-- "Interoceptive" framing replaced with per-partner metacognitive precision tracking throughout.
+The partner-type B matrix is action-independent: cooperate/defect doesn't affect type transitions. This is domain-correct (your action genuinely doesn't change what type your partner is), but it has consequences:
 
-**Phase 3 status: COMPLETE.** All tasks done. The theory document covers: orthogonal augmentation framing, Hesp et al. grounding, 2x2 orthogonality table, H3 boundary condition, graded game integration (S4.11-4.15), C5 > C2 explanation (S4.12), clinical sensitivity restoration (S4.13), beta-not-value validation (S4.14), and cross-game synthesis (S4.15).
+- The agent can't model at the B-matrix level how sustained cooperation stabilizes a reciprocator. Reciprocator dynamics are handled entirely through the A matrix (likelihood conditions on last_action).
+- Planning depth may be structurally uninformative because looking further ahead doesn't reveal new state transitions — the B matrix just drifts with p_switch regardless of what the agent does.
+- **The flat depth curve might be a structural consequence of this design choice, not a finding about the domain.**
 
-### Phase 4: Variational Beta Extension (complete)
+If you added an action-dependent B (e.g., cooperating increases probability that a reciprocator stays reciprocating), deeper planning could start to matter. That would reframe the "orthogonal augmentation" claim: affect might still be orthogonal, but depth might no longer be irrelevant.
 
-**Goal:** Formalize beta as a discrete hidden state within the generative model, extending the current continuous update (grounded in Hesp et al.'s variational precision dynamics) to a full Bayesian inference scheme.
+**Options:**
+- (a) Keep current design, explicitly justify in paper — "in domains where actions don't affect hidden state transitions, affect provides orthogonal value" (defensible, narrows claim)
+- (b) Add action-dependent B for reciprocator dynamics, re-run experiments — tests whether depth matters when B is action-dependent (high effort, could strengthen or weaken the story)
+- (c) Test both and compare — run a small experiment with action-dependent B to see if depth separates, then decide
 
-**Scope:**
+#### Decision 2: pymdp alignment path
 
-- Discretize beta into a set of hidden-state levels with likelihood P(epsilon|beta) and transition dynamics P(beta_t|beta_{t-1}).
-- Show formal correspondence between the current EMA update and the discrete hidden-state posterior.
-- Quantify any behavioral divergence between the continuous and discrete formulations in the trust-game setting.
+Andrew offered to help formalize in pymdp. Options:
+- (a) **Notation only** — keep JAX code, make docs/paper match pymdp conventions. Fastest but reviewers may push back on custom implementation.
+- (b) **pymdp wrapper** — use pymdp for generative model definition, keep custom JAX planning. Middle ground.
+- (c) **Full pymdp** — re-implement in pymdp 1.0 with Andrew's help. Most credible for AIF community, but significant effort and may require extending pymdp for the affect mechanism.
+- (d) **Keep JAX, document departures** — add explicit section to theory.md justifying each departure.
 
-**Phase 4 status: COMPLETE.** Discrete Bayesian beta formulation implemented and validated. Behaviorally equivalent to continuous EMA in stable environments (d = 0.001). Moderate divergence under betrayal (d = 0.41) due to transition matrix persistence.
+#### Decision 3: Multiplicative vs additive precision weighting
 
-### Phase 5: Clinical Sensitivity Analysis (complete)
+Current: `G(π) * (1 + μβ)` — multiplicative. Standard AIF would add a terminal value: `G(π) + μβ`. The multiplicative form means high-beta partners amplify the *entire* EFE, not just add a fixed bias. This is theoretically motivated (precision should scale the whole estimate, not add to it) but non-standard. Options:
+- (a) Keep multiplicative, add theoretical justification
+- (b) Test additive form and compare
+- (c) Implement both, let experiments decide
 
-**Goal:** Treat clinical phenotypes (vmPFC lesion, alexithymia, borderline, depression) as sensitivity analysis over model parameters, with clinical interpretation.
+#### Decision 4: AIF partners vs rule-based partners
 
-**Prior attempts (failed):**
+Currently all partners are rule-based (cooperator, reciprocator, exploiter, random). Using AIF agents as partners would be a fundamental change — genuine multi-agent inference rather than learning about scripted opponents. This is a future direction, not a current priority, but worth discussing with Andrew as a subsequent phase.
 
-- Binary PD: softmax saturation (EFE gap ~10.83) makes clinical parameter perturbations behaviorally inert (<0.5% effect)
-- Graded default: improved sensitivity (d>2.1 vs C4) but between-clinical differentiation minimal (~0.03 point spread)
-- Binary Stag Hunt: same saturation as binary PD (C9 and C11 identical to C2)
+---
 
-**Breakthrough: graded betrayal environment.** Combining the graded game's ambiguous EFE (q_pi_entropy ~5.8) with betrayal stress (cooperator->exploiter switch) produced massive between-clinical differentiation:
+### Improvement Areas
 
-| Variant | vs C2 diff | Cohen's d | p |
-|---|---|---|---|
-| C9 alexithymia (alpha=0.1) | +29.8 | +0.80 | <0.0001 |
-| C10 borderline (alpha=12, lambda=0.5) | -50.7 | -1.14 | <0.0001 |
-| C11 depression (beta0=0.2) | +3.1 | +0.08 | 0.562 |
+Work that can proceed in parallel, organized by category rather than sequential phases.
 
-Between-clinical spread: 80.5 points (2700x improvement over graded default).
+#### Area 1: Code Correctness Fixes
 
-**Key findings:**
-1. Alexithymia is paradoxically protective under acute volatility (blunted response prevents costly overreaction)
-2. Borderline shows progressive deterioration (noisy precision updates compound over time, d=-0.83 in late game)
-3. Depression is a self-correcting perturbation (pessimistic prior corrected by evidence within ~30 rounds)
-4. The alpha_charge/lambda_smooth regime has a "sweet spot" — clinical phenotypes represent systematic deviations
+Items that don't require design decisions — just fixing known issues.
 
-**Phase 5 status: COMPLETE.** Graded betrayal environment validated as the clinical test bed. Full results in `docs/results_tracking.md` Phase 5 section.
+1. **Fix mean-field epistemic term** — `_rollout_policy_trust_game_mean_field()` in `core/rollout.py` line 136 uses channel ambiguity (`-expected_ambiguity`) instead of true information gain. Replace with proper expected entropy reduction. All published results use sophisticated inference (correct), so existing findings are unaffected.
 
-### Phase 6: Bayesian Model Comparison (complete)
+2. **Single-factor documentation** — The model defines two hidden state factors (partner type + interaction context) but only infers over partner type. Context is directly observed, so this is correct — but it should be documented as a single-factor POMDP with partner-indexed beliefs, not a two-factor system requiring mean-field coordinate ascent.
 
-**Goal:** Reformulate the current condition comparisons as proper Bayesian model comparison.
+#### Area 2: Test Coverage
 
-**Scope:**
+3. **EFE unit tests** — Direct tests for EFE computation: epistemic value is positive for uncertain beliefs and approaches zero for sharp beliefs; pragmatic value aligns with C matrix preferences; terminal value adjustment works correctly; sophisticated and mean-field rollouts agree for sharp beliefs.
 
-- Compute marginal likelihoods for each model variant (with/without affect, different planning depths).
-- Use random-effects Bayesian model selection (Stephan et al., 2009) with protected exceedance probabilities.
-- Complement the current frequentist hypothesis tests with Bayes factors where appropriate.
+4. **Affective state convergence tests** — Beta converges toward 1.0 under consistent correct predictions, toward 0.0 under consistent surprise. Clinical parameter regimes produce different trajectories. Extreme surprise values don't cause numerical issues.
 
-**Implementation (complete):**
+5. **Generative model likelihood tests** — Verify A matrix produces correct observation probabilities for each partner type under each action.
 
-- Per-round log-evidence computation added to all agent types via `_compute_round_log_evidence()` in `BaseAgent`
-- Log-evidence logged per round and accumulated per episode in experiment CSV output
-- `affect_aif/analysis/model_comparison.py` implements: log-evidence summaries, pairwise Bayes factors (Kass & Raftery, 1995), random-effects BMS with protected exceedance (Rigoux et al., 2014)
-- `scripts/run_model_comparison.py` provides CLI for model comparison analysis
-- 8 unit tests covering all components, full test suite passes
-- Theory documented in `docs/theory.md` S4.16
+#### Area 3: Documentation & Theory
 
-**Confirmation results (50 seeds):**
+6. **Document architectural departures** — Add a section to theory.md (e.g., §3.8 "Relationship to Standard Active Inference") explicitly addressing: why single-factor inference is sufficient, why B is action-independent, why precision weighting is multiplicative, why one-step Bayes IS VFE minimization for categorical distributions.
 
-- Default: C2/C5 substantially preferred over C1/C3/C4 (log10 BF ~ 0.7-0.9). RFX-BMS: C5 wins (exceedance 1.000), C2 second (frequency 0.177).
-- Betrayal: C2 **decisively** preferred — log10 BF = 3.00 vs C1, 2.70 vs C5, 2.51 vs C3. RFX-BMS: C2 wins (exceedance 0.998).
-- Key finding: precision tracking is the best *predictive* model under volatility, not just the best payoff achiever. C5 wins on payoff in default but C2 wins on model quality under betrayal.
+7. **Soften depth claims pending Decision 1** — Current paper says depth is "irrelevant." If the flat curve is a structural artifact of action-independent B, the claim needs hedging.
 
-**Phase 6 status: COMPLETE.**
+8. **Narrow H3 framing** — Reframe precision-vs-reward-averaging as context-dependent: precision tracking benefits arise specifically when prediction error and reward dissociate (binary betrayal), not universally.
 
-### Phase 7: Richer Task Environments (complete)
+#### Area 4: Benchmark & CvC
 
-**Goal:** Test whether the orthogonal augmentation result generalizes beyond the trust game.
+9. **Flag CvC as early WIP** — Add clear status documentation to benchmark module. Results are proof-of-concept, not publication-ready.
 
-**Approach:** Tested three 2x2 symmetric games (Prisoner's Dilemma, Stag Hunt, Chicken) with zero code changes — only payoff matrix differs. Each game creates fundamentally different strategic dynamics.
+10. **CvC navigation improvements** — Current BFS heuristic achieves 84-91% move success. Full scoring loop (gear → ore → hearts → aligned junctions) is incomplete. Deprioritized until core architecture is settled.
 
-**Key results (50 seeds each):**
+#### Area 5: Experimental Re-runs (after architecture decisions)
 
-- **Augmentation generalizes under volatility.** H1 (d > 1.0) holds across all three games in betrayal conditions. Not trust-game-specific.
-- **Augmentation is game-dependent in stable conditions.** Strong in PD/Stag Hunt (d ~ 0.5-0.6), negligible in Chicken (d = 0.05).
-- **Stag Hunt is the precision tracking game.** C2 wins RFX-BMS in both default (exceedance 0.992) and betrayal (0.954). The severe miscoordination penalty makes prediction accuracy critical.
-- **Chicken is the reward averaging game.** C5 wins RFX-BMS under betrayal (exceedance 0.931). The reward gradient is more directly informative in anti-coordination settings.
+11. **Re-run core experiments** after any architecture changes from Decisions 1-3. Use same configs but on updated codebase. Compare against MVP results to verify findings hold.
 
-**Phase 7 status: COMPLETE.** Three games tested, cross-game comparison documented. See `docs/results_tracking.md` S Phase 7 and `docs/theory.md` S4.17.
+12. **Test action-dependent B** (if Decision 1 = option b or c) — Small experiment (10 seeds, 100 rounds) to see if depth separates when B is action-dependent.
 
-## Completed: Four-Track Plan for Paper Submission
+13. **Test additive precision weighting** (if Decision 3 = option b or c) — Compare multiplicative vs additive forms on default + betrayal configs.
 
-All four tracks are complete. Sessions 10-16 addressed theory gaps, CvC benchmark, paper preparation, review findings, and final polish.
+---
 
-### Track 1: Paper Theory Gaps — COMPLETE
+## Future Directions
 
-All five gaps addressed and integrated into `docs/paper/main.tex`:
+These are post-tightening priorities, roughly ordered:
 
-1. **Inside-out literature positioning (1.1):** Triple dissociation (outside-in empathy / cognitive ToM / inside-out precision monitoring) in Introduction.
-2. **Precision modulation pathway (1.2):** Tested in graded betrayal (50 seeds x 120 rounds). Entropy reduction 0.44 nats, payoff d=0.21 (directionally positive, non-significant). Results in paper Section 4.8.
-3. **vmPFC neuro-architectural argument (1.3):** Bancee et al. (2026) + Baram et al. (2026) + Damasio grounding in Discussion Section 5.3.
-4. **BMR trigger framing (1.4):** Behrens (2025) + Mishchanchuk (2024) integrated into Future Work Section 6.
-5. **Between-clinical framing (1.5):** Qualitative story and initial-condition vs dynamical-parameter distinction in Results Section 4.9 and Discussion Section 5.3.
-
-### Track 2: CoGames/CvC Benchmark — COMPLETE
-
-Navigation solved via BFS + aoe_mask wall detection (84-91% move success). ScoringLoopPolicy: 0.072 reward, 2.5 junctions. AffectCvCPolicy: 0.071 reward, 3x fewer stuck steps. StarterPolicy: 0.000 (baseline). Full benchmark: 3 policies x 10 seeds on machina_1. Results in `results/benchmark_cvc_comparison/` and paper Section 4.10.
-
-### Track 3: Paper Preparation — COMPLETE
-
-Docs consistency check done. CvC results in paper. LaTeX polish complete (sessions 15-16): P1-P10 paper issues addressed, C1-C3 code/consistency issues fixed, D1 doc issue fixed. Session 16 fixed abstract P7 phrasing, unified clinical table headers (sign convention consistent: positive d = phenotype outperforms reference), merged to master, and deleted all session branches.
-
-### Track 4: Research-Brain Improvements — LOW priority, deferred
-
-Nine identified issues with the agentic literature sweep system. Not blocking the paper. User will handle separately.
-
-## Planned Phases
-
-### Phase 8: Human Data
-
-**Goal:** Validate the model against human behavioral data.
-
-**Scope:**
-
-- Collect or obtain trust-game data from healthy participants and vmPFC-lesioned patients.
-- Fit the model to individual participant trajectories.
-- Test whether the affect-on/affect-off model distinction predicts the patient/control behavioral split.
-
-**Entry condition:** Paper draft stable. User approval required.
-
-## Remaining Items
-
-Three minor items remain from the review process:
-
-1. **C4 (navigation unit tests):** Unit tests for CvC navigation/pathfinding code. Low priority — does not block submission.
-2. **D2 (Track 1.2 CSVs):** Archive the precision modulation experiment CSVs in results/. Low priority — data is already in the paper.
-3. **Phase 8 (human data):** Validate the model against human behavioral data from trust games. Requires user approval before starting.
+1. **pymdp alignment** — depending on Decision 2, either notation alignment or re-implementation
+2. **AIF partners** — replace rule-based partners with active inference agents for genuine multi-agent inference
+3. **Human data validation** — fit model to human trust-game data from healthy participants and vmPFC-lesioned patients
+4. **CoGames/CvC** — develop AIF-based navigation policy for full benchmark
+5. **Richer environments** — partial observability, larger action spaces, multi-step belief cascades
 
 ## Operational Summary
 
-- **Completed:** Phases 1-7 (primary results, exploiter deep-dive, theory tightening, variational beta, clinical sensitivity, Bayesian model comparison, cross-game generalization).
-- **Completed:** Tracks 1-4 (paper theory gaps, CvC benchmark, paper preparation, research-brain improvements deferred).
-- **Completed:** Paper polish sessions 15-16 (P1-P10, C1-C3, D1 all addressed; abstract fixed; clinical table headers unified; branches merged and deleted).
-- **Phase 5 key finding:** Graded betrayal environment produces massive between-clinical differentiation (80.5 point spread). Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
-- **Phase 6 key finding:** C2 is the decisively best predictive model under betrayal stress (log10 BF = 3.0 vs C1, 2.7 vs C5).
-- **Phase 7 key finding:** Augmentation generalizes across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **Paper status:** Submission-ready. All sections written, all results integrated, figures included, bibliography complete.
-- **Remaining:** C4 (navigation unit tests), D2 (Track 1.2 CSVs), Phase 8 (human data — requires user approval).
+- **MVP:** Complete (Phases 1-7, paper draft, CvC proof-of-concept).
+- **Current focus:** Architectural tightening — fix known issues, address standard-AIF departures, make design decisions.
+- **Blocking on user:** Decisions 1-4 above. Code fixes (Area 1-2) can proceed independently.
+- **Paper status:** Results solid. Architecture needs justification/revision before submission to AIF venue.
+- **Benchmark:** Early WIP. Not publication-ready.

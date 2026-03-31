@@ -14,10 +14,15 @@ import pandas as pd
 
 from affect_aif.analysis.visualization import build_run_gifs
 from affect_aif.cli.common import slugify_name
-from affect_aif.experiment.calibration import build_calibration_summary, serialize_config
+from affect_aif.experiment.calibration import (
+    build_calibration_summary,
+    build_sensitivity_specs,
+    build_zero_calibration_summary,
+    resolve_calibration_episodes,
+    serialize_config,
+)
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.constants import PRIMARY_CONDITIONS_REQUIRING_MU, SENSITIVITY_CONDITIONS
-from affect_aif.experiment.runner import ExperimentRunner
 from affect_aif.experiment.tasks import (
     run_calibration_episode_task,
     run_primary_replication_task,
@@ -111,9 +116,11 @@ class BatchExperimentRunner:
             config.verbose = False
             config.gif_after_run = False
             config.gif_output_dir = None
-            probe = ExperimentRunner(config)
-            needs_calibration = probe.needs_mu_calibration() and config.deep_horizon > config.shallow_horizon
-            calibration_episodes = probe._resolve_calibration_episodes(enforce_minimum=True) if needs_calibration else 0
+            needs_calibration = (
+                any(condition in PRIMARY_CONDITIONS_REQUIRING_MU for condition in config.conditions)
+                and config.deep_horizon > config.shallow_horizon
+            )
+            calibration_episodes = resolve_calibration_episodes(config, enforce_minimum=True) if needs_calibration else 0
             states.append(
                 ConfigBatchState(
                     config_path=config_path,
@@ -134,6 +141,7 @@ class BatchExperimentRunner:
         future_map: dict[Any, tuple[str, ConfigBatchState, dict[str, Any]]],
     ):
         calibration_summary = state.calibration_summary
+        sensitivity_conditions = [condition for condition in state.config.conditions if condition in SENSITIVITY_CONDITIONS]
         for condition in state.config.conditions:
             for replication in range(state.config.num_replications):
                 seed = state.config.random_seed + replication
@@ -155,11 +163,7 @@ class BatchExperimentRunner:
                     {"condition": condition, "replication": replication, "seed": seed},
                 )
         if state.config.run_sensitivity and calibration_summary is not None:
-            sensitivity_conditions = [
-                condition for condition in state.config.conditions if condition in SENSITIVITY_CONDITIONS
-            ]
-            probe = ExperimentRunner(state.config)
-            for parameter_name, parameter_value in probe._sensitivity_specs():
+            for parameter_name, parameter_value in build_sensitivity_specs(state.config):
                 for condition in sensitivity_conditions:
                     for replication in range(state.config.num_replications):
                         seed = state.config.random_seed + replication
@@ -241,7 +245,7 @@ class BatchExperimentRunner:
                         future_map[future] = ("calibration", state, {"episode_idx": episode_idx, "seed": seed})
                 else:
                     if any(condition in PRIMARY_CONDITIONS_REQUIRING_MU for condition in state.config.conditions):
-                        state.calibration_summary = ExperimentRunner(state.config).build_zero_calibration_summary()
+                        state.calibration_summary = build_zero_calibration_summary(state.config)
                     else:
                         state.calibration_summary = None
                     self._schedule_config_work(executor, state, future_map)

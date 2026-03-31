@@ -58,7 +58,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 - "augmentation" NOT "compensation" or "depth replacement"
 - beta update rule is variationally grounded via Hesp et al. — NOT a "heuristic" or "engineering approximation"
 - Phase numbers: 3=theory tightening, 4=variational beta, 5=clinical sensitivity, 6=model comparison, 7=richer tasks, 8=human data
-- Current phase: Phases 3-7 COMPLETE; paper preparation and CvC benchmark in progress
+- Current phase: MVP complete (Phases 1-7, paper draft). Now in architectural tightening — addressing standard-AIF departures before next paper. See `docs/long_term_plan.md` for open decisions.
 
 ---
 

@@ -37,7 +37,7 @@
 
 - The trust-game planner now uses observation-branching sophisticated inference for **all** conditions and horizons.
 - Implementation-wise, the supported control surface is split across `affect_aif/core/policies.py`, `affect_aif/core/efe.py`, and `affect_aif/core/rollout.py`, with `affect_aif/core/control.py` kept as a compatibility facade. The rollout path precomputes all binary observation sequences of length `planning_horizon - 1`, evaluates each `(policy, observation-sequence)` path, updates the acted-on partner belief after each hypothetical observation by Bayes rule, and then sums the pathwise EFE under the path probabilities.
-- The old mean-field rollout is retained only as an internal comparison path for tests; it is no longer the default decision rule.
+- The old mean-field rollout is retained only as an internal comparison path for tests; it is no longer the default decision rule. That retained path now uses observation-weighted expected information gain on non-terminal steps rather than negative ambiguity alone.
 - This keeps the planning-method axis controlled across Conditions 1-8, so horizon comparisons are not confounded with different rollout approximations.
 
 ## Trust vs Affect

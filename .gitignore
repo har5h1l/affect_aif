@@ -34,6 +34,11 @@ results/*
 outputs/
 artifacts/
 
+# LaTeX build artifacts
+docs/paper/*.aux
+docs/paper/*.log
+docs/paper/*.out
+
 # Claude Code local settings (not shared)
 .claude/settings.local.json
 

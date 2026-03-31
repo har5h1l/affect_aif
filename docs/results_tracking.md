@@ -1,6 +1,19 @@
 # Results Tracking
 
-This document tracks the current empirical status of the project and the next recommended run. Update it when the user asks for a results refresh after new experiments finish.
+This document tracks the empirical status of the project. Update it when new experiments finish.
+
+## Architectural Review Note (2026-03-30)
+
+A three-agent codebase/results/architecture review identified issues that may affect interpretation of existing results:
+
+1. **Flat depth curve may be structural:** The action-independent B matrix means deeper planning can't discover new state transitions. The τ=2 through τ=8 equivalence may be a consequence of POMDP design, not a domain finding. Pending user decision on whether to test action-dependent B.
+2. **Softmax saturation in binary games:** EFE gap ~10.83 makes precision modulation inert. Clinical results require graded/betrayal environments.
+3. **H3 is context-dependent:** Precision > reward averaging only when prediction error and reward dissociate (binary betrayal). Not a universal mechanism.
+4. **Mean-field epistemic term incorrect:** Channel ambiguity used instead of true information gain. Does not affect published results (all use sophisticated inference).
+
+Core findings (H1, H2, H4) are robust. See `docs/long_term_plan.md` for decisions needed before next paper.
+
+---
 
 ## Current Status
 
@@ -170,7 +183,7 @@ Current read:
 - Stag Hunt betrayal produces the first qualitative clinical differentiation (borderline impaired, alexithymia protected)
 - Beta does not approximate value-to-go, confirming orthogonality
 - Cross-game generalization confirms augmentation under volatility in all games tested
-- Phase 8 (human data) is the next step and requires user decision
+- Architectural tightening (see `docs/long_term_plan.md`) is the next step, with four open decisions for the user
 
 ## Execution Record
 

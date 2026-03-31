@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import warnings
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -114,6 +115,17 @@ def main():
                 "pool": args.observatory_pool,
             }
         config = BenchmarkConfig.from_dict(config_payload)
+
+    experimental_backends = [backend for backend in config.backends if backend in {"cvc_local", "toy_gridworld"}]
+    if experimental_backends:
+        warnings.warn(
+            "Experimental benchmark backend(s) selected: "
+            f"{', '.join(experimental_backends)}. "
+            "Trust is the canonical supported backend; CvC and toy_gridworld "
+            "are WIP/compatibility paths.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
 
     print(f"Backends: {config.backends}")
     print(f"Agents: {[agent.name for agent in config.agents]}")

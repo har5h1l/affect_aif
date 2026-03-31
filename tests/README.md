@@ -1,8 +1,10 @@
 # Test Suite
 
-Tests in this directory cover the supported package and CLI surface.
+## Responsibility
 
-The default verification flow is:
+Tests in this directory cover the supported package, CLI, benchmark, and compatibility surface.
+
+## Verification Flow
 
 ```bash
 ruff check .
@@ -11,4 +13,7 @@ python -m pytest
 python -m mypy
 ```
 
-Archived prototypes and exploratory scripts are intentionally excluded from the default test surface.
+## Internal / Compatibility Notes
+
+- The suite includes explicit checks for the supported import surface and legacy compatibility shims.
+- Archived prototypes and exploratory scripts are intentionally excluded from the default test surface.

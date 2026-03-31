@@ -109,8 +109,10 @@ def _rollout_policy_trust_game_mean_field(
     use_information_gain_flag,
     num_social_actions=2,
 ):
+    horizon = policy.shape[0]
+
     def scan_step(carry, raw_action):
-        beliefs_t, last_actions_t, counts_t = carry
+        beliefs_t, last_actions_t, counts_t, t = carry
         partner_idx, social_action = _decode_action_jax(
             raw_action, active_partner, assignment_mode_code, num_social_actions
         )
@@ -133,7 +135,12 @@ def _rollout_policy_trust_game_mean_field(
         pragmatic = -jnp.sum(partner_action_probs * partner_action_preferences) - jnp.sum(
             payoff_dist * payoff_preferences
         )
-        epistemic = -expected_ambiguity
+        has_observation = t < (horizon - 1)
+        epistemic = jnp.where(
+            has_observation,
+            expected_ambiguity - _entropy_jax(partner_action_probs),
+            0.0,
+        )
         step_cost = use_utility_flag * pragmatic + use_information_gain_flag * epistemic
 
         beliefs_tp1 = beliefs_t.at[partner_idx].set(B_type @ belief)
@@ -141,11 +148,11 @@ def _rollout_policy_trust_game_mean_field(
         last_actions_tp1 = last_actions_t.at[partner_idx].set(binary_action)
         counts_tp1 = counts_t.at[partner_idx].set(count + 1)
         aux = (step_cost, partner_idx, social_action)
-        return (beliefs_tp1, last_actions_tp1, counts_tp1), aux
+        return (beliefs_tp1, last_actions_tp1, counts_tp1, t + 1), aux
 
-    (beliefs_f, last_actions_f, counts_f), (step_costs, partner_indices, social_actions) = jax.lax.scan(
+    (beliefs_f, last_actions_f, counts_f, _), (step_costs, partner_indices, social_actions) = jax.lax.scan(
         scan_step,
-        (beliefs, last_actions, counts),
+        (beliefs, last_actions, counts, jnp.int32(0)),
         policy,
     )
 

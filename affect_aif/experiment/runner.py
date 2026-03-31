@@ -16,40 +16,26 @@ from affect_aif.agent.reward_avg_agent import RewardAvgAgent
 from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
 from affect_aif.environment.trust_game import TrustGameEnv
 from affect_aif.experiment.conditions import get_condition_name
+from affect_aif.experiment.calibration import (
+    MIN_FULL_RUN_CALIBRATION_EPISODES as CALIBRATION_MIN_FULL_RUN_EPISODES,
+    build_calibration_summary,
+    build_sensitivity_specs,
+    build_zero_calibration_summary,
+    deserialize_config,
+    resolve_calibration_episodes,
+)
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.logger import MetricLogger
 from affect_aif.experiment.progress import ProgressReporter, create_progress_reporter
 from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
 
-
-PRIMARY_CONDITIONS_REQUIRING_MU = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-SENSITIVITY_CONDITIONS = {2, 3, 5, 8}
-
-
-def _build_calibration_summary(config: ExperimentConfig, efe_values: list[float], calibration_episodes: int) -> dict[str, float | int]:
-    mean_abs_efe = float(np.nanmean(np.asarray(efe_values, dtype=float))) if efe_values else 0.0
-    horizon_gap = max(1, config.deep_horizon - config.shallow_horizon)
-    derived_mu = float(mean_abs_efe * horizon_gap)
-    return {
-        "requested_calibration_episodes": int(config.calibration_episodes),
-        "calibration_episodes": int(calibration_episodes),
-        "mean_abs_efe_per_step": mean_abs_efe,
-        "derived_mu": derived_mu,
-    }
-
-
-def _serialize_config(config: ExperimentConfig) -> dict[str, Any]:
-    return asdict(config)
-
-
-def _deserialize_config(payload: dict[str, Any]) -> ExperimentConfig:
-    return ExperimentConfig.from_dict(payload)
+from affect_aif.experiment.constants import PRIMARY_CONDITIONS_REQUIRING_MU, SENSITIVITY_CONDITIONS
 
 
 class ExperimentRunner:
     """Run all conditions, including a principled μ calibration phase."""
 
-    MIN_FULL_RUN_CALIBRATION_EPISODES = 10
+    MIN_FULL_RUN_CALIBRATION_EPISODES = CALIBRATION_MIN_FULL_RUN_EPISODES
 
     def __init__(self, config: ExperimentConfig):
         self.config = config
@@ -177,21 +163,13 @@ class ExperimentRunner:
         raise ValueError(f"Unknown condition '{condition}'.")
 
     def _resolve_calibration_episodes(self, enforce_minimum: bool) -> int:
-        requested = int(self.config.calibration_episodes)
-        if enforce_minimum:
-            return max(requested, self.MIN_FULL_RUN_CALIBRATION_EPISODES)
-        return requested
+        return resolve_calibration_episodes(self.config, enforce_minimum=enforce_minimum)
 
     def needs_mu_calibration(self) -> bool:
         return any(condition in PRIMARY_CONDITIONS_REQUIRING_MU for condition in self.config.conditions)
 
     def build_zero_calibration_summary(self) -> dict[str, float | int]:
-        return {
-            "requested_calibration_episodes": int(self.config.calibration_episodes),
-            "calibration_episodes": 0,
-            "mean_abs_efe_per_step": 0.0,
-            "derived_mu": 0.0,
-        }
+        return build_zero_calibration_summary(self.config)
 
     def _annotate_primary_records(
         self,
@@ -343,7 +321,7 @@ class ExperimentRunner:
         self.progress.emit(
             "calibration_episode_start",
             episode_idx=episode_idx,
-            episode_count=self._resolve_calibration_episodes(enforce_minimum=False),
+            episode_count=resolve_calibration_episodes(self.config, enforce_minimum=False),
             seed=seed,
         )
         model = self._create_model()
@@ -354,7 +332,7 @@ class ExperimentRunner:
         self.progress.emit(
             "calibration_episode_end",
             episode_idx=episode_idx,
-            episode_count=self._resolve_calibration_episodes(enforce_minimum=False),
+            episode_count=resolve_calibration_episodes(self.config, enforce_minimum=False),
             seed=seed,
             mean_abs_step_efe=mean_abs_step_efe,
         )
@@ -367,14 +345,14 @@ class ExperimentRunner:
     def calibrate_mu(self, enforce_minimum: bool = False) -> float:
         """Derive μ from deep-planner EFE mass instead of tuning it."""
 
-        calibration_episodes = self._resolve_calibration_episodes(enforce_minimum=enforce_minimum)
+        calibration_episodes = resolve_calibration_episodes(self.config, enforce_minimum=enforce_minimum)
         efe_values: list[float] = []
         for offset in range(calibration_episodes):
             seed = self.config.random_seed + 10_000 + offset
             episode_summary = self.run_calibration_episode(episode_idx=offset, seed=seed)
             efe_values.append(float(episode_summary["mean_abs_step_efe"]))
 
-        self.calibration_summary = _build_calibration_summary(self.config, efe_values, calibration_episodes)
+        self.calibration_summary = build_calibration_summary(self.config, efe_values, calibration_episodes)
         self.config.mu = float(self.calibration_summary["derived_mu"])
         return float(self.calibration_summary["derived_mu"])
 
@@ -498,16 +476,7 @@ class ExperimentRunner:
         return self.run_parameter_sensitivity()
 
     def _sensitivity_specs(self) -> list[tuple[str, float]]:
-        sweep_specs = []
-        for factor in self.config.sensitivity_factors["mu"]:
-            sweep_specs.append(("mu", float(factor)))
-        for value in self.config.sensitivity_factors["lambda_smooth"]:
-            sweep_specs.append(("lambda_smooth", float(value)))
-        for value in self.config.sensitivity_factors["alpha_charge"]:
-            sweep_specs.append(("alpha_charge", float(value)))
-        for value in self.config.sensitivity_factors["sigma_0_sq"]:
-            sweep_specs.append(("sigma_0_sq", float(value)))
-        return sweep_specs
+        return build_sensitivity_specs(self.config)
 
     def _apply_sensitivity_override(self, parameter_name: str, parameter_value: float, base_mu: float):
         self.config.mu = base_mu
@@ -587,7 +556,7 @@ class ExperimentRunner:
             return pd.DataFrame()
 
         records: list[dict] = []
-        for parameter_name, parameter_value in self._sensitivity_specs():
+        for parameter_name, parameter_value in build_sensitivity_specs(self.config):
             for condition in sensitivity_conditions:
                 for replication in range(self.config.num_replications):
                     seed = self.config.random_seed + replication
@@ -608,7 +577,7 @@ class ExperimentRunner:
 
 
 def run_calibration_episode_task(config_payload: dict[str, Any], episode_idx: int, seed: int) -> dict[str, float | int]:
-    config = _deserialize_config(config_payload)
+    config = deserialize_config(config_payload)
     config.verbose = False
     runner = ExperimentRunner(config)
     return runner.run_calibration_episode(episode_idx=episode_idx, seed=seed)
@@ -625,7 +594,7 @@ def run_primary_replication_task(
     config_name: str,
     batch_id: str,
 ) -> dict[str, Any]:
-    config = _deserialize_config(config_payload)
+    config = deserialize_config(config_payload)
     config.verbose = False
     if calibration_summary is not None:
         config.mu = float(calibration_summary["derived_mu"])
@@ -662,7 +631,7 @@ def run_sensitivity_replication_task(
     config_name: str,
     batch_id: str,
 ) -> dict[str, Any]:
-    config = _deserialize_config(config_payload)
+    config = deserialize_config(config_payload)
     config.verbose = False
     config.mu = float(calibration_summary["derived_mu"])
     runner = ExperimentRunner(config)
@@ -695,6 +664,4 @@ __all__ = [
     "run_calibration_episode_task",
     "run_primary_replication_task",
     "run_sensitivity_replication_task",
-    "_build_calibration_summary",
-    "_serialize_config",
 ]

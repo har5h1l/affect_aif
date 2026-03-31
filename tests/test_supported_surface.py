@@ -88,9 +88,15 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
     assert run_experiment.main() == 0
 
     results_path = tmp_path / "results" / batch_name / "tiny" / "results.csv"
+    partial_path = tmp_path / "results" / batch_name / "tiny" / "results_partial.csv"
+    config_copy_path = tmp_path / "results" / batch_name / "tiny" / "config.json"
+    metadata_path = tmp_path / "results" / batch_name / "tiny" / "batch_metadata.json"
     figures_dir = tmp_path / "figures"
     model_dir = tmp_path / "model"
     assert results_path.exists()
+    assert partial_path.exists()
+    assert config_copy_path.exists()
+    assert metadata_path.exists()
     assert run_analysis.main(["--results", str(results_path), "--output-dir", str(figures_dir)]) == 0
     assert run_model_comparison.main(["--results", str(results_path), "--output-dir", str(model_dir)]) == 0
     assert (figures_dir / "final_round_summary.csv").exists()
@@ -98,26 +104,23 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
 
 
 def test_archive_boundary_is_explicit():
-    supported_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
+    supported_scripts = {
+        "run_experiment.py",
+        "run_preliminary.py",
+        "run_analysis.py",
+        "run_visualization.py",
+        "run_model_comparison.py",
+    }
+    all_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
     archived_scripts = {path.name for path in (REPO_ROOT / "archive" / "scripts").glob("*.py")}
     pyproject_text = (REPO_ROOT / "pyproject.toml").read_text()
     cli_doc = (REPO_ROOT / "docs" / "cli.md").read_text()
 
-    assert supported_scripts == {
-        "analyze_benchmark.py",
-        "analyze_benchmark_paper.py",
-        "analyze_clinical_results.py",
-        "cvc_list_missions.py",
-        "cvc_obs_diagnostic.py",
-        "generate_paper_figures.py",
-        "run_analysis.py",
-        "run_benchmark.py",
-        "run_clinical_sensitivity.py",
-        "run_experiment.py",
-        "run_model_comparison.py",
-        "run_preliminary.py",
-        "run_visualization.py",
-    }
+    assert supported_scripts <= all_scripts
+    assert "analyze_benchmark.py" in all_scripts
+    assert "analyze_benchmark.py" not in supported_scripts
+    for script_name in supported_scripts:
+        assert script_name in cli_doc
     assert "run_precision_modulation.py" in archived_scripts
     assert 'extend-exclude = ["archive"]' in pyproject_text
     assert "archive/configs/" in cli_doc
