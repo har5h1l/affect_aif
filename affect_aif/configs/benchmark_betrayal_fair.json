@@ -1,10 +1,10 @@
 {
   "backends": ["trust"],
   "agents": [
-    {"name": "affective_shallow", "backend": "trust", "kind": "registry", "implementation": "affective_shallow"},
-    {"name": "shallow_no_affect", "backend": "trust", "kind": "registry", "implementation": "shallow_no_affect"},
-    {"name": "deep_no_affect", "backend": "trust", "kind": "registry", "implementation": "deep_no_affect"},
-    {"name": "reward_avg_shallow", "backend": "trust", "kind": "registry", "implementation": "reward_avg_shallow"},
+    {"name": "tau4_affect", "backend": "trust", "kind": "registry", "implementation": "tau4_affect"},
+    {"name": "tau4_no_affect", "backend": "trust", "kind": "registry", "implementation": "tau4_no_affect"},
+    {"name": "tau8_no_affect", "backend": "trust", "kind": "registry", "implementation": "tau8_no_affect"},
+    {"name": "reward_average", "backend": "trust", "kind": "registry", "implementation": "reward_average"},
     {"name": "random", "backend": "trust", "kind": "registry", "implementation": "random"},
     {"name": "tit_for_tat", "backend": "trust", "kind": "registry", "implementation": "tit_for_tat"},
     {"name": "win_stay_lose_shift", "backend": "trust", "kind": "registry", "implementation": "win_stay_lose_shift"},
@@ -22,8 +22,9 @@
       "num_partners": 2,
       "assignment_mode": "random",
       "initial_partner_types": ["cooperator", "random"],
-      "scheduled_type_switches": [
-        {"partner_idx": 0, "round": 50, "to_type": "exploiter"}
+      "initial_partner_stances": ["trusting", "neutral"],
+      "scheduled_stance_switches": [
+        {"partner_idx": 0, "round": 50, "to_stance": "hostile"}
       ],
       "p_switch": 0.0
     }

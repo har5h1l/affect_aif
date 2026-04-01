@@ -10,6 +10,7 @@ from affect_aif.agent.lesioned_agent import LesionedAgent
 from affect_aif.agent.reward_avg_agent import RewardAvgAgent
 from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
 from affect_aif.environment.trust_game import TrustGameEnv
+from affect_aif.experiment.conditions import resolve_condition_spec
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
 
@@ -26,12 +27,26 @@ def create_env(config: ExperimentConfig, seed: int) -> TrustGameEnv:
     return TrustGameEnv(config, seed=seed)
 
 
-def planning_horizon_for(config: ExperimentConfig, condition: int, default_horizon: int) -> int:
-    return int(config.horizon_overrides.get(int(condition), default_horizon))
+def _planning_horizon_for_condition(config: ExperimentConfig, condition: int | str, default_horizon: int) -> int:
+    candidates: list[int | str] = [condition]
+    if isinstance(condition, str) and condition.strip().isdigit():
+        candidates.append(int(condition))
+    elif not isinstance(condition, str):
+        candidates.append(str(condition))
+        candidates.append(resolve_condition_spec(condition).name)
+    else:
+        candidates.append(resolve_condition_spec(condition).name)
+
+    for key in candidates:
+        if key in config.horizon_overrides:
+            return int(config.horizon_overrides[key])
+    return int(default_horizon)
 
 
-def create_agent(config: ExperimentConfig, condition: int, model: TrustGameModel, seed: int) -> BaseAgent:
+def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGameModel, seed: int) -> BaseAgent:
+    spec = resolve_condition_spec(condition)
     matrices = model.get_matrices()
+    planning_horizon = _planning_horizon_for_condition(config, condition, spec.planning_horizon)
     common = dict(
         A=matrices[0],
         B=matrices[1],
@@ -46,50 +61,50 @@ def create_agent(config: ExperimentConfig, condition: int, model: TrustGameModel
         seed=seed,
         affect_modulates_precision=config.affect_modulates_precision,
         use_parameter_learning=config.use_parameter_learning,
+        use_information_gain=spec.use_information_gain,
     )
+    params = {
+        "lambda_smooth": config.lambda_smooth,
+        "alpha_charge": config.alpha_charge,
+        "sigma_0_sq": config.sigma_0_sq,
+        "initial_beta": config.initial_beta,
+    }
+    params.update(spec.parameter_overrides)
 
-    if condition == 1:
-        return BaseAgent(planning_horizon=planning_horizon_for(config, condition, config.deep_horizon), **common)
-    if condition == 3:
-        return LesionedAgent(
-            planning_horizon=planning_horizon_for(config, condition, config.shallow_horizon),
-            num_partners=config.num_partners,
-            lambda_smooth=config.lambda_smooth,
-            alpha_charge=config.alpha_charge,
-            sigma_0_sq=config.sigma_0_sq,
-            initial_beta=config.initial_beta,
-            lesion_mode=config.lesion_mode,
-            mu=float(config.mu or 0.0),
-            **common,
-        )
-    if condition == 4:
-        return BaseAgent(planning_horizon=planning_horizon_for(config, condition, config.shallow_horizon), **common)
-    if condition == 5:
+    if spec.agent_kind == "base":
+        return BaseAgent(planning_horizon=planning_horizon, **common)
+    if spec.agent_kind == "reward_average":
         return RewardAvgAgent(
-            planning_horizon=planning_horizon_for(config, condition, config.shallow_horizon),
+            planning_horizon=planning_horizon,
             num_partners=config.num_partners,
-            lambda_smooth=config.lambda_smooth,
+            lambda_smooth=params["lambda_smooth"],
             mu=float(config.mu or 0.0),
             **common,
         )
-    if condition == 6:
-        return BaseAgent(planning_horizon=planning_horizon_for(config, condition, 3), **common)
-    if condition == 7:
-        return BaseAgent(planning_horizon=planning_horizon_for(config, condition, 4), **common)
-    if condition in {2, 8, 9, 10, 11, 12}:
-        default_horizon = config.deep_horizon if condition == 8 else config.shallow_horizon
-        beta_mode = "variational" if condition == 12 else config.beta_mode
-        return AffectiveAgent(
-            planning_horizon=planning_horizon_for(config, condition, default_horizon),
+    if spec.agent_kind == "lesioned":
+        return LesionedAgent(
+            planning_horizon=planning_horizon,
             num_partners=config.num_partners,
-            lambda_smooth=config.lambda_smooth,
-            alpha_charge=config.alpha_charge,
-            sigma_0_sq=config.sigma_0_sq,
-            initial_beta=config.initial_beta,
-            beta_mode=beta_mode,
+            lambda_smooth=params["lambda_smooth"],
+            alpha_charge=params["alpha_charge"],
+            sigma_0_sq=params["sigma_0_sq"],
+            initial_beta=params["initial_beta"],
+            lesion_mode=spec.lesion_mode or config.lesion_mode,
+            mu=float(config.mu or 0.0),
+            **common,
+        )
+    if spec.agent_kind == "affective":
+        return AffectiveAgent(
+            planning_horizon=planning_horizon,
+            num_partners=config.num_partners,
+            lambda_smooth=params["lambda_smooth"],
+            alpha_charge=params["alpha_charge"],
+            sigma_0_sq=params["sigma_0_sq"],
+            initial_beta=params["initial_beta"],
+            beta_mode=spec.beta_mode or config.beta_mode,
             num_levels=config.beta_num_levels,
             persistence=config.beta_persistence,
             mu=float(config.mu or 0.0),
             **common,
         )
-    raise ValueError(f"Unknown condition '{condition}'.")
+    raise ValueError(f"Unknown agent kind '{spec.agent_kind}'.")

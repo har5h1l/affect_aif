@@ -1,8 +1,8 @@
 {
   "backends": ["trust"],
   "agents": [
-    {"name": "affective_shallow", "backend": "trust", "kind": "registry", "implementation": "affective_shallow"},
-    {"name": "shallow_no_affect", "backend": "trust", "kind": "registry", "implementation": "shallow_no_affect"},
+    {"name": "tau4_affect", "backend": "trust", "kind": "registry", "implementation": "tau4_affect"},
+    {"name": "tau4_no_affect", "backend": "trust", "kind": "registry", "implementation": "tau4_no_affect"},
     {"name": "tit_for_tat", "backend": "trust", "kind": "registry", "implementation": "tit_for_tat"},
     {"name": "win_stay_lose_shift", "backend": "trust", "kind": "registry", "implementation": "win_stay_lose_shift"},
     {"name": "grim_trigger", "backend": "trust", "kind": "registry", "implementation": "grim_trigger"},
@@ -18,8 +18,9 @@
       "trust_game_overrides": {
         "num_partners": 2,
         "initial_partner_types": ["cooperative", "reciprocal"],
-        "scheduled_type_switches": [
-          {"partner_idx": 0, "round": 100, "to_type": "exploiter"}
+        "initial_partner_stances": ["trusting", "neutral"],
+        "scheduled_stance_switches": [
+          {"partner_idx": 0, "round": 100, "to_stance": "hostile"}
         ]
       }
     }

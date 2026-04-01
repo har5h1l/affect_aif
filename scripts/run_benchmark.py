@@ -90,7 +90,7 @@ def main():
         config = BenchmarkConfig.from_json(args.config)
     else:
         backends = args.backends or ["trust"]
-        agents = _coerce_agents(args.agents or ["affective_shallow", "shallow_no_affect", "random", "tit_for_tat"], backends)
+        agents = _coerce_agents(args.agents or ["tau4_affect", "tau4_no_affect", "random", "tit_for_tat"], backends)
         config_payload = {
             "backends": backends,
             "agents": agents,

@@ -12,7 +12,7 @@ These wrappers are the supported CLI surface:
 | `scripts/run_preliminary.py` | Run a small smoke-test experiment and print directional checks. |
 | `scripts/run_analysis.py` | Generate post-hoc figures, summary tables, and betrayal artifacts. |
 | `scripts/run_visualization.py` | Regenerate GIFs from saved results. |
-| `scripts/run_model_comparison.py` | Compare conditions with Bayesian model comparison. |
+| `scripts/run_model_comparison.py` | Compare conditions with predictive log-score summaries and RFX-BMS. |
 
 Historical one-off scripts are not part of the supported workflow contract.
 

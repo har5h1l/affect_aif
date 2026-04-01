@@ -7,14 +7,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from affect_aif.experiment.conditions import get_condition_name
+from affect_aif.experiment.conditions import resolve_condition_spec
 from affect_aif.experiment.config import ExperimentConfig
 
 
 def annotate_primary_records(
     rows: list[dict],
     *,
-    condition: int,
+    condition: int | str,
     config: ExperimentConfig,
     calibration_summary: dict | None,
     config_path: str | None = None,
@@ -22,7 +22,7 @@ def annotate_primary_records(
     batch_id: str | None = None,
 ) -> list[dict]:
     for row in rows:
-        row["condition_name"] = get_condition_name(condition)
+        row["condition_name"] = resolve_condition_spec(condition).name
         if calibration_summary is not None:
             row["mu_source"] = "derived"
             row["calibration_mean_abs_efe_per_step"] = calibration_summary["mean_abs_efe_per_step"]

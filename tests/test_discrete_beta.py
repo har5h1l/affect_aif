@@ -195,9 +195,10 @@ class TestDiscreteContinuousCorrespondence:
 class TestDiscreteAffectiveAgent:
     """Integration test: discrete agent runs through the experiment machinery."""
 
-    def test_condition_12_creates_discrete_agent(self):
-        from affect_aif.experiment.conditions import get_condition_name
-        assert get_condition_name(12) == "variational_affective"
+    def test_variational_beta_preset_is_registered(self):
+        from affect_aif.experiment.conditions import get_preset_condition
+
+        assert get_preset_condition("variational_beta").name == "variational_beta"
 
     def test_discrete_agent_instantiation(self):
         from affect_aif.agent.discrete_affective_agent import DiscreteAffectiveAgent

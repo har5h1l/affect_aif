@@ -13,6 +13,7 @@ from PIL import Image
 
 LIST_LIKE_COLUMNS = (
     "true_types",
+    "true_stances",
     "betas",
     "prediction_errors",
     "reward_avgs",
@@ -24,6 +25,9 @@ LIST_LIKE_COLUMNS = (
     "scheduled_switch_partner_ids",
     "partner_beliefs",
     "partner_posteriors",
+    "partner_joint_beliefs",
+    "partner_joint_posteriors",
+    "partner_stance_beliefs",
 )
 
 
@@ -69,6 +73,19 @@ def _slugify(text: str) -> str:
     return slug or "run"
 
 
+def _condition_slug(value) -> str:
+    if isinstance(value, (int, np.integer)):
+        return f"{int(value):02d}"
+    text = _slugify(str(value))
+    return text or "condition"
+
+
+def _condition_sort_key(value) -> tuple[int, str]:
+    if isinstance(value, (int, np.integer)):
+        return (0, f"{int(value):04d}")
+    return (1, str(value))
+
+
 def _signal_label(run: pd.DataFrame) -> str:
     reward_values = run["reward_avgs"].dropna() if "reward_avgs" in run.columns else pd.Series(dtype=object)
     if any(np.any(np.isfinite(np.asarray(item, dtype=float))) for item in reward_values):
@@ -97,6 +114,7 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
     signal_label = _signal_label(run)
     signal = _signal_values(row)
     true_types = list(row["true_types"])
+    true_stances = list(row.get("true_stances", []))
 
     fig = plt.figure(figsize=(12, 7))
     grid = fig.add_gridspec(2, 2, width_ratios=(1.2, 1.0), height_ratios=(1.0, 1.0))
@@ -119,8 +137,8 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
         else "Active partner at start: agent choice",
         f"Selected partner/action: P{selected_partner} / {int(row['selected_action'])}",
         f"Observed current partner: P{current_partner}",
-        f"True type: {row['true_partner_type']}",
-        f"Inferred type: {row['inferred_type']} ({'correct' if bool(row['inferred_type_correct']) else 'wrong'})",
+        f"True type/stance: {row['true_partner_type']} / {row.get('true_partner_stance', 'unknown')}",
+        f"Inferred type/stance: {row['inferred_type']} / {row.get('inferred_stance', 'unknown')}",
         f"Actions (agent/partner): {int(row['agent_action'])} / {int(row['partner_action'])}",
         f"Payoff: {float(row['payoff']):0.2f}",
         f"Switch: {row['switch_kind']}",
@@ -129,14 +147,22 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
     ax_summary.axis("off")
     ax_summary.text(0.0, 0.98, "\n".join(summary_lines), va="top", ha="left", fontsize=11, family="monospace")
     partner_roster = "\n".join(
-        f"P{idx}: {partner_type}{' <=' if idx == current_partner else ''}"
+        (
+            f"P{idx}: {partner_type}"
+            f"{'/' + true_stances[idx] if idx < len(true_stances) else ''}"
+            f"{' <=' if idx == current_partner else ''}"
+        )
         for idx, partner_type in enumerate(true_types)
     )
     ax_summary.text(0.62, 0.98, partner_roster, va="top", ha="left", fontsize=11, family="monospace")
 
     ax_payoff.plot(rounds[: frame_idx + 1], cumulative_payoff[: frame_idx + 1], color="#1f77b4", linewidth=2)
     ax_payoff.scatter([rounds[frame_idx]], [cumulative_payoff[frame_idx]], color="#d62728", zorder=3)
-    switch_rounds = run.loc[run["type_switched"].astype(bool), "round"].to_numpy(dtype=int) + 1
+    switch_mask = (
+        run.get("type_switched", pd.Series(False, index=run.index)).fillna(False).astype(bool)
+        | run.get("stance_switched", pd.Series(False, index=run.index)).fillna(False).astype(bool)
+    )
+    switch_rounds = run.loc[switch_mask, "round"].to_numpy(dtype=int) + 1
     for switch_round in switch_rounds:
         ax_payoff.axvline(switch_round, color="#ff7f0e", linestyle="--", linewidth=1, alpha=0.6)
     ax_payoff.set_title("Cumulative Payoff")
@@ -195,11 +221,16 @@ def build_run_gifs(
         reporter.emit("gif_generation_start", output_dir=str(output))
 
     written: list[Path] = []
-    grouped = primary.sort_values(["condition", "seed", "round"]).groupby(["condition", "seed"], sort=True)
+    primary["_condition_sort"] = primary["condition"].apply(_condition_sort_key)
+    grouped = (
+        primary.sort_values(["_condition_sort", "seed", "round"])
+        .drop(columns="_condition_sort")
+        .groupby(["condition", "seed"], sort=True)
+    )
     for (condition, seed), run in grouped:
         frames = [_make_frame(run.reset_index(drop=True), idx) for idx in range(len(run))]
         condition_name = str(run["condition_name"].iloc[0])
-        target = output / f"{int(condition):02d}_{_slugify(condition_name)}_seed_{int(seed)}.gif"
+        target = output / f"{_condition_slug(condition)}_{_slugify(condition_name)}_seed_{int(seed)}.gif"
         first, *rest = frames
         first.save(
             target,

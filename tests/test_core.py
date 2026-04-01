@@ -62,16 +62,23 @@ def _toy_efe_inputs():
 
 
 def _rollout_inputs():
-    beliefs = jnp.asarray([[0.5, 0.5]], dtype=jnp.float32)
-    one_hot_beliefs = jnp.asarray([[1.0, 0.0]], dtype=jnp.float32)
+    beliefs = jnp.asarray([[[0.25, 0.25], [0.25, 0.25]]], dtype=jnp.float32)
+    one_hot_beliefs = jnp.asarray([[[1.0, 0.0], [0.0, 0.0]]], dtype=jnp.float32)
     common = dict(
         active_partner=jnp.int32(0),
         assignment_mode_code=jnp.int32(0),
         B_type=jnp.asarray(np.eye(2), dtype=jnp.float32),
+        B_stance_by_action=jnp.asarray(
+            [
+                np.eye(2, dtype=float),
+                np.eye(2, dtype=float),
+            ],
+            dtype=jnp.float32,
+        ),
         partner_action_prob_table=jnp.asarray(
             [
-                [[0.999, 0.999], [0.999, 0.999]],
-                [[0.001, 0.001], [0.001, 0.001]],
+                [0.999, 0.999],
+                [0.001, 0.001],
             ],
             dtype=jnp.float32,
         ),
@@ -80,7 +87,6 @@ def _rollout_inputs():
         payoff_preferences=jnp.asarray([0.0, 0.0], dtype=jnp.float32),
         partner_action_preferences=jnp.asarray([0.0, 0.0], dtype=jnp.float32),
         terminal_signal=jnp.zeros((1,), dtype=jnp.float32),
-        switch_round=jnp.int32(999),
         mu=jnp.float32(0.0),
         max_abs_payoff=jnp.float32(1.0),
     )
@@ -89,8 +95,6 @@ def _rollout_inputs():
         "observation_sequences": jnp.asarray(generate_observation_sequences(3), dtype=jnp.int32),
         "beliefs": beliefs,
         "one_hot_beliefs": one_hot_beliefs,
-        "last_actions": jnp.zeros((1,), dtype=jnp.int32),
-        "counts": jnp.zeros((1,), dtype=jnp.int32),
         "common": common,
     }
 
@@ -151,8 +155,6 @@ def test_rollout_epistemic_value_is_positive_for_uncertain_beliefs():
         inputs["policy"],
         inputs["observation_sequences"],
         inputs["beliefs"],
-        inputs["last_actions"],
-        inputs["counts"],
         use_utility_flag=jnp.float32(0.0),
         use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
@@ -168,8 +170,6 @@ def test_rollout_epistemic_value_approaches_zero_for_sharp_beliefs():
         inputs["policy"],
         inputs["observation_sequences"],
         inputs["one_hot_beliefs"],
-        inputs["last_actions"],
-        inputs["counts"],
         use_utility_flag=jnp.float32(0.0),
         use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
@@ -188,8 +188,6 @@ def test_rollout_terminal_value_adjustment_works_correctly():
     base_total, base_step_costs, _, _ = _rollout_policy_trust_game_mean_field(
         inputs["policy"],
         inputs["beliefs"],
-        inputs["last_actions"],
-        inputs["counts"],
         use_utility_flag=jnp.float32(0.0),
         use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
@@ -197,8 +195,6 @@ def test_rollout_terminal_value_adjustment_works_correctly():
     weighted_total, _, terminal_value, _ = _rollout_policy_trust_game_mean_field(
         inputs["policy"],
         inputs["beliefs"],
-        inputs["last_actions"],
-        inputs["counts"],
         use_utility_flag=jnp.float32(0.0),
         use_information_gain_flag=jnp.float32(1.0),
         **weighted_common,
@@ -216,8 +212,6 @@ def test_sophisticated_and_mean_field_rollouts_agree_for_sharp_beliefs():
     mean_field = _rollout_policy_trust_game_mean_field(
         inputs["policy"],
         inputs["one_hot_beliefs"],
-        inputs["last_actions"],
-        inputs["counts"],
         use_utility_flag=jnp.float32(0.0),
         use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
@@ -226,8 +220,6 @@ def test_sophisticated_and_mean_field_rollouts_agree_for_sharp_beliefs():
         inputs["policy"],
         inputs["observation_sequences"],
         inputs["one_hot_beliefs"],
-        inputs["last_actions"],
-        inputs["counts"],
         use_utility_flag=jnp.float32(0.0),
         use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],

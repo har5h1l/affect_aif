@@ -35,20 +35,20 @@ def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
             "available": bool(payload.get("available", False)),
         }
         if hypothesis_id == "h1":
-            row["primary_metric"] = payload.get("payoff_ratio_c2_over_c1")
-            row["secondary_metric"] = payload.get("welch_p_value")
+            row["primary_metric"] = payload.get("mean_affect_payoff_gain")
+            row["secondary_metric"] = payload.get("mean_affect_joint_accuracy_gain")
         elif hypothesis_id == "h2":
-            row["primary_metric"] = payload.get("accuracy_difference_c3_minus_c1")
-            row["secondary_metric"] = payload.get("payoff_difference_c3_minus_c2")
+            row["primary_metric"] = payload.get("payoff_difference_tau8_minus_tau1")
+            row["secondary_metric"] = payload.get("welch_p_value")
         elif hypothesis_id == "h3":
-            row["primary_metric"] = payload.get("payoff_difference_c2_minus_c5")
-            row["secondary_metric"] = payload.get("exploiter_payoff_difference_c2_minus_c5")
+            row["primary_metric"] = payload.get("payoff_difference_lesioned_minus_tau4_affect")
+            row["secondary_metric"] = payload.get("stance_accuracy_difference_lesioned_minus_tau4_affect")
         elif hypothesis_id == "h4":
-            row["primary_metric"] = payload.get("payoff_difference_c2_minus_c4")
-            row["secondary_metric"] = payload.get("payoff_difference_c2_minus_c1")
+            row["primary_metric"] = payload.get("payoff_difference_tau4_affect_minus_tau4_no_affect")
+            row["secondary_metric"] = payload.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect")
         elif hypothesis_id == "h5":
-            row["primary_metric"] = payload.get("mean_beta_selection_correlation")
-            row["secondary_metric"] = payload.get("p_value_vs_zero")
+            row["primary_metric"] = payload.get("payoff_difference_tau4_affect_minus_reward_average")
+            row["secondary_metric"] = payload.get("detection_latency_difference_reward_average_minus_tau4_affect")
         rows.append(row)
     return pd.DataFrame(rows)
 
@@ -116,8 +116,14 @@ def main(argv: list[str] | None = None) -> int:
             grouped = (
                 betrayal_comp.groupby(["window"], as_index=False)
                 .agg(
-                    mean_payoff_difference_c2_minus_c5=("payoff_difference_c2_minus_c5", "mean"),
-                    mean_accuracy_difference_c2_minus_c5=("accuracy_difference_c2_minus_c5", "mean"),
+                    mean_payoff_difference_tau4_affect_minus_reward_average=(
+                        "payoff_difference_tau4_affect_minus_reward_average",
+                        "mean",
+                    ),
+                    mean_stance_accuracy_difference_tau4_affect_minus_reward_average=(
+                        "stance_accuracy_difference_tau4_affect_minus_reward_average",
+                        "mean",
+                    ),
                 )
                 .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
             )
@@ -158,8 +164,14 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 betrayal_comp.groupby(["window"], as_index=False)
                 .agg(
-                    mean_payoff_difference_c2_minus_c5=("payoff_difference_c2_minus_c5", "mean"),
-                    mean_accuracy_difference_c2_minus_c5=("accuracy_difference_c2_minus_c5", "mean"),
+                    mean_payoff_difference_tau4_affect_minus_reward_average=(
+                        "payoff_difference_tau4_affect_minus_reward_average",
+                        "mean",
+                    ),
+                    mean_stance_accuracy_difference_tau4_affect_minus_reward_average=(
+                        "stance_accuracy_difference_tau4_affect_minus_reward_average",
+                        "mean",
+                    ),
                 )
                 .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
             )

@@ -8,7 +8,15 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from affect_aif.analysis.metrics import _ensure_array, final_round_summary, post_switch_window_summary
+from affect_aif.analysis.metrics import betrayal_latency_summary, final_round_summary, post_switch_window_summary
+
+
+DEPTH_CONDITION_NAMES = {
+    1: ("tau1_no_affect", "tau1_affect"),
+    2: ("tau2_no_affect", "tau2_affect"),
+    4: ("tau4_no_affect", "tau4_affect"),
+    8: ("tau8_no_affect", "tau8_affect"),
+}
 
 
 def _clean(values) -> np.ndarray:
@@ -60,234 +68,278 @@ def _summary_by_condition(results: pd.DataFrame) -> pd.DataFrame:
     return final_round_summary(results)
 
 
-def _condition_values(summary: pd.DataFrame, condition: int, column: str) -> np.ndarray:
-    return summary.loc[summary["condition"] == int(condition), column].to_numpy(dtype=float)
+def _condition_values(summary: pd.DataFrame, condition_name: str, column: str) -> np.ndarray:
+    return summary.loc[summary["condition_name"] == condition_name, column].to_numpy(dtype=float)
 
 
-def test_h1_depth_compensation(results: pd.DataFrame) -> dict:
-    """Condition 2 approaches condition 1 payoff despite shallower planning."""
+def _paired_seed_differences(
+    summary: pd.DataFrame,
+    left_condition_name: str,
+    right_condition_name: str,
+    column: str,
+) -> np.ndarray:
+    left = summary.loc[summary["condition_name"] == left_condition_name, ["seed", column]].rename(
+        columns={column: "left_value"}
+    )
+    right = summary.loc[summary["condition_name"] == right_condition_name, ["seed", column]].rename(
+        columns={column: "right_value"}
+    )
+    merged = left.merge(right, on="seed", how="inner")
+    if merged.empty:
+        return np.asarray([], dtype=float)
+    deltas = merged["right_value"].to_numpy(dtype=float) - merged["left_value"].to_numpy(dtype=float)
+    return _clean(deltas)
+
+
+def _depth_gain_payload(summary: pd.DataFrame, column: str) -> tuple[dict[int, float], np.ndarray]:
+    mean_by_depth: dict[int, float] = {}
+    deltas: list[np.ndarray] = []
+    for depth, (no_affect_name, affect_name) in DEPTH_CONDITION_NAMES.items():
+        delta = _paired_seed_differences(summary, no_affect_name, affect_name, column)
+        if delta.size == 0:
+            continue
+        mean_by_depth[int(depth)] = float(delta.mean())
+        deltas.append(delta)
+    if not deltas:
+        return {}, np.asarray([], dtype=float)
+    return mean_by_depth, np.concatenate(deltas)
+
+
+def _switch_window_metric(
+    results: pd.DataFrame,
+    condition_name: str,
+    column: str,
+    *,
+    window: int = 5,
+) -> np.ndarray:
+    windows = post_switch_window_summary(results, window=window)
+    if windows.empty or condition_name not in set(windows["condition_name"]):
+        return np.asarray([], dtype=float)
+    return windows.loc[windows["condition_name"] == condition_name, column].to_numpy(dtype=float)
+
+
+def _latency_metric(results: pd.DataFrame, condition_name: str, column: str) -> np.ndarray:
+    latency = betrayal_latency_summary(results, max_encounters=10)
+    if latency.empty or condition_name not in set(latency["condition_name"]):
+        return np.asarray([], dtype=float)
+    return latency.loc[latency["condition_name"] == condition_name, column].to_numpy(dtype=float)
+
+
+def test_h1_orthogonal_augmentation(results: pd.DataFrame) -> dict:
+    """Affect adds value beyond matched planning depth across the core depth sweep."""
 
     summary = _summary_by_condition(results)
-    c1 = _condition_values(summary, 1, "total_payoff")
-    c2 = _condition_values(summary, 2, "total_payoff")
-    test = _welch_ttest(c2, c1)
-    mean_c1 = _mean(c1)
-    mean_c2 = _mean(c2)
+    payoff_gains_by_depth, payoff_deltas = _depth_gain_payload(summary, "total_payoff")
+    joint_gains_by_depth, joint_deltas = _depth_gain_payload(summary, "mean_joint_accuracy")
+    if payoff_deltas.size == 0:
+        return {
+            "hypothesis": "H1",
+            "label": "orthogonal_augmentation",
+            "available": False,
+            "reason": "Matched affect/no-affect depth pairs are missing from the results.",
+        }
+
+    test = _welch_ttest(payoff_deltas, np.zeros_like(payoff_deltas))
+    overall_baseline = []
+    overall_affect = []
+    for no_affect_name, affect_name in DEPTH_CONDITION_NAMES.values():
+        overall_baseline.extend(_condition_values(summary, no_affect_name, "total_payoff"))
+        overall_affect.extend(_condition_values(summary, affect_name, "total_payoff"))
+    interaction_range = (
+        float(max(payoff_gains_by_depth.values()) - min(payoff_gains_by_depth.values()))
+        if len(payoff_gains_by_depth) >= 2
+        else float("nan")
+    )
+
     return {
         "hypothesis": "H1",
-        "label": "depth_compensation",
+        "label": "orthogonal_augmentation",
         "available": True,
-        "condition_1_mean_payoff": mean_c1,
-        "condition_2_mean_payoff": mean_c2,
-        "payoff_ratio_c2_over_c1": float(mean_c2 / mean_c1)
-        if np.isfinite(mean_c1) and mean_c1 != 0.0
-        else float("nan"),
+        "depths_evaluated": sorted(payoff_gains_by_depth),
+        "mean_affect_payoff_gain": _mean(payoff_deltas),
+        "mean_affect_joint_accuracy_gain": _mean(joint_deltas),
+        "payoff_gain_by_depth": {str(depth): value for depth, value in payoff_gains_by_depth.items()},
+        "joint_accuracy_gain_by_depth": {str(depth): value for depth, value in joint_gains_by_depth.items()},
+        "interaction_range": interaction_range,
+        "payoff_ratio_affect_over_no_affect": (
+            float(_mean(overall_affect) / _mean(overall_baseline))
+            if np.isfinite(_mean(overall_baseline)) and _mean(overall_baseline) != 0.0
+            else float("nan")
+        ),
         "welch_t_stat": test["t_stat"],
         "welch_p_value": test["p_value"],
-        "cohens_d": _cohen_d(c2, c1),
+        "cohens_d": _cohen_d(payoff_deltas, np.zeros_like(payoff_deltas)),
     }
 
 
-def test_h2_lesion_dissociation(results: pd.DataFrame, accuracy_margin: float = 0.05) -> dict:
-    """Condition 3 preserves identification accuracy better than payoff."""
+def test_h2_depth_matters(results: pd.DataFrame) -> dict:
+    """Deeper planning helps in the action-dependent trust environment."""
 
     summary = _summary_by_condition(results)
-    c1_acc = _condition_values(summary, 1, "mean_accuracy")
-    c3_acc = _condition_values(summary, 3, "mean_accuracy")
-    c2_payoff = _condition_values(summary, 2, "total_payoff")
-    c3_payoff = _condition_values(summary, 3, "total_payoff")
-    acc_test = _welch_ttest(c3_acc, c1_acc)
-    payoff_test = _welch_ttest(c3_payoff, c2_payoff)
-    acc_diff = _mean(c3_acc) - _mean(c1_acc)
-    payoff_diff = _mean(c3_payoff) - _mean(c2_payoff)
+    tau1 = _condition_values(summary, "tau1_no_affect", "total_payoff")
+    tau8 = _condition_values(summary, "tau8_no_affect", "total_payoff")
+    if tau1.size == 0 or tau8.size == 0:
+        return {
+            "hypothesis": "H2",
+            "label": "depth_matters",
+            "available": False,
+            "reason": "Tau-1 and tau-8 no-affect conditions are required.",
+        }
+
+    no_affect_curve = {
+        str(depth): _mean(_condition_values(summary, condition_names[0], "total_payoff"))
+        for depth, condition_names in DEPTH_CONDITION_NAMES.items()
+    }
+    test = _welch_ttest(tau8, tau1)
     return {
         "hypothesis": "H2",
-        "label": "lesion_dissociation",
+        "label": "depth_matters",
         "available": True,
-        "condition_1_mean_accuracy": _mean(c1_acc),
-        "condition_3_mean_accuracy": _mean(c3_acc),
-        "accuracy_difference_c3_minus_c1": acc_diff,
-        "accuracy_within_margin": bool(np.isfinite(acc_diff) and abs(acc_diff) <= float(accuracy_margin)),
-        "accuracy_margin": float(accuracy_margin),
-        "accuracy_welch_t_stat": acc_test["t_stat"],
-        "accuracy_welch_p_value": acc_test["p_value"],
-        "condition_2_mean_payoff": _mean(c2_payoff),
-        "condition_3_mean_payoff": _mean(c3_payoff),
-        "payoff_difference_c3_minus_c2": payoff_diff,
-        "payoff_lower_than_c2": bool(np.isfinite(payoff_diff) and payoff_diff < 0.0),
-        "payoff_welch_t_stat": payoff_test["t_stat"],
-        "payoff_welch_p_value": payoff_test["p_value"],
+        "mean_payoff_tau1_no_affect": _mean(tau1),
+        "mean_payoff_tau8_no_affect": _mean(tau8),
+        "payoff_difference_tau8_minus_tau1": _mean(tau8) - _mean(tau1),
+        "no_affect_payoff_curve": no_affect_curve,
+        "welch_t_stat": test["t_stat"],
+        "welch_p_value": test["p_value"],
+        "cohens_d": _cohen_d(tau8, tau1),
     }
 
 
-def test_h3_precision_vs_reward(results: pd.DataFrame) -> dict:
-    """Condition 2 outperforms reward averaging, especially against exploiters."""
+def test_h3_lesion_dissociation(results: pd.DataFrame, accuracy_margin: float = 0.05) -> dict:
+    """Lesioned agents preserve type inference better than stance recovery."""
 
     summary = _summary_by_condition(results)
-    c2 = _condition_values(summary, 2, "total_payoff")
-    c5 = _condition_values(summary, 5, "total_payoff")
-    overall_test = _welch_ttest(c2, c5)
-
-    exploiter = (
-        results[results["true_partner_type"] == "exploiter"]
-        .groupby(["condition", "seed"], as_index=False)
-        .agg(
-            mean_payoff=("payoff", "mean"),
-            exploitation_rate=("partner_action", lambda x: float(np.mean(np.asarray(x, dtype=float) == 1.0))),
+    switch_source = post_switch_window_summary(results, window=5)
+    if switch_source.empty:
+        switch_source = summary.rename(
+            columns={
+                "mean_accuracy": "mean_accuracy",
+                "mean_stance_accuracy": "mean_stance_accuracy",
+                "total_payoff": "mean_payoff",
+            }
         )
-    )
-    c2_exploit = exploiter.loc[exploiter["condition"] == 2, "mean_payoff"].to_numpy(dtype=float)
-    c5_exploit = exploiter.loc[exploiter["condition"] == 5, "mean_payoff"].to_numpy(dtype=float)
-    c2_exploitation_rate = exploiter.loc[exploiter["condition"] == 2, "exploitation_rate"].to_numpy(dtype=float)
-    c5_exploitation_rate = exploiter.loc[exploiter["condition"] == 5, "exploitation_rate"].to_numpy(dtype=float)
-    exploiter_test = _welch_ttest(c2_exploit, c5_exploit)
+    lesion_name = "lesioned"
+    intact_name = "tau4_affect"
+    if lesion_name not in set(summary["condition_name"]) or intact_name not in set(summary["condition_name"]):
+        return {
+            "hypothesis": "H3",
+            "label": "lesion_dissociation",
+            "available": False,
+            "reason": "Tau-4 affective and lesioned runs are required.",
+        }
 
+    lesion_type = _condition_values(summary, lesion_name, "mean_accuracy")
+    intact_type = _condition_values(summary, intact_name, "mean_accuracy")
+    lesion_window = switch_source.loc[switch_source["condition_name"] == lesion_name]
+    intact_window = switch_source.loc[switch_source["condition_name"] == intact_name]
+    lesion_stance = lesion_window["mean_stance_accuracy"].to_numpy(dtype=float)
+    intact_stance = intact_window["mean_stance_accuracy"].to_numpy(dtype=float)
+    lesion_payoff = lesion_window["mean_payoff"].to_numpy(dtype=float)
+    intact_payoff = intact_window["mean_payoff"].to_numpy(dtype=float)
+
+    type_diff = _mean(lesion_type) - _mean(intact_type)
+    stance_diff = _mean(lesion_stance) - _mean(intact_stance)
+    payoff_diff = _mean(lesion_payoff) - _mean(intact_payoff)
     return {
         "hypothesis": "H3",
-        "label": "precision_vs_reward",
+        "label": "lesion_dissociation",
         "available": True,
-        "condition_2_mean_payoff": _mean(c2),
-        "condition_5_mean_payoff": _mean(c5),
-        "payoff_difference_c2_minus_c5": _mean(c2) - _mean(c5),
-        "welch_t_stat": overall_test["t_stat"],
-        "welch_p_value": overall_test["p_value"],
-        "cohens_d": _cohen_d(c2, c5),
-        "exploiter_mean_payoff_c2": _mean(c2_exploit),
-        "exploiter_mean_payoff_c5": _mean(c5_exploit),
-        "exploiter_payoff_difference_c2_minus_c5": _mean(c2_exploit) - _mean(c5_exploit),
-        "exploiter_welch_t_stat": exploiter_test["t_stat"],
-        "exploiter_welch_p_value": exploiter_test["p_value"],
-        "exploitation_rate_c2": _mean(c2_exploitation_rate),
-        "exploitation_rate_c5": _mean(c5_exploitation_rate),
+        "type_accuracy_difference_lesioned_minus_tau4_affect": type_diff,
+        "stance_accuracy_difference_lesioned_minus_tau4_affect": stance_diff,
+        "payoff_difference_lesioned_minus_tau4_affect": payoff_diff,
+        "type_accuracy_preserved": bool(np.isfinite(type_diff) and abs(type_diff) <= float(accuracy_margin)),
+        "stance_recovery_worse_than_intact": bool(np.isfinite(stance_diff) and stance_diff < 0.0),
+        "payoff_lower_than_intact": bool(np.isfinite(payoff_diff) and payoff_diff < 0.0),
+        "accuracy_margin": float(accuracy_margin),
     }
 
 
-def test_h4_noise_robustness(results: pd.DataFrame, window: int = 10) -> dict:
-    """Compare post-switch behavior in the configured switch window."""
+def test_h4_betrayal_recovery(results: pd.DataFrame) -> dict:
+    """Affect should improve betrayal detection and recovery over matched-depth no-affect controls."""
 
-    windows = post_switch_window_summary(results, window=window)
-    if windows.empty:
+    affect_name = "tau4_affect"
+    control_name = "tau4_no_affect"
+    affect_payoff = _switch_window_metric(results, affect_name, "mean_payoff", window=5)
+    control_payoff = _switch_window_metric(results, control_name, "mean_payoff", window=5)
+    affect_detection = _latency_metric(results, affect_name, "detection_latency")
+    control_detection = _latency_metric(results, control_name, "detection_latency")
+    affect_recovery = _latency_metric(results, affect_name, "payoff_recovery_latency")
+    control_recovery = _latency_metric(results, control_name, "payoff_recovery_latency")
+    if affect_payoff.size == 0 or control_payoff.size == 0:
         return {
             "hypothesis": "H4",
-            "label": "noise_robustness",
+            "label": "betrayal_recovery",
             "available": False,
-            "reason": "No switch windows were found in the results.",
+            "reason": "Scheduled stance-switch runs for tau-4 affect and tau-4 no-affect are required.",
         }
 
-    def _window_values(condition: int, column: str) -> np.ndarray:
-        return windows.loc[windows["condition"] == int(condition), column].to_numpy(dtype=float)
-
-    c2_payoff = _window_values(2, "mean_payoff")
-    c1_payoff = _window_values(1, "mean_payoff")
-    c4_payoff = _window_values(4, "mean_payoff")
-    c2_accuracy = _window_values(2, "mean_accuracy")
-    c1_accuracy = _window_values(1, "mean_accuracy")
-    c4_accuracy = _window_values(4, "mean_accuracy")
-    test_c2_c1 = _welch_ttest(c2_payoff, c1_payoff)
-    test_c2_c4 = _welch_ttest(c2_payoff, c4_payoff)
-
+    payoff_test = _welch_ttest(affect_payoff, control_payoff)
     return {
         "hypothesis": "H4",
-        "label": "noise_robustness",
+        "label": "betrayal_recovery",
         "available": True,
-        "window": int(window),
-        "condition_2_post_switch_payoff": _mean(c2_payoff),
-        "condition_1_post_switch_payoff": _mean(c1_payoff),
-        "condition_4_post_switch_payoff": _mean(c4_payoff),
-        "condition_2_post_switch_accuracy": _mean(c2_accuracy),
-        "condition_1_post_switch_accuracy": _mean(c1_accuracy),
-        "condition_4_post_switch_accuracy": _mean(c4_accuracy),
-        "payoff_difference_c2_minus_c1": _mean(c2_payoff) - _mean(c1_payoff),
-        "payoff_difference_c2_minus_c4": _mean(c2_payoff) - _mean(c4_payoff),
-        "welch_t_stat_c2_vs_c1": test_c2_c1["t_stat"],
-        "welch_p_value_c2_vs_c1": test_c2_c1["p_value"],
-        "welch_t_stat_c2_vs_c4": test_c2_c4["t_stat"],
-        "welch_p_value_c2_vs_c4": test_c2_c4["p_value"],
+        "mean_post_switch_payoff_tau4_affect": _mean(affect_payoff),
+        "mean_post_switch_payoff_tau4_no_affect": _mean(control_payoff),
+        "payoff_difference_tau4_affect_minus_tau4_no_affect": _mean(affect_payoff) - _mean(control_payoff),
+        "detection_latency_difference_tau4_no_affect_minus_tau4_affect": (
+            _mean(control_detection) - _mean(affect_detection)
+        ),
+        "recovery_latency_difference_tau4_no_affect_minus_tau4_affect": (
+            _mean(control_recovery) - _mean(affect_recovery)
+        ),
+        "welch_t_stat": payoff_test["t_stat"],
+        "welch_p_value": payoff_test["p_value"],
     }
 
 
-def test_h5_partner_selection(results: pd.DataFrame) -> dict:
-    """Estimate whether higher β is associated with more partner selection in variant B."""
+def test_h5_precision_vs_reward(results: pd.DataFrame) -> dict:
+    """Precision tracking should beat reward averaging around stance shifts."""
 
-    if "raw_action" not in results.columns or not (results["raw_action"] > 1).any():
+    affect_name = "tau4_affect"
+    reward_name = "reward_average"
+    affect_payoff = _switch_window_metric(results, affect_name, "mean_payoff", window=5)
+    reward_payoff = _switch_window_metric(results, reward_name, "mean_payoff", window=5)
+    affect_detection = _latency_metric(results, affect_name, "detection_latency")
+    reward_detection = _latency_metric(results, reward_name, "detection_latency")
+    affect_stance = _switch_window_metric(results, affect_name, "mean_stance_accuracy", window=5)
+    reward_stance = _switch_window_metric(results, reward_name, "mean_stance_accuracy", window=5)
+    if affect_payoff.size == 0 or reward_payoff.size == 0:
         return {
             "hypothesis": "H5",
-            "label": "partner_selection",
+            "label": "precision_vs_reward",
             "available": False,
-            "reason": "Partner selection is only available when assignment_mode='agent_choice' (variant B-style runs).",
+            "reason": "Tau-4 affect and reward-average preset runs are required.",
         }
 
-    affective = results[results["condition"] == 2].copy()
-    if affective.empty:
-        return {
-            "hypothesis": "H5",
-            "label": "partner_selection",
-            "available": False,
-            "reason": "Condition 2 rows are missing from the results.",
-        }
-
-    records: list[dict] = []
-    for seed, group in affective.groupby("seed"):
-        group = group.sort_values("round")
-        selections = group["partner_idx"].value_counts().to_dict()
-        beta_by_partner: dict[int, list[float]] = {}
-        max_len = 0
-        for _, row in group.iterrows():
-            betas = _ensure_array(row["betas"])
-            max_len = max(max_len, len(betas))
-            for partner_idx, beta in enumerate(betas):
-                beta_by_partner.setdefault(int(partner_idx), []).append(float(beta))
-        partner_rows = []
-        for partner_idx in range(max_len):
-            beta_values = beta_by_partner.get(partner_idx, [])
-            partner_rows.append(
-                {
-                    "partner_idx": int(partner_idx),
-                    "mean_beta": _mean(beta_values),
-                    "selection_count": int(selections.get(partner_idx, 0)),
-                }
-            )
-        partner_frame = pd.DataFrame(partner_rows)
-        if len(partner_frame) < 2 or partner_frame["selection_count"].nunique() < 2:
-            continue
-        corr = partner_frame["mean_beta"].corr(partner_frame["selection_count"])
-        if np.isfinite(corr):
-            records.append({"seed": int(seed), "beta_selection_corr": float(corr)})
-
-    correlations = np.asarray([row["beta_selection_corr"] for row in records], dtype=float)
-    if correlations.size == 0:
-        return {
-            "hypothesis": "H5",
-            "label": "partner_selection",
-            "available": False,
-            "reason": "Insufficient variation to estimate beta-selection correlations.",
-        }
-
-    t_stat, p_value = (float("nan"), float("nan"))
-    if correlations.size >= 2:
-        t_stat, p_value = stats.ttest_1samp(correlations, popmean=0.0)
-
+    overall_test = _welch_ttest(affect_payoff, reward_payoff)
     return {
         "hypothesis": "H5",
-        "label": "partner_selection",
+        "label": "precision_vs_reward",
         "available": True,
-        "num_seeds": int(correlations.size),
-        "mean_beta_selection_correlation": float(correlations.mean()),
-        "std_beta_selection_correlation": _std(correlations),
-        "positive_seed_fraction": float(np.mean(correlations > 0.0)),
-        "t_stat_vs_zero": float(t_stat),
-        "p_value_vs_zero": float(p_value),
+        "mean_post_switch_payoff_tau4_affect": _mean(affect_payoff),
+        "mean_post_switch_payoff_reward_average": _mean(reward_payoff),
+        "payoff_difference_tau4_affect_minus_reward_average": _mean(affect_payoff) - _mean(reward_payoff),
+        "stance_accuracy_difference_tau4_affect_minus_reward_average": _mean(affect_stance) - _mean(reward_stance),
+        "detection_latency_difference_reward_average_minus_tau4_affect": (
+            _mean(reward_detection) - _mean(affect_detection)
+        ),
+        "welch_t_stat": overall_test["t_stat"],
+        "welch_p_value": overall_test["p_value"],
+        "cohens_d": _cohen_d(affect_payoff, reward_payoff),
     }
 
 
 def run_all_hypothesis_tests(results: pd.DataFrame) -> dict:
-    """Run the full H1-H5 suite and return a JSON-safe dictionary."""
+    """Run the current H1-H5 suite and return a JSON-safe dictionary."""
 
     tests = {
-        "h1": test_h1_depth_compensation(results),
-        "h2": test_h2_lesion_dissociation(results),
-        "h3": test_h3_precision_vs_reward(results),
-        "h4": test_h4_noise_robustness(results),
-        "h5": test_h5_partner_selection(results),
+        "h1": test_h1_orthogonal_augmentation(results),
+        "h2": test_h2_depth_matters(results),
+        "h3": test_h3_lesion_dissociation(results),
+        "h4": test_h4_betrayal_recovery(results),
+        "h5": test_h5_precision_vs_reward(results),
     }
     return {"tests": tests}
+
+
+test_h1_depth_compensation = test_h1_orthogonal_augmentation

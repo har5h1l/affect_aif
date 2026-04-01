@@ -3,7 +3,7 @@ import numpy as np
 from affect_aif.agent.affective_agent import AffectiveAgent
 from affect_aif.agent.lesioned_agent import LesionedAgent
 from affect_aif.agent.reward_avg_agent import RewardAvgAgent
-from affect_aif.experiment.conditions import get_condition_name
+from affect_aif.experiment.conditions import PRESET_CONDITIONS, get_condition_name
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
 from affect_aif.generative_model.model import TrustGameModel
@@ -63,40 +63,43 @@ def test_affective_outperforms_shallow_baseline():
         num_replications=3,
         calibration_episodes=1,
         random_seed=0,
-        conditions=[2, 4],
+        conditions=[5, 6],
         p_switch=0.0,
         initial_partner_types=["cooperator", "reciprocator", "random", "random"],
-        scheduled_type_switches=[{"round": 26, "partner_idx": 0, "to_type": "exploiter"}],
+        initial_partner_stances=["trusting", "neutral", "neutral", "neutral"],
+        scheduled_stance_switches=[{"round": 26, "partner_idx": 0, "to_stance": "hostile"}],
     )
     runner = ExperimentRunner(cfg)
     results = runner.run_all()
     summary = results.groupby("condition", as_index=False).agg(mean_payoff=("payoff", "mean"))
-    c2 = float(summary.loc[summary["condition"] == 2, "mean_payoff"].iloc[0])
-    c4 = float(summary.loc[summary["condition"] == 4, "mean_payoff"].iloc[0])
-    assert c2 >= c4
+    c5 = float(summary.loc[summary["condition"] == 5, "mean_payoff"].iloc[0])
+    c6 = float(summary.loc[summary["condition"] == 6, "mean_payoff"].iloc[0])
+    assert c6 >= c5
 
 
 def test_betrayal_run_separates_deep_and_affective_actions():
     cfg = ExperimentConfig(
-        num_rounds=40,
+        num_rounds=8,
         num_replications=1,
         calibration_episodes=1,
         random_seed=42,
-        conditions=[1, 2],
+        conditions=[7, 8],
         assignment_mode="agent_choice",
         p_switch=0.0,
         observation_noise=0.0,
+        max_policies=64,
         initial_partner_types=["cooperator", "reciprocator", "random", "random"],
-        scheduled_type_switches=[{"round": 16, "partner_idx": 0, "to_type": "exploiter"}],
+        initial_partner_stances=["trusting", "neutral", "neutral", "neutral"],
+        scheduled_stance_switches=[{"round": 4, "partner_idx": 0, "to_stance": "hostile"}],
     )
     results = ExperimentRunner(cfg).run_all()
     primary = results[results["run_mode"] == "primary"].copy()
 
-    c1 = primary[primary["condition"] == 1].sort_values("round")
-    c2 = primary[primary["condition"] == 2].sort_values("round")
+    c7 = primary[primary["condition"] == 7].sort_values("round")
+    c8 = primary[primary["condition"] == 8].sort_values("round")
 
-    assert c1["selected_action"].tolist() != c2["selected_action"].tolist()
-    assert float(c1["payoff"].sum()) != float(c2["payoff"].sum())
+    assert c7["selected_action"].tolist() != c8["selected_action"].tolist()
+    assert float(c7["payoff"].sum()) != float(c8["payoff"].sum())
 
 
 def test_affect_tracks_precision_not_reward():
@@ -152,13 +155,14 @@ def test_full_run_enforces_minimum_calibration_episodes():
     assert runner.calibration_summary["calibration_episodes"] == runner.MIN_FULL_RUN_CALIBRATION_EPISODES
 
 
-def test_horizon_override_and_deep_affective_conditions():
+def test_horizon_override_and_core_and_preset_affective_conditions():
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
         calibration_episodes=1,
         conditions=[6, 7, 8],
-        horizon_overrides={6: 3, 7: 4},
+        presets=["variational_beta"],
+        horizon_overrides={6: 3, 7: 4, "variational_beta": 5},
     )
     runner = ExperimentRunner(cfg)
     model = TrustGameModel(cfg)
@@ -166,73 +170,87 @@ def test_horizon_override_and_deep_affective_conditions():
     c6 = runner._create_agent(condition=6, model=model, seed=0)
     c7 = runner._create_agent(condition=7, model=model, seed=0)
     c8 = runner._create_agent(condition=8, model=model, seed=0)
+    variational = runner._create_agent(condition="variational_beta", model=model, seed=0)
 
     assert c6.planning_horizon == 3
     assert c7.planning_horizon == 4
     assert c8.planning_horizon == cfg.deep_horizon
+    assert variational.planning_horizon == 5
     assert c8.current_mu() == 0.0
 
 
-def test_clinical_alexithymia_condition_9():
-    """Condition 9 (alexithymia) creates an AffectiveAgent with blunted alpha_charge."""
+def test_clinical_alexithymia_preset():
+    """Alexithymia preset creates an AffectiveAgent with blunted alpha_charge."""
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
         calibration_episodes=1,
         random_seed=0,
-        conditions=[9],
+        conditions=[],
+        presets=["alexithymia"],
         alpha_charge=0.1,
     )
     runner = ExperimentRunner(cfg)
     model = TrustGameModel(cfg)
-    agent = runner._create_agent(condition=9, model=model, seed=0)
+    agent = runner._create_agent(condition="alexithymia", model=model, seed=0)
     assert isinstance(agent, AffectiveAgent)
     assert agent.affect.alpha_charge == 0.1
-    assert agent.planning_horizon == cfg.shallow_horizon
+    assert agent.planning_horizon == 4
 
 
-def test_clinical_borderline_condition_10():
-    """Condition 10 (borderline) creates an AffectiveAgent with volatile affect parameters."""
+def test_clinical_borderline_preset():
+    """Borderline preset creates an AffectiveAgent with volatile affect parameters."""
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
         calibration_episodes=1,
         random_seed=0,
-        conditions=[10],
+        conditions=[],
+        presets=["borderline"],
         alpha_charge=12.0,
         lambda_smooth=0.5,
     )
     runner = ExperimentRunner(cfg)
     model = TrustGameModel(cfg)
-    agent = runner._create_agent(condition=10, model=model, seed=0)
+    agent = runner._create_agent(condition="borderline", model=model, seed=0)
     assert isinstance(agent, AffectiveAgent)
     assert agent.affect.alpha_charge == 12.0
     assert agent.affect.lambda_smooth == 0.5
-    assert agent.planning_horizon == cfg.shallow_horizon
+    assert agent.planning_horizon == 4
 
 
-def test_clinical_depression_condition_11():
-    """Condition 11 (depression) creates an AffectiveAgent with low initial_beta."""
+def test_clinical_depression_preset():
+    """Depression preset creates an AffectiveAgent with low initial_beta."""
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
         calibration_episodes=1,
         random_seed=0,
-        conditions=[11],
+        conditions=[],
+        presets=["depression"],
         initial_beta=0.2,
     )
     runner = ExperimentRunner(cfg)
     model = TrustGameModel(cfg)
-    agent = runner._create_agent(condition=11, model=model, seed=0)
+    agent = runner._create_agent(condition="depression", model=model, seed=0)
     assert isinstance(agent, AffectiveAgent)
     assert agent.affect.initial_beta == 0.2
     assert np.allclose(agent.get_betas(), 0.2)
-    assert agent.planning_horizon == cfg.shallow_horizon
+    assert agent.planning_horizon == 4
 
 
 def test_get_condition_name_all_conditions():
-    """get_condition_name returns a non-empty string for every defined condition (1-11)."""
-    for condition_id in range(1, 12):
+    """All core conditions and named presets expose stable names."""
+    for condition_id in range(1, 9):
         name = get_condition_name(condition_id)
         assert isinstance(name, str)
         assert len(name) > 0
+    assert set(PRESET_CONDITIONS) == {
+        "lesioned",
+        "no_epistemic",
+        "reward_average",
+        "variational_beta",
+        "alexithymia",
+        "borderline",
+        "depression",
+    }

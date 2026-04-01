@@ -4,12 +4,13 @@
   "num_rounds": 120,
   "p_switch": 0.0,
   "assignment_mode": "agent_choice",
-  "observation_noise": 0.1,
+  "observation_noise": 0.0,
   "correlation_pairs": [],
   "correlation_strength": 0.9,
   "initial_partner_types": ["cooperator", "reciprocator", "cooperator", "random"],
-  "scheduled_type_switches": [
-    {"round": 31, "partner_idx": 0, "to_type": "exploiter"}
+  "initial_partner_stances": ["trusting", "neutral", "neutral", "neutral"],
+  "scheduled_stance_switches": [
+    {"round": 31, "partner_idx": 0, "to_stance": "hostile"}
   ],
   "mutual_coop": [3.0, 3.0],
   "sucker": [-1.0, 5.0],
@@ -30,9 +31,10 @@
   "initial_beta": 0.5,
   "lesion_mode": "decouple",
   "num_replications": 5,
-  "calibration_episodes": 5,
+  "calibration_episodes": 3,
   "random_seed": 42,
-  "conditions": [2],
+  "conditions": [6],
+  "presets": [],
   "partner_types": ["cooperator", "reciprocator", "exploiter", "random"],
   "run_sensitivity": false
 }

@@ -9,13 +9,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from affect_aif.agent.affective_agent import AffectiveAgent
 from affect_aif.agent.base_agent import BaseAgent
-from affect_aif.agent.lesioned_agent import LesionedAgent
-from affect_aif.agent.reward_avg_agent import RewardAvgAgent
-from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
 from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.experiment.conditions import get_condition_name
+from affect_aif.experiment.conditions import get_condition_name, resolve_condition_spec
 from affect_aif.experiment.calibration import (
     MIN_FULL_RUN_CALIBRATION_EPISODES as CALIBRATION_MIN_FULL_RUN_EPISODES,
     build_calibration_summary,
@@ -25,11 +21,12 @@ from affect_aif.experiment.calibration import (
     resolve_calibration_episodes,
 )
 from affect_aif.experiment.config import ExperimentConfig
+from affect_aif.experiment.factory import create_agent, create_env, create_model
 from affect_aif.experiment.logger import MetricLogger
 from affect_aif.experiment.progress import ProgressReporter, create_progress_reporter
-from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
+from affect_aif.generative_model.model import TrustGameModel
 
-from affect_aif.experiment.constants import PRIMARY_CONDITIONS_REQUIRING_MU, SENSITIVITY_CONDITIONS
+from affect_aif.experiment.constants import SENSITIVITY_CONDITIONS
 
 
 class ExperimentRunner:
@@ -47,126 +44,32 @@ class ExperimentRunner:
         )
 
     def _create_model(self) -> TrustGameModel:
-        if self.config.payoff_mode == "graded":
-            return GradedTrustGameModel(asdict(self.config))
-        return TrustGameModel(asdict(self.config))
+        return create_model(self.config)
 
     def _create_env(self, seed: int) -> TrustGameEnv:
-        if self.config.payoff_mode == "graded":
-            return GradedTrustGameEnv(self.config, seed=seed)
-        return TrustGameEnv(self.config, seed=seed)
+        return create_env(self.config, seed=seed)
 
-    def _planning_horizon_for(self, condition: int, default_horizon: int) -> int:
-        return int(self.config.horizon_overrides.get(int(condition), default_horizon))
-
-    def _create_agent(self, condition: int, model: TrustGameModel, seed: int) -> BaseAgent:
-        matrices = model.get_matrices()
-        common = dict(
-            A=matrices[0],
-            B=matrices[1],
-            C=matrices[2],
-            D=matrices[3],
-            model=model,
-            gamma=self.config.gamma,
-            lr=self.config.lr,
-            action_sampling=self.config.action_sampling,
-            max_policies=self.config.max_policies,
-            reference_horizon=self.config.deep_horizon,
-            seed=seed,
-            affect_modulates_precision=self.config.affect_modulates_precision,
-            use_parameter_learning=self.config.use_parameter_learning,
-        )
-        if condition == 1:
-            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, self.config.deep_horizon), **common)
-        if condition == 2:
-            return AffectiveAgent(
-                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
-                num_partners=self.config.num_partners,
-                lambda_smooth=self.config.lambda_smooth,
-                alpha_charge=self.config.alpha_charge,
-                sigma_0_sq=self.config.sigma_0_sq,
-                initial_beta=self.config.initial_beta,
-                beta_mode=self.config.beta_mode,
-                num_levels=self.config.beta_num_levels,
-                persistence=self.config.beta_persistence,
-                mu=float(self.config.mu or 0.0),
-                **common,
-            )
-        if condition == 3:
-            return LesionedAgent(
-                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
-                num_partners=self.config.num_partners,
-                lambda_smooth=self.config.lambda_smooth,
-                alpha_charge=self.config.alpha_charge,
-                sigma_0_sq=self.config.sigma_0_sq,
-                initial_beta=self.config.initial_beta,
-                lesion_mode=self.config.lesion_mode,
-                mu=float(self.config.mu or 0.0),
-                **common,
-            )
-        if condition == 4:
-            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon), **common)
-        if condition == 5:
-            return RewardAvgAgent(
-                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
-                num_partners=self.config.num_partners,
-                lambda_smooth=self.config.lambda_smooth,
-                mu=float(self.config.mu or 0.0),
-                **common,
-            )
-        if condition == 6:
-            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, 3), **common)
-        if condition == 7:
-            return BaseAgent(planning_horizon=self._planning_horizon_for(condition, 4), **common)
-        if condition == 8:
-            return AffectiveAgent(
-                planning_horizon=self._planning_horizon_for(condition, self.config.deep_horizon),
-                num_partners=self.config.num_partners,
-                lambda_smooth=self.config.lambda_smooth,
-                alpha_charge=self.config.alpha_charge,
-                sigma_0_sq=self.config.sigma_0_sq,
-                initial_beta=self.config.initial_beta,
-                beta_mode=self.config.beta_mode,
-                num_levels=self.config.beta_num_levels,
-                persistence=self.config.beta_persistence,
-                mu=float(self.config.mu or 0.0),
-                **common,
-            )
-        if condition in (9, 10, 11):
-            return AffectiveAgent(
-                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
-                num_partners=self.config.num_partners,
-                lambda_smooth=self.config.lambda_smooth,
-                alpha_charge=self.config.alpha_charge,
-                sigma_0_sq=self.config.sigma_0_sq,
-                initial_beta=self.config.initial_beta,
-                beta_mode=self.config.beta_mode,
-                num_levels=self.config.beta_num_levels,
-                persistence=self.config.beta_persistence,
-                mu=float(self.config.mu or 0.0),
-                **common,
-            )
-        if condition == 12:
-            return AffectiveAgent(
-                planning_horizon=self._planning_horizon_for(condition, self.config.shallow_horizon),
-                num_partners=self.config.num_partners,
-                lambda_smooth=self.config.lambda_smooth,
-                alpha_charge=self.config.alpha_charge,
-                sigma_0_sq=self.config.sigma_0_sq,
-                initial_beta=self.config.initial_beta,
-                beta_mode="variational",
-                num_levels=self.config.beta_num_levels,
-                persistence=self.config.beta_persistence,
-                mu=float(self.config.mu or 0.0),
-                **common,
-            )
-        raise ValueError(f"Unknown condition '{condition}'.")
+    def _create_agent(self, condition: int | str, model: TrustGameModel, seed: int) -> BaseAgent:
+        return create_agent(self.config, condition, model, seed)
 
     def _resolve_calibration_episodes(self, enforce_minimum: bool) -> int:
         return resolve_calibration_episodes(self.config, enforce_minimum=enforce_minimum)
 
+    def _calibration_condition(self) -> int:
+        configured = list(self.config.conditions) + list(self.config.presets)
+        configured_base_conditions = [
+            int(condition)
+            for condition in configured
+            if isinstance(condition, int) and resolve_condition_spec(condition).agent_kind == "base"
+        ]
+        if configured_base_conditions:
+            return max(configured_base_conditions)
+        # Named presets are tau-4 based; use the matched no-affect core condition.
+        return 5
+
     def needs_mu_calibration(self) -> bool:
-        return any(condition in PRIMARY_CONDITIONS_REQUIRING_MU for condition in self.config.conditions)
+        configured = list(self.config.conditions) + list(self.config.presets)
+        return any(resolve_condition_spec(condition).agent_kind != "base" for condition in configured)
 
     def build_zero_calibration_summary(self) -> dict[str, float | int]:
         return build_zero_calibration_summary(self.config)
@@ -175,13 +78,13 @@ class ExperimentRunner:
         self,
         rows: list[dict],
         *,
-        condition: int,
+        condition: int | str,
         config_path: str | None = None,
         config_name: str | None = None,
         batch_id: str | None = None,
     ) -> list[dict]:
         for row in rows:
-            row["condition_name"] = get_condition_name(condition)
+            row["condition_name"] = resolve_condition_spec(condition).name
             if self.calibration_summary is not None:
                 row["mu_source"] = "derived"
                 row["calibration_mean_abs_efe_per_step"] = self.calibration_summary["mean_abs_efe_per_step"]
@@ -201,7 +104,7 @@ class ExperimentRunner:
         agent: BaseAgent,
         env: TrustGameEnv,
         seed: int,
-        condition: int,
+        condition: int | str,
         replication: int = 0,
     ) -> list[dict]:
         logger = MetricLogger(num_rounds=self.config.num_rounds, num_partners=self.config.num_partners)
@@ -276,11 +179,16 @@ class ExperimentRunner:
                 partner_action=result["partner_action"],
                 payoff=result["agent_payoff"],
                 true_partner_type=result["true_partner_type"],
+                true_partner_stance=result.get("true_partner_stance"),
             )
             partner_belief = agent.get_partner_type_belief(result["partner_idx"])
             inferred_type_idx = int(np.argmax(partner_belief))
             inferred_type = agent.model.partner_type_names[inferred_type_idx]
             inferred_correct = inferred_type == result["true_partner_type"]
+            stance_belief = agent.get_partner_stance_belief(result["partner_idx"])
+            inferred_stance_idx = int(np.argmax(stance_belief))
+            inferred_stance = agent.model.stance_names[inferred_stance_idx]
+            inferred_stance_correct = inferred_stance == result.get("true_partner_stance")
             self.progress.emit(
                 "belief_update_end",
                 condition=condition,
@@ -295,6 +203,9 @@ class ExperimentRunner:
             agent_metrics = agent.get_metrics()
             agent_metrics["inferred_type"] = inferred_type
             agent_metrics["inferred_type_correct"] = inferred_correct
+            agent_metrics["inferred_stance"] = inferred_stance
+            agent_metrics["inferred_stance_correct"] = inferred_stance_correct
+            agent_metrics["inferred_joint_correct"] = bool(inferred_correct and inferred_stance_correct)
             agent_metrics["predictive_log_lik"] = predictive_log_lik
             logger.log_round(
                 round_idx=round_idx,
@@ -326,9 +237,10 @@ class ExperimentRunner:
         )
         model = self._create_model()
         env = self._create_env(seed=seed)
-        agent = self._create_agent(condition=1, model=model, seed=seed)
-        calibration_records = self._run_episode(agent=agent, env=env, seed=seed, condition=1, replication=episode_idx)
-        mean_abs_step_efe = float(np.nanmean([row["mean_abs_step_efe"] for row in calibration_records])) if calibration_records else 0.0
+        agent = self._create_agent(condition=self._calibration_condition(), model=model, seed=seed)
+        context = env.reset()
+        agent.plan_and_act(context["active_partner"])
+        mean_abs_step_efe = float(agent.get_metrics()["mean_abs_step_efe"])
         self.progress.emit(
             "calibration_episode_end",
             episode_idx=episode_idx,
@@ -359,7 +271,7 @@ class ExperimentRunner:
     def run_replication(
         self,
         *,
-        condition: int,
+        condition: int | str,
         replication: int,
         seed: int,
         config_path: str | None = None,
@@ -421,12 +333,13 @@ class ExperimentRunner:
 
         records: list[dict] = []
         reps_since_checkpoint = 0
-        for condition in self.config.conditions:
+        configured_conditions: list[int | str] = list(self.config.conditions) + list(self.config.presets)
+        for condition in configured_conditions:
             self.progress.emit(
                 "condition_start",
                 condition=condition,
                 replication=0,
-                condition_name=get_condition_name(condition),
+                condition_name=resolve_condition_spec(condition).name,
             )
             for replication in range(self.config.num_replications):
                 seed = self.config.random_seed + replication
@@ -497,7 +410,7 @@ class ExperimentRunner:
         *,
         parameter_name: str,
         parameter_value: float,
-        condition: int,
+        condition: int | str,
         replication: int,
         seed: int,
         config_path: str | None = None,
@@ -518,7 +431,7 @@ class ExperimentRunner:
             agent = self._create_agent(condition=condition, model=model, seed=seed)
             rows = self._run_episode(agent=agent, env=env, seed=seed, condition=condition, replication=replication)
             for row in rows:
-                row["condition_name"] = get_condition_name(condition)
+                row["condition_name"] = resolve_condition_spec(condition).name
                 row["mu_source"] = "sensitivity"
                 row["calibration_mean_abs_efe_per_step"] = self.calibration_summary["mean_abs_efe_per_step"]
                 row["derived_mu"] = base_mu
@@ -586,7 +499,7 @@ def run_calibration_episode_task(config_payload: dict[str, Any], episode_idx: in
 def run_primary_replication_task(
     config_payload: dict[str, Any],
     *,
-    condition: int,
+    condition: int | str,
     replication: int,
     seed: int,
     calibration_summary: dict[str, Any] | None,
@@ -610,7 +523,7 @@ def run_primary_replication_task(
     )
     return {
         "task_kind": "primary",
-        "condition": int(condition),
+        "condition": condition,
         "replication": int(replication),
         "seed": int(seed),
         "records": rows,
@@ -623,7 +536,7 @@ def run_sensitivity_replication_task(
     *,
     parameter_name: str,
     parameter_value: float,
-    condition: int,
+    condition: int | str,
     replication: int,
     seed: int,
     calibration_summary: dict[str, Any],
@@ -648,7 +561,7 @@ def run_sensitivity_replication_task(
     )
     return {
         "task_kind": "sensitivity",
-        "condition": int(condition),
+        "condition": condition,
         "replication": int(replication),
         "seed": int(seed),
         "parameter_name": parameter_name,

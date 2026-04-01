@@ -21,8 +21,9 @@ from affect_aif.experiment.calibration import (
     resolve_calibration_episodes,
     serialize_config,
 )
+from affect_aif.experiment.conditions import resolve_condition_spec
 from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.constants import PRIMARY_CONDITIONS_REQUIRING_MU, SENSITIVITY_CONDITIONS
+from affect_aif.experiment.constants import SENSITIVITY_CONDITIONS
 from affect_aif.experiment.tasks import (
     run_calibration_episode_task,
     run_primary_replication_task,
@@ -116,8 +117,9 @@ class BatchExperimentRunner:
             config.verbose = False
             config.gif_after_run = False
             config.gif_output_dir = None
+            configured_conditions = list(config.conditions) + list(config.presets)
             needs_calibration = (
-                any(condition in PRIMARY_CONDITIONS_REQUIRING_MU for condition in config.conditions)
+                any(resolve_condition_spec(condition).agent_kind != "base" for condition in configured_conditions)
                 and config.deep_horizon > config.shallow_horizon
             )
             calibration_episodes = resolve_calibration_episodes(config, enforce_minimum=True) if needs_calibration else 0
@@ -141,8 +143,13 @@ class BatchExperimentRunner:
         future_map: dict[Any, tuple[str, ConfigBatchState, dict[str, Any]]],
     ):
         calibration_summary = state.calibration_summary
-        sensitivity_conditions = [condition for condition in state.config.conditions if condition in SENSITIVITY_CONDITIONS]
-        for condition in state.config.conditions:
+        configured_conditions = list(state.config.conditions) + list(state.config.presets)
+        sensitivity_conditions = [
+            condition
+            for condition in configured_conditions
+            if isinstance(condition, int) and condition in SENSITIVITY_CONDITIONS
+        ]
+        for condition in configured_conditions:
             for replication in range(state.config.num_replications):
                 seed = state.config.random_seed + replication
                 future = executor.submit(
@@ -244,7 +251,8 @@ class BatchExperimentRunner:
                         )
                         future_map[future] = ("calibration", state, {"episode_idx": episode_idx, "seed": seed})
                 else:
-                    if any(condition in PRIMARY_CONDITIONS_REQUIRING_MU for condition in state.config.conditions):
+                    configured_conditions = list(state.config.conditions) + list(state.config.presets)
+                    if any(resolve_condition_spec(condition).agent_kind != "base" for condition in configured_conditions):
                         state.calibration_summary = build_zero_calibration_summary(state.config)
                     else:
                         state.calibration_summary = None

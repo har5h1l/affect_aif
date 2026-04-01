@@ -14,7 +14,7 @@ def test_runner_uses_numeric_condition_and_condition_name():
     config = BenchmarkConfig.from_dict(
         {
             "backends": ["trust"],
-            "agents": ["affective_shallow", "random"],
+            "agents": ["tau4_affect", "random"],
             "num_replications": 1,
             "num_rounds": 5,
             "random_seed": 1,
@@ -27,10 +27,10 @@ def test_runner_uses_numeric_condition_and_condition_name():
     assert set(results["backend"].unique()) == {"trust"}
     assert set(results["scenario"].unique()) == {"resource_sharing"}
     assert np.issubdtype(results["condition"].dtype, np.integer)
-    affective_rows = results[results["agent_name"] == "affective_shallow"]
+    affective_rows = results[results["agent_name"] == "tau4_affect"]
     random_rows = results[results["agent_name"] == "random"]
-    assert set(affective_rows["condition"].unique()) == {2}
-    assert set(affective_rows["condition_name"].unique()) == {"affective_shallow"}
+    assert set(affective_rows["condition"].unique()) == {6}
+    assert set(affective_rows["condition_name"].unique()) == {"tau4_affect"}
     assert set(random_rows["condition"].unique()) == {-2}
     assert set(random_rows["condition_name"].unique()) == {"random"}
 

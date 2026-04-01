@@ -28,7 +28,9 @@ class ExperimentConfig:
     correlation_pairs: list[list[int]] = field(default_factory=list)
     correlation_strength: float = 0.9
     initial_partner_types: list[str] | None = None
+    initial_partner_stances: list[str] | None = None
     scheduled_type_switches: list[dict] = field(default_factory=list)
+    scheduled_stance_switches: list[dict] = field(default_factory=list)
 
     payoff_mode: str = "binary"
     num_investment_levels: int = 6
@@ -48,7 +50,7 @@ class ExperimentConfig:
 
     deep_horizon: int = 8
     shallow_horizon: int = 2
-    horizon_overrides: dict[int, int] = field(default_factory=dict)
+    horizon_overrides: dict[int | str, int] = field(default_factory=dict)
     max_policies: int = 4096
 
     lambda_smooth: float = 0.6
@@ -65,7 +67,8 @@ class ExperimentConfig:
     num_replications: int = 100
     calibration_episodes: int = 20
     random_seed: int = 42
-    conditions: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 5])
+    conditions: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 5, 6, 7, 8])
+    presets: list[str] = field(default_factory=list)
     partner_types: list[str] = field(default_factory=lambda: list(PARTNER_TYPE_ORDER))
 
     run_sensitivity: bool = False
@@ -97,7 +100,13 @@ class ExperimentConfig:
         self.verbosity_include_calibration = bool(self.verbosity_include_calibration)
         self.gif_after_run = bool(self.gif_after_run)
         self.gif_output_dir = None if self.gif_output_dir is None else str(self.gif_output_dir)
-        self.horizon_overrides = {int(key): int(value) for key, value in dict(self.horizon_overrides).items()}
+        normalized_horizon_overrides: dict[int | str, int] = {}
+        for key, value in dict(self.horizon_overrides).items():
+            if isinstance(key, str) and not key.strip().isdigit():
+                normalized_horizon_overrides[str(key).strip()] = int(value)
+            else:
+                normalized_horizon_overrides[int(key)] = int(value)
+        self.horizon_overrides = normalized_horizon_overrides
 
     @classmethod
     def from_dict(cls, data: dict) -> ExperimentConfig:

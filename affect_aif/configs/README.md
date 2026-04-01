@@ -10,10 +10,15 @@ The files here are loaded through `ExperimentConfig.from_json(...)` and the benc
 
 ## Key Groups
 
-- `default.json`, `betrayal_stress.json`: primary experiment configs
+- `default.json`, `betrayal_stress.json`: primary action-dependent trust configs
 - `graded_trust.json`, `graded_betrayal_*.json`: graded-task variants
 - `benchmark_*.json`: benchmark runner configs
 - `figure_*.json`, `variant_*.json`, `horizon_sweep.json`, `cautious_prior.json`, `deep_affect_test.json`: documented workflow variants
+
+The supported trust configs use the new study matrix:
+- Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`
+- Named presets = `lesioned`, `reward_average`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`
+- Betrayal-style runs should use `initial_partner_stances` and `scheduled_stance_switches`
 
 ## Internal / Compatibility Notes
 

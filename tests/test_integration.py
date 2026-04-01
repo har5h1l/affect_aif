@@ -145,7 +145,7 @@ def test_visualization_handles_betrayal_switch_runs(tmp_path, betrayal_config):
     loaded = load_results(str(output_csv))
     written = build_run_gifs(loaded, str(tmp_path / "gifs"))
 
-    assert any(bool(ids) for ids in loaded["scheduled_switch_partner_ids"].tolist())
+    assert any(bool(ids) for ids in loaded["scheduled_stance_switch_partner_ids"].tolist())
     assert len(written) == len(loaded[loaded["run_mode"] == "primary"].groupby(["condition", "seed"]))
 
 

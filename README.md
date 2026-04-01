@@ -17,6 +17,12 @@ pre-commit install
 
 See [docs/cli.md](docs/cli.md) for the command-line reference and [results/README.md](results/README.md) for the local results layout.
 
+The supported trust-game workflow now uses the action-dependent partner redesign:
+- partner behavior depends on latent `type × stance`
+- stance changes are action-dependent and can also be scheduled explicitly with `scheduled_stance_switches`
+- the core study matrix is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`
+- lesion, reward-average, no-epistemic, variational, and clinical runs are named presets (`lesioned`, `reward_average`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`)
+
 Common entry points:
 
 ```bash
@@ -50,4 +56,4 @@ python scripts/analyze_benchmark.py --results results/benchmark/benchmark_result
 
 - The main package exposes the supported runner/config entry points at the top level.
 - The trust benchmark is the supported benchmark surface; the local CvC path and the scripted gridworld adapter remain separate compatibility paths.
-- The discrete-beta prototype is archived; the supported affective path uses the current `affect/` helpers and the variational `Condition 12` implementation.
+- The discrete-beta prototype is archived; the supported affective path uses the current `affect/` helpers and the `variational_beta` preset.

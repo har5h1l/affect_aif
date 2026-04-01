@@ -2,6 +2,17 @@
 
 ## A Theory of Per-Partner Metacognitive Affective States as Precision Controllers in Multi-Agent Social Learning
 
+## Current Trust-Game Status
+
+The supported trust-family experiments now use the action-dependent stance redesign from [docs/action-dependent-partner-design.md](docs/action-dependent-partner-design.md).
+
+- The hidden social state is `partner type × partner stance`, not partner type plus exploiter phase.
+- Stance is endogenous: partners maintain a posterior over the agent's character and map that posterior to `trusting`, `neutral`, or `hostile`.
+- The agent's generative model includes an explicit stance factor and action-dependent `B_stance`, so deeper planning is now structurally informative.
+- The core claim is no longer "depth is irrelevant." The current claim is: depth matters in action-dependent social environments, and per-partner affective precision adds orthogonal value beyond that depth.
+
+Unless a section explicitly says "archived" or "prototype", read older references to exploiter phases, `switch_round`, or flat depth curves as superseded by the current redesign.
+
 ---
 
 ## 1. Background
@@ -69,7 +80,7 @@ This triple dissociation — outside-in empathy, cognitive ToM, and inside-out p
 
 ### 2.1 Core Claim
 
-Affect provides orthogonal augmentation to explicit planning in social inference. Specifically, per-partner metacognitive affective states — slow-timescale hierarchical representations tracking the reliability of one's social model for each partner — function as learned precision weights that improve policy evaluation by adding partner-specific confidence information that no amount of additional explicit lookahead recovers in the current task.
+Affect provides orthogonal augmentation to explicit planning in social inference. Specifically, per-partner metacognitive affective states — slow-timescale auxiliary summaries tracking the reliability of one's social model for each partner — function as learned precision weights that improve policy evaluation by adding partner-specific confidence information that additional explicit lookahead does not recover in the current shipped binary-action task.
 
 ### 2.2 What the Affective State Tracks
 
@@ -89,16 +100,16 @@ The difference manifests in three ways:
 
 ### 2.3 Three-Level Architecture
 
-The model has three hierarchical levels, each operating on a different timescale:
+The current shipped experiments are best read as a single hidden-state inference problem plus an auxiliary affective summary:
 
-**Level 1 — Observations (fastest timescale: per-trial)**
-Trial-by-trial outcomes of social interactions: partner's action (cooperate/defect), own payoff, any observable behavioral cues. Updated every round.
+**Level 1 — Directly observed task context (fastest timescale: per-trial)**
+Partner identity / interaction context and trial outcome are task-given. The agent observes which partner is being played and what happened on that round; context is not a latent factor in the main experiments.
 
 **Level 2 — Cognitive social model (medium timescale: parameter learning)**
-Latent states encoding each partner's type/strategy (e.g., cooperator, reciprocator, exploiter, random) and potentially their beliefs about the agent. This is the standard theory-of-mind layer. Dirichlet parameters accumulate evidence about partner tendencies over many rounds. This is where the existing trust-as-learning-rate mechanism operates.
+The main hidden state is each partner's type/strategy (e.g., cooperator, reciprocator, exploiter, random). This is the standard theory-of-mind layer. Dirichlet parameters accumulate evidence about partner tendencies over many rounds. This is where the existing trust-as-learning-rate mechanism operates.
 
-**Level 3 — Per-partner affective state (slowest timescale: metacognitive affective integration)**
-A slow state for each partner summarizing the running quality of the agent's social model of that partner — operationalized as the expected precision of the level-2 action model with respect to that partner. Updated by an exponentially-weighted moving average of prediction error magnitudes from level 2, with a long time constant that makes it resistant to single-trial fluctuations.
+**Level 3 — Per-partner affective summary (slowest timescale: metacognitive affective integration)**
+A slow auxiliary state for each partner summarizes the running quality of the agent's social model of that partner — operationalized as an expected precision-like signal tied to level-2 prediction error. It modulates policy evaluation, but it is not treated as a fully symmetric hidden-state factor in the main generative model.
 
 ### 2.4 Mechanism: Affect as Precision Weighting
 
@@ -118,7 +129,7 @@ The vmPFC lesion maps to: remove the affective weighting and force the agent to 
 
 1. **Per-partner metacognitive affective state in multi-agent AIF.** Not a global mood, not a shared precision parameter — a learned affective state for each social partner that compresses that specific interaction history into a precision signal. No existing AIF model has this.
 
-2. **Affect as orthogonal augmentation beyond planning depth.** Under sophisticated inference, explicit planning depth ($\tau = 2$ through $\tau = 8$) produces identical non-affective performance. The model demonstrates that partner-specific affective precision adds an evaluative signal that no amount of additional explicit lookahead recovers in the current task — the augmentation is orthogonal to depth, not a substitute for it.
+2. **Affect as orthogonal augmentation beyond planning depth.** Under sophisticated inference, explicit planning depth ($\tau = 2$ through $\tau = 8$) produces identical non-affective performance. The model demonstrates that partner-specific affective precision adds an evaluative signal that additional explicit lookahead does not recover in the current task — the augmentation is orthogonal to depth, not a substitute for it.
 
 3. **Computational vmPFC lesion in a social context.** The IGT literature shows the behavioral syndrome in single-agent gambling tasks. This model reproduces it computationally in a multi-agent setting by decoupling the affective state from policy selection.
 
@@ -134,16 +145,16 @@ $$P(o_{1:T}, s_{1:T}, \pi) = P(\pi) \prod_{t=1}^{T} P(o_t | s_t) P(s_t | s_{t-1}
 
 Where:
 - $o_t$ — observations at time t (partner's action, payoff)
-- $s_t$ — hidden states at time t (partner's type, strategy, context)
+- $s_t$ — hidden states at time t (partner's type, strategy)
 - $\pi$ — policy (sequence of actions the agent takes)
 
-For the three-level model, hidden states factor hierarchically:
+For the current experiments, the latent structure is simpler than a fully factorized three-hidden-state POMDP:
 
-$$s_t = (s_t^{(1)}, s_t^{(2)}, s_t^{(3)})$$
+$$s_t = (s_t^{(2)})$$
 
-- $s^{(1)}$ — current trial-level state (action on this round)
 - $s^{(2)}$ — partner type/strategy (stable over blocks of trials)
-- $s^{(3)}_k$ — affective state for partner $k$ (stable over longer blocks)
+
+Partner identity / interaction context is directly observed, and the affective state $\beta_k$ is tracked as an auxiliary per-partner summary that influences policy evaluation.
 
 **State inference and variational free energy.** Belief updating over partner type (level-2 hidden state) follows the variational free energy principle. For a categorical variational distribution $q(s)$ over discrete states, the VFE-minimizing posterior is the Bayesian posterior $q^*(s) \propto P(o \mid s) P(s)$. The implementation therefore uses the **analytical solution** to VFE minimization: one-step Bayes with the likelihood matrix $A$ and transition matrix $B$, i.e. posterior = normalize(likelihood × prior), then predictive next prior = $B \times$ posterior. No iterative optimization is required because the optimum is closed-form under this generative model.
 
@@ -173,7 +184,7 @@ In the primary experiments in this repository, that precision-modulation path is
 
 ### 3.4 Affective State Dynamics
 
-> **Variational Grounding.** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. Phase 4 (see §4.9) targets a further formalization in which $\beta$ becomes a discrete hidden state with its own likelihood and transition model.
+> **Variational Grounding.** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. The `variational_beta` preset now uses the supported variational beta path, but in the main pipeline $\beta$ remains an auxiliary summary rather than a fully symmetric hidden-state factor. The archived standalone discrete-beta prototype is separate from the shipped experiments.
 
 The affective state $\beta_k$ for partner $k$ is updated from a signed affective charge derived from prediction error:
 
@@ -194,7 +205,7 @@ $$\phi(\epsilon) = \alpha \cdot (\sigma_0^2 - \epsilon^2)$$
 Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. Defaults of `lambda_smooth = 0.6` and `alpha_charge = 3.0` keep affect slower than belief updates while still letting partner-specific precision estimates separate over roughly 5-10 interactions. When actual squared surprise is below baseline, affect increases; when above, it decreases. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
 Within-theory sensitivity analysis therefore varies not just $\mu$, $\lambda$, and $\alpha$, but also $\sigma_0^2$. That sweep asks whether the mechanism is under-expressed because the baseline surprise scale is badly calibrated, while keeping the update law itself fixed.
 
-This update law extends Hesp et al.'s variational precision dynamics to the per-partner social setting. The surprise term is computed from the agent's own level-2 predictive beliefs about the observed partner action, so the affective update is belief-coupled rather than externally injected or decoupled from inference. Phase 4 targets formalizing this as a discrete hidden-state inference problem (see §4.9), which would make the precision state a first-class component of the generative model subject to the same variational machinery as partner-type inference.
+This update law extends Hesp et al.'s variational precision dynamics to the per-partner social setting. The surprise term is computed from the agent's own level-2 predictive beliefs about the observed partner action, so the affective update is belief-coupled rather than externally injected or decoupled from inference. The supported variational beta path formalizes this auxiliary state with explicit posterior updates, but it does not change the main experiment architecture into a fully factorized hidden-state model.
 
 ### 3.5 Affect as Precision Weighting of Shallow EFE
 
@@ -272,13 +283,13 @@ The three-timescale architecture (fast observation inference, medium parameter l
 
 The model predicts that disruption at each level produces qualitatively different behavioral deficits: level-1 damage impairs perception of social cues, level-2 damage impairs learning about partners, level-3 damage impairs efficient deployment of learned knowledge — each a distinct clinical presentation.
 
-### 4.5 Depth Irrelevance Under Sophisticated Inference
+### 4.5 Depth Flatness Under the Shipped Binary Task
 
-The most important empirical update is that explicit planning depth is effectively irrelevant in the shipped binary-action trust game once all conditions use the same observation-branching sophisticated inference. In the `horizon_sweep` run, the non-affective planners are flat: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, and every pairwise comparison among those four conditions has `p > 0.93`.
+The most important empirical update is that explicit planning depth is empirically flat in the shipped binary-action trust game once all conditions use the same observation-branching sophisticated inference. In the `horizon_sweep` run, the non-affective planners are flat: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, and every pairwise comparison among those four conditions has `p > 0.93`.
 
-This sharply changes the theoretical reading of the earlier depth story. The old mean-field rollout was the practical bottleneck, not horizon length itself. Once hypothetical observations are integrated correctly and partner-type beliefs are updated pathwise, extending the explicit horizon from `τ = 2` to `τ = 8` yields no measurable payoff gain in this task. So the relevant comparison is no longer "can affect approximate a deep planner?" but "does affect add something that no amount of extra explicit lookahead recovers here?" The current answer is yes.
+This changes the theoretical reading of the earlier depth story. The old mean-field rollout was the practical bottleneck, not horizon length itself. Once hypothetical observations are integrated correctly and partner-type beliefs are updated pathwise, extending the explicit horizon from `τ = 2` to `τ = 8` yields no measurable payoff gain in this task. In the current shipped setup, with an action-independent B matrix for partner types, extra lookahead does not uncover additional state transitions.
 
-That does not imply depth is universally irrelevant in active inference. It implies that in this particular task family, with binary actions and a small partner-type state space, sophisticated inference already captures the strategically relevant contingencies within a shallow horizon. Extra depth then mostly repeats the same local ranking rather than revealing qualitatively new futures.
+That does not imply depth is universally irrelevant in active inference. It implies that in this particular task family, with binary actions and a small partner-type state space, sophisticated inference already captures the strategically relevant contingencies within a shallow horizon. If hidden-state transitions became action-dependent, or if the environment exposed richer transition structure, depth could matter again.
 
 ### 4.6 Affect as Augmentation, Not Compensation
 
@@ -294,7 +305,7 @@ The lesion result reinforces this interpretation. In the `default` run, `C3` and
 
 The precision-versus-reward story is now conditional rather than uniformly null. In the default random-assignment task, Condition 2 and Condition 5 remain tied (`575.06` vs `574.42`, `d = 0.009`, `p = 0.95`). There, identifying partner type quickly tells the agent how to act for reward, so predictive calibration and reward history mostly co-move.
 
-In `betrayal_stress`, however, the environment temporarily breaks that alignment. A previously cooperative partner switches to exploiter under scheduled betrayal, so recent reward still looks attractive while prediction error spikes. Under those conditions, Condition 2 outperforms Condition 5 (`481.88` vs `428.32`, `d = 0.59`, `p = 0.004`). This is exactly the regime where a precision-tracking signal should matter.
+In `betrayal_stress`, however, the environment temporarily breaks that alignment. A previously cooperative partner switches to exploiter under scheduled betrayal, so recent reward still looks attractive while prediction error spikes. Under those conditions, Condition 2 outperforms Condition 5 (`481.88` vs `428.32`, `d = 0.59`, `p = 0.004`). This is exactly the prediction-reward dissociation regime where a precision-tracking signal should matter.
 
 The theoretical distinction should therefore surface when model calibration and reward decouple. Three cases matter most:
 
@@ -321,9 +332,9 @@ So the present theory should be read as: affect adds a partner-specific precisio
 
 ### 4.9 Discrete Variational Beta Formulation
 
-> **Status: Implemented (supported path) and archived (prototype path).** Condition 12 now uses the supported variational affective state in `affect_aif/agent/affect/variational_state.py`. The earlier standalone discrete-beta prototype is preserved in `archive/legacy_discrete_beta/`.
+> **Status: Implemented (supported path) and archived (prototype path).** The `variational_beta` preset now uses the supported variational affective state in `affect_aif/agent/affect/variational_state.py`. The earlier standalone discrete-beta prototype is preserved in `archive/legacy_discrete_beta/`.
 
-The current $\beta$ update rule (§3.4) extends Hesp et al.'s variational precision dynamics to the multi-partner setting using a continuous EMA formulation. Phase 4 extends this further by treating $\beta_k$ as a discrete hidden state within the generative model, with its own likelihood and transition dynamics, so that its posterior update falls out of the same categorical inference machinery used for partner-type estimation.
+The current $\beta$ update rule (§3.4) extends Hesp et al.'s variational precision dynamics to the multi-partner setting using a continuous EMA formulation. The supported variational path treats $\beta_k$ as an auxiliary posterior state with explicit likelihood and transition dynamics, but the main pipeline still keeps partner type as the primary hidden-state factor.
 
 **The discrete formulation:**
 
@@ -343,7 +354,7 @@ $$q(\beta_k^{(t)}) \propto P(\epsilon_k^{(t)} \mid \beta_k) \cdot \sum_{\beta_k^
 
 This is the same predict-then-correct scheme used for the level-2 partner-type inference, extended to the precision state. The point estimate $\hat{\beta}_k = \mathbb{E}_{q}[b_l]$ is used as the terminal signal for EFE weighting, identical to how the continuous $\beta$ enters the policy evaluation.
 
-**Advantages of the discrete formulation:** (a) $\beta$ becomes a first-class hidden state within the generative model, subject to the same inference machinery as every other latent variable; (b) the precision of the precision estimate is itself represented (the width of $q(\beta_k)$), enabling the agent to distinguish "I'm confident my model is good" from "I'm unsure whether my model is good"; (c) the framework naturally accommodates structure learning — Bayesian Model Reduction over the $\beta$ state space can discover whether fewer or more precision levels are needed.
+**Advantages of the discrete formulation:** (a) $\beta$ has an explicit posterior rather than a pure point estimate; (b) the precision of the precision estimate is itself represented (the width of $q(\beta_k)$), enabling the agent to distinguish "I'm confident my model is good" from "I'm unsure whether my model is good"; (c) the framework naturally accommodates structure learning — Bayesian Model Reduction over the $\beta$ state space can discover whether fewer or more precision levels are needed.
 
 **Formal correspondence to the continuous EMA.** The continuous update $\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \sigma(\alpha(\sigma_0^2 - \epsilon^2))$ is a point-estimate analogue of the discrete posterior mean. The smoothing parameter $\lambda$ maps to the persistence of the transition matrix (both control the timescale), and the charge amplitude $\alpha$ controls the strength of a single observation's influence (the likelihood's informativeness). In the limit $L \to \infty$ with appropriate scaling, the discrete posterior mean converges to the EMA update. In practice with $L = 5$, the qualitative behavior matches exactly: low surprise increases $\beta$, high surprise decreases it, and the timescale is governed by the transition matrix rather than the smoothing parameter.
 
@@ -461,41 +472,41 @@ The null therefore validates the orthogonal augmentation claim from the opposite
 
 The binary and graded trust games together tell a more complete story than either alone:
 
-1. **Binary game establishes the core claim.** Affect provides orthogonal augmentation beyond planning depth. Under sophisticated inference, depth $\tau = 2$ through $\tau = 8$ is flat; affect adds $\sim 46$ payoff points at every depth. The lesion reproduces the Damasio dissociation. Precision tracking separates from reward averaging only under betrayal stress.
+1. **Binary game is the core headline.** It establishes orthogonal augmentation in the shipped binary-action task. Under sophisticated inference, depth $\tau = 2$ through $\tau = 8$ is flat; affect adds $\sim 46$ payoff points at every depth. The lesion reproduces the Damasio dissociation. Precision tracking separates from reward averaging only under betrayal stress, where prediction error and reward dissociate.
 
-2. **Graded game tests the mechanism's generality.** Moving from 8 to 24 actions activates the precision channel that was structurally inert in the binary game. Both terminal value mechanisms (precision and reward) provide strong augmentation ($d > 1$), but reward averaging dominates because the continuous investment gradient makes reward history directly decision-relevant. This is not a failure of precision tracking — it is a task-specificity result: the graded game's monotonic reward structure favors the simpler signal.
+2. **Graded and Stag Hunt tasks are secondary support.** They show where the mechanism generalizes and where it becomes clinically expressive. In the graded task, both terminal value mechanisms help, but reward averaging dominates because the continuous investment gradient makes reward history directly decision-relevant. In the Stag Hunt betrayal condition, the clinical phenotypes separate more clearly because miscoordination costs make precision volatility behaviorally visible.
 
 3. **The precision tracking mechanism's value is modelability.** Its parameters ($\alpha$, $\lambda$, $\beta_0$) map naturally onto clinically interpretable constructs (alexithymia, borderline volatility, depressive pessimism) in ways that reward averaging's single EMA parameter does not. This makes precision tracking the right mechanism for clinical and neuroscientific modeling, even when reward averaging achieves higher raw performance in a specific task.
 
-4. **The graded game unlocks the clinical sensitivity that the binary game cannot provide.** Clinical parameter variations produce effect sizes above $d = 2$ in the graded game, compared to negligible effects in the binary game. This validates the theoretical prediction that the parameter space has clinically relevant structure — it just needs an environment with sufficient decision ambiguity to express it.
+4. **Richer environments expose the clinical story.** Clinical parameter variations produce effect sizes above $d = 2$ in the graded game, and the Stag Hunt betrayal condition produces the clearest phenotype separation. This validates the theoretical prediction that the parameter space has clinically relevant structure, but the expression of that structure depends on a sufficiently ambiguous environment.
 
-### 4.16 Bayesian Model Comparison: From Frequentist to Evidence-Based Inference
+### 4.16 Predictive Log Score Comparison: From Frequentist to Predictive Inference
 
-The preceding results sections relied on frequentist statistics (Welch's t-tests, Cohen's d effect sizes) to compare conditions. Phase 6 introduces formal Bayesian model comparison, treating each agent variant as a generative model and asking: *which model best predicts the observed environment?*
+The preceding results sections relied on frequentist statistics (Welch's t-tests, Cohen's d effect sizes) to compare conditions. Phase 6 adds predictive model comparison, treating each agent variant as a predictive model and asking: *which model best predicts the observed environment?*
 
-**Approach.** Each agent condition constitutes a generative model of the trust game environment. At each round, the agent produces a predictive distribution over the partner's action, $p(\text{partner\_action}_t \mid \text{model}, \text{history}_{<t})$. The log-probability of the actually observed partner action under this predictive distribution is the per-round log-evidence:
+**Approach.** Each agent condition constitutes a predictive model of the trust game environment. At each round, the agent produces a predictive distribution over the partner's action, $p(\text{partner\_action}_t \mid \text{model}, \text{history}_{<t})$. The log-probability of the actually observed partner action under this predictive distribution is the per-round predictive log score:
 
 $$\ell_t = \log p(o_t \mid m, h_{<t})$$
 
-Summing across all $T$ rounds gives the cumulative log-evidence for model $m$ on seed $s$:
+Summing across all $T$ rounds gives the cumulative predictive log likelihood for model $m$ on seed $s$:
 
 $$\mathcal{L}_{m,s} = \sum_{t=1}^{T} \ell_t$$
 
-This is the natural metric for Bayesian model comparison in the active inference framework: each agent already computes $p(o_t \mid m)$ as part of its inference, so the log-evidence falls out with no additional computational overhead. The model with higher cumulative log-evidence is the better predictor of the social environment.
+This is the natural metric for predictive comparison in the active inference framework: each agent already computes $p(o_t \mid m)$ as part of its inference, so the predictive score falls out with no additional computational overhead. The model with higher cumulative predictive score is the better predictor of the social environment.
 
-**Pairwise Bayes factors.** For two models $m_A$ and $m_B$, the log Bayes factor is:
+**Pairwise predictive score differences.** For two models $m_A$ and $m_B$, the log score difference is:
 
 $$\log \text{BF}_{AB} = \mathcal{L}_A - \mathcal{L}_B$$
 
-We report these on the $\log_{10}$ scale using the Kass & Raftery (1995) interpretation: $|\log_{10} \text{BF}| < 0.5$ is negligible, $0.5$–$1$ is substantial, $1$–$2$ is strong, $> 2$ is decisive.
+We report these on the $\log_{10}$ scale as a predictive-score proxy. The usual Kass & Raftery (1995) thresholds are a useful heuristic, but these are still per-seed predictive scores rather than exact marginal likelihoods.
 
-**Random-effects Bayesian model selection.** Following Stephan et al. (2009), we treat each seed as a "subject" and estimate the population-level model frequencies using variational Bayes on a Dirichlet-multinomial model. This yields:
+**Random-effects predictive model selection.** Following Stephan et al. (2009), we treat each seed as a "subject" and estimate the population-level model frequencies using variational Bayes on a Dirichlet-multinomial model over the per-seed predictive scores. This yields:
 
 - **Expected model frequencies** $E[r_k]$: the proportion of the population best described by model $k$
 - **Exceedance probabilities** $P(r_k > r_j \;\forall\; j \neq k)$: the probability that model $k$ is the most frequent in the population
 - **Protected exceedance probabilities** (Rigoux et al., 2014): adjusted for the Bayesian omnibus risk (BOR), the probability that the data do not discriminate between models at all
 
-**Why this matters.** Frequentist tests answer "do conditions differ?" but cannot answer "which model best explains the data?" or "how much evidence favors one model over another?" Bayesian model comparison provides both. It also naturally penalizes model complexity through the Occam factor implicit in predictive likelihood — a model with more parameters must predict more precisely to achieve the same evidence.
+**Why this matters.** Frequentist tests answer "do conditions differ?" but cannot answer "which model best predicts the data?" or "how much predictive support favors one model over another?" Predictive score comparison provides both. It also naturally penalizes model complexity through the Occam factor implicit in predictive likelihood — a model with more parameters must predict more precisely to achieve the same score.
 
 *Results for this section are documented in §Hypothesis Scorecard of `docs/results_tracking.md` and in the model comparison output files.*
 
@@ -513,9 +524,9 @@ These games create qualitatively different strategic landscapes while sharing th
 
 **Game-dependent findings:** In stable (default) conditions, augmentation is game-dependent. PD and Stag Hunt show substantial effects (d = 0.5–0.6) because both games reward accurate partner prediction. Chicken shows negligible augmentation (d = 0.05) because its anti-coordination structure makes partner prediction less decision-relevant.
 
-**The Stag Hunt as the precision tracking game.** The Stag Hunt uniquely favors precision tracking (C2) over reward averaging (C5) in both default and betrayal conditions (RFX-BMS exceedance > 0.95 in both). Theoretically, this follows from the Stag Hunt's severe miscoordination penalty: getting the sucker payoff (0) when cooperating with a defecting partner makes the *accuracy* of partner prediction more important than the *average reward* from that partner. This is exactly the informational niche that per-partner precision tracking fills.
+**The Stag Hunt as the precision tracking game.** In the predictive model comparison, the Stag Hunt uniquely favors precision tracking (C2) over reward averaging (C5) in both default and betrayal conditions (RFX-BMS over per-seed predictive scores, exceedance > 0.95 in both). Theoretically, this follows from the Stag Hunt's severe miscoordination penalty: getting the sucker payoff (0) when cooperating with a defecting partner makes the *accuracy* of partner prediction more important than the *average reward* from that partner. This is exactly the informational niche that per-partner precision tracking fills.
 
-**Chicken as the reward averaging game.** Under betrayal stress in Chicken, C5 (reward averaging) wins RFX-BMS (exceedance 0.931), reversing the PD and Stag Hunt pattern. The reward gradient in Chicken is more directly informative of optimal play than precision accuracy, because the catastrophic mutual-defection payoff (0) means the agent's best response depends more on expected reward level than on prediction confidence.
+**Chicken as the reward averaging game.** Under betrayal stress in Chicken, C5 (reward averaging) wins the predictive comparison (RFX-BMS over per-seed predictive scores, exceedance 0.931), reversing the PD and Stag Hunt pattern. The reward gradient in Chicken is more directly informative of optimal play than precision accuracy, because the catastrophic mutual-defection payoff (0) means the agent's best response depends more on expected reward level than on prediction confidence.
 
 **Theoretical implication:** Per-partner metacognitive precision tracking is not a universal improvement but a *mechanism matched to specific informational niches*. It excels when: (a) partner behavior is volatile, (b) miscoordination is costly, and (c) prediction accuracy is more decision-relevant than reward history. These conditions are common in human social environments, which is why the mechanism has adaptive value despite not being universally superior.
 
@@ -549,11 +560,11 @@ Section 4.13 showed that the graded trust game restores clinical sensitivity los
 | Borderline (C10, $\alpha = 12$, $\lambda = 0.5$) | 439.8 | $+0.72$ | $< 0.001$ | $-2.89$ **decisive** |
 | No-affect (C4) | 402.7 | — | — | — |
 
-**The borderline phenotype is significantly impaired** ($d = 0.72$, $p < 0.001$, decisive Bayes factor against), losing approximately 50 payoff points relative to healthy affect. Crucially, borderline still outperforms no-affect ($d = 0.57$, $p = 0.006$): volatile precision tracking is worse than stable tracking but better than none.
+**The borderline phenotype is significantly impaired** ($d = 0.72$, $p < 0.001$, decisive predictive-score proxy against), losing approximately 50 payoff points relative to healthy affect. Crucially, borderline still outperforms no-affect ($d = 0.57$, $p = 0.006$): volatile precision tracking is worse than stable tracking but better than none.
 
 **Alexithymia is not impaired.** Blunted affective charge ($\alpha = 0.1$) produces frozen beta (volatility = 0.003, range = 0.016) but does not degrade payoff. This makes theoretical sense: in the Stag Hunt, stable (even if flat) partner predictions are better than volatile ones. Alexithymia's insensitivity to prediction errors is protective — the agent maintains consistent partner models rather than overreacting to noisy evidence.
 
-**Depression shows mild impairment** detectable by Bayes factor ($-0.66$, substantial) but not by frequentist test ($p = 0.51$). The low initial beta requires several rounds to calibrate, creating a transient vulnerability that washes out over the full episode.
+**Depression shows mild impairment** detectable by predictive-score proxy ($-0.66$, substantial) but not by frequentist test ($p = 0.51$). The low initial beta requires several rounds to calibrate, creating a transient vulnerability that washes out over the full episode.
 
 **Stag Hunt default shows no clinical differentiation** ($d \approx 0$ for all phenotypes, 20 seeds). The stable environment's EFE landscape is as saturated as the binary PD — clinical parameter perturbations do not change the argmax of the softmax-transformed policy distribution.
 

@@ -17,7 +17,7 @@ from affect_aif.benchmark.backend import BenchmarkBackend, BenchmarkBackendConte
 from affect_aif.benchmark.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
 from affect_aif.benchmark.cogames_adapter import CoGamesTrustAdapter
 from affect_aif.benchmark.scenarios import get_scenario
-from affect_aif.experiment.conditions import get_condition_name
+from affect_aif.experiment.conditions import resolve_condition_spec
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
 
@@ -29,7 +29,7 @@ def _create_baseline_agent(agent_name: str, num_partners: int, seed: int):
     return cls(num_partners=num_partners, seed=seed)
 
 
-def _create_aif_agent(condition: int, config: ExperimentConfig, seed: int):
+def _create_aif_agent(condition: int | str, config: ExperimentConfig, seed: int):
     runner = ExperimentRunner(config)
     model = runner._create_model()
     return runner._create_agent(condition, model, seed), model
@@ -86,16 +86,12 @@ class ToyGridworldBackend(BenchmarkBackend):
             ticks_per_round=int(self.backend_config.get("ticks_per_round", self.scenario.ticks_per_round)),
         )
         info = AGENT_REGISTRY[agent_name]
-        condition_id = (
-            info["condition"]
-            if info["type"] == "aif"
-            else -(config.agents.index(agent_spec) + 1)
-        )
+        condition_key = info.get("condition", info.get("preset")) if info["type"] == "aif" else -(config.agents.index(agent_spec) + 1)
 
         if info["type"] == "baseline":
             agent = _create_baseline_agent(agent_name, self.scenario.num_partners, seed)
         else:
-            agent, _ = _create_aif_agent(info["condition"], trust_config, seed)
+            agent, _ = _create_aif_agent(condition_key, trust_config, seed)
 
         context_payload = env.reset()
         agent.reset()
@@ -138,8 +134,8 @@ class ToyGridworldBackend(BenchmarkBackend):
                     "episode_id": episode_id,
                     "step": round_idx,
                     "reward": float(result["agent_payoff"]),
-                    "condition": condition_id,
-                    "condition_name": get_condition_name(condition_id) if condition_id > 0 else agent_spec.name,
+                    "condition": condition_key,
+                    "condition_name": resolve_condition_spec(condition_key).name if info["type"] == "aif" else agent_spec.name,
                     "partner_idx": partner_idx,
                     "true_partner_type": result.get("true_partner_type", "unknown"),
                     "agent_action": result["agent_action"],

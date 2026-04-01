@@ -7,13 +7,21 @@
 - This file records implementation-specific choices that are easy to misread from the theory alone.
 - When code changes any of these behaviors, update the docs in the same patch.
 
+## Current Trust-Game Status
+
+The shipped trust-game path now uses the action-dependent stance redesign.
+
+- `switch_round`, exploiter early/late phases, and `last_action × phase` likelihood conditioning are no longer part of the supported trust-game semantics.
+- `TrustGameModel` and `GradedTrustGameModel` expose joint `type × stance` likelihoods and action-dependent stance transitions.
+- `BaseAgent` maintains per-partner joint beliefs over 12 states (`4 types × 3 stances`), with derived type and stance marginals for logging.
+- `ExperimentConfig` supports `initial_partner_stances`, `scheduled_stance_switches`, and named `presets`.
+- The enforced minimum full-run `mu` calibration count is now `3`, and calibration uses the deepest relevant no-affect condition for the current config rather than always forcing tau-8.
+
 ## Switching Semantics
 
 - `p_switch` in the environment is the stochastic probability that a partner changes **latent type** after an interaction.
-- `switch_round` in the generative model is not that process. It is the exploiter-type partner's internal phase boundary: after enough interactions, an exploiter switches from `p_coop_early` to `p_coop_late`.
-- These are intentionally separate:
-  - stochastic type switching controls volatility across partner identities
-  - exploiter phase switching controls a specific within-type betrayal profile
+- `scheduled_stance_switches` is the supported way to induce betrayal-like disruptions in the redesigned task.
+- Stance persists across type switches because stance tracks the partner's posterior over the agent, not the exogenous fixed type.
 
 ## Partner Interface Seam
 
@@ -54,7 +62,7 @@
 - Affective and reward-average agents now both emit terminal signals on a comparable `[0, 1]` scale.
 - Affective agents use raw `beta_k`.
 - Reward-average agents use `0.5 * (1 + tanh(reward_avg / max_abs_payoff))`, which is centered at `0.5` when reward history is neutral.
-- Full experiment runs enforce a minimum of `10` calibration episodes when deriving `mu`, even if the config requests fewer.
+- Full experiment runs enforce a minimum of `3` calibration episodes when deriving `mu`, even if the config requests fewer.
 - This guard exists because `mu` is shared across all affective and control conditions in a run, so calibrating from only `2-3` episodes makes downstream comparisons noisier than intended.
 - Direct calls to `ExperimentRunner.calibrate_mu()` can still use fewer episodes for fast unit tests or notebook demos.
 - The planning adjustment used in the JAX trust-game rollout is:
@@ -70,10 +78,9 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 
 ## Condition-specific horizons
 
-- `ExperimentConfig.horizon_overrides` maps condition id to planning horizon.
-- This is used for the intermediate depth sweep (Conditions 6 and 7) without changing the global `deep_horizon` and `shallow_horizon` defaults.
-- Condition 8 reuses the affective mechanism at the deep horizon to test whether affect provides anything beyond explicit depth.
-- Condition 12 reuses the shallow affective planner with `beta_mode="variational"` so the supported variational beta state can be compared against the default continuous update without adding a new agent class.
+- `ExperimentConfig.horizon_overrides` can target either numeric core conditions or named presets.
+- The supported core sweep is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
+- Named presets (`lesioned`, `reward_average`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`) default to the tau-4 base unless overridden.
 
 ## Affective Update Signal
 
@@ -137,8 +144,8 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 ## Betrayal Stress Experiment
 
 - The environment supports `initial_partner_types` to seed a specific partner roster.
-- It also supports `scheduled_type_switches`, a list of `{round, partner_idx, to_type}` events.
-- Scheduled switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the switch as an unexpected behavioral change.
+- It also supports `initial_partner_stances` and `scheduled_stance_switches`, a list of `{round, partner_idx, to_stance}` events.
+- Scheduled stance switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the disruption as an unexpected trust violation.
 - See `affect_aif/configs/betrayal_stress.json` for the reference setup.
 - When a config enables `run_sensitivity`, `results.csv` contains both `run_mode="primary"` rows and sensitivity rows. `scripts/run_analysis.py` filters to `run_mode == "primary"` before aggregating so post-hoc summaries do not double-count sensitivity sweeps that reuse the same `(condition, seed)` identifiers.
 - `scripts/run_analysis.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:

@@ -4,7 +4,12 @@ import sys
 from pathlib import Path
 
 from affect_aif.agent.affective_agent import AffectiveAgent
-from affect_aif.experiment.conditions import get_condition_metadata, get_condition_name, normalize_condition_name
+from affect_aif.experiment.conditions import (
+    get_condition_metadata,
+    get_condition_name,
+    get_preset_condition,
+    normalize_condition_name,
+)
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
 from affect_aif.generative_model.model import TrustGameModel
@@ -32,18 +37,26 @@ def test_config_legacy_beta_alias_loads_but_serializes_canonical(tmp_path):
     assert "num_beta_levels" not in payload
 
 
-def test_condition_metadata_normalizes_legacy_alias():
-    metadata = get_condition_metadata(12)
-    assert metadata.name == "variational_affective"
-    assert get_condition_name(12) == "variational_affective"
-    assert normalize_condition_name("discrete_affective_shallow") == "variational_affective"
+def test_condition_metadata_and_presets_normalize_current_names():
+    metadata = get_condition_metadata(6)
+    assert metadata.name == "tau4_affect"
+    assert get_condition_name(6) == "tau4_affect"
+    assert get_preset_condition("variational_beta").name == "variational_beta"
+    assert normalize_condition_name("variational_beta") == "variational_beta"
 
 
-def test_runner_condition_12_uses_variational_affective_agent():
-    config = ExperimentConfig(num_rounds=2, num_replications=1, calibration_episodes=1, conditions=[12], random_seed=0)
+def test_runner_variational_beta_preset_uses_variational_affective_agent():
+    config = ExperimentConfig(
+        num_rounds=2,
+        num_replications=1,
+        calibration_episodes=1,
+        conditions=[],
+        presets=["variational_beta"],
+        random_seed=0,
+    )
     runner = ExperimentRunner(config)
     model = TrustGameModel(config)
-    agent = runner._create_agent(condition=12, model=model, seed=0)
+    agent = runner._create_agent(condition="variational_beta", model=model, seed=0)
 
     assert isinstance(agent, AffectiveAgent)
     assert agent.beta_mode == "variational"

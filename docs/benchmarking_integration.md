@@ -43,7 +43,7 @@ Because of that mismatch:
 `AgentSpec` is backend-specific:
 
 - trust and toy-gridworld use registry-backed agents such as
-  `affective_shallow`, `random`, `pavlov`, `grim_trigger`
+  `tau4_affect`, `random`, `pavlov`, `grim_trigger`
 - CvC uses explicit policy specs such as
   `class=affect_aif.benchmark.cvc_policy.TeammateReliabilityPolicy`
 
@@ -153,7 +153,7 @@ It does not log in, upload, or submit policies.
 
 ```bash
 python scripts/run_benchmark.py --backend trust --config affect_aif/configs/benchmark_default.json
-python scripts/run_benchmark.py --backend trust --agents affective_shallow random tit_for_tat --rounds 50 --replications 3
+python scripts/run_benchmark.py --backend trust --agents tau4_affect random tit_for_tat --rounds 50 --replications 3
 # Experimental / WIP: requires Python 3.12 and uses the real CvC local worker.
 python scripts/run_benchmark.py --backend cvc_local --agents teammate_reliability starter --mission machina_1 --max-steps 250 --python-bin python3.12
 ```

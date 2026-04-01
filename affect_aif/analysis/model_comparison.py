@@ -1,13 +1,13 @@
-"""Bayesian model comparison for agent variants.
+"""Predictive log-score comparison for agent variants.
 
-Each agent condition is treated as a generative model. Per-round log-evidence
-(log predictive probability of the observed partner action) accumulates across
-an episode to give the total log-evidence for that model on that seed.
+Each agent condition is treated as a predictive model. Per-round predictive
+log probabilities of the observed partner action accumulate across an episode
+to give the total predictive log score for that model on that seed.
 
-Bayes factors between conditions are computed from the difference in total
-log-evidence. Random-effects Bayesian model selection (Stephan et al., 2009)
-estimates protected exceedance probabilities when individual-level model
-assignments may vary.
+Pairwise comparisons report differences in total predictive log scores.
+Random-effects Bayesian model selection (Stephan et al., 2009) is kept intact
+for the same seed-by-condition score matrix; the semantics of those inputs are
+now described explicitly as predictive log scores rather than exact evidence.
 """
 
 from __future__ import annotations
@@ -22,41 +22,65 @@ from scipy.special import digamma, gammaln
 from affect_aif.analysis.metrics import final_round_summary
 
 
-def log_evidence_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Per-condition summary of total log-evidence across seeds.
+def _condition_sort_key(value) -> tuple[int, str]:
+    if isinstance(value, (int, np.integer)):
+        return (0, f"{int(value):04d}")
+    return (1, str(value))
 
-    Returns a DataFrame with columns: condition, condition_name, n_seeds,
-    mean_log_evidence, se_log_evidence, median_log_evidence.
+
+def _condition_value(value):
+    return value.item() if isinstance(value, np.generic) else value
+
+
+def log_score_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Per-condition summary of total predictive log score across seeds.
+
+    Returns a DataFrame with canonical predictive-log-score columns and legacy
+    log-evidence aliases for compatibility.
     """
     summary = final_round_summary(results)
     if "total_log_evidence" not in summary.columns:
-        raise ValueError("Results do not contain log-evidence data. Re-run experiments with the updated agent code.")
+        raise ValueError(
+            "Results do not contain predictive log-score data. Re-run experiments with the updated agent code."
+        )
 
     records = []
     for (cond, cond_name), grp in summary.groupby(["condition", "condition_name"]):
-        le = grp["total_log_evidence"].to_numpy()
-        le = le[np.isfinite(le)]
+        scores = grp["total_log_evidence"].to_numpy()
+        scores = scores[np.isfinite(scores)]
+        mean_score = float(scores.mean()) if len(scores) > 0 else float("nan")
+        se_score = float(scores.std(ddof=1) / np.sqrt(len(scores))) if len(scores) > 1 else float("nan")
+        median_score = float(np.median(scores)) if len(scores) > 0 else float("nan")
         records.append(
             {
-                "condition": int(cond),
+                "condition": _condition_value(cond),
                 "condition_name": str(cond_name),
-                "n_seeds": len(le),
-                "mean_log_evidence": float(le.mean()) if len(le) > 0 else float("nan"),
-                "se_log_evidence": float(le.std(ddof=1) / np.sqrt(len(le))) if len(le) > 1 else float("nan"),
-                "median_log_evidence": float(np.median(le)) if len(le) > 0 else float("nan"),
+                "n_seeds": len(scores),
+                "mean_predictive_log_score": mean_score,
+                "se_predictive_log_score": se_score,
+                "median_predictive_log_score": median_score,
+                "mean_log_evidence": mean_score,
+                "se_log_evidence": se_score,
+                "median_log_evidence": median_score,
             }
         )
     return pd.DataFrame(records)
 
 
-def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
-    """Compute pairwise Bayes factors between all condition pairs.
+def log_evidence_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Compatibility alias for :func:`log_score_summary`."""
 
-    For each pair (A, B), computes the mean log Bayes factor log(BF_AB) =
-    mean(log_evidence_A) - mean(log_evidence_B) across seeds. Also reports
-    the proportion of seeds where model A is preferred (individual BF > 0).
+    return log_score_summary(results)
 
-    Interpretation of |log10 BF|:
+
+def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
+    """Compute pairwise predictive log-score differences between conditions.
+
+    For each pair (A, B), computes the mean difference in total predictive log
+    score mean(score_A) - mean(score_B) across seeds. Also reports the
+    proportion of seeds where model A is preferred.
+
+    Interpretation of |log10 score difference|:
         < 0.5: not worth more than a bare mention
         0.5-1: substantial
         1-2:   strong
@@ -64,7 +88,7 @@ def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
     """
     summary = final_round_summary(results)
     if "total_log_evidence" not in summary.columns:
-        raise ValueError("Results do not contain log-evidence data.")
+        raise ValueError("Results do not contain predictive log-score data.")
 
     records = []
     for (cond_a, frame_a), (cond_b, frame_b) in combinations(summary.groupby("condition"), 2):
@@ -76,8 +100,11 @@ def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
         if len(le_a) < 2 or len(le_b) < 2:
             records.append(
                 {
-                    "condition_a": int(cond_a),
-                    "condition_b": int(cond_b),
+                    "condition_a": _condition_value(cond_a),
+                    "condition_b": _condition_value(cond_b),
+                    "mean_predictive_log_score_difference": float("nan"),
+                    "log10_predictive_log_score_difference": float("nan"),
+                    "se_predictive_log_score_difference": float("nan"),
                     "mean_log_bf": float("nan"),
                     "log10_bf": float("nan"),
                     "se_log_bf": float("nan"),
@@ -100,8 +127,11 @@ def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
 
         records.append(
             {
-                "condition_a": int(cond_a),
-                "condition_b": int(cond_b),
+                "condition_a": _condition_value(cond_a),
+                "condition_b": _condition_value(cond_b),
+                "mean_predictive_log_score_difference": mean_diff,
+                "log10_predictive_log_score_difference": float(mean_diff / np.log(10)),
+                "se_predictive_log_score_difference": se_diff,
                 "mean_log_bf": mean_diff,
                 "log10_bf": float(mean_diff / np.log(10)),
                 "se_log_bf": se_diff,
@@ -114,13 +144,19 @@ def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
+    """Compatibility alias for :func:`pairwise_predictive_log_scores`."""
+
+    return pairwise_predictive_log_scores(results)
+
+
 def _spm_bms(log_evidence_matrix: np.ndarray, max_iter: int = 100, tol: float = 1e-6) -> dict:
     """Random-effects Bayesian model selection (Stephan et al., 2009).
 
     Parameters
     ----------
     log_evidence_matrix : ndarray, shape (n_subjects, n_models)
-        Per-subject total log-evidence for each model.
+        Per-subject total predictive log score for each model.
     max_iter : int
         Maximum VB iterations.
     tol : float
@@ -183,12 +219,14 @@ def _bayesian_omnibus_risk(log_evidence_matrix: np.ndarray, alpha: np.ndarray) -
 
     Compares the fitted Dirichlet against a flat Dirichlet(1,...,1).
     BOR = p(H0) / (p(H0) + p(H1)) where H0 is the null (all models equal).
+    The comparison operates on predictive log scores rather than exact model
+    evidence.
     """
     n_subjects, n_models = log_evidence_matrix.shape
 
-    # Log-evidence under the null (flat Dirichlet)
+    # Log evidence under the null (flat Dirichlet)
     log_ev_null = _dirichlet_log_evidence(log_evidence_matrix, np.ones(n_models))
-    # Log-evidence under the fitted model
+    # Log evidence under the fitted model
     log_ev_fitted = _dirichlet_log_evidence(log_evidence_matrix, alpha)
 
     # BOR with equal prior on H0 and H1
@@ -198,7 +236,7 @@ def _bayesian_omnibus_risk(log_evidence_matrix: np.ndarray, alpha: np.ndarray) -
 
 
 def _dirichlet_log_evidence(log_evidence_matrix: np.ndarray, alpha0: np.ndarray) -> float:
-    """Log-evidence for a Dirichlet-multinomial model of model assignments."""
+    """Approximate score for a Dirichlet-multinomial model of assignments."""
     n_subjects, n_models = log_evidence_matrix.shape
 
     # Compute responsibilities under this prior
@@ -224,16 +262,16 @@ def random_effects_bms(results: pd.DataFrame) -> dict:
     """Run random-effects Bayesian model selection on experiment results.
 
     Each seed is treated as a 'subject'. Returns posterior model frequencies
-    and protected exceedance probabilities.
+    and protected exceedance probabilities from the predictive log-score matrix.
     """
     summary = final_round_summary(results)
     if "total_log_evidence" not in summary.columns:
-        raise ValueError("Results do not contain log-evidence data.")
+        raise ValueError("Results do not contain predictive log-score data.")
 
-    conditions = sorted(summary["condition"].unique())
+    conditions = sorted(summary["condition"].unique(), key=_condition_sort_key)
     seeds = sorted(summary["seed"].unique())
 
-    # Build the log-evidence matrix (n_seeds x n_conditions)
+    # Build the predictive log-score matrix (n_seeds x n_conditions)
     le_matrix = np.full((len(seeds), len(conditions)), np.nan)
     for j, cond in enumerate(conditions):
         cond_data = summary[summary["condition"] == cond]
@@ -253,25 +291,28 @@ def random_effects_bms(results: pd.DataFrame) -> dict:
         }
 
     bms_result = _spm_bms(le_matrix)
-    bms_result["conditions"] = [int(c) for c in conditions]
+    bms_result["conditions"] = [c.item() if isinstance(c, np.generic) else c for c in conditions]
     bms_result["n_valid_seeds"] = int(le_matrix.shape[0])
     return bms_result
 
 
 def model_comparison_report(results: pd.DataFrame) -> dict:
-    """Full Bayesian model comparison report.
+    """Full predictive log-score comparison report.
 
     Returns a dict with:
-        - log_evidence_summary: per-condition log-evidence stats
-        - pairwise_bayes_factors: all pairwise BFs
+        - predictive_log_score_summary: per-condition summary
+        - pairwise_predictive_log_scores: all pairwise score differences
         - random_effects_bms: RFX-BMS results (if enough data)
+        - legacy log_evidence_summary / pairwise_bayes_factors aliases
     """
-    le_summary = log_evidence_summary(results)
-    bf_table = pairwise_bayes_factors(results)
+    le_summary = log_score_summary(results)
+    bf_table = pairwise_predictive_log_scores(results)
     bms = random_effects_bms(results)
 
     return {
+        "predictive_log_score_summary": le_summary.to_dict(orient="records"),
         "log_evidence_summary": le_summary.to_dict(orient="records"),
+        "pairwise_predictive_log_scores": bf_table.to_dict(orient="records"),
         "pairwise_bayes_factors": bf_table.to_dict(orient="records"),
         "random_effects_bms": bms,
     }

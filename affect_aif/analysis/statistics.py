@@ -10,6 +10,10 @@ from scipy import stats
 from affect_aif.analysis.metrics import final_round_summary
 
 
+def _condition_value(value):
+    return value.item() if hasattr(value, "item") else value
+
+
 def cumulative_payoff_anova(results: pd.DataFrame) -> dict:
     """One-way ANOVA over total payoff by condition."""
 
@@ -33,8 +37,8 @@ def pairwise_payoff_tests(results: pd.DataFrame) -> pd.DataFrame:
             t_stat, p_value = stats.ttest_ind(frame_a["total_payoff"], frame_b["total_payoff"], equal_var=False)
         records.append(
             {
-                "condition_a": int(cond_a),
-                "condition_b": int(cond_b),
+                "condition_a": _condition_value(cond_a),
+                "condition_b": _condition_value(cond_b),
                 "t_stat": float(t_stat),
                 "p_value": float(p_value),
             }

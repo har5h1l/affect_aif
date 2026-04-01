@@ -18,7 +18,7 @@ def run_calibration_episode_task(config_payload: dict[str, Any], episode_idx: in
 def run_primary_replication_task(
     config_payload: dict[str, Any],
     *,
-    condition: int,
+    condition: int | str,
     replication: int,
     seed: int,
     calibration_summary: dict[str, Any] | None,
@@ -42,7 +42,7 @@ def run_primary_replication_task(
     )
     return {
         "task_kind": "primary",
-        "condition": int(condition),
+        "condition": condition,
         "replication": int(replication),
         "seed": int(seed),
         "records": rows,
@@ -55,7 +55,7 @@ def run_sensitivity_replication_task(
     *,
     parameter_name: str,
     parameter_value: float,
-    condition: int,
+    condition: int | str,
     replication: int,
     seed: int,
     calibration_summary: dict[str, Any],
@@ -80,7 +80,7 @@ def run_sensitivity_replication_task(
     )
     return {
         "task_kind": "sensitivity",
-        "condition": int(condition),
+        "condition": condition,
         "replication": int(replication),
         "seed": int(seed),
         "parameter_name": parameter_name,

@@ -14,7 +14,7 @@ from affect_aif.benchmark.backend import BenchmarkBackend, BenchmarkBackendConte
 from affect_aif.benchmark.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
 from affect_aif.benchmark.scenarios import get_scenario
 from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.experiment.conditions import get_condition_name
+from affect_aif.experiment.conditions import resolve_condition_spec
 from affect_aif.experiment.config import ExperimentConfig
 from affect_aif.experiment.runner import ExperimentRunner
 
@@ -28,7 +28,7 @@ def _create_baseline_agent(agent_name: str, num_partners: int, seed: int):
     return cls(num_partners=num_partners, seed=seed)
 
 
-def _create_aif_agent(condition: int, config: ExperimentConfig, seed: int):
+def _create_aif_agent(condition: int | str, config: ExperimentConfig, seed: int):
     runner = ExperimentRunner(config)
     model = runner._create_model()
     return runner._create_agent(condition, model, seed), model
@@ -136,16 +136,12 @@ class TrustBackend(BenchmarkBackend):
 
         env = TrustGameEnv(experiment_config, seed=seed)
         info = AGENT_REGISTRY[agent_name]
-        condition_id = (
-            info["condition"]
-            if info["type"] == "aif"
-            else -(config.agents.index(agent_spec) + 1)
-        )
+        condition_key = info.get("condition", info.get("preset")) if info["type"] == "aif" else -(config.agents.index(agent_spec) + 1)
 
         if info["type"] == "baseline":
             agent = _create_baseline_agent(agent_name, env.num_partners, seed)
         else:
-            agent, _ = _create_aif_agent(info["condition"], experiment_config, seed)
+            agent, _ = _create_aif_agent(condition_key, experiment_config, seed)
 
         context_payload = env.reset()
         agent.reset()
@@ -159,23 +155,34 @@ class TrustBackend(BenchmarkBackend):
             result = env.step(raw_action)
 
             partner_idx = result["partner_idx"]
-            agent.observe_outcome(
+            observe_kwargs = dict(
                 partner_idx=partner_idx,
                 observation=result["observation"],
                 action_taken=result["agent_action"],
                 partner_action=result["partner_action"],
                 payoff=result["agent_payoff"],
-                true_partner_type=result.get("true_partner_type"),
             )
+            if info["type"] == "aif":
+                observe_kwargs["true_partner_type"] = result.get("true_partner_type")
+                observe_kwargs["true_partner_stance"] = result.get("true_partner_stance")
+            agent.observe_outcome(**observe_kwargs)
 
             inferred_type = "unknown"
             inferred_correct = np.nan
+            inferred_stance = "unknown"
+            inferred_stance_correct = np.nan
             if hasattr(agent, "get_partner_type_belief"):
                 belief = agent.get_partner_type_belief(partner_idx)
                 if hasattr(agent, "model") and hasattr(agent.model, "partner_type_names"):
                     inferred_idx = int(np.argmax(belief))
                     inferred_type = agent.model.partner_type_names[inferred_idx]
                     inferred_correct = inferred_type == result.get("true_partner_type", "")
+            if hasattr(agent, "get_partner_stance_belief"):
+                belief = agent.get_partner_stance_belief(partner_idx)
+                if hasattr(agent, "model") and hasattr(agent.model, "stance_names"):
+                    inferred_idx = int(np.argmax(belief))
+                    inferred_stance = agent.model.stance_names[inferred_idx]
+                    inferred_stance_correct = inferred_stance == result.get("true_partner_stance", "")
 
             records.append(
                 {
@@ -188,8 +195,10 @@ class TrustBackend(BenchmarkBackend):
                     "episode_id": episode_id,
                     "step": round_idx,
                     "reward": float(result["agent_payoff"]),
-                    "condition": condition_id,
-                    "condition_name": get_condition_name(condition_id) if condition_id > 0 else agent_spec.name,
+                    "condition": condition_key,
+                    "condition_name": (
+                        resolve_condition_spec(condition_key).name if info["type"] == "aif" else agent_spec.name
+                    ),
                     "partner_idx": partner_idx,
                     "true_partner_type": result.get("true_partner_type", "unknown"),
                     "agent_action": result["agent_action"],
@@ -198,15 +207,31 @@ class TrustBackend(BenchmarkBackend):
                     "payoff": float(result["agent_payoff"]),
                     "partner_payoff": float(result.get("partner_payoff", np.nan)),
                     "type_switched": bool(result.get("type_switched", False)),
+                    "stance_switched": bool(result.get("stance_switched", False)),
                     "switch_kind": result.get("switch_kind", "none"),
                     "current_partner_switched": bool(result.get("current_partner_switched", False)),
                     "current_partner_scheduled_switch": bool(result.get("current_partner_scheduled_switch", False)),
+                    "current_partner_scheduled_stance_switch": bool(
+                        result.get("current_partner_scheduled_stance_switch", False)
+                    ),
                     "scheduled_switch_partner_ids": ",".join(
                         str(value) for value in result.get("scheduled_switch_partner_ids", [])
                     ),
+                    "scheduled_stance_switch_partner_ids": ",".join(
+                        str(value) for value in result.get("scheduled_stance_switch_partner_ids", [])
+                    ),
                     "true_types": json.dumps(result.get("true_types", [])),
+                    "true_stances": json.dumps(result.get("true_stances", [])),
+                    "true_partner_stance": result.get("true_partner_stance", "unknown"),
                     "inferred_type": inferred_type,
                     "inferred_type_correct": inferred_correct,
+                    "inferred_stance": inferred_stance,
+                    "inferred_stance_correct": inferred_stance_correct,
+                    "inferred_joint_correct": (
+                        bool(inferred_correct and inferred_stance_correct)
+                        if np.isfinite(inferred_correct) and np.isfinite(inferred_stance_correct)
+                        else np.nan
+                    ),
                 }
             )
 

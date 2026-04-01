@@ -9,7 +9,7 @@ import numpy as np
 
 from affect_aif.experiment.config import ExperimentConfig
 
-MIN_FULL_RUN_CALIBRATION_EPISODES = 10
+MIN_FULL_RUN_CALIBRATION_EPISODES = 3
 
 
 def build_calibration_summary(

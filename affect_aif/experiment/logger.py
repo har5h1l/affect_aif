@@ -17,7 +17,7 @@ class MetricLogger:
     def log_round(
         self,
         round_idx: int,
-        condition: int,
+        condition: int | str,
         seed: int,
         agent_metrics: dict,
         env_result: dict,
@@ -28,7 +28,7 @@ class MetricLogger:
             return [float(item) for item in np.asarray(values, dtype=float).tolist()]
 
         record = {
-            "condition": int(condition),
+            "condition": condition,
             "seed": int(seed),
             "round": int(round_idx),
             "partner_idx": int(env_result["partner_idx"]),
@@ -38,20 +38,30 @@ class MetricLogger:
                 else int(env_result.get("active_partner_start", -1))
             ),
             "true_partner_type": str(env_result["true_partner_type"]),
+            "true_partner_stance": str(env_result.get("true_partner_stance", "unknown")),
             "agent_action": int(env_result["agent_action"]),
             "raw_action": int(env_result["raw_action"]),
             "partner_action": int(env_result["partner_action"]),
             "payoff": float(env_result["agent_payoff"]),
             "partner_payoff": float(env_result["partner_payoff"]),
             "type_switched": bool(env_result["type_switched"]),
+            "stance_switched": bool(env_result.get("stance_switched", False)),
             "switch_kind": str(env_result.get("switch_kind", "none")),
             "current_partner_switched": bool(env_result.get("current_partner_switched", env_result["type_switched"])),
             "current_partner_scheduled_switch": bool(env_result.get("current_partner_scheduled_switch", False)),
+            "current_partner_scheduled_stance_switch": bool(
+                env_result.get("current_partner_scheduled_stance_switch", False)
+            ),
             "scheduled_switch_partner_ids": list(env_result.get("scheduled_switch_partner_ids", [])),
+            "scheduled_stance_switch_partner_ids": list(env_result.get("scheduled_stance_switch_partner_ids", [])),
             "active_partner_next": env_result["active_partner"],
             "true_types": list(env_result["true_types"]),
+            "true_stances": list(env_result.get("true_stances", [])),
             "inferred_type": str(agent_metrics["inferred_type"]),
             "inferred_type_correct": bool(agent_metrics["inferred_type_correct"]),
+            "inferred_stance": str(agent_metrics.get("inferred_stance", "unknown")),
+            "inferred_stance_correct": bool(agent_metrics.get("inferred_stance_correct", False)),
+            "inferred_joint_correct": bool(agent_metrics.get("inferred_joint_correct", False)),
             "selected_partner": int(agent_metrics["selected_partner"]),
             "selected_action": int(agent_metrics["selected_action"]),
             "best_policy_idx": int(agent_metrics["best_policy_idx"]),
@@ -71,6 +81,9 @@ class MetricLogger:
             "predictive_log_lik": float(agent_metrics.get("predictive_log_lik", float("nan"))),
             "partner_beliefs": np.asarray(agent_metrics["partner_beliefs"], dtype=float).tolist(),
             "partner_posteriors": np.asarray(agent_metrics["partner_posteriors"], dtype=float).tolist(),
+            "partner_joint_beliefs": np.asarray(agent_metrics["partner_joint_beliefs"], dtype=float).tolist(),
+            "partner_joint_posteriors": np.asarray(agent_metrics["partner_joint_posteriors"], dtype=float).tolist(),
+            "partner_stance_beliefs": np.asarray(agent_metrics["partner_stance_beliefs"], dtype=float).tolist(),
             "round_log_evidence": float(agent_metrics.get("round_log_evidence", float("nan"))),
             "cumulative_log_evidence": float(agent_metrics.get("cumulative_log_evidence", 0.0)),
         }

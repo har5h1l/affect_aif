@@ -1,4 +1,4 @@
-"""Tests for Bayesian model comparison (Phase 6)."""
+"""Tests for predictive model comparison (Phase 6)."""
 
 import numpy as np
 

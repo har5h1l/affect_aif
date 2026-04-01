@@ -2,58 +2,134 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
-class ConditionMetadata:
-    """Stable metadata for a supported experiment condition."""
+class ConditionSpec:
+    """Stable metadata and construction settings for an experiment condition."""
 
     name: str
     description: str
+    planning_horizon: int
+    agent_kind: str
+    use_information_gain: bool = True
+    beta_mode: str | None = None
+    lesion_mode: str | None = None
+    parameter_overrides: dict[str, float] = field(default_factory=dict)
     aliases: tuple[str, ...] = ()
 
 
-CONDITIONS: dict[int, ConditionMetadata] = {
-    1: ConditionMetadata("deep_no_affect", "Deep planner baseline"),
-    2: ConditionMetadata("affective_shallow", "Shallow planner with affective terminal values"),
-    3: ConditionMetadata("lesioned_shallow", "Shallow planner with decoupled affect"),
-    4: ConditionMetadata("shallow_no_affect", "Shallow planner baseline"),
-    5: ConditionMetadata("reward_avg_shallow", "Shallow planner with reward-average terminal values"),
-    6: ConditionMetadata("intermediate_3_no_affect", "Intermediate planner baseline at horizon 3"),
-    7: ConditionMetadata("intermediate_4_no_affect", "Intermediate planner baseline at horizon 4"),
-    8: ConditionMetadata("deep_affective", "Deep planner with affective terminal values"),
-    9: ConditionMetadata("alexithymia", "Blunted affective charging (alpha_charge=0.1)"),
-    10: ConditionMetadata("borderline", "Volatile affect (alpha_charge=12.0, lambda_smooth=0.5)"),
-    11: ConditionMetadata("depression", "Persistently low baseline precision (initial_beta=0.2)"),
-    12: ConditionMetadata(
-        "variational_affective",
-        "Shallow planner with variational discrete beta",
-        aliases=("discrete_affective_shallow",),
+CONDITIONS: dict[int, ConditionSpec] = {
+    1: ConditionSpec("tau1_no_affect", "No affect at horizon 1", planning_horizon=1, agent_kind="base"),
+    2: ConditionSpec("tau1_affect", "Affective agent at horizon 1", planning_horizon=1, agent_kind="affective"),
+    3: ConditionSpec("tau2_no_affect", "No affect at horizon 2", planning_horizon=2, agent_kind="base"),
+    4: ConditionSpec("tau2_affect", "Affective agent at horizon 2", planning_horizon=2, agent_kind="affective"),
+    5: ConditionSpec("tau4_no_affect", "No affect at horizon 4", planning_horizon=4, agent_kind="base"),
+    6: ConditionSpec("tau4_affect", "Affective agent at horizon 4", planning_horizon=4, agent_kind="affective"),
+    7: ConditionSpec("tau8_no_affect", "No affect at horizon 8", planning_horizon=8, agent_kind="base"),
+    8: ConditionSpec("tau8_affect", "Affective agent at horizon 8", planning_horizon=8, agent_kind="affective"),
+}
+
+PRESET_CONDITIONS: dict[str, ConditionSpec] = {
+    "lesioned": ConditionSpec(
+        "lesioned",
+        "Tau-4 affective lesion with decoupled affect-to-action pathway",
+        planning_horizon=4,
+        agent_kind="lesioned",
+        lesion_mode="decouple",
+    ),
+    "no_epistemic": ConditionSpec(
+        "no_epistemic",
+        "Tau-4 affective agent without epistemic value",
+        planning_horizon=4,
+        agent_kind="affective",
+        use_information_gain=False,
+    ),
+    "reward_average": ConditionSpec(
+        "reward_average",
+        "Tau-4 reward-average control",
+        planning_horizon=4,
+        agent_kind="reward_average",
+    ),
+    "variational_beta": ConditionSpec(
+        "variational_beta",
+        "Tau-4 affective agent with variational beta state",
+        planning_horizon=4,
+        agent_kind="affective",
+        beta_mode="variational",
+    ),
+    "alexithymia": ConditionSpec(
+        "alexithymia",
+        "Tau-4 affective agent with blunted beta charging",
+        planning_horizon=4,
+        agent_kind="affective",
+        parameter_overrides={"alpha_charge": 0.1},
+    ),
+    "borderline": ConditionSpec(
+        "borderline",
+        "Tau-4 affective agent with volatile beta dynamics",
+        planning_horizon=4,
+        agent_kind="affective",
+        parameter_overrides={"alpha_charge": 12.0, "lambda_smooth": 0.5},
+    ),
+    "depression": ConditionSpec(
+        "depression",
+        "Tau-4 affective agent with pessimistic initial beta prior",
+        planning_horizon=4,
+        agent_kind="affective",
+        parameter_overrides={"initial_beta": 0.2},
     ),
 }
 
 
 def get_condition_name(condition: int) -> str:
-    return CONDITIONS[condition].name
+    return CONDITIONS[int(condition)].name
 
 
-def get_condition_metadata(condition: int) -> ConditionMetadata:
-    return CONDITIONS[condition]
+def get_condition_metadata(condition: int) -> ConditionSpec:
+    return CONDITIONS[int(condition)]
+
+
+def get_preset_condition(name: str) -> ConditionSpec:
+    normalized = str(name).strip().lower()
+    if normalized in PRESET_CONDITIONS:
+        return PRESET_CONDITIONS[normalized]
+    for preset_name, metadata in PRESET_CONDITIONS.items():
+        if normalized == metadata.name or normalized in metadata.aliases:
+            return PRESET_CONDITIONS[preset_name]
+    raise KeyError(f"Unknown preset condition '{name}'.")
 
 
 def normalize_condition_name(name: str) -> str:
     normalized = str(name).strip().lower()
-    for metadata in CONDITIONS.values():
+    for metadata in list(CONDITIONS.values()) + list(PRESET_CONDITIONS.values()):
         if normalized == metadata.name or normalized in metadata.aliases:
             return metadata.name
     raise KeyError(f"Unknown condition name '{name}'.")
 
 
+def resolve_condition_spec(condition: int | str) -> ConditionSpec:
+    if isinstance(condition, str):
+        normalized = str(condition).strip().lower()
+        if normalized.isdigit():
+            return get_condition_metadata(int(normalized))
+        if normalized in PRESET_CONDITIONS:
+            return get_preset_condition(normalized)
+        for condition_id, metadata in CONDITIONS.items():
+            if normalized == metadata.name or normalized in metadata.aliases:
+                return get_condition_metadata(condition_id)
+        return get_preset_condition(normalized)
+    return get_condition_metadata(condition)
+
+
 __all__ = [
     "CONDITIONS",
-    "ConditionMetadata",
+    "ConditionSpec",
+    "PRESET_CONDITIONS",
     "get_condition_metadata",
     "get_condition_name",
+    "get_preset_condition",
     "normalize_condition_name",
+    "resolve_condition_spec",
 ]

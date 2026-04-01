@@ -7,6 +7,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from affect_aif.experiment.conditions import CONDITIONS, PRESET_CONDITIONS
+
 
 DEFAULT_BACKENDS = ["trust"]
 DEFAULT_OUTPUT_DIR = "results/benchmark"
@@ -64,8 +66,8 @@ class BenchmarkConfig:
     backends: list[str] = field(default_factory=lambda: DEFAULT_BACKENDS[:])
     agents: list[AgentSpec] = field(
         default_factory=lambda: [
-            AgentSpec(name="affective_shallow", backend="trust", implementation="affective_shallow"),
-            AgentSpec(name="shallow_no_affect", backend="trust", implementation="shallow_no_affect"),
+            AgentSpec(name="tau4_affect", backend="trust", implementation="tau4_affect"),
+            AgentSpec(name="tau4_no_affect", backend="trust", implementation="tau4_no_affect"),
             AgentSpec(name="random", backend="trust", implementation="random"),
             AgentSpec(name="tit_for_tat", backend="trust", implementation="tit_for_tat"),
         ]
@@ -146,19 +148,8 @@ class BenchmarkConfig:
 # Trust and toy-gridworld backends share the same registry because both operate on
 # the trust-game action protocol. Real CvC runs use explicit policy specs instead.
 AGENT_REGISTRY = {
-    # Active inference agents (by condition ID)
-    "deep_no_affect": {"type": "aif", "condition": 1},
-    "affective_shallow": {"type": "aif", "condition": 2},
-    "lesioned_shallow": {"type": "aif", "condition": 3},
-    "shallow_no_affect": {"type": "aif", "condition": 4},
-    "reward_avg_shallow": {"type": "aif", "condition": 5},
-    "intermediate_3": {"type": "aif", "condition": 6},
-    "intermediate_4": {"type": "aif", "condition": 7},
-    "deep_affective": {"type": "aif", "condition": 8},
-    "alexithymia": {"type": "aif", "condition": 9},
-    "borderline": {"type": "aif", "condition": 10},
-    "depression": {"type": "aif", "condition": 11},
-    "variational_affective": {"type": "aif", "condition": 12},
+    **{spec.name: {"type": "aif", "condition": condition_id} for condition_id, spec in CONDITIONS.items()},
+    **{spec.name: {"type": "aif", "preset": preset_name} for preset_name, spec in PRESET_CONDITIONS.items()},
     # Baseline agents
     "random": {"type": "baseline", "class": "RandomAgent"},
     "tit_for_tat": {"type": "baseline", "class": "TitForTatAgent"},

@@ -8,19 +8,20 @@
   "num_rounds": 120,
   "p_switch": 0.0,
   "assignment_mode": "agent_choice",
-  "observation_noise": 0.1,
+  "observation_noise": 0.0,
   "correlation_pairs": [],
   "correlation_strength": 0.9,
   "initial_partner_types": ["cooperator", "reciprocator", "cooperator", "random"],
-  "scheduled_type_switches": [
-    {"round": 31, "partner_idx": 0, "to_type": "exploiter"}
+  "initial_partner_stances": ["trusting", "neutral", "neutral", "neutral"],
+  "scheduled_stance_switches": [
+    {"round": 31, "partner_idx": 0, "to_stance": "hostile"}
   ],
   "gamma": 1.0,
   "lr": 0.1,
   "action_sampling": "marginal",
   "affect_modulates_precision": false,
   "use_parameter_learning": false,
-  "deep_horizon": 2,
+  "deep_horizon": 8,
   "shallow_horizon": 2,
   "max_policies": 4096,
   "lambda_smooth": 0.6,
@@ -30,9 +31,10 @@
   "initial_beta": 0.5,
   "lesion_mode": "decouple",
   "num_replications": 50,
-  "calibration_episodes": 10,
+  "calibration_episodes": 5,
   "random_seed": 42,
-  "conditions": [1, 2, 3, 5],
+  "conditions": [5, 6],
+  "presets": ["lesioned"],
   "partner_types": ["cooperator", "reciprocator", "exploiter", "random"],
   "run_sensitivity": false
 }

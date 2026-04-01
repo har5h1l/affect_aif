@@ -7,7 +7,7 @@ def test_legacy_boolean_environment_flags_are_mapped_to_backends():
     config = BenchmarkConfig.from_dict(
         {
             "scenario": "resource_sharing",
-            "agents": ["affective_shallow", "random"],
+            "agents": ["tau4_affect", "random"],
             "run_trust_game": True,
             "run_gridworld": False,
         }
@@ -15,7 +15,7 @@ def test_legacy_boolean_environment_flags_are_mapped_to_backends():
 
     assert config.backends == ["trust"]
     assert [agent.backend for agent in config.agents] == ["trust", "trust"]
-    assert [agent.implementation for agent in config.agents] == ["affective_shallow", "random"]
+    assert [agent.implementation for agent in config.agents] == ["tau4_affect", "random"]
 
 
 def test_agent_specs_accept_explicit_policy_specs_for_cvc_backend():

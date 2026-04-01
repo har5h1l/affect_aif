@@ -18,6 +18,7 @@ def test_b_matrix_column_normalized():
     model = TrustGameModel(ExperimentConfig())
     assert np.allclose(model.B[0].sum(axis=0), 1.0)
     assert np.allclose(model.B[1].sum(axis=0), 1.0)
+    assert np.allclose(model.B[2].sum(axis=0), 1.0)
 
 
 def test_c_and_d_shapes():
@@ -26,15 +27,19 @@ def test_c_and_d_shapes():
     assert model.C[1].shape == (4,)
     assert np.isclose(model.D[0].sum(), 1.0)
     assert np.isclose(model.D[1].sum(), 1.0)
+    assert np.isclose(model.D[2].sum(), 1.0)
 
 
 def test_partner_type_probabilities():
-    cooperator = PartnerType("cooperator", {"p_coop": 0.9})
-    reciprocator = PartnerType("reciprocator", {"p_mirror": 0.85})
-    exploiter = PartnerType("exploiter", {"p_coop_early": 0.85, "p_coop_late": 0.15, "switch_round": 4})
-    assert np.isclose(cooperator.get_action_probability(0, 0), 0.9)
-    assert reciprocator.get_action_probability(0, 0) > reciprocator.get_action_probability(1, 0)
-    assert exploiter.get_action_probability(0, 0) > exploiter.get_action_probability(0, 8)
+    cooperator = PartnerType("cooperator", {"cooperation_probabilities": {"trusting": 0.95, "neutral": 0.8, "hostile": 0.55}})
+    reciprocator = PartnerType(
+        "reciprocator",
+        {"cooperation_probabilities": {"trusting": 0.9, "neutral": 0.7, "hostile": 0.3}},
+    )
+    exploiter = PartnerType("exploiter", {"cooperation_probabilities": {"trusting": 0.7, "neutral": 0.35, "hostile": 0.1}})
+    assert np.isclose(cooperator.get_action_probability("neutral"), 0.8)
+    assert reciprocator.get_action_probability("trusting") > reciprocator.get_action_probability("hostile")
+    assert exploiter.get_action_probability("trusting") > exploiter.get_action_probability("hostile")
 
 
 def test_graded_payoff_matrix_shape():
@@ -74,7 +79,8 @@ def test_graded_model_construction():
     assert A[0].shape[0] == 2  # partner action obs is binary
     assert B[0].shape[2] == 24  # transitions for each action
     assert D[0].shape[0] == model.num_types
-    assert D[1].shape[0] == model.num_partners
+    assert D[1].shape[0] == model.num_stances
+    assert D[2].shape[0] == model.num_partners
 
 
 def test_graded_a_matrix_column_normalized():

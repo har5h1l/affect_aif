@@ -32,8 +32,10 @@ def betrayal_config():
         p_switch=0.0,
         observation_noise=0.0,
         initial_partner_types=["cooperator", "random"],
-        scheduled_type_switches=[{"round": 3, "partner_idx": 0, "to_type": "exploiter"}],
-        conditions=[1, 2, 5],
+        initial_partner_stances=["trusting", "neutral"],
+        scheduled_stance_switches=[{"round": 3, "partner_idx": 0, "to_stance": "hostile"}],
+        conditions=[5, 6],
+        presets=["reward_average"],
         run_sensitivity=False,
     )
 

@@ -2,6 +2,15 @@
 
 This document tracks the empirical status of the project. Update it when new experiments finish.
 
+## Status Note (2026-03-31)
+
+The trust-family environment has been redesigned around action-dependent partner stance dynamics. Older entries below that interpret:
+- exploiter phase switches
+- flat depth curves as a primary finding
+- Condition 12 / old clinical numeric condition numbering
+
+should be treated as archived historical records rather than the supported current story. No new result-interpretation text has been added here yet for the redesigned stance model.
+
 ## Architectural Review Note (2026-03-30)
 
 A three-agent codebase/results/architecture review identified issues that may affect interpretation of existing results:
@@ -17,14 +26,14 @@ Core findings (H1, H2, H4) are robust. See `docs/long_term_plan.md` for decision
 
 ## Current Status
 
-As of 2026-03-17, the core sophisticated-inference experiment families and Phase 4 discrete beta validation have been completed:
+As of 2026-03-17, the core sophisticated-inference experiment families and the supported variational-beta path have been completed:
 
-### Phase 4: Discrete Beta Comparison (new)
+### Phase 4: Variational Beta Validation (supported path)
 
 - `discrete_beta_confirm_default`: 50 replications × 200 rounds, random assignment, conditions 2, 4, 12
 - `discrete_beta_confirm_betrayal`: 50 replications × 120 rounds, agent-chosen partner, scheduled betrayal, conditions 2, 4, 12
 
-**Key finding:** The discrete Bayesian beta formulation (Condition 12) is behaviorally equivalent to the continuous EMA (Condition 2) in stable environments (d = 0.001, p = 0.99) and both outperform the baseline (d ≈ 0.6, p = 0.003). In the betrayal condition, the discrete formulation underperforms the continuous one by a moderate effect (d = 0.41, p = 0.04) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperform the no-affect baseline. This divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
+**Key finding:** The supported variational beta path used by Condition 12 is behaviorally equivalent to the continuous EMA (Condition 2) in stable environments (d = 0.001, p = 0.99) and both outperform the baseline (d ≈ 0.6, p = 0.003). In the betrayal condition, the variational formulation underperforms the continuous one by a moderate effect (d = 0.41, p = 0.04) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperform the no-affect baseline. This divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
 
 ### Prior experiment families (Phases 1-3)
 
@@ -38,7 +47,7 @@ As of 2026-03-15, the core sophisticated-inference experiment families have been
 
 ## Headline
 
-The main empirical update is: under sophisticated inference, explicit planning depth is irrelevant in the shipped binary-action task.
+The main empirical update is: binary PD establishes the core orthogonal-augmentation claim in the shipped binary-action task, while the richer Stag Hunt and graded environments refine where the mechanism becomes clinically expressive.
 
 In `horizon_sweep`, all non-affective planners are statistically identical:
 
@@ -64,7 +73,7 @@ The defensible story is therefore no longer "affect compensates for shallow dept
 - `C2` vs `C8`: `p = 0.94`
 - affect adds roughly `+46` payoff points whether planning depth is `τ = 2` or `τ = 8`
 
-So the current evidence is stronger than "affect beats shallow non-affect." It is that affect and depth are orthogonal in the shipped binary-action task: affect matters, depth does not.
+So the current evidence is stronger than "affect beats shallow non-affect." It is that affect and depth are orthogonal in the shipped binary-action task, with the binary PD as the primary headline and the richer environments as supporting refinements.
 
 ## Hypothesis Scorecard
 
@@ -72,14 +81,14 @@ So the current evidence is stronger than "affect beats shallow non-affect." It i
 |---|---|---|
 | H1 affect > non-affect baselines | Strongly supported | `default` supports it (`d = 0.64`, `p = 1.1e-5`), `betrayal_stress` supports it more strongly (`d = 1.30`, `p = 6.8e-9`), and `horizon_sweep` shows the entire non-affect depth curve is flat. |
 | H2 lesion dissociation | Strongly supported | In `default`, lesion accuracy matches deep planner accuracy (`p = 0.96`) while payoff drops relative to affect (`p = 1.4e-5`). In `betrayal_stress`, the same pattern holds (`p = 0.55` for accuracy, `p = 9.6e-7` for payoff). `C3 = C4` exactly in `default`, confirming the lesion is a clean affect-to-action decoupling. |
-| H3 precision > reward average | Task-dependent | Binary default: null (`d = 0.009`). Binary betrayal: C2 wins (`d = 0.59`, `p = 0.004`). Graded default: C5 wins (`d = 0.43`). Graded betrayal: C5 wins (`d = −0.89`). Precision tracking helps when decisions are binary and model fitness diverges from reward; reward averaging dominates in continuous-investment settings where the reward gradient is directly decision-relevant. |
+| H3 precision > reward average | Task-dependent | Binary default: null (`d = 0.009`). Binary betrayal: C2 wins (`d = 0.59`, `p = 0.004`). Graded default: C5 wins (`d = 0.43`). Graded betrayal: C5 wins (`d = −0.89`). Precision tracking helps when prediction error and reward dissociate; reward averaging dominates in continuous-investment settings where the reward gradient is directly decision-relevant. |
 | H4 post-switch robustness | Supported | `default`: `C2` beats `C1` (`p = 2.8e-9`) and `C4` (`p = 5.4e-9`) in the post-switch window. `betrayal_stress`: `C2` beats `C1` (`p = 0.013`). |
 | H5 partner selection | Supported | In `betrayal_stress`, beta correlates with partner selection frequency (`r = 0.51`, `p = 2.9e-9`). |
 | Clinical sensitivity | Task-dependent | Binary PD: inert (<0.5% effect). Graded: all clinical d>2.1 vs C4 but no between-clinical separation. **SH betrayal: borderline impaired (d=-0.72, p<0.001, BF=-2.89 decisive), alexithymia ≈ healthy, depression mild BF impairment.** First qualitative clinical differentiation. |
 
 ## Interpretation
 
-The old framing was "affect compensates for shallow planning depth." The current data do not support that framing. Once mean-field rollouts are replaced by sophisticated inference, non-affective planning depth from `τ = 2` through `τ = 8` has no measurable marginal value in the default task.
+The old framing was "affect compensates for shallow planning depth." The current data do not support that framing. Once mean-field rollouts are replaced by sophisticated inference, non-affective planning depth from `τ = 2` through `τ = 8` has no measurable marginal value in the default binary task, and the action-independent B matrix is a likely structural contributor to that flatness.
 
 The stronger framing is:
 
@@ -113,6 +122,8 @@ This null is predicted by the theory: beta tracks prediction accuracy, not rewar
 
 ### Design
 
+This is a supporting environment-specific refinement, not the primary headline. The binary PD result stays canonical; this section shows where the clinical phenotype separation becomes visible.
+
 Previous clinical sensitivity analysis (binary PD, graded trust game) showed:
 - Binary PD: EFE softmax saturation makes clinical parameter variations behaviorally inert (<0.5% payoff effect)
 - Graded game: restores clinical sensitivity (d ≈ 2.2 vs no-affect) but within-clinical differentiation is small
@@ -127,7 +138,7 @@ Phase 7 established that Stag Hunt uniquely favors precision tracking (C2 wins R
 
 **Stag Hunt Betrayal (50 seeds × 120 rounds):**
 
-| Phenotype | Mean payoff | vs C2 d | p | log10 BF |
+| Phenotype | Mean payoff | vs C2 d | p | log10 predictive score proxy |
 |---|---|---|---|---|
 | Healthy (C2) | 489.7 | — | — | — |
 | Alexithymia (C9) | 497.1 | +0.20 | 0.318 | +0.12 anecdotal |
@@ -136,10 +147,10 @@ Phase 7 established that Stag Hunt uniquely favors precision tracking (C2 wins R
 | No-affect (C4) | 402.7 | — | — | — |
 
 **Key findings:**
-1. Borderline is significantly impaired (d=-0.72, p<0.001, decisive BF). First environment with statistically significant clinical differentiation from healthy affect.
+1. Borderline is significantly impaired (d=-0.72, p<0.001, decisive predictive-score proxy). First environment with statistically significant clinical differentiation from healthy affect.
 2. Borderline is still above no-affect (d=0.57, p=0.006) — volatile affect is worse than stable but better than none.
 3. Alexithymia is statistically indistinguishable from healthy — frozen precision is protective in high-miscoordination environments.
-4. Depression shows mild Bayesian impairment (BF=-0.66) but frequentist null (p=0.51).
+4. Depression shows mild predictive-score impairment (proxy=-0.66) but frequentist null (p=0.51).
 
 **Beta dynamics (50 seeds):**
 
@@ -302,15 +313,15 @@ The paper story becomes:
 
 The precision tracking mechanism's advantage is *modelability* — its parameters map naturally to clinical constructs (alexithymia, borderline, depression) in ways that simple reward averaging does not. The performance advantage, however, lies with C5.
 
-## Phase 6: Bayesian Model Comparison
+## Phase 6: Predictive Log Score Comparison
 
 ### Approach
 
-Each agent condition is treated as a generative model. Per-round log-evidence is computed as `log p(partner_action | agent's predictive distribution)`. Cumulative log-evidence across all rounds gives the total model evidence per seed. Pairwise Bayes factors and random-effects BMS (Stephan et al., 2009) with protected exceedance probabilities (Rigoux et al., 2014) are used for formal comparison.
+Each agent condition is treated as a predictive model. Per-round log score is computed as `log p(partner_action | agent's predictive distribution)`. Cumulative log predictive likelihood across all rounds gives the total predictive score per seed. Pairwise score differences and random-effects BMS (Stephan et al., 2009) over those per-seed predictive scores are used as a ranking heuristic, not as exact marginal evidence.
 
 ### Default Condition (50 seeds × 200 rounds × 5 conditions)
 
-| Condition | Mean log-evidence | SE |
+| Condition | Mean predictive score | SE |
 |---|---|---|
 | C1 deep_no_affect | -117.69 | 1.55 |
 | C2 affective_shallow | -115.89 | 1.56 |
@@ -318,9 +329,9 @@ Each agent condition is treated as a generative model. Per-round log-evidence is
 | C4 shallow_no_affect | -117.55 | 1.56 |
 | C5 reward_avg_shallow | -115.62 | 1.53 |
 
-**Pairwise Bayes factors (log10 scale):**
+**Pairwise predictive score differences (log10 proxy scale):**
 
-| Comparison | log10 BF | Interpretation |
+| Comparison | log10 predictive score proxy | Interpretation |
 |---|---|---|
 | C2 vs C1 | +0.78 | substantial, favors C2 |
 | C5 vs C1 | +0.90 | substantial, favors C5 |
@@ -329,20 +340,20 @@ Each agent condition is treated as a generative model. Per-round log-evidence is
 | C2 vs C5 | -0.12 | negligible |
 | C3 vs C4 | 0.00 | identical |
 
-**RFX-BMS:** C5 wins decisively — expected frequency 0.623, protected exceedance probability **1.000**. C2 second at 0.177. BOR ≈ 0. The data strongly discriminate: affect-augmented models (C2 and C5) are better predictors of the environment than non-affect models, and at the population level C5 is the most frequent best model.
+**RFX-BMS:** C5 wins decisively — expected frequency 0.623, protected exceedance probability **1.000**. C2 second at 0.177. BOR ≈ 0. The data strongly discriminate: affect-augmented models (C2 and C5) are better predictive fits to the environment than non-affect models, and at the population level C5 is the most frequent best model.
 
 ### Betrayal Stress Condition (50 seeds × 120 rounds × 4 conditions)
 
-| Condition | Mean log-evidence | SE |
+| Condition | Mean predictive score | SE |
 |---|---|---|
 | C1 deep_no_affect | -63.91 | 1.33 |
 | C2 affective_shallow | -57.01 | 2.04 |
 | C3 lesioned_shallow | -62.80 | 1.04 |
 | C5 reward_avg_shallow | -63.23 | 2.24 |
 
-**Pairwise Bayes factors (log10 scale):**
+**Pairwise predictive score differences (log10 proxy scale):**
 
-| Comparison | log10 BF | Interpretation |
+| Comparison | log10 predictive score proxy | Interpretation |
 |---|---|---|
 | C2 vs C1 | +3.00 | **decisive**, favors C2 |
 | C2 vs C3 | +2.51 | **decisive**, favors C2 |
@@ -351,29 +362,29 @@ Each agent condition is treated as a generative model. Per-round log-evidence is
 | C1 vs C5 | -0.30 | negligible |
 | C3 vs C5 | +0.18 | negligible |
 
-**RFX-BMS:** C2 wins decisively — expected frequency 0.566, protected exceedance probability **0.998**. BOR ≈ 0. Under betrayal stress, the affective model is overwhelmingly the best predictor of partner behavior.
+**RFX-BMS:** C2 wins decisively — expected frequency 0.566, protected exceedance probability **0.998**. BOR ≈ 0. Under betrayal stress, the affective model is overwhelmingly the best predictive fit to partner behavior.
 
 ### Interpretation
 
-The Bayesian model comparison adds a qualitatively new layer to the existing frequentist results:
+The predictive model comparison adds a qualitatively new layer to the existing frequentist results:
 
-1. **Default condition:** Both affect-augmented models (C2, C5) are substantially better predictors than non-affect models, confirming H1 with Bayesian evidence. C5 slightly edges C2 at the population level, consistent with the frequentist finding that reward averaging performs as well or slightly better in the default task.
+1. **Default condition:** Both affect-augmented models (C2, C5) are substantially better predictors than non-affect models, confirming H1 with predictive-score support. C5 slightly edges C2 at the population level, consistent with the frequentist finding that reward averaging performs as well or slightly better in the default task.
 
-2. **Betrayal condition:** This is the strongest finding. C2 (precision tracking) is **decisively** the best predictive model — not just higher payoff, but fundamentally better at predicting what partners will do. The log10 BF of 3.0 against C1 and 2.7 against C5 are far above the "decisive" threshold. This means:
+2. **Betrayal condition:** This is the strongest finding. C2 (precision tracking) is **decisively** the best predictive model — not just higher payoff, but fundamentally better at predicting what partners will do. The log10 score differences of 3.0 against C1 and 2.7 against C5 are far above the "decisive" heuristic threshold. This means:
    - Precision tracking produces systematically better partner predictions under volatility
    - The affective signal is not just a terminal value hack that improves action selection — it genuinely improves the agent's world model
    - Reward averaging (C5) provides no predictive advantage over non-affect models under betrayal, despite performing better on payoff. This dissociation between predictive accuracy and payoff suggests C5's payoff advantage comes from action selection, not from better environmental modeling
 
-3. **The modelability argument is strengthened.** Not only does precision tracking have interpretable clinical parameters, it also produces the best generative model of volatile social environments. C5 may win on payoff in stable conditions, but C2 wins on model quality when it matters most — under betrayal stress.
+3. **The modelability argument is strengthened.** Not only does precision tracking have interpretable clinical parameters, it also produces the best predictive model of volatile social environments. C5 may win on payoff in stable conditions, but C2 wins on predictive quality when it matters most — under betrayal stress.
 
-### Updated Hypothesis Scorecard (Bayesian)
+### Updated Hypothesis Scorecard (Predictive Comparison)
 
-| Hypothesis | Frequentist | Bayesian model comparison |
+| Hypothesis | Frequentist | Predictive model comparison |
 |---|---|---|
-| H1 affect > non-affect | d=0.64, p<0.001 | Substantial BF (default), decisive BF (betrayal) |
-| H2 lesion dissociation | C3=C4 | C3=C4 (identical log-evidence, BF=1.00) |
-| H3 precision > reward avg | Task-dependent | C5 ≈ C2 in default; C2 **decisively** > C5 in betrayal (log10 BF=2.70) |
-| H4 post-switch robustness | C2 > C1 post-switch | C2 best predictor overall in betrayal (log10 BF=3.00 vs C1) |
+| H1 affect > non-affect | d=0.64, p<0.001 | Strong predictive-score support (default), decisive predictive-score support (betrayal) |
+| H2 lesion dissociation | C3=C4 | C3=C4 (identical predictive score, ratio≈1.00 proxy) |
+| H3 precision > reward avg | Task-dependent | C5 ≈ C2 in default; C2 **decisively** > C5 in betrayal (log10 proxy=2.70) |
+| H4 post-switch robustness | C2 > C1 post-switch | C2 best predictive fit overall in betrayal (log10 proxy=3.00 vs C1) |
 
 ## Phase 7: Cross-Game Generalization
 
@@ -425,7 +436,7 @@ Each game run with 50 seeds in both default (random assignment, p_switch=0.05) a
 
 **RFX-BMS (betrayal):**
 
-| Game | Winner | Expected freq | Exceedance | C2 vs C5 log10 BF |
+| Game | Winner | Expected freq | Exceedance | C2 vs C5 log10 predictive score proxy |
 |---|---|---|---|---|
 | PD | C2 | 0.566 | 0.998 | +2.70 (decisive) |
 | Stag Hunt | C2 | 0.565 | 0.954 | +1.08 (strong) |

@@ -9,6 +9,12 @@ import numpy as np
 import pandas as pd
 
 
+def _condition_sort_key(value) -> tuple[int, str]:
+    if isinstance(value, (int, np.integer)):
+        return (0, f"{int(value):04d}")
+    return (1, str(value))
+
+
 def _ensure_array(value) -> np.ndarray:
     if isinstance(value, np.ndarray):
         return value.astype(float)
@@ -49,10 +55,14 @@ def _scheduled_switch_targets(value) -> list[int]:
 def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
     """Aggregate final cumulative payoff and identification accuracy per seed and condition."""
 
-    frame = results.sort_values(["condition", "seed", "round"]).copy()
+    frame = results.copy()
+    frame["_condition_sort"] = frame["condition"].apply(_condition_sort_key)
+    frame = frame.sort_values(["_condition_sort", "seed", "round"]).drop(columns="_condition_sort")
     agg_dict = {
         "total_payoff": ("payoff", "sum"),
         "mean_accuracy": ("inferred_type_correct", "mean"),
+        "mean_stance_accuracy": ("inferred_stance_correct", "mean"),
+        "mean_joint_accuracy": ("inferred_joint_correct", "mean"),
         "mean_q_pi_entropy": ("q_pi_entropy", "mean"),
         "mean_abs_step_efe": ("mean_abs_step_efe", "mean"),
         "planning_cost": ("planning_cost", "first"),
@@ -123,23 +133,45 @@ def has_switch_events(results: pd.DataFrame) -> bool:
 
     if "type_switched" in results.columns and bool(results["type_switched"].fillna(False).astype(bool).any()):
         return True
+    if "stance_switched" in results.columns and bool(results["stance_switched"].fillna(False).astype(bool).any()):
+        return True
     if "current_partner_scheduled_switch" in results.columns and bool(
         results["current_partner_scheduled_switch"].fillna(False).astype(bool).any()
     ):
         return True
+    if "current_partner_scheduled_stance_switch" in results.columns and bool(
+        results["current_partner_scheduled_stance_switch"].fillna(False).astype(bool).any()
+    ):
+        return True
     if "scheduled_switch_partner_ids" not in results.columns:
-        return False
-    scheduled = results["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
-    return bool(scheduled.apply(len).gt(0).any())
+        scheduled_type = pd.Series([[] for _ in range(len(results))], index=results.index)
+    else:
+        scheduled_type = results["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    if "scheduled_stance_switch_partner_ids" not in results.columns:
+        scheduled_stance = pd.Series([[] for _ in range(len(results))], index=results.index)
+    else:
+        scheduled_stance = results["scheduled_stance_switch_partner_ids"].apply(_scheduled_switch_targets)
+    return bool(scheduled_type.apply(len).gt(0).any() or scheduled_stance.apply(len).gt(0).any())
 
 
 def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.DataFrame:
     """Summarize payoff and inference quality in the rounds immediately after a switch."""
 
-    frame = results.sort_values(["condition", "seed", "partner_idx", "round"]).copy()
+    frame = results.copy()
+    frame["_condition_sort"] = frame["condition"].apply(_condition_sort_key)
+    frame = frame.sort_values(["_condition_sort", "seed", "partner_idx", "round"]).drop(columns="_condition_sort")
     if frame.empty:
         return pd.DataFrame()
-    frame["scheduled_switch_partner_ids"] = frame["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    if "scheduled_switch_partner_ids" in frame.columns:
+        frame["scheduled_switch_partner_ids"] = frame["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    else:
+        frame["scheduled_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    if "scheduled_stance_switch_partner_ids" in frame.columns:
+        frame["scheduled_stance_switch_partner_ids"] = frame["scheduled_stance_switch_partner_ids"].apply(
+            _scheduled_switch_targets
+        )
+    else:
+        frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
     summaries: list[dict] = []
     for (condition, condition_name, seed, partner_idx), group in frame.groupby(
         ["condition", "condition_name", "seed", "partner_idx"],
@@ -148,8 +180,18 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
         switch_rounds: set[tuple[int, str]] = set()
         for _, switch_row in seed_rows.iterrows():
             if int(partner_idx) in switch_row["scheduled_switch_partner_ids"]:
-                switch_rounds.add((int(switch_row["round"]), "scheduled"))
-        for _, switch_row in group[group["type_switched"].astype(bool)].iterrows():
+                switch_rounds.add((int(switch_row["round"]), "scheduled_type"))
+            if int(partner_idx) in switch_row["scheduled_stance_switch_partner_ids"]:
+                switch_rounds.add((int(switch_row["round"]), "scheduled_stance"))
+        if "type_switched" in group.columns:
+            switched_types = group["type_switched"].fillna(False).astype(bool)
+        else:
+            switched_types = pd.Series(False, index=group.index)
+        if "stance_switched" in group.columns:
+            switched_stances = group["stance_switched"].fillna(False).astype(bool)
+        else:
+            switched_stances = pd.Series(False, index=group.index)
+        for _, switch_row in group[switched_types | switched_stances].iterrows():
             switch_rounds.add((int(switch_row["round"]), str(switch_row.get("switch_kind", "unknown"))))
 
         for switch_round, switch_kind in sorted(switch_rounds):
@@ -159,7 +201,7 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
             window_frame["encounters_since_switch"] = np.arange(len(window_frame), dtype=int)
             summaries.append(
                 {
-                    "condition": int(condition),
+                    "condition": condition,
                     "condition_name": str(condition_name),
                     "seed": int(seed),
                     "partner_idx": int(partner_idx),
@@ -169,6 +211,16 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
                     "window_label": f"1-{int(window)}",
                     "mean_payoff": float(window_frame["payoff"].mean()),
                     "mean_accuracy": float(window_frame["inferred_type_correct"].mean()),
+                    "mean_stance_accuracy": (
+                        float(window_frame["inferred_stance_correct"].mean())
+                        if "inferred_stance_correct" in window_frame.columns
+                        else np.nan
+                    ),
+                    "mean_joint_accuracy": (
+                        float(window_frame["inferred_joint_correct"].mean())
+                        if "inferred_joint_correct" in window_frame.columns
+                        else np.nan
+                    ),
                     "mean_terminal_signal": _safe_nanmean(
                         np.asarray(
                             [
@@ -189,10 +241,21 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
 def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.DataFrame:
     """Return per-encounter trajectories following partner switches."""
 
-    frame = results.sort_values(["condition", "seed", "partner_idx", "round"]).copy()
-    if frame.empty or "type_switched" not in frame.columns:
+    frame = results.copy()
+    frame["_condition_sort"] = frame["condition"].apply(_condition_sort_key)
+    frame = frame.sort_values(["_condition_sort", "seed", "partner_idx", "round"]).drop(columns="_condition_sort")
+    if frame.empty:
         return pd.DataFrame()
-    frame["scheduled_switch_partner_ids"] = frame["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    if "scheduled_switch_partner_ids" in frame.columns:
+        frame["scheduled_switch_partner_ids"] = frame["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    else:
+        frame["scheduled_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    if "scheduled_stance_switch_partner_ids" in frame.columns:
+        frame["scheduled_stance_switch_partner_ids"] = frame["scheduled_stance_switch_partner_ids"].apply(
+            _scheduled_switch_targets
+        )
+    else:
+        frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
 
     records: list[dict] = []
     for (condition, condition_name, seed, partner_idx), group in frame.groupby(
@@ -206,8 +269,20 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
         switch_rounds: set[tuple[int, str]] = set()
         for _, switch_row in seed_rows.iterrows():
             if int(partner_idx) in switch_row["scheduled_switch_partner_ids"]:
-                switch_rounds.add((int(switch_row["round"]), "scheduled"))
-        for _, switch_row in group[group["type_switched"].astype(bool)].iterrows():
+                switch_rounds.add((int(switch_row["round"]), "scheduled_type"))
+            if int(partner_idx) in switch_row["scheduled_stance_switch_partner_ids"]:
+                switch_rounds.add((int(switch_row["round"]), "scheduled_stance"))
+        type_switched = (
+            group["type_switched"].fillna(False).astype(bool)
+            if "type_switched" in group.columns
+            else pd.Series(False, index=group.index)
+        )
+        stance_switched = (
+            group["stance_switched"].fillna(False).astype(bool)
+            if "stance_switched" in group.columns
+            else pd.Series(False, index=group.index)
+        )
+        for _, switch_row in group[type_switched | stance_switched].iterrows():
             switch_rounds.add((int(switch_row["round"]), str(switch_row.get("switch_kind", "unknown"))))
 
         for event_idx, (switch_round, switch_kind) in enumerate(sorted(switch_rounds)):
@@ -218,7 +293,7 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
                 terminal_arr = row["terminal_signal"]
                 records.append(
                     {
-                        "condition": int(condition),
+                        "condition": condition,
                         "condition_name": str(condition_name),
                         "seed": int(seed),
                         "partner_idx": int(partner_idx),
@@ -282,7 +357,11 @@ def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, ...] = (5, 10)) -> pd.DataFrame:
-    """Compare affective and reward-average conditions in post-switch windows."""
+    """Compare paired conditions in post-switch windows.
+
+    Uses the canonical tau-4 affective agent (`tau4_affect`) and the reward
+    average preset when both are present in the results.
+    """
 
     rows: list[pd.DataFrame] = []
     for window in windows:
@@ -300,17 +379,24 @@ def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, 
         pivot = pivot.reset_index()
         pivot["window"] = int(window)
         pivot["window_label"] = f"1-{int(window)}"
-        pivot["payoff_difference_c2_minus_c5"] = pivot.get("mean_payoff_c2", np.nan) - pivot.get(
-            "mean_payoff_c5", np.nan
+        pivot["payoff_difference_tau4_affect_minus_reward_average"] = pivot.get(
+            "mean_payoff_ctau4_affect", np.nan
+        ) - pivot.get(
+            "mean_payoff_creward_average", np.nan
         )
-        pivot["accuracy_difference_c2_minus_c5"] = pivot.get("mean_accuracy_c2", np.nan) - pivot.get(
-            "mean_accuracy_c5",
+        pivot["accuracy_difference_tau4_affect_minus_reward_average"] = pivot.get(
+            "mean_accuracy_ctau4_affect", np.nan
+        ) - pivot.get(
+            "mean_accuracy_creward_average",
             np.nan,
         )
-        pivot["terminal_signal_difference_c2_minus_c5"] = pivot.get(
-            "mean_terminal_signal_c2",
+        pivot["stance_accuracy_difference_tau4_affect_minus_reward_average"] = pivot.get(
+            "mean_stance_accuracy_ctau4_affect",
             np.nan,
-        ) - pivot.get("mean_terminal_signal_c5", np.nan)
+        ) - pivot.get("mean_stance_accuracy_creward_average", np.nan)
+        pivot["terminal_signal_difference_tau4_affect_minus_reward_average"] = pivot.get(
+            "mean_terminal_signal_ctau4_affect", np.nan
+        ) - pivot.get("mean_terminal_signal_creward_average", np.nan)
         rows.append(pivot)
     if not rows:
         return pd.DataFrame()
@@ -337,7 +423,7 @@ def betrayal_latency_summary(
         recovery = group.loc[group["payoff"] >= float(safe_payoff_threshold), "encounters_since_switch"]
         rows.append(
             {
-                "condition": int(condition),
+                "condition": condition,
                 "condition_name": str(condition_name),
                 "seed": int(seed),
                 "partner_idx": int(partner_idx),

@@ -2,11 +2,23 @@
 
 ## Testing Per-Partner Affective Precision in Multi-Agent Active Inference
 
+## Current Trust-Game Status
+
+The supported experiment surface has moved to the action-dependent stance model described in [docs/action-dependent-partner-design.md](docs/action-dependent-partner-design.md).
+
+- Ground-truth partners now have a fixed type and an evolving stance.
+- The agent jointly infers `type × stance` and plans with action-dependent stance transitions.
+- The primary factorial is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
+- Lesion, reward-average, no-epistemic, variational-beta, and clinical runs are named presets layered on top of the `tau4_affect` base.
+- Scheduled betrayal should be expressed via `scheduled_stance_switches`, not `scheduled_type_switches`, unless the experiment is explicitly about exogenous type volatility.
+
+Older condition numbering below is retained only as historical context and should not be used for new runs.
+
 ---
 
 ## 1. Overview
 
-This document specifies the experimental design for testing the central claim: per-partner metacognitive precision tracking provides an orthogonal augmentation to active inference policy evaluation — one that improves social decision-making in ways that increasing planning depth alone does not recover. Under sophisticated inference with binary actions, non-affective planners from horizon 2 through horizon 8 are statistically indistinguishable, yet adding a per-partner affective signal yields a measurable benefit at every depth. Ablating this signal reproduces the behavioral signature of vmPFC damage — intact social knowledge with impaired social decision-making.
+This document specifies the experimental design for testing the central claim: per-partner metacognitive precision tracking provides an orthogonal augmentation to active inference policy evaluation — one that improves social decision-making in ways that increasing planning depth alone does not recover in the current shipped binary-action task. Under sophisticated inference with binary actions, non-affective planners from horizon 2 through horizon 8 are statistically indistinguishable, yet adding a per-partner affective signal yields a measurable benefit at every depth. Ablating this signal reproduces the behavioral signature of vmPFC damage — intact social knowledge with impaired social decision-making.
 
 ---
 
@@ -14,14 +26,14 @@ This document specifies the experimental design for testing the central claim: p
 
 ### 2.1 State Space Factorization
 
-The generative model factorizes hidden states into three hierarchical levels per partner $k$:
+The generative model is best understood as a single hidden-state inference problem plus an auxiliary affective summary:
 
 **Level 1 — Trial State** $s^{(1)}_t$
-The current-round game state, including:
-- Partner $k$'s action on this trial: {Cooperate, Defect}
-- Context: {which partner is currently interacting}
+The current-round game context is task-given:
+- which partner is currently interacting
+- the partner's action on this trial: {Cooperate, Defect}
 
-This is directly observed (or noisily observed, depending on the variant — see Section 3.3).
+This is directly observed in the main experiments (or noisily observed in later variants — see Section 3.3). It is not treated as a latent factor in the shipped binary-action setup.
 
 **Level 2 — Partner Type** $s^{(2)}_k$
 Each partner's latent strategy type, drawn from:
@@ -33,7 +45,7 @@ Each partner's latent strategy type, drawn from:
 Types are stable within blocks but switch at geometrically-distributed intervals (expected block length ~20 rounds). The agent does not observe type switches directly.
 
 **Level 3 — Affective State** $\beta_k$ (for affective agents only)
-A continuous-valued state per partner, bounded in $[0, 1]$, representing the agent's running estimate of social model precision for partner $k$. Initialized at $\beta_k = 0.5$ (neutral).
+A continuous-valued auxiliary state per partner, bounded in $[0, 1]$, representing the agent's running estimate of social model precision for partner $k$. Initialized at $\beta_k = 0.5$ (neutral). It modulates policy evaluation but is not a fully symmetric hidden-state factor in the main generative model.
 
 ### 2.2 Observation Model (A matrix)
 
@@ -57,7 +69,7 @@ $$P(s^{(2)}_{k,t+1} | s^{(2)}_{k,t}) = (1 - p_{\text{switch}}) \cdot \mathbb{I}[
 
 Important implementation note: this stochastic type switching is separate from the exploiter's internal `switch_round`. `p_switch` governs when a partner changes latent type altogether; `switch_round` only governs when an **exploiter-type** partner changes from its early cooperative phase to its later exploitative phase after repeated interactions.
 
-**Level 3 transitions (affective state)**: governed by the exponential moving average update described in the theory document. Not a standard discrete POMDP transition — implemented as a continuous auxiliary variable updated outside the core POMDP loop (see Section 2.6).
+**Level 3 transitions (affective state)**: governed by the exponential moving average update described in the theory document. This is a continuous auxiliary variable updated outside the core POMDP loop in the default path; the `variational_beta` preset uses the supported variational beta path instead of treating beta as a primary hidden-state factor.
 
 ### 2.4 Preference Model (C matrix)
 
@@ -82,7 +94,7 @@ This creates the standard tension: mutual cooperation is collectively optimal bu
 - Deep planner: $T = 8$ steps ahead
 - Shallow planner: $\tau = 2$ steps ahead
 
-**Policy evaluation**: standard expected free energy computation over the planning horizon, using sophisticated inference rather than a mean-field rollout. For each policy, the planner enumerates all future binary partner-action observation sequences, updates partner-type beliefs after each hypothetical observation via Bayes rule, and averages the pathwise EFE under the corresponding path probabilities. For affective agents, the shallow-horizon EFE is then precision-weighted by the current partner-specific signal. This is now the implemented planning method for all conditions, so horizon comparisons isolate explicit depth rather than mixing depth with different rollout approximations.
+**Policy evaluation**: standard expected free energy computation over the planning horizon, using sophisticated inference rather than a mean-field rollout. For each policy, the planner enumerates all future binary partner-action observation sequences, updates partner-type beliefs after each hypothetical observation via Bayes rule, and averages the pathwise EFE under the corresponding path probabilities. For affective agents, the shallow-horizon EFE is then precision-weighted by the current partner-specific signal. In the shipped binary-action task, this makes the horizon comparison a check on explicit depth rather than a proxy for different rollout approximations.
 
 ### 2.6 Affective State Update (Level 3 Implementation)
 
@@ -107,6 +119,8 @@ Parameters:
 - $\alpha = 3.0$ — charge sensitivity; expands the sigmoid operating range so correct vs. incorrect predictions separate betas materially
 - $\sigma_0^2$ — baseline expected squared surprise; default `0.25` matches a random binary partner because $(1 - 0.5)^2 = 0.25$
 - sigmoid clamps the charge contribution to $[0, 1]$
+
+The `variational_beta` preset uses the supported variational beta path in place of the EMA update above. That path formalizes beta as an auxiliary posterior state, but it does not turn beta into the primary hidden-state factor of the main experiment pipeline.
 
 The affective precision weight is then:
 
@@ -338,19 +352,19 @@ Operationally, inspect `betrayal_post_switch_window_1_5.csv`, `betrayal_post_swi
 
 **Expected outcome**: Affective agents develop clear partner preferences early and update them after type switches. Non-affective agents either exploit myopically (Condition 4) or distribute interactions more evenly (Condition 1 can reason about information value but at high computational cost).
 
-### Hypothesis 6 (FUTURE/PROPOSED): Bayesian Model Comparison of Affective vs. Non-Affective Generative Models
+### Hypothesis 6 (FUTURE/PROPOSED): Predictive Model Comparison of Affective vs. Non-Affective Generative Models
 
-**Status: Proposed, requires Phase 4 (variational beta) and Phase 6 (model comparison).**
+**Status: Supported as a follow-up comparison; Condition 12 already provides the variational beta path.**
 
-**Prediction**: Formal model evidence (marginal likelihood) favors the affective generative model over the non-affective generative model, providing a principled basis for preferring the affect-augmented architecture beyond point-estimate performance metrics.
+**Prediction**: Predictive log scores favor the affective generative model over the non-affective generative model, providing a principled basis for preferring the affect-augmented architecture beyond point-estimate performance metrics.
 
 **Metrics**:
-- Log model evidence (marginal likelihood) for affective vs. non-affective generative models
-- Bayes factor across task variants
+- Cumulative log predictive likelihood for affective vs. non-affective generative models
+- Random-effects predictive score comparison across task variants
 
-**Conceptual issues**: This hypothesis requires Phase 4 (variational beta — formalizing the current EMA-based precision update as a discrete hidden state with explicit likelihood) before the model evidence computation is cleanly defined. The current trigger-based BMR approach (Section 8.2) is NOT suitable for this comparison because it conflates structure learning with model selection. A clean Bayesian model comparison must treat the affective and non-affective models as competing generative models evaluated on the same observation sequences, without using affect-triggered structural changes as part of the evidence calculation.
+**Conceptual issues**: The comparison should stay on the same observation sequences and be interpreted as predictive scoring, not exact marginal evidence. The current trigger-based BMR approach (Section 8.2) is NOT suitable for this comparison because it conflates structure learning with model selection. A clean predictive comparison must treat the affective and non-affective models as competing generative models evaluated on the same observation sequences, without using affect-triggered structural changes as part of the score calculation.
 
-**Failure mode**: If the non-affective model has comparable or higher evidence despite worse behavioral performance, this would suggest the affective signal improves decisions through a mechanism that is not well-captured by the current generative model formulation — pointing toward the need for a tighter variational treatment of beta.
+**Failure mode**: If the non-affective model has comparable or higher predictive score despite worse behavioral performance, this would suggest the affective signal improves decisions through a mechanism that is not well-captured by the current generative model formulation — pointing toward the need for a tighter variational treatment of beta.
 
 ### Hypothesis 7 (PRELIMINARY): Clinical Parameter Sensitivity Analysis
 
@@ -518,13 +532,13 @@ Fit the model to human behavioral data from multi-partner trust games. Estimate 
 
 Implement Bayesian Model Reduction triggered by persistent low $\beta_k$. When the affective state for partner $k$ remains below a threshold despite ongoing parameter learning, launch BMR over alternative social model structures (partner types, coalition structures, domain-specific reliability). Test whether this accelerates discovery of non-trivial social structures compared to untriggered BMR.
 
-**Critical analysis warning**: The trigger-based BMR formulation needs reformulation before it can be used for formal model comparison (see H6). Using affect thresholds to trigger structural changes conflates the affective signal with the model selection process, making it impossible to cleanly evaluate whether affect improves model evidence. A cleaner approach would separate the BMR machinery from the affective trigger and compare triggered vs. untriggered BMR as competing model selection strategies, rather than embedding the trigger in the generative model itself.
+**Critical analysis warning**: The trigger-based BMR formulation needs reformulation before it can be used for predictive comparison (see H6). Using affect thresholds to trigger structural changes conflates the affective signal with the model selection process, making it impossible to cleanly evaluate whether affect improves predictive score. A cleaner approach would separate the BMR machinery from the affective trigger and compare triggered vs. untriggered BMR as competing model-selection strategies, rather than embedding the trigger in the generative model itself.
 
 ### 8.3 Developmental Bootstrapping (Phase 7: Richer Tasks)
 
 Initialize agents with no prior knowledge and simulate the full developmental trajectory: from exploration-heavy behavior (all partners are novel → low precision → high epistemic drive) through gradual affective differentiation (partners become differentially predictable) to a mature state with stable partner-specific affective profiles. Compare the learning trajectory to developmental findings on children's trust calibration.
 
-**Critical analysis warning**: Learning rate modulation based on $\beta$ (e.g., increasing learning rate when precision is low) creates a positive feedback loop risk: low $\beta$ increases learning rate, which increases belief volatility, which increases surprise, which further lowers $\beta$. Any extension that couples $\beta$ to the learning dynamics must include stability analysis or damping to prevent runaway oscillation. Phase 4 (discrete hidden-state $\beta$) would help by replacing the continuous EMA with a categorical inference scheme that has natural self-regularization through the transition prior.
+**Critical analysis warning**: Learning rate modulation based on $\beta$ (e.g., increasing learning rate when precision is low) creates a positive feedback loop risk: low $\beta$ increases learning rate, which increases belief volatility, which increases surprise, which further lowers $\beta$. Any extension that couples $\beta$ to the learning dynamics must include stability analysis or damping to prevent runaway oscillation. The supported variational beta path is safer than a raw feedback loop because it keeps the precision signal in a bounded posterior update rather than feeding directly into learning-rate control.
 
 ### 8.4 Clinical Parameter Sensitivity Analysis (Phase 5)
 
@@ -560,8 +574,8 @@ The C5 > C2 result is the key finding. In the graded game's ambiguous landscape,
 | Phase | Description | Dependencies | Status |
 |---|---|---|---|
 | Phase 3 | Theory tightening: formalize the augmentation claim, present the variational grounding of beta via Hesp et al. | Current results | In progress |
-| Phase 4 | Variational beta: replace EMA with proper variational inference over precision | Phase 3 | Planned |
+| Phase 4 | Variational beta: supported auxiliary posterior path in Condition 12; broader formalization remains | Phase 3 | Supported |
 | Phase 5 | Clinical sensitivity: revisit in richer environments | Phase 7 | **Completed** (graded game enables d>2.1 clinical effects) |
-| Phase 6 | Model comparison: formal Bayesian model evidence comparison (H6) | Phase 4 | Planned |
+| Phase 6 | Model comparison: predictive log score comparison (H6) | Phase 4 | Planned |
 | Phase 7 | Richer tasks: test whether depth curve remains flat in larger action spaces, structure learning | Phase 3 | **Completed** (graded investment trust game) |
 | Phase 8 | Human data: fit to behavioral data, estimate individual-difference parameters | Phases 5-7 | Planned |

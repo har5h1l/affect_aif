@@ -8,13 +8,13 @@ This document tracks the project roadmap for the affect_aif system: per-partner 
 
 The first major iteration established the core finding and produced a paper draft. Key results:
 
-- **Core finding:** Per-partner affective precision tracking provides orthogonal augmentation to planning depth. Under sophisticated inference, planning horizon τ=2 through τ=8 produces identical non-affective performance, yet adding affect yields ~+46 payoff points at any depth.
+- **Core finding:** Per-partner affective precision tracking provides orthogonal augmentation to planning depth. Under sophisticated inference in the shipped binary-action task, planning horizon τ=2 through τ=8 produces identical non-affective performance, yet adding affect yields ~+46 payoff points at any depth.
 - **Hypothesis scorecard:** H1 (affect > baselines) strongly supported (d=0.64 default, d=1.30 betrayal). H2 (lesion dissociation / Damasio pattern) strongly supported. H3 (precision > reward averaging) context-dependent — supported only when prediction error and reward diverge (binary betrayal). H4 (post-switch robustness) supported. H5 (partner selection) supported.
 - **Cross-game generalization:** Augmentation holds across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions.
 - **Clinical sensitivity:** Requires graded/betrayal environments (binary games saturate softmax). Graded betrayal produces 80.5-point between-clinical spread. Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
-- **Bayesian model comparison:** C2 decisively preferred under betrayal stress (log10 BF = 3.0 vs C1). Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **Variational beta:** Discrete Bayesian beta formulation behaviorally equivalent to continuous EMA in stable environments (d=0.001). Moderate divergence under betrayal (d=0.41).
-- **CvC benchmark:** Early WIP / proof-of-concept. Navigation works (BFS + wall detection, 84-91% move success). Reward results minimal. Not publication-ready.
+- **Predictive score comparison:** C2 decisively preferred under betrayal stress (log10 proxy = 3.0 vs C1). Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
+- **Variational beta:** Supported auxiliary variational-beta path in Condition 12 is behaviorally equivalent to continuous EMA in stable environments (d=0.001). Moderate divergence under betrayal (d=0.41).
+- **CvC benchmark:** Early WIP / proof-of-concept. Navigation-only baseline works (BFS + wall detection, 84-91% move success). Reward results minimal. Not publication-ready.
 - **Paper:** Draft complete (theory gaps addressed, results integrated, figures included). Architecture needs justification of departures from standard AIF before submission.
 
 Detailed phase-by-phase history is in git commits and prior versions of this document.
@@ -125,4 +125,4 @@ These are post-tightening priorities, roughly ordered:
 - **Current focus:** Architectural tightening — fix known issues, address standard-AIF departures, make design decisions.
 - **Blocking on user:** Decisions 1-4 above. Code fixes (Area 1-2) can proceed independently.
 - **Paper status:** Results solid. Architecture needs justification/revision before submission to AIF venue.
-- **Benchmark:** Early WIP. Not publication-ready.
+- **Benchmark:** Early WIP / proof-of-concept. Not publication-ready.
