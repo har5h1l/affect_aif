@@ -39,6 +39,8 @@ Joint state space per partner: 4 types x 3 stances x 2 own_action = 24 states.
 
 **Payoff**: A proper modality with A[1] conditioned on (s_own, s_type, s_stance). The partner's actual action is marginalized through the type x stance cooperation probabilities. This preserves the Prisoner's Dilemma temptation structure at horizon 1 while trust-building via stance dynamics emerges at horizon >= 2.
 
+**Note on payoff representation**: In the environment, realized payoff is deterministically derived from joint actions. In the agent's generative model, payoff is instead treated as a modality conditionally generated from own action and latent partner disposition, with partner action marginalized through the cooperation table. This is a reduced generative representation that preserves standard factorized pymdp structure while retaining the expected incentive landscape. It is not a claim that payoff is stochastic in the real game.
+
 ---
 
 ## 4. Control Factors (U=1)
@@ -103,6 +105,8 @@ Near-identity with small stochastic drift:
 P(stay same type) = 1 - p_switch = 0.95
 P(switch to each other type) = p_switch / 3 ~ 0.017
 ```
+
+**Why drift?** Type is modeled as slowly drifting rather than perfectly fixed, to (a) capture behavioral nonstationarity in partners, (b) prevent pathological certainty that locks the agent into a wrong type inference, and (c) accommodate regime shifts (e.g., betrayal scenarios where a partner's behavior fundamentally changes).
 
 ### B[1]: P(s_stance' | s_stance, pi_social)
 
@@ -213,6 +217,8 @@ Where `P_predicted` comes from the agent's belief over type × stance before the
 
 **Design choice**: Prediction error is computed from partner action only, not from the joint (action, payoff) observation. Partner action is the most direct social signal of partner model mismatch — it reflects type and stance directly. Payoff adds information about the game outcome but is downstream of partner action (marginalized through the cooperation table). A richer alternative would define eps_k from the joint negative log-likelihood of both observations; this is a straightforward extension if needed.
 
+**Terminology**: This is a bounded prediction error proxy (range [0, 1]), not standard surprisal (-log P). It linearizes surprise for computational simplicity and ensures the affective charge has a natural zero-crossing at eps = sigma_0.
+
 ### Step 2: Affective Charge
 
 ```
@@ -238,7 +244,7 @@ Where T is a (5×5) tridiagonal matrix with persistence 0.8 and reflecting bound
 
 Construct a pseudo-likelihood directly from the affective charge:
 
-This is not a standard observation likelihood in the POMDP sense; it is a hand-specified Bayesian update rule that converts affective charge into evidence over discrete beta levels. The functional form is chosen so that positive charge favors low beta (high precision) and negative charge favors high beta (low precision), with the strength scaled by effective precision at each level:
+This is not a standard observation likelihood in the POMDP sense. It is a hand-designed Bayesian update rule chosen to satisfy three monotonicity properties: (1) positive affective charge should favor low beta (high precision), (2) negative charge should favor high beta (low precision), (3) the strength of evidence should scale with effective precision at each level. The specific functional form `log_lik[l] = phi * (1/beta_l)` is a normative design choice, not a derived theorem:
 
 ```
 effective_precision_l = 1 / beta_levels[l]
@@ -258,6 +264,8 @@ gamma_k = gamma_base / E[beta_k]
 ```
 
 Policy selection: `q(pi) = softmax(-gamma_k * G(pi))`.
+
+**Per-partner routing in agent-choice mode**: When the action space includes partner selection (N × 2 actions), each policy's first action determines which partner it engages. The policy inherits gamma from that partner: `gamma(pi) = gamma_base / E[beta_{first_partner(pi)}]`. This means policies targeting a well-modeled partner (low beta) are evaluated more decisively than policies targeting an uncertain partner (high beta). The effect is branchwise: different branches of the policy tree may have different effective precision, creating an implicit exploration-exploitation dynamic across partners.
 
 **Framing**: The POMDP handles social inference (type, stance). The precision tracker is a separate Bayesian module that reads prediction errors from social inference and modulates policy precision. This is a hierarchical architecture: the precision tracker operates on the *dynamics* of belief updating, not on a dedicated observation channel.
 
@@ -284,22 +292,24 @@ The POMDP is a purely social inference model: type and stance posteriors are upd
 
 ## 12. Multi-Agent Extension
 
-All agents (including "partners") run active inference with the same model structure. In simulations, behavioral differences arise primarily from **C[1] preference temperature**, which controls how sharply the agent pursues payoff differences. This is a simplification — real type differences also depend on planning horizon, belief initialization, and stance dynamics:
+All agents (including "partners") run active inference with the same model structure. In simulations, behavioral differences arise from **parameter regimes** — combinations of preference sharpness, planning horizon, and action noise — rather than from temperature alone. Type labels are latent social categories inferred by the focal agent; the simulation instantiates them as follows:
 
-| Type | C[1] temperature | Effect |
-|------|-----------------|--------|
-| Cooperator | 0.5 (sharp) | Strong payoff preference, naturally cooperates for trust |
-| Exploiter | 2.0 (flat) | Weak payoff preference, opportunistic |
-| Reciprocator | 1.0 (moderate) | Moderate, reciprocates via planning depth |
-| Random | 5.0 (very flat) | Nearly indifferent, near-random |
+| Type | C[1] temp | Horizon | Notes |
+|------|-----------|---------|-------|
+| Cooperator | 0.5 (sharp) | 4+ | Strong payoff preference + deep planning → discovers trust-building |
+| Exploiter | 2.0 (flat) | 1-2 | Weak preference + shallow planning → greedy, opportunistic |
+| Reciprocator | 1.0 (moderate) | 4+ | Moderate preference + deep planning → reciprocates via stance dynamics |
+| Random | 5.0 (very flat) | 1 | Nearly indifferent + myopic → near-random behavior |
+
+These are example parameterizations, not a claim that temperature alone generates each phenotype.
 
 ### Turn-Taking Protocol
 
 Each round:
 1. Focal agent selected (round-robin or random)
 2. If agent_choice mode: focal agent selects partner
-3. Focal agent: `infer_states -> infer_policies -> modulate_precision -> sample_action -> u_focal`
-4. Engaged partner: observes u_focal, runs `infer_states -> infer_policies -> modulate_precision -> sample_action -> u_partner`
+3. Focal agent: `infer_states → compute G(pi) → retrieve gamma_k from precision tracker → form q(pi) = softmax(-gamma_k · G) → sample action → u_focal`
+4. Engaged partner: observes u_focal, runs `infer_states → compute G(pi) → retrieve gamma_k → form q(pi) = softmax(-gamma_k · G) → sample action → u_partner`
 5. Both observe: o_action (each sees the other's action), o_payoff (from joint actions)
 6. Both update: type x stance posteriors via POMDP inference + beta posteriors via precision tracker
 
@@ -323,4 +333,4 @@ Each round:
 2. **External precision tracker**: Per-partner categorical over 5 beta levels, updated via affective charge pseudo-likelihood (Section 10). Runs after each trial observation, before policy selection.
 3. **Separated inference channels**: Type × stance inference via A[0]+A[1] in the POMDP. Beta inference via external tracker. Beta is not a POMDP factor and does not enter A/B; computationally the tracker is downstream of belief updates (reads prediction errors) and upstream of policy selection (modulates gamma).
 4. **Per-partner gamma**: `gamma_k = gamma_base / E[beta_k]` in the policy softmax.
-5. **Multi-agent**: All agents run AIF. Turn-taking. Types from C temperature.
+5. **Multi-agent**: All agents run AIF with shared architecture. Partner phenotypes emerge from different internal parameterizations (preference temperature, planning depth, noise).
