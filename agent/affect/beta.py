@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from agent.affect.interoception import affective_charge, discretize_intero
+from agent.affect.interoception import affective_charge
 
 
 DEFAULT_BETA_LEVELS = np.asarray([0.5, 0.67, 1.0, 1.5, 2.0], dtype=np.float64)
@@ -34,41 +34,19 @@ def _build_transition_matrix(num_levels: int, persistence: float) -> np.ndarray:
     return B
 
 
-def _build_likelihood_matrix(
-    num_intero_bins: int,
-    beta_levels: np.ndarray,
-    alpha_charge: float = 3.0,
-    sigma_0_sq: float = 0.25,
-) -> np.ndarray:
-    """Build P(o_intero | beta) using HESP's rate-parameter convention."""
-
-    # High-valence intero bins should correspond to low surprise / accurate models.
-    bin_centers = np.linspace(1.0, 0.0, num_intero_bins, dtype=np.float64)
-    L = len(beta_levels)
-    A = np.zeros((num_intero_bins, L), dtype=np.float64)
-    for l_idx in range(L):
-        bl = beta_levels[l_idx]
-        effective_precision = 1.0 / max(float(bl), 1e-12)
-        for s_idx in range(num_intero_bins):
-            eps = bin_centers[s_idx]
-            charge = affective_charge(eps, alpha=alpha_charge, sigma_0_sq=sigma_0_sq)
-            A[s_idx, l_idx] = np.exp(charge * effective_precision)
-    # Normalize columns
-    col_sums = A.sum(axis=0, keepdims=True)
-    A /= col_sums + 1e-16
-    return A
-
-
 class DiscreteBetaState:
-    """Manage per-partner affective precision via discrete Bayesian inference.
+    """Per-partner affective precision tracking outside the POMDP state space.
 
     Each partner's precision state β_k is a categorical distribution over L
-    levels. On each observation, the posterior updates as:
+    discrete levels. On each social observation, the posterior updates via:
 
-        q(β_k^t) ∝ P(ε_k^t | β_k^t) · Σ_{β'} P(β_k^t | β') q(β_k^{t-1} = β')
+        1. Predict: prior = T @ previous_posterior  (persistence smoothing)
+        2. Charge: φ = α(σ₀² - ε²)  (affective charge from prediction error)
+        3. Likelihood: ℓ(β_l) ∝ exp(φ / β_l)  (pseudo-likelihood over levels)
+        4. Update: posterior ∝ ℓ × prior  (Bayesian correction)
 
-    This is the same predict-then-correct scheme used for partner-type
-    inference, extended to the precision state.
+    This is a standalone precision tracker that reads social prediction errors
+    and modulates policy precision, without being part of the POMDP generative model.
     """
 
     def __init__(
@@ -96,14 +74,8 @@ class DiscreteBetaState:
             hi = float(beta_max) if beta_max is not None else 2.0
             self.beta_levels = np.linspace(lo, hi, num_levels, dtype=np.float64)
 
-        # Transition matrix: B_beta[:, j] = P(β_t | β_{t-1} = j)
-        self.B_beta = _build_transition_matrix(num_levels, persistence)
-        self.A_intero = _build_likelihood_matrix(
-            num_intero_bins=num_levels,
-            beta_levels=self.beta_levels,
-            alpha_charge=self.alpha_charge,
-            sigma_0_sq=self.sigma_0_sq,
-        )
+        # Transition matrix: _transition[:, j] = P(β_t | β_{t-1} = j)
+        self._transition = _build_transition_matrix(num_levels, persistence)
 
         # Initial posterior concentrated at the level nearest initial_beta
         self._initial_posterior = self._build_initial_posterior()
@@ -123,18 +95,30 @@ class DiscreteBetaState:
         predicted_action_probs,
         observed_action: int,
     ) -> tuple[float, float]:
-        """Bayesian predict-then-correct update of the precision posterior."""
+        """Update precision belief for a partner from social prediction error.
+
+        Computes affective charge from prediction error, constructs a
+        pseudo-likelihood over beta levels, and performs a Bayesian
+        predict-then-correct update.
+        """
         probs = np.asarray(predicted_action_probs, dtype=np.float64)
         surprise = 1.0 - probs[int(observed_action)]
         charge = affective_charge(surprise, alpha=self.alpha_charge, sigma_0_sq=self.sigma_0_sq)
-        intero_obs = discretize_intero(charge, num_levels=self.num_levels)
 
-        # Predict: prior = B @ previous posterior
-        prior = self.B_beta @ self.posteriors[int(partner_idx)]
+        # Predict: apply persistence transition
+        prior = self._transition @ self.posteriors[int(partner_idx)]
         prior /= prior.sum() + 1e-16
 
-        # Update: posterior ∝ likelihood × prior
-        lik = self.A_intero[int(intero_obs)]
+        # Pseudo-likelihood from affective charge:
+        # positive charge (accurate model) → favor low beta (high precision)
+        # negative charge (surprise) → favor high beta (low precision)
+        effective_precision = 1.0 / np.maximum(self.beta_levels, 1e-12)
+        log_lik = charge * effective_precision
+        log_lik -= log_lik.max()  # numerical stability
+        lik = np.exp(log_lik)
+        lik /= lik.sum() + 1e-16
+
+        # Bayesian update
         posterior = lik * prior
         posterior /= posterior.sum() + 1e-16
 

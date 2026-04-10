@@ -1,15 +1,12 @@
-"""Tests for Phase 4: discrete hidden-state beta formulation."""
+"""Tests for discrete Bayesian beta precision tracking."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-import pytest
-
 from agent.affect.beta import (
     DiscreteBetaState,
-    _build_likelihood_matrix,
     _build_transition_matrix,
 )
 
@@ -44,19 +41,6 @@ class TestTransitionMatrix:
         for j in range(1, 4):
             np.testing.assert_allclose(B[j - 1, j], B[j + 1, j], atol=1e-10)
 
-
-class TestLikelihoodMatrix:
-    def test_column_probabilities(self):
-        levels = np.linspace(0.1, 0.9, 5)
-        A = _build_likelihood_matrix(5, levels)
-        np.testing.assert_allclose(A.sum(axis=0), 1.0, atol=1e-10)
-
-    def test_monotonicity(self):
-        """High-valence intero observations should be most likely at low beta."""
-        levels = np.asarray([0.5, 0.67, 1.0, 1.5, 2.0], dtype=float)
-        A = _build_likelihood_matrix(5, levels)
-        for i in range(4):
-            assert A[-1, i] > A[-1, i + 1], "High-valence intero should be more likely at lower beta"
 
 
 class TestDiscreteBetaState:

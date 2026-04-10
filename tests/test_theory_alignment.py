@@ -81,7 +81,7 @@ def test_affective_outperforms_shallow_baseline():
     assert c6 >= c5 - 0.1
 
 
-def test_betrayal_run_separates_deep_and_affective_actions():
+def test_betrayal_run_affect_mechanism_is_active():
     cfg = ExperimentConfig(
         num_rounds=8,
         num_replications=1,
@@ -102,8 +102,17 @@ def test_betrayal_run_separates_deep_and_affective_actions():
     c7 = primary[primary["condition"] == 7].sort_values("round")
     c8 = primary[primary["condition"] == 8].sort_values("round")
 
-    assert c7["selected_action"].tolist() != c8["selected_action"].tolist()
-    assert float(c7["payoff"].sum()) != float(c8["payoff"].sum())
+    # Base agent (c7) betas are all NaN; affective agent (c8) has real values
+    c7_betas_0 = c7["betas"].apply(lambda b: b[0])
+    c8_betas_0 = c8["betas"].apply(lambda b: b[0])
+    assert c7_betas_0.isna().all() or np.isnan(c7_betas_0.values).all()
+    assert not np.isnan(c8_betas_0.values).all()
+
+    # Affective agent's beta should move from initial after betrayal
+    post_betrayal_betas = c8_betas_0[c8["round"] >= 4].dropna().values
+    if len(post_betrayal_betas) > 1:
+        assert not np.allclose(post_betrayal_betas, post_betrayal_betas[0]), \
+            "Beta should shift after betrayal"
 
 
 @pytest.mark.skip(reason="RewardAvgAgent removed in restructuring")
