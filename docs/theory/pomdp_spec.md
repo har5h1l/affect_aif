@@ -6,7 +6,7 @@ Specifies the generative model in standard pymdp A/B/C/D/E format.
 
 ## 1. Overview
 
-N agents interact in a repeated trust game with turn-taking. Each round, one focal agent selects an action (cooperate/defect, and optionally which partner to engage). All agents run active inference — behavioral "types" are encoded in preference structures (C), not hardcoded policies. Each agent maintains per-partner beliefs over (type, stance) via the POMDP, plus a per-partner precision tracker (beta) that operates outside the generative model.
+N agents interact in a repeated trust game with turn-taking. Each round, one focal agent selects an action (cooperate/defect, and optionally which partner to engage). All agents run active inference — behavioral "types" are inferred social categories in the focal agent's model; in simulations, partner behavior is shaped by internal parameterizations including preference temperature, planning horizon, and policy noise. Each agent maintains per-partner beliefs over (type, stance) via the POMDP, plus a per-partner precision tracker (beta) that operates outside the generative model.
 
 Precision tracking reads social prediction errors and modulates policy precision, without being part of the POMDP state space. This matches Hesp et al.'s hierarchical approach where precision is inferred from inference dynamics rather than from a dedicated sensory channel.
 
@@ -14,14 +14,15 @@ Precision tracking reads social prediction errors and modulates policy precision
 
 ---
 
-## 2. Hidden State Factors (F=4)
+## 2. Hidden State Factors (F=3)
 
 | Factor | Symbol | States | Controllable? | Notes |
 |--------|--------|--------|---------------|-------|
 | Partner type | `s_type` | cooperator, reciprocator, exploiter, random (4) | No | Fixed behavioral tendency. Small stochastic drift (p_switch = 0.05). |
 | Partner stance | `s_stance` | trusting, neutral, hostile (3) | **Yes** | Partner's disposition toward the agent. Evolves based on agent's actions. Agent influences via actions, cannot observe directly. |
-| Interaction context | `s_context` | partner_1, ..., partner_N (N) | Depends on mode | agent_choice: controllable. random: uncontrollable. |
 | Own action | `s_own` | cooperate, defect (2) | Yes | Deterministic: tracks agent's own last action. Needed for payoff modality. |
+
+**Note on s_own**: This is not a substantive latent variable. It is a deterministic bookkeeping state included so that payoff can be represented as a standard factorized A-matrix dependency: A[1] = P(o_payoff | s_own, s_type, s_stance). The agent always knows its own action; s_own simply makes this knowledge available to the observation model in pymdp-standard form.
 
 **Key structural property**: Stance is the **partner's** disposition toward the **agent** (a hidden state the agent must infer), not the agent's own attitude. The agent influences stance through its actions (cooperating builds trust, defecting destroys it), but cannot directly observe or control it.
 
@@ -46,7 +47,7 @@ Joint state space per partner: 4 types x 3 stances x 2 own_action = 24 states.
 |--------|--------|---------|----------|
 | Social action | `pi_social` | cooperate, defect (2) | `s_stance` transitions (via action-dependent B), `s_own` (deterministic) |
 
-In agent_choice mode, the action space expands to N x 2 (choose partner x choose social action), and `pi_social` also controls `s_context`.
+In agent_choice mode, the action space expands to N x 2 (choose partner x choose social action). Partner selection is handled via action encoding, not as a hidden state transition.
 
 ---
 
@@ -54,7 +55,7 @@ In agent_choice mode, the action space expands to N x 2 (choose partner x choose
 
 ### A[0]: P(o_action | s_type, s_stance)
 
-Shape: `(2, 4, 3)` — uniform over s_context, s_own.
+Shape: `(2, 4, 3)` — uniform over s_own.
 
 Each entry is the probability that the partner cooperates given their type and stance:
 
@@ -69,7 +70,7 @@ The row for P(defect) is 1 minus the above. Optional observation noise: `A_noisy
 
 ### A[1]: P(o_payoff | s_own, s_type, s_stance)
 
-Shape: `(4, 2, 4, 3)` — 4 payoff outcomes x 2 own_action x 4 types x 3 stances. Uniform over s_context.
+Shape: `(4, 2, 4, 3)` — 4 payoff outcomes x 2 own_action x 4 types x 3 stances.
 
 Construction: for each (own_action, type, stance), marginalize over partner_action:
 
@@ -129,14 +130,7 @@ Key dynamics:
 - Recovery from hostile is slow (hostile -> neutral takes ~4-5 cooperations)
 - This asymmetry is what makes deeper planning (horizon 4+) discover trust-building strategies
 
-### B[2]: P(s_context' | s_context, pi_social)
-
-Shape: `(N, N, 2)`.
-
-- Agent_choice mode: deterministic partner selection based on action encoding.
-- Random assignment: uniform `1/N` regardless of action.
-
-### B[3]: P(s_own' | s_own, pi_social)
+### B[2]: P(s_own' | s_own, pi_social)
 
 Shape: `(2, 2, 2)` — **deterministic on the control.**
 
@@ -182,11 +176,7 @@ Shape: `(4,)` — `[0.25, 0.25, 0.25, 0.25]` — no initial bias toward any part
 
 Shape: `(3,)` — `[0.2, 0.6, 0.2]` — centered on neutral. Partners expected to start neutral.
 
-### D[2]: Prior over s_context
-
-Shape: `(N,)` — `[1/N, ..., 1/N]` — uniform over partners.
-
-### D[3]: Prior over s_own
+### D[2]: Prior over s_own
 
 Shape: `(2,)` — `[0.5, 0.5]` — uniform. (The first action overwrites this deterministically.)
 
@@ -221,6 +211,8 @@ eps_k = 1 - P_predicted(observed_action_k)
 
 Where `P_predicted` comes from the agent's belief over type × stance before the observation.
 
+**Design choice**: Prediction error is computed from partner action only, not from the joint (action, payoff) observation. Partner action is the most direct social signal of partner model mismatch — it reflects type and stance directly. Payoff adds information about the game outcome but is downstream of partner action (marginalized through the cooperation table). A richer alternative would define eps_k from the joint negative log-likelihood of both observations; this is a straightforward extension if needed.
+
 ### Step 2: Affective Charge
 
 ```
@@ -245,6 +237,8 @@ Where T is a (5×5) tridiagonal matrix with persistence 0.8 and reflecting bound
 ### Step 4: Pseudo-Likelihood and Bayesian Update
 
 Construct a pseudo-likelihood directly from the affective charge:
+
+This is not a standard observation likelihood in the POMDP sense; it is a hand-specified Bayesian update rule that converts affective charge into evidence over discrete beta levels. The functional form is chosen so that positive charge favors low beta (high precision) and negative charge favors high beta (low precision), with the strength scaled by effective precision at each level:
 
 ```
 effective_precision_l = 1 / beta_levels[l]
@@ -271,7 +265,7 @@ Policy selection: `q(pi) = softmax(-gamma_k * G(pi))`.
 
 ## 11. Per-Partner Inference (Multi-Partner Handling)
 
-The spec above describes a single POMDP with factors (type, stance, context, own_action). But a single shared posterior over type and stance does not make sense with K partners who have different types. The implementation runs **K parallel instances** of the generative model:
+The implementation maintains **K parallel instances** of the generative model, one per partner:
 
 - Each partner k has its own posterior over `(type_k, stance_k)`: shape `(4, 3)`
 - Each partner k has a corresponding precision tracker maintaining a categorical posterior over `beta_k`: shape `(5,)`. This operates outside the POMDP.
@@ -280,7 +274,9 @@ The spec above describes a single POMDP with factors (type, stance, context, own
 - A/B matrices are shared across all instances
 - D (initial beliefs) are per-partner (all start at the same prior, diverge through observation)
 
-In agent_choice mode, the context factor `s_context` selects which partner is active, and the action space is `N x 2` (choose partner x choose social action).
+Partner selection is handled outside the POMDP:
+- **Random assignment**: environment selects the active partner each round
+- **Agent choice**: the agent evaluates expected outcomes for each partner instance and selects which to engage
 
 The POMDP is a purely social inference model: type and stance posteriors are updated from partner action and payoff observations only.
 
@@ -288,7 +284,7 @@ The POMDP is a purely social inference model: type and stance posteriors are upd
 
 ## 12. Multi-Agent Extension
 
-All agents (including "partners") run active inference with the same model structure. Behavioral types are encoded in **C preference temperature**, not hardcoded policies:
+All agents (including "partners") run active inference with the same model structure. In simulations, behavioral differences arise primarily from **C[1] preference temperature**, which controls how sharply the agent pursues payoff differences. This is a simplification — real type differences also depend on planning horizon, belief initialization, and stance dynamics:
 
 | Type | C[1] temperature | Effect |
 |------|-----------------|--------|
@@ -323,8 +319,8 @@ Each round:
 
 ## 14. Summary: What to Build
 
-1. **Standard pymdp model**: A[0] (2x4x3), A[1] (4x2x4x3), B[0] (4x4x2), B[1] (3x3x2), B[2] (NxNx2), B[3] (2x2x2), C[0-1], D[0-3], E.
+1. **Standard pymdp model**: A[0] (2x4x3), A[1] (4x2x4x3), B[0] (4x4x2), B[1] (3x3x2), B[2] (2x2x2), C[0-1], D[0-2], E.
 2. **External precision tracker**: Per-partner categorical over 5 beta levels, updated via affective charge pseudo-likelihood (Section 10). Runs after each trial observation, before policy selection.
-3. **Factorized inference**: Type × stance inference via A[0]+A[1] in the POMDP. Beta inference via external tracker. These are structurally independent.
+3. **Separated inference channels**: Type × stance inference via A[0]+A[1] in the POMDP. Beta inference via external tracker. Beta is not a POMDP factor and does not enter A/B; computationally the tracker is downstream of belief updates (reads prediction errors) and upstream of policy selection (modulates gamma).
 4. **Per-partner gamma**: `gamma_k = gamma_base / E[beta_k]` in the policy softmax.
 5. **Multi-agent**: All agents run AIF. Turn-taking. Types from C temperature.

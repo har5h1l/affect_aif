@@ -18,7 +18,6 @@ def test_b_matrix_column_normalized():
     model = TrustGameModel(ExperimentConfig())
     assert np.allclose(model.B[0].sum(axis=0), 1.0)
     assert np.allclose(model.B[1].sum(axis=0), 1.0)
-    assert np.allclose(model.B[2].sum(axis=0), 1.0)
 
 
 def test_c_and_d_shapes():
@@ -80,7 +79,7 @@ def test_graded_model_construction():
     assert B[0].shape[2] == 24  # transitions for each action
     assert D[0].shape[0] == model.num_types
     assert D[1].shape[0] == model.num_stances
-    assert D[2].shape[0] == model.num_partners
+    assert D[2].shape[0] == model.num_social_actions
 
 
 def test_graded_a_matrix_column_normalized():

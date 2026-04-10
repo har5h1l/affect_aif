@@ -4,25 +4,24 @@ from experiment.config import ExperimentConfig
 from agent.model.trust_game import TrustGameModel
 
 
-def test_v3_model_exposes_two_modalities_and_four_factors():
+def test_model_exposes_two_modalities_and_three_factors():
     model = TrustGameModel(ExperimentConfig())
 
     assert len(model.A) == 2
     assert model.A[0].shape == (2, 4, 3)
     assert model.A[1].shape == (4, 2, 4, 3)
 
-    assert len(model.B) == 4
+    assert len(model.B) == 3
     assert model.B[0].shape == (4, 4, 2)
     assert model.B[1].shape == (3, 3, 2)
-    assert model.B[2].shape == (4, 4, 2)
-    assert model.B[3].shape == (2, 2, 2)
+    assert model.B[2].shape == (2, 2, 2)
 
     assert len(model.C) == 2
     assert model.C[0].shape == (2,)
     assert model.C[1].shape == (4,)
 
-    assert len(model.D) == 4
-    assert model.D[3].shape == (2,)
+    assert len(model.D) == 3
+    assert model.D[2].shape == (2,)
 
 
 def test_payoff_modality_marginalizes_partner_action_from_type_and_stance():
@@ -40,8 +39,8 @@ def test_payoff_modality_marginalizes_partner_action_from_type_and_stance():
 def test_own_action_transition_is_deterministic():
     model = TrustGameModel(ExperimentConfig())
 
-    cooperate = model.B[3][:, :, 0]
-    defect = model.B[3][:, :, 1]
+    cooperate = model.B[2][:, :, 0]
+    defect = model.B[2][:, :, 1]
 
     np.testing.assert_allclose(cooperate, np.asarray([[1.0, 1.0], [0.0, 0.0]]))
     np.testing.assert_allclose(defect, np.asarray([[0.0, 0.0], [1.0, 1.0]]))

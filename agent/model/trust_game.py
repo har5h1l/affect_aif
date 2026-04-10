@@ -118,9 +118,9 @@ class _BaseTrustGameModel:
         return A
 
     def build_B(self) -> np.ndarray:
-        """Build transition tensors for type, stance, context, and own action."""
+        """Build transition tensors for type, stance, and own action."""
 
-        B = obj_array(4)
+        B = obj_array(3)
         num_actions_total = self.num_controls[0]
 
         type_transition = np.full(
@@ -138,27 +138,11 @@ class _BaseTrustGameModel:
             stance_transition[:, :, action] = interpolate_stance_transition(evidence)
         B[1] = stance_transition
 
-        if self.assignment_mode == "agent_choice":
-            context = np.zeros((self.num_partners, self.num_partners, num_actions_total), dtype=float)
-            for action in range(num_actions_total):
-                partner_idx, _ = decode_action(
-                    action,
-                    self.num_partners,
-                    self.assignment_mode,
-                    num_social_actions=self.num_social_actions,
-                )
-                context[partner_idx, :, action] = 1.0
-        else:
-            context = np.full(
-                (self.num_partners, self.num_partners, num_actions_total), 1.0 / self.num_partners, dtype=float
-            )
-        B[2] = context
-
         own_action = np.zeros((self.num_social_actions, self.num_social_actions, num_actions_total), dtype=float)
         for action in range(num_actions_total):
             social_action = self.social_action_for_action(action)
             own_action[social_action, :, action] = 1.0
-        B[3] = own_action
+        B[2] = own_action
         return B
 
     def build_C(self) -> np.ndarray:
@@ -170,11 +154,10 @@ class _BaseTrustGameModel:
         return C
 
     def build_D(self) -> np.ndarray:
-        D = obj_array(4)
+        D = obj_array(3)
         D[0] = np.full(self.num_types, 1.0 / self.num_types, dtype=float)
         D[1] = np.asarray([0.2, 0.6, 0.2], dtype=float)
-        D[2] = np.full(self.num_partners, 1.0 / self.num_partners, dtype=float)
-        D[3] = np.full(self.num_social_actions, 1.0 / self.num_social_actions, dtype=float)
+        D[2] = np.full(self.num_social_actions, 1.0 / self.num_social_actions, dtype=float)
         return D
 
     def get_matrices(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -212,9 +195,6 @@ class _BaseTrustGameModel:
 
     def stance_transition_for_action(self, action: int) -> np.ndarray:
         return np.asarray(self.B[1][:, :, int(action)], dtype=float)
-
-    def context_transition_for_action(self, action: int) -> np.ndarray:
-        return np.asarray(self.B[2][:, :, int(action)], dtype=float)
 
     def transition_for_action(self, action: int = 0) -> np.ndarray:
         return self.type_transition_for_action(action)
