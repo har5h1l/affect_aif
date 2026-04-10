@@ -46,10 +46,6 @@ class _BaseTrustGameModel:
         self.assignment_mode = str(cfg.get("assignment_mode", cfg.get("variant", "random")))
         self.observation_noise = float(cfg.get("observation_noise", 0.0))
         self.preference_temperature = float(cfg.get("preference_temperature", 1.0))
-        self.alpha_charge = float(cfg.get("alpha_charge", 3.0))
-        self.sigma_0_sq = float(cfg.get("sigma_0_sq", 0.25))
-        self.beta_persistence = float(cfg.get("beta_persistence", 0.8))
-        self.beta_levels = np.asarray(cfg.get("beta_levels", (0.5, 0.67, 1.0, 1.5, 2.0)), dtype=float)
         self.partner_type_params = default_partner_type_params()
         self.partner_type_params.update(cfg.get("partner_type_params", {}))
         self.partner_types = [
@@ -59,7 +55,7 @@ class _BaseTrustGameModel:
 
         self._init_payoffs(cfg)
         self.payoff_levels = infer_payoff_levels(self.payoff_matrix)
-        self.num_obs = [2, len(self.payoff_levels), len(self.beta_levels)]
+        self.num_obs = [2, len(self.payoff_levels)]
         self.num_controls = [num_actions(self.num_partners, self.assignment_mode, self.num_social_actions)]
 
         self.partner_action_prob_table = self._build_partner_action_prob_table()
@@ -96,9 +92,9 @@ class _BaseTrustGameModel:
         return int(action)
 
     def build_A(self) -> np.ndarray:
-        """Build likelihood tensors for action, payoff, and interoception."""
+        """Build likelihood tensors for action and payoff observations."""
 
-        A = obj_array(3)
+        A = obj_array(2)
         partner_action = np.zeros((2, self.num_types, self.num_stances), dtype=float)
         for type_idx in range(self.num_types):
             for stance_idx in range(self.num_stances):
@@ -117,25 +113,14 @@ class _BaseTrustGameModel:
                     payoff_obs[coop_idx, agent_action, type_idx, stance_idx] += p_coop
                     payoff_obs[defect_idx, agent_action, type_idx, stance_idx] += 1.0 - p_coop
 
-        intero_obs = np.zeros((len(self.beta_levels), len(self.beta_levels)), dtype=float)
-        intero_bin_centers = np.linspace(1.0, 0.0, len(self.beta_levels), dtype=float)
-        for beta_idx, beta_level in enumerate(self.beta_levels):
-            effective_precision = 1.0 / max(float(beta_level), 1e-12)
-            for intero_idx, eps in enumerate(intero_bin_centers):
-                intero_obs[intero_idx, beta_idx] = np.exp(
-                    self.alpha_charge * (self.sigma_0_sq - eps**2) * effective_precision
-                )
-        intero_obs /= intero_obs.sum(axis=0, keepdims=True) + 1e-16
-
         A[0] = partner_action
         A[1] = payoff_obs
-        A[2] = intero_obs
         return A
 
     def build_B(self) -> np.ndarray:
-        """Build transition tensors for type, stance, context, beta, and own action."""
+        """Build transition tensors for type, stance, context, and own action."""
 
-        B = obj_array(5)
+        B = obj_array(4)
         num_actions_total = self.num_controls[0]
 
         type_transition = np.full(
@@ -169,44 +154,27 @@ class _BaseTrustGameModel:
             )
         B[2] = context
 
-        persistence = float(np.clip(self.beta_persistence, 0.0, 1.0))
-        half_leak = (1.0 - persistence) / 2.0
-        beta_transition = np.zeros((len(self.beta_levels), len(self.beta_levels)), dtype=float)
-        for idx in range(len(self.beta_levels)):
-            beta_transition[idx, idx] = persistence
-            if idx > 0:
-                beta_transition[idx - 1, idx] += half_leak
-            else:
-                beta_transition[idx, idx] += half_leak
-            if idx < len(self.beta_levels) - 1:
-                beta_transition[idx + 1, idx] += half_leak
-            else:
-                beta_transition[idx, idx] += half_leak
-        B[3] = np.repeat(beta_transition[:, :, None], num_actions_total, axis=2)
-
         own_action = np.zeros((self.num_social_actions, self.num_social_actions, num_actions_total), dtype=float)
         for action in range(num_actions_total):
             social_action = self.social_action_for_action(action)
             own_action[social_action, :, action] = 1.0
-        B[4] = own_action
+        B[3] = own_action
         return B
 
     def build_C(self) -> np.ndarray:
-        C = obj_array(3)
+        C = obj_array(2)
         C[0] = np.zeros(2, dtype=float)
         payoff_values = np.asarray(self.payoff_levels, dtype=float)
         scaled = payoff_values / max(self.preference_temperature, 1e-12)
         C[1] = log_stable(softmax(scaled, backend="numpy"), backend="numpy")
-        C[2] = np.linspace(0.0, 1.0, len(self.beta_levels), dtype=float) * self.preference_temperature
         return C
 
     def build_D(self) -> np.ndarray:
-        D = obj_array(5)
+        D = obj_array(4)
         D[0] = np.full(self.num_types, 1.0 / self.num_types, dtype=float)
         D[1] = np.asarray([0.2, 0.6, 0.2], dtype=float)
         D[2] = np.full(self.num_partners, 1.0 / self.num_partners, dtype=float)
-        D[3] = np.asarray([0.05, 0.15, 0.60, 0.15, 0.05], dtype=float)
-        D[4] = np.full(self.num_social_actions, 1.0 / self.num_social_actions, dtype=float)
+        D[3] = np.full(self.num_social_actions, 1.0 / self.num_social_actions, dtype=float)
         return D
 
     def get_matrices(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:

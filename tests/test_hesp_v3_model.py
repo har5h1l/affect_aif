@@ -4,29 +4,25 @@ from experiment.config import ExperimentConfig
 from agent.model.trust_game import TrustGameModel
 
 
-def test_v3_model_exposes_three_modalities_and_five_factors():
+def test_v3_model_exposes_two_modalities_and_four_factors():
     model = TrustGameModel(ExperimentConfig())
 
-    assert len(model.A) == 3
+    assert len(model.A) == 2
     assert model.A[0].shape == (2, 4, 3)
     assert model.A[1].shape == (4, 2, 4, 3)
-    assert model.A[2].shape == (5, 5)
 
-    assert len(model.B) == 5
+    assert len(model.B) == 4
     assert model.B[0].shape == (4, 4, 2)
     assert model.B[1].shape == (3, 3, 2)
     assert model.B[2].shape == (4, 4, 2)
-    assert model.B[3].shape == (5, 5, 2)
-    assert model.B[4].shape == (2, 2, 2)
+    assert model.B[3].shape == (2, 2, 2)
 
-    assert len(model.C) == 3
+    assert len(model.C) == 2
     assert model.C[0].shape == (2,)
     assert model.C[1].shape == (4,)
-    assert model.C[2].shape == (5,)
 
-    assert len(model.D) == 5
-    assert model.D[3].shape == (5,)
-    assert model.D[4].shape == (2,)
+    assert len(model.D) == 4
+    assert model.D[3].shape == (2,)
 
 
 def test_payoff_modality_marginalizes_partner_action_from_type_and_stance():
@@ -44,22 +40,11 @@ def test_payoff_modality_marginalizes_partner_action_from_type_and_stance():
 def test_own_action_transition_is_deterministic():
     model = TrustGameModel(ExperimentConfig())
 
-    cooperate = model.B[4][:, :, 0]
-    defect = model.B[4][:, :, 1]
+    cooperate = model.B[3][:, :, 0]
+    defect = model.B[3][:, :, 1]
 
     np.testing.assert_allclose(cooperate, np.asarray([[1.0, 1.0], [0.0, 0.0]]))
     np.testing.assert_allclose(defect, np.asarray([[0.0, 0.0], [1.0, 1.0]]))
-
-
-def test_intero_likelihood_prefers_positive_valence_for_low_beta():
-    model = TrustGameModel(ExperimentConfig())
-
-    high_valence_bin = 4
-    low_beta_idx = 0
-    high_beta_idx = 4
-
-    assert model.A[2][high_valence_bin, low_beta_idx] > model.A[2][high_valence_bin, high_beta_idx]
-    assert np.allclose(model.A[2].sum(axis=0), 1.0)
 
 
 def test_social_posterior_does_not_double_count_deterministic_payoff():
@@ -74,8 +59,3 @@ def test_social_posterior_does_not_double_count_deterministic_payoff():
     np.testing.assert_allclose(posterior_with_payoff, posterior_without_payoff)
 
 
-def test_beta_transition_respects_configured_persistence():
-    model = TrustGameModel(ExperimentConfig(beta_persistence=0.2))
-    beta_transition = model.B[3][:, :, 0]
-
-    assert np.isclose(beta_transition[2, 2], 0.2)
