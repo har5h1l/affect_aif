@@ -13,7 +13,6 @@ def tiny_config():
     return ExperimentConfig(
         num_rounds=3,
         num_replications=1,
-        calibration_episodes=1,
         random_seed=0,
     )
 
@@ -25,7 +24,6 @@ def betrayal_config():
         num_partners=2,
         num_rounds=8,
         num_replications=1,
-        calibration_episodes=1,
         random_seed=0,
         assignment_mode="agent_choice",
         p_switch=0.0,

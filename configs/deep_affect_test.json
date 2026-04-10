@@ -1,7 +1,0 @@
-{
-  "experiment_name": "deep_affect_test",
-  "conditions": [5, 6, 8],
-  "num_replications": 100,
-  "calibration_episodes": 5,
-  "random_seed": 42
-}

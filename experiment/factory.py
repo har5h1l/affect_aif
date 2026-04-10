@@ -62,7 +62,6 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
         use_information_gain=spec.use_information_gain,
     )
     params = {
-        "lambda_smooth": config.lambda_smooth,
         "alpha_charge": config.alpha_charge,
         "sigma_0_sq": config.sigma_0_sq,
         "initial_beta": config.initial_beta,
@@ -77,10 +76,11 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
         return LesionedAgent(
             planning_horizon=planning_horizon,
             num_partners=config.num_partners,
-            lambda_smooth=params["lambda_smooth"],
             alpha_charge=params["alpha_charge"],
             sigma_0_sq=params["sigma_0_sq"],
             initial_beta=params["initial_beta"],
+            num_levels=config.beta_num_levels,
+            persistence=config.beta_persistence,
             lesion_mode=spec.lesion_mode or config.lesion_mode,
             **common,
         )
@@ -88,7 +88,6 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
         return AffectiveAgent(
             planning_horizon=planning_horizon,
             num_partners=config.num_partners,
-            lambda_smooth=params["lambda_smooth"],
             alpha_charge=params["alpha_charge"],
             sigma_0_sq=params["sigma_0_sq"],
             initial_beta=params["initial_beta"],

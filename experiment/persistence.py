@@ -16,21 +16,12 @@ def annotate_primary_records(
     *,
     condition: int | str,
     config: ExperimentConfig,
-    calibration_summary: dict | None,
     config_path: str | None = None,
     config_name: str | None = None,
     batch_id: str | None = None,
 ) -> list[dict]:
     for row in rows:
         row["condition_name"] = resolve_condition_spec(condition).name
-        if calibration_summary is not None:
-            row["mu_source"] = "derived"
-            row["calibration_mean_abs_efe_per_step"] = calibration_summary["mean_abs_efe_per_step"]
-            row["derived_mu"] = calibration_summary["derived_mu"]
-        else:
-            row["mu_source"] = "not_required"
-            row["calibration_mean_abs_efe_per_step"] = np.nan
-            row["derived_mu"] = np.nan
         row["run_mode"] = "primary"
         row["config_path"] = config_path or np.nan
         row["config_name"] = config_name or config.experiment_name

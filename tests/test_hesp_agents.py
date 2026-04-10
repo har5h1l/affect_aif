@@ -8,7 +8,7 @@ from agent.model.trust_game import TrustGameModel
 
 
 def _make_agent(agent_cls, **kwargs):
-    cfg = ExperimentConfig(num_rounds=2, calibration_episodes=1, num_replications=1, random_seed=0)
+    cfg = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
     model = TrustGameModel(cfg)
     A, B, C, D = model.get_matrices()
     common_kwargs = dict(

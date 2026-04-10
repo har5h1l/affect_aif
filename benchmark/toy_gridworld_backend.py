@@ -57,7 +57,6 @@ class ToyGridworldBackend(BenchmarkBackend):
             overrides = {
                 "num_rounds": config.num_rounds,
                 "num_replications": 1,
-                "calibration_episodes": 5,
                 "random_seed": config.random_seed,
             }
             overrides.update(self.scenario.trust_game_defaults())

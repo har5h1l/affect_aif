@@ -15,7 +15,7 @@ def test_log_evidence_tracked_in_agent_metrics(representative_agents, tiny_model
     """All agent types should produce finite log-evidence after observing outcomes."""
     from env.trust_game import TrustGameEnv
 
-    config = ExperimentConfig(num_rounds=5, num_replications=1, calibration_episodes=1, random_seed=0)
+    config = ExperimentConfig(num_rounds=5, num_replications=1, random_seed=0)
     env = TrustGameEnv(config, seed=0)
 
     for name, agent in representative_agents.items():

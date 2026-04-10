@@ -82,16 +82,12 @@ def _serial_single_config_run(args) -> int:
                 "config_name": config_name,
                 "results_path": str(results_path),
                 "workers": 1,
-                "calibration_summary": runner.calibration_summary,
             },
             indent=2,
         )
     )
 
     print(f"Saved {len(results)} rows to {results_path}")
-    if runner.calibration_summary is not None:
-        print(f"Derived mu: {runner.calibration_summary['derived_mu']:.6f}")
-        print(f"Mean |EFE| per step: {runner.calibration_summary['mean_abs_efe_per_step']:.6f}")
     if args.make_gifs:
         gif_dir = config_dir / "gifs"
         written = build_run_gifs(results, str(gif_dir), reporter=runner.progress)
@@ -114,8 +110,6 @@ def _batch_run(args) -> int:
     for state in result.config_states:
         rows = len(state.primary_rows) + len(state.sensitivity_rows)
         print(f"{state.config_name}: {rows} rows -> {state.output_dir / 'results.csv'}")
-        if state.calibration_summary is not None:
-            print(f"{state.config_name}: derived mu {float(state.calibration_summary['derived_mu']):.6f}")
     return 0
 
 

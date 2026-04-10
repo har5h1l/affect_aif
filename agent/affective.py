@@ -23,7 +23,6 @@ class AffectiveAgent(BaseAgent):
         gamma: float = 1.0,
         lr: float = 0.1,
         num_partners: int = 4,
-        lambda_smooth: float = 0.6,
         alpha_charge: float = 3.0,
         sigma_0_sq: float = 0.25,
         initial_beta: float = 1.0,

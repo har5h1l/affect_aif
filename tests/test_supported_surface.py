@@ -49,7 +49,6 @@ def test_runner_variational_beta_preset_uses_variational_affective_agent():
     config = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
-        calibration_episodes=1,
         conditions=[],
         presets=["variational_beta"],
         random_seed=0,
@@ -71,7 +70,6 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
     config = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
-        calibration_episodes=1,
         random_seed=0,
         conditions=[1, 2],
         run_sensitivity=False,

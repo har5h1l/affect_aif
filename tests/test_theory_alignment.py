@@ -11,7 +11,7 @@ from agent.model.trust_game import TrustGameModel
 
 
 def make_agent(agent_cls, **kwargs):
-    cfg = ExperimentConfig(num_rounds=2, calibration_episodes=1, num_replications=1, random_seed=0)
+    cfg = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
     model = TrustGameModel(cfg)
     A, B, C, D = model.get_matrices()
     return agent_cls(
@@ -64,7 +64,6 @@ def test_affective_outperforms_shallow_baseline():
     cfg = ExperimentConfig(
         num_rounds=50,
         num_replications=3,
-        calibration_episodes=1,
         random_seed=0,
         conditions=[5, 6],
         p_switch=0.0,
@@ -85,7 +84,6 @@ def test_betrayal_run_affect_mechanism_is_active():
     cfg = ExperimentConfig(
         num_rounds=8,
         num_replications=1,
-        calibration_episodes=1,
         random_seed=42,
         conditions=[7, 8],
         assignment_mode="agent_choice",
@@ -120,37 +118,34 @@ def test_affect_tracks_precision_not_reward():
     pass
 
 
-def test_mu_calibration_positive():
+def test_runner_runs_directly_without_calibration():
     cfg = ExperimentConfig(
-        num_rounds=5, num_replications=1, calibration_episodes=1, random_seed=0, deep_horizon=4, shallow_horizon=2
+        num_rounds=5, num_replications=1, random_seed=0, deep_horizon=4, shallow_horizon=2, conditions=[2]
     )
     runner = ExperimentRunner(cfg)
-    mu = runner.calibrate_mu()
-    assert mu > 0.0
+    results = runner.run_all()
+    assert len(results) > 0
+    assert "condition" in results.columns
+    assert "payoff" in results.columns
 
 
-def test_full_run_enforces_minimum_calibration_episodes():
+def test_full_run_produces_primary_records():
     cfg = ExperimentConfig(
         num_rounds=5,
         num_replications=1,
-        calibration_episodes=2,
         random_seed=0,
-        deep_horizon=4,
-        shallow_horizon=2,
         conditions=[2],
     )
     runner = ExperimentRunner(cfg)
-    runner.run_all()
-    assert runner.calibration_summary is not None
-    assert runner.calibration_summary["requested_calibration_episodes"] == 2
-    assert runner.calibration_summary["calibration_episodes"] == runner.MIN_FULL_RUN_CALIBRATION_EPISODES
+    results = runner.run_all()
+    primary = results[results["run_mode"] == "primary"]
+    assert len(primary) == 5
 
 
 def test_horizon_override_and_core_and_preset_affective_conditions():
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
-        calibration_episodes=1,
         conditions=[6, 7, 8],
         presets=["variational_beta"],
         horizon_overrides={6: 3, 7: 4, "variational_beta": 5},
@@ -174,7 +169,6 @@ def test_clinical_alexithymia_preset():
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
-        calibration_episodes=1,
         random_seed=0,
         conditions=[],
         presets=["alexithymia"],
@@ -193,7 +187,6 @@ def test_clinical_borderline_preset():
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
-        calibration_episodes=1,
         random_seed=0,
         conditions=[],
         presets=["borderline"],
@@ -212,7 +205,6 @@ def test_clinical_depression_preset():
     cfg = ExperimentConfig(
         num_rounds=2,
         num_replications=1,
-        calibration_episodes=1,
         random_seed=0,
         conditions=[],
         presets=["depression"],
@@ -236,7 +228,6 @@ def test_get_condition_name_all_conditions():
     assert set(PRESET_CONDITIONS) == {
         "lesioned",
         "no_epistemic",
-        "reward_average",
         "variational_beta",
         "alexithymia",
         "borderline",

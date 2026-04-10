@@ -38,25 +38,21 @@ CLINICAL_PHENOTYPES = {
     "healthy": {
         "conditions": [2, 4],
         "alpha_charge": 3.0,
-        "lambda_smooth": 0.6,
         "initial_beta": 0.5,
     },
     "alexithymia": {
         "conditions": [9],
         "alpha_charge": 0.1,
-        "lambda_smooth": 0.6,
         "initial_beta": 0.5,
     },
     "borderline": {
         "conditions": [10],
         "alpha_charge": 12.0,
-        "lambda_smooth": 0.5,
         "initial_beta": 0.5,
     },
     "depression": {
         "conditions": [11],
         "alpha_charge": 3.0,
-        "lambda_smooth": 0.6,
         "initial_beta": 0.2,
     },
 }
@@ -68,7 +64,6 @@ SCENARIOS = {
         "p_switch": 0.05,
         "assignment_mode": "random",
         "observation_noise": 0.0,
-        "calibration_episodes": 20,
     },
     "sh_betrayal": {
         "num_rounds": 120,
@@ -77,7 +72,6 @@ SCENARIOS = {
         "observation_noise": 0.1,
         "initial_partner_types": ["cooperator", "reciprocator", "cooperator", "random"],
         "scheduled_type_switches": [{"round": 31, "partner_idx": 0, "to_type": "exploiter"}],
-        "calibration_episodes": 10,
     },
 }
 
@@ -110,7 +104,6 @@ def build_config(
         "shallow_horizon": 2,
         "max_policies": 4096,
         "sigma_0_sq": 0.25,
-        "mu": None,
         "lesion_mode": "decouple",
         "num_replications": num_replications,
         "random_seed": random_seed,
@@ -119,7 +112,6 @@ def build_config(
         "run_sensitivity": False,
         # Phenotype-specific parameters
         "alpha_charge": phenotype["alpha_charge"],
-        "lambda_smooth": phenotype["lambda_smooth"],
         "initial_beta": phenotype["initial_beta"],
     }
 
@@ -127,8 +119,6 @@ def build_config(
         params["initial_partner_types"] = scenario["initial_partner_types"]
     if "scheduled_type_switches" in scenario:
         params["scheduled_type_switches"] = scenario["scheduled_type_switches"]
-    if "calibration_episodes" in scenario:
-        params["calibration_episodes"] = scenario["calibration_episodes"]
 
     return ExperimentConfig.from_dict(params)
 
@@ -143,10 +133,6 @@ def run_phenotype(
     """Run a single phenotype and save incremental results."""
     config = build_config(scenario_name, phenotype_name, num_replications, random_seed)
     runner = ExperimentRunner(config)
-
-    if runner.needs_mu_calibration():
-        mu = runner.calibrate_mu(enforce_minimum=True)
-        print(f"  {phenotype_name}: derived mu = {mu:.6f}")
 
     all_records: list[dict] = []
     for condition in config.conditions:

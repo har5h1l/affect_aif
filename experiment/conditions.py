@@ -46,12 +46,6 @@ PRESET_CONDITIONS: dict[str, ConditionSpec] = {
         agent_kind="affective",
         use_information_gain=False,
     ),
-    "reward_average": ConditionSpec(
-        "reward_average",
-        "Tau-4 reward-average control",
-        planning_horizon=4,
-        agent_kind="reward_average",
-    ),
     "variational_beta": ConditionSpec(
         "variational_beta",
         "Tau-4 affective agent with variational beta state",

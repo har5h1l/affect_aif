@@ -79,7 +79,6 @@ class TrustBackend(BenchmarkBackend):
         overrides = {
             "num_rounds": config.num_rounds,
             "num_replications": 1,
-            "calibration_episodes": 5,
             "random_seed": config.random_seed,
         }
         overrides.update(self.scenario.trust_game_defaults())
@@ -102,17 +101,7 @@ class TrustBackend(BenchmarkBackend):
             self._prepared_config = context.shared["trust_experiment_config"]
             return
 
-        has_aif_agents = any(
-            agent.kind == "registry"
-            and agent.implementation in AGENT_REGISTRY
-            and AGENT_REGISTRY[agent.implementation]["type"] == "aif"
-            for agent in agent_specs
-        )
         trust_config = self._make_experiment_config(config)
-        if has_aif_agents:
-            runner = ExperimentRunner(trust_config)
-            if runner.needs_mu_calibration():
-                runner.calibrate_mu(enforce_minimum=True)
         self._prepared_config = trust_config
         context.shared["trust_experiment_config"] = trust_config
 

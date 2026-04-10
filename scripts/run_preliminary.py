@@ -122,7 +122,7 @@ def main(argv: list[str] | None = None):
     config.num_replications = int(args.replications)
     config.num_rounds = int(args.rounds)
     config.conditions = [1, 2, 3, 4, 5, 6, 7, 8]
-    config.presets = ["lesioned", "reward_average"]
+    config.presets = ["lesioned"]
     config.run_sensitivity = False
 
     runner = ExperimentRunner(config)
@@ -134,9 +134,6 @@ def main(argv: list[str] | None = None):
     directional = _directional_checks(hypotheses)
 
     print(f"Saved {len(results)} rows to {Path(args.output)}")
-    if runner.calibration_summary is not None:
-        print(f"Derived mu: {runner.calibration_summary['derived_mu']:.6f}")
-        print(f"Mean |EFE| per step: {runner.calibration_summary['mean_abs_efe_per_step']:.6f}")
 
     print("\nPer-condition summary")
     print(summary_table.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))

@@ -14,19 +14,16 @@ from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
 
 
-def test_full_experiment_runs_and_derives_mu(tiny_config):
+def test_full_experiment_runs_and_produces_records(tiny_config):
     cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2, 3, 4, 5]})
     runner = ExperimentRunner(cfg)
     results = runner.run_all()
     assert len(results) == 15
-    assert runner.calibration_summary is not None
-    assert runner.calibration_summary["derived_mu"] >= 0.0
     assert {
         "true_partner_type",
         "partner_idx",
         "betas",
         "prediction_errors",
-        "reward_avgs",
     }.issubset(results.columns)
 
 
@@ -45,7 +42,7 @@ def test_parameter_learning_updates_likelihoods_in_episode(tiny_config):
     assert not np.allclose(updated, initial)
 
 
-def test_parameter_sensitivity_sweeps_mu_lambda_charge_and_sigma(tiny_config):
+def test_parameter_sensitivity_sweeps_charge_sigma_persistence_and_initial_beta(tiny_config):
     cfg = ExperimentConfig(
         **{
             **tiny_config.__dict__,
@@ -58,16 +55,21 @@ def test_parameter_sensitivity_sweeps_mu_lambda_charge_and_sigma(tiny_config):
     results = runner.run_all()
     sensitivity_rows = results[results["run_mode"] == "sensitivity"]
 
-    assert len(results) == 17
-    assert set(sensitivity_rows["sensitivity_parameter"]) == {"mu", "lambda_smooth", "alpha_charge", "sigma_0_sq"}
+    assert len(sensitivity_rows) > 0
+    assert set(sensitivity_rows["sensitivity_parameter"]) == {
+        "alpha_charge",
+        "sigma_0_sq",
+        "beta_persistence",
+        "initial_beta",
+    }
 
 
-def test_sensitivity_config_normalization_includes_sigma():
+def test_sensitivity_config_normalization_uses_new_keys():
     cfg = ExperimentConfig(sensitivity_factors=[0.5, 1.0])
-    assert cfg.sensitivity_factors["mu"] == [0.5, 1.0]
-    assert cfg.sensitivity_factors["sigma_0_sq"] == [0.1, 0.25, 0.4]
-    assert cfg.sensitivity_factors["lambda_smooth"] == [0.4, 0.6, 0.8, 0.9]
-    assert cfg.sensitivity_factors["alpha_charge"] == [1.0, 2.0, 3.0, 4.0]
+    assert cfg.sensitivity_factors["alpha_charge"] == [0.5, 1.0]
+    assert cfg.sensitivity_factors["sigma_0_sq"] == [0.1, 0.25, 0.4, 0.6]
+    assert cfg.sensitivity_factors["beta_persistence"] == [0.5, 0.7, 0.8, 0.9, 0.95]
+    assert cfg.sensitivity_factors["initial_beta"] == [0.5, 0.67, 1.0, 1.5, 2.0]
 
 
 def test_betrayal_metrics_and_analysis_outputs(tmp_path, betrayal_config):

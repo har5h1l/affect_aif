@@ -15,17 +15,13 @@ import pandas as pd
 from analysis.visualization import build_run_gifs
 from cli.common import slugify_name
 from experiment.calibration import (
-    build_calibration_summary,
     build_sensitivity_specs,
-    build_zero_calibration_summary,
-    resolve_calibration_episodes,
     serialize_config,
 )
 from experiment.conditions import resolve_condition_spec
 from experiment.config import ExperimentConfig
 from experiment.constants import SENSITIVITY_CONDITIONS
 from experiment.tasks import (
-    run_calibration_episode_task,
     run_primary_replication_task,
     run_sensitivity_replication_task,
 )
@@ -43,13 +39,8 @@ class ConfigBatchState:
     output_dir: Path
     config: ExperimentConfig
     config_payload: dict[str, Any]
-    calibration_episodes: int
-    needs_calibration: bool
     primary_rows: list[dict] = field(default_factory=list)
     sensitivity_rows: list[dict] = field(default_factory=list)
-    calibration_efe_values: list[float] = field(default_factory=list)
-    calibration_completed: int = 0
-    calibration_summary: dict[str, Any] | None = None
     submitted_primary: int = 0
     completed_primary: int = 0
     submitted_sensitivity: int = 0
@@ -117,12 +108,6 @@ class BatchExperimentRunner:
             config.verbose = False
             config.gif_after_run = False
             config.gif_output_dir = None
-            configured_conditions = list(config.conditions) + list(config.presets)
-            needs_calibration = (
-                any(resolve_condition_spec(condition).agent_kind != "base" for condition in configured_conditions)
-                and config.deep_horizon > config.shallow_horizon
-            )
-            calibration_episodes = resolve_calibration_episodes(config, enforce_minimum=True) if needs_calibration else 0
             states.append(
                 ConfigBatchState(
                     config_path=config_path,
@@ -130,8 +115,6 @@ class BatchExperimentRunner:
                     output_dir=output_dir,
                     config=config,
                     config_payload=serialize_config(config),
-                    calibration_episodes=calibration_episodes,
-                    needs_calibration=needs_calibration,
                 )
             )
         return states
@@ -142,7 +125,6 @@ class BatchExperimentRunner:
         state: ConfigBatchState,
         future_map: dict[Any, tuple[str, ConfigBatchState, dict[str, Any]]],
     ):
-        calibration_summary = state.calibration_summary
         configured_conditions = list(state.config.conditions) + list(state.config.presets)
         sensitivity_conditions = [
             condition
@@ -158,7 +140,6 @@ class BatchExperimentRunner:
                     condition=condition,
                     replication=replication,
                     seed=seed,
-                    calibration_summary=calibration_summary,
                     config_path=state.config_path,
                     config_name=state.config_name,
                     batch_id=self.batch_id,
@@ -169,7 +150,7 @@ class BatchExperimentRunner:
                     state,
                     {"condition": condition, "replication": replication, "seed": seed},
                 )
-        if state.config.run_sensitivity and calibration_summary is not None:
+        if state.config.run_sensitivity:
             for parameter_name, parameter_value in build_sensitivity_specs(state.config):
                 for condition in sensitivity_conditions:
                     for replication in range(state.config.num_replications):
@@ -182,7 +163,6 @@ class BatchExperimentRunner:
                             condition=condition,
                             replication=replication,
                             seed=seed,
-                            calibration_summary=calibration_summary,
                             config_path=state.config_path,
                             config_name=state.config_name,
                             batch_id=self.batch_id,
@@ -225,7 +205,6 @@ class BatchExperimentRunner:
             "config_name": state.config_name,
             "results_path": str(results_path),
             "workers": self.workers,
-            "calibration_summary": state.calibration_summary,
             "primary_tasks": state.submitted_primary,
             "sensitivity_tasks": state.submitted_sensitivity,
         }
@@ -240,60 +219,21 @@ class BatchExperimentRunner:
 
         with ProcessPoolExecutor(max_workers=self.workers) as executor:
             for state in states:
-                if state.needs_calibration:
-                    for episode_idx in range(state.calibration_episodes):
-                        seed = state.config.random_seed + 10_000 + episode_idx
-                        future = executor.submit(
-                            run_calibration_episode_task,
-                            state.config_payload,
-                            episode_idx,
-                            seed,
-                        )
-                        future_map[future] = ("calibration", state, {"episode_idx": episode_idx, "seed": seed})
-                else:
-                    configured_conditions = list(state.config.conditions) + list(state.config.presets)
-                    if any(resolve_condition_spec(condition).agent_kind != "base" for condition in configured_conditions):
-                        state.calibration_summary = build_zero_calibration_summary(state.config)
-                    else:
-                        state.calibration_summary = None
-                    self._schedule_config_work(executor, state, future_map)
+                self._schedule_config_work(executor, state, future_map)
 
             while future_map:
                 done, _ = wait(list(future_map.keys()), return_when=FIRST_COMPLETED)
                 for future in done:
                     task_kind, state, metadata = future_map.pop(future)
                     payload = future.result()
-                    if task_kind == "calibration":
-                        state.calibration_completed += 1
-                        state.calibration_efe_values.append(float(payload["mean_abs_step_efe"]))
-                        self.completion_log.append(
-                            {
-                                "task_kind": "calibration",
-                                "config_name": state.config_name,
-                                "episode_idx": int(metadata["episode_idx"]),
-                            }
-                        )
-                        self._emit(
-                            f"[batch={self.batch_id}] calibration complete "
-                            "config="
-                            f"{state.config_name} episode="
-                            f"{int(metadata['episode_idx']) + 1}/{state.calibration_episodes}"
-                        )
-                        if state.calibration_completed == state.calibration_episodes:
-                            state.calibration_summary = build_calibration_summary(
-                                state.config,
-                                state.calibration_efe_values,
-                                state.calibration_episodes,
-                            )
-                            self._schedule_config_work(executor, state, future_map)
-                    elif task_kind == "primary":
+                    if task_kind == "primary":
                         state.completed_primary += 1
                         state.primary_rows.extend(payload["records"])
                         self.completion_log.append(
                             {
                                 "task_kind": "primary",
                                 "config_name": state.config_name,
-                                "condition": int(payload["condition"]),
+                                "condition": payload["condition"],
                                 "replication": int(payload["replication"]),
                             }
                         )
@@ -311,7 +251,7 @@ class BatchExperimentRunner:
                             {
                                 "task_kind": "sensitivity",
                                 "config_name": state.config_name,
-                                "condition": int(payload["condition"]),
+                                "condition": payload["condition"],
                                 "replication": int(payload["replication"]),
                                 "parameter_name": str(payload["parameter_name"]),
                             }

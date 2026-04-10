@@ -1,46 +1,65 @@
-from experiment.calibration import (
-    build_sensitivity_specs,
-    build_zero_calibration_summary,
-    resolve_calibration_episodes,
-)
+from experiment.calibration import build_sensitivity_specs
 from experiment.config import ExperimentConfig
 
 
-def test_resolve_calibration_episodes_enforces_minimum_when_requested():
-    cfg = ExperimentConfig(calibration_episodes=2, deep_horizon=4, shallow_horizon=2)
-
-    assert resolve_calibration_episodes(cfg, enforce_minimum=False) == 2
-    assert resolve_calibration_episodes(cfg, enforce_minimum=True) == 3
-
-
-def test_build_zero_calibration_summary_matches_expected_shape():
-    cfg = ExperimentConfig(calibration_episodes=7)
-
-    summary = build_zero_calibration_summary(cfg)
-
-    assert summary == {
-        "requested_calibration_episodes": 7,
-        "calibration_episodes": 0,
-        "mean_abs_efe_per_step": 0.0,
-        "derived_mu": 0.0,
-    }
-
-
-def test_build_sensitivity_specs_preserves_existing_parameter_order():
+def test_build_sensitivity_specs_returns_all_four_parameters():
     cfg = ExperimentConfig(
         sensitivity_factors={
-            "mu": [0.5, 1.0],
-            "lambda_smooth": [0.4],
-            "alpha_charge": [2.0],
-            "sigma_0_sq": [0.1, 0.25],
+            "alpha_charge": [1.0, 2.0],
+            "sigma_0_sq": [0.1],
+            "beta_persistence": [0.8],
+            "initial_beta": [0.5, 1.0],
         }
     )
 
-    assert build_sensitivity_specs(cfg) == [
-        ("mu", 0.5),
-        ("mu", 1.0),
-        ("lambda_smooth", 0.4),
-        ("alpha_charge", 2.0),
-        ("sigma_0_sq", 0.1),
-        ("sigma_0_sq", 0.25),
-    ]
+    specs = build_sensitivity_specs(cfg)
+
+    assert ("alpha_charge", 1.0) in specs
+    assert ("alpha_charge", 2.0) in specs
+    assert ("sigma_0_sq", 0.1) in specs
+    assert ("beta_persistence", 0.8) in specs
+    assert ("initial_beta", 0.5) in specs
+    assert ("initial_beta", 1.0) in specs
+
+
+def test_build_sensitivity_specs_ordering():
+    cfg = ExperimentConfig(
+        sensitivity_factors={
+            "alpha_charge": [2.0],
+            "sigma_0_sq": [0.1],
+            "beta_persistence": [0.8],
+            "initial_beta": [1.0],
+        }
+    )
+
+    specs = build_sensitivity_specs(cfg)
+
+    parameter_names = [name for name, _ in specs]
+    assert parameter_names == ["alpha_charge", "sigma_0_sq", "beta_persistence", "initial_beta"]
+
+
+def test_build_sensitivity_specs_empty_when_no_factors():
+    cfg = ExperimentConfig(
+        sensitivity_factors={
+            "alpha_charge": [],
+            "sigma_0_sq": [],
+            "beta_persistence": [],
+            "initial_beta": [],
+        }
+    )
+
+    specs = build_sensitivity_specs(cfg)
+
+    assert specs == []
+
+
+def test_build_sensitivity_specs_uses_defaults_when_not_overridden():
+    cfg = ExperimentConfig()
+
+    specs = build_sensitivity_specs(cfg)
+
+    parameter_names = [name for name, _ in specs]
+    assert "alpha_charge" in parameter_names
+    assert "sigma_0_sq" in parameter_names
+    assert "beta_persistence" in parameter_names
+    assert "initial_beta" in parameter_names

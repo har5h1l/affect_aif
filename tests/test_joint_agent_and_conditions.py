@@ -11,7 +11,7 @@ from agent.model.trust_game import TrustGameModel
 
 
 def _make_model_and_agent(agent_cls=BaseAgent, **kwargs):
-    cfg = ExperimentConfig(num_rounds=2, num_replications=1, calibration_episodes=1, random_seed=0)
+    cfg = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
     model = TrustGameModel(cfg)
     A, B, C, D = model.get_matrices()
     agent = agent_cls(
@@ -75,11 +75,11 @@ def test_core_conditions_are_the_depth_affect_matrix():
 
 
 def test_named_presets_cover_lesion_control_and_clinical_variants():
-    assert {"lesioned", "no_epistemic", "reward_average", "variational_beta", "alexithymia", "borderline", "depression"} <= set(PRESET_CONDITIONS)
+    assert {"lesioned", "no_epistemic", "variational_beta", "alexithymia", "borderline", "depression"} <= set(PRESET_CONDITIONS)
 
 
 def test_factory_builds_agents_from_core_conditions_and_presets():
-    config = ExperimentConfig(num_rounds=2, num_replications=1, calibration_episodes=1, random_seed=0)
+    config = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
     model = TrustGameModel(config)
 
     tau4_affect = create_agent(config, 6, model, seed=0)
