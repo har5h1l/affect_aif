@@ -54,10 +54,10 @@
   "sigma_0_sq": 0.25,
   "initial_beta": 1.0,
   "lesion_mode": "decouple",
-  "num_replications": 5,
-  "calibration_episodes": 3,
+  "num_replications": 50,
+  "calibration_episodes": 5,
   "random_seed": 42,
-  "conditions": [],
+  "conditions": [5, 6],
   "presets": [
     "alexithymia",
     "borderline",

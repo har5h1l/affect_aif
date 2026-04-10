@@ -51,7 +51,6 @@
   ],
   "presets": [
     "lesioned",
-    "reward_average",
     "no_epistemic"
   ],
   "partner_types": [
