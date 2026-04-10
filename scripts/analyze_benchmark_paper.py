@@ -13,7 +13,7 @@ from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from affect_aif.benchmark.common_metrics import (
+from benchmark.common_metrics import (
     adaptation_speed,
     cooperation_rate,
     cumulative_payoff,

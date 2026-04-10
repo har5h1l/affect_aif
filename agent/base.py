@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from affect_aif.core.control import construct_policies, decision_step_trust_game, generate_observation_sequences
-from affect_aif.core.policies import sample_action
+from agent.inference.control import construct_policies, decision_step_trust_game, generate_observation_sequences
+from agent.inference.policies import sample_action
 
 
 class BaseAgent:
@@ -27,7 +27,6 @@ class BaseAgent:
         max_policies: int | None = None,
         reference_horizon: int | None = None,
         seed: int = 0,
-        affect_modulates_precision: bool = False,
         use_parameter_learning: bool = False,
     ):
         self.A = A
@@ -44,7 +43,6 @@ class BaseAgent:
         self.max_policies = max_policies
         self.reference_horizon = int(reference_horizon if reference_horizon is not None else planning_horizon)
         self.seed = int(seed)
-        self.affect_modulates_precision = bool(affect_modulates_precision)
         self.use_parameter_learning = bool(use_parameter_learning)
 
         self.num_partners = int(model.num_partners)
@@ -92,7 +90,6 @@ class BaseAgent:
 
         self.last_q_pi = np.asarray([], dtype=float)
         self.last_G = np.asarray([], dtype=float)
-        self.last_terminal_values = np.asarray([], dtype=float)
         self.last_best_policy_step_costs = np.asarray([], dtype=float)
         self.last_mean_abs_step_efe = np.nan
         self.last_selected_partner: int | None = None
@@ -106,14 +103,8 @@ class BaseAgent:
         self.last_round_log_evidence: float = np.nan
         self.cumulative_log_evidence: float = 0.0
 
-    def current_mu(self) -> float:
-        return 0.0
-
-    def terminal_signal(self):
-        return np.zeros((self.num_partners,), dtype=float)
-
     def precision_signal(self):
-        return np.zeros((self.num_partners,), dtype=float)
+        return np.ones((self.num_partners,), dtype=float)
 
     def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):
         del partner_idx, partner_action, payoff
@@ -155,14 +146,11 @@ class BaseAgent:
             agent_payoff_table=self.agent_payoff_table,
             payoff_preferences=self.payoff_preferences,
             partner_action_preferences=self.partner_action_preferences,
-            terminal_signal=self.terminal_signal(),
             precision_signal=self.precision_signal(),
             assignment_mode_code=self.assignment_mode_code,
             gamma=self.gamma,
-            mu=self.current_mu(),
             use_utility_flag=float(self.use_utility),
             use_information_gain_flag=float(self.use_information_gain),
-            modulate_precision_flag=int(self.affect_modulates_precision),
             num_social_actions=self.num_social_actions,
         )
 
@@ -182,7 +170,6 @@ class BaseAgent:
 
         self.last_q_pi = q_pi
         self.last_G = np.asarray(decision["G"], dtype=float)
-        self.last_terminal_values = np.asarray(decision["terminal_values"], dtype=float)
         self.last_best_policy_step_costs = np.asarray(decision["step_costs"][best_policy_idx], dtype=float)
         self.last_mean_abs_step_efe = float(decision["mean_abs_step_efe"])
         self.last_best_policy_idx = best_policy_idx
@@ -217,7 +204,7 @@ class BaseAgent:
         self.cumulative_log_evidence += round_log_ev
 
         prior = np.asarray(self.partner_joint_beliefs[partner_idx], dtype=float)
-        posterior = self.model.infer_joint_posterior(prior, observation)
+        posterior = self.model.infer_joint_posterior(prior, observation, own_action=int(action_taken))
         predictive_next = self.model.predict_next_joint_belief(posterior, action=int(action_taken))
         self._apply_parameter_learning(posterior=posterior, observed_partner_action=int(partner_action))
         self._update_auxiliary_states(partner_idx=partner_idx, partner_action=int(partner_action), payoff=float(payoff))
@@ -263,8 +250,6 @@ class BaseAgent:
         return {
             "q_pi": q_pi_np,
             "G": np.asarray(self.last_G, dtype=float),
-            "terminal_values": np.asarray(self.last_terminal_values, dtype=float),
-            "terminal_signal": np.asarray(self.terminal_signal(), dtype=float),
             "best_policy_step_costs": np.asarray(self.last_best_policy_step_costs, dtype=float),
             "mean_abs_step_efe": float(self.last_mean_abs_step_efe),
             "best_policy_idx": self.last_best_policy_idx,
@@ -282,7 +267,6 @@ class BaseAgent:
             "partner_stance_beliefs": np.asarray(self.partner_stance_beliefs, dtype=float),
             "planning_cost": self.planning_cost,
             "planning_cost_ratio": self.planning_cost_ratio,
-            "mu": self.current_mu(),
             "round_log_evidence": self.last_round_log_evidence,
             "cumulative_log_evidence": self.cumulative_log_evidence,
         }

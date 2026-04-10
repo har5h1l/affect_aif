@@ -10,12 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from affect_aif.analysis.model_comparison import (
+from analysis.model_comparison import (
     log_score_summary,
     model_comparison_report,
     pairwise_predictive_log_scores,
 )
-from affect_aif.cli.common import filter_primary_runs, load_results_table
+from cli.common import filter_primary_runs, load_results_table
 
 
 def build_parser() -> argparse.ArgumentParser:

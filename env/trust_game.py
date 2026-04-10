@@ -6,9 +6,9 @@ from dataclasses import asdict, is_dataclass
 
 import numpy as np
 
-from affect_aif.environment.partner import Partner
-from affect_aif.generative_model.model import TrustGameModel
-from affect_aif.generative_model.payoffs import decode_action, payoff_to_index
+from env.partner import Partner
+from agent.model.trust_game import TrustGameModel
+from agent.model.payoffs import decode_action, payoff_to_index
 
 
 class TrustGameEnv:

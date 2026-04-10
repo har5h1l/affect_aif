@@ -17,8 +17,6 @@ LIST_LIKE_COLUMNS = (
     "betas",
     "prediction_errors",
     "reward_avgs",
-    "terminal_signal",
-    "terminal_values",
     "G",
     "q_pi",
     "best_policy_step_costs",

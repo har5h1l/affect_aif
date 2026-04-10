@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from affect_aif.experiment.conditions import CONDITIONS, PRESET_CONDITIONS
+from experiment.conditions import CONDITIONS, PRESET_CONDITIONS
 
 
 DEFAULT_BACKENDS = ["trust"]

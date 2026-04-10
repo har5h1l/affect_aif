@@ -10,10 +10,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from affect_aif.analysis.visualization import build_run_gifs
-from affect_aif.experiment.batch import BatchExperimentRunner, default_batch_id
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
+from analysis.visualization import build_run_gifs
+from experiment.batch import BatchExperimentRunner, default_batch_id
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
 
 
 def build_parser() -> argparse.ArgumentParser:

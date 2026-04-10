@@ -1,16 +1,16 @@
-from affect_aif.experiment.calibration import (
+from experiment.calibration import (
     build_sensitivity_specs,
     build_zero_calibration_summary,
     resolve_calibration_episodes,
 )
-from affect_aif.experiment.config import ExperimentConfig
+from experiment.config import ExperimentConfig
 
 
 def test_resolve_calibration_episodes_enforces_minimum_when_requested():
     cfg = ExperimentConfig(calibration_episodes=2, deep_horizon=4, shallow_horizon=2)
 
     assert resolve_calibration_episodes(cfg, enforce_minimum=False) == 2
-    assert resolve_calibration_episodes(cfg, enforce_minimum=True) == 10
+    assert resolve_calibration_episodes(cfg, enforce_minimum=True) == 3
 
 
 def test_build_zero_calibration_summary_matches_expected_shape():

@@ -9,9 +9,9 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from affect_aif.benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
-from affect_aif.benchmark.benchmark_config import AgentSpec, BenchmarkConfig
-from affect_aif.benchmark.observatory import ObservatoryClient
+from benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
+from benchmark.benchmark_config import AgentSpec, BenchmarkConfig
+from benchmark.observatory import ObservatoryClient
 
 
 class CvCLocalBackend(BenchmarkBackend):
@@ -86,7 +86,7 @@ class CvCLocalBackend(BenchmarkBackend):
         cmd = [
             self.python_bin,
             "-m",
-            "affect_aif.benchmark.cvc_local_worker",
+            "benchmark.cvc_local_worker",
             "--output",
             str(output_path),
             "--agent-name",
@@ -116,7 +116,7 @@ class CvCLocalBackend(BenchmarkBackend):
             )
 
         timeout_s = int(self.backend_config.get("timeout_s", 600))
-        # Ensure the repo root is on PYTHONPATH so the worker can import affect_aif
+        # Ensure the repo root is on PYTHONPATH so the worker can import benchmark
         repo_root = str(Path(__file__).resolve().parent.parent.parent)
         env = os.environ.copy()
         env["PYTHONPATH"] = repo_root + os.pathsep + env.get("PYTHONPATH", "")

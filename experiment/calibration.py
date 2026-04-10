@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 
-from affect_aif.experiment.config import ExperimentConfig
+from experiment.config import ExperimentConfig
 
 MIN_FULL_RUN_CALIBRATION_EPISODES = 3
 

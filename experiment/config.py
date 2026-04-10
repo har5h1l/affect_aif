@@ -6,7 +6,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from affect_aif.generative_model.partner_types import PARTNER_TYPE_ORDER
+from agent.model.types import PARTNER_TYPE_ORDER
 
 DEFAULT_SENSITIVITY_FACTORS = {
     "mu": [0.5, 0.75, 1.0, 1.25, 1.5],
@@ -45,7 +45,6 @@ class ExperimentConfig:
     gamma: float = 1.0
     lr: float = 0.1
     action_sampling: str = "marginal"
-    affect_modulates_precision: bool = False
     use_parameter_learning: bool = False
 
     deep_horizon: int = 8
@@ -57,8 +56,8 @@ class ExperimentConfig:
     alpha_charge: float = 3.0
     sigma_0_sq: float = 0.25
     mu: float | None = None
-    initial_beta: float = 0.5
-    beta_mode: str = "continuous"
+    initial_beta: float = 1.0
+    beta_mode: str = "discrete"
     beta_num_levels: int = 5
     beta_persistence: float = 0.8
 
@@ -117,6 +116,7 @@ class ExperimentConfig:
             data["beta_num_levels"] = data.pop("num_beta_levels")
         else:
             data.pop("num_beta_levels", None)
+        data.pop("affect_modulates_precision", None)
         tuple_fields = ("mutual_coop", "sucker", "temptation", "mutual_defect")
         for key in tuple_fields:
             if key in data:

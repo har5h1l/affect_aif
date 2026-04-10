@@ -12,12 +12,22 @@
   "lambda_smooth": 0.6,
   "alpha_charge": 3.0,
   "sigma_0_sq": 0.25,
-  "mu": null,
-  "initial_beta": 0.5,
+  "initial_beta": 1.0,
   "lesion_mode": "decouple",
   "num_replications": 100,
   "calibration_episodes": 20,
   "random_seed": 42,
-  "conditions": [1, 2, 3, 4, 5],
-  "partner_types": ["cooperator", "reciprocator", "exploiter", "random"]
+  "conditions": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "partner_types": [
+    "cooperator",
+    "reciprocator",
+    "exploiter",
+    "random"
+  ]
 }

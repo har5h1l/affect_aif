@@ -4,9 +4,9 @@ import json
 import subprocess
 from pathlib import Path
 
-from affect_aif.benchmark.backend import BenchmarkBackendContext
-from affect_aif.benchmark.benchmark_config import BenchmarkConfig
-from affect_aif.benchmark.cvc_local_backend import CvCLocalBackend
+from benchmark.backend import BenchmarkBackendContext
+from benchmark.benchmark_config import BenchmarkConfig
+from benchmark.cvc_local_backend import CvCLocalBackend
 
 
 def test_cvc_local_backend_runs_python_worker_and_reads_standardized_records(monkeypatch, tmp_path):
@@ -18,7 +18,7 @@ def test_cvc_local_backend_runs_python_worker_and_reads_standardized_records(mon
                     "name": "teammate_reliability",
                     "backend": "cvc_local",
                     "kind": "policy_spec",
-                    "policy_spec": "class=affect_aif.benchmark.cvc_policy.TeammateReliabilityPolicy",
+                    "policy_spec": "class=benchmark.cvc_policy.TeammateReliabilityPolicy",
                 }
             ],
             "backend_configs": {

@@ -7,8 +7,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from affect_aif.experiment.conditions import resolve_condition_spec
-from affect_aif.experiment.config import ExperimentConfig
+from experiment.conditions import resolve_condition_spec
+from experiment.config import ExperimentConfig
 
 
 def annotate_primary_records(

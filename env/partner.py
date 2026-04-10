@@ -6,9 +6,9 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from affect_aif.generative_model.partner_types import PartnerType
-from affect_aif.generative_model.payoffs import COOPERATE, DEFECT
-from affect_aif.generative_model.stance import (
+from agent.model.types import PartnerType
+from agent.model.payoffs import COOPERATE, DEFECT
+from agent.model.stance import (
     AGENT_CHARACTER_ORDER,
     cooperation_evidence_strength,
     posterior_to_stance,

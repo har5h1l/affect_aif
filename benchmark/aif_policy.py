@@ -13,8 +13,8 @@ from typing import Any
 
 import numpy as np
 
-from affect_aif.benchmark.interaction_tracker import InteractionEvent, InteractionTracker
-from affect_aif.benchmark.observation_encoder import ObservationEncoder
+from benchmark.interaction_tracker import InteractionEvent, InteractionTracker
+from benchmark.observation_encoder import ObservationEncoder
 
 
 class AIFPolicy:

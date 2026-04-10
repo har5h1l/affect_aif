@@ -6,8 +6,8 @@ import itertools
 
 import numpy as np
 
-from affect_aif.core.maths import normalize, softmax
-from affect_aif.core.utils import enumerate_factorized_actions
+from agent.inference.maths import normalize, softmax
+from agent.inference.utils import enumerate_factorized_actions
 
 
 def construct_policies(

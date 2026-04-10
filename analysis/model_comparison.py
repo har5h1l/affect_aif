@@ -19,7 +19,7 @@ import pandas as pd
 from scipy import stats
 from scipy.special import digamma, gammaln
 
-from affect_aif.analysis.metrics import final_round_summary
+from analysis.metrics import final_round_summary
 
 
 def _condition_sort_key(value) -> tuple[int, str]:

@@ -11,8 +11,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from affect_aif.analysis.hypotheses import run_all_hypothesis_tests
-from affect_aif.analysis.metrics import (
+from analysis.hypotheses import run_all_hypothesis_tests
+from analysis.metrics import (
     affective_movement_summary,
     betrayal_latency_summary,
     betrayal_trajectory,
@@ -21,9 +21,9 @@ from affect_aif.analysis.metrics import (
     post_switch_condition_comparison,
     post_switch_window_summary,
 )
-from affect_aif.analysis.plots import save_all_figures
-from affect_aif.analysis.statistics import cumulative_payoff_anova, pairwise_payoff_tests
-from affect_aif.cli.common import filter_primary_runs, load_results_table
+from analysis.plots import save_all_figures
+from analysis.statistics import cumulative_payoff_anova, pairwise_payoff_tests
+from cli.common import filter_primary_runs, load_results_table
 
 
 def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
@@ -102,13 +102,11 @@ def main(argv: list[str] | None = None) -> int:
             movement.groupby(["condition", "condition_name"], as_index=False)
             .agg(
                 mean_beta_range=("beta_range", "mean"),
-                mean_terminal_signal_range=("terminal_signal_range", "mean"),
                 fraction_beta_moved=("beta_moved_materially", "mean"),
-                fraction_terminal_signal_moved=("terminal_signal_moved_materially", "mean"),
             )
             .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
         )
-        movement_lines = ["\nAffective movement summary\n", grouped, "\n"]
+        movement_lines = ["\nAffective movement (beta) summary\n", grouped, "\n"]
     betrayal_lines = []
     if has_switch_events(results):
         betrayal_comp = post_switch_condition_comparison(results, windows=(5, 10))
@@ -151,9 +149,7 @@ def main(argv: list[str] | None = None) -> int:
             movement.groupby(["condition", "condition_name"], as_index=False)
             .agg(
                 mean_beta_range=("beta_range", "mean"),
-                mean_terminal_signal_range=("terminal_signal_range", "mean"),
                 fraction_beta_moved=("beta_moved_materially", "mean"),
-                fraction_terminal_signal_moved=("terminal_signal_moved_materially", "mean"),
             )
             .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
         )

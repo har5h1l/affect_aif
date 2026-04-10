@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from affect_aif.analysis.hypotheses import run_all_hypothesis_tests
-from affect_aif.analysis.model_comparison import model_comparison_report
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
+from analysis.hypotheses import run_all_hypothesis_tests
+from analysis.model_comparison import model_comparison_report
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
 from scripts.run_analysis import _hypothesis_summary_frame
 from scripts.run_model_comparison import main as run_model_comparison_main
 

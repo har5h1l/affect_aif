@@ -74,6 +74,15 @@ def _payoff_distribution(social_action, partner_action_probs, payoff_index_table
     return dist
 
 
+def gamma_per_policy(gamma_base, first_partners, precision_signal):
+    """Map per-partner beta expectations onto per-policy policy precision."""
+
+    partners = np.asarray(first_partners, dtype=int)
+    beta_expectations = np.asarray(precision_signal, dtype=float)[partners]
+    safe_beta = np.maximum(beta_expectations, 1e-12)
+    return float(gamma_base) / safe_beta
+
+
 def _rollout_policy_trust_game_mean_field(
     policy,
     beliefs,
@@ -86,8 +95,6 @@ def _rollout_policy_trust_game_mean_field(
     agent_payoff_table,
     payoff_preferences,
     partner_action_preferences,
-    terminal_signal,
-    mu,
     max_abs_payoff,
     use_utility_flag,
     use_information_gain_flag,
@@ -125,11 +132,8 @@ def _rollout_policy_trust_game_mean_field(
             B_stance=np.asarray(B_stance_by_action[int(raw_action)], dtype=float),
         )
 
-    total_step_cost = float(sum(step_costs))
-    precision_weight = 1.0 + float(mu) * float(np.asarray(terminal_signal, dtype=float)[int(first_partner)])
-    total = total_step_cost * precision_weight
-    terminal_value = total - total_step_cost
-    return total, np.asarray(step_costs, dtype=float), terminal_value, int(first_partner)
+    total = float(sum(step_costs))
+    return total, np.asarray(step_costs, dtype=float), int(first_partner)
 
 
 def _rollout_policy_trust_game_sophisticated(
@@ -145,8 +149,6 @@ def _rollout_policy_trust_game_sophisticated(
     agent_payoff_table,
     payoff_preferences,
     partner_action_preferences,
-    terminal_signal,
-    mu,
     max_abs_payoff,
     use_utility_flag,
     use_information_gain_flag,
@@ -163,7 +165,6 @@ def _rollout_policy_trust_game_sophisticated(
 
     weighted_total = 0.0
     weighted_steps = np.zeros((len(policy),), dtype=float)
-    weighted_terminal = 0.0
     first_partner = None
 
     for obs_sequence in observation_sequences:
@@ -215,15 +216,11 @@ def _rollout_policy_trust_game_sophisticated(
 
             step_costs[t] = float(use_utility_flag) * pragmatic + float(use_information_gain_flag) * epistemic
 
-        precision_weight = 1.0 + float(mu) * float(np.asarray(terminal_signal, dtype=float)[int(first_partner)])
-        step_total = float(step_costs.sum())
-        total = step_total * precision_weight
         path_weight = float(np.exp(path_log_prob))
-        weighted_total += total * path_weight
+        weighted_total += float(step_costs.sum()) * path_weight
         weighted_steps += step_costs * path_weight
-        weighted_terminal += (total - step_total) * path_weight
 
-    return weighted_total, weighted_steps, weighted_terminal, int(first_partner if first_partner is not None else 0)
+    return weighted_total, weighted_steps, int(first_partner if first_partner is not None else 0)
 
 
 def decision_step_trust_game(
@@ -238,24 +235,20 @@ def decision_step_trust_game(
     agent_payoff_table,
     payoff_preferences,
     partner_action_preferences,
-    terminal_signal,
     precision_signal,
     assignment_mode_code,
     gamma,
-    mu,
     use_utility_flag,
     use_information_gain_flag,
-    modulate_precision_flag,
     num_social_actions=2,
 ):
     """Evaluate all policies and return rollout diagnostics."""
 
     totals = []
     step_costs = []
-    terminal_values = []
     first_partners = []
     for policy in np.asarray(policies, dtype=int):
-        total, steps, terminal_value, first_partner = _rollout_policy_trust_game_sophisticated(
+        total, steps, first_partner = _rollout_policy_trust_game_sophisticated(
             policy=policy,
             observation_sequences=observation_sequences,
             beliefs=beliefs,
@@ -268,8 +261,6 @@ def decision_step_trust_game(
             agent_payoff_table=agent_payoff_table,
             payoff_preferences=payoff_preferences,
             partner_action_preferences=partner_action_preferences,
-            terminal_signal=terminal_signal,
-            mu=mu,
             max_abs_payoff=1.0,
             use_utility_flag=use_utility_flag,
             use_information_gain_flag=use_information_gain_flag,
@@ -277,18 +268,13 @@ def decision_step_trust_game(
         )
         totals.append(total)
         step_costs.append(steps)
-        terminal_values.append(terminal_value)
         first_partners.append(first_partner)
 
     G = np.asarray(totals, dtype=float)
-    terminal_values = np.asarray(terminal_values, dtype=float)
     step_costs = np.asarray(step_costs, dtype=float)
     first_partners = np.asarray(first_partners, dtype=int)
-    if int(modulate_precision_flag):
-        gamma_per_policy = float(gamma) * (1.0 + np.asarray(precision_signal, dtype=float)[first_partners])
-    else:
-        gamma_per_policy = np.full_like(G, float(gamma), dtype=float)
-    logits = -gamma_per_policy * G
+    gamma_values = gamma_per_policy(gamma_base=gamma, first_partners=first_partners, precision_signal=precision_signal)
+    logits = -gamma_values * G
     logits -= logits.max(initial=0.0)
     exp_logits = np.exp(logits)
     q_pi = exp_logits / max(float(exp_logits.sum()), 1e-16)
@@ -296,7 +282,6 @@ def decision_step_trust_game(
     return {
         "G": G,
         "q_pi": q_pi,
-        "terminal_values": terminal_values,
         "step_costs": step_costs,
         "first_partners": first_partners,
         "mean_abs_step_efe": mean_abs_step_efe,

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from affect_aif.experiment.calibration import deserialize_config
-from affect_aif.experiment.runner import ExperimentRunner
+from experiment.calibration import deserialize_config
+from experiment.runner import ExperimentRunner
 
 
 def run_calibration_episode_task(config_payload: dict[str, Any], episode_idx: int, seed: int) -> dict[str, float | int]:

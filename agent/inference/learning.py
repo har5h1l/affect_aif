@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from affect_aif.core.utils import obj_array
+from agent.inference.utils import obj_array
 
 
 def _ensure_obj(x):

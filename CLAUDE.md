@@ -12,7 +12,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 |------|---------|
 | Run all tests | `python -m pytest tests/ -v` |
 | Run single test | `python -m pytest tests/test_core.py::test_name -v` |
-| Run experiment | `python scripts/run_experiment.py --config affect_aif/configs/<name>.json --output-dir results --batch-name <name>` |
+| Run experiment | `python scripts/run_experiment.py --config configs/<name>.json --output-dir results --batch-name <name>` |
 | Analyze results | `python scripts/run_analysis.py --results <path>/results.csv --output-dir <path>/figures` |
 | Preliminary check | `python scripts/run_preliminary.py --replications 5 --output results/preliminary.csv` |
 | Generate GIFs | `python scripts/run_visualization.py --results <path>/results.csv --output-dir <path>/gifs` |
@@ -22,13 +22,15 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 
 | Directory | Purpose |
 |-----------|---------|
-| `affect_aif/core/` | Generic active inference math, control, learning helpers |
-| `affect_aif/generative_model/` | Trust-game model, partner types, payoffs |
-| `affect_aif/agent/` | Vanilla, affective, lesioned, reward-average agents |
-| `affect_aif/environment/` | Multi-partner trust game (binary and graded) |
-| `affect_aif/experiment/` | Configs, condition factory, logging, runner |
-| `affect_aif/analysis/` | Metrics, statistics, plotting, hypothesis tests |
-| `affect_aif/configs/` | JSON experiment configurations |
+| `agent/` | Base, affective, and lesioned AIF agents |
+| `agent/model/` | Trust-game generative model (A/B/C/D/E matrices), partner types, payoffs |
+| `agent/inference/` | Generic active inference math: EFE, rollout, control, policies |
+| `agent/affect/` | Per-partner precision tracking: beta state, interoception |
+| `env/` | Multi-partner trust game (binary and graded) |
+| `experiment/` | Configs, condition factory, logging, runner |
+| `analysis/` | Metrics, statistics, plotting, hypothesis tests |
+| `benchmark/` | CvC adapters and trust-game benchmark backends |
+| `configs/` | JSON experiment configurations |
 | `scripts/` | CLI entry points (thin orchestrators) |
 | `tests/` | Unit and integration tests |
 | `docs/` | Theory, experiment design, implementation, results tracking, roadmap |
@@ -38,12 +40,16 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 
 | Question | Read first |
 |----------|-----------|
-| Theory or mechanism | `docs/theory.md`, `docs/experiment.md` |
-| Environment, switching, analysis | `docs/implementation.md` |
+| Theory or mechanism | `docs/theory/theory.md`, `docs/experiment/design.md` |
+| POMDP model specification | `docs/theory/pomdp_spec.md` |
+| Environment, implementation | `docs/design/implementation.md` |
 | Setup or usage | `README.md` |
-| Current results and hypothesis status | `docs/results_tracking.md` |
-| Phase roadmap and what's next | `docs/long_term_plan.md` |
-| Experimental design and conditions | `docs/experiment.md` |
+| Current results and hypothesis status | `docs/experiment/results.md` |
+| Phase roadmap and what's next | `docs/future/roadmap.md` |
+| Experimental design and conditions | `docs/experiment/design.md` |
+| Partner stance redesign | `docs/design/partner_stance.md` |
+| CLI reference | `docs/operations/cli.md` |
+| Benchmark integration | `docs/operations/benchmark.md` |
 
 ## Working Rules
 
@@ -58,7 +64,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 - "augmentation" NOT "compensation" or "depth replacement"
 - beta update rule is variationally grounded via Hesp et al. — NOT a "heuristic" or "engineering approximation"
 - Phase numbers: 3=theory tightening, 4=variational beta, 5=clinical sensitivity, 6=model comparison, 7=richer tasks, 8=human data
-- Current phase: MVP complete (Phases 1-7, paper draft). Now in architectural tightening — addressing standard-AIF departures before next paper. See `docs/long_term_plan.md` for open decisions.
+- Current phase: MVP complete (Phases 1-7, paper draft). Now in architectural tightening — addressing standard-AIF departures before next paper. See `docs/future/roadmap.md` for open decisions.
 
 ---
 
@@ -70,9 +76,9 @@ When operating autonomously (all permissions granted), follow this protocol. The
 
 Every session begins with orientation:
 
-1. Read `docs/long_term_plan.md` to identify the current phase and its tasks
-2. Read `docs/results_tracking.md` to understand where the last session left off
-3. Read `docs/experiment.md` for experimental design context
+1. Read `docs/future/roadmap.md` to identify the current phase and its tasks
+2. Read `docs/experiment/results.md` to understand where the last session left off
+3. Read `docs/experiment/design.md` for experimental design context
 4. Check git status for uncommitted work from a prior session
 5. Run `python -m pytest tests/ -v` to confirm the codebase is clean
 
@@ -96,13 +102,13 @@ orient -> plan -> code -> test -> experiment -> analyze -> interpret -> document
 
 **Analyze**: Run `scripts/run_analysis.py` on the results. Read the output summary, hypothesis tests, and movement tables.
 
-**Interpret**: Compare results against the hypothesis scorecard in `docs/results_tracking.md`. Does this change the story? If yes, flag it clearly.
+**Interpret**: Compare results against the hypothesis scorecard in `docs/experiment/results.md`. Does this change the story? If yes, flag it clearly.
 
 **Document**: Update docs to reflect new findings. Follow the documentation map above.
 
 **Commit**: Stage and commit at meaningful checkpoints with descriptive messages.
 
-**Loop**: Go back to orient. If the phase is complete, update `docs/long_term_plan.md` and ask the user before advancing to the next phase.
+**Loop**: Go back to orient. If the phase is complete, update `docs/future/roadmap.md` and ask the user before advancing to the next phase.
 
 ### Subagent Strategy
 
@@ -125,7 +131,7 @@ These are absolute rules that never bend:
 4. **Never force-push**: All git operations are local-only unless the user explicitly asks to push
 5. **Never silently rewrite narrative**: If experiment results change the interpretation, flag it to the user before updating docs
 6. **Commit at checkpoints**: After any working code change + passing tests, commit. After any completed experiment + analysis, commit
-7. **Preserve the hypothesis scorecard**: The scorecard in `docs/results_tracking.md` is the ground truth. Update it with evidence, not speculation
+7. **Preserve the hypothesis scorecard**: The scorecard in `docs/experiment/results.md` is the ground truth. Update it with evidence, not speculation
 8. **Save results incrementally**: When running experiments, use partial saves (e.g., `_partial.csv`) during long runs so that a crash or OOM doesn't lose all progress. Scripts like `run_clinical_incremental.py` and `run_comparison.py` already do this — follow the same pattern for any new experiment scripts
 9. **No orchestration infrastructure in this repo.** Syncing, deployment, conductor scripts, and cloud operations belong in the mango repo only. This repo contains only project code, configs, tests, and results.
 
@@ -153,7 +159,7 @@ STOP and ask the user when:
 
 Experiments are configured via JSON in `affect_aif/configs/`. Key parameters:
 
-- `conditions`: list of condition IDs to run (see `docs/experiment.md` Section 3)
+- `conditions`: list of condition IDs to run (see `docs/experiment/design.md` Section 3)
 - `num_replications`: seeds per condition
 - `num_rounds`: rounds per episode
 - `payoff_mode`: "binary" or "graded"

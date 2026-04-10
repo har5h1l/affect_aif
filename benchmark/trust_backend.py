@@ -9,14 +9,14 @@ from typing import Any
 
 import numpy as np
 
-from affect_aif.benchmark import baselines
-from affect_aif.benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
-from affect_aif.benchmark.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
-from affect_aif.benchmark.scenarios import get_scenario
-from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.experiment.conditions import resolve_condition_spec
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
+from benchmark import baselines
+from benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
+from benchmark.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
+from benchmark.scenarios import get_scenario
+from env.trust_game import TrustGameEnv
+from experiment.conditions import resolve_condition_spec
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
 
 EXPERIMENT_CONFIG_FIELDS = {field.name for field in fields(ExperimentConfig)}
 

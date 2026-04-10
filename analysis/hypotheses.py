@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from affect_aif.analysis.metrics import betrayal_latency_summary, final_round_summary, post_switch_window_summary
+from analysis.metrics import betrayal_latency_summary, final_round_summary, post_switch_window_summary
 
 
 DEPTH_CONDITION_NAMES = {

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from affect_aif.benchmark.observatory import ObservatoryClient
+from benchmark.observatory import ObservatoryClient
 
 
 def _fixture(name: str):

@@ -6,12 +6,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from affect_aif.analysis.metrics import post_switch_window_summary
-from affect_aif.analysis.visualization import build_run_gifs, load_results
-from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.experiment.batch import BatchExperimentRunner
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
+from analysis.metrics import post_switch_window_summary
+from analysis.visualization import build_run_gifs, load_results
+from env.trust_game import TrustGameEnv
+from experiment.batch import BatchExperimentRunner
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
 
 
 def test_full_experiment_runs_and_derives_mu(tiny_config):
@@ -27,15 +27,7 @@ def test_full_experiment_runs_and_derives_mu(tiny_config):
         "betas",
         "prediction_errors",
         "reward_avgs",
-        "terminal_signal",
     }.issubset(results.columns)
-
-
-def test_lesion_condition_has_zero_mu(tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "num_rounds": 2, "conditions": [3]})
-    runner = ExperimentRunner(cfg)
-    results = runner.run_all()
-    assert (results["mu"] == 0.0).all()
 
 
 def test_parameter_learning_updates_likelihoods_in_episode(tiny_config):
@@ -170,9 +162,9 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
     args = parser.parse_args(
         [
             "--config",
-            "affect_aif/configs/default.json",
+            "configs/default.json",
             "--config",
-            "affect_aif/configs/betrayal_stress.json",
+            "configs/betrayal_stress.json",
             "--output-dir",
             "results",
             "--workers",
@@ -180,7 +172,7 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
         ]
     )
 
-    assert args.config == ["affect_aif/configs/default.json", "affect_aif/configs/betrayal_stress.json"]
+    assert args.config == ["configs/default.json", "configs/betrayal_stress.json"]
     assert args.output_dir == "results"
     assert args.workers == 3
 

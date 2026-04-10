@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from affect_aif.benchmark.common_metrics import (
+from benchmark.common_metrics import (
     adaptation_speed,
     cooperation_rate,
     cumulative_payoff,

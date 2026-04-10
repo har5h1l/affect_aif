@@ -1,15 +1,15 @@
 import jax.numpy as jnp
 import numpy as np
 
-from affect_aif.core.control import (
-    compute_efe_with_terminal_value,
+from agent.inference.control import (
     compute_expected_free_energy,
     _rollout_policy_trust_game_mean_field,
     _rollout_policy_trust_game_sophisticated,
     construct_policies,
     generate_observation_sequences,
 )
-from affect_aif.core.maths import entropy, normalize, softmax
+from agent.inference.efe import compute_efe_with_terminal_value
+from agent.inference.maths import entropy, normalize, softmax
 
 
 def test_softmax_sums_to_one():
@@ -86,8 +86,6 @@ def _rollout_inputs():
         agent_payoff_table=jnp.zeros((2, 2), dtype=jnp.float32),
         payoff_preferences=jnp.asarray([0.0, 0.0], dtype=jnp.float32),
         partner_action_preferences=jnp.asarray([0.0, 0.0], dtype=jnp.float32),
-        terminal_signal=jnp.zeros((1,), dtype=jnp.float32),
-        mu=jnp.float32(0.0),
         max_abs_payoff=jnp.float32(1.0),
     )
     return {
@@ -176,35 +174,6 @@ def test_rollout_epistemic_value_approaches_zero_for_sharp_beliefs():
     )
 
     assert abs(float(sophisticated[0])) < 1e-6
-
-
-def test_rollout_terminal_value_adjustment_works_correctly():
-    inputs = _rollout_inputs()
-    weighted_common = {
-        **inputs["common"],
-        "terminal_signal": jnp.asarray([0.25], dtype=jnp.float32),
-        "mu": jnp.float32(2.0),
-    }
-    base_total, base_step_costs, _, _ = _rollout_policy_trust_game_mean_field(
-        inputs["policy"],
-        inputs["beliefs"],
-        use_utility_flag=jnp.float32(0.0),
-        use_information_gain_flag=jnp.float32(1.0),
-        **inputs["common"],
-    )
-    weighted_total, _, terminal_value, _ = _rollout_policy_trust_game_mean_field(
-        inputs["policy"],
-        inputs["beliefs"],
-        use_utility_flag=jnp.float32(0.0),
-        use_information_gain_flag=jnp.float32(1.0),
-        **weighted_common,
-    )
-
-    expected_step_sum = float(jnp.sum(base_step_costs))
-    expected_weight = 1.0 + float(jnp.float32(2.0) * jnp.float32(0.25))
-    assert np.isclose(float(base_total), expected_step_sum, atol=1e-6)
-    assert np.isclose(float(weighted_total), expected_step_sum * expected_weight, atol=1e-6)
-    assert np.isclose(float(terminal_value), expected_step_sum * (expected_weight - 1.0), atol=1e-6)
 
 
 def test_sophisticated_and_mean_field_rollouts_agree_for_sharp_beliefs():

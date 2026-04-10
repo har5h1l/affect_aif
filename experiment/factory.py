@@ -4,15 +4,14 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from affect_aif.agent.affective_agent import AffectiveAgent
-from affect_aif.agent.base_agent import BaseAgent
-from affect_aif.agent.lesioned_agent import LesionedAgent
-from affect_aif.agent.reward_avg_agent import RewardAvgAgent
-from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
-from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.experiment.conditions import resolve_condition_spec
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
+from agent.affective import AffectiveAgent
+from agent.base import BaseAgent
+from agent.lesioned import LesionedAgent
+from env.graded_trust_game import GradedTrustGameEnv
+from env.trust_game import TrustGameEnv
+from experiment.conditions import resolve_condition_spec
+from experiment.config import ExperimentConfig
+from agent.model.trust_game import GradedTrustGameModel, TrustGameModel
 
 
 def create_model(config: ExperimentConfig) -> TrustGameModel:
@@ -59,7 +58,6 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
         max_policies=config.max_policies,
         reference_horizon=config.deep_horizon,
         seed=seed,
-        affect_modulates_precision=config.affect_modulates_precision,
         use_parameter_learning=config.use_parameter_learning,
         use_information_gain=spec.use_information_gain,
     )
@@ -74,13 +72,7 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
     if spec.agent_kind == "base":
         return BaseAgent(planning_horizon=planning_horizon, **common)
     if spec.agent_kind == "reward_average":
-        return RewardAvgAgent(
-            planning_horizon=planning_horizon,
-            num_partners=config.num_partners,
-            lambda_smooth=params["lambda_smooth"],
-            mu=float(config.mu or 0.0),
-            **common,
-        )
+        raise ValueError("reward_average agent kind has been removed. Use 'affective' or 'base' instead.")
     if spec.agent_kind == "lesioned":
         return LesionedAgent(
             planning_horizon=planning_horizon,
@@ -90,7 +82,6 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
             sigma_0_sq=params["sigma_0_sq"],
             initial_beta=params["initial_beta"],
             lesion_mode=spec.lesion_mode or config.lesion_mode,
-            mu=float(config.mu or 0.0),
             **common,
         )
     if spec.agent_kind == "affective":
@@ -101,10 +92,8 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
             alpha_charge=params["alpha_charge"],
             sigma_0_sq=params["sigma_0_sq"],
             initial_beta=params["initial_beta"],
-            beta_mode=spec.beta_mode or config.beta_mode,
             num_levels=config.beta_num_levels,
             persistence=config.beta_persistence,
-            mu=float(config.mu or 0.0),
             **common,
         )
     raise ValueError(f"Unknown agent kind '{spec.agent_kind}'.")

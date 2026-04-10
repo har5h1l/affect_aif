@@ -9,7 +9,7 @@ rule. The team-average beta modulates coordination strategy:
   low  team_beta (<0.4) -> work independently (solo mining/exploration)
   mid  team_beta        -> default scoring-loop behaviour
 
-The beta update mirrors affect_aif/agent/affect/state.py:
+The beta update mirrors agent/affect/beta.py:
   surprise = manhattan_distance(predicted, actual) / max_distance
   charge   = alpha * (sigma_0_sq - surprise**2)
   beta_k   = lambda_smooth * beta_k + (1 - lambda_smooth) * sigmoid(charge)
@@ -26,14 +26,14 @@ from mettagrid.policy.policy_env_interface import PolicyEnvInterface
 from mettagrid.simulator import Action
 from mettagrid.simulator.interface import AgentObservation
 
-from affect_aif.benchmark.cvc_beta import (
+from benchmark.cvc_beta import (
     COOPERATE_THRESHOLD,
     INDEPENDENT_THRESHOLD,
     INITIAL_BETA,
     TEAM_BETA_SMOOTH,
     update_beta,
 )
-from affect_aif.benchmark.cvc_navigation import NavigationHelper, NavigationState
+from benchmark.cvc_navigation import NavigationHelper, NavigationState
 
 # ---------------------------------------------------------------------------
 # Constants

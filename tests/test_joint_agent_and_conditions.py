@@ -1,14 +1,13 @@
 import numpy as np
 
-from affect_aif.agent.affective_agent import AffectiveAgent
-from affect_aif.agent.base_agent import BaseAgent
-from affect_aif.agent.lesioned_agent import LesionedAgent
-from affect_aif.agent.reward_avg_agent import RewardAvgAgent
-from affect_aif.benchmark.benchmark_config import AGENT_REGISTRY
-from affect_aif.experiment.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.factory import create_agent
-from affect_aif.generative_model.model import TrustGameModel
+from agent.affective import AffectiveAgent
+from agent.base import BaseAgent
+from agent.lesioned import LesionedAgent
+from benchmark.benchmark_config import AGENT_REGISTRY
+from experiment.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
+from experiment.config import ExperimentConfig
+from experiment.factory import create_agent
+from agent.model.trust_game import TrustGameModel
 
 
 def _make_model_and_agent(agent_cls=BaseAgent, **kwargs):
@@ -85,11 +84,9 @@ def test_factory_builds_agents_from_core_conditions_and_presets():
 
     tau4_affect = create_agent(config, 6, model, seed=0)
     lesioned = create_agent(config, "lesioned", model, seed=0)
-    reward_average = create_agent(config, "reward_average", model, seed=0)
 
     assert isinstance(tau4_affect, AffectiveAgent)
     assert isinstance(lesioned, LesionedAgent)
-    assert isinstance(reward_average, RewardAvgAgent)
     assert tau4_affect.planning_horizon == 4
     assert get_condition_name(6) == "tau4_affect"
 

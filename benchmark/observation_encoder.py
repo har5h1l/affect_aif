@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from affect_aif.benchmark.interaction_tracker import RoundSummary
+from benchmark.interaction_tracker import RoundSummary
 
 
 class ObservationEncoder:

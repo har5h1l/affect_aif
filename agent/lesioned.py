@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import jax.numpy as jnp
 
-from affect_aif.agent.affective_agent import AffectiveAgent
+from agent.affective import AffectiveAgent
 
 
 class LesionedAgent(AffectiveAgent):
@@ -16,19 +16,9 @@ class LesionedAgent(AffectiveAgent):
         self.lesion_mode = lesion_mode
         self._frozen_beta = initial_beta
 
-    def current_mu(self) -> float:
-        if self.lesion_mode == "decouple":
-            return 0.0
-        return super().current_mu()
-
-    def terminal_signal(self):
-        if self.lesion_mode == "freeze":
-            return jnp.full((self.num_partners,), self._frozen_beta, dtype=jnp.float32)
-        return super().terminal_signal()
-
     def precision_signal(self):
-        if self.lesion_mode == "freeze":
-            return jnp.full((self.num_partners,), self._frozen_beta, dtype=jnp.float32)
+        if self.lesion_mode in {"decouple", "freeze"}:
+            return jnp.ones((self.num_partners,), dtype=jnp.float32)
         return super().precision_signal()
 
     def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):

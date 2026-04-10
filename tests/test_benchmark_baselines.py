@@ -6,7 +6,7 @@ These tests do NOT require cogames or mettagrid.
 import numpy as np
 import pytest
 
-from affect_aif.benchmark.baselines import (
+from benchmark.baselines import (
     GrimTriggerAgent,
     PavlovAgent,
     QLearningAgent,
@@ -14,7 +14,7 @@ from affect_aif.benchmark.baselines import (
     TitForTatAgent,
     WinStayLoseShiftAgent,
 )
-from affect_aif.benchmark.compat import cogames_available, mettagrid_available
+from benchmark.compat import cogames_available, mettagrid_available
 
 
 def test_compat_returns_bool():

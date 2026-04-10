@@ -6,7 +6,7 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from affect_aif.core.backend import asarray, get_xp
+from agent.inference.backend import asarray, get_xp
 
 
 def softmax(x, tau: float = 1.0, backend: str | None = None):

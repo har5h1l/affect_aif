@@ -1,8 +1,8 @@
-from affect_aif.environment.graded_trust_game import GradedTrustGameEnv
-from affect_aif.environment.partner import Partner
-from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import TrustGameModel
+from env.graded_trust_game import GradedTrustGameEnv
+from env.partner import Partner
+from env.trust_game import TrustGameEnv
+from experiment.config import ExperimentConfig
+from agent.model.trust_game import TrustGameModel
 
 
 def test_cooperator_mostly_cooperates():

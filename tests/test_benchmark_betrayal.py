@@ -1,7 +1,7 @@
 """Tests for betrayal-specific benchmark wiring."""
 
-from affect_aif.benchmark.benchmark_config import BenchmarkConfig
-from affect_aif.benchmark.benchmark_runner import BenchmarkRunner
+from benchmark.benchmark_config import BenchmarkConfig
+from benchmark.benchmark_runner import BenchmarkRunner
 
 
 def test_trust_backend_uses_betrayal_arena_default_switch():
@@ -24,10 +24,10 @@ def test_trust_backend_uses_betrayal_arena_default_switch():
 
     assert (results["scheduled_switch_partner_ids"] != "").any()
     assert (results["type_switched"]).any()
-    assert "scheduled" in set(results["switch_kind"])
+    assert "scheduled_type" in set(results["switch_kind"])
     assert "stochastic" not in set(results["switch_kind"])
 
-    switched_rows = results[results["switch_kind"] == "scheduled"]
+    switched_rows = results[results["switch_kind"] == "scheduled_type"]
     assert list(switched_rows["step"]) == [49]
     assert list(switched_rows["true_partner_type"]) == ["exploiter"]
 
@@ -59,9 +59,9 @@ def test_trust_backend_passes_scheduled_switches_through_to_results():
 
     assert (results["scheduled_switch_partner_ids"] != "").any()
     assert (results["type_switched"]).any()
-    assert "scheduled" in set(results["switch_kind"])
+    assert "scheduled_type" in set(results["switch_kind"])
     assert "stochastic" not in set(results["switch_kind"])
 
-    switched_rows = results[results["switch_kind"] == "scheduled"]
+    switched_rows = results[results["switch_kind"] == "scheduled_type"]
     assert list(switched_rows["step"]) == [9]
     assert list(switched_rows["true_partner_type"]) == ["exploiter"]

@@ -8,6 +8,9 @@ The supported experiment surface has moved to the action-dependent stance model 
 
 - Ground-truth partners now have a fixed type and an evolving stance.
 - The agent jointly infers `type × stance` and plans with action-dependent stance transitions.
+- The trust-game generative model now instantiates the v3 HESP surface with `o_action`, `o_payoff`, and `o_intero` modalities plus `type`, `stance`, `context`, `beta`, and `own_action` factors.
+- The default affective path now uses the discrete HESP beta convention (`beta_mode="discrete"`, `initial_beta=1.0`, beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`).
+- The legacy `mu`-weighted shallow-EFE path still exists in the runner; read later mentions of `mu` as current implementation notes, not as the final end-state of the v3 migration.
 - The primary factorial is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
 - Lesion, reward-average, no-epistemic, variational-beta, and clinical runs are named presets layered on top of the `tau4_affect` base.
 - Scheduled betrayal should be expressed via `scheduled_stance_switches`, not `scheduled_type_switches`, unless the experiment is explicitly about exogenous type volatility.
@@ -45,7 +48,7 @@ Each partner's latent strategy type, drawn from:
 Types are stable within blocks but switch at geometrically-distributed intervals (expected block length ~20 rounds). The agent does not observe type switches directly.
 
 **Level 3 — Affective State** $\beta_k$ (for affective agents only)
-A continuous-valued auxiliary state per partner, bounded in $[0, 1]$, representing the agent's running estimate of social model precision for partner $k$. Initialized at $\beta_k = 0.5$ (neutral). It modulates policy evaluation but is not a fully symmetric hidden-state factor in the main generative model.
+A discrete HESP-style auxiliary state per partner representing the **rate parameter** of expected policy precision. Default levels are `[0.5, 0.67, 1.0, 1.5, 2.0]`, with `\beta_k = 1.0` as the baseline prior. Lower beta means higher expected precision and more decisive policy selection when precision modulation is enabled.
 
 ### 2.2 Observation Model (A matrix)
 
@@ -69,7 +72,7 @@ $$P(s^{(2)}_{k,t+1} | s^{(2)}_{k,t}) = (1 - p_{\text{switch}}) \cdot \mathbb{I}[
 
 Important implementation note: this stochastic type switching is separate from the exploiter's internal `switch_round`. `p_switch` governs when a partner changes latent type altogether; `switch_round` only governs when an **exploiter-type** partner changes from its early cooperative phase to its later exploitative phase after repeated interactions.
 
-**Level 3 transitions (affective state)**: governed by the exponential moving average update described in the theory document. This is a continuous auxiliary variable updated outside the core POMDP loop in the default path; the `variational_beta` preset uses the supported variational beta path instead of treating beta as a primary hidden-state factor.
+**Level 3 transitions (affective state)**: in the default path, beta updates via a discrete predict-then-correct filter over the HESP beta levels using interoceptive observations derived from surprise. The `variational_beta` preset remains available as an alternate compatibility path.
 
 ### 2.4 Preference Model (C matrix)
 
@@ -129,7 +132,7 @@ precision_weight_k = 1 + mu * beta_k
 G_shallow(pi) = sum_t G_t(pi) * precision_weight_k
 ```
 
-Where $\mu$ scales the influence of affect on policy selection. The weight is keyed to the first partner implicated by the policy so the affective signal changes first-action marginals rather than washing out at the end of the rollout. For full experiment runs, `mu` calibration should average over at least `10` deep-planner episodes; shorter calibrations are acceptable only for smoke tests and fast debugging.
+Where $\mu$ scales the influence of affect on policy selection in the current runner. The weight is keyed to the first partner implicated by the policy so the affective signal changes first-action marginals rather than washing out at the end of the rollout. Full experiment runs now enforce a minimum of `3` calibration episodes rather than `10`.
 
 ---
 
@@ -188,7 +191,7 @@ The repository now treats this as the primary diagnostic benchmark for condition
 
 - Planning horizon: $\tau = 2$
 - Level 3 (affective state): active, per-partner, updated on slow timescale
-- Beta implementation: continuous EMA by default; config can instead select a discrete variational beta state
+- Beta implementation: discrete HESP beta by default; config can still select the variational beta compatibility path
 - Policy selection: EFE over 2-step horizon, precision-weighted by the first partner's affective signal
 - Precision modulation: off by default in the primary experiments (`affect_modulates_precision=False`), so Condition 2 tests shallow-EFE weighting rather than per-partner $\gamma_k$ modulation
 - Purpose: tests the core hypothesis — does per-partner metacognitive precision tracking provide orthogonal value that planning depth alone does not recover? Under sophisticated inference the non-affective depth curve is flat, so the comparison is not "shallow + affect vs. deep" but "affect vs. no-affect at any depth."
@@ -259,14 +262,14 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 ### 4.11 Condition 10: Borderline (Clinical)
 
 - Planning horizon: $\tau = 2$
-- Level 3 (affective state): active, per-partner, with volatile affect ($\alpha = 12.0$, $\lambda = 0.5$ vs defaults $\alpha = 3.0$, $\lambda = 0.6$)
+- Level 3 (affective state): active, per-partner, with volatile affect via amplified charge gain ($\alpha = 12.0$ vs default $\alpha = 3.0$)
 - Policy selection: same as Condition 2
 - Purpose: models borderline personality as over-reactive, poorly smoothed precision dynamics. High $\alpha$ amplifies charge; low $\lambda$ reduces temporal smoothing, producing noisy beta oscillations.
 
 ### 4.12 Condition 11: Depression (Clinical)
 
 - Planning horizon: $\tau = 2$
-- Level 3 (affective state): active, per-partner, with pessimistic initial precision ($\beta_0 = 0.2$ vs default $\beta_0 = 0.5$)
+- Level 3 (affective state): active, per-partner, with pessimistic initial precision ($\beta_0 = 2.0$ vs default $\beta_0 = 1.0$)
 - Policy selection: same as Condition 2
 - Purpose: models depression as a pessimistic prior on model reliability. Unlike C9 and C10, this is an initial-condition perturbation (not a dynamical parameter change), so it self-corrects through evidence accumulation.
 

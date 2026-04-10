@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from affect_aif.benchmark.common_metrics import (
+from benchmark.common_metrics import (
     cooperation_rate,
     cumulative_payoff,
     mean_payoff,

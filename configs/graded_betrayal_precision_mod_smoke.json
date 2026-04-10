@@ -11,15 +11,28 @@
   "observation_noise": 0.0,
   "correlation_pairs": [],
   "correlation_strength": 0.9,
-  "initial_partner_types": ["cooperator", "reciprocator", "cooperator", "random"],
-  "initial_partner_stances": ["trusting", "neutral", "neutral", "neutral"],
+  "initial_partner_types": [
+    "cooperator",
+    "reciprocator",
+    "cooperator",
+    "random"
+  ],
+  "initial_partner_stances": [
+    "trusting",
+    "neutral",
+    "neutral",
+    "neutral"
+  ],
   "scheduled_stance_switches": [
-    {"round": 31, "partner_idx": 0, "to_stance": "hostile"}
+    {
+      "round": 31,
+      "partner_idx": 0,
+      "to_stance": "hostile"
+    }
   ],
   "gamma": 1.0,
   "lr": 0.1,
   "action_sampling": "marginal",
-  "affect_modulates_precision": true,
   "use_parameter_learning": false,
   "deep_horizon": 8,
   "shallow_horizon": 2,
@@ -27,14 +40,21 @@
   "lambda_smooth": 0.6,
   "alpha_charge": 3.0,
   "sigma_0_sq": 0.25,
-  "mu": null,
-  "initial_beta": 0.5,
+  "initial_beta": 1.0,
   "lesion_mode": "decouple",
   "num_replications": 5,
   "calibration_episodes": 3,
   "random_seed": 42,
-  "conditions": [5, 6],
+  "conditions": [
+    5,
+    6
+  ],
   "presets": [],
-  "partner_types": ["cooperator", "reciprocator", "exploiter", "random"],
+  "partner_types": [
+    "cooperator",
+    "reciprocator",
+    "exploiter",
+    "random"
+  ],
   "run_sensitivity": false
 }

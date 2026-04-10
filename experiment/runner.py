@@ -9,10 +9,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from affect_aif.agent.base_agent import BaseAgent
-from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.experiment.conditions import get_condition_name, resolve_condition_spec
-from affect_aif.experiment.calibration import (
+from agent.base import BaseAgent
+from env.trust_game import TrustGameEnv
+from experiment.conditions import get_condition_name, resolve_condition_spec
+from experiment.calibration import (
     MIN_FULL_RUN_CALIBRATION_EPISODES as CALIBRATION_MIN_FULL_RUN_EPISODES,
     build_calibration_summary,
     build_sensitivity_specs,
@@ -20,13 +20,13 @@ from affect_aif.experiment.calibration import (
     deserialize_config,
     resolve_calibration_episodes,
 )
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.factory import create_agent, create_env, create_model
-from affect_aif.experiment.logger import MetricLogger
-from affect_aif.experiment.progress import ProgressReporter, create_progress_reporter
-from affect_aif.generative_model.model import TrustGameModel
+from experiment.config import ExperimentConfig
+from experiment.factory import create_agent, create_env, create_model
+from experiment.logger import MetricLogger
+from experiment.progress import ProgressReporter, create_progress_reporter
+from agent.model.trust_game import TrustGameModel
 
-from affect_aif.experiment.constants import SENSITIVITY_CONDITIONS
+from experiment.constants import SENSITIVITY_CONDITIONS
 
 
 class ExperimentRunner:

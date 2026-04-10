@@ -13,11 +13,11 @@ from typing import Any
 
 import numpy as np
 
-from affect_aif.benchmark.compat import require_cogames
-from affect_aif.benchmark.interaction_tracker import InteractionEvent, InteractionTracker
-from affect_aif.benchmark.observation_encoder import ObservationEncoder
-from affect_aif.benchmark.scenarios import BenchmarkScenario, get_scenario
-from affect_aif.benchmark.scripted_partners import ScriptedPartner, create_partner
+from benchmark.compat import require_cogames
+from benchmark.interaction_tracker import InteractionEvent, InteractionTracker
+from benchmark.observation_encoder import ObservationEncoder
+from benchmark.scenarios import BenchmarkScenario, get_scenario
+from benchmark.scripted_partners import ScriptedPartner, create_partner
 
 
 class CoGamesTrustAdapter:

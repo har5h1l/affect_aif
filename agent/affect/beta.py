@@ -1,13 +1,13 @@
-"""Per-partner discrete Bayesian affective state tracking.
-
-Phase 4 implementation: beta as a categorical hidden state with explicit
-likelihood P(ε|β) and transition dynamics P(β_t|β_{t-1}), subject to
-standard Bayesian inference rather than the continuous EMA update.
-"""
+"""Per-partner HESP-aligned discrete Bayesian beta tracking."""
 
 from __future__ import annotations
 
 import numpy as np
+
+from agent.affect.interoception import affective_charge, discretize_intero
+
+
+DEFAULT_BETA_LEVELS = np.asarray([0.5, 0.67, 1.0, 1.5, 2.0], dtype=np.float64)
 
 
 def _build_transition_matrix(num_levels: int, persistence: float) -> np.ndarray:
@@ -35,29 +35,24 @@ def _build_transition_matrix(num_levels: int, persistence: float) -> np.ndarray:
 
 
 def _build_likelihood_matrix(
-    num_surprise_bins: int,
+    num_intero_bins: int,
     beta_levels: np.ndarray,
     alpha_charge: float = 3.0,
     sigma_0_sq: float = 0.25,
 ) -> np.ndarray:
-    """Build a discretized likelihood matrix P(surprise_bin | beta_level).
+    """Build P(o_intero | beta) using HESP's rate-parameter convention."""
 
-    Shape: (num_surprise_bins, num_beta_levels). Each column sums to 1.
-    Higher beta levels assign more probability to low surprise bins.
-
-    This is the discretized form of the continuous likelihood used at runtime.
-    Useful for theoretical analysis and visualization.
-    """
-    # Surprise bin centers in [0, 1]
-    bin_centers = np.linspace(0.0, 1.0, num_surprise_bins, dtype=np.float64)
+    # High-valence intero bins should correspond to low surprise / accurate models.
+    bin_centers = np.linspace(1.0, 0.0, num_intero_bins, dtype=np.float64)
     L = len(beta_levels)
-    A = np.zeros((num_surprise_bins, L), dtype=np.float64)
+    A = np.zeros((num_intero_bins, L), dtype=np.float64)
     for l_idx in range(L):
         bl = beta_levels[l_idx]
-        for s_idx in range(num_surprise_bins):
+        effective_precision = 1.0 / max(float(bl), 1e-12)
+        for s_idx in range(num_intero_bins):
             eps = bin_centers[s_idx]
-            charge = alpha_charge * (sigma_0_sq - eps**2)
-            A[s_idx, l_idx] = np.exp(charge * bl)
+            charge = affective_charge(eps, alpha=alpha_charge, sigma_0_sq=sigma_0_sq)
+            A[s_idx, l_idx] = np.exp(charge * effective_precision)
     # Normalize columns
     col_sums = A.sum(axis=0, keepdims=True)
     A /= col_sums + 1e-16
@@ -83,7 +78,7 @@ class DiscreteBetaState:
         persistence: float = 0.8,
         alpha_charge: float = 3.0,
         sigma_0_sq: float = 0.25,
-        initial_beta: float = 0.5,
+        initial_beta: float = 1.0,
         beta_min: float | None = None,
         beta_max: float | None = None,
     ):
@@ -94,13 +89,21 @@ class DiscreteBetaState:
         self.sigma_0_sq = float(sigma_0_sq)
         self.initial_beta = float(initial_beta)
 
-        # Beta levels: evenly spaced. Use beta_min/beta_max if provided.
-        lo = float(beta_min) if beta_min is not None else 1.0 / (num_levels + 1)
-        hi = float(beta_max) if beta_max is not None else num_levels / (num_levels + 1)
-        self.beta_levels = np.linspace(lo, hi, num_levels, dtype=np.float64)
+        if beta_min is None and beta_max is None and num_levels == len(DEFAULT_BETA_LEVELS):
+            self.beta_levels = DEFAULT_BETA_LEVELS.copy()
+        else:
+            lo = float(beta_min) if beta_min is not None else 0.5
+            hi = float(beta_max) if beta_max is not None else 2.0
+            self.beta_levels = np.linspace(lo, hi, num_levels, dtype=np.float64)
 
         # Transition matrix: B_beta[:, j] = P(β_t | β_{t-1} = j)
         self.B_beta = _build_transition_matrix(num_levels, persistence)
+        self.A_intero = _build_likelihood_matrix(
+            num_intero_bins=num_levels,
+            beta_levels=self.beta_levels,
+            alpha_charge=self.alpha_charge,
+            sigma_0_sq=self.sigma_0_sq,
+        )
 
         # Initial posterior concentrated at the level nearest initial_beta
         self._initial_posterior = self._build_initial_posterior()
@@ -108,28 +111,11 @@ class DiscreteBetaState:
         self.reset()
 
     def _build_initial_posterior(self) -> np.ndarray:
-        """Soft assignment concentrated at the level nearest initial_beta."""
+        """Initialize at the nearest discrete beta level."""
         dists = np.abs(self.beta_levels - self.initial_beta)
-        # Sharpness of 5 gives a moderately concentrated initial distribution
-        # that can be sharpened or shifted by evidence
-        log_posterior = -5.0 * dists
-        log_posterior -= log_posterior.max()
-        posterior = np.exp(log_posterior)
-        posterior /= posterior.sum()
+        posterior = np.zeros((self.num_levels,), dtype=np.float64)
+        posterior[int(np.argmin(dists))] = 1.0
         return posterior
-
-    def _likelihood(self, surprise: float) -> np.ndarray:
-        """P(ε|β_l) for each level l (unnormalized).
-
-        Uses charge = α(σ₀² - ε²) and likelihood ∝ exp(charge × β_l).
-        This directly mirrors the continuous EMA's signed charge mechanism:
-        low surprise (charge > 0) favors higher β, high surprise (charge < 0)
-        favors lower β.
-        """
-        charge = self.alpha_charge * (self.sigma_0_sq - surprise**2)
-        log_lik = charge * self.beta_levels
-        log_lik -= log_lik.max()
-        return np.exp(log_lik)
 
     def update(
         self,
@@ -140,13 +126,15 @@ class DiscreteBetaState:
         """Bayesian predict-then-correct update of the precision posterior."""
         probs = np.asarray(predicted_action_probs, dtype=np.float64)
         surprise = 1.0 - probs[int(observed_action)]
+        charge = affective_charge(surprise, alpha=self.alpha_charge, sigma_0_sq=self.sigma_0_sq)
+        intero_obs = discretize_intero(charge, num_levels=self.num_levels)
 
         # Predict: prior = B @ previous posterior
         prior = self.B_beta @ self.posteriors[int(partner_idx)]
         prior /= prior.sum() + 1e-16
 
         # Update: posterior ∝ likelihood × prior
-        lik = self._likelihood(float(surprise))
+        lik = self.A_intero[int(intero_obs)]
         posterior = lik * prior
         posterior /= posterior.sum() + 1e-16
 

@@ -11,7 +11,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from affect_aif.benchmark.comparison import (
+from benchmark.comparison import (
     compute_cvc_summary,
     compute_shared_summary,
     compute_trust_summary,

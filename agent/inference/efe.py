@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from affect_aif.core.maths import entropy, normalize, spm_dot
+from agent.inference.maths import entropy, normalize, spm_dot
 
 
 def _precompute_ambiguity(A: np.ndarray) -> list[np.ndarray]:

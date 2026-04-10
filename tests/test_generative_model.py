@@ -1,9 +1,9 @@
 import numpy as np
 
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
-from affect_aif.generative_model.partner_types import PartnerType
-from affect_aif.generative_model.payoffs import build_graded_payoff_matrix, decode_action, encode_action
+from experiment.config import ExperimentConfig
+from agent.model.trust_game import GradedTrustGameModel, TrustGameModel
+from agent.model.types import PartnerType
+from agent.model.payoffs import build_graded_payoff_matrix, decode_action, encode_action
 
 
 def test_a_matrix_column_normalized():

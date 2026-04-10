@@ -22,8 +22,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
 
 # Stag Hunt payoffs
 SH_PAYOFFS = {
@@ -105,7 +105,6 @@ def build_config(
         "gamma": 1.0,
         "lr": 0.1,
         "action_sampling": "marginal",
-        "affect_modulates_precision": False,
         "use_parameter_learning": False,
         "deep_horizon": 8,
         "shallow_horizon": 2,

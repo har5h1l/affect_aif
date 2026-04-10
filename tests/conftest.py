@@ -1,12 +1,11 @@
 import pytest
 
-from affect_aif.agent.affective_agent import AffectiveAgent
-from affect_aif.agent.base_agent import BaseAgent
-from affect_aif.agent.lesioned_agent import LesionedAgent
-from affect_aif.agent.reward_avg_agent import RewardAvgAgent
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
-from affect_aif.generative_model.model import TrustGameModel
+from agent.affective import AffectiveAgent
+from agent.base import BaseAgent
+from agent.lesioned import LesionedAgent
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
+from agent.model.trust_game import TrustGameModel
 
 
 @pytest.fixture
@@ -35,7 +34,6 @@ def betrayal_config():
         initial_partner_stances=["trusting", "neutral"],
         scheduled_stance_switches=[{"round": 3, "partner_idx": 0, "to_stance": "hostile"}],
         conditions=[5, 6],
-        presets=["reward_average"],
         run_sensitivity=False,
     )
 
@@ -71,14 +69,12 @@ def agent_factory(tiny_config, tiny_model):
 def representative_agents(agent_factory, tiny_model):
     return {
         "base": agent_factory(BaseAgent),
-        "affective": agent_factory(AffectiveAgent, num_partners=tiny_model.num_partners, mu=1.0),
+        "affective": agent_factory(AffectiveAgent, num_partners=tiny_model.num_partners),
         "lesioned": agent_factory(
             LesionedAgent,
             num_partners=tiny_model.num_partners,
-            mu=2.0,
             lesion_mode="decouple",
         ),
-        "reward_avg": agent_factory(RewardAvgAgent, num_partners=tiny_model.num_partners, mu=1.0),
     }
 
 

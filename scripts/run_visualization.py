@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from affect_aif.analysis.visualization import build_run_gifs, load_results
+from analysis.visualization import build_run_gifs, load_results
 
 
 def build_parser() -> argparse.ArgumentParser:

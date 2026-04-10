@@ -10,10 +10,10 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from affect_aif.analysis.hypotheses import run_all_hypothesis_tests
-from affect_aif.analysis.metrics import final_round_summary
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
+from analysis.hypotheses import run_all_hypothesis_tests
+from analysis.metrics import final_round_summary
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
 
 
 def _condition_sort_key(value) -> tuple[int, str]:
@@ -99,7 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a small preliminary affect_aif experiment.")
     parser.add_argument(
         "--config",
-        default="affect_aif/configs/betrayal_stress.json",
+        default="configs/betrayal_stress.json",
         help=(
             "Path to a JSON config file. Agent-choice configs such as betrayal_stress.json or variant_b.json enable H5."
         ),

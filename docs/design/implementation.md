@@ -12,8 +12,10 @@
 The shipped trust-game path now uses the action-dependent stance redesign.
 
 - `switch_round`, exploiter early/late phases, and `last_action × phase` likelihood conditioning are no longer part of the supported trust-game semantics.
-- `TrustGameModel` and `GradedTrustGameModel` expose joint `type × stance` likelihoods and action-dependent stance transitions.
+- `TrustGameModel` now exposes the HESP-aligned trust-game matrices: `A = {o_action, o_payoff, o_intero}` and `B = {type, stance, context, beta, own_action}`.
+- `GradedTrustGameModel` keeps the same `type × stance` social structure but extends the own-action factor to the graded action count.
 - `BaseAgent` maintains per-partner joint beliefs over 12 states (`4 types × 3 stances`), with derived type and stance marginals for logging.
+- The affective helper path now defaults to a discrete HESP beta state with levels `[0.5, 0.67, 1.0, 1.5, 2.0]` and baseline `initial_beta = 1.0`.
 - `ExperimentConfig` supports `initial_partner_stances`, `scheduled_stance_switches`, and named `presets`.
 - The enforced minimum full-run `mu` calibration count is now `3`, and calibration uses the deepest relevant no-affect condition for the current config rather than always forcing tau-8.
 
@@ -34,12 +36,14 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## Precision Modulation
 
 - `affect_modulates_precision=False` by default.
-- When enabled, the current implementation multiplies policy precision by `1 + precision_signal`.
-- That means the optional precision path only boosts decisiveness above the base `gamma`; it does not suppress precision below baseline.
+- When enabled, the current implementation uses the HESP inverse-beta mapping `gamma_k = gamma_base / E[beta_k]`.
+- That means low beta (high expected precision) sharpens the policy posterior, while high beta (low expected precision) softens it below the base `gamma`.
 
 ## Belief updating (state inference)
 
-- Partner-type beliefs are updated by the **analytical solution** to variational free energy minimization: for a categorical $q(s)$, the VFE-minimizing posterior equals the Bayesian posterior. The code implements this as one-step Bayes using the likelihood tensor $A$ and transition matrix $B$ (see `infer_partner_state` in `affect_aif/agent/base_agent.py`). No gradient descent or iterative VFE minimization is used; the matrix-based update is the closed-form optimum.
+- Partner social beliefs are updated by the **analytical solution** to variational free energy minimization: for a categorical $q(s)$, the VFE-minimizing posterior equals the Bayesian posterior.
+- The current trust-game posterior now conditions on both the observed partner action and the realized payoff, with the payoff likelihood keyed by the agent's own action.
+- No gradient descent or iterative VFE minimization is used; the matrix-based update is the closed-form optimum.
 
 ## Sophisticated rollout inference
 
@@ -87,7 +91,8 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 - The current code tracks unsigned surprise, not signed residual error.
 - Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
-- `ExperimentConfig.beta_mode` defaults to `"continuous"` and preserves the existing EMA-based `AffectiveState`.
+- `ExperimentConfig.beta_mode` now defaults to `"discrete"`, which instantiates the HESP-aligned discrete beta filter.
+- In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
 - Setting `beta_mode="variational"` switches `AffectiveAgent` to `VariationalAffectiveState`, with `beta_num_levels` discrete levels and `beta_persistence` controlling the beta-state transition kernel.
 - `num_beta_levels` is accepted only as a legacy config input alias; serialized configs now emit `beta_num_levels`.
 

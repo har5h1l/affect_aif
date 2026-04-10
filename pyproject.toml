@@ -30,7 +30,7 @@ dev = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["affect_aif*"]
+include = ["agent*", "env*", "experiment*", "analysis*", "benchmark*", "cli*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -56,12 +56,12 @@ select = [
 [tool.mypy]
 python_version = "3.10"
 files = [
-  "affect_aif/cli",
-  "affect_aif/experiment/calibration.py",
-  "affect_aif/experiment/conditions.py",
-  "affect_aif/experiment/config.py",
-  "affect_aif/experiment/constants.py",
-  "affect_aif/experiment/persistence.py",
+  "cli",
+  "experiment/calibration.py",
+  "experiment/conditions.py",
+  "experiment/config.py",
+  "experiment/constants.py",
+  "experiment/persistence.py",
   "scripts/run_analysis.py",
   "scripts/run_experiment.py",
   "scripts/run_model_comparison.py",

@@ -6,24 +6,24 @@ from pathlib import Path
 
 import pandas as pd
 
-from affect_aif.benchmark.backend import BenchmarkBackendContext
-from affect_aif.benchmark.benchmark_config import BenchmarkConfig
+from benchmark.backend import BenchmarkBackendContext
+from benchmark.benchmark_config import BenchmarkConfig
 
 
 def _load_trust_backend():
-    from affect_aif.benchmark.trust_backend import TrustBackend
+    from benchmark.trust_backend import TrustBackend
 
     return TrustBackend
 
 
 def _load_toy_gridworld_backend():
-    from affect_aif.benchmark.toy_gridworld_backend import ToyGridworldBackend
+    from benchmark.toy_gridworld_backend import ToyGridworldBackend
 
     return ToyGridworldBackend
 
 
 def _load_cvc_backend():
-    from affect_aif.benchmark.cvc_local_backend import CvCLocalBackend
+    from benchmark.cvc_local_backend import CvCLocalBackend
 
     return CvCLocalBackend
 

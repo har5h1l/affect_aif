@@ -71,14 +71,14 @@ PRESET_CONDITIONS: dict[str, ConditionSpec] = {
         "Tau-4 affective agent with volatile beta dynamics",
         planning_horizon=4,
         agent_kind="affective",
-        parameter_overrides={"alpha_charge": 12.0, "lambda_smooth": 0.5},
+        parameter_overrides={"alpha_charge": 12.0},
     ),
     "depression": ConditionSpec(
         "depression",
         "Tau-4 affective agent with pessimistic initial beta prior",
         planning_horizon=4,
         agent_kind="affective",
-        parameter_overrides={"initial_beta": 0.2},
+        parameter_overrides={"initial_beta": 2.0},
     ),
 }
 

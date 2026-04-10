@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from affect_aif.benchmark.comparison import compute_shared_summary, format_comparison_report
+from benchmark.comparison import compute_shared_summary, format_comparison_report
 
 
 def test_shared_summary_aggregates_episode_reward_per_backend():

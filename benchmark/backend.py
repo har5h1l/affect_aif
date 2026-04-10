@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from affect_aif.benchmark.benchmark_config import AgentSpec, BenchmarkConfig
+from benchmark.benchmark_config import AgentSpec, BenchmarkConfig
 
 
 @dataclass

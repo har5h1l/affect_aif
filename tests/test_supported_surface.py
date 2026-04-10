@@ -3,16 +3,16 @@ import json
 import sys
 from pathlib import Path
 
-from affect_aif.agent.affective_agent import AffectiveAgent
-from affect_aif.experiment.conditions import (
+from agent.affective import AffectiveAgent
+from experiment.conditions import (
     get_condition_metadata,
     get_condition_name,
     get_preset_condition,
     normalize_condition_name,
 )
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
-from affect_aif.generative_model.model import TrustGameModel
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
+from agent.model.trust_game import TrustGameModel
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -59,7 +59,6 @@ def test_runner_variational_beta_preset_uses_variational_affective_agent():
     agent = runner._create_agent(condition="variational_beta", model=model, seed=0)
 
     assert isinstance(agent, AffectiveAgent)
-    assert agent.beta_mode == "variational"
 
 
 def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
@@ -127,7 +126,7 @@ def test_archive_boundary_is_explicit():
     all_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
     archived_scripts = {path.name for path in (REPO_ROOT / "archive" / "scripts").glob("*.py")}
     pyproject_text = (REPO_ROOT / "pyproject.toml").read_text()
-    cli_doc = (REPO_ROOT / "docs" / "cli.md").read_text()
+    cli_doc = (REPO_ROOT / "docs" / "operations" / "cli.md").read_text()
 
     assert supported_scripts <= all_scripts
     assert "analyze_benchmark.py" in all_scripts

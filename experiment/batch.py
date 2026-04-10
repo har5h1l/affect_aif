@@ -12,19 +12,19 @@ from typing import Any
 
 import pandas as pd
 
-from affect_aif.analysis.visualization import build_run_gifs
-from affect_aif.cli.common import slugify_name
-from affect_aif.experiment.calibration import (
+from analysis.visualization import build_run_gifs
+from cli.common import slugify_name
+from experiment.calibration import (
     build_calibration_summary,
     build_sensitivity_specs,
     build_zero_calibration_summary,
     resolve_calibration_episodes,
     serialize_config,
 )
-from affect_aif.experiment.conditions import resolve_condition_spec
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.constants import SENSITIVITY_CONDITIONS
-from affect_aif.experiment.tasks import (
+from experiment.conditions import resolve_condition_spec
+from experiment.config import ExperimentConfig
+from experiment.constants import SENSITIVITY_CONDITIONS
+from experiment.tasks import (
     run_calibration_episode_task,
     run_primary_replication_task,
     run_sensitivity_replication_task,

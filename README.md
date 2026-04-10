@@ -20,6 +20,8 @@ See [docs/cli.md](docs/cli.md) for the command-line reference and [results/READM
 The supported trust-game workflow now uses the action-dependent partner redesign:
 - partner behavior depends on latent `type × stance`
 - stance changes are action-dependent and can also be scheduled explicitly with `scheduled_stance_switches`
+- the trust-game generative model now exposes the HESP-aligned `o_action`, `o_payoff`, and `o_intero` modalities plus `type`, `stance`, `context`, `beta`, and `own_action` factors
+- the default affective config path now uses the discrete HESP beta convention (`beta_mode="discrete"`, `initial_beta=1.0`)
 - the core study matrix is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`
 - lesion, reward-average, no-epistemic, variational, and clinical runs are named presets (`lesioned`, `reward_average`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`)
 

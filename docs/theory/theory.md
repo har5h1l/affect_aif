@@ -13,6 +13,8 @@ The supported trust-family experiments now use the action-dependent stance redes
 
 Unless a section explicitly says "archived" or "prototype", read older references to exploiter phases, `switch_round`, or flat depth curves as superseded by the current redesign.
 
+Implementation note (2026-04-09): the current code now uses HESP-style discrete beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`, explicit `o_action` / `o_payoff` / `o_intero` modalities, and `type` / `stance` / `context` / `beta` / `own_action` factors in the trust-game model. The optional precision-modulation path now follows `gamma_k = gamma_base / E[beta_k]`. Some later sections still discuss the legacy `mu`-weighted shallow-EFE experiments; treat those as historical context until the full v3 migration removes that path.
+
 ---
 
 ## 1. Background

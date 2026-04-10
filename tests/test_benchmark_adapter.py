@@ -7,11 +7,11 @@ Tests for CoGamesTrustAdapter use the simulated gridworld fallback.
 import numpy as np
 import pytest
 
-from affect_aif.benchmark.interaction_tracker import InteractionEvent, InteractionTracker
-from affect_aif.benchmark.observation_encoder import ObservationEncoder
-from affect_aif.benchmark.cogames_adapter import CoGamesTrustAdapter
-from affect_aif.benchmark.scenarios import BenchmarkScenario, RESOURCE_SHARING, get_scenario, list_scenarios
-from affect_aif.benchmark.scripted_partners import (
+from benchmark.interaction_tracker import InteractionEvent, InteractionTracker
+from benchmark.observation_encoder import ObservationEncoder
+from benchmark.cogames_adapter import CoGamesTrustAdapter
+from benchmark.scenarios import BenchmarkScenario, RESOURCE_SHARING, get_scenario, list_scenarios
+from benchmark.scripted_partners import (
     CooperatorPartner,
     ExploiterPartner,
     RandomPartner,
@@ -80,7 +80,7 @@ class TestInteractionTracker:
 
 class TestObservationEncoder:
     def test_encode_produces_valid_observation(self):
-        from affect_aif.benchmark.interaction_tracker import RoundSummary
+        from benchmark.interaction_tracker import RoundSummary
         encoder = ObservationEncoder(payoff_levels=[-1.0, 1.0, 3.0, 5.0])
         summary = RoundSummary(
             partner_idx=0, partner_action=0, agent_action=0,

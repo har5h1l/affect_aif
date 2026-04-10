@@ -1,7 +1,7 @@
 import numpy as np
 
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.generative_model.model import GradedTrustGameModel, TrustGameModel
+from experiment.config import ExperimentConfig
+from agent.model.trust_game import GradedTrustGameModel, TrustGameModel
 
 
 def test_trust_model_exposes_stance_factor_and_joint_likelihood():

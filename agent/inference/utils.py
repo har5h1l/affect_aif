@@ -6,7 +6,7 @@ from itertools import product
 
 import numpy as np
 
-from affect_aif.core.maths import normalize
+from agent.inference.maths import normalize
 
 
 def obj_array(num_elements: int) -> np.ndarray:

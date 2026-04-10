@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from affect_aif.environment.trust_game import TrustGameEnv
-from affect_aif.generative_model.model import GradedTrustGameModel
+from env.trust_game import TrustGameEnv
+from agent.model.trust_game import GradedTrustGameModel
 
 
 class GradedTrustGameEnv(TrustGameEnv):

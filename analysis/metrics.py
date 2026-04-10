@@ -67,7 +67,6 @@ def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
         "mean_abs_step_efe": ("mean_abs_step_efe", "mean"),
         "planning_cost": ("planning_cost", "first"),
         "planning_cost_ratio": ("planning_cost_ratio", "first"),
-        "mu": ("mu", "first"),
     }
     if "cumulative_log_evidence" in frame.columns:
         agg_dict["total_log_evidence"] = ("cumulative_log_evidence", "last")
@@ -221,17 +220,6 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
                         if "inferred_joint_correct" in window_frame.columns
                         else np.nan
                     ),
-                    "mean_terminal_signal": _safe_nanmean(
-                        np.asarray(
-                            [
-                                _ensure_array(value)[int(partner_idx)]
-                                for value in window_frame["terminal_signal"].tolist()
-                            ],
-                            dtype=float,
-                        )
-                    )
-                    if "terminal_signal" in window_frame
-                    else np.nan,
                     "encounters": int(len(window_frame)),
                 }
             )
@@ -264,7 +252,6 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
         group = group.reset_index(drop=True)
         group["betas"] = group["betas"].apply(_ensure_array)
         group["reward_avgs"] = group["reward_avgs"].apply(_ensure_array)
-        group["terminal_signal"] = group["terminal_signal"].apply(_ensure_array)
         seed_rows = frame[(frame["condition"] == condition) & (frame["seed"] == seed)]
         switch_rounds: set[tuple[int, str]] = set()
         for _, switch_row in seed_rows.iterrows():
@@ -290,7 +277,6 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
             for encounter_offset, (_, row) in enumerate(window.iterrows()):
                 beta_arr = row["betas"]
                 reward_arr = row["reward_avgs"]
-                terminal_arr = row["terminal_signal"]
                 records.append(
                     {
                         "condition": condition,
@@ -308,9 +294,6 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
                         "reward_signal": float(reward_arr[int(partner_idx)])
                         if len(reward_arr) > partner_idx
                         else np.nan,
-                        "terminal_signal": float(terminal_arr[int(partner_idx)])
-                        if len(terminal_arr) > partner_idx
-                        else np.nan,
                         "divergence_beta_minus_reward": (
                             float(beta_arr[int(partner_idx)] - reward_arr[int(partner_idx)])
                             if len(beta_arr) > partner_idx and len(reward_arr) > partner_idx
@@ -322,29 +305,20 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
 
 
 def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Summarize whether β and terminal signals move enough to matter."""
+    """Summarize whether β values move enough to matter."""
 
-    frame = results[["condition", "condition_name", "seed", "betas", "terminal_signal"]].copy()
+    frame = results[["condition", "condition_name", "seed", "betas"]].copy()
     if frame.empty:
         return pd.DataFrame()
 
     frame["betas"] = frame["betas"].apply(_ensure_array)
-    frame["terminal_signal"] = frame["terminal_signal"].apply(_ensure_array)
     per_seed = frame.groupby(["condition", "condition_name", "seed"], as_index=False).agg(
         beta_range=(
             "betas",
             lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float)),
         ),
-        terminal_signal_range=(
-            "terminal_signal",
-            lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float)),
-        ),
         beta_mean=(
             "betas",
-            lambda series: _safe_nanmean(np.asarray([_safe_nanmean(arr) for arr in series], dtype=float)),
-        ),
-        terminal_signal_mean=(
-            "terminal_signal",
             lambda series: _safe_nanmean(np.asarray([_safe_nanmean(arr) for arr in series], dtype=float)),
         ),
     )
@@ -352,7 +326,6 @@ def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
         return per_seed
     thresholds = per_seed.copy()
     thresholds["beta_moved_materially"] = thresholds["beta_range"] >= 0.05
-    thresholds["terminal_signal_moved_materially"] = thresholds["terminal_signal_range"] >= 0.05
     return thresholds
 
 
@@ -371,7 +344,7 @@ def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, 
         pivot = summary.pivot_table(
             index=["seed", "partner_idx", "switch_round"],
             columns="condition",
-            values=["mean_payoff", "mean_accuracy", "mean_terminal_signal"],
+            values=["mean_payoff", "mean_accuracy"],
         )
         if pivot.empty:
             continue
@@ -394,9 +367,6 @@ def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, 
             "mean_stance_accuracy_ctau4_affect",
             np.nan,
         ) - pivot.get("mean_stance_accuracy_creward_average", np.nan)
-        pivot["terminal_signal_difference_tau4_affect_minus_reward_average"] = pivot.get(
-            "mean_terminal_signal_ctau4_affect", np.nan
-        ) - pivot.get("mean_terminal_signal_creward_average", np.nan)
         rows.append(pivot)
     if not rows:
         return pd.DataFrame()

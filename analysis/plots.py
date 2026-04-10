@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from affect_aif.analysis.metrics import (
+from analysis.metrics import (
     beta_reward_divergence,
     betrayal_trajectory,
     final_round_summary,
@@ -34,18 +34,7 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
     axes[0].set_title("Post-Betrayal Beta Trajectory")
     axes[0].set_xlabel("Encounters Since Switch")
     axes[0].set_ylabel("Beta")
-    sns.lineplot(
-        data=trajectory,
-        x="encounters_since_switch",
-        y="terminal_signal",
-        hue="condition_name",
-        ax=axes[1],
-        errorbar="sd",
-        legend=False,
-    )
-    axes[1].set_title("Post-Betrayal Terminal Signal")
-    axes[1].set_xlabel("Encounters Since Switch")
-    axes[1].set_ylabel("Terminal Signal")
+    axes[1].axis("off")
     fig.tight_layout()
     fig.savefig(out / "figure_7_betrayal_signal_trajectories.png", dpi=180)
     plt.close(fig)

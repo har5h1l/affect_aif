@@ -11,17 +11,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from affect_aif.benchmark.benchmark_config import BenchmarkConfig
-from affect_aif.benchmark.benchmark_runner import BenchmarkRunner
-from affect_aif.benchmark.comparison import format_comparison_report
+from benchmark.benchmark_config import BenchmarkConfig
+from benchmark.benchmark_runner import BenchmarkRunner
+from benchmark.comparison import format_comparison_report
 
 
 CVC_POLICY_ALIASES = {
-    "teammate_reliability": "class=affect_aif.benchmark.cvc_policy.TeammateReliabilityPolicy",
-    "scoring_loop": "class=affect_aif.benchmark.cvc_scoring_policy.ScoringLoopPolicy",
-    "scoring": "class=affect_aif.benchmark.cvc_scoring_policy.ScoringLoopPolicy",
-    "affect_cvc": "class=affect_aif.benchmark.cvc_affect_policy.AffectCvCPolicy",
-    "affect": "class=affect_aif.benchmark.cvc_affect_policy.AffectCvCPolicy",
+    "teammate_reliability": "class=benchmark.cvc_policy.TeammateReliabilityPolicy",
+    "scoring_loop": "class=benchmark.cvc_scoring_policy.ScoringLoopPolicy",
+    "scoring": "class=benchmark.cvc_scoring_policy.ScoringLoopPolicy",
+    "affect_cvc": "class=benchmark.cvc_affect_policy.AffectCvCPolicy",
+    "affect": "class=benchmark.cvc_affect_policy.AffectCvCPolicy",
     "starter": "class=cogames.policy.starter_agent.StarterPolicy",
     "miner": "class=cogames.policy.role_policies.MinerRolePolicy",
     "aligner": "class=cogames.policy.role_policies.AlignerRolePolicy",

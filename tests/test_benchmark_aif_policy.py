@@ -2,7 +2,7 @@
 
 import pytest
 
-from affect_aif.benchmark.aif_policy import AIFPolicy
+from benchmark.aif_policy import AIFPolicy
 
 
 class _DummyAgent:

@@ -2,18 +2,18 @@
 
 import numpy as np
 
-from affect_aif.analysis.model_comparison import (
+from analysis.model_comparison import (
     _spm_bms,
     model_comparison_report,
     pairwise_bayes_factors,
 )
-from affect_aif.experiment.config import ExperimentConfig
-from affect_aif.experiment.runner import ExperimentRunner
+from experiment.config import ExperimentConfig
+from experiment.runner import ExperimentRunner
 
 
 def test_log_evidence_tracked_in_agent_metrics(representative_agents, tiny_model):
     """All agent types should produce finite log-evidence after observing outcomes."""
-    from affect_aif.environment.trust_game import TrustGameEnv
+    from env.trust_game import TrustGameEnv
 
     config = ExperimentConfig(num_rounds=5, num_replications=1, calibration_episodes=1, random_seed=0)
     env = TrustGameEnv(config, seed=0)
@@ -72,7 +72,7 @@ def test_log_evidence_accumulates_correctly(tiny_config):
 
 def test_final_round_summary_includes_log_evidence(tiny_config):
     """final_round_summary should include total_log_evidence when available."""
-    from affect_aif.analysis.metrics import final_round_summary
+    from analysis.metrics import final_round_summary
 
     cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2]})
     runner = ExperimentRunner(cfg)
