@@ -1,79 +1,88 @@
 ---
-status: DONE
-next_priority: 0
-pending_work: []
-next_session_focus: "All paper polish complete. Remaining: C4 (navigation tests), D2 (Track 1.2 CSVs). Phase 8 (human data) requires user approval."
-model_hint: opus
+status: READY
+next_priority: 1
+model_hint: sonnet
 ---
 
 # Research State
 
 ## Last Updated
-2026-03-30 (Session 16 — merge + final cleanup)
+2026-04-14 (Session 17 — post-restructure analysis handoff)
 
 ## Session Count
-16
+17
 
-## Current Findings
+## Current Direction
+Post-restructure reframe. Action-dependent stance experiments (H1, H2, H4) are complete on new architecture. Key finding: G compression is structural — depth is redundant in action-dependent trust games. Affect signal is pooled across depths in current results, masking effect at calibrated (tau=1,2) horizons. Need targeted reanalysis + remaining experiments (H5, clinical).
 
-### Trust-Game Results (Phases 1-7: COMPLETE)
+## What's Been Done This Session
 
-All trust-game phases are complete with publication-quality results. Full results in docs/results_tracking.md.
+### Architectural restructuring (prior sessions)
+- Action-dependent partner stance implemented in B[1]: cooperate/defect actions produce different stance transition matrices
+- Package restructured: flat root-level modules, beta tracking external to POMDP state
+- Core experiments rerun: H1 factorial (160k rows), H2 lesion (80k rows), H4 betrayal (48k rows)
 
-### Session 16: Merge + Final Cleanup (2026-03-30)
+### Post-restructure analysis (this session)
+- **G compression confirmed structural**: Policy entropy 0.37 (tau=1) → 3.90 (tau=8). G range 2.0 → 9.6. Matching tau=1 entropy at tau=8 requires gamma≈41 — exponential scaling. Fixed gamma=1.0 IS standard AIF. Do not change.
+- **Depth inversion confirmed**: tau=1 beats tau=8 by ~37 points, d=0.82, p<1e-8
+- **Affect effect pooled**: d=0.15-0.26 across all depths, not significant. Expected — softmax saturated at deep horizons
+- **Lesion dissociation**: d=0.26, p=.07. Needs retest at tau=1,2
+- **Betrayal recovery**: d=0.22, p=.13. Same issue
 
-Merged paper-polish branch to master. Final fixes applied:
-- Fixed abstract P7 phrasing (reward-averaging effect size clarification)
-- Unified clinical table headers for consistent formatting
-- Deleted all mango session branches
+### Key decisions made
+- pymdp: removed from roadmap entirely
+- CvC: deprioritized to future work
+- Gamma scaling: NOT implementing (non-standard AIF)
+- Decision 1 (B matrix): RESOLVED — action-dependent stance is correct and in place
 
-### Session 15: Paper Polish (2026-03-28)
+## Pending Work (Phases)
 
-DECISION: All critical and important paper issues have been fixed. The paper now has:
-- Consistent d sign convention across all clinical tables (P1)
-- No uncited empirical claims (P2)
-- Two figures: beta trajectory under betrayal + clinical phenotype comparison (P3)
-- Cross-references to all tables and key equations in prose (P4)
-- Author affiliation filled in (P5)
-- C8 approximate value explained in table footnote (P6)
-- Abstract d=1.72 clarified with head-to-head comparison range (P7)
-- Bibliography alphabetically sorted (P8)
-- "Phase 4" internal terminology removed (P9)
-- Implementation section expanded to Code Availability with runtime info (P10)
+### Phase 1: Cleanup [NOT STARTED]
+- Delete `results/clinical_run/` (pre-restructure, 20 reps, wrong arch)
+- Delete `results/h5_selection/h5_partner_selection/results_partial.csv`
+- Update `docs/future/roadmap.md`: resolve Decision 1, remove pymdp, deprioritize CvC
+- Run `python -m pytest tests/ -v` — confirm clean
 
-**Code cleanup completed:**
-- C1: Dead stuck_steps/stuck_counter removed from CvC policies and navigation
-- C2: Docstring mismatch in cvc_navigation.py fixed
-- C3: Hardcoded server path in benchmark config replaced with portable python3
+### Phase 2: Hypothesis Reframe [NOT STARTED]
+- Update `docs/experiment/design.md` Section 1 and hypothesis framing (see MISSION.md)
+- Update `docs/experiment/results.md` Status Note
+- New framing: G compression is H1, affect augmentation is H2, lesion is H3, betrayal is H4, partner selection is H5
 
-**Docs cleanup completed:**
-- D1: Clinical conditions C9-C11 added to experiment.md
+### Phase 3: Targeted Re-Analysis [NOT STARTED]
+- H1 shallow reanalysis: filter results.csv to conditions 1-4 (tau=1,2), compute affect d
+- H2 lesion reanalysis: lesion dissociation at tau=4
+- H4 betrayal window: effect size in post-switch rounds
+- Save outputs to `results/reanalysis/`
 
-**Items not addressed (low priority):**
-- C4: Navigation unit tests — would need significant new test infrastructure
-- D2: Track 1.2 result CSVs on server — not critical for publication
-- P11: Sennesh/Ramstead reference — not needed, Ramstead already cited via Hesp et al. (2021)
+### Phase 4: New Experiments [NOT STARTED]
+- Create `configs/shallow_affect_confirm.json` (conditions [1,2,3,4] + lesioned preset, 100 reps)
+- H5 partner selection: fresh full run
+- Clinical betrayal: first run on new architecture
+- Clinical phenotypes: first run on new architecture
 
-### Commits on this branch
-1. `e410224` Fix critical paper issues P1 (d sign convention) and P2 (uncited timing claims)
-2. `b6fd2be` Fix paper polish items P4-P10 (cross-refs, affiliation, bibliography, etc.)
-3. `37cc86c` P3: Add two key figures to paper (beta trajectory + clinical phenotypes)
-4. `51f1943` Code cleanup C1-C3: remove dead stuck_steps, fix docstring, fix hardcoded path
-5. `6f62b3c` D1: Add clinical conditions C9-C11 to experiment.md
+### Phase 5: Analysis + Docs [NOT STARTED]
+- Run analysis on each new experiment
+- Update hypothesis scorecard in results.md
+- Flag any surprising finding before updating narrative
 
-### Track Status Summary
+## Experiment Status
 
-| Track | Status | Details |
-|-------|--------|---------|
-| 1.1-1.5 | COMPLETE | All theory gaps addressed in paper |
-| 2.1-2.5 | COMPLETE | CvC benchmark complete |
-| 3.1-3.4 | COMPLETE | Paper written with all fixes applied |
-| Paper Polish | COMPLETE | All critical/important issues resolved |
+| Experiment | Config | Status | Rows | Notes |
+|---|---|---|---|---|
+| H1 factorial | h1_depth_affect_factorial.json | COMPLETE | 160k | All 8 conditions, 100 reps |
+| H2 lesion | h2_lesion_dissociation.json | COMPLETE | 80k | Conditions 5,6 + presets |
+| H4 betrayal | h4_betrayal_recovery.json | COMPLETE | 48k | Conditions 5,6 + presets |
+| H5 selection | h5_partner_selection.json | INCOMPLETE | 6.4k | 32 seeds condition 5 only — DELETE and rerun |
+| Clinical betrayal | clinical_betrayal.json | NOT RUN | — | New arch, run in Phase 4 |
+| Clinical phenotypes | clinical_phenotypes.json | NOT RUN | — | New arch, run in Phase 4 |
+| Shallow confirm | shallow_affect_confirm.json | NOT CREATED | — | Create + run in Phase 4 |
 
 ## Auto Handoff
-- **What changed:** Session 16 merged the paper-polish branch to master, fixed abstract P7 phrasing, unified clinical table headers, and deleted all mango session branches.
-- **What is still in flight:** Nothing.
-- **What next session should do:** Remaining low-priority items: C4 (navigation unit tests), D2 (Track 1.2 result CSVs). Phase 8 (human data) requires user approval before starting.
+
+- **What changed:** Post-restructure experiments complete. G compression confirmed structural. Decision: fixed gamma=1.0 with full enumeration is standard AIF, no fix needed. Depth inversion is a domain finding, not a bug.
+- **What is still in flight:** Phases 1-5 not started. See pending work above.
+- **What next session should do:** Start at Phase 1 — cleanup then reframe then re-analyze then new experiments. Read MISSION.md fully before starting.
+- **Key risk:** If shallow-depth affect effect is also weak (d<0.3 at tau=1), flag immediately — this would change the paper story fundamentally.
 
 ## Status
-DONE — Paper polish phase complete. All critical and important issues resolved. Merged to master.
+READY — Hand off to conductor. Start at Phase 1.
