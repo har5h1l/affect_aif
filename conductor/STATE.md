@@ -4,8 +4,8 @@ next_priority: 3
 pending_work:
   - "Phase 3: run targeted re-analysis for H1 shallow, H2 lesion, and H4 betrayal window into results/reanalysis/"
   - "Phase 4-5: create shallow_affect_confirm config, run smoke/full experiments, analyze outputs, then update docs cautiously"
-  - "Refresh STATE.md again after each re-analysis output and commit checkpoint"
-next_session_focus: "Run the three targeted re-analyses and stop immediately if tau=1 affect remains weak (d < 0.3)"
+  - "Resolve missing result CSVs in this worktree by fetching synced outputs or regenerating H1/H2/H4 runs"
+next_session_focus: "Get the H1/H2/H4 result CSVs into this worktree, then run scripts/run_targeted_reanalysis.py immediately"
 model_hint: sonnet
 mode_hint: codex
 ---
@@ -48,15 +48,34 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
   - Rewrote the top-level headline, hypothesis scorecard, and interpretation sections so they no longer anchor on the old pooled-depth story.
   - Left lower historical sections in place as archival context; the top of the file now explicitly marks them as historical unless updated.
 
+### Phase 3 analysis tooling
+- Added `scripts/run_targeted_reanalysis.py`.
+  - Inputs default to the mission paths for H1, H2, and H4 result CSVs.
+  - Writes the requested outputs:
+    - `results/reanalysis/h1_shallow_reanalysis.txt`
+    - `results/reanalysis/h2_lesion_reanalysis.txt`
+    - `results/reanalysis/h4_betrayal_window_reanalysis.txt`
+  - Computes the exact targeted summaries needed for Phase 3 once the CSVs exist locally.
+- Added a smoke test in `tests/test_supported_surface.py` for the new CLI.
+- Verified with `python -m pytest tests/test_supported_surface.py -v`
+  - Result: `6 passed, 1 warning`
+
+### Phase 3 blocker
+- The required existing result CSVs are absent from this worktree:
+  - `results/h1_factorial/h1_depth_affect_factorial/results.csv`
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv`
+  - `results/h4_betrayal/h4_betrayal_recovery/results.csv`
+- `results/` still contains only `.gitkeep` and `results/README.md`.
+- Attempted to use `mango` for result sync, but the installed `mango v2` CLI here does not expose the older `cloud sync` commands documented in `CLAUDE.md`.
+
 ## Pending Work (Phases)
 
 ### Phase 2: Hypothesis Reframe [DONE]
 - `docs/experiment/design.md` and `docs/experiment/results.md` now use the post-restructure H1-H5 framing at their canonical top sections.
 
 ### Phase 3: Targeted Re-Analysis [NEXT]
-- H1 shallow reanalysis from `results/h1_factorial/h1_depth_affect_factorial/results.csv`
-- H2 lesion reanalysis from `results/h2_lesion/h2_lesion_dissociation/results.csv`
-- H4 betrayal-window reanalysis from `results/h4_betrayal/h4_betrayal_recovery/results.csv`
+- Resolve missing H1/H2/H4 result CSVs in this worktree
+- Run `python scripts/run_targeted_reanalysis.py`
 - Save outputs under `results/reanalysis/`
 
 ### Phase 4: New Experiments [NOT STARTED]
@@ -72,10 +91,11 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
 
 ## Auto Handoff
 
-- **What changed:** Phase 1 and Phase 2 completed. Roadmap and canonical experiment docs now reflect the post-restructure H1-H5 framing. Full test suite passes.
-- **What is still in flight:** Phases 3-5 remain. No experiment jobs launched yet.
-- **What next session should do:** Run the three targeted re-analyses, save `results/reanalysis/*.txt`, and checkpoint each output with a commit.
+- **What changed:** Phase 1 and Phase 2 completed. Added a dedicated Phase 3 re-analysis CLI plus smoke test. Canonical docs reflect the post-restructure H1-H5 framing.
+- **What is still in flight:** Actual Phase 3 outputs are blocked on missing result CSVs. Phases 4-5 have not started. No experiment jobs launched yet.
+- **What next session should do:** Fetch or regenerate the missing H1/H2/H4 CSVs, then run `python scripts/run_targeted_reanalysis.py` and checkpoint the resulting text outputs.
 - **Key risk:** If shallow-depth reanalysis still shows weak affect at tau=1 (`d < 0.3`), stop and flag; that would require a deeper story change.
 
 DECISION: Treat depth redundancy / G compression as a structural result of the supported binary action-dependent trust-game surface, not as a pending implementation defect.
-NEXT: Commit the Phase 2 checkpoint, then run H1/H2/H4 re-analyses in that order.
+BLOCKER: Phase 3 cannot be executed from this worktree until the required result CSVs are fetched or regenerated.
+NEXT: Commit the re-analysis CLI, then obtain the missing result files before proceeding.

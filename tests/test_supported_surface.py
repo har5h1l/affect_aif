@@ -3,6 +3,8 @@ import json
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 from agent.affective import AffectiveAgent
 from experiment.conditions import (
     get_condition_metadata,
@@ -65,6 +67,7 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
     run_analysis = _load_script_module("run_analysis.py")
     run_model_comparison = _load_script_module("run_model_comparison.py")
     run_preliminary = _load_script_module("run_preliminary.py")
+    run_targeted_reanalysis = _load_script_module("run_targeted_reanalysis.py")
     run_visualization = _load_script_module("run_visualization.py")
 
     config = ExperimentConfig(
@@ -80,6 +83,7 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
     assert run_preliminary.build_parser().parse_args(
         ["--config", str(config_path), "--replications", "1", "--rounds", "2"]
     )
+    assert run_targeted_reanalysis.build_parser().parse_args(["--output-dir", "out"])
     assert run_visualization.build_parser().parse_args(["--results", "x.csv", "--output-dir", "out"])
     assert run_model_comparison.build_parser().parse_args(["--results", "x.csv", "--output-dir", "out"])
 
@@ -111,6 +115,70 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
     assert run_model_comparison.main(["--results", str(results_path), "--output-dir", str(model_dir)]) == 0
     assert (figures_dir / "final_round_summary.csv").exists()
     assert (model_dir / "model_comparison_report.json").exists()
+
+
+def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
+    run_targeted_reanalysis = _load_script_module("run_targeted_reanalysis.py")
+
+    h1_rows = []
+    for seed in (0, 1):
+        h1_rows.extend(
+            [
+                {"condition": 1, "condition_name": "tau1_no_affect", "seed": seed, "round": 0, "payoff": 10 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+                {"condition": 2, "condition_name": "tau1_affect", "seed": seed, "round": 0, "payoff": 14 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+                {"condition": 3, "condition_name": "tau2_no_affect", "seed": seed, "round": 0, "payoff": 11 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+                {"condition": 4, "condition_name": "tau2_affect", "seed": seed, "round": 0, "payoff": 15 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+            ]
+        )
+    h2_rows = []
+    for seed in (0, 1):
+        h2_rows.extend(
+            [
+                {"condition": 5, "condition_name": "tau4_no_affect", "seed": seed, "round": 0, "payoff": 10 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 0.8, "inferred_joint_correct": 0.8, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+                {"condition": 6, "condition_name": "tau4_affect", "seed": seed, "round": 0, "payoff": 16 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 0.9, "inferred_joint_correct": 0.9, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+                {"condition": 99, "condition_name": "lesioned", "seed": seed, "round": 0, "payoff": 12 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 0.85, "inferred_joint_correct": 0.85, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+            ]
+        )
+    h4_rows = []
+    for seed in (0, 1):
+        for round_idx in range(30, 61):
+            h4_rows.extend(
+                [
+                    {"condition_name": "tau4_no_affect", "seed": seed, "round": round_idx, "payoff": 1.0 + seed},
+                    {"condition_name": "tau4_affect", "seed": seed, "round": round_idx, "payoff": 2.0 + seed},
+                ]
+            )
+
+    h1_path = tmp_path / "h1.csv"
+    h2_path = tmp_path / "h2.csv"
+    h4_path = tmp_path / "h4.csv"
+    pd.DataFrame(h1_rows).to_csv(h1_path, index=False)
+    pd.DataFrame(h2_rows).to_csv(h2_path, index=False)
+    pd.DataFrame(h4_rows).to_csv(h4_path, index=False)
+
+    out_dir = tmp_path / "reanalysis"
+    assert (
+        run_targeted_reanalysis.main(
+            [
+                "--h1-results",
+                str(h1_path),
+                "--h2-results",
+                str(h2_path),
+                "--h4-results",
+                str(h4_path),
+                "--output-dir",
+                str(out_dir),
+            ]
+        )
+        == 0
+    )
+
+    assert (out_dir / "h1_shallow_reanalysis.txt").exists()
+    assert (out_dir / "h2_lesion_reanalysis.txt").exists()
+    assert (out_dir / "h4_betrayal_window_reanalysis.txt").exists()
+    assert "tau=1" in (out_dir / "h1_shallow_reanalysis.txt").read_text()
+    assert "lesioned vs tau4_affect" in (out_dir / "h2_lesion_reanalysis.txt").read_text()
+    assert "rounds 30-60" in (out_dir / "h4_betrayal_window_reanalysis.txt").read_text()
 
 
 def test_archive_boundary_is_explicit():

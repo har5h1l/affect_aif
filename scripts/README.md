@@ -23,6 +23,7 @@ These scripts remain in the active tree because they support benchmark, paper, c
 - `analyze_benchmark_paper.py`
 - `analyze_clinical_results.py`
 - `run_clinical_sensitivity.py`
+- `run_targeted_reanalysis.py`
 - `generate_paper_figures.py`
 - `cvc_list_missions.py`
 - `cvc_obs_diagnostic.py`
