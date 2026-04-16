@@ -13,50 +13,30 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-16 (Session 23 — regeneration relaunch recovery)
+2026-04-16 (Session 24 — regeneration still running)
 
 ## Session Count
-23
+24
 
 
-<!-- Older entries truncated (was 168 lines) -->
+<!-- Older entries truncated (was 186 lines) -->
 
-- Startup / orientation:
+- Session 24 startup:
   - read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
   - confirmed `conductor/INBOX.md` does not exist
   - re-checked phase docs: `docs/future/roadmap.md`, `docs/experiment/results.md`
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
 - Performed the single allowed completion check for the detached Phase 3 regeneration jobs:
-  - local CSVs still missing:
-    - `results/h1_factorial/h1_depth_affect_factorial/results.csv`
-    - `results/h2_lesion/h2_lesion_dissociation/results.csv`
-    - `results/h4_betrayal/h4_betrayal_recovery/results.csv`
-  - `pgrep -af ...` showed only `h1` and `h4` experiment processes; `h2` was no longer running
-- Diagnosed the detached-run failure mode:
-  - surviving `h1` / `h4` processes had `/proc/<pid>/cwd` bound to `/tmp/mango-worktree-affect_aif-20260416_143926-170352 (deleted)`
-  - the old detached worktree no longer contained the expected run dirs or logs
-  - conclusion: prior detached jobs were orphaned in a deleted worktree and could not be relied on to produce usable local outputs for Phase 3
-- Re-ran the required full verification gate before relaunching experiments:
-  - `python -m pytest tests/ -v`
-  - Result: `248 passed, 26 skipped, 2 warnings in 260.13s`
-  - Warnings:
-    - multiprocessing `os.fork()` with JAX in `test_batch_runner_writes_per_config_subdirs_and_provenance`
-    - SciPy precision-loss warning in the targeted reanalysis CLI smoke test
-- Terminated stale deleted-worktree regeneration processes:
-  - killed old launch / worker PIDs `184267 184345 184351 184456 184463 184464`
-- Relaunched all three required Phase 3 regeneration jobs detached from the current worktree and verified each once with `kill -0`:
-  - `h1_factorial`
-    - PID `209790`
-    - run dir: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/h1_factorial/h1_depth_affect_factorial`
-    - log: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/logs/h1_factorial_relaunch.log`
-  - `h2_lesion`
-    - PID `209791`
-    - run dir: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/h2_lesion/h2_lesion_dissociation`
-    - log: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/logs/h2_lesion_relaunch.log`
-  - `h4_betrayal`
-    - PID `209792`
-    - run dir: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/h4_betrayal/h4_betrayal_recovery`
+  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
+  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
+  - `kill -0` confirms all three relaunched PIDs are still live:
+    - `209790`
+    - `209791`
+    - `209792`
+- No additional polling performed after that single check.
+
     - log: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/logs/h4_betrayal_relaunch.log`
 - No additional polling performed after that single post-launch verification.
 
@@ -171,11 +151,11 @@ mode_hint: monitor
 
 ## Auto Handoff
 
-- **What changed:** Session 23 found that the previous detached `h1` / `h4` jobs were still running inside a deleted worktree and that `h2` was no longer running at all.
-- **What changed:** Full test gate passed again this session (`248 passed, 26 skipped, 2 warnings`), stale deleted-worktree processes were terminated, and all three Phase 3 regeneration jobs were relaunched from the current worktree with fresh logs and verified live PIDs.
-- **What changed:** Added and committed `configs/shallow_affect_confirm.json` (`141fcbe`) so the Phase 4 smoke/full shallow confirmation runs are ready once Phase 3 clears.
-- **What is still in flight:** The relaunched detached regenerations are running under PIDs `209790`, `209791`, and `209792`; Phase 3 outputs have not been written yet. No new Phase 4 experiments have been launched this wake.
-- **What next session should do:** Perform one completion check against the current-worktree run dirs / PIDs above. If the three `results.csv` files exist, run `python scripts/run_targeted_reanalysis.py` immediately, save the requested text outputs, and checkpoint them. If those outputs do not trigger the `d<0.3 at tau=1` stop condition, start `shallow_affect_confirm` smoke next.
+- **What changed:** Session 24 completed the required startup sequence and performed exactly one completion check against the current-worktree Phase 3 regeneration outputs.
+- **What changed:** All three required CSVs are still missing locally, while the relaunched regeneration processes remain live under PIDs `209790`, `209791`, and `209792`.
+- **What changed:** No code, docs, configs, or experiment launches were added this wake; this was a monitor-only pass to avoid unnecessary polling.
+- **What is still in flight:** The detached regenerations for `h1_factorial`, `h2_lesion`, and `h4_betrayal` are still running; `results/reanalysis/` has not been produced yet. Phase 4 remains blocked on those inputs.
+- **What next session should do:** Perform one completion check again. If the three `results.csv` files now exist, run `python scripts/run_targeted_reanalysis.py`, inspect the tau-1 affect effect size, save the Phase 3 outputs, and checkpoint them. If the jobs are still running, stop again after that one check.
 - **Key risk:** If shallow-depth reanalysis still shows weak affect at tau=1 (`d < 0.3`), stop and flag; that would require a deeper story change.
 
 DECISION: Treat depth redundancy / G compression as a structural result of the supported binary action-dependent trust-game surface, not as a pending implementation defect.
