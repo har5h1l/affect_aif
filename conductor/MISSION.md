@@ -99,4 +99,4 @@ The precision modulation experiment ran on the server; raw CSVs were not fetched
 - STOP and ask if any change would alter the scientific narrative
 
 ## Status
-DONE — All critical and important paper polish issues resolved and merged to master. Remaining low-priority: C4 (navigation tests), D2 (Track 1.2 CSVs). Phase 8 (human data) requires user approval.
+PAUSED — paper polish complete. Awaiting user decision.
