@@ -36,44 +36,31 @@ The first major iteration established the core finding and produced a paper draf
 
 **Phase 7 details:** Augmentation generalizes under volatility across PD, Stag Hunt, and Chicken (d > 1.0 in all). Game-dependent in stable conditions. Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
 
-### Current Direction: Architectural Tightening
+### Current Direction: Post-Restructure Reframe
 
-Prompted by external review (Andrew Pashea, 2026-03-30) and internal three-agent codebase audit. The goal is to align the implementation with standard active inference conventions, fix known issues, and re-run experiments on a cleaner foundation before the next paper.
+Action-dependent stance is now implemented and the first post-restructure experiment family is in hand. The current task is to reframe the hypothesis story around what the new architecture actually shows, clean up stale artifacts, and finish the remaining runs on the action-dependent trust-game surface.
 
 **Operational summary:**
 - MVP: Complete (Phases 1-7, paper draft, CvC proof-of-concept).
-- Current focus: Architectural tightening — fix known issues, address standard-AIF departures, make design decisions.
-- Paper status: Results solid. Architecture needs justification/revision before submission to AIF venue.
+- Current focus: Post-restructure reframe — action-dependent stance results in hand, reframing hypotheses and completing remaining experiments.
+- Paper status: Binary trust-game results need updated framing before the next paper iteration.
 - Benchmark: Early WIP / proof-of-concept. Not publication-ready.
 
 ---
 
-## 2. Open Architectural Decisions
+## 2. Architectural Decisions Status
 
-These require the user's thinking before implementation can proceed.
+These track what remains open after the action-dependent stance redesign.
 
-### Decision 1: The B matrix question (most important)
+### Decision 1: The B matrix question (resolved)
 
-The partner-type B matrix is action-independent: cooperate/defect doesn't affect type transitions. This is domain-correct (your action genuinely doesn't change what type your partner is), but it has consequences:
+This decision is now resolved. The supported trust-game path includes action-dependent stance transitions, and the post-restructure results show that depth redundancy persists as a structural property of the binary trust-game policy landscape rather than as an artifact of the old action-independent transition story.
 
-- The agent can't model at the B-matrix level how sustained cooperation stabilizes a reciprocator. Reciprocator dynamics are handled entirely through the A matrix (likelihood conditions on last_action).
-- Planning depth may be structurally uninformative because looking further ahead doesn't reveal new state transitions — the B matrix just drifts with p_switch regardless of what the agent does.
-- **The flat depth curve might be a structural consequence of this design choice, not a finding about the domain.**
+Implication for the paper: document action-dependent stance as the supported architecture and present G compression / depth redundancy as a domain finding of the binary-action task, not as a bug that still needs fixing.
 
-If you added an action-dependent B (e.g., cooperating increases probability that a reciprocator stays reciprocating), deeper planning could start to matter. That would reframe the "orthogonal augmentation" claim: affect might still be orthogonal, but depth might no longer be irrelevant.
+### Decision 2: pymdp alignment path (removed)
 
-**Options:**
-- (a) Keep current design, explicitly justify in paper — "in domains where actions don't affect hidden state transitions, affect provides orthogonal value" (defensible, narrows claim)
-- (b) Add action-dependent B for reciprocator dynamics, re-run experiments — tests whether depth matters when B is action-dependent (high effort, could strengthen or weaken the story)
-- (c) Test both and compare — run a small experiment with action-dependent B to see if depth separates, then decide
-
-### Decision 2: pymdp alignment path
-
-Andrew offered to help formalize in pymdp. Options:
-- (a) **Notation only** — keep JAX code, make docs/paper match pymdp conventions. Fastest but reviewers may push back on custom implementation.
-- (b) **pymdp wrapper** — use pymdp for generative model definition, keep custom JAX planning. Middle ground.
-- (c) **Full pymdp** — re-implement in pymdp 1.0 with Andrew's help. Most credible for AIF community, but significant effort and may require extending pymdp for the affect mechanism.
-- (d) **Keep JAX, document departures** — add explicit section to theory.md justifying each departure.
+No pymdp migration path is active. The project will continue on the current implementation and document the supported conventions directly.
 
 ### Decision 3: Multiplicative vs additive precision weighting
 
@@ -106,7 +93,7 @@ Work that can proceed without waiting for the decisions above, organized by cate
 
 **Area 4: Benchmark & CvC**
 9. **Flag CvC as early WIP** — Add clear status documentation to benchmark module. Results are proof-of-concept, not publication-ready.
-10. **CvC navigation improvements** — Current BFS heuristic achieves 84-91% move success. Full scoring loop (gear → ore → hearts → aligned junctions) is incomplete. Deprioritized until core architecture is settled.
+10. **CvC navigation improvements** — Current BFS heuristic achieves 84-91% move success. Full scoring loop (gear → ore → hearts → aligned junctions) is incomplete. Kept as a future direction, not an active track.
 
 **Area 5: Experimental Re-runs (after architecture decisions)**
 11. **Re-run core experiments** after any architecture changes from Decisions 1-3. Use same configs but on updated codebase.
@@ -117,7 +104,7 @@ Work that can proceed without waiting for the decisions above, organized by cate
 
 ## 3. Active Tracks
 
-These tracks are the immediate actionable work, organized by priority. They depend on Decisions 1-4 above for the experimental re-runs, but the theory and benchmark tracks can proceed in parallel.
+These tracks are the immediate actionable work after the restructure.
 
 ### Track 1: Paper Theory Gaps (active, HIGH priority)
 
@@ -164,55 +151,15 @@ Phase 5 between-profile payoff differences are small (10.324-10.353). The paper 
 - Structural distinction: beta_0 correctable by inference vs alpha/lambda creating persistent perturbations
 - Acknowledge between-profile quantitative differentiation as a limitation/future-work item
 
-### Track 2: CoGames/CvC Benchmark (active, HIGH priority)
+### Track 2: Paper Preparation (active, MEDIUM priority)
 
-**Goal:** Get a submission-ready policy onto the actual CvC benchmark (beta-cvc Observatory season, compat_version 0.19) with non-zero reward.
-
-**2.1 Solve Navigation**
-
-A* pathfinding layer to replace directional heuristics:
-1. Parse local grid observation to build walkability map
-2. A*/BFS to find path to target
-3. Return next cardinal action
-4. Fall back to random valid moves
-
-Implementation: `PathfindingMixin` in `affect_aif/benchmark/cvc_navigation.py`.
-
-**2.2 ScoringLoopPolicy Baseline**
-
-State-machine policy that completes the CvC scoring loop: get gear -> mine ore -> deposit at base -> collect hearts -> align junction. Uses PathfindingMixin for navigation. Target: non-zero reward.
-
-**2.3 AffectCvCPolicy**
-
-Layer per-partner precision tracking onto the baseline:
-1. Teammate observation model (predict position/behavior per teammate)
-2. Beta_k update (compare predicted vs actual)
-3. Policy modulation (high-beta -> coordinate, low-beta -> independent)
-
-**2.4 Benchmark and Observatory Submission**
-
-Full benchmark, analysis, packaging via `cvc_packaging.py`. Validate compat_version 0.19.
-
-**2.5 Simpler Missions (Parallel)**
-
-Check if simpler/more-open CvC missions exist as stepping stones.
-
-**Current status:** Pipeline complete. All policies score 0 reward due to navigation failures (~80% wall collisions on machina_1). See `docs/operations/benchmark.md`.
-
-**Dependencies:** cogames >= 0.19.2, mettagrid >= 0.19.3, Python 3.12 for execution.
-
-### Track 3: Paper Preparation (active, MEDIUM priority — depends on Tracks 1-2)
-
-**3.1 Docs Consistency Check**
+**2.1 Docs Consistency Check**
 Verify agreement across `docs/theory/theory.md`, `docs/experiment/results.md`, `docs/experiment/design.md`, and `docs/paper/main.tex` on condition numbering, key numbers, hypothesis status, and phase descriptions.
 
-**3.2 Results Reproducibility Spot-Check**
+**2.2 Results Reproducibility Spot-Check**
 Spot-check key configs (5 seeds each): `default.json`, `betrayal_stress.json`, `horizon_sweep.json`.
 
-**3.3 Add CvC Results to Paper**
-Once Track 2 produces results: describe CvC environment, report benchmark results, show beta dynamics, frame as architectural generality demonstration.
-
-**3.4 Final LaTeX Polish**
+**2.3 Final LaTeX Polish**
 Bibliography completeness, figure/table numbering, equation references, add Yoshida/Sennesh/Ramstead/Bancee/Baram, check for TODO/FIXME.
 
 ---
@@ -221,11 +168,10 @@ Bibliography completeness, figure/table numbering, equation references, add Yosh
 
 These are post-tightening priorities, roughly ordered by likely sequencing.
 
-1. **pymdp alignment** — depending on Decision 2, either notation alignment or re-implementation with Andrew's help.
-2. **AIF partners** — replace rule-based partners with active inference agents for genuine multi-agent inference rather than scripted opponents.
-3. **Human data validation** — fit model to human trust-game data from healthy participants and vmPFC-lesioned patients.
-4. **CoGames/CvC** — develop AIF-based navigation policy for full benchmark, beyond the rule-based TeammateReliabilityPolicy.
-5. **Richer environments** — partial observability, larger action spaces, multi-step belief cascades.
+1. **AIF partners** — replace rule-based partners with active inference agents for genuine multi-agent inference rather than scripted opponents.
+2. **Human data validation** — fit model to human trust-game data from healthy participants and vmPFC-lesioned patients.
+3. **CoGames/CvC** — develop AIF-based navigation policy for full benchmark, beyond the rule-based TeammateReliabilityPolicy.
+4. **Richer environments** — partial observability, larger action spaces, multi-step belief cascades.
 
 ### Phase 8: Human Data Fitting (future, requires user decision)
 
@@ -248,9 +194,9 @@ Trust Game (Phases 1-7) <- COMPLETE
     |
     |---> Track 1: Paper Theory Gaps (1.1-1.5) <- ACTIVE
     |       |
-    |---> Track 2: CvC Benchmark (2.1-2.5) <- ACTIVE
-    |       |
-    |-------+---> Track 3: Paper Preparation (3.1-3.4) <- BLOCKED on 1+2
+    |---> Track 2: Paper Preparation (2.1-2.3) <- ACTIVE
+    |
+    +---> CvC / CoGames <- FUTURE DIRECTION
     |
     +---> Phase 8: Human Data <- FUTURE (requires user)
 ```
