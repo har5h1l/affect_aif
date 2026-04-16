@@ -13,32 +13,53 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-16 (Session 22 — regeneration monitor check)
+2026-04-16 (Session 23 — regeneration relaunch recovery)
 
 ## Session Count
-22
+23
 
 
-<!-- Older entries truncated (was 170 lines) -->
+<!-- Older entries truncated (was 168 lines) -->
 
-- Completed the required startup sequence again:
-  - read `CLAUDE.md`
-  - read `conductor/MISSION.md` and `conductor/STATE.md`
+- Startup / orientation:
+  - read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
   - confirmed `conductor/INBOX.md` does not exist
   - re-checked phase docs: `docs/future/roadmap.md`, `docs/experiment/results.md`
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
-- Performed one post-launch completion check for the detached Phase 3 regeneration jobs:
-  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
-  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `pgrep -af` still shows the launched experiment processes for all three configs
-    - h1: launcher `184267`, python `184351`, workers `184463` and `184464`
-    - h2: launcher `184309`, python `184455`
-    - h4: launcher `184345`, python `184456`
-- No additional polling performed after that single check.
+- Performed the single allowed completion check for the detached Phase 3 regeneration jobs:
+  - local CSVs still missing:
+    - `results/h1_factorial/h1_depth_affect_factorial/results.csv`
+    - `results/h2_lesion/h2_lesion_dissociation/results.csv`
+    - `results/h4_betrayal/h4_betrayal_recovery/results.csv`
+  - `pgrep -af ...` showed only `h1` and `h4` experiment processes; `h2` was no longer running
+- Diagnosed the detached-run failure mode:
+  - surviving `h1` / `h4` processes had `/proc/<pid>/cwd` bound to `/tmp/mango-worktree-affect_aif-20260416_143926-170352 (deleted)`
+  - the old detached worktree no longer contained the expected run dirs or logs
+  - conclusion: prior detached jobs were orphaned in a deleted worktree and could not be relied on to produce usable local outputs for Phase 3
+- Re-ran the required full verification gate before relaunching experiments:
+  - `python -m pytest tests/ -v`
+  - Result: `248 passed, 26 skipped, 2 warnings in 260.13s`
+  - Warnings:
+    - multiprocessing `os.fork()` with JAX in `test_batch_runner_writes_per_config_subdirs_and_provenance`
+    - SciPy precision-loss warning in the targeted reanalysis CLI smoke test
+- Terminated stale deleted-worktree regeneration processes:
+  - killed old launch / worker PIDs `184267 184345 184351 184456 184463 184464`
+- Relaunched all three required Phase 3 regeneration jobs detached from the current worktree and verified each once with `kill -0`:
+  - `h1_factorial`
+    - PID `209790`
+    - run dir: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/h1_factorial/h1_depth_affect_factorial`
+    - log: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/logs/h1_factorial_relaunch.log`
+  - `h2_lesion`
+    - PID `209791`
+    - run dir: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/h2_lesion/h2_lesion_dissociation`
+    - log: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/logs/h2_lesion_relaunch.log`
+  - `h4_betrayal`
+    - PID `209792`
+    - run dir: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/h4_betrayal/h4_betrayal_recovery`
+    - log: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/logs/h4_betrayal_relaunch.log`
+- No additional polling performed after that single post-launch verification.
 
-  - read `CLAUDE.md`
   - read `conductor/MISSION.md` and `conductor/STATE.md`
   - confirmed `conductor/INBOX.md` does not exist
   - re-checked phase docs: `docs/future/roadmap.md`, `docs/experiment/results.md`
@@ -126,7 +147,7 @@ mode_hint: monitor
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv`
   - `results/h2_lesion/h2_lesion_dissociation/results.csv`
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv`
-- Local regeneration is now in flight in detached jobs instead of remaining blocked on sync.
+- Local regeneration is again in flight in detached jobs, now relaunched from the current live worktree after recovering from a deleted-worktree detach failure.
 
 ## Pending Work (Phases)
 
@@ -150,19 +171,16 @@ mode_hint: monitor
 
 ## Auto Handoff
 
-- **What changed:** Session 22 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
-- **What changed:** Session 21 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
-- **What changed:** Session 20 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
-- **What changed:** Session 19 confirmed the detached H1/H2/H4 regeneration jobs are still running and that none of the three required `results.csv` files are present yet.
-- **What changed:** No code or docs changed beyond this handoff refresh; the branch is clean and still at `analysis/post-restructure-reframe`.
-- **What changed:** Full test gate passed again this session, and the missing H1/H2/H4 experiment families were relaunched in detached mode with verified process matches and fixed output paths.
+- **What changed:** Session 23 found that the previous detached `h1` / `h4` jobs were still running inside a deleted worktree and that `h2` was no longer running at all.
+- **What changed:** Full test gate passed again this session (`248 passed, 26 skipped, 2 warnings`), stale deleted-worktree processes were terminated, and all three Phase 3 regeneration jobs were relaunched from the current worktree with fresh logs and verified live PIDs.
 - **What changed:** Added and committed `configs/shallow_affect_confirm.json` (`141fcbe`) so the Phase 4 smoke/full shallow confirmation runs are ready once Phase 3 clears.
-- **What is still in flight:** The detached regenerations are still running; Phase 3 outputs have not been written yet. No new experiments have been launched this wake.
-- **What next session should do:** Check whether the three detached runs finished, then run `python scripts/run_targeted_reanalysis.py` immediately and checkpoint the resulting text outputs. If those outputs do not trigger the `d<0.3 at tau=1` stop condition, start `shallow_affect_confirm` smoke next.
+- **What is still in flight:** The relaunched detached regenerations are running under PIDs `209790`, `209791`, and `209792`; Phase 3 outputs have not been written yet. No new Phase 4 experiments have been launched this wake.
+- **What next session should do:** Perform one completion check against the current-worktree run dirs / PIDs above. If the three `results.csv` files exist, run `python scripts/run_targeted_reanalysis.py` immediately, save the requested text outputs, and checkpoint them. If those outputs do not trigger the `d<0.3 at tau=1` stop condition, start `shallow_affect_confirm` smoke next.
 - **Key risk:** If shallow-depth reanalysis still shows weak affect at tau=1 (`d < 0.3`), stop and flag; that would require a deeper story change.
 
 DECISION: Treat depth redundancy / G compression as a structural result of the supported binary action-dependent trust-game surface, not as a pending implementation defect.
 DECISION: Use local regeneration rather than result sync because the required CSVs are absent and this `mango` install does not expose the old fetch workflow documented in repo notes.
+DECISION: Treat deleted-worktree detached runs as invalid for continuation; relaunch from the live worktree rather than continuing to monitor orphaned processes.
 DECISION: `scripts/run_experiment.py` already writes per-replication checkpoints (`checkpoint_interval=1`) and partial CSVs by default for each run, so the new shallow config does not need extra unsupported save keys.
-NEXT: Do not poll the detached jobs repeatedly. On the next wake, check completion once, then run the targeted reanalysis script and checkpoint the outputs.
+NEXT: Do not poll the relaunched detached jobs repeatedly. On the next wake, check completion once against the new PIDs / run dirs above, then run the targeted reanalysis script as soon as the three CSVs exist.
 NEXT: If the regeneration jobs are still running on the next wake, perform only one completion check again and then stop; do not tail logs or watch file growth.
