@@ -13,15 +13,14 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-16 (Session 20 — regeneration monitor check)
+2026-04-16 (Session 21 — regeneration monitor check)
 
 ## Session Count
-20
+21
 
 
-<!-- Older entries truncated (was 152 lines) -->
+<!-- Older entries truncated (was 166 lines) -->
 
-### Regeneration monitor check
 - Completed the required startup sequence again:
   - read `CLAUDE.md`
   - read `conductor/MISSION.md` and `conductor/STATE.md`
@@ -29,14 +28,16 @@ mode_hint: monitor
   - re-checked phase docs: `docs/future/roadmap.md`, `docs/experiment/results.md`
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
-- Performed one completion check for the detached Phase 3 regeneration jobs:
+- Performed one post-launch completion check for the detached Phase 3 regeneration jobs:
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
   - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `pgrep -af` still shows the launched experiment processes for all three configs, including python PIDs `184351`, `184455`, and `184456`
+  - `pgrep -af` still shows the launched experiment processes for all three configs
+    - h1: launcher `184267`, python `184351`, workers `184463` and `184464`
+    - h2: launcher `184309`, python `184455`
+    - h4: launcher `184345`, python `184456`
 - No additional polling performed after that single check.
 
-### Regeneration monitor check
 - Completed the required startup sequence again:
   - read `CLAUDE.md`
   - read `conductor/MISSION.md` and `conductor/STATE.md`
@@ -150,6 +151,7 @@ mode_hint: monitor
 
 ## Auto Handoff
 
+- **What changed:** Session 21 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
 - **What changed:** Session 20 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
 - **What changed:** Session 19 confirmed the detached H1/H2/H4 regeneration jobs are still running and that none of the three required `results.csv` files are present yet.
 - **What changed:** No code or docs changed beyond this handoff refresh; the branch is clean and still at `analysis/post-restructure-reframe`.
