@@ -176,9 +176,15 @@ def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
     assert (out_dir / "h1_shallow_reanalysis.txt").exists()
     assert (out_dir / "h2_lesion_reanalysis.txt").exists()
     assert (out_dir / "h4_betrayal_window_reanalysis.txt").exists()
-    assert "tau=1" in (out_dir / "h1_shallow_reanalysis.txt").read_text()
-    assert "lesioned vs tau4_affect" in (out_dir / "h2_lesion_reanalysis.txt").read_text()
-    assert "rounds 30-60" in (out_dir / "h4_betrayal_window_reanalysis.txt").read_text()
+    h1_text = (out_dir / "h1_shallow_reanalysis.txt").read_text()
+    h2_text = (out_dir / "h2_lesion_reanalysis.txt").read_text()
+    h4_text = (out_dir / "h4_betrayal_window_reanalysis.txt").read_text()
+    assert "tau=1" in h1_text
+    assert "Source file:" in h1_text
+    assert "completed_seeds=" in h1_text
+    assert "lesioned vs tau4_affect" in h2_text
+    assert "Source type: final results" in h2_text
+    assert "rounds 30-60" in h4_text
 
 
 def test_archive_boundary_is_explicit():

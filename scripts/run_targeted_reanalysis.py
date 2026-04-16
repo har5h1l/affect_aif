@@ -106,13 +106,36 @@ def _write(path: Path, text: str) -> None:
     path.write_text(text.rstrip() + "\n")
 
 
-def _run_h1(frame: pd.DataFrame) -> str:
+def _format_coverage(frame: pd.DataFrame) -> list[str]:
+    if not {"condition_name", "seed", "round"}.issubset(frame.columns):
+        return []
+    grouped = (
+        frame.groupby("condition_name", as_index=False)
+        .agg(completed_seeds=("seed", "nunique"), max_round=("round", "max"))
+        .sort_values("condition_name")
+    )
+    lines = ["", "Source coverage:"]
+    for row in grouped.itertuples(index=False):
+        lines.append(
+            f"- {row.condition_name}: completed_seeds={int(row.completed_seeds)}, max_round={int(row.max_round)}"
+        )
+    return lines
+
+
+def _header(title: str, source_path: str, frame: pd.DataFrame) -> list[str]:
+    lines = [title, "", f"Source file: {Path(source_path)}"]
+    if str(source_path).endswith("results_partial.csv"):
+        lines.append("Source type: partial checkpoint")
+    else:
+        lines.append("Source type: final results")
+    lines.extend(_format_coverage(frame))
+    return lines
+
+
+def _run_h1(frame: pd.DataFrame, source_path: str) -> str:
     summary = final_round_summary(frame)
-    lines = [
-        "H1 shallow-depth reanalysis",
-        "",
-        "Compare affect vs. no-affect at tau=1 and tau=2 using per-seed total payoff.",
-    ]
+    lines = _header("H1 shallow-depth reanalysis", source_path, frame)
+    lines.extend(["", "Compare affect vs. no-affect at tau=1 and tau=2 using per-seed total payoff."])
     for depth, no_affect, affect in (
         (1, "tau1_no_affect", "tau1_affect"),
         (2, "tau2_no_affect", "tau2_affect"),
@@ -143,17 +166,18 @@ def _run_h1(frame: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
-def _run_h2(frame: pd.DataFrame) -> str:
+def _run_h2(frame: pd.DataFrame, source_path: str) -> str:
     summary = final_round_summary(frame)
     lesion_accuracy = _summary_values(summary, "lesioned", "mean_joint_accuracy")
     no_affect_accuracy = _summary_values(summary, "tau4_no_affect", "mean_joint_accuracy")
     lesion_payoff = _summary_values(summary, "lesioned", "total_payoff")
     affect_payoff = _summary_values(summary, "tau4_affect", "total_payoff")
-    lines = [
-        "H2 lesion reanalysis",
-        "",
-        "Tau-4 family only. Check whether lesion preserves inference accuracy while losing payoff versus intact affect.",
-        "",
+    lines = _header("H2 lesion reanalysis", source_path, frame)
+    lines.extend(
+        [
+            "",
+            "Tau-4 family only. Check whether lesion preserves inference accuracy while losing payoff versus intact affect.",
+            "",
         "Inference accuracy: lesioned vs tau4_no_affect",
         f"- lesioned mean joint accuracy: {_format_stat(_mean(lesion_accuracy))}",
         f"- tau4_no_affect mean joint accuracy: {_format_stat(_mean(no_affect_accuracy))}",
@@ -169,11 +193,12 @@ def _run_h2(frame: pd.DataFrame) -> str:
         f"- Welch p-value: {_format_stat(_welch_p(lesion_payoff, affect_payoff), digits=6)}",
         "",
         "Caveat: this read is from the tau=4 regime, which is already partially saturated.",
-    ]
+        ]
+    )
     return "\n".join(lines)
 
 
-def _run_h4(frame: pd.DataFrame) -> str:
+def _run_h4(frame: pd.DataFrame, source_path: str) -> str:
     required = {"condition_name", "seed", "round", "payoff"}
     missing = sorted(required - set(frame.columns))
     if missing:
@@ -185,8 +210,8 @@ def _run_h4(frame: pd.DataFrame) -> str:
     )
     affect = grouped.loc[grouped["condition_name"] == "tau4_affect", "mean_window_payoff"].to_numpy(dtype=float)
     no_affect = grouped.loc[grouped["condition_name"] == "tau4_no_affect", "mean_window_payoff"].to_numpy(dtype=float)
-    lines = [
-        "H4 betrayal-window reanalysis",
+    lines = _header("H4 betrayal-window reanalysis", source_path, frame)
+    lines.extend([
         "",
         "Compare tau4_affect vs tau4_no_affect over rounds 30-60 using per-seed mean payoff.",
         f"- tau4_affect mean window payoff: {_format_stat(_mean(affect))}",
@@ -194,7 +219,7 @@ def _run_h4(frame: pd.DataFrame) -> str:
         f"- difference: {_format_stat(_mean(affect) - _mean(no_affect))}",
         f"- Cohen's d: {_format_stat(_cohen_d(affect, no_affect))}",
         f"- Welch p-value: {_format_stat(_welch_p(affect, no_affect), digits=6)}",
-    ]
+    ])
     return "\n".join(lines)
 
 
@@ -202,9 +227,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     output_dir = Path(args.output_dir)
 
-    h1 = _run_h1(_load_results(args.h1_results))
-    h2 = _run_h2(_load_results(args.h2_results))
-    h4 = _run_h4(_load_results(args.h4_results))
+    h1_frame = _load_results(args.h1_results)
+    h2_frame = _load_results(args.h2_results)
+    h4_frame = _load_results(args.h4_results)
+
+    h1 = _run_h1(h1_frame, args.h1_results)
+    h2 = _run_h2(h2_frame, args.h2_results)
+    h4 = _run_h4(h4_frame, args.h4_results)
 
     _write(output_dir / "h1_shallow_reanalysis.txt", h1)
     _write(output_dir / "h2_lesion_reanalysis.txt", h2)
