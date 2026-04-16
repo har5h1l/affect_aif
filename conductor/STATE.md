@@ -13,56 +13,55 @@ mode_hint: research
 # Research State
 
 ## Last Updated
-2026-04-16 (Session 35 — partial Phase 3 reanalysis hit the shallow-H1 stop condition)
+2026-04-16 (Session 37 — stop condition still active; reruns still incomplete)
 
 ## Session Count
-35
+37
 
-### Session 35 contradiction checkpoint
-- Read `CLAUDE.md`, `conductor/MISSION.md`, `conductor/STATE.md`; confirmed `conductor/INBOX.md` absent.
+
+<!-- Older entries truncated (was 173 lines) -->
+
+### Session 37 monitor pass
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
-  - `docs/experiment/design.md`
-- Verified mission prerequisites already in place:
-  - `results/clinical_run/` absent
-  - `results/h5_selection/h5_partner_selection/results_partial.csv` absent
-  - `configs/shallow_affect_confirm.json` present
-- Confirmed detached Phase 3 reruns were still in flight, with duplicate original + `*_setsid_20260416` jobs.
-- Tightened `scripts/run_targeted_reanalysis.py` so outputs include source path, final-vs-partial provenance, and per-condition completed-seed coverage.
-- Added coverage assertions to `tests/test_supported_surface.py`.
-- Ran targeted validation:
-  - `python -m pytest tests/test_supported_surface.py -v` → `6 passed`
-- Generated requested Phase 3 summaries from the best available partial checkpoints:
-  - `results/reanalysis/h1_shallow_reanalysis.txt`
-  - `results/reanalysis/h2_lesion_reanalysis.txt`
-  - `results/reanalysis/h4_betrayal_window_reanalysis.txt`
-- Key findings from those partial summaries:
-  - `H1`: source `results/h1_factorial/.../results_partial.csv`; shallow effect is weak in both available shallow slices.
-    - `tau=1`: affect minus no-affect `+0.549`, `d=0.011`, `p=0.953175`
-    - `tau=2`: affect minus no-affect `+3.179`, `d=0.074`, `p=0.780319`
-    - This triggers the mission stop condition (`d < 0.3` at `tau=1`).
-  - `H2`: source `results/h2_lesion/.../results_partial.csv`; lesioned preserves joint accuracy exactly vs `tau4_no_affect` and loses modest payoff vs `tau4_affect` (`d=-0.146`, `p=0.303173`).
-  - `H4`: source `results/h4_betrayal/.../results_partial.csv`; only `tau4_no_affect` has completed seeds (`7`), so no affect-vs-no-affect window effect can be estimated yet.
-- DECISION: stop before Phase 4. Do not update interpretation docs from these new outputs and do not launch new experiments until the user decides whether to trust the partial contradiction, wait for full reruns, or change the mission.
-- NEXT:
-  - Keep current detached reruns as-is unless the user wants a clean relaunch.
-  - If asked to confirm, prefer one canonical rerun family without duplicate jobs before making any story-level claim.
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree remains dirty only from `conductor/STATE.md`
+- Performed one completion check for the detached Phase 3 regeneration jobs:
+  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
+  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
+  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` is present
+  - Original wrapper processes still live:
+    - `209790` for `h1_factorial`
+    - `209791` for `h2_lesion`
+    - `209792` for `h4_betrayal`
+  - Original python children still live:
+    - `209969`, `209985`, `209986` for `h1_factorial`
+    - `209972` for `h2_lesion`
+    - `209973` for `h4_betrayal`
+  - Additional detached python reruns are also present:
+    - `283269` for `h1_factorial_setsid_20260416`
+    - `283271` for `h2_lesion_setsid_20260416`
+    - `283274` for `h4_betrayal_setsid_20260416`
+- DECISION: the mission stop condition remains active. Do not advance to Phase 4 or update result-interpretation docs without explicit user direction.
+- NEXT: user should choose whether to let one rerun line finish for canonical reanalysis, or terminate duplicates and relaunch a single clean batch.
 
 ## Auto Handoff
-- What changed:
-  - `run_targeted_reanalysis.py` now stamps summaries with source-path and coverage metadata.
-  - `tests/test_supported_surface.py` covers the new metadata output.
-  - Partial Phase 3 summaries were generated under `results/reanalysis/`.
-- Still in flight:
-  - Detached H1/H2/H4 experiment reruns are still running and have not emitted final `results.csv`.
-  - H4 remains especially incomplete on current partial data.
-- Next session should do:
-  - Wait for user direction first because the partial H1 shallow reanalysis contradicts the expected story.
-  - If the user wants confirmation, check the detached runs once, then either use finished `results.csv` files or relaunch a single clean batch.
-
-
-<!-- Older entries truncated (was 199 lines) -->
+- What changed
+  - Recorded a fresh single-pass status check; no code or docs were modified.
+  - Confirmed the three Phase 3 reruns still have no final `results.csv`.
+  - Identified duplicate detached rerun processes alongside the original wrapper-managed runs.
+- Still in flight
+  - Shallow-H1 contradiction remains unresolved from partial data (`tau=1` affect `d=0.011`).
+  - H2/H4 reanalysis outputs remain blocked on missing completed result files.
+  - Duplicate rerun lines may waste compute and complicate which batch should be treated as canonical.
+- Next session should do
+  - Wait for explicit user direction.
+  - If told to proceed autonomously, choose one canonical rerun path, stop duplicates if approved, and only then resume Phase 3 completion.
 
   - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
