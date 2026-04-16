@@ -3,9 +3,9 @@ status: CONTINUE
 next_priority: 3
 pending_work:
   - "Phase 3: once the detached H1/H2/H4 regenerations finish, run scripts/run_targeted_reanalysis.py and save outputs under results/reanalysis/"
-  - "Phase 4-5: create shallow_affect_confirm config, run smoke/full experiments, analyze outputs, then update docs cautiously"
+  - "Phase 4-5: run shallow_affect_confirm smoke/full experiments, analyze outputs, then update docs cautiously"
   - "If shallow H1 reanalysis yields d<0.3 at tau=1, stop and flag a story-level contradiction before changing docs"
-next_session_focus: "Check whether the detached H1/H2/H4 regeneration jobs finished, then run scripts/run_targeted_reanalysis.py immediately against those regenerated CSVs"
+next_session_focus: "Check whether the detached H1/H2/H4 regeneration jobs finished, then run scripts/run_targeted_reanalysis.py; if Phase 3 clears, start shallow_affect_confirm smoke run with the committed config"
 model_hint: haiku
 mode_hint: monitor
 ---
@@ -22,6 +22,16 @@ mode_hint: monitor
 Post-restructure reframe. Action-dependent stance is the supported trust-game architecture; current work is reframing the hypothesis story around depth redundancy / G compression and then finishing the remaining experiments on that surface.
 
 ## This Session
+
+### Config checkpoint
+- Added `configs/shallow_affect_confirm.json` exactly for the Phase 4 shallow-depth confirmation run:
+  - conditions `[1, 2, 3, 4]`
+  - preset `lesioned`
+  - 100 replications / 200 rounds
+  - matches mission-specified binary random-assignment surface
+- Verified it parses through `ExperimentConfig.from_json(...)`.
+- Commit created:
+  - `141fcbe` — `Config: add shallow affect confirmation run`
 
 ### Verification + detached regeneration launch
 - Re-ran the full required test gate before any experiments:
@@ -101,7 +111,6 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
 - Save outputs under `results/reanalysis/`
 
 ### Phase 4: New Experiments [NOT STARTED]
-- Create `configs/shallow_affect_confirm.json`
 - Run smoke + full shallow confirmation
 - Rerun H5 partner selection
 - Run clinical betrayal and clinical phenotypes on new architecture
@@ -114,10 +123,12 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
 ## Auto Handoff
 
 - **What changed:** Full test gate passed again this session, and the missing H1/H2/H4 experiment families were relaunched in detached mode with verified process matches and fixed output paths.
-- **What is still in flight:** The detached regenerations are still running; Phase 3 outputs have not been written yet. Phases 4-5 remain unstarted.
-- **What next session should do:** Check whether the three detached runs finished, then run `python scripts/run_targeted_reanalysis.py` immediately and checkpoint the resulting text outputs.
+- **What changed:** Added and committed `configs/shallow_affect_confirm.json` (`141fcbe`) so the Phase 4 smoke/full shallow confirmation runs are ready once Phase 3 clears.
+- **What is still in flight:** The detached regenerations are still running; Phase 3 outputs have not been written yet. No new experiments have been launched this wake.
+- **What next session should do:** Check whether the three detached runs finished, then run `python scripts/run_targeted_reanalysis.py` immediately and checkpoint the resulting text outputs. If those outputs do not trigger the `d<0.3 at tau=1` stop condition, start `shallow_affect_confirm` smoke next.
 - **Key risk:** If shallow-depth reanalysis still shows weak affect at tau=1 (`d < 0.3`), stop and flag; that would require a deeper story change.
 
 DECISION: Treat depth redundancy / G compression as a structural result of the supported binary action-dependent trust-game surface, not as a pending implementation defect.
 DECISION: Use local regeneration rather than result sync because the required CSVs are absent and this `mango` install does not expose the old fetch workflow documented in repo notes.
+DECISION: `scripts/run_experiment.py` already writes per-replication checkpoints (`checkpoint_interval=1`) and partial CSVs by default for each run, so the new shallow config does not need extra unsupported save keys.
 NEXT: Do not poll the detached jobs repeatedly. On the next wake, check completion once, then run the targeted reanalysis script and checkpoint the outputs.
