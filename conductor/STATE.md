@@ -2,12 +2,12 @@
 status: CONTINUE
 next_priority: 3
 pending_work:
-  - "Phase 3: run targeted re-analysis for H1 shallow, H2 lesion, and H4 betrayal window into results/reanalysis/"
+  - "Phase 3: once the detached H1/H2/H4 regenerations finish, run scripts/run_targeted_reanalysis.py and save outputs under results/reanalysis/"
   - "Phase 4-5: create shallow_affect_confirm config, run smoke/full experiments, analyze outputs, then update docs cautiously"
-  - "Resolve missing result CSVs in this worktree by fetching synced outputs or regenerating H1/H2/H4 runs"
-next_session_focus: "Get the H1/H2/H4 result CSVs into this worktree, then run scripts/run_targeted_reanalysis.py immediately"
-model_hint: sonnet
-mode_hint: codex
+  - "If shallow H1 reanalysis yields d<0.3 at tau=1, stop and flag a story-level contradiction before changing docs"
+next_session_focus: "Check whether the detached H1/H2/H4 regeneration jobs finished, then run scripts/run_targeted_reanalysis.py immediately against those regenerated CSVs"
+model_hint: haiku
+mode_hint: monitor
 ---
 
 # Research State
@@ -22,6 +22,29 @@ mode_hint: codex
 Post-restructure reframe. Action-dependent stance is the supported trust-game architecture; current work is reframing the hypothesis story around depth redundancy / G compression and then finishing the remaining experiments on that surface.
 
 ## This Session
+
+### Verification + detached regeneration launch
+- Re-ran the full required test gate before any experiments:
+  - `python -m pytest tests/ -v`
+  - Result: `248 passed, 26 skipped, 2 warnings in 159.10s`
+  - Warnings:
+    - multiprocessing `os.fork()` with JAX in `test_batch_runner_writes_per_config_subdirs_and_provenance`
+    - SciPy precision-loss warning in the targeted reanalysis CLI smoke test
+- Confirmed the three required Phase 3 CSVs are still absent locally under `results/`.
+- Confirmed the current `mango` CLI here does not provide the older result-fetch flow documented in `CLAUDE.md`; local fallback is regeneration.
+- Launched detached regeneration jobs for the missing mission datasets and verified them once with `pgrep -af`:
+  - `h1_factorial` → run dir `/tmp/mango-worktree-affect_aif-20260416_143926-170352/results/h1_factorial/h1_depth_affect_factorial`
+    - log: `/tmp/mango-worktree-affect_aif-20260416_143926-170352/results/logs/h1_factorial.log`
+    - verified process match included python PID `184351` (plus two worker processes from `--workers 2`)
+  - `h2_lesion` → run dir `/tmp/mango-worktree-affect_aif-20260416_143926-170352/results/h2_lesion/h2_lesion_dissociation`
+    - log: `/tmp/mango-worktree-affect_aif-20260416_143926-170352/results/logs/h2_lesion.log`
+    - verified process match included python PID `184455`
+  - `h4_betrayal` → run dir `/tmp/mango-worktree-affect_aif-20260416_143926-170352/results/h4_betrayal/h4_betrayal_recovery`
+    - log: `/tmp/mango-worktree-affect_aif-20260416_143926-170352/results/logs/h4_betrayal.log`
+    - verified process match included python PID `184456`
+  - Launch pattern that survives the exec wrapper:
+    - `setsid bash -lc 'cd "$PWD" && python scripts/run_experiment.py ... > results/logs/<name>.log 2>&1 < /dev/null' >/dev/null 2>&1 &`
+  - Important: plain `nohup ... &` from this runner is not sufficient; the wrapper reaps normal background jobs when the command exits.
 
 ### Phase 1 cleanup
 - Updated `docs/future/roadmap.md`:
@@ -61,12 +84,11 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
   - Result: `6 passed, 1 warning`
 
 ### Phase 3 blocker
-- The required existing result CSVs are absent from this worktree:
+- The required existing result CSVs were absent from this worktree at session start:
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv`
   - `results/h2_lesion/h2_lesion_dissociation/results.csv`
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv`
-- `results/` still contains only `.gitkeep` and `results/README.md`.
-- Attempted to use `mango` for result sync, but the installed `mango v2` CLI here does not expose the older `cloud sync` commands documented in `CLAUDE.md`.
+- Local regeneration is now in flight in detached jobs instead of remaining blocked on sync.
 
 ## Pending Work (Phases)
 
@@ -74,7 +96,7 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
 - `docs/experiment/design.md` and `docs/experiment/results.md` now use the post-restructure H1-H5 framing at their canonical top sections.
 
 ### Phase 3: Targeted Re-Analysis [NEXT]
-- Resolve missing H1/H2/H4 result CSVs in this worktree
+- Wait for the detached H1/H2/H4 regenerations to finish
 - Run `python scripts/run_targeted_reanalysis.py`
 - Save outputs under `results/reanalysis/`
 
@@ -91,11 +113,11 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
 
 ## Auto Handoff
 
-- **What changed:** Phase 1 and Phase 2 completed. Added a dedicated Phase 3 re-analysis CLI plus smoke test. Canonical docs reflect the post-restructure H1-H5 framing.
-- **What is still in flight:** Actual Phase 3 outputs are blocked on missing result CSVs. Phases 4-5 have not started. No experiment jobs launched yet.
-- **What next session should do:** Fetch or regenerate the missing H1/H2/H4 CSVs, then run `python scripts/run_targeted_reanalysis.py` and checkpoint the resulting text outputs.
+- **What changed:** Full test gate passed again this session, and the missing H1/H2/H4 experiment families were relaunched in detached mode with verified process matches and fixed output paths.
+- **What is still in flight:** The detached regenerations are still running; Phase 3 outputs have not been written yet. Phases 4-5 remain unstarted.
+- **What next session should do:** Check whether the three detached runs finished, then run `python scripts/run_targeted_reanalysis.py` immediately and checkpoint the resulting text outputs.
 - **Key risk:** If shallow-depth reanalysis still shows weak affect at tau=1 (`d < 0.3`), stop and flag; that would require a deeper story change.
 
 DECISION: Treat depth redundancy / G compression as a structural result of the supported binary action-dependent trust-game surface, not as a pending implementation defect.
-BLOCKER: Phase 3 cannot be executed from this worktree until the required result CSVs are fetched or regenerated.
-NEXT: Commit the re-analysis CLI, then obtain the missing result files before proceeding.
+DECISION: Use local regeneration rather than result sync because the required CSVs are absent and this `mango` install does not expose the old fetch workflow documented in repo notes.
+NEXT: Do not poll the detached jobs repeatedly. On the next wake, check completion once, then run the targeted reanalysis script and checkpoint the outputs.
