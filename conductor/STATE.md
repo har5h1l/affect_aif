@@ -13,36 +13,14 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-16 (Session 25 — regeneration still running)
+2026-04-16 (Session 26 — regeneration still running)
 
 ## Session Count
-25
+26
 
 
-<!-- Older entries truncated (was 166 lines) -->
+<!-- Older entries truncated (was 172 lines) -->
 
-    - log: `/tmp/mango-worktree-affect_aif-20260416_165841-206877/results/logs/h4_betrayal_relaunch.log`
-- No additional polling performed after that single post-launch verification.
-
-  - read `conductor/MISSION.md` and `conductor/STATE.md`
-  - confirmed `conductor/INBOX.md` does not exist
-  - re-checked phase docs: `docs/future/roadmap.md`, `docs/experiment/results.md`
-- Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
-- Performed one post-launch completion check for the detached Phase 3 regeneration jobs:
-  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
-  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `pgrep -af` still shows the launched experiment processes for all three configs
-- No additional polling performed after that single check.
-
-### Config checkpoint
-- Added `configs/shallow_affect_confirm.json` exactly for the Phase 4 shallow-depth confirmation run:
-  - conditions `[1, 2, 3, 4]`
-  - preset `lesioned`
-  - 100 replications / 200 rounds
-  - matches mission-specified binary random-assignment surface
-- Verified it parses through `ExperimentConfig.from_json(...)`.
 - Commit created:
   - `141fcbe` — `Config: add shallow affect confirmation run`
 
@@ -135,9 +113,9 @@ mode_hint: monitor
 
 ## Auto Handoff
 
-- **What changed:** Session 25 completed the required startup sequence again and performed exactly one completion check against the current-worktree Phase 3 regeneration outputs.
-- **What changed:** All three required CSVs are still missing locally, while the relaunched regeneration processes remain live under wrapper PIDs `209790`, `209791`, `209792` and python PIDs `209969`, `209972`, `209973` (plus H1 worker PIDs `209985`, `209986`).
-- **What changed:** No code, docs, configs, or experiment launches were added this wake; this was a monitor-only pass to avoid unnecessary polling.
+- **What changed:** Session 26 completed the required startup sequence again and performed exactly one completion check against the current-worktree Phase 3 regeneration outputs.
+- **What changed:** All three required CSVs are still missing locally, and the detached regeneration processes are still live under wrapper PIDs `209790`, `209791`, `209792` and python PIDs `209969`, `209972`, `209973` (plus H1 worker PIDs `209985`, `209986`).
+- **What changed:** No code, docs, configs, or experiment launches were added this wake; this was another monitor-only pass to avoid unnecessary polling.
 - **What is still in flight:** The detached regenerations for `h1_factorial`, `h2_lesion`, and `h4_betrayal` are still running; `results/reanalysis/` has not been produced yet. Phase 4 remains blocked on those inputs.
 - **What next session should do:** Perform one completion check again. If the three `results.csv` files now exist, run `python scripts/run_targeted_reanalysis.py`, inspect the tau-1 affect effect size, save the Phase 3 outputs, and checkpoint them. If the jobs are still running, stop again after that one check.
 - **Key risk:** If shallow-depth reanalysis still shows weak affect at tau=1 (`d < 0.3`), stop and flag; that would require a deeper story change.
@@ -166,6 +144,29 @@ NEXT: If the regeneration jobs are still running on the next wake, perform only 
     - `209791` for `h2_lesion`
     - `209792` for `h4_betrayal`
   - `pgrep -af` also still shows live python children:
+    - `209969`, `209985`, `209986` for `h1_factorial`
+    - `209972` for `h2_lesion`
+    - `209973` for `h4_betrayal`
+- No additional polling performed after that single check.
+
+### Session 26 monitor pass
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree remains dirty only from `conductor/STATE.md`
+- Performed one completion check for the detached Phase 3 regeneration jobs:
+  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
+  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
+  - `pgrep -af` still shows the launched wrapper processes:
+    - `209790` for `h1_factorial`
+    - `209791` for `h2_lesion`
+    - `209792` for `h4_betrayal`
+  - `pgrep -af` still shows live python children:
     - `209969`, `209985`, `209986` for `h1_factorial`
     - `209972` for `h2_lesion`
     - `209973` for `h4_betrayal`
