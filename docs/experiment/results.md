@@ -2,31 +2,35 @@
 
 This document tracks the empirical status of the project. Update it when new experiments finish.
 
-## Status Note (2026-03-31)
+## Status Note (2026-04-16)
 
-The trust-family environment has been redesigned around action-dependent partner stance dynamics. Older entries below that interpret:
-- exploiter phase switches
-- flat depth curves as a primary finding
-- Condition 12 / old clinical numeric condition numbering
+The supported trust-game surface now uses action-dependent stance dynamics, and the headline interpretation has changed.
 
-should be treated as archived historical records rather than the supported current story. No new result-interpretation text has been added here yet for the redesigned stance model.
+Current top-line read:
+- **H1 — G compression / depth redundancy:** in the binary task, deeper planning is structurally redundant beyond `tau=2` under full policy enumeration with fixed `gamma=1.0`.
+- **H2 — affect as orthogonal augmentation:** pooled affect effects are weak because deep horizons saturate the policy posterior; the mechanism should be judged at calibrated shallow horizons (`tau=1,2`).
+- **H3 — lesion dissociation:** still expected, but should be evaluated in that same shallow regime rather than from pooled tau-4 results.
+- **H4 — betrayal recovery:** the key readout is the post-switch recovery window, not pooled whole-run averages.
+- **H5 — partner selection:** requires a clean rerun on the redesigned architecture.
 
-## Architectural Review Note (2026-03-30)
+Older entries below remain as historical records. Treat pre-reframe scorecards and narratives as archived unless they are explicitly updated to this hypothesis framing.
+
+## Architectural Review Note (2026-04-16)
 
 A three-agent codebase/results/architecture review identified issues that may affect interpretation of existing results:
 
-1. **Flat depth curve may be structural:** The action-independent B matrix means deeper planning can't discover new state transitions. The τ=2 through τ=8 equivalence may be a consequence of POMDP design, not a domain finding. Pending user decision on whether to test action-dependent B.
-2. **Softmax saturation in binary games:** EFE gap ~10.83 makes precision modulation inert. Clinical results require graded/betrayal environments.
-3. **H3 is context-dependent:** Precision > reward averaging only when prediction error and reward dissociate (binary betrayal). Not a universal mechanism.
-4. **Mean-field epistemic term incorrect:** Channel ambiguity used instead of true information gain. Does not affect published results (all use sophisticated inference).
+1. **Action-dependent stance is now implemented:** the old B-matrix decision is resolved.
+2. **Depth redundancy persists structurally:** policy entropy expands faster than discriminating `G` signal, so fixed-`gamma` deep planning remains weakly discriminating in the binary task.
+3. **Softmax saturation still matters:** pooled deep horizons weaken the visible affect signal, so shallow targeted analyses are now the primary mechanism check.
+4. **Mean-field epistemic issue was not the driver:** primary interpretations rely on sophisticated inference, and the current reframe treats depth redundancy as structural rather than as a rollout bug.
 
-Core findings (H1, H2, H4) are robust. See `docs/long_term_plan.md` for decisions needed before next paper.
+The active task is no longer deciding whether to redesign the trust-game surface. It is finishing the shallow-depth and targeted post-switch analyses that complete the post-restructure story.
 
 ---
 
 ## Current Status
 
-As of 2026-03-17, the core sophisticated-inference experiment families and the supported variational-beta path have been completed:
+As of 2026-04-16, the first post-restructure binary experiment families are complete, but several claims now depend on targeted re-analysis before they should be treated as final:
 
 ### Phase 4: Variational Beta Validation (supported path)
 
@@ -47,66 +51,37 @@ As of 2026-03-15, the core sophisticated-inference experiment families have been
 
 ## Headline
 
-The main empirical update is: binary PD establishes the core orthogonal-augmentation claim in the shipped binary-action task, while the richer Stag Hunt and graded environments refine where the mechanism becomes clinically expressive.
+The main empirical update is now structural: the redesigned binary trust game still exhibits depth redundancy because `G` compression overwhelms additional policy enumeration beyond `tau=2`.
 
-In `horizon_sweep`, all non-affective planners are statistically identical:
+That changes how the affect story should be read. The relevant question is no longer whether affect substitutes for deep planning. It is whether affect provides a measurable gain in the shallow regime where the policy posterior is still discriminating.
 
-- `C1 deep_no_affect = 529.26`
-- `C7 intermediate_4_no_affect = 529.40`
-- `C6 intermediate_3_no_affect = 529.82`
-- `C4 shallow_no_affect = 530.04`
-- every pairwise comparison among those four conditions has `p > 0.93`
+So the current headline is:
 
-Condition 2 remains clearly better than each non-affect condition:
-
-- `C2 affective_shallow = 575.06`
-- `C2` vs `C1`: `d = 0.64`, `p = 1.1e-5`
-- `C2` vs `C4`: `p = 1.4e-5`
-- `C2` vs `C6`: `p = 1.3e-5`
-- `C2` vs `C7`: `p = 1.1e-5`
-
-The defensible story is therefore no longer "affect compensates for shallow depth." It is "affect provides orthogonal augmentation beyond explicit planning depth."
-
-`deep_affect_test` closes the loop on that interpretation:
-
-- `C8 deep_affective ≈ 576`
-- `C2` vs `C8`: `p = 0.94`
-- affect adds roughly `+46` payoff points whether planning depth is `τ = 2` or `τ = 8`
-
-So the current evidence is stronger than "affect beats shallow non-affect." It is that affect and depth are orthogonal in the shipped binary-action task, with the binary PD as the primary headline and the richer environments as supporting refinements.
+- depth redundancy / G compression is the primary binary-task finding
+- affect, lesion, and betrayal claims should be judged from shallow-depth and post-switch analyses, not from pooled deep+saturated summaries
+- partner selection and clinical claims need clean redesigned-architecture runs before they should anchor the narrative
 
 ## Hypothesis Scorecard
 
 | Hypothesis | Status | Current reading |
 |---|---|---|
-| H1 affect > non-affect baselines | Strongly supported | `default` supports it (`d = 0.64`, `p = 1.1e-5`), `betrayal_stress` supports it more strongly (`d = 1.30`, `p = 6.8e-9`), and `horizon_sweep` shows the entire non-affect depth curve is flat. |
-| H2 lesion dissociation | Strongly supported | In `default`, lesion accuracy matches deep planner accuracy (`p = 0.96`) while payoff drops relative to affect (`p = 1.4e-5`). In `betrayal_stress`, the same pattern holds (`p = 0.55` for accuracy, `p = 9.6e-7` for payoff). `C3 = C4` exactly in `default`, confirming the lesion is a clean affect-to-action decoupling. |
-| H3 precision > reward average | Task-dependent | Binary default: null (`d = 0.009`). Binary betrayal: C2 wins (`d = 0.59`, `p = 0.004`). Graded default: C5 wins (`d = 0.43`). Graded betrayal: C5 wins (`d = −0.89`). Precision tracking helps when prediction error and reward dissociate; reward averaging dominates in continuous-investment settings where the reward gradient is directly decision-relevant. |
-| H4 post-switch robustness | Supported | `default`: `C2` beats `C1` (`p = 2.8e-9`) and `C4` (`p = 5.4e-9`) in the post-switch window. `betrayal_stress`: `C2` beats `C1` (`p = 0.013`). |
-| H5 partner selection | Supported | In `betrayal_stress`, beta correlates with partner selection frequency (`r = 0.51`, `p = 2.9e-9`). |
-| Clinical sensitivity | Task-dependent | Binary PD: inert (<0.5% effect). Graded: all clinical d>2.1 vs C4 but no between-clinical separation. **SH betrayal: borderline impaired (d=-0.72, p<0.001, BF=-2.89 decisive), alexithymia ≈ healthy, depression mild BF impairment.** First qualitative clinical differentiation. |
+| H1 G compression / depth redundancy | Supported | Policy entropy grows from shallow to deep horizons much faster than discriminating `G` range, so deeper planning is structurally redundant in the binary task. |
+| H2 affect as orthogonal augmentation | Needs shallow re-analysis | Pooled depth analyses understate the effect because deep horizons already saturate the policy posterior. Re-read at `tau=1,2`. |
+| H3 lesion dissociation | Needs shallow re-analysis | Existing tau-4 lesion results are suggestive but weaker than expected; the main test is whether accuracy is preserved while payoff drops at `tau=1,2`. |
+| H4 betrayal recovery | Needs targeted window analysis | The key test is affect vs. no-affect in the post-switch window, especially around rounds 30-60 at calibrated depth. |
+| H5 partner selection | Needs rerun | Prior evidence exists, but the redesigned architecture still needs a clean agent-choice rerun focused at `tau=2`. |
+| Clinical sensitivity | Needs redesigned-architecture reruns | Clinical interpretation should wait for fresh clinical betrayal / phenotype runs on the current architecture. |
 
 ## Interpretation
 
-The old framing was "affect compensates for shallow planning depth." The current data do not support that framing. Once mean-field rollouts are replaced by sophisticated inference, non-affective planning depth from `τ = 2` through `τ = 8` has no measurable marginal value in the default binary task, and the action-independent B matrix is a likely structural contributor to that flatness.
+The old framing was "affect compensates for shallow planning depth." The post-restructure binary results support a different reading.
 
 The stronger framing is:
 
-- affect is an orthogonal augmentation, not a depth compensation
-- the mean-field approximation was the real bottleneck, not horizon length
-- the affective signal adds partner-specific precision weighting that explicit depth alone does not recover in this task
-- adding affect at depth `τ = 8` reproduces the same payoff lift as adding affect at depth `τ = 2`, so the gain is not a hidden depth substitute
-
-H3 also needs a narrower reading than before. It is not a universal null and not a universal win. It is a context-dependent mechanism result:
-
-- null when predictive reliability and reward history stay aligned
-- supported when betrayal creates a temporary prediction-reward dissociation
-
-The beta dynamics remain active in both primary runs, so the results are not a frozen-signal artifact:
-
-- `default`: mean Condition 2 beta range `= 0.164`, 100% of seeds move materially
-- `betrayal_stress`: mean Condition 2 beta range `= 0.134`, 100% of seeds move materially
-- `deep_affect_test`: mean beta range is effectively identical for `C2` and `C8` (`0.1636` vs `0.1640`), consistent with the same affective mechanism operating at both depths
+- depth redundancy is a structural finding of the binary task under full policy enumeration and fixed `gamma`
+- affect is still an orthogonal augmentation, but it must be evaluated where the softmax remains discriminating (`tau=1,2`)
+- lesion and betrayal claims should be read from shallow-depth and post-switch windows, not from pooled deeper summaries
+- clinical and partner-selection stories remain open on the redesigned architecture until their dedicated reruns complete
 
 ## Terminal Value Approximation Analysis
 

@@ -21,7 +21,17 @@ Older condition numbering below is retained only as historical context and shoul
 
 ## 1. Overview
 
-This document specifies the experimental design for testing the central claim: per-partner metacognitive precision tracking provides an orthogonal augmentation to active inference policy evaluation — one that improves social decision-making in ways that increasing planning depth alone does not recover in the current shipped binary-action task. Under sophisticated inference with binary actions, non-affective planners from horizon 2 through horizon 8 are statistically indistinguishable, yet adding a per-partner affective signal yields a measurable benefit at every depth. Ablating this signal reproduces the behavioral signature of vmPFC damage — intact social knowledge with impaired social decision-making.
+This document now frames the supported trust-game program around the post-restructure action-dependent stance results.
+
+The older story treated affect as something that compensated for shallow planning. The current binary-action results point to a different structure:
+
+- **H1 — G compression / depth redundancy:** beyond `tau=2`, the policy set grows much faster than the discriminating `G` signal, so fixed-`gamma` planning becomes computationally redundant.
+- **H2 — Affect as orthogonal augmentation:** per-partner metacognitive precision still improves payoff, but the effect should be judged at calibrated shallow horizons (`tau=1,2`) where the policy posterior remains discriminating.
+- **H3 — Lesion dissociation:** affective decoupling should preserve inference accuracy while impairing payoff, most clearly in that same shallow regime.
+- **H4 — Betrayal recovery:** affect should help agents recover faster after a hostile switch, with the main test focused at `tau=2`.
+- **H5 — Partner selection:** beta-guided precision should shape adaptive partner choice in agent-choice settings, again at `tau=2`.
+
+So the central claim is narrower and more structural than before: in the shipped binary-action task, depth redundancy is itself a result, and affect is tested as an orthogonal augmentation that remains useful where the policy softmax has not already saturated.
 
 ---
 
@@ -277,83 +287,70 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 
 ## 5. Hypotheses and Predictions
 
-### Hypothesis 1: Affect Provides Orthogonal Augmentation Beyond Planning Depth
+### Hypothesis 1: G Compression / Depth Redundancy
 
-**Prediction**: Condition 2 (affective, shallow) outperforms every non-affective planner, including Conditions 1, 4, 6, and 7, while using much less explicit computation than the deep planner.
-
-**Metrics**:
-- Cumulative payoff over 200 rounds (primary)
-- Number of policy-tree nodes expanded per decision (secondary/supplementary)
-- Per-round decision time (wall clock, if relevant)
-
-**Expected outcome**: Under sophisticated inference, the explicit-depth curve among non-affective agents is flat in this binary-action trust game, so Condition 2 should beat the whole no-affect family rather than merely matching Condition 1. The result is best understood as orthogonal augmentation: affect adds a partner-specific evaluation signal that depth alone does not recover, rather than approximating deeper lookahead.
-
-**Failure mode**: If Conditions 1, 4, 6, and 7 form a rising depth-performance curve and Condition 2 only matches the shallow baseline, then the affective weighting is not adding information beyond explicit lookahead. That would push the interpretation back toward a standard planning-depth story.
-
-### Hypothesis 2: Lesion Reproduces Damasio Pattern
-
-**Prediction**: Condition 3 (lesioned) shows:
-- Level-2 posteriors correctly identify partner types (comparable accuracy to Condition 1)
-- Behavioral performance is significantly worse than Condition 2 (and comparable to Condition 4)
-- The deficit is largest during volatile periods (after partner type switches)
+**Prediction**: Under sophisticated inference with action-dependent stance dynamics, non-affective planners separate little or not at all once horizon exceeds `tau=2`, because policy entropy grows much faster than the discriminating `G` range.
 
 **Metrics**:
-- Partner type identification accuracy (inspecting argmax of level-2 posterior)
-- Cumulative payoff (should be near Condition 4 level)
-- Performance gap between stable periods and post-switch periods
+- Cumulative payoff by horizon for no-affect conditions
+- Policy entropy as a function of horizon
+- `G` range / spread as a function of horizon
 
-**Expected outcome**: Lesioned agents "know" partner types but "can't use" that knowledge. During stable periods (types not switching), the lesion effect is moderate — shallow planning is adequate when nothing changes. During volatile periods, the lesion effect is large — without affective inertia to buffer noise and without affective weighting to extend shallow evaluation, the agent makes myopic, exploitable decisions.
+**Expected outcome**: `tau=1` and `tau=2` remain the only materially discriminating horizons in the binary task; deeper horizons enumerate many more policies without adding enough `G` contrast for fixed `gamma=1.0` to separate them. This is a structural property of the task, not a calibration failure.
 
-**Failure mode**: If the lesioned agent performs as well as Condition 2, then affect isn't doing computational work — the architecture itself (having a level-3 state, even decoupled) provides some benefit, or the task is too easy for 2-step planning alone.
+**Failure mode**: If the no-affect depth curve rises materially beyond `tau=2`, then the current depth-redundancy framing is wrong and the task still supports a standard explicit-lookahead account.
 
-### Hypothesis 3: Precision Tracking Outperforms Reward Averaging (Boundary-Condition Result)
+### Hypothesis 2: Affect as Orthogonal Augmentation
 
-This is now understood as a boundary-condition result rather than a universal separation. When planning depth is equalized under sophisticated inference, affect still provides measurable benefit — but the precision-vs-reward-average distinction surfaces only in environments that create a genuine dissociation between recent reward and current predictive reliability.
-
-**Prediction**: Condition 2 (precision-based affect) outperforms Condition 5 (reward-average weighting) specifically in scenarios where prediction error and reward dissociate:
-- Betrayal-style environments (scheduled cooperator→exploiter switch)
-- Volatile periods immediately following type switches
-- Mixed partner populations where some partners are predictable and others aren't
-
-In default random-assignment tasks, Condition 2 and Condition 5 may remain effectively tied because prediction accuracy and reward history stay closely aligned.
+**Prediction**: Affect-augmented agents outperform matched no-affect agents at calibrated shallow horizons (`tau=1,2`), where the policy posterior still discriminates among actions.
 
 **Metrics**:
-- Cumulative payoff (overall and broken down by partner type)
-- Performance in the first 10 rounds after a partner type switch (where uncertainty information is most valuable)
-- Exploitation rate by Exploiter-type partners
-- In the betrayal stress test, performance in the first 5-10 encounters after the forced cooperator→exploiter switch
+- Cumulative payoff for affect vs. no-affect at each shallow horizon
+- Cohen's `d` and `p`-value for `tau=1` and `tau=2`
+- Comparison against pooled-across-depth effect sizes
 
-**Expected outcome**: Context-dependent. In the default task, the two conditions remain tied (null boundary condition). In the betrayal-stress task, the reward-average agent is exploited more by the forced cooperator→exploiter switch because it confuses attractive recent reward with current reliability, whereas the precision-based agent reacts to the spike in surprise (positive mechanism test).
-Operationally, inspect `betrayal_post_switch_window_1_5.csv`, `betrayal_post_switch_window_1_10.csv`, and `betrayal_condition_comparison.csv`. A successful mechanism result means Condition 2 beats Condition 5 on post-switch payoff and/or accuracy while `affective_movement_summary.csv` shows non-flat beta and terminal-signal ranges. If both the comparison tables and movement summary are flat, interpret the outcome as a null mechanism result rather than a broken analysis pipeline.
+**Expected outcome**: Affect produces a clear positive effect at `tau=1,2`, larger than the weak pooled-across-depth effect seen when saturated deep horizons are included. The mechanism claim is therefore about orthogonal augmentation in the discriminating regime, not about a uniform gain at every horizon.
 
-**Failure mode**: If Conditions 2 and 5 perform comparably even in betrayal stress, then the simpler reward-average account is sufficient in the shipped environment family. That would weaken the precision-specific claim while leaving the broader affect-versus-no-affect result intact.
+**Failure mode**: If affect remains weak even at `tau=1`, then the core augmentation claim needs a deeper reframing because the effect would not survive in the one regime where it should be strongest.
 
-### Hypothesis 4: Affective Inertia Provides Noise Robustness
+### Hypothesis 3: Lesion Dissociation
 
-**Prediction**: Condition 2 is more robust to single-trial noise (partner occasionally deviates from type by 1 trial) but slower to detect genuine type switches (sustained deviation) compared to Condition 1.
+**Prediction**: Lesioned agents preserve partner-state inference accuracy while losing the payoff benefit provided by affective deployment, with the clearest signature expected at `tau=1,2`.
 
 **Metrics**:
-- False alarm rate: how often the agent changes strategy toward a partner after a single noisy trial
-- Detection latency: how many trials after a genuine type switch before the agent's behavior changes
-- Payoff during noisy vs. stable stretches
+- Partner-state inference accuracy for lesioned vs. no-affect baseline
+- Cumulative payoff for lesioned vs. affective baseline
+- Post-switch or volatile-window payoff cost
 
-**Expected outcome**: Condition 1 (deep planner) detects type switches fastest but also has more false alarms during noisy stretches. Condition 2 (affective) has fewer false alarms (affective inertia smooths over noise) but slightly slower detection (the slow timescale acts as a low-pass filter). The net effect is positive because in realistic social environments, noise frequency far exceeds signal (type switch) frequency.
+**Expected outcome**: The Damasio-style dissociation holds, but it should be evaluated where affect still has leverage on action selection rather than in pooled deeper runs that already compress the policy posterior.
 
-**Failure mode**: If Condition 2 is both slower to detect and no more robust to noise, then the slow timescale is a pure cost. This would suggest $\lambda$ is too high and the smoothing parameter needs recalibration.
+**Failure mode**: If lesion and affect remain behaviorally indistinguishable at shallow depth, then the affective deployment pathway is not doing meaningful work in the supported task.
 
-### Hypothesis 5: Affect Enables Adaptive Partner Selection (Variant B only)
+### Hypothesis 4: Betrayal Recovery
 
-**Prediction**: In Variant B (agent chooses which partner to interact with), Condition 2 shows more adaptive partner selection than Conditions 3, 4, and 5:
-- Preferentially selects high-precision partners (where model is reliable, regardless of type)
-- Probes low-precision partners epistemically (interacts to reduce uncertainty, then either commits or avoids)
-- Rapidly shifts away from partners whose precision drops (type switch detected through affect)
+**Prediction**: Affect-augmented agents recover faster after a hostile stance switch than matched no-affect agents, with the cleanest test at `tau=2`.
 
 **Metrics**:
-- Partner selection entropy (how evenly the agent distributes interactions)
-- Correlation between affective precision $\beta_k$ and selection frequency
-- Payoff-per-interaction for selected vs. available partners
+- Payoff in the post-betrayal windows (for example rounds 30-60)
+- Recovery latency after the switch
+- Post-switch effect size for affect vs. no-affect
 
-**Expected outcome**: Affective agents develop clear partner preferences early and update them after type switches. Non-affective agents either exploit myopically (Condition 4) or distribute interactions more evenly (Condition 1 can reason about information value but at high computational cost).
+**Expected outcome**: Affect helps the agent abandon an outdated trust policy faster after betrayal because beta and the partner-specific terminal signal react to the sudden prediction failure.
+
+**Failure mode**: If post-switch payoff is flat across affect and no-affect at the calibrated horizon, then the betrayal-recovery claim is not supported in the redesigned task.
+
+### Hypothesis 5: Partner Selection
+
+**Prediction**: In agent-choice settings, beta-guided precision steers interaction toward well-predicted partners and away from poorly predicted ones, with the main test focused at `tau=2`.
+
+**Metrics**:
+- Correlation between beta / terminal signal and partner selection frequency
+- Partner-selection entropy
+- Payoff conditioned on selected partner
+
+**Expected outcome**: Affect-augmented agents should concentrate interactions on partners whose models are stable or rapidly become stable, rather than distributing play uniformly.
+
+**Failure mode**: If partner selection is uncorrelated with beta at `tau=2`, then the precision signal is not being deployed behaviorally in the agent-choice regime.
 
 ### Hypothesis 6 (FUTURE/PROPOSED): Predictive Model Comparison of Affective vs. Non-Affective Generative Models
 
@@ -466,28 +463,27 @@ These phases describe the original build sequence. For future research phases (t
 
 ### 6.6 Current Empirical Status
 
-The current repo state is no longer pre-results. The core sophisticated-inference experiment families have been run and interpreted:
+The current repo state is no longer pre-results. The first post-restructure experiment families have been run, but several headline claims now need shallow-depth or post-switch re-analysis before they should be treated as settled:
 
-- `default`: 100 replications x 200 rounds, random partner assignment, conditions 1-5
-- `betrayal_stress`: 50 replications x 120 rounds, agent-choice with a scheduled betrayal switch, conditions 1-3 and 5
-- `horizon_sweep`: 100 replications x 200 rounds, random partner assignment, conditions 1, 2, 4, 6, and 7
+- `h1_depth_affect_factorial`: 100 replications x 200 rounds, conditions spanning `tau={1,2,4,8}` with and without affect
+- `h2_lesion_dissociation`: 100 replications x 200 rounds, lesion comparison family centered on the tau-4 base
+- `h4_betrayal_recovery`: 100 replications x 120 rounds, agent-choice betrayal family on the redesigned architecture
 
 Current scorecard:
 
-| Hypothesis | Default | Betrayal Stress | Horizon Sweep / cross-run read | Final reading |
-|---|---|---|---|---|
-| H1 affect > baseline | Supported (`d = 0.64`, `p = 1.1e-5`) | Supported (`d = 1.30`, `p = 6.8e-9`) | Supported: all non-affective horizons are tied (`p > 0.93` pairwise) while `C2` exceeds each one (`p < 2e-5`) | Affect adds value orthogonal to explicit depth |
-| H2 lesion dissociation | Supported: accuracy match `p = 0.96`, payoff gap `p = 1.4e-5` | Supported: accuracy match `p = 0.55`, payoff gap `p = 9.6e-7` | `C3 = C4` exactly in `default`, confirming the lesion is a pure affect-to-action decoupling | Strongly supported |
-| H3 precision > reward average | Null (`d = 0.009`, `p = 0.95`) | Supported (`d = 0.59`, `p = 0.004`) | Context-dependent: default remains tied, betrayal stress separates them | Supported when prediction error and reward dissociate |
-| H4 post-switch robustness | Supported (`p = 2.8e-9` vs `C1`, `p = 5.4e-9` vs `C4`) | Supported (`p = 0.013` vs `C1`) | Consistent with affective inertia helping after switches | Supported |
-| H5 partner selection | N/A | Supported (`r = 0.51`, `p = 2.9e-9`) | N/A | Supported |
+| Hypothesis | Current evidence | Current reading | Status |
+|---|---|---|---|
+| H1 G compression / depth redundancy | Policy entropy rises sharply with depth while discriminating `G` spread grows slowly; deep pooled runs underperform shallow ones | Depth beyond `tau=2` is currently read as structurally redundant in the binary task | Supported |
+| H2 affect as orthogonal augmentation | Pooled-across-depth affect effect is weak; targeted shallow re-analysis is pending | Judge the mechanism at `tau=1,2`, not from pooled saturated deep horizons | Needs shallow re-analysis |
+| H3 lesion dissociation | Tau-4 lesion family shows a weak pooled dissociation | Expected to sharpen at `tau=1,2` where affect still influences action selection | Needs shallow re-analysis |
+| H4 betrayal recovery | Tau-4 betrayal family shows a modest pooled post-switch effect | Main readout should be the post-betrayal recovery window at calibrated horizon | Needs targeted betrayal-window analysis |
+| H5 partner selection | Prior partner-choice evidence exists, but the redesigned architecture needs a clean rerun | Test should focus on `tau=2` agent-choice dynamics | Needs rerun |
 
 Interpretation:
 
-- The old depth-compensation framing no longer fits the data. Under sophisticated inference, non-affective planners from `τ = 2` through `τ = 8` are statistically indistinguishable in the default task: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, with every pairwise `p > 0.93`.
-- The defensible claim is **orthogonal augmentation**. Affect adds a partner-specific terminal signal that improves policy evaluation in a way explicit lookahead depth does not recover in the shipped binary-action task.
-- H3 is no longer a confirmed null. It is a boundary-condition result: null in `default`, but supported in `betrayal_stress` where the scheduled betrayal creates a temporary dissociation between recent reward and current predictive reliability (`C2 = 481.88` vs `C5 = 428.32`, `p = 0.004`, `d = 0.59`).
-- `C3` and `C4` are exactly identical in the default run, confirming that `mu = 0` removes the affective contribution cleanly without perturbing belief updating or other planning logic.
+- The old depth-compensation framing is retired. In the redesigned binary task, depth redundancy is itself a structural result that must be explained.
+- The affective story is now horizon-specific: evaluate it where the policy posterior remains discriminating (`tau=1,2`), not where deep enumeration already compresses the softmax.
+- Lesion and betrayal claims remain live, but the headline versions should come from shallow-depth and post-switch analyses rather than pooled tau-4 summaries.
 
 For the rolling summary and next recommended run, see [docs/results_tracking.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/results_tracking.md).
 
