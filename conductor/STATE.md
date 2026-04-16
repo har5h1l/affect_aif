@@ -13,15 +13,30 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-16 (Session 18 — Phase 1 cleanup checkpoint)
+2026-04-16 (Session 19 — regeneration monitor check)
 
 ## Session Count
-18
+19
 
 ## Current Direction
 Post-restructure reframe. Action-dependent stance is the supported trust-game architecture; current work is reframing the hypothesis story around depth redundancy / G compression and then finishing the remaining experiments on that surface.
 
 ## This Session
+
+### Regeneration monitor check
+- Completed the required startup sequence again:
+  - read `CLAUDE.md`
+  - read `conductor/MISSION.md` and `conductor/STATE.md`
+  - confirmed `conductor/INBOX.md` does not exist
+  - re-checked phase docs: `docs/future/roadmap.md`, `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+- Performed one post-launch completion check for the detached Phase 3 regeneration jobs:
+  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
+  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
+  - `pgrep -af` still shows the launched experiment processes for all three configs
+- No additional polling performed after that single check.
 
 ### Config checkpoint
 - Added `configs/shallow_affect_confirm.json` exactly for the Phase 4 shallow-depth confirmation run:
@@ -122,6 +137,8 @@ Post-restructure reframe. Action-dependent stance is the supported trust-game ar
 
 ## Auto Handoff
 
+- **What changed:** Session 19 confirmed the detached H1/H2/H4 regeneration jobs are still running and that none of the three required `results.csv` files are present yet.
+- **What changed:** No code or docs changed beyond this handoff refresh; the branch is clean and still at `analysis/post-restructure-reframe`.
 - **What changed:** Full test gate passed again this session, and the missing H1/H2/H4 experiment families were relaunched in detached mode with verified process matches and fixed output paths.
 - **What changed:** Added and committed `configs/shallow_affect_confirm.json` (`141fcbe`) so the Phase 4 smoke/full shallow confirmation runs are ready once Phase 3 clears.
 - **What is still in flight:** The detached regenerations are still running; Phase 3 outputs have not been written yet. No new experiments have been launched this wake.
@@ -132,3 +149,4 @@ DECISION: Treat depth redundancy / G compression as a structural result of the s
 DECISION: Use local regeneration rather than result sync because the required CSVs are absent and this `mango` install does not expose the old fetch workflow documented in repo notes.
 DECISION: `scripts/run_experiment.py` already writes per-replication checkpoints (`checkpoint_interval=1`) and partial CSVs by default for each run, so the new shallow config does not need extra unsupported save keys.
 NEXT: Do not poll the detached jobs repeatedly. On the next wake, check completion once, then run the targeted reanalysis script and checkpoint the outputs.
+NEXT: If the regeneration jobs are still running on the next wake, perform only one completion check again and then stop; do not tail logs or watch file growth.
