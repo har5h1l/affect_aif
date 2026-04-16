@@ -13,13 +13,13 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-16 (Session 21 — regeneration monitor check)
+2026-04-16 (Session 22 — regeneration monitor check)
 
 ## Session Count
-21
+22
 
 
-<!-- Older entries truncated (was 166 lines) -->
+<!-- Older entries truncated (was 170 lines) -->
 
 - Completed the required startup sequence again:
   - read `CLAUDE.md`
@@ -38,7 +38,6 @@ mode_hint: monitor
     - h4: launcher `184345`, python `184456`
 - No additional polling performed after that single check.
 
-- Completed the required startup sequence again:
   - read `CLAUDE.md`
   - read `conductor/MISSION.md` and `conductor/STATE.md`
   - confirmed `conductor/INBOX.md` does not exist
@@ -151,6 +150,7 @@ mode_hint: monitor
 
 ## Auto Handoff
 
+- **What changed:** Session 22 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
 - **What changed:** Session 21 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
 - **What changed:** Session 20 repeated the single allowed completion check; all three Phase 3 regeneration jobs are still running and none of the target CSVs exist yet.
 - **What changed:** Session 19 confirmed the detached H1/H2/H4 regeneration jobs are still running and that none of the three required `results.csv` files are present yet.
