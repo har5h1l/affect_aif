@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import math
 import sys
+from collections import OrderedDict
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +15,22 @@ from scipy import stats
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from analysis.metrics import final_round_summary
+from experiment.conditions import CONDITIONS, resolve_condition_spec
+
+
+H1_TARGET_CONDITIONS = ("tau1_no_affect", "tau1_affect", "tau2_no_affect", "tau2_affect")
+H2_TARGET_CONDITIONS = ("lesioned", "tau4_no_affect", "tau4_affect")
+H4_TARGET_CONDITIONS = ("tau4_no_affect", "tau4_affect")
+CONDITION_IDS_BY_NAME = {metadata.name: condition_id for condition_id, metadata in CONDITIONS.items()}
+SUMMARY_REQUIRED_COLUMNS = {
+    "inferred_type_correct": np.nan,
+    "inferred_stance_correct": np.nan,
+    "inferred_joint_correct": np.nan,
+    "q_pi_entropy": np.nan,
+    "mean_abs_step_efe": np.nan,
+    "planning_cost": np.nan,
+    "planning_cost_ratio": np.nan,
+}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -41,16 +58,116 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _load_results(path: str) -> pd.DataFrame:
+def _results_root(path: Path) -> Path | None:
+    for parent in (path.parent, *path.parents):
+        if parent.name == "results":
+            return parent
+    return None
+
+
+def _read_csv_resilient(csv_path: Path) -> pd.DataFrame:
+    try:
+        return pd.read_csv(csv_path)
+    except pd.errors.ParserError:
+        # Live checkpoint files can be read while another process is appending.
+        return pd.read_csv(csv_path, engine="python", on_bad_lines="skip")
+
+
+def _discover_candidate_paths(path: str) -> list[Path]:
     csv_path = Path(path)
-    if not csv_path.exists():
-        raise FileNotFoundError(f"Missing results CSV: {csv_path}")
-    frame = pd.read_csv(csv_path)
+    candidates: list[Path] = []
+    if csv_path.exists():
+        candidates.append(csv_path)
+
+    sibling_partial = csv_path.with_name("results_partial.csv")
+    if sibling_partial.exists():
+        candidates.append(sibling_partial)
+
+    results_root = _results_root(csv_path)
+    experiment_dir = csv_path.parent.name
+    if results_root and experiment_dir:
+        for pattern in (f"*/{experiment_dir}/results.csv", f"*/{experiment_dir}/results_partial.csv"):
+            for candidate in sorted(results_root.glob(pattern)):
+                if candidate not in candidates:
+                    candidates.append(candidate)
+    return candidates
+
+
+def _condition_score(frame: pd.DataFrame, condition_name: str, source_path: Path) -> tuple[int, int, int, int, str]:
+    if "condition_name" not in frame.columns:
+        return (-1, -1, -1, -1, str(source_path))
+    subset = frame.loc[frame["condition_name"] == condition_name]
+    if subset.empty:
+        return (-1, -1, -1, -1, str(source_path))
+    max_round = int(subset["round"].max()) if "round" in subset.columns else -1
+    seed_count = int(subset["seed"].nunique()) if "seed" in subset.columns else -1
+    row_count = int(len(subset))
+    is_final = int(source_path.name == "results.csv")
+    return (max_round, seed_count, row_count, is_final, str(source_path))
+
+
+def _filter_primary(frame: pd.DataFrame) -> pd.DataFrame:
     if "run_mode" in frame.columns:
         primary = frame.loc[frame["run_mode"] == "primary"].copy()
         if not primary.empty:
-            frame = primary
+            return primary
     return frame
+
+
+def _backfill_condition_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    prepared = frame.copy()
+    if "condition_name" in prepared.columns:
+        prepared["condition_name"] = prepared["condition_name"].astype(str)
+    if "condition" not in prepared.columns and "condition_name" in prepared.columns:
+        def _resolve_condition_value(name: str):
+            canonical = resolve_condition_spec(name).name
+            return CONDITION_IDS_BY_NAME.get(canonical, canonical)
+
+        prepared["condition"] = prepared["condition_name"].map(_resolve_condition_value)
+    return prepared
+
+
+def _ensure_summary_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    prepared = _backfill_condition_columns(frame)
+    for column_name, default_value in SUMMARY_REQUIRED_COLUMNS.items():
+        if column_name not in prepared.columns:
+            prepared[column_name] = default_value
+    return prepared
+
+
+def _load_results(path: str, target_conditions: tuple[str, ...]) -> tuple[pd.DataFrame, OrderedDict[Path, list[str]]]:
+    candidates = _discover_candidate_paths(path)
+    if not candidates:
+        raise FileNotFoundError(f"Missing results CSV: {Path(path)}")
+
+    loaded: list[tuple[Path, pd.DataFrame]] = []
+    for candidate in candidates:
+        frame = _ensure_summary_columns(_filter_primary(_read_csv_resilient(candidate)))
+        loaded.append((candidate, frame))
+
+    selected_sources: OrderedDict[Path, list[str]] = OrderedDict()
+    pieces: list[pd.DataFrame] = []
+    for condition_name in target_conditions:
+        best: tuple[Path, pd.DataFrame] | None = None
+        best_score: tuple[int, int, int, int, str] | None = None
+        for candidate, frame in loaded:
+            score = _condition_score(frame, condition_name, candidate)
+            if best_score is None or score > best_score:
+                best_score = score
+                best = (candidate, frame)
+        if best is None or best_score is None or best_score[0] < 0:
+            continue
+        candidate, frame = best
+        pieces.append(frame.loc[frame["condition_name"] == condition_name].copy())
+        selected_sources.setdefault(candidate, []).append(condition_name)
+
+    if not pieces:
+        # Fall back to the first readable file if condition-aware selection found nothing.
+        candidate, frame = loaded[0]
+        selected_sources.setdefault(candidate, [])
+        return frame, selected_sources
+
+    return pd.concat(pieces, ignore_index=True), selected_sources
 
 
 def _clean(values) -> np.ndarray:
@@ -122,19 +239,29 @@ def _format_coverage(frame: pd.DataFrame) -> list[str]:
     return lines
 
 
-def _header(title: str, source_path: str, frame: pd.DataFrame) -> list[str]:
-    lines = [title, "", f"Source file: {Path(source_path)}"]
-    if str(source_path).endswith("results_partial.csv"):
-        lines.append("Source type: partial checkpoint")
+def _header(title: str, source_paths: OrderedDict[Path, list[str]], frame: pd.DataFrame) -> list[str]:
+    lines = [title, ""]
+    if len(source_paths) == 1:
+        source_path = next(iter(source_paths))
+        lines.append(f"Source file: {source_path}")
+        if str(source_path).endswith("results_partial.csv"):
+            lines.append("Source type: partial checkpoint")
+        else:
+            lines.append("Source type: final results")
     else:
-        lines.append("Source type: final results")
+        lines.append("Source files:")
+        for source_path, conditions in source_paths.items():
+            source_type = "partial checkpoint" if str(source_path).endswith("results_partial.csv") else "final results"
+            lines.append(
+                f"- {source_path} ({source_type}; conditions: {', '.join(conditions) if conditions else 'all available'})"
+            )
     lines.extend(_format_coverage(frame))
     return lines
 
 
-def _run_h1(frame: pd.DataFrame, source_path: str) -> str:
+def _run_h1(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> str:
     summary = final_round_summary(frame)
-    lines = _header("H1 shallow-depth reanalysis", source_path, frame)
+    lines = _header("H1 shallow-depth reanalysis", source_paths, frame)
     lines.extend(["", "Compare affect vs. no-affect at tau=1 and tau=2 using per-seed total payoff."])
     for depth, no_affect, affect in (
         (1, "tau1_no_affect", "tau1_affect"),
@@ -166,13 +293,13 @@ def _run_h1(frame: pd.DataFrame, source_path: str) -> str:
     return "\n".join(lines)
 
 
-def _run_h2(frame: pd.DataFrame, source_path: str) -> str:
+def _run_h2(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> str:
     summary = final_round_summary(frame)
     lesion_accuracy = _summary_values(summary, "lesioned", "mean_joint_accuracy")
     no_affect_accuracy = _summary_values(summary, "tau4_no_affect", "mean_joint_accuracy")
     lesion_payoff = _summary_values(summary, "lesioned", "total_payoff")
     affect_payoff = _summary_values(summary, "tau4_affect", "total_payoff")
-    lines = _header("H2 lesion reanalysis", source_path, frame)
+    lines = _header("H2 lesion reanalysis", source_paths, frame)
     lines.extend(
         [
             "",
@@ -198,7 +325,7 @@ def _run_h2(frame: pd.DataFrame, source_path: str) -> str:
     return "\n".join(lines)
 
 
-def _run_h4(frame: pd.DataFrame, source_path: str) -> str:
+def _run_h4(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> str:
     required = {"condition_name", "seed", "round", "payoff"}
     missing = sorted(required - set(frame.columns))
     if missing:
@@ -210,7 +337,7 @@ def _run_h4(frame: pd.DataFrame, source_path: str) -> str:
     )
     affect = grouped.loc[grouped["condition_name"] == "tau4_affect", "mean_window_payoff"].to_numpy(dtype=float)
     no_affect = grouped.loc[grouped["condition_name"] == "tau4_no_affect", "mean_window_payoff"].to_numpy(dtype=float)
-    lines = _header("H4 betrayal-window reanalysis", source_path, frame)
+    lines = _header("H4 betrayal-window reanalysis", source_paths, frame)
     lines.extend([
         "",
         "Compare tau4_affect vs tau4_no_affect over rounds 30-60 using per-seed mean payoff.",
@@ -227,13 +354,13 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     output_dir = Path(args.output_dir)
 
-    h1_frame = _load_results(args.h1_results)
-    h2_frame = _load_results(args.h2_results)
-    h4_frame = _load_results(args.h4_results)
+    h1_frame, h1_sources = _load_results(args.h1_results, H1_TARGET_CONDITIONS)
+    h2_frame, h2_sources = _load_results(args.h2_results, H2_TARGET_CONDITIONS)
+    h4_frame, h4_sources = _load_results(args.h4_results, H4_TARGET_CONDITIONS)
 
-    h1 = _run_h1(h1_frame, args.h1_results)
-    h2 = _run_h2(h2_frame, args.h2_results)
-    h4 = _run_h4(h4_frame, args.h4_results)
+    h1 = _run_h1(h1_frame, h1_sources)
+    h2 = _run_h2(h2_frame, h2_sources)
+    h4 = _run_h4(h4_frame, h4_sources)
 
     _write(output_dir / "h1_shallow_reanalysis.txt", h1)
     _write(output_dir / "h2_lesion_reanalysis.txt", h2)

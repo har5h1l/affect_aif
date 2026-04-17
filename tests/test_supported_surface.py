@@ -187,6 +187,89 @@ def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
     assert "rounds 30-60" in h4_text
 
 
+def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_live_tail(tmp_path):
+    run_targeted_reanalysis = _load_script_module("run_targeted_reanalysis.py")
+
+    results_root = tmp_path / "results"
+    h1_main = results_root / "h1_factorial" / "h1_depth_affect_factorial"
+    h1_setsid = results_root / "h1_factorial_setsid_20260416" / "h1_depth_affect_factorial"
+    h2_dir = tmp_path / "inputs" / "h2"
+    h4_dir = tmp_path / "inputs" / "h4"
+    h1_main.mkdir(parents=True)
+    h1_setsid.mkdir(parents=True)
+    h2_dir.mkdir(parents=True)
+    h4_dir.mkdir(parents=True)
+
+    (h1_main / "results_partial.csv").write_text(
+        "\n".join(
+            [
+                "condition_name,seed,round,payoff,inferred_joint_correct",
+                "tau1_no_affect,0,199,10,1.0",
+                "tau1_no_affect,1,199,11,1.0",
+                "tau2_no_affect,0,199,12,1.0",
+                'tau2_no_affect,1,199,"unterminated',
+            ]
+        )
+        + "\n"
+    )
+    pd.DataFrame(
+        [
+            {"condition_name": "tau1_affect", "seed": 0, "round": 199, "payoff": 15, "inferred_joint_correct": 1.0},
+            {"condition_name": "tau1_affect", "seed": 1, "round": 199, "payoff": 16, "inferred_joint_correct": 1.0},
+            {"condition_name": "tau2_affect", "seed": 0, "round": 199, "payoff": 17, "inferred_joint_correct": 1.0},
+        ]
+    ).to_csv(h1_setsid / "results_partial.csv", index=False)
+
+    h2_path = h2_dir / "h2.csv"
+    pd.DataFrame(
+        [
+            {"condition_name": "tau4_no_affect", "seed": 0, "round": 199, "payoff": 10, "inferred_joint_correct": 0.8},
+            {"condition_name": "tau4_affect", "seed": 0, "round": 199, "payoff": 16, "inferred_joint_correct": 0.9},
+            {"condition_name": "lesioned", "seed": 0, "round": 199, "payoff": 12, "inferred_joint_correct": 0.8},
+            {"condition_name": "tau4_no_affect", "seed": 1, "round": 199, "payoff": 11, "inferred_joint_correct": 0.8},
+            {"condition_name": "tau4_affect", "seed": 1, "round": 199, "payoff": 17, "inferred_joint_correct": 0.9},
+            {"condition_name": "lesioned", "seed": 1, "round": 199, "payoff": 13, "inferred_joint_correct": 0.8},
+        ]
+    ).to_csv(h2_path, index=False)
+
+    h4_path = h4_dir / "h4.csv"
+    h4_rows = []
+    for seed in (0, 1):
+        for round_idx in range(30, 61):
+            h4_rows.extend(
+                [
+                    {"condition_name": "tau4_no_affect", "seed": seed, "round": round_idx, "payoff": 1.0 + seed},
+                    {"condition_name": "tau4_affect", "seed": seed, "round": round_idx, "payoff": 2.0 + seed},
+                ]
+            )
+    pd.DataFrame(h4_rows).to_csv(h4_path, index=False)
+
+    out_dir = tmp_path / "reanalysis"
+    h1_missing_final = results_root / "h1_factorial" / "h1_depth_affect_factorial" / "results.csv"
+    assert (
+        run_targeted_reanalysis.main(
+            [
+                "--h1-results",
+                str(h1_missing_final),
+                "--h2-results",
+                str(h2_path),
+                "--h4-results",
+                str(h4_path),
+                "--output-dir",
+                str(out_dir),
+            ]
+        )
+        == 0
+    )
+
+    h1_text = (out_dir / "h1_shallow_reanalysis.txt").read_text()
+    assert "Source files:" in h1_text
+    assert str(h1_main / "results_partial.csv") in h1_text
+    assert str(h1_setsid / "results_partial.csv") in h1_text
+    assert "tau1_affect" in h1_text
+    assert "tau2_no_affect" in h1_text
+
+
 def test_archive_boundary_is_explicit():
     supported_scripts = {
         "run_experiment.py",
