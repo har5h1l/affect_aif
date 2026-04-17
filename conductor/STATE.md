@@ -13,35 +13,14 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 66 — bounded completion check on detached Phase 4 experiment batches)
+2026-04-17 (Session 67 — bounded completion check on detached Phase 4 experiment batches)
 
 ## Session Count
-65
+67
 
 
 <!-- Older entries truncated (was 171 lines) -->
 
-  - `docs/future/roadmap.md`
-  - `docs/experiment/results.md`
-- Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
-  - working tree was dirty only from `conductor/STATE.md`
-- Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing
-  - `results/h5_selection/h5_partner_selection/results.csv` still missing
-  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing
-  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing
-  - `pgrep -af` confirms the original wrappers and worker processes remain live:
-    - `shallow_confirm`: wrapper `373967`; python `374127`, `374164`, `374165`
-    - `h5_selection`: wrapper `373976`; python `374138`
-    - `clinical_post_restructure`: wrapper `373989`; python `374151`, `374161`
-- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
-- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
-
-### Session 61 status check
-- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
-- Confirmed `conductor/INBOX.md` does not exist
-- Re-checked phase docs:
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
 - Checked branch state:
@@ -164,8 +143,30 @@ mode_hint: monitor
 - DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
 - NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
 
+### Session 67 status check
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree was dirty only from `conductor/STATE.md`
+- Performed one bounded completion check for the detached Phase 4 runs:
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv`
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv`
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv`
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory still absent under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
+    - `shallow_confirm`: wrapper/children `373967`, `374127`, `374164`, `374165`
+    - `h5_selection`: wrapper/child `373976`, `374138`
+    - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
+  - `pgrep -af` also showed older unrelated `h1_factorial` / `h4_betrayal` relaunch processes (`209790`, `209792`, `209969`, `209973`, `209985`, `209986`, `283269`, `283274`); these were not part of this bounded check and were not touched
+- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
+- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
+
 ## Auto Handoff
 
-- What changed: recorded Session 66 bounded-check results; no new experiment output files completed; process liveness still confirmed from the original detached launches.
-- In flight: `shallow_confirm`, `h5_selection`, and `clinical_post_restructure` are still running; only partial CSVs exist for shallow/H5/clinical_betrayal, and `clinical_phenotypes` has not emitted a run directory yet.
+- What changed: recorded Session 67 bounded-check results; no new Phase 4 output files completed; the original detached Phase 4 wrappers are still live.
+- In flight: `shallow_confirm`, `h5_selection`, and `clinical_post_restructure` are still running; only partial CSVs exist for shallow/H5/clinical_betrayal, and `clinical_phenotypes` still has no run directory.
 - Next session should do: one bounded completion check only; if any `results.csv` appears, run `scripts/run_analysis.py` for that batch, summarize effect sizes/p-values in `STATE.md`, and do not rewrite result-interpretation docs without user confirmation if the narrative changes.
