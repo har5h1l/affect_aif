@@ -1,41 +1,44 @@
 ---
-status: CONTINUE
+status: BLOCKED
 next_priority: 1
 pending_work:
-  - "Wait for the detached Phase 4 runs to finish: `results/shallow_confirm/shallow_affect_confirm`, `results/h5_selection/h5_partner_selection`, and `results/clinical_post_restructure/{clinical_betrayal,clinical_phenotypes}`"
-  - "When any run completes, execute `scripts/run_analysis.py` on its `results.csv`, summarize the effect sizes/p-values, and only then update `docs/experiment/results.md` if the new results do not require another user-facing interpretation check"
-  - "Revisit the weak shallow-H1 story once the full `shallow_confirm` batch is complete; the smoke artifact remains contradictory context, not the final read"
-next_session_focus: "Do one bounded completion check for the detached Phase 4 processes; if a results.csv is present, run analysis for that batch and record the hypothesis readout"
-model_hint: haiku
-mode_hint: monitor
+  - "Await user decision on the shallow-confirm blocker: `tau1` affect remained weak (`d=0.149`, `p=0.294`) and `tau2` remained weak (`d=0.196`, `p=0.168`), which triggers the mission stop condition"
+  - "Detached runs remain in flight: `results/h5_selection/h5_partner_selection` and `results/clinical_post_restructure/clinical_betrayal`; `clinical_phenotypes` still has no run directory"
+  - "If the user wants continuation despite the blocker, finish bounded completion checks for the detached runs, then analyze any completed `results.csv` batches before revising docs"
+next_session_focus: "Wait for user direction on the weak shallow-affect result before doing more interpretation work; detached run follow-up can resume afterward"
+model_hint: opus
+mode_hint: research
 ---
 
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 76 — bounded completion check on detached Phase 4 experiment batches)
+2026-04-17 (Session 77 — shallow_confirm completion check and blocker readout)
 
 ## Session Count
-76
-
-
-<!-- Older entries truncated (was 166 lines) -->
+77
 
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
   - working tree was dirty only from `conductor/STATE.md`
-- Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv` (`366528069` bytes, timestamp `2026-04-17 22:02 UTC`)
-  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`143899201` bytes, timestamp `2026-04-17 20:03 UTC`)
+- Completed the required bounded completion check for Phase 4:
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` now exists (`392152888` bytes, timestamp `2026-04-17 22:31 UTC`)
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`179868361` bytes, timestamp `2026-04-17 22:06 UTC`)
   - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`172650918` bytes, timestamp `2026-04-17 21:37 UTC`)
-  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; no run directory outputs exist yet for `clinical_phenotypes`
-  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
-    - `shallow_confirm`: wrapper/children `373967`, `374127`, `374164`, `374165`
-    - `h5_selection`: wrapper/child `373976`, `374138`
-    - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
-- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
-- DECISION: `shallow_confirm` and `clinical_betrayal` partial outputs advanced materially since Session 75; `h5_selection` remains unchanged; `clinical_phenotypes` still has not emitted any run outputs
-- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory still absent under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms only the `h5_selection` and `clinical_post_restructure` wrappers/workers remain live; `shallow_confirm` is no longer running
+- Ran `python scripts/run_analysis.py --results results/shallow_confirm/shallow_affect_confirm/results.csv --output-dir results/shallow_confirm/shallow_affect_confirm/figures`
+  - figure outputs were created under `results/shallow_confirm/shallow_affect_confirm/figures/`
+  - summary CSV/TXT artifacts were not yet written during this wake cycle; a long-lived `run_analysis.py` process remained active after figure generation
+- Computed the shallow payoff readout directly from `results/shallow_confirm/shallow_affect_confirm/results.csv` using a bounded one-pass CSV aggregation over primary rows:
+  - `tau1_affect` mean payoff `416.66` vs `tau1_no_affect` `410.34` → `d=0.149`, `p=0.293599`
+  - `tau2_affect` mean payoff `398.58` vs `tau2_no_affect` `390.34` → `d=0.196`, `p=0.168379`
+- BLOCKER: the mission explicitly says to stop if shallow re-analysis still shows a weak affect effect at `tau=1` (`d < 0.3`). The completed `shallow_confirm` batch meets that stop condition.
+- DECISION: no interpretation-doc update was made. The new shallow result materially challenges the current H2/H3 framing and needs user direction before further narrative changes.
+- NEXT: wait for user guidance on whether to continue with analysis of the still-running H5/clinical batches, rerun/inspect shallow conditions differently, or reframe the paper story around a weaker-than-expected shallow affect signal.
+
+
+<!-- Older entries truncated (was 166 lines) -->
 
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
@@ -161,6 +164,6 @@ mode_hint: monitor
 
 ## Auto Handoff
 
-- What changed: recorded Session 76 bounded-check results; no new Phase 4 output files completed; the detached wrappers are still live; `shallow_confirm` partial CSV advanced to `366528069` bytes, `clinical_betrayal` advanced to `172650918` bytes, `h5_selection` stayed at `143899201` bytes, and `clinical_phenotypes` still has no run outputs.
-- In flight: `shallow_confirm`, `h5_selection`, and `clinical_post_restructure` are still running; partial CSVs exist for shallow/H5/clinical_betrayal, and `clinical_phenotypes` still has no run directory.
-- Next session should do: one bounded completion check only; if any `results.csv` appears, run `scripts/run_analysis.py` for that batch, summarize effect sizes/p-values in `STATE.md`, and do not rewrite result-interpretation docs without user confirmation if the narrative changes.
+- What changed: `shallow_confirm` completed and produced `results.csv`; direct shallow re-analysis found weak affect effects at both calibrated horizons (`tau1 d=0.149 p=0.294`, `tau2 d=0.196 p=0.168`), which triggers the mission stop condition. `run_analysis.py` generated figures for `shallow_confirm` but had not yet written summary CSV/TXT outputs during this wake cycle.
+- In flight: `h5_selection` and `clinical_post_restructure` wrappers/workers are still live; `clinical_betrayal` has a partial CSV, `clinical_phenotypes` still has no run directory, and `shallow_confirm` is no longer running.
+- Next session should do: wait for user direction first. If the user wants continuation despite the blocker, resume bounded completion checks for `h5_selection` / `clinical_post_restructure`, analyze any newly completed batch, and keep result-interpretation docs unchanged until the user approves a narrative update.
