@@ -13,15 +13,15 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 46 — one completion check done; H1/H4 still incomplete, duplicate legacy reruns still alive, stop condition still active)
+2026-04-17 (Session 47 — one completion check done; H2 canonical results now present, H1/H4 still incomplete, duplicate legacy reruns still alive, stop condition still active)
 
 ## Session Count
-46
+47
 
 
-<!-- Older entries truncated (was 174 lines) -->
+<!-- Older entries truncated (was 173 lines) -->
 
-### Session 46 monitor pass
+### Session 47 monitor pass
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
 - Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
@@ -30,19 +30,20 @@ mode_hint: hybrid
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
   - working tree remains dirty only from `conductor/STATE.md`
-- Performed the one allowed completion check for detached H1/H4 reruns:
+- Performed one completion check for the detached regeneration jobs:
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` present and still growing (`240332537` bytes at check time)
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` is now present
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `results/h4_betrayal/h4_betrayal_recovery/results_partial.csv` present (`302222317` bytes at check time)
-  - active wrapper/python processes still present for current reruns:
-    - H1: wrapper `209790`; python `209969`, `209985`, `209986`
-    - H4: wrapper `209792`; python `209973`
-  - older duplicate detached python processes also still present:
-    - H1 legacy rerun `283269` (`h1_factorial_setsid_20260416`)
-    - H4 legacy rerun `283274` (`h4_betrayal_setsid_20260416`)
-- DECISION: mission remains blocked because the shallow-H1 contradiction still stands and the canonical H1/H4 reruns are not yet complete.
-- NEXT: if reawakened without user input, do not restart experiments or rewrite docs; at most do one fresh completion check and wait for user direction or finished canonical outputs.
+  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` is present
+  - `pgrep -af` still shows the relaunched wrapper/python processes:
+    - `209790`, `209969`, `209985`, `209986` for `h1_factorial`
+    - `209792`, `209973` for `h4_betrayal`
+  - `pgrep -af` also shows older detached `setsid` python runs still alive:
+    - `283269` for `h1_factorial_setsid_20260416`
+    - `283271` for `h2_lesion_setsid_20260416`
+    - `283274` for `h4_betrayal_setsid_20260416`
+- DECISION: mission remains blocked because the shallow-H1 contradiction still stands and the canonical H1/H4 reruns are not complete.
+- NEXT: if reawakened without new user instruction, do not start Phase 4 or rewrite docs; at most one more completion check is warranted, then continue waiting for user direction.
 
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
