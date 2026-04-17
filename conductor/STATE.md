@@ -13,10 +13,10 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 74 — bounded completion check on detached Phase 4 experiment batches)
+2026-04-17 (Session 75 — bounded completion check on detached Phase 4 experiment batches)
 
 ## Session Count
-74
+75
 
 
 <!-- Older entries truncated (was 166 lines) -->
@@ -25,16 +25,16 @@ mode_hint: monitor
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
   - working tree was dirty only from `conductor/STATE.md`
 - Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv` (`283645599` bytes, timestamp `2026-04-17 20:59 UTC`)
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv` (`204577120` bytes, timestamp `2026-04-17 21:31 UTC`)
   - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`143899201` bytes, timestamp `2026-04-17 20:03 UTC`)
   - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`151074809` bytes, timestamp `2026-04-17 20:24 UTC`)
-  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; no run directory output file is present under `results/clinical_post_restructure/clinical_phenotypes`
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory still absent under `results/clinical_post_restructure/clinical_phenotypes`
   - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
     - `shallow_confirm`: wrapper/children `373967`, `374127`, `374164`, `374165`
     - `h5_selection`: wrapper/child `373976`, `374138`
     - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
 - DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
-- DECISION: `shallow_confirm` partial output advanced materially since Session 73; `h5_selection` and `clinical_betrayal` remain live but their partial outputs are unchanged from the last handoff; `clinical_phenotypes` still has not emitted a run directory or partial file
+- DECISION: `shallow_confirm` partial output is smaller than the prior handoff’s recorded size while the processes remain live; `h5_selection` and `clinical_betrayal` partial outputs remain unchanged since the previous bounded check; `clinical_phenotypes` still has not created a run directory
 - NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
 
 - Checked branch state:
@@ -161,6 +161,6 @@ mode_hint: monitor
 
 ## Auto Handoff
 
-- What changed: recorded Session 74 bounded-check results; no new Phase 4 output files completed; the detached wrappers are still live; `shallow_confirm` partial CSV is now `283645599` bytes while `h5_selection` and `clinical_betrayal` remain at `143899201` and `151074809` bytes respectively; `clinical_phenotypes` still has no run directory.
+- What changed: recorded Session 75 bounded-check results; no new Phase 4 output files completed; the detached wrappers are still live; `shallow_confirm` partial CSV now reads `204577120` bytes while `h5_selection` and `clinical_betrayal` remain at `143899201` and `151074809` bytes respectively; `clinical_phenotypes` still has no run directory.
 - In flight: `shallow_confirm`, `h5_selection`, and `clinical_post_restructure` are still running; partial CSVs exist for shallow/H5/clinical_betrayal, and `clinical_phenotypes` still has no run directory.
 - Next session should do: one bounded completion check only; if any `results.csv` appears, run `scripts/run_analysis.py` for that batch, summarize effect sizes/p-values in `STATE.md`, and do not rewrite result-interpretation docs without user confirmation if the narrative changes.
