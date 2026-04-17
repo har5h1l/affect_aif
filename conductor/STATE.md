@@ -13,15 +13,15 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 44 — one completion check done; H2 full CSV still present, H1/H4 still incomplete, stop condition still active)
+2026-04-17 (Session 45 — one completion check done; H2 full CSV still present, H1/H4 still incomplete, stop condition still active)
 
 ## Session Count
-44
+45
 
 
-<!-- Older entries truncated (was 170 lines) -->
+<!-- Older entries truncated (was 172 lines) -->
 
-### Session 44 monitor pass
+### Session 45 monitor pass
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
 - Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
@@ -30,18 +30,20 @@ mode_hint: hybrid
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
   - working tree remains dirty only from `conductor/STATE.md`
-- Performed one completion check for the detached regeneration jobs:
+- Performed one completion check for the detached reruns:
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` present
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` exists
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` present
-  - `results/h4_betrayal/h4_betrayal_recovery/results_partial.csv` present
-  - `pgrep -af` still shows live detached runners for:
-    - `h1_factorial` wrappers/python: `209790`, `209969`, `209985`, `209986`
-    - `h4_betrayal` wrapper/python: `209792`, `209973`
-    - older `setsid` jobs still visible: `283269`, `283271`, `283274`
-- DECISION: stop condition remains active because the shallow-H1 contradiction is still unresolved and the canonical H1/H4 reruns are not finished.
-- NEXT: if reawakened without new user instruction, do at most one completion check for H1/H4; do not start Phase 4 or rewrite result-interpretation docs.
+  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` exists
+  - `pgrep -af` still shows active rerun processes:
+    - wrapper `209790` for `h1_factorial`
+    - wrapper `209792` for `h4_betrayal`
+    - python `209969`, `209985`, `209986` for `h1_factorial`
+    - python `209973` for `h4_betrayal`
+    - older detached python `283269` for `h1_factorial_setsid_20260416`
+    - older detached python `283271` for `h2_lesion_setsid_20260416`
+    - older detached python `283274` for `h4_betrayal_setsid_20260416`
+- DECISION: stop condition still active; no additional polling performed after this single check.
 
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
