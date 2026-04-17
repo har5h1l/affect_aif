@@ -13,56 +13,14 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 60 — bounded completion check on detached Phase 4 experiment batches)
+2026-04-17 (Session 62 — bounded completion check on detached Phase 4 experiment batches)
 
 ## Session Count
-60
+62
 
 
 <!-- Older entries truncated (was 171 lines) -->
 
-Auto-generated because session `affect_aif_20260417_004904` hit the max-turn budget.
-
-- Final runner detail: Agent exited without a result event — likely crash or timeout (exit: 0)
-- Latest commit on branch: `73d9900 State: record stronger shallow-H1 contradiction from current partial reruns`
-
-### Agent Notes To Carry Forward
-- No assistant notes were recoverable from the session log.
-
-### Next Session Should
-- Review recent workspace changes, then continue from the existing STATE.md plan.
-- Confirm whether the interrupted session's final step completed or needs to be retried.
-<!-- AUTO-HANDOFF-END -->
-
-### Session 53 status check
-- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
-- Confirmed `conductor/INBOX.md` does not exist
-- Re-checked phase docs:
-  - `docs/future/roadmap.md`
-  - `docs/experiment/results.md`
-- Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
-  - working tree remains dirty only from `conductor/STATE.md`
-- Verified the shallow smoke artifact cited in the stop condition still exists:
-  - `results/shallow_confirm_smoke/shallow_affect_confirm_smoke_vhxnwh/results.csv`
-- DECISION: mission remains blocked because `MISSION.md` explicitly says to stop once shallow-depth affect is still weak at `tau=1`; no new user direction is present in this wake cycle
-- NEXT: wait for the user to decide whether to treat the weak shallow signal as a paper-story reframe or to request stronger confirmation before any further experiments or result-interpretation edits
-
-### Session 54 status check
-- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
-- Confirmed `conductor/INBOX.md` does not exist
-- Re-checked phase docs:
-  - `docs/future/roadmap.md`
-  - `docs/experiment/results.md`
-- Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
-  - working tree remains dirty only from `conductor/STATE.md`
-- DECISION: no executable mission work is authorized in this wake cycle because the shallow-H1 stop condition is still the active blocker and no user override is present
-- NEXT: wait for the user to choose between stronger confirmation and a paper-story reframe before resuming Phase 4-5 work
-
-### Session 55 status check
-- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
-- Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
@@ -164,6 +122,48 @@ Auto-generated because session `affect_aif_20260417_004904` hit the max-turn bud
   - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing
   - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing
   - `pgrep -af` confirms the original wrappers and worker processes remain live:
+    - `shallow_confirm`: wrapper `373967`; python `374127`, `374164`, `374165`
+    - `h5_selection`: wrapper `373976`; python `374138`
+    - `clinical_post_restructure`: wrapper `373989`; python `374151`, `374161`
+- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
+- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
+
+### Session 61 status check
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree was dirty only from `conductor/STATE.md`
+- Performed one bounded completion check for the detached Phase 4 runs:
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv`
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; no batch files present yet under `results/h5_selection/h5_partner_selection`
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv`
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory not created yet under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms the launched wrappers and worker processes remain live:
+    - `shallow_confirm`: wrapper `373967`; python `374127`, `374164`, `374165`
+    - `h5_selection`: wrapper `373976`; python `374138`
+    - `clinical_post_restructure`: wrapper `373989`; python `374151`, `374161`
+- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
+- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
+
+### Session 62 status check
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree was dirty only from `conductor/STATE.md`
+- Performed one bounded completion check for the detached Phase 4 runs:
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv`
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output now present at `results/h5_selection/h5_partner_selection/results_partial.csv`
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv`
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory not created yet under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms the launched wrappers and worker processes remain live:
     - `shallow_confirm`: wrapper `373967`; python `374127`, `374164`, `374165`
     - `h5_selection`: wrapper `373976`; python `374138`
     - `clinical_post_restructure`: wrapper `373989`; python `374151`, `374161`
