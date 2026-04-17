@@ -13,34 +13,13 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 62 — bounded completion check on detached Phase 4 experiment batches)
+2026-04-17 (Session 63 — bounded completion check on detached Phase 4 experiment batches)
 
 ## Session Count
-62
+63
 
 
 <!-- Older entries truncated (was 171 lines) -->
-
-- Re-checked phase docs:
-  - `docs/future/roadmap.md`
-  - `docs/experiment/results.md`
-- Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
-  - working tree remains dirty only from `conductor/STATE.md`
-- DECISION: the mission remains blocked because `MISSION.md` explicitly requires stopping when shallow-depth affect is still weak at `tau=1`, and there is still no user override in this wake cycle
-- NEXT: wait for the user to decide whether to treat the repeated weak shallow signal as a paper-story reframe or to request stronger confirmation before any further experiments or result-interpretation edits
-
-### Session 56 status check
-- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
-- Confirmed `conductor/INBOX.md` does not exist
-- Re-checked phase docs:
-  - `docs/future/roadmap.md`
-  - `docs/experiment/results.md`
-- Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
-  - working tree remains dirty only from `conductor/STATE.md`
-- DECISION: no executable mission work is authorized in this wake cycle because the shallow-H1 stop condition is still active and no user override or inbox task is present
-- NEXT: wait for the user to decide whether to proceed with a stronger confirmation run or to treat the repeated weak shallow signal as a paper-story reframe before resuming Phase 4-5 work
 
 ### Session 57 status check
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
@@ -161,6 +140,27 @@ mode_hint: monitor
 - Performed one bounded completion check for the detached Phase 4 runs:
   - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv`
   - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output now present at `results/h5_selection/h5_partner_selection/results_partial.csv`
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv`
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory not created yet under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms the launched wrappers and worker processes remain live:
+    - `shallow_confirm`: wrapper `373967`; python `374127`, `374164`, `374165`
+    - `h5_selection`: wrapper `373976`; python `374138`
+    - `clinical_post_restructure`: wrapper `373989`; python `374151`, `374161`
+- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
+- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
+
+### Session 63 status check
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree was dirty only from `conductor/STATE.md`
+- Performed one bounded completion check for the detached Phase 4 runs:
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv`
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv`
   - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv`
   - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory not created yet under `results/clinical_post_restructure/clinical_phenotypes`
   - `pgrep -af` confirms the launched wrappers and worker processes remain live:
