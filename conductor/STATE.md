@@ -13,34 +13,13 @@ mode_hint: monitor
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 59 — bounded completion check on detached Phase 4 experiment batches)
+2026-04-17 (Session 60 — bounded completion check on detached Phase 4 experiment batches)
 
 ## Session Count
-59
+60
 
 
-<!-- Older entries truncated (was 182 lines) -->
-
-  - `docs/experiment/results.md`
-- Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
-  - working tree remains dirty only from `conductor/STATE.md`
-- Performed one completion check for the detached Phase 3 regeneration jobs:
-  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` still missing
-  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` is present
-  - `pgrep -af 'h1_factorial'` still shows the launched wrapper and python processes:
-    - wrapper `209790`
-    - python `209969`, `209985`, `209986`
-  - `pgrep -af 'scripts/run_experiment.py --config configs/(h1_factorial|h2_lesion_dissociation|h4_betrayal_recovery)\\.json'` shows:
-    - wrappers `209791`, `209792`
-    - python `209972`, `209973`
-- No additional polling performed after that single completion check and one H1-specific liveness clarification.
-
-<!-- AUTO-HANDOFF-START -->
-## Auto Handoff
-_Last generated at 2026-04-17T00:58:41Z for session `affect_aif_20260417_004904`._
+<!-- Older entries truncated (was 171 lines) -->
 
 Auto-generated because session `affect_aif_20260417_004904` hit the max-turn budget.
 
@@ -168,4 +147,25 @@ Auto-generated because session `affect_aif_20260417_004904` hit the max-turn bud
     - `h5_selection`: wrapper `373976`; python `374138`
     - `clinical_post_restructure`: wrapper `373989`; python `374151`, `374161`
 - DECISION: no analysis or doc updates are available in this wake cycle because none of the Phase 4 batches has completed yet
+- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
+
+### Session 60 status check
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree was dirty only from `conductor/STATE.md`
+- Performed one bounded completion check for the detached Phase 4 runs:
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing
+  - `pgrep -af` confirms the original wrappers and worker processes remain live:
+    - `shallow_confirm`: wrapper `373967`; python `374127`, `374164`, `374165`
+    - `h5_selection`: wrapper `373976`; python `374138`
+    - `clinical_post_restructure`: wrapper `373989`; python `374151`, `374161`
+- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
 - NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
