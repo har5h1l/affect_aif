@@ -13,15 +13,15 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 47 — one completion check done; H2 canonical results now present, H1/H4 still incomplete, duplicate legacy reruns still alive, stop condition still active)
+2026-04-17 (Session 48 — one completion check done; H1/H4 still incomplete, both partial files present, duplicate legacy reruns still alive, stop condition still active)
 
 ## Session Count
-47
+48
 
 
-<!-- Older entries truncated (was 173 lines) -->
+<!-- Older entries truncated (was 174 lines) -->
 
-### Session 47 monitor pass
+### Session 48 monitor pass
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
 - Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
@@ -30,20 +30,21 @@ mode_hint: hybrid
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
   - working tree remains dirty only from `conductor/STATE.md`
-- Performed one completion check for the detached regeneration jobs:
+- Performed the single allowed completion check for the blocked H1/H4 reruns:
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` is now present
-  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
   - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` is present
-  - `pgrep -af` still shows the relaunched wrapper/python processes:
+  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
+  - `results/h4_betrayal/h4_betrayal_recovery/results_partial.csv` is present
+  - `pgrep -af 'scripts/run_experiment.py --config configs/(h1_factorial|h4_betrayal_recovery)\.json'` still shows wrapper and python processes:
+    - `209792`, `209973` for `h4_betrayal`
+    - `283274` for duplicate `h4_betrayal_setsid_20260416`
+  - `pgrep -af 'h1_factorial|h4_betrayal'` still shows wrapper and python processes:
     - `209790`, `209969`, `209985`, `209986` for `h1_factorial`
     - `209792`, `209973` for `h4_betrayal`
-  - `pgrep -af` also shows older detached `setsid` python runs still alive:
-    - `283269` for `h1_factorial_setsid_20260416`
-    - `283271` for `h2_lesion_setsid_20260416`
-    - `283274` for `h4_betrayal_setsid_20260416`
-- DECISION: mission remains blocked because the shallow-H1 contradiction still stands and the canonical H1/H4 reruns are not complete.
-- NEXT: if reawakened without new user instruction, do not start Phase 4 or rewrite docs; at most one more completion check is warranted, then continue waiting for user direction.
+    - `283269` for duplicate `h1_factorial_setsid_20260416`
+    - `283274` for duplicate `h4_betrayal_setsid_20260416`
+- DECISION: mission remains blocked pending user direction because the shallow-H1 contradiction remains unresolved and no new complete H1/H4 outputs are available.
+- NEXT: if reawakened without user input, do not resume implementation; at most do one more completion check and otherwise let conductor sleep.
 
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
