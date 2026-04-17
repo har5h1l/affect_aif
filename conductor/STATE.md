@@ -2,53 +2,67 @@
 status: BLOCKED
 next_priority: 1
 pending_work:
-  - "User decision needed: H1 shallow contradiction still persists in the latest available checkpoint; `results/reanalysis/h1_shallow_reanalysis.txt` still reports tau1 d=0.011 and tau2 d=0.074 from completed seeds in `results_partial.csv`"
-  - "If confirmation is desired, let the detached H1/H4 reruns finish or relaunch one canonical confirmation batch before changing docs or starting Phase 4"
-  - "H4 betrayal window remains unusable from the available outputs because `results/h4_betrayal/h4_betrayal_recovery/results.csv` is still absent"
-next_session_focus: "Wait for user direction on the shallow-H1 contradiction; do not advance to Phase 4 or rewrite the narrative unless the user approves a confirmation path"
+  - "User decision still needed: H1 shallow contradiction persists in `results/reanalysis/h1_shallow_reanalysis.txt` with tau1 d=0.011 and tau2 d=0.074 from the best available checkpoint data"
+  - "If confirmation is desired, let the detached H1/H4 reruns finish or launch one canonical shallow confirmation batch before changing docs or starting Phase 4"
+  - "H4 betrayal-window evidence is still incomplete: `results/h4_betrayal/h4_betrayal_recovery/results.csv` is absent and the current partial only contains `tau4_no_affect` coverage"
+next_session_focus: "Hold on the post-restructure narrative until the user chooses how to handle the weak shallow-H1 signal; only do one completion check for H1/H4 if reawakened without new direction"
 model_hint: opus
-mode_hint: research
+mode_hint: hybrid
 ---
 
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 39 — stop condition still active; H2 main csv is present but H1/H4 remain incomplete)
+2026-04-17 (Session 40 — test suite repaired and green; mission stop condition still active)
 
 ## Session Count
-39
+40
 
-### Session 39 stop-check
+### Session 40 checkpoint
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
 - Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
-- Checked branch state:
+- Checked branch state before editing:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
-  - worktree is not limited to `conductor/STATE.md`; additional modified files are:
-    - `scripts/README.md`
-    - `scripts/run_targeted_reanalysis.py`
-    - `tests/test_supported_surface.py`
-- Performed one completion/liveness check for the detached reruns:
-  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` is now present
-  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
+  - dirty files included `scripts/README.md`, `scripts/run_targeted_reanalysis.py`, `tests/test_supported_surface.py`, and `conductor/STATE.md`
+- Performed one completion/liveness check for the detached Phase 3 reruns:
+  - `results/h1_factorial/h1_depth_affect_factorial/results.csv` is still missing
   - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` is present
-  - `pgrep -af ...` still shows live rerun processes for:
-    - main wrappers/python: `209790`, `209792`, `209969`, `209973`, `209985`, `209986`
-    - setsid reruns: `283269`, `283271`, `283274`
-- Re-read `results/reanalysis/h1_shallow_reanalysis.txt`:
-  - tau1 affect vs no-affect: `d=0.011`, `p=0.953175`
-  - tau2 affect vs no-affect: `d=0.074`, `p=0.780319`
-  - file still flags `Flag tau=1 weak affect signal: YES`
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` is now present
+  - `results/h4_betrayal/h4_betrayal_recovery/results.csv` is still missing
+  - live rerun processes still include the H1/H4 wrappers and python workers; no additional polling performed after this check
+- Fixed the targeted reanalysis checkpoint loader so sparse/live partial CSVs are normalized before calling `final_round_summary()`:
+  - backfills missing `condition` values from canonical `condition_name`
+  - injects missing summary columns with `NaN` defaults for sparse checkpoint CSVs
+  - preserves partial/final multi-source reporting in the output text
+- Verification:
+  - `python -m pytest tests/test_supported_surface.py::test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_live_tail -v --tb=short` → passed
+  - `python -m pytest tests/ -v` → `249 passed, 26 skipped, 3 warnings`
+- Commit created:
+  - `2fd4581` — `Fix targeted reanalysis fallback for sparse checkpoints`
 
-DECISION: The mission stop condition remains active because the latest available shallow H1 checkpoint still shows a weak effect far below the `d<0.3` threshold.
-BLOCKER: Do not proceed to Phase 4 or rewrite the hypothesis narrative without user approval on how to handle the contradiction.
-NEXT: Wait for user direction or for a deliberate confirmation plan; avoid further polling beyond a future single completion check.
+DECISION: Keep the mission blocked on the H1 contradiction even though the test failure is fixed; the latest reanalysis still reports tau1 `d=0.011` and tau2 `d=0.074`.
+BLOCKER: Do not rewrite docs or start Phase 4 while the shallow-H1 contradiction remains unresolved and H1/H4 final CSVs are still missing.
+NEXT: If the user wants confirmation, wait for the existing H1/H4 reruns to finish or run one explicit shallow confirmation batch with incremental saves; otherwise continue holding.
+
+## Auto Handoff
+- What changed:
+  - committed `2fd4581` to make `scripts/run_targeted_reanalysis.py` tolerate sparse/live checkpoint CSVs
+  - restored the test invariant; full suite is green
+  - confirmed `h2_lesion` final CSV now exists
+- Still in flight:
+  - detached H1 and H4 reruns are still running and their final CSVs are absent
+  - H1 shallow reanalysis remains contradictory to the expected story
+  - H4 partial is not analyzable yet because affect rows are missing
+- Next session should do:
+  - wait for explicit user direction on the weak shallow-H1 result
+  - if woken without new direction, do at most one H1/H4 completion check and update state only
+  - do not start Phase 4 or update the narrative unless the user approves a confirmation path
 
 
-<!-- Older entries truncated (was 167 lines) -->
+<!-- Older entries truncated (was 179 lines) -->
 
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
