@@ -13,15 +13,15 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 45 — one completion check done; H2 full CSV still present, H1/H4 still incomplete, stop condition still active)
+2026-04-17 (Session 46 — one completion check done; H1/H4 still incomplete, duplicate legacy reruns still alive, stop condition still active)
 
 ## Session Count
-45
+46
 
 
-<!-- Older entries truncated (was 172 lines) -->
+<!-- Older entries truncated (was 174 lines) -->
 
-### Session 45 monitor pass
+### Session 46 monitor pass
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
 - Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
@@ -30,20 +30,19 @@ mode_hint: hybrid
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
   - working tree remains dirty only from `conductor/STATE.md`
-- Performed one completion check for the detached reruns:
+- Performed the one allowed completion check for detached H1/H4 reruns:
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` exists
+  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` present and still growing (`240332537` bytes at check time)
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` exists
-  - `pgrep -af` still shows active rerun processes:
-    - wrapper `209790` for `h1_factorial`
-    - wrapper `209792` for `h4_betrayal`
-    - python `209969`, `209985`, `209986` for `h1_factorial`
-    - python `209973` for `h4_betrayal`
-    - older detached python `283269` for `h1_factorial_setsid_20260416`
-    - older detached python `283271` for `h2_lesion_setsid_20260416`
-    - older detached python `283274` for `h4_betrayal_setsid_20260416`
-- DECISION: stop condition still active; no additional polling performed after this single check.
+  - `results/h4_betrayal/h4_betrayal_recovery/results_partial.csv` present (`302222317` bytes at check time)
+  - active wrapper/python processes still present for current reruns:
+    - H1: wrapper `209790`; python `209969`, `209985`, `209986`
+    - H4: wrapper `209792`; python `209973`
+  - older duplicate detached python processes also still present:
+    - H1 legacy rerun `283269` (`h1_factorial_setsid_20260416`)
+    - H4 legacy rerun `283274` (`h4_betrayal_setsid_20260416`)
+- DECISION: mission remains blocked because the shallow-H1 contradiction still stands and the canonical H1/H4 reruns are not yet complete.
+- NEXT: if reawakened without user input, do not restart experiments or rewrite docs; at most do one fresh completion check and wait for user direction or finished canonical outputs.
 
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
