@@ -4,8 +4,8 @@ next_priority: 1
 pending_work:
   - "User decision still needed: H1 shallow contradiction persists in `results/reanalysis/h1_shallow_reanalysis.txt` with tau1 d=0.011 and tau2 d=0.074 from the best available checkpoint data"
   - "If confirmation is desired, let the detached H1/H4 reruns finish or launch one canonical shallow confirmation batch before changing docs or starting Phase 4"
-  - "H2 lesion rerun finished and produced `results/h2_lesion/h2_lesion_dissociation/results.csv`, but H1/H4 remain incomplete and should not be re-polled repeatedly"
-next_session_focus: "Hold on the post-restructure narrative until the user chooses how to handle the weak shallow-H1 signal; if reawakened without new direction, do at most one completion check for H1/H4 and avoid further polling"
+  - "H2 lesion rerun is complete at `results/h2_lesion/h2_lesion_dissociation/results.csv`, but H1/H4 remain incomplete and should not be re-polled repeatedly"
+next_session_focus: "Keep the mission blocked pending user direction on the weak shallow-H1 result; if reawakened without new instruction, do at most one completion check for H1/H4 and avoid further polling"
 model_hint: opus
 mode_hint: hybrid
 ---
@@ -13,32 +13,37 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-17 (Session 41 — one completion check done; H2 full CSV landed, H1/H4 still incomplete, stop condition still active)
+2026-04-17 (Session 42 — one completion check done; H2 full CSV still present, H1/H4 still incomplete, stop condition still active)
 
 ## Session Count
-41
+42
 
-
-<!-- Older entries truncated (was 193 lines) -->
-
-### Session 41 monitor pass
+### Session 42 monitor pass
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
 - Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
 - Checked branch state:
-  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - `git status --short --branch` -> `## analysis/post-restructure-reframe`
   - working tree remains dirty only from `conductor/STATE.md`
 - Performed one completion check for the detached regeneration jobs:
   - `results/h1_factorial/h1_depth_affect_factorial/results.csv` still missing
-  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` present and updated at `2026-04-17 02:47:56 UTC`
-  - `results/h2_lesion/h2_lesion_dissociation/results.csv` now present (`357103649` bytes, updated `2026-04-17 01:08:51 UTC`)
+  - `results/h2_lesion/h2_lesion_dissociation/results.csv` is now present
   - `results/h4_betrayal/h4_betrayal_recovery/results.csv` still missing
-  - `results/h4_betrayal/h4_betrayal_recovery/results_partial.csv` present and last updated at `2026-04-17 02:31:01 UTC`
-  - `pgrep -af` still shows live H1/H4 wrapper/python processes plus the older `*_setsid_20260416` detached python runs
-- DECISION: mission stop condition remains active because the shallow-H1 contradiction is still unresolved and the missing H1/H4 full outputs do not provide new user direction
-- NEXT: do not change the narrative or launch Phase 4 work unless the user explicitly wants to proceed despite weak shallow-H1 evidence
+  - `results/h1_factorial/h1_depth_affect_factorial/results_partial.csv` is present
+  - `pgrep -af` still shows active H1/H4 wrapper and python processes:
+    - wrappers `209790`, `209792`
+    - python `209969`, `209973`, `209985`, `209986`
+  - additional detached `setsid` reruns are also still visible:
+    - `283269` for `h1_factorial_setsid_20260416`
+    - `283271` for `h2_lesion_setsid_20260416`
+    - `283274` for `h4_betrayal_setsid_20260416`
+- DECISION: stop condition remains active because the best available shallow H1 re-analysis still contradicts the expected H2 narrative.
+- NEXT: do not change docs or start Phase 4 without user direction; if reawakened, limit to one completion check for H1/H4.
+
+
+<!-- Older entries truncated (was 169 lines) -->
 
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
