@@ -8,7 +8,7 @@ import numpy as np
 
 from env.partner import Partner
 from agent.model.trust_game import TrustGameModel
-from agent.model.payoffs import decode_action, payoff_to_index
+from agent.model.payoffs import decode_env_agent_action, payoff_to_index
 
 
 class TrustGameEnv:
@@ -135,21 +135,14 @@ class TrustGameEnv:
         """Execute one round of the trust game."""
 
         nsa = self.model.num_social_actions
-        if self.assignment_mode == "agent_choice":
-            partner_idx, social_action = decode_action(
-                agent_action,
-                num_partners=self.num_partners,
-                assignment_mode=self.assignment_mode,
-                num_social_actions=nsa,
-            )
-        else:
-            partner_idx, social_action = decode_action(
-                agent_action,
-                num_partners=self.num_partners,
-                assignment_mode=self.assignment_mode,
-                active_partner=self.active_partner,
-                num_social_actions=nsa,
-            )
+        partner_idx, social_action = decode_env_agent_action(
+            int(agent_action),
+            num_partners=self.num_partners,
+            assignment_mode=self.assignment_mode,
+            active_partner=self.active_partner,
+            num_social_actions=nsa,
+            factorized=self.model.uses_factorized_controls,
+        )
 
         scheduled_type_switched = self._apply_scheduled_type_switches(self.round_idx + 1)
         scheduled_stance_switched = self._apply_scheduled_stance_switches(self.round_idx + 1)

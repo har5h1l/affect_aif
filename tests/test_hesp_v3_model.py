@@ -12,9 +12,10 @@ def test_model_exposes_two_modalities_and_three_factors():
     assert model.A[1].shape == (4, 2, 4, 3)
 
     assert len(model.B) == 3
-    assert model.B[0].shape == (4, 4, 2)
-    assert model.B[1].shape == (3, 3, 2)
-    assert model.B[2].shape == (2, 2, 2)
+    n_ctrl = int(np.prod(model.num_controls))
+    assert model.B[0].shape == (4, 4, n_ctrl)
+    assert model.B[1].shape == (3, 3, n_ctrl)
+    assert model.B[2].shape == (2, 2, n_ctrl)
 
     assert len(model.C) == 2
     assert model.C[0].shape == (2,)

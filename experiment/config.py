@@ -46,6 +46,12 @@ class ExperimentConfig:
     lr: float = 0.1
     action_sampling: str = "marginal"
     use_parameter_learning: bool = False
+    learn_A: bool = False
+    learn_B: bool = False
+    learn_E: bool = False
+    pA_scale: float = 1.0
+    pB_scale: float = 10.0
+    lr_E: float = 0.5
 
     deep_horizon: int = 8
     shallow_horizon: int = 2

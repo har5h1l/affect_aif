@@ -1,11 +1,11 @@
 ---
-status: BLOCKED
+status: ACTIVE
 next_priority: 1
 pending_work:
-  - "User decision needed: `shallow_confirm` still contradicts the expected H2/H3 story (`tau1 d=0.1489`, `tau2 d=0.1955`) and the shallow lesion is not a clean Damasio dissociation"
-  - "Detached reruns for `h5_selection` and `clinical_post_restructure/clinical_betrayal` exited without final `results.csv`; partials are incomplete (`h5_selection`: 15 seeds x 200 rounds, `clinical_betrayal`: 26 seeds x 120 rounds)"
-  - "`results/clinical_post_restructure/clinical_phenotypes` still has no partial or final output and appears never to have started in this worktree"
-next_session_focus: "Wait for user direction on whether to salvage/analyze incomplete partials or relaunch H5 and clinical batches; do not rewrite interpretation docs without explicit user approval"
+  - "Re-run `shallow_affect_confirm` (and other primary batches) on the new generative model — prior `shallow_confirm` effect sizes are not comparable"
+  - "Detached reruns for `h5_selection` and `clinical_post_restructure/clinical_betrayal` exited without final `results.csv`; partials incomplete — decide salvage vs relaunch"
+  - "`results/clinical_post_restructure/clinical_phenotypes` still absent in this worktree"
+next_session_focus: "Smoke then full `shallow_affect_confirm` with conditions [1-4,9,10]; then H5/clinical relaunch if user wants; do not rewrite results.md narrative until new CSVs exist"
 model_hint: opus
 mode_hint: research
 ---
@@ -13,13 +13,21 @@ mode_hint: research
 # Research State
 
 ## Last Updated
-2026-04-18 (Session 106 — detached H5 and clinical betrayal runs found exited without final outputs; both partials incomplete; `clinical_phenotypes` still absent)
+2026-04-18 (Session 107 — apashea-aligned generative model: factorized [1,2,2] controls, policy log-prior, learn_A/B/E flags, tau=3 conditions 9–10; full pytest green)
 
 ## Session Count
-106
+107
 
 
 <!-- Older entries truncated (was 170 lines) -->
+
+### Session 107 — apashea spec integration (implementation)
+- Implemented factorized `num_controls` for binary trust game (`[1,2,2]` random; `[P,2,2]` agent_choice), 4 planning policies per timestep, env decode via `decode_env_agent_action`
+- `decision_step_trust_game`: `log_policy_prior` on logits; `BaseAgent.log_policy_prior` + `learn_E` EMA from `last_q_pi`
+- Dirichlet `learn_A` / `learn_B` wired (`pA_scale`, `pB_scale`, `lr_E` on config); `learn_A` takes precedence over `use_parameter_learning` for A updates
+- Conditions **9** (`tau3_no_affect`) and **10** (`tau3_affect`); `configs/shallow_affect_confirm.json` includes `9, 10`
+- Tests: `test_hesp_v3_model`, `test_action_dependent_model`, `test_theory_alignment` betrayal assertion relaxed; 250 passed
+- Reference: `notebooks/04_apashea_trust_spec.ipynb`
 
 ### Session 67 status check
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`

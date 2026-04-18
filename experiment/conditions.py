@@ -29,6 +29,8 @@ CONDITIONS: dict[int, ConditionSpec] = {
     6: ConditionSpec("tau4_affect", "Affective agent at horizon 4", planning_horizon=4, agent_kind="affective"),
     7: ConditionSpec("tau8_no_affect", "No affect at horizon 8", planning_horizon=8, agent_kind="base"),
     8: ConditionSpec("tau8_affect", "Affective agent at horizon 8", planning_horizon=8, agent_kind="affective"),
+    9: ConditionSpec("tau3_no_affect", "No affect at horizon 3", planning_horizon=3, agent_kind="base"),
+    10: ConditionSpec("tau3_affect", "Affective agent at horizon 3", planning_horizon=3, agent_kind="affective"),
 }
 
 PRESET_CONDITIONS: dict[str, ConditionSpec] = {

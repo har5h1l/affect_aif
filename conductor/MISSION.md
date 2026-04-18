@@ -109,41 +109,35 @@ Save re-analysis outputs to:
 
 ---
 
+## Generative model update (apashea-aligned — landed in repo)
+
+Reference notebook: `notebooks/04_apashea_trust_spec.ipynb` (Andrew Pescia / apashea pymdp fork conventions, mapped to our JAX/NumPy stack — we do **not** embed pymdp).
+
+**Implemented (code):**
+
+1. **Factorized controls `[1,2,2]`** (binary games only; graded keeps single control `num_social_actions`). Planning enumerates **4** instantaneous policies per timestep `(NULL, stance, own)`; agent_choice uses `[num_partners, 2, 2]` with env encoding `partner*4 + stance*2 + own`. Payoff and `observe_outcome` use **executed `own_action`**; rollout uses **stance** column for generative stance transitions during planning; `predict_next_joint_belief` uses **executed own** for partner-observed stance dynamics (world-consistent).
+
+2. **Policy log-prior `log_policy_prior`** added to policy logits (`logits = -gamma_per_policy * G + log_policy_prior`), apashea `policy_sep_prior=True` analogue.
+
+3. **Optional Dirichlet learning** via `ExperimentConfig`: `learn_A`, `learn_B`, `learn_E`, `pA_scale`, `pB_scale`, `lr_E` (defaults off). `learn_A` supersedes legacy `use_parameter_learning` for A when both would apply.
+
+4. **Conditions 9–10**: `tau3_no_affect` / `tau3_affect` (horizon 3). `configs/shallow_affect_confirm.json` now includes `[1,2,3,4,9,10]`.
+
+5. **C[1]**: kept **log-softmax** (standard AIF); not raw softmax.
+
+**Implications:** All pre-change `shallow_confirm` / factorial numbers are **not** comparable to new runs — policy cardinality and env decoding changed. Re-run shallow confirmation and H1/H2 slices after this merge.
+
+---
+
 ## Phase 4: New Experiment Runs
 
 Run in this order (each requires smoke test first):
 
-**4.1 Shallow Depth Confirmation** (new config — create first)
+**4.1 Shallow Depth Confirmation**
 
-Create `configs/shallow_affect_confirm.json`:
-```json
-{
-  "experiment_name": "shallow_affect_confirm",
-  "num_partners": 4,
-  "num_rounds": 200,
-  "p_switch": 0.05,
-  "assignment_mode": "random",
-  "gamma": 1.0,
-  "lr": 0.1,
-  "action_sampling": "marginal",
-  "deep_horizon": 8,
-  "shallow_horizon": 2,
-  "max_policies": 4096,
-  "alpha_charge": 3.0,
-  "sigma_0_sq": 0.25,
-  "initial_beta": 1.0,
-  "beta_persistence": 0.8,
-  "beta_num_levels": 5,
-  "lesion_mode": "decouple",
-  "num_replications": 100,
-  "random_seed": 42,
-  "conditions": [1, 2, 3, 4],
-  "presets": ["lesioned"],
-  "partner_types": ["cooperator", "reciprocator", "exploiter", "random"],
-  "run_sensitivity": false
-}
-```
-Purpose: Confirm affect effect size at tau=1,2 where softmax discriminates. Also include lesioned preset to get lesion dissociation at shallow depth.
+`configs/shallow_affect_confirm.json` exists; **conditions must include** `[1, 2, 3, 4, 9, 10]` plus `presets: ["lesioned"]` as already committed.
+
+Purpose: Confirm affect at tau=1,2,3 where softmax still discriminates; lesioned preset for shallow lesion readout.
 
 Run:
 ```bash

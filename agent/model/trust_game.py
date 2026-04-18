@@ -17,7 +17,9 @@ from agent.model.payoffs import (
     build_graded_payoff_matrix,
     build_payoff_matrix,
     decode_action,
+    decode_instantaneous_index,
     expected_agent_payoff,
+    factorized_num_controls,
     infer_payoff_levels,
     num_actions,
     payoff_distribution,
@@ -56,7 +58,9 @@ class _BaseTrustGameModel:
         self._init_payoffs(cfg)
         self.payoff_levels = infer_payoff_levels(self.payoff_matrix)
         self.num_obs = [2, len(self.payoff_levels)]
-        self.num_controls = [num_actions(self.num_partners, self.assignment_mode, self.num_social_actions)]
+        self.num_controls = factorized_num_controls(
+            self.num_partners, self.assignment_mode, self.num_social_actions
+        )
 
         self.partner_action_prob_table = self._build_partner_action_prob_table()
         self.payoff_index_table = self._build_payoff_index_table()
@@ -65,6 +69,10 @@ class _BaseTrustGameModel:
         self.B = self.build_B()
         self.C = self.build_C()
         self.D = self.build_D()
+
+    @property
+    def uses_factorized_controls(self) -> bool:
+        return len(self.num_controls) > 1
 
     def _init_payoffs(self, cfg: dict) -> None:  # pragma: no cover - implemented by subclasses
         raise NotImplementedError
@@ -121,7 +129,7 @@ class _BaseTrustGameModel:
         """Build transition tensors for type, stance, and own action."""
 
         B = obj_array(3)
-        num_actions_total = self.num_controls[0]
+        num_actions_total = int(np.prod(self.num_controls))
 
         type_transition = np.full(
             (self.num_types, self.num_types), self.p_switch / max(self.num_types - 1, 1), dtype=float
@@ -130,19 +138,25 @@ class _BaseTrustGameModel:
         B[0] = np.repeat(type_transition[:, :, None], num_actions_total, axis=2)
 
         stance_transition = np.zeros((self.num_stances, self.num_stances, num_actions_total), dtype=float)
+        own_tensor = np.zeros((self.num_social_actions, self.num_social_actions, num_actions_total), dtype=float)
         for action in range(num_actions_total):
-            evidence = cooperation_evidence_strength(
-                action=self.social_action_for_action(action),
-                num_social_actions=self.num_social_actions,
-            )
-            stance_transition[:, :, action] = interpolate_stance_transition(evidence)
+            controls = decode_instantaneous_index(action, self.num_controls)
+            if self.uses_factorized_controls:
+                stance_idx = int(controls[-2])
+                own_idx = int(controls[-1])
+                evidence = cooperation_evidence_strength(stance_idx, num_social_actions=self.num_social_actions)
+                stance_transition[:, :, action] = interpolate_stance_transition(evidence)
+                own_tensor[own_idx, :, action] = 1.0
+            else:
+                evidence = cooperation_evidence_strength(
+                    action=self.social_action_for_action(action),
+                    num_social_actions=self.num_social_actions,
+                )
+                stance_transition[:, :, action] = interpolate_stance_transition(evidence)
+                social_action = self.social_action_for_action(action)
+                own_tensor[social_action, :, action] = 1.0
         B[1] = stance_transition
-
-        own_action = np.zeros((self.num_social_actions, self.num_social_actions, num_actions_total), dtype=float)
-        for action in range(num_actions_total):
-            social_action = self.social_action_for_action(action)
-            own_action[social_action, :, action] = 1.0
-        B[2] = own_action
+        B[2] = own_tensor
         return B
 
     def build_C(self) -> np.ndarray:
@@ -162,6 +176,22 @@ class _BaseTrustGameModel:
 
     def get_matrices(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         return self.A, self.B, self.C, self.D
+
+    def build_pA(self, scale: float = 1.0) -> np.ndarray:
+        """Dirichlet prior hyperparameters for observation likelihoods."""
+
+        pA = obj_array(len(self.A))
+        for modality in range(len(self.A)):
+            pA[modality] = float(scale) * np.asarray(self.A[modality], dtype=float).copy()
+        return pA
+
+    def build_pB(self, scale: float = 10.0) -> np.ndarray:
+        """Dirichlet prior hyperparameters for transition tensors."""
+
+        pB = obj_array(len(self.B))
+        for factor in range(len(self.B)):
+            pB[factor] = float(scale) * np.asarray(self.B[factor], dtype=float).copy()
+        return pB
 
     def as_joint_belief(self, belief: np.ndarray) -> np.ndarray:
         array = np.asarray(belief, dtype=float)
@@ -199,10 +229,19 @@ class _BaseTrustGameModel:
     def transition_for_action(self, action: int = 0) -> np.ndarray:
         return self.type_transition_for_action(action)
 
+    def stance_transition_for_executed_own_action(self, own_action: int) -> np.ndarray:
+        """Stance dynamics from partner-observed behavior (executed own action)."""
+
+        evidence = cooperation_evidence_strength(int(own_action), num_social_actions=self.num_social_actions)
+        return interpolate_stance_transition(evidence)
+
     def predict_next_joint_belief(self, joint_belief: np.ndarray, action: int) -> np.ndarray:
         joint = self.as_joint_belief(joint_belief)
-        type_transition = self.type_transition_for_action(action)
-        stance_transition = self.stance_transition_for_action(action)
+        type_transition = self.type_transition_for_action(int(action) if not self.uses_factorized_controls else 0)
+        if self.uses_factorized_controls:
+            stance_transition = self.stance_transition_for_executed_own_action(int(action))
+        else:
+            stance_transition = self.stance_transition_for_action(int(action))
         predictive = type_transition @ joint @ stance_transition.T
         predictive /= max(float(predictive.sum()), 1e-16)
         return predictive

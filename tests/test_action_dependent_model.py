@@ -9,8 +9,9 @@ def test_trust_model_exposes_stance_factor_and_joint_likelihood():
 
     assert model.num_stances == 3
     assert model.A[0].shape == (2, model.num_types, model.num_stances)
-    assert model.B[0].shape == (model.num_types, model.num_types, model.num_controls[0])
-    assert model.B[1].shape == (model.num_stances, model.num_stances, model.num_controls[0])
+    n_ctrl = int(np.prod(model.num_controls))
+    assert model.B[0].shape == (model.num_types, model.num_types, n_ctrl)
+    assert model.B[1].shape == (model.num_stances, model.num_stances, n_ctrl)
     np.testing.assert_allclose(model.D[1], np.asarray([0.2, 0.6, 0.2], dtype=float))
 
 

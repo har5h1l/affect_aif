@@ -11,6 +11,28 @@ def _decode_action(action, active_partner, assignment_mode_code, num_social_acti
     return int(active_partner), int(action)
 
 
+def _decode_policy_timestep(
+    policy_row,
+    active_partner,
+    assignment_mode_code,
+    num_social_actions=2,
+):
+    """Return (partner_idx, stance_action, own_action). Legacy flat rows use stance=own=social."""
+
+    row = np.asarray(policy_row, dtype=int).ravel()
+    if row.size == 1:
+        partner_idx, social_action = _decode_action(
+            int(row[0]),
+            active_partner=active_partner,
+            assignment_mode_code=assignment_mode_code,
+            num_social_actions=num_social_actions,
+        )
+        return partner_idx, int(social_action), int(social_action)
+    if int(assignment_mode_code) == 1:
+        return int(row[0]), int(row[1]), int(row[2])
+    return int(active_partner), int(row[1]), int(row[2])
+
+
 def generate_observation_sequences(planning_horizon: int) -> np.ndarray:
     """Enumerate all binary observation sequences needed for sophisticated rollout."""
 
@@ -106,9 +128,9 @@ def _rollout_policy_trust_game_mean_field(
     step_costs: list[float] = []
     first_partner = None
 
-    for raw_action in np.asarray(policy, dtype=int):
-        partner_idx, social_action = _decode_action(
-            raw_action,
+    for policy_row in np.asarray(policy, dtype=int):
+        partner_idx, stance_action, own_action = _decode_policy_timestep(
+            policy_row,
             active_partner=active_partner,
             assignment_mode_code=assignment_mode_code,
             num_social_actions=num_social_actions,
@@ -118,7 +140,7 @@ def _rollout_policy_trust_game_mean_field(
         joint = beliefs_t[partner_idx]
         partner_probs = _partner_action_distribution(joint, partner_action_prob_table)
         payoff_dist = _payoff_distribution(
-            social_action=social_action,
+            social_action=own_action,
             partner_action_probs=partner_probs,
             payoff_index_table=payoff_index_table,
             num_payoffs=len(payoff_preferences),
@@ -129,7 +151,7 @@ def _rollout_policy_trust_game_mean_field(
         beliefs_t[partner_idx] = _predict_next_joint(
             joint,
             B_type=np.asarray(B_type, dtype=float),
-            B_stance=np.asarray(B_stance_by_action[int(raw_action)], dtype=float),
+            B_stance=np.asarray(B_stance_by_action[int(stance_action)], dtype=float),
         )
 
     total = float(sum(step_costs))
@@ -172,9 +194,9 @@ def _rollout_policy_trust_game_sophisticated(
         path_log_prob = 0.0
         step_costs = np.zeros((len(policy),), dtype=float)
 
-        for t, raw_action in enumerate(policy):
-            partner_idx, social_action = _decode_action(
-                raw_action,
+        for t, policy_row in enumerate(policy):
+            partner_idx, stance_action, own_action = _decode_policy_timestep(
+                policy_row,
                 active_partner=active_partner,
                 assignment_mode_code=assignment_mode_code,
                 num_social_actions=num_social_actions,
@@ -184,7 +206,7 @@ def _rollout_policy_trust_game_sophisticated(
             joint = beliefs_t[partner_idx]
             partner_probs = _partner_action_distribution(joint, partner_action_prob_table)
             payoff_dist = _payoff_distribution(
-                social_action=social_action,
+                social_action=own_action,
                 partner_action_probs=partner_probs,
                 payoff_index_table=payoff_index_table,
                 num_payoffs=len(payoff_preferences),
@@ -198,7 +220,7 @@ def _rollout_policy_trust_game_sophisticated(
                     joint,
                     observed_action=observed_action,
                     B_type=B_type,
-                    B_stance=B_stance_by_action[int(raw_action)],
+                    B_stance=B_stance_by_action[int(stance_action)],
                     partner_action_prob_table=partner_action_prob_table,
                 )
                 prior_entropy = _entropy(joint.reshape(-1))
@@ -211,7 +233,7 @@ def _rollout_policy_trust_game_sophisticated(
                 beliefs_t[partner_idx] = _predict_next_joint(
                     joint,
                     B_type=B_type,
-                    B_stance=B_stance_by_action[int(raw_action)],
+                    B_stance=B_stance_by_action[int(stance_action)],
                 )
 
             step_costs[t] = float(use_utility_flag) * pragmatic + float(use_information_gain_flag) * epistemic
@@ -241,6 +263,7 @@ def decision_step_trust_game(
     use_utility_flag,
     use_information_gain_flag,
     num_social_actions=2,
+    log_policy_prior=None,
 ):
     """Evaluate all policies and return rollout diagnostics."""
 
@@ -275,6 +298,8 @@ def decision_step_trust_game(
     first_partners = np.asarray(first_partners, dtype=int)
     gamma_values = gamma_per_policy(gamma_base=gamma, first_partners=first_partners, precision_signal=precision_signal)
     logits = -gamma_values * G
+    if log_policy_prior is not None:
+        logits = logits + np.asarray(log_policy_prior, dtype=float)
     logits -= logits.max(initial=0.0)
     exp_logits = np.exp(logits)
     q_pi = exp_logits / max(float(exp_logits.sum()), 1e-16)

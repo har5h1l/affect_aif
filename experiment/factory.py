@@ -60,6 +60,12 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
         seed=seed,
         use_parameter_learning=config.use_parameter_learning,
         use_information_gain=spec.use_information_gain,
+        learn_A=config.learn_A,
+        learn_B=config.learn_B,
+        learn_E=config.learn_E,
+        pA_scale=config.pA_scale,
+        pB_scale=config.pB_scale,
+        lr_E=config.lr_E,
     )
     params = {
         "alpha_charge": config.alpha_charge,

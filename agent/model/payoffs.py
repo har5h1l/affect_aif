@@ -128,3 +128,89 @@ def decode_action(
     if active_partner is None:
         raise ValueError("active_partner is required when assignment_mode is not 'agent_choice'.")
     return active_partner, action
+
+
+def factorized_num_controls(num_partners: int, assignment_mode: str, num_social_actions: int) -> list[int]:
+    """Control factor sizes: [1,2,2] (binary) or [num_partners,2,2] (agent_choice); else legacy single control."""
+
+    if int(num_social_actions) != 2:
+        return [num_actions(num_partners, assignment_mode, num_social_actions)]
+    if assignment_mode == "agent_choice":
+        return [int(num_partners), 2, 2]
+    return [1, 2, 2]
+
+
+def decode_instantaneous_index(idx: int, num_controls: list[int]) -> tuple[int, ...]:
+    """Map flat index to control tuple (first factor slowest, last fastest — matches itertools.product)."""
+
+    idx = int(idx)
+    if len(num_controls) == 1:
+        return (idx,)
+    out: list[int] = []
+    for n in reversed(num_controls):
+        n = int(n)
+        out.append(idx % n)
+        idx //= n
+    return tuple(reversed(out))
+
+
+def encode_instantaneous_index(controls: tuple[int, ...], num_controls: list[int]) -> int:
+    """Inverse of decode_instantaneous_index."""
+
+    idx = 0
+    for c, n in zip(controls, num_controls):
+        idx = idx * int(n) + int(c)
+    return int(idx)
+
+
+def encode_env_action_factorized(
+    partner_idx: int,
+    stance_action: int,
+    own_action: int,
+    assignment_mode: str,
+    num_partners: int,
+    num_controls: list[int],
+) -> int:
+    """Encode policy row for env.step. random: own_action only. agent_choice: partner*4 + stance*2 + own."""
+
+    if len(num_controls) == 1:
+        if assignment_mode == "agent_choice":
+            return encode_action(
+                int(partner_idx),
+                int(stance_action),
+                int(num_partners),
+                assignment_mode,
+                num_social_actions=2,
+            )
+        return int(own_action)
+    if assignment_mode == "agent_choice":
+        return int(partner_idx) * 4 + int(stance_action) * 2 + int(own_action)
+    return int(own_action)
+
+
+def decode_env_agent_action(
+    agent_action: int,
+    num_partners: int,
+    assignment_mode: str,
+    active_partner: int | None,
+    num_social_actions: int,
+    factorized: bool,
+) -> tuple[int, int]:
+    """Decode env.step input to (partner_idx, own_action) for payoff and agent.observe_outcome."""
+
+    if not factorized:
+        return decode_action(
+            int(agent_action),
+            num_partners,
+            assignment_mode,
+            active_partner=active_partner,
+            num_social_actions=num_social_actions,
+        )
+    if assignment_mode == "agent_choice":
+        partner_idx = int(agent_action) // 4
+        rem = int(agent_action) % 4
+        own_action = rem % 2
+        return partner_idx, own_action
+    if active_partner is None:
+        raise ValueError("active_partner is required when assignment_mode is not 'agent_choice'.")
+    return int(active_partner), int(agent_action)

@@ -66,7 +66,10 @@ def sample_action(
 
     if sampling_mode == "full":
         policy_idx = int(rng.choice(len(q_pi), p=q_pi))
-        return int(policies[policy_idx, timestep])
+        step = policies[policy_idx, timestep]
+        if policies.ndim == 3:
+            return np.asarray(step, dtype=int)
+        return int(step)
 
     if policies.ndim == 2:
         actions = policies[:, timestep]
