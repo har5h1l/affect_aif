@@ -15,7 +15,8 @@ from aif import runtime as aif_runtime
 ROOT = Path(__file__).resolve().parents[1]
 AIF_DIR = ROOT / "aif"
 AGENT_INFERENCE_DIR = ROOT / "agent" / "inference"
-MOVED_MODULES = ("backend", "efe", "learning", "maths", "policies", "runtime", "utils")
+# Phase 2 intentionally diverges in policies/learning as Agent-aware wrappers land.
+MOVED_MODULES = ("backend", "efe", "maths", "runtime", "utils")
 
 
 class _InferenceImportRewriter(ast.NodeTransformer):

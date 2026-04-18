@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 import aif
 from agent.model.trust_game import TrustGameModel
@@ -86,3 +87,36 @@ def test_infer_states_matches_trust_game_joint_posterior_buggy_path():
     )
 
     np.testing.assert_allclose(qs[0].reshape(num_types, num_stances), posterior, atol=1e-10)
+
+
+def test_infer_states_handles_multimodal_trust_game_tensors_without_crashing():
+    model = TrustGameModel(ExperimentConfig())
+    agent = aif.Agent(
+        A=np.asarray(model.A, dtype=object),
+        B=np.asarray(model.B, dtype=object),
+        C=np.asarray(model.C, dtype=object),
+        D=np.asarray(model.D, dtype=object),
+        policies=np.asarray([[[0, 0, 0]]], dtype=int),
+    )
+
+    qs = aif.infer_states(agent, obs=[0, 0], action=[0, 0, 0])
+
+    assert len(qs) == 3
+    for factor_qs in qs:
+        np.testing.assert_allclose(np.sum(factor_qs), 1.0, atol=1e-12)
+        assert np.all(np.isfinite(factor_qs))
+
+
+def test_infer_policies_rejects_multifactor_agents_for_now():
+    model = TrustGameModel(ExperimentConfig())
+    agent = aif.Agent(
+        A=np.asarray(model.A, dtype=object),
+        B=np.asarray(model.B, dtype=object),
+        C=np.asarray(model.C, dtype=object),
+        D=np.asarray(model.D, dtype=object),
+        policies=np.asarray([[[0, 0, 0]]], dtype=int),
+    )
+    agent.reset()
+
+    with pytest.raises(ValueError, match="single-factor"):
+        aif.infer_policies(agent)
