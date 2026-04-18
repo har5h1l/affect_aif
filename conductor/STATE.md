@@ -13,15 +13,15 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-18 (Session 82 — bounded completion check, no new batch completions)
+2026-04-18 (Session 83 — bounded completion check, no new batch completions)
 
 ## Session Count
-82
+83
 
 
-<!-- Older entries truncated (was 179 lines) -->
+<!-- Older entries truncated (was 172 lines) -->
 
-### Session 82 status check
+### Session 83 status check
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
 - Confirmed `conductor/INBOX.md` does not exist
 - Re-checked phase docs:
@@ -31,17 +31,16 @@ mode_hint: hybrid
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
   - working tree was dirty only from `conductor/STATE.md`
 - Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/shallow_confirm/shallow_affect_confirm/results.csv` exists (`392152888` bytes, timestamp `2026-04-17 22:31 UTC`); `figures/` is present from the recovered shallow-confirm analysis
+  - `results/shallow_confirm/shallow_affect_confirm/results.csv` exists (`392152888` bytes, timestamp `2026-04-17 22:31 UTC`); no new work needed there this wake
   - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`251859188` bytes, timestamp `2026-04-18 01:45 UTC`)
-  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`258982927` bytes, timestamp `2026-04-18 01:58 UTC`)
-  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory is still absent under `results/clinical_post_restructure/clinical_phenotypes`
-  - `pgrep -af` confirms the targeted detached wrappers/workers remain live for the unfinished runs:
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`280564005` bytes, timestamp `2026-04-18 02:55 UTC`)
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory still absent under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
     - `h5_selection`: wrapper/child `373976`, `374138`
     - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
-  - `pgrep -af` also still shows older unrelated `h1_factorial` / `h4_betrayal` relaunch processes (`209790`, `209792`, `209969`, `209973`, `209985`, `209986`, `283269`, `283274`); these were not part of this bounded check and were not touched
-- DECISION: no new analysis or doc updates were available in this wake cycle because neither `h5_selection` nor `clinical_post_restructure` produced a fresh `results.csv`
-- DECISION: the detached Phase 4 situation is unchanged from the previous handoff except that shallow-confirm completion is now explicitly confirmed from on-disk artifacts during this wake
-- NEXT: on the next wake, do one bounded completion check again; if either unfinished batch has `results.csv`, run `scripts/run_analysis.py` immediately and capture the hypothesis-relevant readout before touching interpretation docs
+- DECISION: no analysis or doc updates are available in this wake cycle because neither unfinished detached batch has produced `results.csv`
+- DECISION: `clinical_betrayal` partial output advanced materially since Session 82; `h5_selection` remains unchanged; `clinical_phenotypes` still has not created a run directory
+- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
 
 - Checked branch state:
   - `git status --short --branch` → `## analysis/post-restructure-reframe`
@@ -167,6 +166,6 @@ mode_hint: hybrid
 
 ## Auto Handoff
 
-- What changed: performed the single bounded completion check for this wake. No new batch completed. `shallow_confirm` remains complete on disk with `results.csv` and `figures/`, but the unfinished targets did not produce fresh `results.csv` files.
-- In flight: `h5_selection` and `clinical_post_restructure` wrappers/workers were still live during this wake; `h5_selection` still only had `results_partial.csv` (`251859188` bytes, `2026-04-18 01:45 UTC`), `clinical_betrayal` still only had `results_partial.csv` (`258982927` bytes, `2026-04-18 01:58 UTC`), and `clinical_phenotypes` still had no run directory.
+- What changed: performed the single bounded completion check for this wake. No new detached batch completed. `shallow_confirm` remains complete on disk with `results.csv` and `figures/`, while the unfinished targets still have not produced `results.csv`.
+- In flight: `h5_selection` and `clinical_post_restructure` wrappers/workers were still live during this wake; `h5_selection` still only had `results_partial.csv` (`251859188` bytes, `2026-04-18 01:45 UTC`), `clinical_betrayal` still only had `results_partial.csv` (`280564005` bytes, `2026-04-18 02:55 UTC`), and `clinical_phenotypes` still had no run directory.
 - Next session should do: one bounded completion check for the detached experiment runs, analyze any newly completed batch immediately, and keep two contradictions visible in handoff: shallow affect is still weak (`d≈0.20` at tau=1,2) and the shallow lesion is not a clean Damasio dissociation on stance accuracy.
