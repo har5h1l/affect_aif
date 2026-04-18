@@ -13,26 +13,32 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-18 (Session 99 — corrected detached-run state; shallow_confirm confirmed complete)
+2026-04-18 (Session 100 — bounded completion check only; detached runs still partial)
 
 ## Session Count
-98
+99
 
 
-<!-- Older entries truncated (was 160 lines) -->
+<!-- Older entries truncated (was 163 lines) -->
 
-- DECISION: the user cleared the prior "wait for user direction first" gate, but the scientific blocker remains because the finalized shallow-depth confirmation still contradicts the expected strong H2/H3 story
-- DECISION: `results/shallow_confirm/shallow_affect_confirm/results.csv` exists and analysis outputs are already present under `figures/`; it is no longer an in-flight run
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree was dirty only from `conductor/STATE.md`
 - Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/shallow_confirm/shallow_affect_confirm/results.csv` present (`392152888` bytes, timestamp `2026-04-17 22:31 UTC`); existing analysis outputs present under `results/shallow_confirm/shallow_affect_confirm/figures/`
   - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`467744584` bytes, timestamp `2026-04-18 11:28 UTC`)
   - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`474797699` bytes, timestamp `2026-04-18 11:25 UTC`)
-  - `results/clinical_post_restructure/clinical_phenotypes/` still absent; no partial output created yet
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; no run directory final output or partial file present under `results/clinical_post_restructure/clinical_phenotypes`
   - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
     - `h5_selection`: wrapper/child `373976`, `374138`
     - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
-- DECISION: `results/logs/h5_selection.log` and `results/logs/clinical_post_restructure.log` are currently empty; no extra polling performed
-- NEXT: wait for either `h5_selection` or `clinical_post_restructure` to produce a final `results.csv`, then analyze immediately; keep the interpretation docs unchanged until the user explicitly approves a new narrative
+- DECISION: no analysis or doc updates are available in this wake cycle because neither detached Phase 4 batch has produced a final `results.csv`
+- DECISION: both tracked partial outputs advanced materially since Session 99; `clinical_phenotypes` still has not started writing any output path
+- NEXT: on the next wake, do one bounded completion check again; if a final `results.csv` appears for `h5_selection` or `clinical_post_restructure`, run `scripts/run_analysis.py` immediately and capture the hypothesis-relevant readout before touching interpretation docs
 
 - DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
 - DECISION: `h5_selection` and `clinical_betrayal` partial outputs both advanced since the prior handoff; `clinical_phenotypes` still has not created any output path
@@ -158,6 +164,6 @@ mode_hint: hybrid
 
 ## Auto Handoff
 
-- What changed: Session 98 performed the required bounded completion check only. No new final `results.csv` appeared, and the tracked partial outputs did not advance relative to Session 97.
-- In flight: targeted wrappers/workers are still live for `h5_selection` (`373976`, `374138`) and `clinical_post_restructure` (`373989`, `374151`, `374161`); `h5_selection` partial output remains `431774689` bytes at `2026-04-18 09:48 UTC`; `clinical_betrayal` partial output remains `453211976` bytes at `2026-04-18 10:28 UTC`; `clinical_phenotypes` still has no run directory or partial file.
-- Next session should do: wait for user direction first because `shallow_confirm` is finalized and still contradicts the expected H2/H3 story (`tau1 d=0.1489`, `tau2 d=0.1955`, shallow lesion not Damasio-like). If woken before a user decision, do only one bounded completion check for `h5_selection` / `clinical_post_restructure` and analyze immediately if a final `results.csv` appears.
+- What changed: Session 100 performed the required bounded completion check only. No new final `results.csv` appeared, but both tracked partial outputs advanced again.
+- In flight: targeted wrappers/workers are still live for `h5_selection` (`373976`, `374138`) and `clinical_post_restructure` (`373989`, `374151`, `374161`); `h5_selection` partial output is now `467744584` bytes at `2026-04-18 11:28 UTC`; `clinical_betrayal` partial output is now `474797699` bytes at `2026-04-18 11:25 UTC`; `clinical_phenotypes` still has no run directory or partial file.
+- Next session should do: do only one bounded completion check for `h5_selection` / `clinical_post_restructure`; if a final `results.csv` appears, run `scripts/run_analysis.py` immediately and capture the hypothesis-relevant readout. Otherwise leave the detached runs alone and wait for user direction because `shallow_confirm` still contradicts the expected H2/H3 story (`tau1 d=0.1489`, `tau2 d=0.1955`, shallow lesion not Damasio-like).
