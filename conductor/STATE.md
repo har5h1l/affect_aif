@@ -4,8 +4,8 @@ next_priority: 1
 pending_work:
   - "Detached runs remain in flight: `results/h5_selection/h5_partner_selection` and `results/clinical_post_restructure/clinical_betrayal`; `clinical_phenotypes` still has no run directory or partial output"
   - "If `results.csv` appears for `h5_selection` or `clinical_post_restructure`, run `scripts/run_analysis.py` immediately and capture the hypothesis-relevant readout, but do not update interpretation docs without user direction"
-  - "User decision is needed on the paper/story reframe because `shallow_confirm` finalized with weak affect at `tau=1,2` and the shallow lesion is not a clean Damasio dissociation"
-next_session_focus: "Surface the weak shallow-confirm result to the user first, then only do one bounded completion check for the remaining detached batches"
+  - "User decision is still needed on the paper/story reframe because `shallow_confirm` finalized with weak affect at `tau=1,2` and the shallow lesion was not a clean Damasio dissociation"
+next_session_focus: "Wait for user direction first; if woken without it, do only one bounded completion check for `h5_selection` and `clinical_post_restructure`, then analyze immediately if a final `results.csv` appears"
 model_hint: opus
 mode_hint: hybrid
 ---
@@ -13,25 +13,28 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-18 (Session 95 — bounded completion check only; blocker unchanged)
+2026-04-18 (Session 96 — bounded completion check only; blocker unchanged)
 
 ## Session Count
-94
+95
 
 
-<!-- Older entries truncated (was 169 lines) -->
+<!-- Older entries truncated (was 162 lines) -->
 
-- DECISION: the blocker is unchanged; no new implementation or doc-reframe work should start until the user decides how to handle the weak shallow-confirm result
+- DECISION: the mission stop condition remains active because shallow confirmation still contradicts the expected H2/H3 story (`tau1 d=0.1489`, `tau2 d=0.1955`; shallow lesion not Damasio-like)
+- DECISION: do not start new implementation or interpretation-doc rewrites until the user decides how to reframe the paper story around the weak shallow result
+- NEXT: if the user allows continuation before a narrative decision, only do one bounded completion check for `h5_selection` / `clinical_post_restructure` and analyze immediately if a final `results.csv` appears
 - Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`395778977` bytes, timestamp `2026-04-18 08:11 UTC`)
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`431774689` bytes, timestamp `2026-04-18 09:48 UTC`)
   - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`431620426` bytes, timestamp `2026-04-18 09:29 UTC`)
-  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; no run directory output or partial file present under `results/clinical_post_restructure/clinical_phenotypes`
-  - `pgrep -af` confirms the targeted wrappers and worker processes remain live:
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory still absent under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
     - `h5_selection`: wrapper/child `373976`, `374138`
     - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
-- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has produced a final `results.csv`
-- DECISION: `h5_selection` appears stalled relative to the prior check, `clinical_betrayal` is still advancing, and `clinical_phenotypes` still has not emitted any files
-- NEXT: wait for user direction first; if woken again before that decision, do only one bounded completion check and analyze immediately if `results.csv` appears for either in-flight batch
+  - `pgrep -af` also still shows older unrelated `h1_factorial` / `h4_betrayal` relaunch processes (`209790`, `209792`, `209969`, `209973`, `209985`, `209986`, `283269`, `283274`); these were not touched
+- DECISION: no analysis or doc updates are available in this wake cycle because no targeted detached batch has produced a final `results.csv`
+- DECISION: `h5_selection` partial output advanced materially since the last bounded check, `clinical_betrayal` did not advance, and `clinical_phenotypes` still has not started writing outputs
+- NEXT: on the next wake, wait for user direction first; absent that, do only one bounded completion check again and analyze immediately if a final `results.csv` appears
 
 - DECISION: the mission stop condition remains active because shallow confirmation finished with weak affect at calibrated depths (`tau1 d=0.1489`, `tau2 d=0.1955`) and the shallow lesion was not a clean Damasio dissociation
 - DECISION: do not start new implementation or rewrite interpretation docs until the user decides whether to reframe the story around the weak shallow result
