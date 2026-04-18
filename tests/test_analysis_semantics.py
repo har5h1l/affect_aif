@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pandas as pd
+
 from analysis.hypotheses import run_all_hypothesis_tests
+from analysis.metrics import final_round_summary
 from analysis.model_comparison import model_comparison_report
+from cli.common import load_results_table
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
 from scripts.run_analysis import _hypothesis_summary_frame
@@ -54,3 +58,42 @@ def test_run_model_comparison_cli_uses_predictive_language(tmp_path, capsys, tin
     assert exit_code == 0
     assert "predictive log-score" in captured
     assert "predictive model comparison" in captured
+
+
+def test_load_results_table_normalizes_mixed_condition_identifiers(tmp_path):
+    def row(condition, condition_name, round_idx, payoff):
+        return {
+            "condition": condition,
+            "condition_name": condition_name,
+            "seed": 0,
+            "round": round_idx,
+            "payoff": payoff,
+            "inferred_type_correct": 1.0,
+            "inferred_stance_correct": 1.0,
+            "inferred_joint_correct": 1.0,
+            "q_pi_entropy": 0.5,
+            "mean_abs_step_efe": 1.0,
+            "planning_cost": 1.0,
+            "planning_cost_ratio": 1.0,
+        }
+
+    rows = [
+        row(1, "tau1_no_affect", 0, 10),
+        row("1", "tau1_no_affect", 1, 12),
+        row("lesioned", "lesioned", 0, 8),
+        row("lesioned", "lesioned", 1, 9),
+    ]
+    path = tmp_path / "mixed_conditions.csv"
+    pd.DataFrame(rows).to_csv(path, index=False)
+
+    loaded = load_results_table(path)
+    summary = final_round_summary(loaded)
+
+    assert sorted(loaded["condition"].drop_duplicates(), key=str) == [1, "lesioned"]
+    assert len(summary) == 2
+    tau1 = summary.loc[summary["condition_name"] == "tau1_no_affect"].iloc[0]
+    lesion = summary.loc[summary["condition_name"] == "lesioned"].iloc[0]
+    assert tau1["condition"] == 1
+    assert tau1["total_payoff"] == 22
+    assert lesion["condition"] == "lesioned"
+    assert lesion["total_payoff"] == 17
