@@ -13,32 +13,27 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-18 (Session 96 — bounded completion check only; blocker unchanged)
+2026-04-18 (Session 97 — bounded completion check only; blocker unchanged)
 
 ## Session Count
-95
+96
 
 
-<!-- Older entries truncated (was 162 lines) -->
-
-- DECISION: the mission stop condition remains active because shallow confirmation still contradicts the expected H2/H3 story (`tau1 d=0.1489`, `tau2 d=0.1955`; shallow lesion not Damasio-like)
-- DECISION: do not start new implementation or interpretation-doc rewrites until the user decides how to reframe the paper story around the weak shallow result
-- NEXT: if the user allows continuation before a narrative decision, only do one bounded completion check for `h5_selection` / `clinical_post_restructure` and analyze immediately if a final `results.csv` appears
-- Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`431774689` bytes, timestamp `2026-04-18 09:48 UTC`)
-  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`431620426` bytes, timestamp `2026-04-18 09:29 UTC`)
-  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory still absent under `results/clinical_post_restructure/clinical_phenotypes`
-  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
-    - `h5_selection`: wrapper/child `373976`, `374138`
-    - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
-  - `pgrep -af` also still shows older unrelated `h1_factorial` / `h4_betrayal` relaunch processes (`209790`, `209792`, `209969`, `209973`, `209985`, `209986`, `283269`, `283274`); these were not touched
-- DECISION: no analysis or doc updates are available in this wake cycle because no targeted detached batch has produced a final `results.csv`
-- DECISION: `h5_selection` partial output advanced materially since the last bounded check, `clinical_betrayal` did not advance, and `clinical_phenotypes` still has not started writing outputs
-- NEXT: on the next wake, wait for user direction first; absent that, do only one bounded completion check again and analyze immediately if a final `results.csv` appears
+<!-- Older entries truncated (was 165 lines) -->
 
 - DECISION: the mission stop condition remains active because shallow confirmation finished with weak affect at calibrated depths (`tau1 d=0.1489`, `tau2 d=0.1955`) and the shallow lesion was not a clean Damasio dissociation
 - DECISION: do not start new implementation or rewrite interpretation docs until the user decides whether to reframe the story around the weak shallow result
 - NEXT: if the user wants continuation before a narrative decision, only do bounded completion checks for `h5_selection` / `clinical_post_restructure` and analyze immediately once a final `results.csv` appears
+- Performed one bounded completion check for the detached Phase 4 runs:
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`431774689` bytes, timestamp `2026-04-18 09:48 UTC`)
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`453211976` bytes, timestamp `2026-04-18 10:28 UTC`)
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; no run directory beyond `results/clinical_post_restructure/clinical_betrayal` and no partial file present for `clinical_phenotypes`
+  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
+    - `h5_selection`: wrapper/child `373976`, `374138`
+    - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
+- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
+- DECISION: `h5_selection` and `clinical_betrayal` partial outputs both advanced since the prior handoff; `clinical_phenotypes` still has not created any output path
+- NEXT: on the next wake, wait for explicit user direction if possible; otherwise do one bounded completion check again and analyze immediately if a final `results.csv` appears
 - Performed one bounded completion check for the detached Phase 4 runs:
   - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv` (`22091568` bytes, timestamp `2026-04-17 19:23 UTC`)
   - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`107908931` bytes, timestamp `2026-04-17 17:58 UTC`)
@@ -160,6 +155,6 @@ mode_hint: hybrid
 
 ## Auto Handoff
 
-- What changed: Session 95 performed the required bounded completion check only. `clinical_betrayal` partial output advanced again, `h5_selection` did not, and no new final `results.csv` appeared.
-- In flight: targeted wrappers/workers are still live for `h5_selection` (`373976`, `374138`) and `clinical_post_restructure` (`373989`, `374151`, `374161`); `h5_selection` partial output is `395778977` bytes at `2026-04-18 08:11 UTC`; `clinical_betrayal` partial output is `431620426` bytes at `2026-04-18 09:29 UTC`; `clinical_phenotypes` still has no run directory or partial file.
+- What changed: Session 97 performed the required bounded completion check only. `h5_selection` and `clinical_betrayal` partial outputs both advanced again, and no new final `results.csv` appeared.
+- In flight: targeted wrappers/workers are still live for `h5_selection` (`373976`, `374138`) and `clinical_post_restructure` (`373989`, `374151`, `374161`); `h5_selection` partial output is `431774689` bytes at `2026-04-18 09:48 UTC`; `clinical_betrayal` partial output is `453211976` bytes at `2026-04-18 10:28 UTC`; `clinical_phenotypes` still has no run directory or partial file.
 - Next session should do: wait for user direction first because `shallow_confirm` is finalized and still contradicts the expected H2/H3 story (`tau1 d=0.1489`, `tau2 d=0.1955`, shallow lesion not Damasio-like). If woken before a user decision, do only one bounded completion check for `h5_selection` / `clinical_post_restructure` and analyze immediately if a final `results.csv` appears.
