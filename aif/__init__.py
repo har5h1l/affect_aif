@@ -10,3 +10,4 @@ from aif.maths import log_stable, softmax
 from aif.policies import construct_policies
 from aif.utils import obj_array
 
+__all__ = ["softmax", "log_stable", "obj_array", "construct_policies"]
