@@ -13,34 +13,14 @@ mode_hint: hybrid
 # Research State
 
 ## Last Updated
-2026-04-18 (Session 101 — bounded completion check only; detached runs still partial)
+2026-04-18 (Session 102 — bounded completion check only; detached runs still partial)
 
 ## Session Count
-100
+101
 
 
-<!-- Older entries truncated (was 169 lines) -->
+<!-- Older entries truncated (was 170 lines) -->
 
-- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
-- DECISION: `h5_selection` and `clinical_betrayal` partial outputs both advanced since the prior handoff; `clinical_phenotypes` still has not created any output path
-- NEXT: on the next wake, wait for explicit user direction if possible; otherwise do one bounded completion check again and analyze immediately if a final `results.csv` appears
-- Performed one bounded completion check for the detached Phase 4 runs:
-  - `results/shallow_confirm/shallow_affect_confirm/results.csv` still missing; partial output present at `results/shallow_confirm/shallow_affect_confirm/results_partial.csv` (`22091568` bytes, timestamp `2026-04-17 19:23 UTC`)
-  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`107908931` bytes, timestamp `2026-04-17 17:58 UTC`)
-  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`129518364` bytes, timestamp `2026-04-17 19:12 UTC`)
-  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; run directory still absent under `results/clinical_post_restructure/clinical_phenotypes`
-  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
-    - `shallow_confirm`: wrapper/children `373967`, `374127`, `374164`, `374165`
-    - `h5_selection`: wrapper/child `373976`, `374138`
-    - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
-- DECISION: no analysis or doc updates are available in this wake cycle because none of the detached Phase 4 batches has completed yet
-- DECISION: `shallow_confirm` partial output appears to have restarted from a smaller file while remaining live; `clinical_betrayal` partial output advanced materially since Session 70; `h5_selection` remains unchanged and `clinical_phenotypes` has not created a run directory
-- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
-
-### Session 63 status check
-- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
-- Confirmed `conductor/INBOX.md` does not exist
-- Re-checked phase docs:
   - `docs/future/roadmap.md`
   - `docs/experiment/results.md`
 - Checked branch state:
@@ -145,9 +125,29 @@ mode_hint: hybrid
 
 ## Auto Handoff
 
-- What changed: Session 101 performed the required bounded completion check only. No new final `results.csv` appeared. `clinical_betrayal` partial output advanced again; `h5_selection` did not advance during this wake.
-- In flight: targeted wrappers/workers are still live for `h5_selection` (`373976`, `374138`) and `clinical_post_restructure` (`373989`, `374151`, `374161`); `h5_selection` partial output remains `467744584` bytes at `2026-04-18 11:28 UTC`; `clinical_betrayal` partial output is now `496371409` bytes at `2026-04-18 12:23 UTC`; `clinical_phenotypes` still has no partial or final file.
+- What changed: Session 102 performed the required bounded completion check only. No new final `results.csv` appeared. Both `h5_selection` and `clinical_betrayal` partial outputs advanced during this wake; `clinical_phenotypes` still has not started emitting files.
+- In flight: targeted wrappers/workers are still live for `h5_selection` (`373976`, `374138`) and `clinical_post_restructure` (`373989`, `374151`, `374161`); `h5_selection` partial output is now `503737288` bytes at `2026-04-18 13:06 UTC`; `clinical_betrayal` partial output is now `517935352` bytes at `2026-04-18 13:20 UTC`; `clinical_phenotypes` still has no partial or final file.
 - Next session should do: do only one bounded completion check for `h5_selection` / `clinical_post_restructure`; if a final `results.csv` appears, run `scripts/run_analysis.py` immediately and capture the hypothesis-relevant readout. Otherwise leave the detached runs alone and wait for user direction because `shallow_confirm` still contradicts the expected H2/H3 story (`tau1 d=0.1489`, `tau2 d=0.1955`, shallow lesion not Damasio-like).
+
+### Session 102 status check
+- Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
+- Confirmed `conductor/INBOX.md` does not exist
+- Re-checked phase docs:
+  - `docs/future/roadmap.md`
+  - `docs/experiment/results.md`
+- Checked branch state:
+  - `git status --short --branch` → `## analysis/post-restructure-reframe`
+  - working tree was dirty only from `conductor/STATE.md`
+- Performed one bounded completion check for the detached Phase 4 runs:
+  - `results/h5_selection/h5_partner_selection/results.csv` still missing; partial output present at `results/h5_selection/h5_partner_selection/results_partial.csv` (`503737288` bytes, timestamp `2026-04-18 13:06 UTC`)
+  - `results/clinical_post_restructure/clinical_betrayal/results.csv` still missing; partial output present at `results/clinical_post_restructure/clinical_betrayal/results_partial.csv` (`517935352` bytes, timestamp `2026-04-18 13:20 UTC`)
+  - `results/clinical_post_restructure/clinical_phenotypes/results.csv` still missing; no partial output present under `results/clinical_post_restructure/clinical_phenotypes`
+  - `pgrep -af` confirms the targeted Phase 4 wrappers and worker processes remain live:
+    - `h5_selection`: wrapper/child `373976`, `374138`
+    - `clinical_post_restructure`: wrapper/children `373989`, `374151`, `374161`
+- DECISION: no analysis or doc updates are available in this wake cycle because none of the tracked detached Phase 4 batches has completed yet
+- DECISION: both tracked partial outputs advanced during this wake, while `clinical_phenotypes` still has not emitted any file
+- NEXT: on the next wake, do one bounded completion check again; if any `results.csv` exists, run `scripts/run_analysis.py` for that batch and capture the hypothesis readout before touching interpretation docs
 
 ### Session 101 status check
 - Read `CLAUDE.md`, `conductor/MISSION.md`, and `conductor/STATE.md`
