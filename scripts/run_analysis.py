@@ -67,6 +67,7 @@ def main(argv: list[str] | None = None) -> int:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     results = filter_primary_runs(load_results_table(args.results))
+    switch_events_present = has_switch_events(results)
 
     save_all_figures(results, str(output_dir))
     summary = final_round_summary(results)
@@ -82,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     hypothesis_summary.to_csv(output_dir / "hypothesis_summary.csv", index=False)
     movement.to_csv(output_dir / "affective_movement_summary.csv", index=False)
 
-    if has_switch_events(results):
+    if switch_events_present:
         post_switch_5 = post_switch_window_summary(results, window=5)
         post_switch_10 = post_switch_window_summary(results, window=10)
         betrayal_comp = post_switch_condition_comparison(results, windows=(5, 10))
@@ -108,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         movement_lines = ["\nAffective movement (beta) summary\n", grouped, "\n"]
     betrayal_lines = []
-    if has_switch_events(results):
+    if switch_events_present:
         betrayal_comp = post_switch_condition_comparison(results, windows=(5, 10))
         if not betrayal_comp.empty:
             grouped = (
@@ -153,7 +154,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
         )
-    if has_switch_events(results):
+    if switch_events_present:
         betrayal_comp = post_switch_condition_comparison(results, windows=(5, 10))
         if not betrayal_comp.empty:
             print("\nBetrayal post-switch comparison")

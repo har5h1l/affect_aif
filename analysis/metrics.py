@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import re
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -50,6 +51,60 @@ def _scheduled_switch_targets(value) -> list[int]:
     if array.size == 0:
         return []
     return [int(item) for item in array.tolist()]
+
+
+def _build_scheduled_switch_map(
+    frame: pd.DataFrame,
+    column: str,
+    switch_kind: str,
+) -> dict[tuple[object, int, int], set[tuple[int, str]]]:
+    """Index scheduled switch rows by condition/seed/partner for fast lookup."""
+
+    schedule_map: dict[tuple[object, int, int], set[tuple[int, str]]] = defaultdict(set)
+    if column not in frame.columns:
+        return schedule_map
+    scheduled_rows = frame.loc[frame[column].apply(len).gt(0), ["condition", "seed", "round", column]]
+    for _, row in scheduled_rows.iterrows():
+        for partner_idx in row[column]:
+            schedule_map[(row["condition"], int(row["seed"]), int(partner_idx))].add(
+                (int(row["round"]), switch_kind)
+            )
+    return schedule_map
+
+
+def _build_observed_switch_map(frame: pd.DataFrame) -> dict[tuple[object, int, int], set[tuple[int, str]]]:
+    """Index observed switch rows by condition/seed/partner for fast lookup."""
+
+    observed_map: dict[tuple[object, int, int], set[tuple[int, str]]] = defaultdict(set)
+    type_switched = (
+        frame["type_switched"].fillna(False).astype(bool)
+        if "type_switched" in frame.columns
+        else pd.Series(False, index=frame.index)
+    )
+    stance_switched = (
+        frame["stance_switched"].fillna(False).astype(bool)
+        if "stance_switched" in frame.columns
+        else pd.Series(False, index=frame.index)
+    )
+    switch_rows = frame.loc[type_switched | stance_switched, ["condition", "seed", "partner_idx", "round", "switch_kind"]]
+    for _, row in switch_rows.iterrows():
+        observed_map[(row["condition"], int(row["seed"]), int(row["partner_idx"]))].add(
+            (int(row["round"]), str(row.get("switch_kind", "unknown")))
+        )
+    return observed_map
+
+
+def _switch_rounds_for_partner(
+    key: tuple[object, int, int],
+    scheduled_type_map: dict[tuple[object, int, int], set[tuple[int, str]]],
+    scheduled_stance_map: dict[tuple[object, int, int], set[tuple[int, str]]],
+    observed_map: dict[tuple[object, int, int], set[tuple[int, str]]],
+) -> list[tuple[int, str]]:
+    switch_rounds = set()
+    switch_rounds.update(scheduled_type_map.get(key, set()))
+    switch_rounds.update(scheduled_stance_map.get(key, set()))
+    switch_rounds.update(observed_map.get(key, set()))
+    return sorted(switch_rounds)
 
 
 def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
@@ -128,12 +183,8 @@ def beta_reward_divergence(results: pd.DataFrame, partner_idx: int | None = None
 
 
 def has_switch_events(results: pd.DataFrame) -> bool:
-    """Return True when the results include at least one partner switch event."""
+    """Return True when the results include scheduled betrayal-style switch events."""
 
-    if "type_switched" in results.columns and bool(results["type_switched"].fillna(False).astype(bool).any()):
-        return True
-    if "stance_switched" in results.columns and bool(results["stance_switched"].fillna(False).astype(bool).any()):
-        return True
     if "current_partner_scheduled_switch" in results.columns and bool(
         results["current_partner_scheduled_switch"].fillna(False).astype(bool).any()
     ):
@@ -142,15 +193,23 @@ def has_switch_events(results: pd.DataFrame) -> bool:
         results["current_partner_scheduled_stance_switch"].fillna(False).astype(bool).any()
     ):
         return True
-    if "scheduled_switch_partner_ids" not in results.columns:
-        scheduled_type = pd.Series([[] for _ in range(len(results))], index=results.index)
-    else:
-        scheduled_type = results["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
-    if "scheduled_stance_switch_partner_ids" not in results.columns:
-        scheduled_stance = pd.Series([[] for _ in range(len(results))], index=results.index)
-    else:
-        scheduled_stance = results["scheduled_stance_switch_partner_ids"].apply(_scheduled_switch_targets)
-    return bool(scheduled_type.apply(len).gt(0).any() or scheduled_stance.apply(len).gt(0).any())
+    def _has_nonempty_schedule(column: str) -> bool:
+        if column not in results.columns:
+            return False
+        raw = results[column].astype(str).str.strip()
+        candidates = raw[~raw.isin({"", "[]", "nan", "None"})]
+        if candidates.empty:
+            return False
+        return bool(candidates.apply(lambda value: len(_scheduled_switch_targets(value)) > 0).any())
+
+    if _has_nonempty_schedule("scheduled_switch_partner_ids") or _has_nonempty_schedule(
+        "scheduled_stance_switch_partner_ids"
+    ):
+        return True
+    if "switch_kind" in results.columns:
+        switch_kind = results["switch_kind"].fillna("").astype(str)
+        return bool(switch_kind.str.startswith("scheduled_").any())
+    return False
 
 
 def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.DataFrame:
@@ -171,28 +230,19 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
         )
     else:
         frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    scheduled_type_map = _build_scheduled_switch_map(
+        frame, "scheduled_switch_partner_ids", "scheduled_type"
+    )
+    scheduled_stance_map = _build_scheduled_switch_map(
+        frame, "scheduled_stance_switch_partner_ids", "scheduled_stance"
+    )
+    observed_map = _build_observed_switch_map(frame)
     summaries: list[dict] = []
     for (condition, condition_name, seed, partner_idx), group in frame.groupby(
         ["condition", "condition_name", "seed", "partner_idx"],
     ):
-        seed_rows = frame[(frame["condition"] == condition) & (frame["seed"] == seed)]
-        switch_rounds: set[tuple[int, str]] = set()
-        for _, switch_row in seed_rows.iterrows():
-            if int(partner_idx) in switch_row["scheduled_switch_partner_ids"]:
-                switch_rounds.add((int(switch_row["round"]), "scheduled_type"))
-            if int(partner_idx) in switch_row["scheduled_stance_switch_partner_ids"]:
-                switch_rounds.add((int(switch_row["round"]), "scheduled_stance"))
-        if "type_switched" in group.columns:
-            switched_types = group["type_switched"].fillna(False).astype(bool)
-        else:
-            switched_types = pd.Series(False, index=group.index)
-        if "stance_switched" in group.columns:
-            switched_stances = group["stance_switched"].fillna(False).astype(bool)
-        else:
-            switched_stances = pd.Series(False, index=group.index)
-        for _, switch_row in group[switched_types | switched_stances].iterrows():
-            switch_rounds.add((int(switch_row["round"]), str(switch_row.get("switch_kind", "unknown"))))
-
+        key = (condition, int(seed), int(partner_idx))
+        switch_rounds = _switch_rounds_for_partner(key, scheduled_type_map, scheduled_stance_map, observed_map)
         for switch_round, switch_kind in sorted(switch_rounds):
             window_frame = group[group["round"] >= switch_round].head(int(window)).copy()
             if window_frame.empty:
@@ -244,36 +294,27 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
         )
     else:
         frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    scheduled_type_map = _build_scheduled_switch_map(
+        frame, "scheduled_switch_partner_ids", "scheduled_type"
+    )
+    scheduled_stance_map = _build_scheduled_switch_map(
+        frame, "scheduled_stance_switch_partner_ids", "scheduled_stance"
+    )
+    observed_map = _build_observed_switch_map(frame)
 
     records: list[dict] = []
     for (condition, condition_name, seed, partner_idx), group in frame.groupby(
         ["condition", "condition_name", "seed", "partner_idx"],
     ):
         group = group.reset_index(drop=True)
-        group["betas"] = group["betas"].apply(_ensure_array)
-        group["reward_avgs"] = group["reward_avgs"].apply(_ensure_array)
-        seed_rows = frame[(frame["condition"] == condition) & (frame["seed"] == seed)]
-        switch_rounds: set[tuple[int, str]] = set()
-        for _, switch_row in seed_rows.iterrows():
-            if int(partner_idx) in switch_row["scheduled_switch_partner_ids"]:
-                switch_rounds.add((int(switch_row["round"]), "scheduled_type"))
-            if int(partner_idx) in switch_row["scheduled_stance_switch_partner_ids"]:
-                switch_rounds.add((int(switch_row["round"]), "scheduled_stance"))
-        type_switched = (
-            group["type_switched"].fillna(False).astype(bool)
-            if "type_switched" in group.columns
-            else pd.Series(False, index=group.index)
-        )
-        stance_switched = (
-            group["stance_switched"].fillna(False).astype(bool)
-            if "stance_switched" in group.columns
-            else pd.Series(False, index=group.index)
-        )
-        for _, switch_row in group[type_switched | stance_switched].iterrows():
-            switch_rounds.add((int(switch_row["round"]), str(switch_row.get("switch_kind", "unknown"))))
-
-        for event_idx, (switch_round, switch_kind) in enumerate(sorted(switch_rounds)):
+        key = (condition, int(seed), int(partner_idx))
+        switch_rounds = _switch_rounds_for_partner(key, scheduled_type_map, scheduled_stance_map, observed_map)
+        for event_idx, (switch_round, switch_kind) in enumerate(switch_rounds):
             window = group[group["round"] >= switch_round].head(int(max_encounters)).copy()
+            if window.empty:
+                continue
+            window["betas"] = window["betas"].apply(_ensure_array)
+            window["reward_avgs"] = window["reward_avgs"].apply(_ensure_array)
             for encounter_offset, (_, row) in enumerate(window.iterrows()):
                 beta_arr = row["betas"]
                 reward_arr = row["reward_avgs"]

@@ -17,56 +17,96 @@ from analysis.metrics import (
 )
 
 
+def _mean_sd_frame(frame: pd.DataFrame, group_cols: list[str], value_col: str) -> pd.DataFrame:
+    """Pre-aggregate repeated trajectories before plotting."""
+
+    return (
+        frame.groupby(group_cols, as_index=False)[value_col]
+        .agg(["mean", "std"])
+        .reset_index()
+        .rename(columns={"mean": value_col, "std": f"{value_col}_sd"})
+    )
+
+
+def _plot_mean_sd_lines(
+    ax,
+    frame: pd.DataFrame,
+    *,
+    x_col: str,
+    y_col: str,
+    hue_col: str,
+):
+    """Draw pre-aggregated mean trajectories with one-sigma bands."""
+
+    for label, group in frame.groupby(hue_col, sort=False):
+        group = group.sort_values(x_col)
+        ax.plot(group[x_col], group[y_col], label=label)
+        sd_col = f"{y_col}_sd"
+        if sd_col in group.columns:
+            lower = group[y_col] - group[sd_col].fillna(0.0)
+            upper = group[y_col] + group[sd_col].fillna(0.0)
+            ax.fill_between(group[x_col], lower, upper, alpha=0.2)
+
+
 def _save_betrayal_figures(results: pd.DataFrame, out: Path):
     trajectory = betrayal_trajectory(results, max_encounters=10)
     if trajectory.empty:
         return
+    trajectory = _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "beta").merge(
+        _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "divergence_beta_minus_reward"),
+        on=["condition_name", "encounters_since_switch"],
+        how="left",
+    ).merge(
+        _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "payoff"),
+        on=["condition_name", "encounters_since_switch"],
+        how="left",
+    )
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharex=True)
-    sns.lineplot(
-        data=trajectory,
-        x="encounters_since_switch",
-        y="beta",
-        hue="condition_name",
-        ax=axes[0],
-        errorbar="sd",
+    _plot_mean_sd_lines(
+        axes[0],
+        trajectory,
+        x_col="encounters_since_switch",
+        y_col="beta",
+        hue_col="condition_name",
     )
     axes[0].set_title("Post-Betrayal Beta Trajectory")
     axes[0].set_xlabel("Encounters Since Switch")
     axes[0].set_ylabel("Beta")
     axes[1].axis("off")
+    axes[0].legend(loc="best")
     fig.tight_layout()
     fig.savefig(out / "figure_7_betrayal_signal_trajectories.png", dpi=180)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.lineplot(
-        data=trajectory,
-        x="encounters_since_switch",
-        y="divergence_beta_minus_reward",
-        hue="condition_name",
-        ax=ax,
-        errorbar="sd",
+    _plot_mean_sd_lines(
+        ax,
+        trajectory,
+        x_col="encounters_since_switch",
+        y_col="divergence_beta_minus_reward",
+        hue_col="condition_name",
     )
     ax.set_title("Post-Betrayal Beta vs Reward Divergence")
     ax.set_xlabel("Encounters Since Switch")
     ax.set_ylabel("Beta - Reward Signal")
+    ax.legend(loc="best")
     fig.tight_layout()
     fig.savefig(out / "figure_8_betrayal_beta_reward_divergence.png", dpi=180)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.lineplot(
-        data=trajectory,
-        x="encounters_since_switch",
-        y="payoff",
-        hue="condition_name",
-        ax=ax,
-        errorbar="sd",
+    _plot_mean_sd_lines(
+        ax,
+        trajectory,
+        x_col="encounters_since_switch",
+        y_col="payoff",
+        hue_col="condition_name",
     )
     ax.set_title("Post-Betrayal Payoff Recovery")
     ax.set_xlabel("Encounters Since Switch")
     ax.set_ylabel("Payoff")
+    ax.legend(loc="best")
     fig.tight_layout()
     fig.savefig(out / "figure_9_betrayal_payoff_recovery.png", dpi=180)
     plt.close(fig)
@@ -155,8 +195,9 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     plt.close(fig)
 
     divergence = beta_reward_divergence(results)
+    divergence = _mean_sd_frame(divergence, ["condition_name", "round"], "divergence")
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.lineplot(data=divergence, x="round", y="divergence", hue="condition_name", ax=ax, errorbar="sd")
+    _plot_mean_sd_lines(ax, divergence, x_col="round", y_col="divergence", hue_col="condition_name")
     ax.set_title("Beta vs Reward-Average Divergence")
     ax.legend(loc="best")
     fig.tight_layout()

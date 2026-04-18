@@ -8,7 +8,12 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from analysis.metrics import betrayal_latency_summary, final_round_summary, post_switch_window_summary
+from analysis.metrics import (
+    betrayal_latency_summary,
+    final_round_summary,
+    has_switch_events,
+    post_switch_window_summary,
+)
 
 
 DEPTH_CONDITION_NAMES = {
@@ -209,7 +214,7 @@ def test_h3_lesion_dissociation(results: pd.DataFrame, accuracy_margin: float = 
     """Lesioned agents preserve type inference better than stance recovery."""
 
     summary = _summary_by_condition(results)
-    switch_source = post_switch_window_summary(results, window=5)
+    switch_source = post_switch_window_summary(results, window=5) if has_switch_events(results) else pd.DataFrame()
     if switch_source.empty:
         switch_source = summary.rename(
             columns={
@@ -257,6 +262,14 @@ def test_h3_lesion_dissociation(results: pd.DataFrame, accuracy_margin: float = 
 def test_h4_betrayal_recovery(results: pd.DataFrame) -> dict:
     """Affect should improve betrayal detection and recovery over matched-depth no-affect controls."""
 
+    if not has_switch_events(results):
+        return {
+            "hypothesis": "H4",
+            "label": "betrayal_recovery",
+            "available": False,
+            "reason": "Scheduled stance-switch runs for tau-4 affect and tau-4 no-affect are required.",
+        }
+
     affect_name = "tau4_affect"
     control_name = "tau4_no_affect"
     affect_payoff = _switch_window_metric(results, affect_name, "mean_payoff", window=5)
@@ -294,6 +307,14 @@ def test_h4_betrayal_recovery(results: pd.DataFrame) -> dict:
 
 def test_h5_precision_vs_reward(results: pd.DataFrame) -> dict:
     """Precision tracking should beat reward averaging around stance shifts."""
+
+    if not has_switch_events(results):
+        return {
+            "hypothesis": "H5",
+            "label": "precision_vs_reward",
+            "available": False,
+            "reason": "Tau-4 affect and reward-average preset runs are required.",
+        }
 
     affect_name = "tau4_affect"
     reward_name = "reward_average"
