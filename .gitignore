@@ -26,6 +26,7 @@ dist/
 .idea/
 .vscode/
 .cursor/
+.worktrees/
 
 # Local experiment outputs
 results/*
