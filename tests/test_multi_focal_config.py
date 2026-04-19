@@ -47,6 +47,13 @@ def test_unknown_round_mode_raises():
         MultiFocalConfig.from_dict(bad)
 
 
+def test_unknown_assignment_mode_raises():
+    bad = dict(_GOOD)
+    bad["assignment_mode"] = "bogus"
+    with pytest.raises(ValueError, match="assignment_mode"):
+        MultiFocalConfig.from_dict(bad)
+
+
 def test_payoff_mode_mismatch_in_overrides_raises():
     bad = dict(_GOOD)
     bad["agents"] = [
