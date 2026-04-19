@@ -102,7 +102,7 @@ class MultiFocalRunner:
                 num_partners=focal.num_partners,
             )
             engaged_g = _global_partner_idx(focal_g, local_p, self.M)
-        else:
+        elif self.config.assignment_mode == "random":
             other_globals = [g for g in range(self.M) if g != focal_g]
             engaged_g = int(self.rng.choice(other_globals))
             local_p = _local_partner_idx(focal_g, engaged_g)
@@ -115,6 +115,8 @@ class MultiFocalRunner:
                 num_social_actions=focal.num_social_actions,
                 num_partners=focal.num_partners,
             )
+        else:
+            raise ValueError(f"unknown assignment_mode={self.config.assignment_mode!r}")
 
         engaged = self.agents[engaged_g]
         local_f_in_engaged = _local_partner_idx(engaged_g, focal_g)
@@ -123,7 +125,7 @@ class MultiFocalRunner:
         # optimize another slot while active_partner constrains rollouts inconsistently. for
         # joint play vs focal, take own-action bits from the same raw encoding as decode (F6).
         if engaged.factorized_policies and engaged.model.assignment_mode == "agent_choice":
-            _p_slot, engaged_action = decode_raw_action_to_partner_and_social(
+            _, engaged_action = decode_raw_action_to_partner_and_social(
                 raw_action=engaged.last_raw_action,
                 active_partner=0,
                 assignment_mode_code=1,
