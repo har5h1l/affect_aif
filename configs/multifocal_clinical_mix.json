@@ -1,0 +1,16 @@
+{
+  "experiment_name": "multifocal_clinical_mix",
+  "round_mode": "turn_taking",
+  "focal_selection": "round_robin",
+  "assignment_mode": "random",
+  "num_rounds": 300,
+  "num_replications": 50,
+  "random_seed": 42,
+  "payoff_mode": "binary",
+  "agents": [
+    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "_label": "healthy"},
+    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 0.5, "_label": "alexithymia"},
+    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 8.0, "_label": "borderline"},
+    {"kind": "lesioned", "planning_horizon": 8, "lesion_mode": "decouple", "_label": "vmPFC_lesion"}
+  ]
+}

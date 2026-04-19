@@ -1,0 +1,14 @@
+{
+  "experiment_name": "multifocal_smoke",
+  "round_mode": "turn_taking",
+  "focal_selection": "round_robin",
+  "assignment_mode": "random",
+  "num_rounds": 10,
+  "num_replications": 1,
+  "random_seed": 0,
+  "payoff_mode": "binary",
+  "agents": [
+    {"kind": "affective", "planning_horizon": 4, "alpha_charge": 3.0},
+    {"kind": "affective", "planning_horizon": 4, "alpha_charge": 3.0}
+  ]
+}

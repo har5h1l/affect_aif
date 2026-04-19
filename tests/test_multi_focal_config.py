@@ -1,6 +1,9 @@
 """Tests for multi-focal config parsing + agent factory (F)."""
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from experiment.factory import create_agents_from_multi_focal_config
@@ -63,6 +66,15 @@ def test_factory_builds_M_agents_with_correct_num_partners():
     assert agents[0]._kind_label == "base"
     assert agents[1]._kind_label == "affective"
     assert agents[2]._kind_label == "lesioned"
+
+
+def test_all_multifocal_configs_load_and_validate():
+    paths = sorted(Path(".").glob("configs/multifocal_*.json"))
+    assert len(paths) >= 4, f"expected >= 4 configs, found {len(paths)}: {paths}"
+    for p in paths:
+        raw = json.loads(p.read_text())
+        cfg = MultiFocalConfig.from_dict(raw)
+        assert cfg.num_agents() >= 2, f"{p}: M={cfg.num_agents()}"
 
 
 def test_factory_label_override():

@@ -1,0 +1,16 @@
+{
+  "experiment_name": "multifocal_assortative_choice",
+  "round_mode": "turn_taking",
+  "focal_selection": "round_robin",
+  "assignment_mode": "agent_choice",
+  "num_rounds": 400,
+  "num_replications": 50,
+  "random_seed": 42,
+  "payoff_mode": "binary",
+  "agents": [
+    {"kind": "affective", "planning_horizon": 8, "_label": "deep_affective_A"},
+    {"kind": "affective", "planning_horizon": 8, "_label": "deep_affective_B"},
+    {"kind": "base", "planning_horizon": 2, "_label": "shallow_no_affect_C"},
+    {"kind": "base", "planning_horizon": 2, "_label": "shallow_no_affect_D"}
+  ]
+}
