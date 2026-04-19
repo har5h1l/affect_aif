@@ -1,4 +1,5 @@
 {
+  "payoff_mode": "binary",
   "experiment_name": "sensitivity_affect_params",
   "num_partners": 4,
   "num_rounds": 200,
@@ -18,14 +19,46 @@
   "lesion_mode": "decouple",
   "num_replications": 50,
   "random_seed": 42,
-  "conditions": [4, 6],
+  "conditions": [
+    4,
+    6
+  ],
   "presets": [],
-  "partner_types": ["cooperator", "reciprocator", "exploiter", "random"],
+  "partner_types": [
+    "cooperator",
+    "reciprocator",
+    "exploiter",
+    "random"
+  ],
   "run_sensitivity": true,
   "sensitivity_factors": {
-    "alpha_charge": [0.5, 1.0, 2.0, 3.0, 5.0, 8.0],
-    "sigma_0_sq": [0.1, 0.25, 0.4, 0.6],
-    "beta_persistence": [0.5, 0.7, 0.8, 0.9, 0.95],
-    "initial_beta": [0.5, 0.67, 1.0, 1.5, 2.0]
+    "alpha_charge": [
+      0.5,
+      1.0,
+      2.0,
+      3.0,
+      5.0,
+      8.0
+    ],
+    "sigma_0_sq": [
+      0.1,
+      0.25,
+      0.4,
+      0.6
+    ],
+    "beta_persistence": [
+      0.5,
+      0.7,
+      0.8,
+      0.9,
+      0.95
+    ],
+    "initial_beta": [
+      0.5,
+      0.67,
+      1.0,
+      1.5,
+      2.0
+    ]
   }
 }

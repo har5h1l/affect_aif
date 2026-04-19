@@ -7,12 +7,17 @@ from agent.lesioned import LesionedAgent
 from experiment.conditions import PRESET_CONDITIONS, get_condition_name
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
-from agent.model.trust_game import TrustGameModel
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def make_agent(agent_cls, **kwargs):
-    cfg = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
-    model = TrustGameModel(cfg)
+    cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
+    model = _build_model(cfg)
     A, B, C, D = model.get_matrices()
     return agent_cls(
         A=A,
@@ -62,6 +67,7 @@ def test_reward_avg_precision_signal_zeros():
 
 def test_affective_outperforms_shallow_baseline():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=50,
         num_replications=3,
         random_seed=0,
@@ -82,6 +88,7 @@ def test_affective_outperforms_shallow_baseline():
 
 def test_betrayal_run_affect_mechanism_is_active():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=8,
         num_replications=1,
         random_seed=42,
@@ -118,6 +125,7 @@ def test_affect_tracks_precision_not_reward():
 
 def test_runner_runs_directly_without_calibration():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=5, num_replications=1, random_seed=0, deep_horizon=4, shallow_horizon=2, conditions=[2]
     )
     runner = ExperimentRunner(cfg)
@@ -129,6 +137,7 @@ def test_runner_runs_directly_without_calibration():
 
 def test_full_run_produces_primary_records():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=5,
         num_replications=1,
         random_seed=0,
@@ -142,6 +151,7 @@ def test_full_run_produces_primary_records():
 
 def test_horizon_override_and_core_and_preset_affective_conditions():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=2,
         num_replications=1,
         conditions=[6, 7, 8],
@@ -149,7 +159,7 @@ def test_horizon_override_and_core_and_preset_affective_conditions():
         horizon_overrides={6: 3, 7: 4, "variational_beta": 5},
     )
     runner = ExperimentRunner(cfg)
-    model = TrustGameModel(cfg)
+    model = _build_model(cfg)
 
     c6 = runner._create_agent(condition=6, model=model, seed=0)
     c7 = runner._create_agent(condition=7, model=model, seed=0)
@@ -165,6 +175,7 @@ def test_horizon_override_and_core_and_preset_affective_conditions():
 def test_clinical_alexithymia_preset():
     """Alexithymia preset creates an AffectiveAgent with blunted alpha_charge."""
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=2,
         num_replications=1,
         random_seed=0,
@@ -173,7 +184,7 @@ def test_clinical_alexithymia_preset():
         alpha_charge=0.1,
     )
     runner = ExperimentRunner(cfg)
-    model = TrustGameModel(cfg)
+    model = _build_model(cfg)
     agent = runner._create_agent(condition="alexithymia", model=model, seed=0)
     assert isinstance(agent, AffectiveAgent)
     assert agent.affect.alpha_charge == 0.1
@@ -183,6 +194,7 @@ def test_clinical_alexithymia_preset():
 def test_clinical_borderline_preset():
     """Borderline preset amplifies charge sensitivity in the discrete HESP beta path."""
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=2,
         num_replications=1,
         random_seed=0,
@@ -191,7 +203,7 @@ def test_clinical_borderline_preset():
         alpha_charge=12.0,
     )
     runner = ExperimentRunner(cfg)
-    model = TrustGameModel(cfg)
+    model = _build_model(cfg)
     agent = runner._create_agent(condition="borderline", model=model, seed=0)
     assert isinstance(agent, AffectiveAgent)
     assert agent.affect.alpha_charge == 12.0
@@ -201,6 +213,7 @@ def test_clinical_borderline_preset():
 def test_clinical_depression_preset():
     """Depression preset biases the discrete beta prior toward high beta / low precision."""
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=2,
         num_replications=1,
         random_seed=0,
@@ -209,7 +222,7 @@ def test_clinical_depression_preset():
         initial_beta=2.0,
     )
     runner = ExperimentRunner(cfg)
-    model = TrustGameModel(cfg)
+    model = _build_model(cfg)
     agent = runner._create_agent(condition="depression", model=model, seed=0)
     assert isinstance(agent, AffectiveAgent)
     assert agent.affect.initial_beta == 2.0

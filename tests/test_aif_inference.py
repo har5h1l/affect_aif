@@ -4,8 +4,13 @@ import numpy as np
 import pytest
 
 import aif
-from agent.model.trust_game import TrustGameModel
 from experiment.config import ExperimentConfig
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def _build_toy_agent():
@@ -62,24 +67,26 @@ def test_infer_policies_returns_q_pi_and_g_with_sane_shapes():
     assert np.all(np.isfinite(G))
 
 
-def test_infer_states_matches_trust_game_joint_posterior_buggy_path():
-    model = TrustGameModel(ExperimentConfig(num_partners=2, observation_noise=0.0))
+def test_infer_states_matches_trust_game_joint_posterior_with_payoff_modality():
+    model = _build_model(ExperimentConfig(payoff_mode="binary", num_partners=2, observation_noise=0.0))
     num_types = model.num_types
     num_stances = model.num_stances
     num_states = num_types * num_stances
 
-    A = np.empty(1, dtype=object)
+    A = np.empty(2, dtype=object)
     A[0] = model.A[0].reshape(2, num_states)
+    A[1] = model.A[1][:, 0].reshape(len(model.payoff_levels), num_states)
     B = np.empty(1, dtype=object)
     B[0] = np.stack([np.eye(num_states), np.eye(num_states)], axis=-1)
-    C = np.empty(1, dtype=object)
+    C = np.empty(2, dtype=object)
     C[0] = np.asarray([1.0, 0.0], dtype=float)
+    C[1] = np.zeros(len(model.payoff_levels), dtype=float)
     D = np.empty(1, dtype=object)
     D[0] = np.full(num_states, 1.0 / num_states, dtype=float)
 
     agent = aif.Agent(A=A, B=B, C=C, D=D, policies=np.asarray([[[0]]], dtype=int))
 
-    qs = aif.infer_states(agent, obs=[0])
+    qs = aif.infer_states(agent, obs=[0, 2])
     posterior = model.infer_joint_posterior(
         D[0].reshape(num_types, num_stances),
         observation=[0, 2],
@@ -90,7 +97,7 @@ def test_infer_states_matches_trust_game_joint_posterior_buggy_path():
 
 
 def test_infer_states_handles_multimodal_trust_game_tensors_without_crashing():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     agent = aif.Agent(
         A=np.asarray(model.A, dtype=object),
         B=np.asarray(model.B, dtype=object),
@@ -108,7 +115,7 @@ def test_infer_states_handles_multimodal_trust_game_tensors_without_crashing():
 
 
 def test_infer_policies_rejects_multifactor_agents_for_now():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     agent = aif.Agent(
         A=np.asarray(model.A, dtype=object),
         B=np.asarray(model.B, dtype=object),

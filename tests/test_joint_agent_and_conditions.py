@@ -7,12 +7,17 @@ from benchmark.benchmark_config import AGENT_REGISTRY
 from experiment.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
 from experiment.config import ExperimentConfig
 from experiment.factory import create_agent
-from agent.model.trust_game import TrustGameModel
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def _make_model_and_agent(agent_cls=BaseAgent, **kwargs):
-    cfg = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
-    model = TrustGameModel(cfg)
+    cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
+    model = _build_model(cfg)
     A, B, C, D = model.get_matrices()
     agent = agent_cls(
         A=A,
@@ -79,8 +84,8 @@ def test_named_presets_cover_lesion_control_and_clinical_variants():
 
 
 def test_factory_builds_agents_from_core_conditions_and_presets():
-    config = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
-    model = TrustGameModel(config)
+    config = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
+    model = _build_model(config)
 
     tau4_affect = create_agent(config, 6, model, seed=0)
     lesioned = create_agent(config, "lesioned", model, seed=0)

@@ -4,12 +4,17 @@ from agent.affective import AffectiveAgent
 from agent.base import BaseAgent
 from agent.lesioned import LesionedAgent
 from experiment.config import ExperimentConfig
-from agent.model.trust_game import TrustGameModel
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def _make_agent(agent_cls, **kwargs):
-    cfg = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
-    model = TrustGameModel(cfg)
+    cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
+    model = _build_model(cfg)
     A, B, C, D = model.get_matrices()
     common_kwargs = dict(
         A=A,

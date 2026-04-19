@@ -1,12 +1,45 @@
 {
-  "backends": ["trust"],
+  "payoff_mode": "binary",
+  "backends": [
+    "trust"
+  ],
   "agents": [
-    {"name": "tau4_affect", "backend": "trust", "kind": "registry", "implementation": "tau4_affect"},
-    {"name": "tau4_no_affect", "backend": "trust", "kind": "registry", "implementation": "tau4_no_affect"},
-    {"name": "tit_for_tat", "backend": "trust", "kind": "registry", "implementation": "tit_for_tat"},
-    {"name": "win_stay_lose_shift", "backend": "trust", "kind": "registry", "implementation": "win_stay_lose_shift"},
-    {"name": "grim_trigger", "backend": "trust", "kind": "registry", "implementation": "grim_trigger"},
-    {"name": "pavlov", "backend": "trust", "kind": "registry", "implementation": "pavlov"}
+    {
+      "name": "tau4_affect",
+      "backend": "trust",
+      "kind": "registry",
+      "implementation": "tau4_affect"
+    },
+    {
+      "name": "tau4_no_affect",
+      "backend": "trust",
+      "kind": "registry",
+      "implementation": "tau4_no_affect"
+    },
+    {
+      "name": "tit_for_tat",
+      "backend": "trust",
+      "kind": "registry",
+      "implementation": "tit_for_tat"
+    },
+    {
+      "name": "win_stay_lose_shift",
+      "backend": "trust",
+      "kind": "registry",
+      "implementation": "win_stay_lose_shift"
+    },
+    {
+      "name": "grim_trigger",
+      "backend": "trust",
+      "kind": "registry",
+      "implementation": "grim_trigger"
+    },
+    {
+      "name": "pavlov",
+      "backend": "trust",
+      "kind": "registry",
+      "implementation": "pavlov"
+    }
   ],
   "num_replications": 50,
   "num_rounds": 200,
@@ -17,10 +50,20 @@
       "scenario": "betrayal_arena",
       "trust_game_overrides": {
         "num_partners": 2,
-        "initial_partner_types": ["cooperative", "reciprocal"],
-        "initial_partner_stances": ["trusting", "neutral"],
+        "initial_partner_types": [
+          "cooperative",
+          "reciprocal"
+        ],
+        "initial_partner_stances": [
+          "trusting",
+          "neutral"
+        ],
         "scheduled_stance_switches": [
-          {"partner_idx": 0, "round": 100, "to_stance": "hostile"}
+          {
+            "partner_idx": 0,
+            "round": 100,
+            "to_stance": "hostile"
+          }
         ]
       }
     }

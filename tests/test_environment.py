@@ -2,11 +2,16 @@ from env.graded_trust_game import GradedTrustGameEnv
 from env.partner import Partner
 from env.trust_game import TrustGameEnv
 from experiment.config import ExperimentConfig
-from agent.model.trust_game import TrustGameModel
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def test_cooperator_mostly_cooperates():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     lookup = {partner.type_name: partner for partner in model.partner_types}
     partner = Partner(
         partner_idx=0,
@@ -20,7 +25,7 @@ def test_cooperator_mostly_cooperates():
 
 
 def test_exploiter_is_more_cooperative_when_trusting_than_hostile():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     lookup = {partner.type_name: partner for partner in model.partner_types}
     partner = Partner(
         partner_idx=0,
@@ -35,7 +40,7 @@ def test_exploiter_is_more_cooperative_when_trusting_than_hostile():
 
 
 def test_environment_step_fields():
-    cfg = ExperimentConfig(num_rounds=2)
+    cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2)
     env = TrustGameEnv(cfg, seed=0)
     context = env.reset()
     assert "active_partner" in context
@@ -45,6 +50,7 @@ def test_environment_step_fields():
 
 def test_environment_applies_scheduled_type_switches():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_partners=1,
         num_rounds=2,
         assignment_mode="random",
@@ -66,6 +72,7 @@ def test_environment_applies_scheduled_type_switches():
 
 def test_environment_applies_scheduled_stance_switches():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_partners=1,
         num_rounds=2,
         assignment_mode="random",
@@ -87,7 +94,7 @@ def test_environment_applies_scheduled_stance_switches():
 
 
 def test_environment_uses_partner_interface_methods():
-    cfg = ExperimentConfig(num_partners=1, num_rounds=1, p_switch=0.0)
+    cfg = ExperimentConfig(payoff_mode="binary", num_partners=1, num_rounds=1, p_switch=0.0)
     env = TrustGameEnv(cfg, seed=0)
     env.reset()
 
@@ -124,6 +131,7 @@ def test_environment_uses_partner_interface_methods():
 
 def test_type_switch_preserves_partner_stance():
     cfg = ExperimentConfig(
+        payoff_mode="binary",
         num_partners=1,
         num_rounds=1,
         assignment_mode="random",

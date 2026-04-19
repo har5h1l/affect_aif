@@ -5,12 +5,18 @@ from agent.base import BaseAgent
 from agent.lesioned import LesionedAgent
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
-from agent.model.trust_game import TrustGameModel
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 @pytest.fixture
 def tiny_config():
     return ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=3,
         num_replications=1,
         random_seed=0,
@@ -21,6 +27,7 @@ def tiny_config():
 def betrayal_config():
     return ExperimentConfig(
         experiment_name="betrayal_stress",
+        payoff_mode="binary",
         num_partners=2,
         num_rounds=8,
         num_replications=1,
@@ -38,7 +45,7 @@ def betrayal_config():
 
 @pytest.fixture
 def tiny_model(tiny_config):
-    return TrustGameModel(tiny_config)
+    return _build_model(tiny_config)
 
 
 @pytest.fixture

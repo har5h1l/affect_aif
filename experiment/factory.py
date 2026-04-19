@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
-
 from agent.affective import AffectiveAgent
 from agent.base import BaseAgent
 from agent.lesioned import LesionedAgent
@@ -11,13 +9,11 @@ from env.graded_trust_game import GradedTrustGameEnv
 from env.trust_game import TrustGameEnv
 from experiment.conditions import resolve_condition_spec
 from experiment.config import ExperimentConfig
-from agent.model.trust_game import GradedTrustGameModel, TrustGameModel
+from trust.model import TrustGameModel
 
 
 def create_model(config: ExperimentConfig) -> TrustGameModel:
-    if config.payoff_mode == "graded":
-        return GradedTrustGameModel(asdict(config))
-    return TrustGameModel(asdict(config))
+    return TrustGameModel(config)
 
 
 def create_env(config: ExperimentConfig, seed: int) -> TrustGameEnv:

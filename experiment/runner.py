@@ -19,7 +19,7 @@ from experiment.config import ExperimentConfig
 from experiment.factory import create_agent, create_env, create_model
 from experiment.logger import MetricLogger
 from experiment.progress import ProgressReporter, create_progress_reporter
-from agent.model.trust_game import TrustGameModel
+from trust.model import TrustGameModel
 
 from experiment.constants import SENSITIVITY_CONDITIONS
 

@@ -144,7 +144,7 @@ class TestDiscreteAffectiveAgent:
 
     def test_discrete_agent_instantiation(self):
         from agent.affective import AffectiveAgent
-        from agent.model.trust_game import TrustGameModel
+        from trust.model import TrustGameModel
 
         config = {
             "num_partners": 4,

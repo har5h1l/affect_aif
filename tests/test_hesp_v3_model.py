@@ -1,11 +1,16 @@
 import numpy as np
 
 from experiment.config import ExperimentConfig
-from agent.model.trust_game import TrustGameModel
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def test_model_exposes_two_modalities_and_three_factors():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
 
     assert len(model.A) == 2
     assert model.A[0].shape == (2, 4, 3)
@@ -26,7 +31,7 @@ def test_model_exposes_two_modalities_and_three_factors():
 
 
 def test_payoff_modality_marginalizes_partner_action_from_type_and_stance():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
 
     trusting_cooperator_prob = model.A[0][0, 0, 0]
     payoff_levels = list(model.payoff_levels)
@@ -38,7 +43,7 @@ def test_payoff_modality_marginalizes_partner_action_from_type_and_stance():
 
 
 def test_own_action_transition_is_deterministic():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
 
     cooperate = model.B[2][:, :, 0]
     defect = model.B[2][:, :, 1]
@@ -47,15 +52,15 @@ def test_own_action_transition_is_deterministic():
     np.testing.assert_allclose(defect, np.asarray([[0.0, 0.0], [1.0, 1.0]]))
 
 
-def test_social_posterior_does_not_double_count_deterministic_payoff():
-    model = TrustGameModel(ExperimentConfig())
+def test_social_posterior_multiplies_action_and_payoff_modalities():
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     prior = np.full((model.num_types, model.num_stances), 1.0 / (model.num_types * model.num_stances))
 
-    posterior_with_payoff = model.infer_joint_posterior(prior, observation=[0, 2], own_action=0)
-    posterior_without_payoff = model.joint_observation_likelihood(0)
-    posterior_without_payoff = posterior_without_payoff * prior
-    posterior_without_payoff /= posterior_without_payoff.sum()
+    expected_likelihood = np.asarray(model.A[0][0], dtype=float) * np.asarray(model.A[1][2, 0], dtype=float)
+    expected_posterior = expected_likelihood * prior
+    expected_posterior /= expected_posterior.sum()
 
-    np.testing.assert_allclose(posterior_with_payoff, posterior_without_payoff)
+    posterior = model.infer_joint_posterior(prior, observation=[0, 2], own_action=0)
 
+    np.testing.assert_allclose(posterior, expected_posterior)
 

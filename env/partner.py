@@ -6,14 +6,14 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from agent.model.types import PartnerType
-from agent.model.payoffs import COOPERATE, DEFECT
-from agent.model.stance import (
+from trust.payoffs import COOPERATE, DEFECT
+from trust.stance import (
     AGENT_CHARACTER_ORDER,
     cooperation_evidence_strength,
     posterior_to_stance,
     update_agent_character_posterior,
 )
+from trust.types import PartnerType
 
 _REPRESENTATIVE_POSTERIORS = {
     "trusting": np.asarray([0.75, 0.10, 0.15], dtype=float),

@@ -1,11 +1,16 @@
 import numpy as np
 
 from experiment.config import ExperimentConfig
-from agent.model.trust_game import GradedTrustGameModel, TrustGameModel
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def test_trust_model_exposes_stance_factor_and_joint_likelihood():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
 
     assert model.num_stances == 3
     assert model.A[0].shape == (2, model.num_types, model.num_stances)
@@ -16,7 +21,7 @@ def test_trust_model_exposes_stance_factor_and_joint_likelihood():
 
 
 def test_graded_model_uses_action_strength_for_stance_transitions():
-    model = GradedTrustGameModel(
+    model = _build_model(
         ExperimentConfig(
             payoff_mode="graded",
             num_investment_levels=6,
@@ -37,7 +42,7 @@ def test_graded_model_uses_action_strength_for_stance_transitions():
 
 
 def test_trust_model_predicts_partner_actions_from_type_and_stance_beliefs():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     belief = np.zeros((model.num_types, model.num_stances), dtype=float)
     cooperator = model.partner_type_names.index("cooperator")
     trusting = model.stance_names.index("trusting")
