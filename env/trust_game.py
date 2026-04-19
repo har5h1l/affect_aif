@@ -7,8 +7,8 @@ from dataclasses import asdict, is_dataclass
 import numpy as np
 
 from env.partner import Partner
-from agent.model.trust_game import TrustGameModel
-from agent.model.payoffs import decode_env_agent_action, payoff_to_index
+from trust.model import TrustGameModel
+from trust.payoffs import decode_env_agent_action, payoff_to_index
 
 
 class TrustGameEnv:
@@ -19,7 +19,7 @@ class TrustGameEnv:
         self.config = cfg
         self.seed = int(seed if seed is not None else cfg.get("random_seed", 42))
         self.rng = np.random.default_rng(self.seed)
-        self.model = TrustGameModel(cfg)
+        self.model = TrustGameModel(config)
         self.num_partners = int(cfg.get("num_partners", 4))
         self.num_rounds = int(cfg.get("num_rounds", 200))
         self.assignment_mode = str(cfg.get("assignment_mode", "random"))

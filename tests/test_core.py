@@ -1,15 +1,11 @@
 import jax.numpy as jnp
 import numpy as np
 
-from agent.inference.control import (
-    compute_expected_free_energy,
-    _rollout_policy_trust_game_mean_field,
-    _rollout_policy_trust_game_sophisticated,
-    construct_policies,
-    generate_observation_sequences,
-)
-from agent.inference.efe import compute_efe_with_terminal_value
-from agent.inference.maths import entropy, normalize, softmax
+import trust.rollout as trust_rollout
+from aif.efe import compute_efe_with_terminal_value, compute_expected_free_energy
+from aif.maths import entropy, normalize, softmax
+from aif.policies import construct_policies
+from aif.runtime import generate_observation_sequences
 
 
 def test_softmax_sums_to_one():
@@ -67,18 +63,22 @@ def _rollout_inputs():
     common = dict(
         active_partner=jnp.int32(0),
         assignment_mode_code=jnp.int32(0),
-        B_type=jnp.asarray(np.eye(2), dtype=jnp.float32),
+        B_type=jnp.asarray([np.eye(2, dtype=float)], dtype=jnp.float32),
         B_stance_by_action=jnp.asarray(
             [
-                np.eye(2, dtype=float),
-                np.eye(2, dtype=float),
+                [
+                    np.eye(2, dtype=float),
+                    np.eye(2, dtype=float),
+                ]
             ],
             dtype=jnp.float32,
         ),
-        partner_action_prob_table=jnp.asarray(
+        partner_action_prob_tables=jnp.asarray(
             [
-                [0.999, 0.999],
-                [0.001, 0.001],
+                [
+                    [0.999, 0.001],
+                    [0.001, 0.999],
+                ]
             ],
             dtype=jnp.float32,
         ),
@@ -149,7 +149,7 @@ def test_expected_free_energy_with_terminal_value_is_additive():
 
 def test_rollout_epistemic_value_is_positive_for_uncertain_beliefs():
     inputs = _rollout_inputs()
-    sophisticated = _rollout_policy_trust_game_sophisticated(
+    sophisticated = trust_rollout._rollout_policy_trust_game_sophisticated(
         inputs["policy"],
         inputs["observation_sequences"],
         inputs["beliefs"],
@@ -164,7 +164,7 @@ def test_rollout_epistemic_value_is_positive_for_uncertain_beliefs():
 
 def test_rollout_epistemic_value_approaches_zero_for_sharp_beliefs():
     inputs = _rollout_inputs()
-    sophisticated = _rollout_policy_trust_game_sophisticated(
+    sophisticated = trust_rollout._rollout_policy_trust_game_sophisticated(
         inputs["policy"],
         inputs["observation_sequences"],
         inputs["one_hot_beliefs"],
@@ -178,14 +178,14 @@ def test_rollout_epistemic_value_approaches_zero_for_sharp_beliefs():
 
 def test_sophisticated_and_mean_field_rollouts_agree_for_sharp_beliefs():
     inputs = _rollout_inputs()
-    mean_field = _rollout_policy_trust_game_mean_field(
+    mean_field = trust_rollout._rollout_policy_trust_game_mean_field(
         inputs["policy"],
         inputs["one_hot_beliefs"],
         use_utility_flag=jnp.float32(0.0),
         use_information_gain_flag=jnp.float32(1.0),
         **inputs["common"],
     )
-    sophisticated = _rollout_policy_trust_game_sophisticated(
+    sophisticated = trust_rollout._rollout_policy_trust_game_sophisticated(
         inputs["policy"],
         inputs["observation_sequences"],
         inputs["one_hot_beliefs"],

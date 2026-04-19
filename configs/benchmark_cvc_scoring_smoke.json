@@ -1,5 +1,8 @@
 {
-  "backends": ["cvc_local"],
+  "payoff_mode": "binary",
+  "backends": [
+    "cvc_local"
+  ],
   "agents": [
     {
       "name": "scoring_loop",

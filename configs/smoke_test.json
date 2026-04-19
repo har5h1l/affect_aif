@@ -1,4 +1,5 @@
 {
+  "payoff_mode": "binary",
   "experiment_name": "smoke_test",
   "num_partners": 4,
   "num_rounds": 20,
@@ -18,8 +19,18 @@
   "lesion_mode": "decouple",
   "num_replications": 3,
   "random_seed": 42,
-  "conditions": [3, 4],
-  "presets": ["lesioned"],
-  "partner_types": ["cooperator", "reciprocator", "exploiter", "random"],
+  "conditions": [
+    3,
+    4
+  ],
+  "presets": [
+    "lesioned"
+  ],
+  "partner_types": [
+    "cooperator",
+    "reciprocator",
+    "exploiter",
+    "random"
+  ],
   "run_sensitivity": false
 }

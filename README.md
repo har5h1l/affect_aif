@@ -20,10 +20,10 @@ See [docs/cli.md](docs/cli.md) for the command-line reference and [results/READM
 The supported trust-game workflow now uses the action-dependent partner redesign:
 - partner behavior depends on latent `type × stance`
 - stance changes are action-dependent and can also be scheduled explicitly with `scheduled_stance_switches`
-- the trust-game generative model now exposes the HESP-aligned `o_action`, `o_payoff`, and `o_intero` modalities plus `type`, `stance`, `context`, `beta`, and `own_action` factors
+- the trust-game generative model now exposes `o_action` and `o_payoff` observations over latent `type × stance`, with `own_action` tracked as a separate control/state factor
 - the default affective config path now uses the discrete HESP beta convention (`beta_mode="discrete"`, `initial_beta=1.0`)
 - the core study matrix is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`
-- lesion, reward-average, no-epistemic, variational, and clinical runs are named presets (`lesioned`, `reward_average`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`)
+- lesion, no-epistemic, variational-label, and clinical runs are named presets (`lesioned`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`)
 
 Common entry points:
 
@@ -39,17 +39,14 @@ python scripts/analyze_benchmark.py --results results/benchmark/benchmark_result
 
 ## Repository Layout
 
-- `affect_aif/`: shipped Python package
-- `affect_aif/README.md`: package overview and public import surface
-- `affect_aif/core/README.md`: core active-inference helpers
-- `affect_aif/agent/README.md`: agent implementations and affect-state boundary
-- `affect_aif/environment/README.md`: executable trust-game environments
-- `affect_aif/experiment/README.md`: configuration, condition, and runner surface
-- `affect_aif/generative_model/README.md`: trust-game generative model
-- `affect_aif/analysis/README.md`: result loading, metrics, and visualization helpers
-- `affect_aif/benchmark/README.md`: benchmark backends and comparison helpers
-- `affect_aif/cli/README.md`: shared CLI helpers
-- `affect_aif/configs/README.md`: bundled JSON configurations
+- `aif/`: generic active-inference primitives
+- `trust/`: canonical trust-game model, rollout helpers, and agent layer
+- `env/`: executable trust-game environments
+- `experiment/`: configuration, condition, and runner surface
+- `analysis/`: result loading, metrics, and visualization helpers
+- `benchmark/`: benchmark backends and comparison helpers
+- `configs/`: bundled JSON configurations
+- `docs/`: theory, experiment, and implementation notes
 - `scripts/README.md`: supported CLI wrappers
 - `tests/README.md`: supported verification surface
 - `archive/`: preserved exploratory scripts, configs, and legacy prototypes
@@ -58,4 +55,5 @@ python scripts/analyze_benchmark.py --results results/benchmark/benchmark_result
 
 - The main package exposes the supported runner/config entry points at the top level.
 - The trust benchmark is the supported benchmark surface; the local CvC path and the scripted gridworld adapter remain separate compatibility paths.
-- The discrete-beta prototype is archived; the supported affective path uses the current `affect/` helpers and the `variational_beta` preset.
+- The discrete-beta prototype is archived; the supported affective path uses `aif.affect.beta.DiscreteBetaState`.
+- The `variational_beta` preset name is retained in condition metadata, but the shipped runtime currently resolves it through the standard `AffectiveAgent` surface.

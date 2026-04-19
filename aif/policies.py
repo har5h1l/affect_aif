@@ -6,6 +6,7 @@ import itertools
 
 import numpy as np
 
+from aif.agent import Agent
 from aif.maths import normalize, softmax
 from aif.utils import enumerate_factorized_actions
 
@@ -51,7 +52,16 @@ def compute_policy_posterior(
     return softmax(logits, backend="numpy")
 
 
-def sample_action(
+def gamma_per_policy(gamma_base, first_partners, precision_signal):
+    """Map per-partner beta expectations onto per-policy precision."""
+
+    partners = np.asarray(first_partners, dtype=int)
+    beta_expectations = np.asarray(precision_signal, dtype=float)[partners]
+    safe_beta = np.maximum(beta_expectations, 1e-12)
+    return float(gamma_base) / safe_beta
+
+
+def _sample_action_impl(
     q_pi: np.ndarray,
     policies: np.ndarray,
     timestep: int = 0,
@@ -87,3 +97,15 @@ def sample_action(
     marginal = normalize(marginal, axis=0, backend="numpy").squeeze()
     chosen = int(rng.choice(len(unique_actions), p=marginal))
     return unique_actions[chosen]
+
+
+def sample_action(agent: Agent, q_pi: np.ndarray, timestep: int = 0):
+    """Sample an action using the agent's policies, mode, and RNG."""
+
+    return _sample_action_impl(
+        q_pi=q_pi,
+        policies=agent.policies,
+        timestep=timestep,
+        sampling_mode=agent.action_sampling,
+        rng=agent.rng,
+    )

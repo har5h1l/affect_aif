@@ -4,8 +4,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import trust
 
-from agent.affective import AffectiveAgent
 from experiment.conditions import (
     get_condition_metadata,
     get_condition_name,
@@ -14,9 +14,15 @@ from experiment.conditions import (
 )
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
-from agent.model.trust_game import TrustGameModel
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def _load_script_module(script_name: str):
@@ -49,6 +55,7 @@ def test_condition_metadata_and_presets_normalize_current_names():
 
 def test_runner_variational_beta_preset_uses_variational_affective_agent():
     config = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=2,
         num_replications=1,
         conditions=[],
@@ -56,10 +63,14 @@ def test_runner_variational_beta_preset_uses_variational_affective_agent():
         random_seed=0,
     )
     runner = ExperimentRunner(config)
-    model = TrustGameModel(config)
+    model = _build_model(config)
     agent = runner._create_agent(condition="variational_beta", model=model, seed=0)
 
-    assert isinstance(agent, AffectiveAgent)
+    assert isinstance(agent, trust.AffectiveAgent)
+    assert trust.TrustGameAgent is TrustGameAgent
+    assert trust.AffectiveAgent is AffectiveAgent
+    assert trust.LesionedAgent is LesionedAgent
+    assert set(trust.__all__) >= {"TrustGameAgent", "AffectiveAgent", "LesionedAgent"}
 
 
 def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
@@ -71,6 +82,7 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
     run_visualization = _load_script_module("run_visualization.py")
 
     config = ExperimentConfig(
+        payoff_mode="binary",
         num_rounds=2,
         num_replications=1,
         random_seed=0,

@@ -1,6 +1,6 @@
 import numpy as np
 
-from agent.model.stance import (
+from trust.stance import (
     AGENT_CHARACTER_ORDER,
     STANCE_ORDER,
     cooperation_evidence_strength,

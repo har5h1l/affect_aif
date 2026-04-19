@@ -39,23 +39,26 @@ This document provides comprehensive system documentation for AI agents operatin
 
 ```
 affect_aif/
-├── core/                  # No internal dependencies
-│   ├── control.py         # Policy evaluation, EFE, sophisticated inference
-│   ├── learning.py        # Belief update mechanics
-│   └── utils.py           # POMDP matrix construction helpers
-├── generative_model/      # Depends on: core
-│   ├── model.py           # TrustGameModel, GradedTrustGameModel
-│   ├── payoffs.py         # Payoff matrix construction
-│   └── partner_types.py   # Partner strategy definitions
-├── agent/                 # Depends on: core, generative_model
-│   ├── base_agent.py      # BaseAgent — plan_and_act / observe_outcome
-│   ├── affective_agent.py # AffectiveAgent — per-partner beta tracking
-│   ├── lesioned_agent.py  # LesionedAgent — beta tracked but decoupled
-│   └── reward_avg_agent.py # RewardAvgAgent — reward-based terminal values
-├── environment/           # Depends on: experiment (config only)
-│   ├── trust_game.py      # Binary trust game (2 actions × 4 partners)
-│   └── graded_trust_game.py # Graded investment (6 levels × 4 partners)
-├── experiment/            # Depends on: agent, environment, generative_model
+├── aif/                   # Generic active-inference primitives
+│   ├── agent.py           # Lightweight Agent dataclass
+│   ├── inference.py       # Generic Bayes / policy posterior helpers
+│   ├── learning.py        # Dirichlet learning helpers
+│   ├── policies.py        # Policy construction and sampling
+│   ├── runtime.py         # Observation-sequence enumeration + runtime helpers
+│   └── utils.py           # POMDP matrix/object-array helpers
+├── trust/                 # Trust-game domain layer
+│   ├── agent.py           # TrustGameAgent multi-partner composition
+│   ├── affective.py       # AffectiveAgent with per-partner beta state
+│   ├── lesioned.py        # LesionedAgent ablations
+│   ├── rollout.py         # Trust-specific planner / rollout helpers
+│   ├── model.py           # Canonical TrustGameModel
+│   ├── payoffs.py         # Trust-game payoff and action encoding helpers
+│   ├── stance.py          # Stance dynamics
+│   └── types.py           # Partner type metadata
+├── env/                   # Depends on: trust
+│   ├── trust_game.py      # Binary trust game (2 actions × N partners)
+│   └── graded_trust_game.py # Graded investment trust game
+├── experiment/            # Depends on: trust, env
 │   ├── config.py          # ExperimentConfig dataclass
 │   ├── conditions.py      # Condition ID → name mapping
 │   ├── runner.py          # ExperimentRunner (calibration + primary + sensitivity)
@@ -75,17 +78,19 @@ affect_aif/
 
 | ID | Name | Agent | Horizon | Affect |
 |----|------|-------|---------|--------|
-| 1 | deep_no_affect | BaseAgent | deep (8) | No |
-| 2 | affective_shallow | AffectiveAgent | shallow (2) | Yes |
-| 3 | lesioned | LesionedAgent | shallow (2) | Tracked but decoupled |
-| 4 | shallow_no_affect | BaseAgent | shallow (2) | No |
-| 5 | reward_avg | RewardAvgAgent | shallow (2) | Reward-based |
-| 6 | intermediate_3 | BaseAgent | 3 | No |
-| 7 | intermediate_4 | BaseAgent | 4 | No |
-| 8 | deep_affective | AffectiveAgent | deep (8) | Yes |
-| 9 | alexithymia | AffectiveAgent | shallow (2) | Low responsiveness |
-| 10 | borderline | AffectiveAgent | shallow (2) | High volatility |
-| 11 | depression | AffectiveAgent | shallow (2) | Low initial beta |
+| 1 | tau1_no_affect | TrustGameAgent | 1 | No |
+| 2 | tau1_affect | AffectiveAgent | 1 | Yes |
+| 3 | tau2_no_affect | TrustGameAgent | 2 | No |
+| 4 | tau2_affect | AffectiveAgent | 2 | Yes |
+| 5 | tau4_no_affect | TrustGameAgent | 4 | No |
+| 6 | tau4_affect | AffectiveAgent | 4 | Yes |
+| 7 | tau8_no_affect | TrustGameAgent | 8 | No |
+| 8 | tau8_affect | AffectiveAgent | 8 | Yes |
+| 9 | tau3_no_affect | TrustGameAgent | 3 | No |
+| 10 | tau3_affect | AffectiveAgent | 3 | Yes |
+
+Preset conditions live in `experiment.conditions.PRESET_CONDITIONS`:
+`lesioned`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`.
 
 ### Experiment Pipeline Flow
 
@@ -97,9 +102,9 @@ Config JSON → ExperimentRunner
     │
     ├── run_all()                   # All conditions × all seeds
     │   └── run_replication()       # Single condition × single seed
-    │       ├── _create_model()     # TrustGameModel or GradedTrustGameModel
+    │       ├── _create_model()     # Canonical TrustGameModel
     │       ├── _create_env()       # TrustGameEnv or GradedTrustGameEnv
-    │       ├── _create_agent()     # Condition → agent type
+    │       ├── _create_agent()     # Condition → TrustGameAgent / affective variant
     │       └── _run_episode()      # Main loop: plan → step → observe
     │
     └── save_results()              # DataFrame → CSV
@@ -117,7 +122,7 @@ Config JSON → ExperimentRunner
 ### Agent Lifecycle (per round)
 
 ```
-agent.plan_and_act(active_partner)
+agent.plan_and_act(active_partner)  # alias for choose_partner_and_action()
     ├── Enumerate policies (partner × action combinations)
     ├── Evaluate EFE via sophisticated inference (observation-branching)
     ├── [Affective] Weight by per-partner beta signal

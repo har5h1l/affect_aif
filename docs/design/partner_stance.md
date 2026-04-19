@@ -282,7 +282,7 @@ With 4+ partners whose stances are evolving independently (each based on their o
 | `environment/partner.py` | Add Bayesian inference over agent type, posterior-to-stance mapping, stance-conditioned action selection | Major |
 | `generative_model/model.py` | New hidden factor (stance), action-dependent B_stance, updated A matrix for type x stance | Major |
 | `core/rollout.py` | B matrix indexing uses action for stance factor; planning propagates stance beliefs forward | Major |
-| `agent/base_agent.py` | Joint inference over type + stance; belief arrays gain a dimension | Major |
+| `trust/agent.py` | TrustGameAgent carries joint inference over type + stance; belief arrays gain a dimension | Major |
 | `environment/trust_game.py` | Pass stance information through step results for logging | Minor |
 | `configs/` | New experiment configs for all 6 experiments | Moderate |
 | `analysis/hypotheses.py` | Updated hypothesis definitions | Moderate |

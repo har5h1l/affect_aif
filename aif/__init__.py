@@ -1,13 +1,13 @@
-"""Generic active-inference primitives.
+"""Generic active-inference primitives."""
 
-PR-1 exposes only a minimal surface from the extracted ``aif`` package:
-``softmax``, ``log_stable``, ``obj_array``, and ``construct_policies``.
-The package is intentionally self-contained and remains dead code until
-later integration work wires it into the rest of the repository.
-"""
+from __future__ import annotations
 
-from aif.maths import log_stable, softmax
-from aif.policies import construct_policies
+from aif.agent import Agent
+from aif.inference import infer_policies, infer_states
+from aif.learning import update_pA, update_pB, update_pD, update_pE
+from aif.maths import dirichlet_expected_value, log_stable, softmax
+from aif.policies import construct_policies, sample_action
 from aif.utils import obj_array
+
 
 __all__ = ["softmax", "log_stable", "obj_array", "construct_policies"]

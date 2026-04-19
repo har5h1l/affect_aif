@@ -6,7 +6,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from agent.model.types import PARTNER_TYPE_ORDER
+from trust.types import PARTNER_TYPE_ORDER
 
 DEFAULT_SENSITIVITY_FACTORS = {
     "alpha_charge": [0.5, 1.0, 2.0, 3.0, 5.0, 8.0],

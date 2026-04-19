@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import jax.numpy as jnp
+import numpy as np
 
-from agent.affective import AffectiveAgent
+from trust.affective import AffectiveAgent
 
 
 class LesionedAgent(AffectiveAgent):
@@ -18,7 +18,7 @@ class LesionedAgent(AffectiveAgent):
 
     def precision_signal(self):
         if self.lesion_mode in {"decouple", "freeze"}:
-            return jnp.ones((self.num_partners,), dtype=jnp.float32)
+            return np.ones((self.num_partners,), dtype=float)
         return super().precision_signal()
 
     def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):

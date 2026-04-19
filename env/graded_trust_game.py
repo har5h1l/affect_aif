@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from env.trust_game import TrustGameEnv
-from agent.model.trust_game import GradedTrustGameModel
+from trust.model import TrustGameModel
 
 
 class GradedTrustGameEnv(TrustGameEnv):
@@ -11,4 +11,4 @@ class GradedTrustGameEnv(TrustGameEnv):
 
     def __init__(self, config: dict, seed: int | None = None):
         super().__init__(config, seed=seed)
-        self.model = GradedTrustGameModel(self.config)
+        self.model = TrustGameModel(config)

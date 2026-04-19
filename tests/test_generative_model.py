@@ -1,13 +1,18 @@
 import numpy as np
 
 from experiment.config import ExperimentConfig
-from agent.model.trust_game import GradedTrustGameModel, TrustGameModel
-from agent.model.types import PartnerType
-from agent.model.payoffs import build_graded_payoff_matrix, decode_action, encode_action
+from trust.payoffs import build_graded_payoff_matrix, decode_action, encode_action
+from trust.types import PartnerType
+
+
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
 
 
 def test_a_matrix_column_normalized():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     partner_a = model.A[0]
     assert np.allclose(partner_a.sum(axis=0), 1.0)
     payoff_a = model.A[1]
@@ -15,13 +20,13 @@ def test_a_matrix_column_normalized():
 
 
 def test_b_matrix_column_normalized():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     assert np.allclose(model.B[0].sum(axis=0), 1.0)
     assert np.allclose(model.B[1].sum(axis=0), 1.0)
 
 
 def test_c_and_d_shapes():
-    model = TrustGameModel(ExperimentConfig())
+    model = _build_model(ExperimentConfig(payoff_mode="binary"))
     assert model.C[0].shape == (2,)
     assert model.C[1].shape == (4,)
     assert np.isclose(model.D[0].sum(), 1.0)
@@ -68,7 +73,7 @@ def test_graded_encode_decode_roundtrip():
 
 def test_graded_model_construction():
     cfg = ExperimentConfig(payoff_mode="graded", num_investment_levels=6, assignment_mode="agent_choice")
-    model = GradedTrustGameModel(cfg)
+    model = _build_model(cfg)
     assert model.num_social_actions == 6
     assert model.payoff_matrix.shape == (6, 2, 2)
     assert model.num_controls == [24]  # 6 levels × 4 partners
@@ -84,7 +89,7 @@ def test_graded_model_construction():
 
 def test_graded_a_matrix_column_normalized():
     cfg = ExperimentConfig(payoff_mode="graded", num_investment_levels=6, assignment_mode="agent_choice")
-    model = GradedTrustGameModel(cfg)
+    model = _build_model(cfg)
     # Partner action A matrix
     assert np.allclose(model.A[0].sum(axis=0), 1.0)
     # Payoff A matrix — each column should sum to 1

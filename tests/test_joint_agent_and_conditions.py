@@ -1,32 +1,22 @@
 import numpy as np
 
-from agent.affective import AffectiveAgent
-from agent.base import BaseAgent
-from agent.lesioned import LesionedAgent
 from benchmark.benchmark_config import AGENT_REGISTRY
 from experiment.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
 from experiment.config import ExperimentConfig
 from experiment.factory import create_agent
-from agent.model.trust_game import TrustGameModel
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
-def _make_model_and_agent(agent_cls=BaseAgent, **kwargs):
-    cfg = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
-    model = TrustGameModel(cfg)
-    A, B, C, D = model.get_matrices()
-    agent = agent_cls(
-        A=A,
-        B=B,
-        C=C,
-        D=D,
-        model=model,
-        planning_horizon=2,
-        gamma=1.0,
-        seed=0,
-        reference_horizon=8,
-        max_policies=64,
-        **kwargs,
-    )
+def _build_model(config):
+    from trust.model import TrustGameModel
+
+    return TrustGameModel(config)
+
+
+def _make_model_and_agent(agent_cls=TrustGameAgent, **kwargs):
+    cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
+    model = _build_model(cfg)
+    agent = agent_cls(model=model, planning_horizon=2, gamma=1.0, seed=0, reference_horizon=8, max_policies=64, **kwargs)
     return model, agent
 
 
@@ -79,8 +69,8 @@ def test_named_presets_cover_lesion_control_and_clinical_variants():
 
 
 def test_factory_builds_agents_from_core_conditions_and_presets():
-    config = ExperimentConfig(num_rounds=2, num_replications=1, random_seed=0)
-    model = TrustGameModel(config)
+    config = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
+    model = _build_model(config)
 
     tau4_affect = create_agent(config, 6, model, seed=0)
     lesioned = create_agent(config, "lesioned", model, seed=0)

@@ -1,4 +1,4 @@
-"""Generative model specification for the trust game."""
+"""Canonical trust-game POMDP."""
 
 from __future__ import annotations
 
@@ -6,14 +6,9 @@ from dataclasses import asdict, is_dataclass
 
 import numpy as np
 
-from agent.inference.maths import log_stable, softmax
-from agent.inference.utils import obj_array
-from agent.model.types import (
-    PARTNER_TYPE_ORDER,
-    PartnerType,
-    default_partner_type_params,
-)
-from agent.model.payoffs import (
+from aif.maths import log_stable, softmax
+from aif.utils import obj_array
+from trust.payoffs import (
     build_graded_payoff_matrix,
     build_payoff_matrix,
     decode_action,
@@ -21,31 +16,57 @@ from agent.model.payoffs import (
     expected_agent_payoff,
     factorized_num_controls,
     infer_payoff_levels,
-    num_actions,
     payoff_distribution,
     payoff_to_index,
 )
-from agent.model.stance import (
+from trust.stance import (
     STANCE_ORDER,
     cooperation_evidence_strength,
     get_type_stance_cooperation_table,
     interpolate_stance_transition,
 )
+from trust.types import (
+    PARTNER_TYPE_ORDER,
+    PartnerType,
+    default_partner_type_params,
+)
 
 
-class _BaseTrustGameModel:
-    """Shared trust-game POMDP with type and stance factors."""
+_BINARY_KEYS = {"mutual_coop", "sucker", "temptation", "mutual_defect"}
+_GRADED_KEYS = {"num_investment_levels", "endowment", "multiplier"}
 
-    def __init__(self, config: dict):
-        cfg = asdict(config) if is_dataclass(config) else dict(config)
+
+class TrustGameModel:
+    """Active-inference generative model for the multi-partner trust game."""
+
+    def __init__(self, config):
+        config_is_dataclass = is_dataclass(config)
+        cfg = asdict(config) if config_is_dataclass else dict(config)
         self.config = cfg
+
+        if "model_class" in cfg:
+            raise ValueError(
+                "config key 'model_class' was removed in the B+A restructure. "
+                "TrustGameModel is now the only model class."
+            )
+        if "variant" in cfg:
+            raise ValueError(
+                "config key 'variant' was removed in the B+A restructure. "
+                "use 'assignment_mode' instead."
+            )
+        if "payoff_mode" not in cfg:
+            raise ValueError(
+                "config must specify payoff_mode={'binary','graded'}. "
+                "implicit defaults were removed in the B+A restructure."
+            )
+
         self.num_partners = int(cfg.get("num_partners", 4))
         self.partner_type_names = tuple(cfg.get("partner_types", PARTNER_TYPE_ORDER))
         self.stance_names = tuple(cfg.get("stance_names", STANCE_ORDER))
         self.num_types = len(self.partner_type_names)
         self.num_stances = len(self.stance_names)
         self.p_switch = float(cfg.get("p_switch", 0.05))
-        self.assignment_mode = str(cfg.get("assignment_mode", cfg.get("variant", "random")))
+        self.assignment_mode = str(cfg.get("assignment_mode", "random"))
         self.observation_noise = float(cfg.get("observation_noise", 0.0))
         self.preference_temperature = float(cfg.get("preference_temperature", 1.0))
         self.partner_type_params = default_partner_type_params()
@@ -55,7 +76,36 @@ class _BaseTrustGameModel:
             for name in self.partner_type_names
         ]
 
-        self._init_payoffs(cfg)
+        self.payoff_mode = str(cfg["payoff_mode"])
+        if self.payoff_mode == "binary":
+            if not config_is_dataclass:
+                stray = _GRADED_KEYS & cfg.keys()
+                if stray:
+                    raise ValueError(f"payoff_mode='binary' but graded-only keys present: {sorted(stray)}")
+            self.num_social_actions = 2
+            self.payoff_matrix = build_payoff_matrix(
+                mutual_coop=tuple(cfg.get("mutual_coop", (3.0, 3.0))),
+                sucker=tuple(cfg.get("sucker", (-1.0, 5.0))),
+                temptation=tuple(cfg.get("temptation", (5.0, -1.0))),
+                mutual_defect=tuple(cfg.get("mutual_defect", (1.0, 1.0))),
+            )
+        elif self.payoff_mode == "graded":
+            if not config_is_dataclass:
+                stray = _BINARY_KEYS & cfg.keys()
+                if stray:
+                    raise ValueError(f"payoff_mode='graded' but binary-only keys present: {sorted(stray)}")
+            num_investment_levels = int(cfg.get("num_investment_levels", 6))
+            endowment = float(cfg.get("endowment", 10.0))
+            multiplier = float(cfg.get("multiplier", 3.0))
+            self.num_social_actions = num_investment_levels
+            self.payoff_matrix = build_graded_payoff_matrix(
+                num_levels=num_investment_levels,
+                endowment=endowment,
+                multiplier=multiplier,
+            )
+        else:
+            raise ValueError(f"unknown payoff_mode={self.payoff_mode!r}, expected 'binary' or 'graded'")
+
         self.payoff_levels = infer_payoff_levels(self.payoff_matrix)
         self.num_obs = [2, len(self.payoff_levels)]
         self.num_controls = factorized_num_controls(
@@ -73,9 +123,6 @@ class _BaseTrustGameModel:
     @property
     def uses_factorized_controls(self) -> bool:
         return len(self.num_controls) > 1
-
-    def _init_payoffs(self, cfg: dict) -> None:  # pragma: no cover - implemented by subclasses
-        raise NotImplementedError
 
     def _build_partner_action_prob_table(self) -> np.ndarray:
         return get_type_stance_cooperation_table(self.partner_type_names)
@@ -100,7 +147,7 @@ class _BaseTrustGameModel:
         return int(action)
 
     def build_A(self) -> np.ndarray:
-        """Build likelihood tensors for action and payoff observations."""
+        """Build a fresh likelihood object-array."""
 
         A = obj_array(2)
         partner_action = np.zeros((2, self.num_types, self.num_stances), dtype=float)
@@ -111,7 +158,10 @@ class _BaseTrustGameModel:
                 noisy = (1.0 - self.observation_noise) * clean + self.observation_noise * 0.5
                 partner_action[:, type_idx, stance_idx] = noisy
 
-        payoff_obs = np.zeros((len(self.payoff_levels), self.num_social_actions, self.num_types, self.num_stances), dtype=float)
+        payoff_obs = np.zeros(
+            (len(self.payoff_levels), self.num_social_actions, self.num_types, self.num_stances),
+            dtype=float,
+        )
         for agent_action in range(self.num_social_actions):
             for type_idx in range(self.num_types):
                 for stance_idx in range(self.num_stances):
@@ -126,13 +176,15 @@ class _BaseTrustGameModel:
         return A
 
     def build_B(self) -> np.ndarray:
-        """Build transition tensors for type, stance, and own action."""
+        """Build a fresh transition object-array."""
 
         B = obj_array(3)
         num_actions_total = int(np.prod(self.num_controls))
 
         type_transition = np.full(
-            (self.num_types, self.num_types), self.p_switch / max(self.num_types - 1, 1), dtype=float
+            (self.num_types, self.num_types),
+            self.p_switch / max(self.num_types - 1, 1),
+            dtype=float,
         )
         np.fill_diagonal(type_transition, 1.0 - self.p_switch)
         B[0] = np.repeat(type_transition[:, :, None], num_actions_total, axis=2)
@@ -212,13 +264,28 @@ class _BaseTrustGameModel:
         p_coop = float(np.sum(joint * self.partner_action_prob_table))
         return np.asarray([p_coop, 1.0 - p_coop], dtype=float)
 
-    def joint_observation_likelihood(self, partner_action: int, payoff_obs: int | None = None, own_action: int | None = None) -> np.ndarray:
-        del payoff_obs, own_action
-        return np.asarray(self.A[0][int(partner_action)], dtype=float)
+    def joint_observation_likelihood(self, partner_action: int, payoff_obs: int, own_action: int) -> np.ndarray:
+        """Likelihood over joint ``(type, stance)`` given both observation modalities."""
 
-    def observation_likelihood(self, observation: list[int], own_action: int | None = None) -> np.ndarray:
-        payoff_obs = int(observation[1]) if len(observation) > 1 else None
-        return self.joint_observation_likelihood(int(observation[0]), payoff_obs=payoff_obs, own_action=own_action)
+        action_likelihood = np.asarray(self.A[0][int(partner_action)], dtype=float)
+        payoff_likelihood = np.asarray(self.A[1][int(payoff_obs), int(own_action)], dtype=float)
+        return action_likelihood * payoff_likelihood
+
+    def observation_likelihood(self, observation: list[int], own_action: int | None) -> np.ndarray:
+        if len(observation) < 2:
+            raise ValueError(
+                f"observation_likelihood now requires both modalities; got {observation!r}. "
+                "callers must pass [o_partner_action, o_payoff]."
+            )
+        if own_action is None:
+            raise ValueError(
+                "observation_likelihood now requires own_action to evaluate the payoff modality."
+            )
+        return self.joint_observation_likelihood(
+            int(observation[0]),
+            payoff_obs=int(observation[1]),
+            own_action=int(own_action),
+        )
 
     def type_transition_for_action(self, action: int) -> np.ndarray:
         return np.asarray(self.B[0][:, :, int(action)], dtype=float)
@@ -230,7 +297,7 @@ class _BaseTrustGameModel:
         return self.type_transition_for_action(action)
 
     def stance_transition_for_executed_own_action(self, own_action: int) -> np.ndarray:
-        """Stance dynamics from partner-observed behavior (executed own action)."""
+        """Stance dynamics from partner-observed behavior."""
 
         evidence = cooperation_evidence_strength(int(own_action), num_social_actions=self.num_social_actions)
         return interpolate_stance_transition(evidence)
@@ -250,8 +317,10 @@ class _BaseTrustGameModel:
         self,
         joint_belief: np.ndarray,
         observation: list[int],
-        own_action: int | None = None,
+        own_action: int | None,
     ) -> np.ndarray:
+        """Update the joint posterior using both observation modalities."""
+
         prior = self.as_joint_belief(joint_belief)
         likelihood = self.observation_likelihood(observation, own_action=own_action)
         posterior = prior * likelihood
@@ -268,31 +337,3 @@ class _BaseTrustGameModel:
 
     def expected_agent_payoff(self, agent_action: int, partner_action_probs: np.ndarray) -> float:
         return expected_agent_payoff(agent_action, partner_action_probs, self.payoff_matrix)
-
-
-class TrustGameModel(_BaseTrustGameModel):
-    """Construct the trust-game POMDP and joint type-stance helpers."""
-
-    def _init_payoffs(self, cfg: dict) -> None:
-        self.num_social_actions = 2
-        self.payoff_matrix = build_payoff_matrix(
-            mutual_coop=tuple(cfg.get("mutual_coop", (3.0, 3.0))),
-            sucker=tuple(cfg.get("sucker", (-1.0, 5.0))),
-            temptation=tuple(cfg.get("temptation", (5.0, -1.0))),
-            mutual_defect=tuple(cfg.get("mutual_defect", (1.0, 1.0))),
-        )
-
-
-class GradedTrustGameModel(_BaseTrustGameModel):
-    """Generative model for a graded investment trust game."""
-
-    def _init_payoffs(self, cfg: dict) -> None:
-        num_investment_levels = int(cfg.get("num_investment_levels", 6))
-        endowment = float(cfg.get("endowment", 10.0))
-        multiplier = float(cfg.get("multiplier", 3.0))
-        self.num_social_actions = num_investment_levels
-        self.payoff_matrix = build_graded_payoff_matrix(
-            num_levels=num_investment_levels,
-            endowment=endowment,
-            multiplier=multiplier,
-        )
