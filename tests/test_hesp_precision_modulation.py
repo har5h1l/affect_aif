@@ -1,6 +1,6 @@
 import numpy as np
 
-from agent.inference.rollout import gamma_per_policy
+from aif.policies import gamma_per_policy
 
 
 def test_gamma_per_policy_uses_inverse_beta_expectation():

@@ -5,7 +5,7 @@ from __future__ import annotations
 import jax.numpy as jnp
 import numpy as np
 
-from agent.affect.beta import DiscreteBetaState
+from aif.affect.beta import DiscreteBetaState
 from agent.base import BaseAgent
 
 
@@ -42,7 +42,7 @@ class AffectiveAgent(BaseAgent):
             **kwargs,
         )
         self.affect = DiscreteBetaState(
-            num_partners=num_partners,
+            num_entities=num_partners,
             num_levels=num_levels,
             persistence=persistence,
             alpha_charge=alpha_charge,
@@ -63,7 +63,7 @@ class AffectiveAgent(BaseAgent):
         if self.pending_prediction_partner != partner_idx:
             return
         self.affect.update(
-            partner_idx=partner_idx,
+            entity_idx=partner_idx,
             predicted_action_probs=self.pending_prediction_probs,
             observed_action=partner_action,
         )

@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from agent.affect.beta import (
+from aif.affect.beta import (
     DiscreteBetaState,
     _build_transition_matrix,
 )
@@ -45,74 +45,74 @@ class TestTransitionMatrix:
 
 class TestDiscreteBetaState:
     def test_initial_state(self):
-        state = DiscreteBetaState(num_partners=4, initial_beta=1.0)
+        state = DiscreteBetaState(num_entities=4, initial_beta=1.0)
         betas = state.get_all_betas()
         assert betas.shape == (4,)
         np.testing.assert_allclose(betas, 1.0, atol=0.1)
 
     def test_low_surprise_decreases_beta(self):
         """Observing low surprise should decrease HESP beta toward higher precision."""
-        state = DiscreteBetaState(num_partners=1, initial_beta=1.0)
+        state = DiscreteBetaState(num_entities=1, initial_beta=1.0)
         beta_before = state.get_beta(0)
         for _ in range(5):
-            state.update(partner_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
+            state.update(entity_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
         beta_after = state.get_beta(0)
         assert beta_after < beta_before, "Low surprise should decrease beta"
 
     def test_high_surprise_increases_beta(self):
         """Observing high surprise should increase HESP beta toward lower precision."""
-        state = DiscreteBetaState(num_partners=1, initial_beta=0.5)
+        state = DiscreteBetaState(num_entities=1, initial_beta=0.5)
         beta_before = state.get_beta(0)
-        state.update(partner_idx=0, predicted_action_probs=[0.1, 0.9], observed_action=0)
+        state.update(entity_idx=0, predicted_action_probs=[0.1, 0.9], observed_action=0)
         beta_after = state.get_beta(0)
         assert beta_after > beta_before, "High surprise should increase beta"
 
     def test_beta_bounded(self):
         """Beta should stay within the defined level range."""
-        state = DiscreteBetaState(num_partners=1, initial_beta=0.5, beta_min=0.1, beta_max=0.9)
+        state = DiscreteBetaState(num_entities=1, initial_beta=0.5, beta_min=0.1, beta_max=0.9)
         # Many high-surprise updates
         for _ in range(50):
-            state.update(partner_idx=0, predicted_action_probs=[0.1, 0.9], observed_action=0)
+            state.update(entity_idx=0, predicted_action_probs=[0.1, 0.9], observed_action=0)
         assert state.get_beta(0) >= 0.1
         assert state.get_beta(0) <= 0.9
 
     def test_per_partner_independence(self):
         """Updates to one partner should not affect another."""
-        state = DiscreteBetaState(num_partners=2, initial_beta=1.0)
-        state.update(partner_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
+        state = DiscreteBetaState(num_entities=2, initial_beta=1.0)
+        state.update(entity_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
         beta_0 = state.get_beta(0)
         beta_1 = state.get_beta(1)
         assert beta_0 != beta_1, "Only updated partner should change"
         np.testing.assert_allclose(beta_1, 1.0, atol=0.1)
 
     def test_belief_is_valid_distribution(self):
-        state = DiscreteBetaState(num_partners=1, initial_beta=0.5)
-        state.update(partner_idx=0, predicted_action_probs=[0.7, 0.3], observed_action=0)
+        state = DiscreteBetaState(num_entities=1, initial_beta=0.5)
+        state.update(entity_idx=0, predicted_action_probs=[0.7, 0.3], observed_action=0)
         belief = state.get_belief(0)
         assert all(belief >= 0), "Belief should be non-negative"
         np.testing.assert_allclose(belief.sum(), 1.0, atol=1e-10)
 
     def test_belief_entropy_increases_from_point_prior_under_new_evidence(self):
         """A point prior should spread once observations push beta away from baseline."""
-        state = DiscreteBetaState(num_partners=1, initial_beta=1.0)
+        state = DiscreteBetaState(num_entities=1, initial_beta=1.0)
         initial_entropy = state.get_belief_entropy(0)
         # Consistently accurate predictions push the posterior off the baseline state.
         for _ in range(10):
-            state.update(partner_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
+            state.update(entity_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
         final_entropy = state.get_belief_entropy(0)
         assert final_entropy > initial_entropy, "Evidence should spread a delta prior into a non-trivial posterior"
 
     def test_reset(self):
-        state = DiscreteBetaState(num_partners=2, initial_beta=1.0)
-        state.update(partner_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
+        state = DiscreteBetaState(num_entities=2, initial_beta=1.0)
+        state.update(entity_idx=0, predicted_action_probs=[0.9, 0.1], observed_action=0)
         state.reset()
         betas = state.get_all_betas()
         np.testing.assert_allclose(betas, 1.0, atol=0.1)
 
     def test_history_tracking(self):
-        state = DiscreteBetaState(num_partners=1, initial_beta=0.5)
+        state = DiscreteBetaState(num_entities=1, initial_beta=0.5)
         for _ in range(5):
-            state.update(partner_idx=0, predicted_action_probs=[0.8, 0.2], observed_action=0)
+            state.update(entity_idx=0, predicted_action_probs=[0.8, 0.2], observed_action=0)
         history = state.get_history(0)
         assert len(history) == 6  # initial + 5 updates
 
