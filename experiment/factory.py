@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-from agent.affective import AffectiveAgent
-from agent.base import BaseAgent
-from agent.lesioned import LesionedAgent
 from env.graded_trust_game import GradedTrustGameEnv
 from env.trust_game import TrustGameEnv
 from experiment.conditions import resolve_condition_spec
 from experiment.config import ExperimentConfig
-from trust.model import TrustGameModel
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent, TrustGameModel
 
 
 def create_model(config: ExperimentConfig) -> TrustGameModel:
@@ -38,15 +35,10 @@ def _planning_horizon_for_condition(config: ExperimentConfig, condition: int | s
     return int(default_horizon)
 
 
-def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGameModel, seed: int) -> BaseAgent:
+def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGameModel, seed: int) -> TrustGameAgent:
     spec = resolve_condition_spec(condition)
-    matrices = model.get_matrices()
     planning_horizon = _planning_horizon_for_condition(config, condition, spec.planning_horizon)
     common = dict(
-        A=matrices[0],
-        B=matrices[1],
-        C=matrices[2],
-        D=matrices[3],
         model=model,
         gamma=config.gamma,
         lr=config.lr,
@@ -71,13 +63,12 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
     params.update(spec.parameter_overrides)
 
     if spec.agent_kind == "base":
-        return BaseAgent(planning_horizon=planning_horizon, **common)
+        return TrustGameAgent(planning_horizon=planning_horizon, **common)
     if spec.agent_kind == "reward_average":
         raise ValueError("reward_average agent kind has been removed. Use 'affective' or 'base' instead.")
     if spec.agent_kind == "lesioned":
         return LesionedAgent(
             planning_horizon=planning_horizon,
-            num_partners=config.num_partners,
             alpha_charge=params["alpha_charge"],
             sigma_0_sq=params["sigma_0_sq"],
             initial_beta=params["initial_beta"],
@@ -89,7 +80,6 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
     if spec.agent_kind == "affective":
         return AffectiveAgent(
             planning_horizon=planning_horizon,
-            num_partners=config.num_partners,
             alpha_charge=params["alpha_charge"],
             sigma_0_sq=params["sigma_0_sq"],
             initial_beta=params["initial_beta"],

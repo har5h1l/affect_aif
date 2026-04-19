@@ -1,10 +1,8 @@
 import pytest
 
-from agent.affective import AffectiveAgent
-from agent.base import BaseAgent
-from agent.lesioned import LesionedAgent
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
 def _build_model(config):
@@ -50,14 +48,8 @@ def tiny_model(tiny_config):
 
 @pytest.fixture
 def agent_factory(tiny_config, tiny_model):
-    A, B, C, D = tiny_model.get_matrices()
-
     def _make(agent_cls, **kwargs):
         return agent_cls(
-            A=A,
-            B=B,
-            C=C,
-            D=D,
             model=tiny_model,
             planning_horizon=2,
             gamma=1.0,
@@ -73,13 +65,9 @@ def agent_factory(tiny_config, tiny_model):
 @pytest.fixture
 def representative_agents(agent_factory, tiny_model):
     return {
-        "base": agent_factory(BaseAgent),
-        "affective": agent_factory(AffectiveAgent, num_partners=tiny_model.num_partners),
-        "lesioned": agent_factory(
-            LesionedAgent,
-            num_partners=tiny_model.num_partners,
-            lesion_mode="decouple",
-        ),
+        "base": agent_factory(TrustGameAgent),
+        "affective": agent_factory(AffectiveAgent),
+        "lesioned": agent_factory(LesionedAgent, lesion_mode="decouple"),
     }
 
 

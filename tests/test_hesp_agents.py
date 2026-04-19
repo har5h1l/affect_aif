@@ -1,9 +1,7 @@
 import numpy as np
 
-from agent.affective import AffectiveAgent
-from agent.base import BaseAgent
-from agent.lesioned import LesionedAgent
 from experiment.config import ExperimentConfig
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
 def _build_model(config):
@@ -15,29 +13,19 @@ def _build_model(config):
 def _make_agent(agent_cls, **kwargs):
     cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
     model = _build_model(cfg)
-    A, B, C, D = model.get_matrices()
-    common_kwargs = dict(
-        A=A,
-        B=B,
-        C=C,
-        D=D,
+    return agent_cls(
         model=model,
         planning_horizon=2,
         gamma=1.0,
         seed=0,
         reference_horizon=cfg.deep_horizon,
         max_policies=64,
-    )
-    if agent_cls is not BaseAgent:
-        common_kwargs["num_partners"] = cfg.num_partners
-    return agent_cls(
-        **common_kwargs,
         **kwargs,
     )
 
 
 def test_base_agent_precision_signal_defaults_to_unity():
-    agent = _make_agent(BaseAgent)
+    agent = _make_agent(TrustGameAgent)
     np.testing.assert_allclose(np.asarray(agent.precision_signal(), dtype=float), np.ones(agent.num_partners))
 
 

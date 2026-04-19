@@ -12,9 +12,9 @@
 The shipped trust-game path now uses the action-dependent stance redesign.
 
 - `switch_round`, exploiter early/late phases, and `last_action × phase` likelihood conditioning are no longer part of the supported trust-game semantics.
-- `TrustGameModel` now exposes the HESP-aligned trust-game matrices: `A = {o_action, o_payoff, o_intero}` and `B = {type, stance, context, beta, own_action}`.
-- `GradedTrustGameModel` keeps the same `type × stance` social structure but extends the own-action factor to the graded action count.
-- `BaseAgent` maintains per-partner joint beliefs over 12 states (`4 types × 3 stances`), with derived type and stance marginals for logging.
+- `TrustGameModel` is the canonical trust-game model for both binary and graded payoffs (`payoff_mode={"binary","graded"}`).
+- The shipped trust-game matrices expose two observation modalities (`o_action`, `o_payoff`) and three hidden/control factors (`type`, `stance`, `own_action`).
+- `TrustGameAgent` composes one `aif.Agent` per tracked partner, each with its own `A/B/pA/pB`, while logging shared per-partner joint beliefs over `4 types × 3 stances`.
 - The affective helper path now defaults to a discrete HESP beta state with levels `[0.5, 0.67, 1.0, 1.5, 2.0]` and baseline `initial_beta = 1.0`.
 - `ExperimentConfig` supports `initial_partner_stances`, `scheduled_stance_switches`, and named `presets`.
 - The enforced minimum full-run `mu` calibration count is now `3`, and calibration uses the deepest relevant no-affect condition for the current config rather than always forcing tau-8.
@@ -48,7 +48,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## Sophisticated rollout inference
 
 - The trust-game planner now uses observation-branching sophisticated inference for **all** conditions and horizons.
-- Implementation-wise, the supported control surface is split across `affect_aif/core/policies.py`, `affect_aif/core/efe.py`, and `affect_aif/core/rollout.py`, with `affect_aif/core/control.py` kept as a compatibility facade. The rollout path precomputes all binary observation sequences of length `planning_horizon - 1`, evaluates each `(policy, observation-sequence)` path, updates the acted-on partner belief after each hypothetical observation by Bayes rule, and then sums the pathwise EFE under the path probabilities.
+- Implementation-wise, the supported control surface is split across `aif/policies.py`, `aif/efe.py`, `aif/runtime.py`, and `trust/rollout.py`. The rollout path precomputes all binary observation sequences of length `planning_horizon - 1`, evaluates each `(policy, observation-sequence)` path, updates the acted-on partner belief after each hypothetical observation by Bayes rule, and then sums the pathwise EFE under the path probabilities.
 - The old mean-field rollout is retained only as an internal comparison path for tests; it is no longer the default decision rule. That retained path now uses observation-weighted expected information gain on non-terminal steps rather than negative ambiguity alone.
 - This keeps the planning-method axis controlled across Conditions 1-8, so horizon comparisons are not confounded with different rollout approximations.
 
@@ -61,30 +61,18 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - affective `beta_k` captures the slow per-partner summary used for shallow-EFE weighting (and optionally precision modulation)
 - The current code therefore keeps trust-like evidence accumulation and affective deployment distinct, rather than instantiating a dedicated trust scalar alongside `beta_k`.
 
-## Precision-Weighted Shallow EFE
+## Policy Weighting and Calibration
 
-- Affective and reward-average agents now both emit terminal signals on a comparable `[0, 1]` scale.
-- Affective agents use raw `beta_k`.
-- Reward-average agents use `0.5 * (1 + tanh(reward_avg / max_abs_payoff))`, which is centered at `0.5` when reward history is neutral.
-- Full experiment runs enforce a minimum of `3` calibration episodes when deriving `mu`, even if the config requests fewer.
-- This guard exists because `mu` is shared across all affective and control conditions in a run, so calibrating from only `2-3` episodes makes downstream comparisons noisier than intended.
-- Direct calls to `ExperimentRunner.calibrate_mu()` can still use fewer episodes for fast unit tests or notebook demos.
-- The planning adjustment used in the JAX trust-game rollout is:
-
-```text
-G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
-```
-
-- The `terminal_values` field logged per policy is the delta between weighted and unweighted shallow EFE, so diagnostics still expose how much the affect/reward signal changed evaluation.
-- The weight is keyed to the policy's first partner, not the terminal rollout node, because action sampling operates on first-action marginals.
-- `RewardAvgAgent` intentionally inherits the base `precision_signal()` implementation, which returns zeros for every partner.
-- That means the reward-average control only contributes through shallow-EFE weighting; it does not modulate policy precision even if precision modulation is enabled globally.
+- Full experiment runs still enforce a minimum of `3` calibration episodes when deriving shared calibration terms such as `mu`, even if the config requests fewer.
+- `ExperimentRunner.calibrate_mu()` can still be called directly with fewer episodes for fast unit tests or notebooks.
+- The shipped affective runtime no longer exposes a supported `RewardAvgAgent`; the `reward_avgs` metric key remains in the logged schema as a placeholder (`NaN`) for compatibility with historical analysis surfaces.
+- Policy differentiation in the current trust runtime is carried by sophisticated rollout plus optional inverse-beta precision modulation (`gamma_k = gamma_base / E[beta_k]`), not by a separate reward-average control path.
 
 ## Condition-specific horizons
 
 - `ExperimentConfig.horizon_overrides` can target either numeric core conditions or named presets.
 - The supported core sweep is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
-- Named presets (`lesioned`, `reward_average`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`) default to the tau-4 base unless overridden.
+- Named presets (`lesioned`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`) default to the tau-4 base unless overridden.
 
 ## Affective Update Signal
 
@@ -93,7 +81,7 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
 - `ExperimentConfig.beta_mode` now defaults to `"discrete"`, which instantiates the HESP-aligned discrete beta filter.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
-- Setting `beta_mode="variational"` switches `AffectiveAgent` to `VariationalAffectiveState`, with `beta_num_levels` discrete levels and `beta_persistence` controlling the beta-state transition kernel.
+- The `variational_beta` preset name is retained for experiment metadata and tests, but the shipped runtime currently resolves it through the same `AffectiveAgent` + `DiscreteBetaState` implementation as the standard affective path.
 - `num_beta_levels` is accepted only as a legacy config input alias; serialized configs now emit `beta_num_levels`.
 
 ## Supported vs archived surface
@@ -167,5 +155,5 @@ G_weighted = sum(step_costs) * (1 + mu * signal_first_partner)
 
 ## Future Directions
 
-- **Phase 4 (variational beta):** The repository now exposes an optional discrete variational beta state in `AffectiveAgent`, but beta still remains an auxiliary state rather than a full hidden-state factor in the main generative model.
-- **Phase 5 (clinical sensitivity):** Clinical personality variants (e.g., high-anxiety, low-interoceptive-precision profiles) are config-level parameter changes to the existing affective hyperparameters; no new agent classes are needed.
+- A stricter variational-beta implementation remains future work; the current shipped path keeps beta as an auxiliary discrete summary state rather than a full hidden-state factor.
+- Clinical personality variants (e.g., high-anxiety, low-interoceptive-precision profiles) are config-level parameter changes to the existing affective hyperparameters; no new agent classes are needed.

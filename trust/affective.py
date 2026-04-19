@@ -1,28 +1,22 @@
-"""Affective active inference agent."""
+"""Affective trust-game agent."""
 
 from __future__ import annotations
 
-import jax.numpy as jnp
 import numpy as np
 
 from aif.affect.beta import DiscreteBetaState
-from agent.base import BaseAgent
+from trust.agent import TrustGameAgent
+from trust.model import TrustGameModel
 
 
-class AffectiveAgent(BaseAgent):
-    """Shallow planner with per-partner affective precision summaries."""
+class AffectiveAgent(TrustGameAgent):
+    """Trust-game agent with per-entity affective precision summaries."""
 
     def __init__(
         self,
-        A,
-        B,
-        C,
-        D,
-        model,
-        planning_horizon: int = 2,
-        gamma: float = 1.0,
-        lr: float = 0.1,
-        num_partners: int = 4,
+        model: TrustGameModel,
+        *,
+        num_partners: int | None = None,
         alpha_charge: float = 3.0,
         sigma_0_sq: float = 0.25,
         initial_beta: float = 1.0,
@@ -30,19 +24,10 @@ class AffectiveAgent(BaseAgent):
         persistence: float = 0.8,
         **kwargs,
     ):
-        super().__init__(
-            A=A,
-            B=B,
-            C=C,
-            D=D,
-            model=model,
-            planning_horizon=planning_horizon,
-            gamma=gamma,
-            lr=lr,
-            **kwargs,
-        )
+        del num_partners
+        super().__init__(model, **kwargs)
         self.affect = DiscreteBetaState(
-            num_entities=num_partners,
+            num_entities=self.num_partners,
             num_levels=num_levels,
             persistence=persistence,
             alpha_charge=alpha_charge,
@@ -56,9 +41,9 @@ class AffectiveAgent(BaseAgent):
             self.affect.reset()
 
     def precision_signal(self):
-        return jnp.asarray(self.affect.get_all_betas(), dtype=jnp.float32)
+        return np.asarray(self.affect.get_all_betas(), dtype=float)
 
-    def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):
+    def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float) -> None:
         del payoff
         if self.pending_prediction_partner != partner_idx:
             return

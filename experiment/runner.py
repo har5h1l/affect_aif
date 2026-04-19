@@ -8,7 +8,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from agent.base import BaseAgent
 from env.trust_game import TrustGameEnv
 from experiment.conditions import resolve_condition_spec
 from experiment.calibration import (
@@ -19,7 +18,7 @@ from experiment.config import ExperimentConfig
 from experiment.factory import create_agent, create_env, create_model
 from experiment.logger import MetricLogger
 from experiment.progress import ProgressReporter, create_progress_reporter
-from trust.model import TrustGameModel
+from trust import TrustGameAgent, TrustGameModel
 
 from experiment.constants import SENSITIVITY_CONDITIONS
 
@@ -41,7 +40,7 @@ class ExperimentRunner:
     def _create_env(self, seed: int) -> TrustGameEnv:
         return create_env(self.config, seed=seed)
 
-    def _create_agent(self, condition: int | str, model: TrustGameModel, seed: int) -> BaseAgent:
+    def _create_agent(self, condition: int | str, model: TrustGameModel, seed: int) -> TrustGameAgent:
         return create_agent(self.config, condition, model, seed)
 
     def _annotate_primary_records(
@@ -63,7 +62,7 @@ class ExperimentRunner:
 
     def _run_episode(
         self,
-        agent: BaseAgent,
+        agent: TrustGameAgent,
         env: TrustGameEnv,
         seed: int,
         condition: int | str,

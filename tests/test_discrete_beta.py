@@ -143,8 +143,8 @@ class TestDiscreteAffectiveAgent:
         assert get_preset_condition("variational_beta").name == "variational_beta"
 
     def test_discrete_agent_instantiation(self):
-        from agent.affective import AffectiveAgent
         from trust.model import TrustGameModel
+        from trust import AffectiveAgent
 
         config = {
             "num_partners": 4,
@@ -157,16 +157,10 @@ class TestDiscreteAffectiveAgent:
             "mutual_defect": (1.0, 1.0),
         }
         model = TrustGameModel(config)
-        matrices = model.get_matrices()
         # DiscreteAffectiveAgent is absorbed into AffectiveAgent (discrete mode is default)
         agent = AffectiveAgent(
-            A=matrices[0],
-            B=matrices[1],
-            C=matrices[2],
-            D=matrices[3],
             model=model,
             planning_horizon=2,
-            num_partners=4,
             num_levels=5,
             persistence=0.8,
             sigma_0_sq=0.25,

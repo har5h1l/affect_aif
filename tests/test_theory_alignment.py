@@ -2,11 +2,10 @@ import numpy as np
 
 import pytest
 
-from agent.affective import AffectiveAgent
-from agent.lesioned import LesionedAgent
 from experiment.conditions import PRESET_CONDITIONS, get_condition_name
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
 def _build_model(config):
@@ -18,12 +17,7 @@ def _build_model(config):
 def make_agent(agent_cls, **kwargs):
     cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
     model = _build_model(cfg)
-    A, B, C, D = model.get_matrices()
     return agent_cls(
-        A=A,
-        B=B,
-        C=C,
-        D=D,
         model=model,
         planning_horizon=2,
         gamma=1.0,
@@ -35,7 +29,7 @@ def make_agent(agent_cls, **kwargs):
 
 
 def test_affective_beta_decreases_under_consistent_accuracy():
-    agent = make_agent(AffectiveAgent, num_partners=4, initial_beta=1.0)
+    agent = make_agent(AffectiveAgent, initial_beta=1.0)
     for _ in range(5):
         agent.pending_prediction_partner = 0
         agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
@@ -44,7 +38,7 @@ def test_affective_beta_decreases_under_consistent_accuracy():
 
 
 def test_affective_beta_increases_under_consistent_surprise():
-    agent = make_agent(AffectiveAgent, num_partners=4, initial_beta=1.0)
+    agent = make_agent(AffectiveAgent, initial_beta=1.0)
     for _ in range(3):
         agent.pending_prediction_partner = 0
         agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
@@ -53,7 +47,7 @@ def test_affective_beta_increases_under_consistent_surprise():
 
 
 def test_lesion_freeze_constant_beta():
-    agent = make_agent(LesionedAgent, num_partners=4, initial_beta=0.5, lesion_mode="freeze")
+    agent = make_agent(LesionedAgent, initial_beta=0.5, lesion_mode="freeze")
     agent.pending_prediction_partner = 0
     agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
     agent.observe_outcome(partner_idx=0, observation=[0, 2], action_taken=0, partner_action=0, payoff=3.0)

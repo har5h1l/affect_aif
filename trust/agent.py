@@ -1,27 +1,30 @@
-"""Base active inference agent for the trust game."""
+"""Trust-game agent composition layer."""
 
 from __future__ import annotations
 
 import numpy as np
 
-from agent.inference.control import construct_policies, decision_step_trust_game, generate_observation_sequences
-from agent.inference.learning import update_likelihood_dirichlet, update_transition_dirichlet
-from agent.inference.maths import dirichlet_expected_value
-from agent.inference.policies import sample_action
-from agent.inference.utils import obj_array, onehot
-from agent.model.payoffs import encode_env_action_factorized, encode_instantaneous_index
+import aif
+from aif.learning import update_transition_dirichlet
+from aif.runtime import generate_observation_sequences
+from aif.utils import obj_array, onehot
+from trust.model import TrustGameModel
+from trust.payoffs import encode_env_action_factorized, encode_instantaneous_index
+from trust.rollout import (
+    _partner_action_distribution,
+    build_transition_views,
+    decode_raw_action_to_partner_and_social,
+    decision_step_trust_game,
+)
 
 
-class BaseAgent:
-    """Standard active inference agent with joint type-stance beliefs per partner."""
+class TrustGameAgent:
+    """Active-inference agent for the multi-partner trust game."""
 
     def __init__(
         self,
-        A,
-        B,
-        C,
-        D,
-        model,
+        model: TrustGameModel,
+        *,
         planning_horizon: int = 8,
         gamma: float = 1.0,
         lr: float = 0.1,
@@ -39,11 +42,15 @@ class BaseAgent:
         pB_scale: float = 10.0,
         lr_E: float = 0.5,
     ):
-        self.A = A
-        self.B = B
-        self.C = C
-        self.D = D
         self.model = model
+        self.num_partners = int(model.num_partners)
+        self.num_types = int(model.num_types)
+        self.num_stances = int(model.num_stances)
+        self.num_controls = list(int(x) for x in model.num_controls)
+        self.num_planning_instantaneous = int(np.prod(self.num_controls))
+        self.num_social_actions = int(model.num_social_actions)
+        self.factorized_policies = bool(model.uses_factorized_controls)
+        self.assignment_mode_code = 1 if model.assignment_mode == "agent_choice" else 0
         self.planning_horizon = int(planning_horizon)
         self.gamma = float(gamma)
         self.lr = float(lr)
@@ -60,36 +67,43 @@ class BaseAgent:
         self.pA_scale = float(pA_scale)
         self.pB_scale = float(pB_scale)
         self.lr_E = float(lr_E)
-        self.pA = None
-        self.pB = None
-        if self.learn_A:
-            self.pA = model.build_pA(self.pA_scale)
-        if self.learn_B:
-            self.pB = model.build_pB(self.pB_scale)
 
-        self.num_partners = int(model.num_partners)
-        self.num_types = int(model.num_types)
-        self.num_stances = int(model.num_stances)
-        self.num_controls = list(int(x) for x in model.num_controls)
-        self.num_planning_instantaneous = int(np.prod(self.num_controls))
-        self.num_social_actions = int(getattr(model, "num_social_actions", 2))
-        self.factorized_policies = bool(getattr(model, "uses_factorized_controls", False))
-        self.assignment_mode_code = 1 if model.assignment_mode == "agent_choice" else 0
-        self.rng = np.random.default_rng(self.seed)
-
+        policy_rng = np.random.default_rng(self.seed)
         self.policies = np.asarray(
-            construct_policies(self.num_controls, self.planning_horizon, max_policies=self.max_policies, rng=self.rng),
+            aif.construct_policies(
+                num_controls=model.num_controls,
+                planning_horizon=self.planning_horizon,
+                max_policies=self.max_policies,
+                rng=policy_rng,
+            ),
             dtype=int,
         )
         self.observation_sequences = np.asarray(generate_observation_sequences(self.planning_horizon), dtype=int)
-        self._refresh_transition_views()
-        self.partner_action_prob_table = np.asarray(self.model.partner_action_prob_table, dtype=float)
-        self.payoff_index_table = np.asarray(self.model.payoff_index_table, dtype=int)
-        self.agent_payoff_table = np.asarray(self.model.agent_payoff_table, dtype=float)
-        self.partner_action_preferences = np.asarray(self.C[0], dtype=float)
-        self.payoff_preferences = np.asarray(self.C[1], dtype=float)
-        self.max_abs_payoff = float(max(abs(level) for level in self.model.payoff_levels))
 
+        shared_C = model.C
+        shared_D = model.D
+        self.partners: list[aif.Agent] = []
+        for idx in range(self.num_partners):
+            self.partners.append(
+                aif.Agent(
+                    A=model.build_A(),
+                    B=model.build_B(),
+                    C=shared_C,
+                    D=shared_D,
+                    E=None,
+                    policies=self.policies,
+                    pA=model.build_pA(self.pA_scale) if self.learn_A else None,
+                    pB=model.build_pB(self.pB_scale) if self.learn_B else None,
+                    gamma=self.gamma,
+                    use_utility=self.use_utility,
+                    use_information_gain=self.use_information_gain,
+                    action_sampling=self.action_sampling,
+                    rng=np.random.default_rng(self.seed + 1 + idx),
+                )
+            )
+
+        self.partner_action_preferences = np.asarray(self.model.C[0], dtype=float)
+        self.payoff_preferences = np.asarray(self.model.C[1], dtype=float)
         self.planning_cost = float((self.num_planning_instantaneous**self.planning_horizon) * self.planning_horizon)
         self.planning_cost_ratio = float(
             (self.num_planning_instantaneous**self.reference_horizon)
@@ -97,15 +111,46 @@ class BaseAgent:
         )
         self.reset()
 
+    @property
+    def num_actions(self) -> int:
+        """Instantaneous action cardinality for the planner."""
+
+        return int(self.num_planning_instantaneous)
+
+    @property
+    def qs_per_partner(self) -> np.ndarray:
+        out = np.zeros((self.num_partners, self.num_types, self.num_stances), dtype=float)
+        for idx, partner in enumerate(self.partners):
+            if partner.qs is None or len(partner.qs) == 0:
+                out[idx] = np.asarray(self.partner_joint_beliefs[idx], dtype=float)
+                continue
+            out[idx] = self.model.as_joint_belief(partner.qs[0])
+        return out
+
+    @property
+    def partner_action_prob_tables(self) -> np.ndarray:
+        out = np.zeros((self.num_partners, self.num_types, self.num_stances), dtype=float)
+        for idx, partner in enumerate(self.partners):
+            out[idx] = np.asarray(partner.A[0][0], dtype=float)
+        return out
+
+    @property
+    def partner_action_prob_table(self) -> np.ndarray:
+        return self.partner_action_prob_tables
+
     def reset(self):
-        type_prior = np.asarray(self.D[0], dtype=float)
-        stance_prior = np.asarray(self.D[1], dtype=float)
+        type_prior = np.asarray(self.model.D[0], dtype=float)
+        stance_prior = np.asarray(self.model.D[1], dtype=float)
         joint_prior = np.outer(type_prior, stance_prior)
         joint_prior /= max(float(joint_prior.sum()), 1e-16)
         self.partner_joint_beliefs = np.repeat(joint_prior[None, :, :], self.num_partners, axis=0)
         self.partner_joint_posteriors = np.repeat(joint_prior[None, :, :], self.num_partners, axis=0)
         self.partner_beliefs = np.repeat(type_prior[None, :], self.num_partners, axis=0)
         self.partner_stance_beliefs = np.repeat(stance_prior[None, :], self.num_partners, axis=0)
+
+        for partner in self.partners:
+            partner.reset()
+            self._set_partner_qs(partner, joint_prior)
 
         self.pending_prediction_partner: int | None = None
         self.pending_prediction_probs = np.asarray([0.5, 0.5], dtype=float)
@@ -127,77 +172,92 @@ class BaseAgent:
         self.last_round_log_evidence: float = np.nan
         self.cumulative_log_evidence: float = 0.0
         self.log_policy_prior = np.zeros(len(self.policies), dtype=float)
-        self._prev_own_action = int(np.argmax(np.asarray(self.D[2], dtype=float)))
-
-    @property
-    def num_actions(self) -> int:
-        """Instantaneous action cardinality (planning); env flat action may differ when factorized."""
-
-        return int(self.num_planning_instantaneous)
+        default_action = int(np.argmax(np.asarray(self.model.D[2], dtype=float)))
+        self._prev_own_actions = np.full((self.num_partners,), default_action, dtype=int)
 
     def precision_signal(self):
         return np.ones((self.num_partners,), dtype=float)
 
-    def _refresh_transition_views(self):
-        self.B_type = np.asarray(self.B[0][:, :, 0], dtype=float)
-        if self.factorized_policies:
-            idx_st0 = encode_instantaneous_index((0, 0, 0), self.num_controls)
-            idx_st1 = encode_instantaneous_index((0, 1, 0), self.num_controls)
-            self.B_stance_by_action = np.stack(
-                [
-                    np.asarray(self.B[1][:, :, idx_st0], dtype=float),
-                    np.asarray(self.B[1][:, :, idx_st1], dtype=float),
-                ],
-                axis=0,
+    def _set_partner_qs(self, partner: aif.Agent, joint_belief: np.ndarray) -> None:
+        qs = obj_array(1)
+        qs[0] = self.model.as_joint_belief(joint_belief)
+        partner.qs = qs
+
+    def _joint_observation_likelihood(self, A: np.ndarray, observation: list[int], own_action: int) -> np.ndarray:
+        if len(observation) < 2:
+            raise ValueError(
+                f"TrustGameAgent expects both observation modalities; got {observation!r}."
             )
-        else:
-            self.B_stance_by_action = np.asarray(np.moveaxis(self.B[1], 2, 0), dtype=float)
+        action_likelihood = np.asarray(A[0][int(observation[0])], dtype=float)
+        payoff_likelihood = np.asarray(A[1][int(observation[1]), int(own_action)], dtype=float)
+        return action_likelihood * payoff_likelihood
 
-    def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float):
-        del partner_idx, partner_action, payoff
+    def _infer_joint_posterior(self, prior: np.ndarray, observation: list[int], own_action: int, A: np.ndarray) -> np.ndarray:
+        posterior = self.model.as_joint_belief(prior) * self._joint_observation_likelihood(A, observation, own_action)
+        posterior /= max(float(posterior.sum()), 1e-16)
+        return posterior
 
-    def _apply_parameter_learning(self, posterior: np.ndarray, observed_partner_action: int):
-        if not self.use_parameter_learning:
-            return
-        target = 1.0 if int(observed_partner_action) == 0 else 0.0
-        self.partner_action_prob_table = (
-            (1.0 - self.lr * posterior) * self.partner_action_prob_table + (self.lr * posterior) * target
-        )
-        partner_action_likelihood = np.zeros((2, self.num_types, self.num_stances), dtype=float)
-        partner_action_likelihood[0] = self.partner_action_prob_table
-        partner_action_likelihood[1] = 1.0 - self.partner_action_prob_table
-        self.A[0] = partner_action_likelihood
-        self.model.A = self.A
-        self.model.partner_action_prob_table = self.partner_action_prob_table
-
-    def _decode_raw_action(self, raw_action: int, active_partner: int | None) -> tuple[int, int]:
+    def _predict_next_joint_belief(self, joint_belief: np.ndarray, action: int, B: np.ndarray) -> np.ndarray:
+        joint = self.model.as_joint_belief(joint_belief)
+        type_action = 0 if self.factorized_policies else int(action)
+        type_transition = np.asarray(B[0][:, :, type_action], dtype=float)
         if self.factorized_policies:
-            if self.assignment_mode_code == 1:
-                partner_idx = int(raw_action) // 4
-                rem = int(raw_action) % 4
-                own_action = rem % 2
-                return partner_idx, own_action
-            return int(active_partner), int(raw_action)
-        if self.assignment_mode_code == 1:
-            partner_idx = int(raw_action) // self.num_social_actions
-            social_action = int(raw_action) % self.num_social_actions
-            return partner_idx, social_action
-        return int(active_partner), int(raw_action)
+            stance_transition = self.model.stance_transition_for_executed_own_action(int(action))
+        else:
+            stance_transition = np.asarray(B[1][:, :, int(action)], dtype=float)
+        predictive = type_transition @ joint @ np.asarray(stance_transition, dtype=float).T
+        predictive /= max(float(predictive.sum()), 1e-16)
+        return predictive
 
-    def plan_and_act(self, active_partner: int | None) -> int:
-        """Evaluate all policies and return the selected action."""
+    def _refresh_partner_payoff_likelihood(self, partner: aif.Agent) -> None:
+        payoff_obs = np.zeros(
+            (len(self.model.payoff_levels), self.num_social_actions, self.num_types, self.num_stances),
+            dtype=float,
+        )
+        partner_table = np.asarray(partner.A[0][0], dtype=float)
+        for agent_action in range(self.num_social_actions):
+            coop_idx = int(self.model.payoff_index_table[agent_action, 0])
+            defect_idx = int(self.model.payoff_index_table[agent_action, 1])
+            payoff_obs[coop_idx, agent_action] += partner_table
+            payoff_obs[defect_idx, agent_action] += 1.0 - partner_table
+        partner.A[1] = payoff_obs
+
+    def _apply_parameter_learning(self, partner_idx: int, posterior: np.ndarray, observed_partner_action: int) -> None:
+        partner = self.partners[int(partner_idx)]
+        table = np.asarray(partner.A[0][0], dtype=float)
+        target = 1.0 if int(observed_partner_action) == 0 else 0.0
+        updated = (1.0 - self.lr * posterior) * table + (self.lr * posterior) * target
+        partner.A[0] = np.asarray([updated, 1.0 - updated], dtype=float)
+        self._refresh_partner_payoff_likelihood(partner)
+
+    def _build_transition_stacks(self) -> tuple[np.ndarray, np.ndarray]:
+        B_type_stack = []
+        B_stance_stack = []
+        for partner in self.partners:
+            B_type, B_stance_by_action = build_transition_views(
+                partner.B,
+                self.num_controls,
+                factorized_policies=self.factorized_policies,
+            )
+            B_type_stack.append(B_type)
+            B_stance_stack.append(B_stance_by_action)
+        return np.stack(B_type_stack), np.stack(B_stance_stack)
+
+    def choose_partner_and_action(self, active_partner: int | None = None) -> int:
+        """Evaluate all policies and return the selected raw action."""
 
         active_partner_idx = -1 if active_partner is None else int(active_partner)
+        B_type_stack, B_stance_stack = self._build_transition_stacks()
         decision = decision_step_trust_game(
             beliefs=self.partner_joint_beliefs,
             active_partner=active_partner_idx,
             policies=self.policies,
             observation_sequences=self.observation_sequences,
-            B_type=self.B_type,
-            B_stance_by_action=self.B_stance_by_action,
-            partner_action_prob_table=self.partner_action_prob_table,
-            payoff_index_table=self.payoff_index_table,
-            agent_payoff_table=self.agent_payoff_table,
+            B_type=B_type_stack,
+            B_stance_by_action=B_stance_stack,
+            partner_action_prob_tables=self.partner_action_prob_tables,
+            payoff_index_table=self.model.payoff_index_table,
+            agent_payoff_table=self.model.agent_payoff_table,
             payoff_preferences=self.payoff_preferences,
             partner_action_preferences=self.partner_action_preferences,
             precision_signal=self.precision_signal(),
@@ -210,13 +270,7 @@ class BaseAgent:
         )
 
         q_pi = np.asarray(decision["q_pi"], dtype=float)
-        sampled = sample_action(
-            q_pi=q_pi,
-            policies=self.policies,
-            timestep=0,
-            sampling_mode=self.action_sampling,
-            rng=self.rng,
-        )
+        sampled = aif.sample_action(self.partners[0], q_pi=q_pi, timestep=0)
         if isinstance(sampled, np.ndarray):
             row = np.asarray(sampled, dtype=int).ravel()
             if self.assignment_mode_code == 1:
@@ -227,7 +281,7 @@ class BaseAgent:
                     partner_sel,
                     stance_a,
                     own_a,
-                    "agent_choice",
+                    self.model.assignment_mode,
                     self.num_partners,
                     self.num_controls,
                 )
@@ -235,20 +289,31 @@ class BaseAgent:
             else:
                 stance_a = int(row[1])
                 own_a = int(row[2])
+                selected_partner = int(active_partner) if active_partner is not None else 0
                 raw_action = encode_env_action_factorized(
-                    int(active_partner) if active_partner is not None else 0,
+                    selected_partner,
                     stance_a,
                     own_a,
-                    "random",
+                    self.model.assignment_mode,
                     self.num_partners,
                     self.num_controls,
                 )
-                selected_partner = int(active_partner) if active_partner is not None else 0
                 selected_social_action = own_a
         else:
             raw_action = int(sampled)
-            selected_partner, selected_social_action = self._decode_raw_action(raw_action, active_partner)
-        predicted_partner_action_probs = self.model.partner_action_distribution(self.partner_joint_beliefs[selected_partner])
+            selected_partner, selected_social_action = decode_raw_action_to_partner_and_social(
+                raw_action=raw_action,
+                active_partner=0 if active_partner is None else int(active_partner),
+                assignment_mode_code=self.assignment_mode_code,
+                factorized_policies=self.factorized_policies,
+                num_social_actions=self.num_social_actions,
+                num_partners=self.num_partners,
+            )
+
+        predicted_partner_action_probs = _partner_action_distribution(
+            self.partner_joint_beliefs[selected_partner],
+            self.partner_action_prob_tables[selected_partner],
+        )
         best_policy_idx = int(np.argmax(q_pi))
 
         self.last_q_pi = q_pi
@@ -264,6 +329,9 @@ class BaseAgent:
         self.last_selected_action = selected_social_action
         return raw_action
 
+    def plan_and_act(self, active_partner: int | None) -> int:
+        return self.choose_partner_and_action(active_partner=active_partner)
+
     def _compute_round_log_evidence(self, partner_action: int) -> float:
         probs = np.asarray(self.pending_prediction_probs, dtype=float)
         p_obs = float(probs[int(partner_action)])
@@ -278,68 +346,72 @@ class BaseAgent:
         payoff: float,
         true_partner_type: str | None = None,
         true_partner_stance: str | None = None,
-    ):
+    ) -> None:
         """Update beliefs and auxiliary state summaries from a realized interaction."""
 
         partner_idx = int(partner_idx)
+        active = self.partners[partner_idx]
         round_log_ev = self._compute_round_log_evidence(partner_action)
         self.last_round_log_evidence = round_log_ev
         self.cumulative_log_evidence += round_log_ev
 
         prior = np.asarray(self.partner_joint_beliefs[partner_idx], dtype=float)
-        posterior = self.model.infer_joint_posterior(prior, observation, own_action=int(action_taken))
-        predictive_next = self.model.predict_next_joint_belief(posterior, action=int(action_taken))
-        if self.learn_A and self.pA is not None:
-            qs_obj = obj_array(1)
-            qs_obj[0] = posterior
-            obs_list = [int(observation[0]), int(observation[1])]
-            self.pA = update_likelihood_dirichlet(self.pA, obs_list, qs_obj, learning_rate=self.lr)
-            for modality in range(len(self.A)):
-                self.A[modality] = np.asarray(
-                    dirichlet_expected_value(np.asarray(self.pA[modality], dtype=float), backend="numpy"),
-                    dtype=float,
-                )
-            self.model.A = self.A
-            self.partner_action_prob_table = np.asarray(self.A[0][0, :, :], dtype=float)
-            self.model.partner_action_prob_table = self.partner_action_prob_table
+        posterior = self._infer_joint_posterior(
+            prior,
+            observation=observation,
+            own_action=int(action_taken),
+            A=active.A,
+        )
+        self._set_partner_qs(active, posterior)
+
+        if self.learn_A:
+            aif.update_pA(active, obs=[int(observation[0]), int(observation[1])], learning_rate=self.lr)
         elif self.use_parameter_learning:
-            self._apply_parameter_learning(posterior=posterior, observed_partner_action=int(partner_action))
-        if self.learn_B and self.pB is not None:
+            self._apply_parameter_learning(
+                partner_idx=partner_idx,
+                posterior=posterior,
+                observed_partner_action=int(partner_action),
+            )
+
+        if self.learn_B and active.pB is not None:
             comp = (
                 encode_instantaneous_index((0, int(action_taken), int(action_taken)), self.num_controls)
                 if self.factorized_policies
                 else int(action_taken)
             )
-            actions_vec = [comp, comp, comp]
-            qs_curr = [
-                posterior.sum(axis=1),
-                posterior.sum(axis=0),
-                onehot(int(action_taken), self.num_social_actions),
-            ]
-            qs_prev = [
-                prior.sum(axis=1),
-                prior.sum(axis=0),
-                onehot(int(self._prev_own_action), self.num_social_actions),
-            ]
-            self.pB = update_transition_dirichlet(self.pB, actions_vec, qs_curr, qs_prev)
-            for factor in range(len(self.B)):
-                conc = np.asarray(self.pB[factor], dtype=float)
+            qs_curr = obj_array(3)
+            qs_curr[0] = posterior.sum(axis=1)
+            qs_curr[1] = posterior.sum(axis=0)
+            qs_curr[2] = onehot(int(action_taken), self.num_social_actions)
+            qs_prev = obj_array(3)
+            qs_prev[0] = prior.sum(axis=1)
+            qs_prev[1] = prior.sum(axis=0)
+            qs_prev[2] = onehot(int(self._prev_own_actions[partner_idx]), self.num_social_actions)
+            active.pB = update_transition_dirichlet(active.pB, [comp, comp, comp], qs_curr, qs_prev)
+            for factor in range(len(active.B)):
+                conc = np.asarray(active.pB[factor], dtype=float)
                 for action in range(conc.shape[2]):
                     sl = conc[:, :, action]
-                    self.B[factor][:, :, action] = sl / np.maximum(sl.sum(axis=0, keepdims=True), 1e-16)
-            self.model.B = self.B
-            self._refresh_transition_views()
+                    active.B[factor][:, :, action] = sl / np.maximum(sl.sum(axis=0, keepdims=True), 1e-16)
+
         if self.learn_E and self.last_q_pi.size:
             log_q = np.log(np.asarray(self.last_q_pi, dtype=float) + 1e-16)
             self.log_policy_prior = (1.0 - self.lr_E) * self.log_policy_prior + self.lr_E * log_q
             self.log_policy_prior -= float(np.mean(self.log_policy_prior))
-        self._prev_own_action = int(action_taken)
+
+        predictive_next = self._predict_next_joint_belief(
+            posterior,
+            action=int(action_taken),
+            B=active.B,
+        )
+        self._prev_own_actions[partner_idx] = int(action_taken)
         self._update_auxiliary_states(partner_idx=partner_idx, partner_action=int(partner_action), payoff=float(payoff))
 
         self.partner_joint_posteriors[partner_idx] = posterior
         self.partner_joint_beliefs[partner_idx] = predictive_next
         self.partner_beliefs[partner_idx] = predictive_next.sum(axis=1)
         self.partner_stance_beliefs[partner_idx] = predictive_next.sum(axis=0)
+        self._set_partner_qs(active, predictive_next)
         self.last_observation_partner = partner_idx
         self.last_true_partner_type = true_partner_type
         self.last_true_partner_stance = true_partner_stance
@@ -397,3 +469,6 @@ class BaseAgent:
             "round_log_evidence": self.last_round_log_evidence,
             "cumulative_log_evidence": self.cumulative_log_evidence,
         }
+
+    def _update_auxiliary_states(self, partner_idx: int, partner_action: int, payoff: float) -> None:
+        del partner_idx, partner_action, payoff

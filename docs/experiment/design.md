@@ -8,11 +8,11 @@ The supported experiment surface has moved to the action-dependent stance model 
 
 - Ground-truth partners now have a fixed type and an evolving stance.
 - The agent jointly infers `type × stance` and plans with action-dependent stance transitions.
-- The trust-game generative model now instantiates the v3 HESP surface with `o_action`, `o_payoff`, and `o_intero` modalities plus `type`, `stance`, `context`, `beta`, and `own_action` factors.
+- The trust-game generative model now uses two observation modalities (`o_action`, `o_payoff`) over latent `type × stance`, with `own_action` tracked separately.
 - The default affective path now uses the discrete HESP beta convention (`beta_mode="discrete"`, `initial_beta=1.0`, beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`).
 - The legacy `mu`-weighted shallow-EFE path still exists in the runner; read later mentions of `mu` as current implementation notes, not as the final end-state of the v3 migration.
 - The primary factorial is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
-- Lesion, reward-average, no-epistemic, variational-beta, and clinical runs are named presets layered on top of the `tau4_affect` base.
+- Lesion, no-epistemic, variational-label, and clinical runs are named presets layered on top of the `tau4_affect` base.
 - Scheduled betrayal should be expressed via `scheduled_stance_switches`, not `scheduled_type_switches`, unless the experiment is explicitly about exogenous type volatility.
 
 Older condition numbering below is retained only as historical context and should not be used for new runs.
@@ -394,7 +394,7 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 
 ### 6.1 Framework
 
-Primary implementation is a custom **JAX-first** active inference stack in this repository. Generic active inference math and control live under `affect_aif/core`, trust-game-specific matrices and payoffs live under `affect_aif/generative_model`, and the affective state (level 3) is implemented as an auxiliary per-partner summary outside the core belief update loop, modulating policy evaluation through shallow-EFE weighting.
+Primary implementation is a custom active-inference stack in this repository. Generic active inference math and control live under `aif/`, trust-game-specific matrices, rollout helpers, and agent composition live under `trust/`, and the affective state is implemented as an auxiliary per-partner summary outside the main belief update loop, modulating policy evaluation through partner-specific beta summaries.
 
 Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://github.com/CasperHesp/deeplyfeltaffect) for the single-agent affective architecture. This will be extended to the multi-partner setting.
 

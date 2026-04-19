@@ -4,8 +4,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import trust
 
-from agent.affective import AffectiveAgent
 from experiment.conditions import (
     get_condition_metadata,
     get_condition_name,
@@ -14,6 +14,7 @@ from experiment.conditions import (
 )
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -65,7 +66,11 @@ def test_runner_variational_beta_preset_uses_variational_affective_agent():
     model = _build_model(config)
     agent = runner._create_agent(condition="variational_beta", model=model, seed=0)
 
-    assert isinstance(agent, AffectiveAgent)
+    assert isinstance(agent, trust.AffectiveAgent)
+    assert trust.TrustGameAgent is TrustGameAgent
+    assert trust.AffectiveAgent is AffectiveAgent
+    assert trust.LesionedAgent is LesionedAgent
+    assert set(trust.__all__) >= {"TrustGameAgent", "AffectiveAgent", "LesionedAgent"}
 
 
 def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):

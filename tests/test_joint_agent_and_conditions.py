@@ -1,12 +1,10 @@
 import numpy as np
 
-from agent.affective import AffectiveAgent
-from agent.base import BaseAgent
-from agent.lesioned import LesionedAgent
 from benchmark.benchmark_config import AGENT_REGISTRY
 from experiment.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
 from experiment.config import ExperimentConfig
 from experiment.factory import create_agent
+from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
 def _build_model(config):
@@ -15,23 +13,10 @@ def _build_model(config):
     return TrustGameModel(config)
 
 
-def _make_model_and_agent(agent_cls=BaseAgent, **kwargs):
+def _make_model_and_agent(agent_cls=TrustGameAgent, **kwargs):
     cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
     model = _build_model(cfg)
-    A, B, C, D = model.get_matrices()
-    agent = agent_cls(
-        A=A,
-        B=B,
-        C=C,
-        D=D,
-        model=model,
-        planning_horizon=2,
-        gamma=1.0,
-        seed=0,
-        reference_horizon=8,
-        max_policies=64,
-        **kwargs,
-    )
+    agent = agent_cls(model=model, planning_horizon=2, gamma=1.0, seed=0, reference_horizon=8, max_policies=64, **kwargs)
     return model, agent
 
 

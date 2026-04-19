@@ -13,7 +13,7 @@ The supported trust-family experiments now use the action-dependent stance redes
 
 Unless a section explicitly says "archived" or "prototype", read older references to exploiter phases, `switch_round`, or flat depth curves as superseded by the current redesign.
 
-Implementation note (2026-04-09): the current code now uses HESP-style discrete beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`, explicit `o_action` / `o_payoff` / `o_intero` modalities, and `type` / `stance` / `context` / `beta` / `own_action` factors in the trust-game model. The optional precision-modulation path now follows `gamma_k = gamma_base / E[beta_k]`. Some later sections still discuss the legacy `mu`-weighted shallow-EFE experiments; treat those as historical context until the full v3 migration removes that path.
+Implementation note (2026-04-18): the shipped code now uses HESP-style discrete beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`, two observation modalities (`o_action`, `o_payoff`), and the trust-game hidden/control structure `type × stance` plus `own_action`. The optional precision-modulation path follows `gamma_k = gamma_base / E[beta_k]`. Some later sections still discuss historical `mu`-weighted shallow-EFE and variational-beta ideas; treat those as theory/prototype context unless a section explicitly says the behavior is supported in the current runtime.
 
 ---
 
@@ -334,7 +334,7 @@ So the present theory should be read as: affect adds a partner-specific precisio
 
 ### 4.9 Discrete Variational Beta Formulation
 
-> **Status: Implemented (supported path) and archived (prototype path).** The `variational_beta` preset now uses the supported variational affective state in `affect_aif/agent/affect/variational_state.py`. The earlier standalone discrete-beta prototype is preserved in `archive/legacy_discrete_beta/`.
+> **Status: preset retained, dedicated implementation deferred.** The `variational_beta` preset name remains in the experiment surface, but the shipped runtime currently routes it through the standard affective agent path rather than a separate supported variational-state implementation. The earlier standalone prototype remains preserved in `archive/legacy_discrete_beta/`.
 
 The current $\beta$ update rule (§3.4) extends Hesp et al.'s variational precision dynamics to the multi-partner setting using a continuous EMA formulation. The supported variational path treats $\beta_k$ as an auxiliary posterior state with explicit likelihood and transition dynamics, but the main pipeline still keeps partner type as the primary hidden-state factor.
 
