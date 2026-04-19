@@ -49,22 +49,22 @@ def test_condition_metadata_and_presets_normalize_current_names():
     metadata = get_condition_metadata(6)
     assert metadata.name == "tau4_affect"
     assert get_condition_name(6) == "tau4_affect"
-    assert get_preset_condition("variational_beta").name == "variational_beta"
-    assert normalize_condition_name("variational_beta") == "variational_beta"
+    assert get_preset_condition("no_epistemic").name == "no_epistemic"
+    assert normalize_condition_name("no_epistemic") == "no_epistemic"
 
 
-def test_runner_variational_beta_preset_uses_variational_affective_agent():
+def test_runner_no_epistemic_preset_builds_affective_agent():
     config = ExperimentConfig(
         payoff_mode="binary",
         num_rounds=2,
         num_replications=1,
         conditions=[],
-        presets=["variational_beta"],
+        presets=["no_epistemic"],
         random_seed=0,
     )
     runner = ExperimentRunner(config)
     model = _build_model(config)
-    agent = runner._create_agent(condition="variational_beta", model=model, seed=0)
+    agent = runner._create_agent(condition="no_epistemic", model=model, seed=0)
 
     assert isinstance(agent, trust.AffectiveAgent)
     assert trust.TrustGameAgent is TrustGameAgent

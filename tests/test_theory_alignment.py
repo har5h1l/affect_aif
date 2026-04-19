@@ -149,8 +149,8 @@ def test_horizon_override_and_core_and_preset_affective_conditions():
         num_rounds=2,
         num_replications=1,
         conditions=[6, 7, 8],
-        presets=["variational_beta"],
-        horizon_overrides={6: 3, 7: 4, "variational_beta": 5},
+        presets=["no_epistemic"],
+        horizon_overrides={6: 3, 7: 4, "no_epistemic": 5},
     )
     runner = ExperimentRunner(cfg)
     model = _build_model(cfg)
@@ -158,12 +158,12 @@ def test_horizon_override_and_core_and_preset_affective_conditions():
     c6 = runner._create_agent(condition=6, model=model, seed=0)
     c7 = runner._create_agent(condition=7, model=model, seed=0)
     c8 = runner._create_agent(condition=8, model=model, seed=0)
-    variational = runner._create_agent(condition="variational_beta", model=model, seed=0)
+    no_epi = runner._create_agent(condition="no_epistemic", model=model, seed=0)
 
     assert c6.planning_horizon == 3
     assert c7.planning_horizon == 4
     assert c8.planning_horizon == cfg.deep_horizon
-    assert variational.planning_horizon == 5
+    assert no_epi.planning_horizon == 5
 
 
 def test_clinical_alexithymia_preset():
@@ -233,7 +233,6 @@ def test_get_condition_name_all_conditions():
     assert set(PRESET_CONDITIONS) == {
         "lesioned",
         "no_epistemic",
-        "variational_beta",
         "alexithymia",
         "borderline",
         "depression",

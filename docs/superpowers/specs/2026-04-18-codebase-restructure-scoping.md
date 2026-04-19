@@ -63,10 +63,10 @@ audit transcripts are in this conversation. key facts feeding each sub-project:
 
 - aif: `BaseAgent`, `AffectiveAgent`, `LesionedAgent`. `LesionedAgent` has two modes (`decouple`, `freeze`); **`freeze` is referenced by zero configs**.
 - baselines (in `benchmark/baselines.py`): `RandomAgent`, `TitForTatAgent`, `WinStayLoseShiftAgent`, `PavlovAgent`, `GrimTriggerAgent`, `QLearningAgent`. all referenced by at least one benchmark config except as noted below.
-- ghosts:
-  - `AIFPolicy` (`benchmark/aif_policy.py`): wrapper with `NotImplementedError` body — referenced by zero configs
-  - `reward_average` listed in several benchmark JSONs but `experiment/factory.py` rejects it; not in `AGENT_REGISTRY` — broken
-  - `variational_beta` preset registered in `PRESET_CONDITIONS` but `experiment/factory.py` does not branch on `spec.beta_mode` — ghost
+- ghosts (resolved in sub-project C, 2026-04-18):
+  - ~~`AIFPolicy`~~ removed from tree; document future CoGames bridge when CvC unfreezes
+  - ~~`reward_average`~~ removed from analysis/factory surface; H5 contrast uses `tau4_no_affect`
+  - ~~`variational_beta` preset / `beta_mode` ghost~~ removed from `PRESET_CONDITIONS` and config
 - cvc/cogames stack: `cvc_scoring_policy.py`, `cvc_affect_policy.py`, `cvc_policy.py`, plus 5 cvc configs and ~10 test files. MISSION says **do not touch** for current reframe.
 
 ### experiments + hypotheses (feeds D)
@@ -478,4 +478,4 @@ each session should, on completion:
 
 ### completed sub-projects
 
-(none yet — this scoping doc is the starting point)
+- **C (agent inventory / honest surface)** — 2026-04-18: removed `variational_beta` preset and `ConditionSpec.beta_mode`; dropped unused `ExperimentConfig.beta_mode` (legacy key stripped in `from_dict`); removed `reward_average` factory branch; retargeted analysis H5 post-switch contrast to `tau4_no_affect`; renamed betrayal pivot columns; deleted `benchmark/aif_policy.py`, `tests/test_benchmark_aif_policy.py`, and dead `tests/test_affect.py`; docs updated (`design.md` future-work section, `theory.md`, `README`, `AGENTS`, `implementation`, `benchmark` ops).

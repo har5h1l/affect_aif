@@ -90,7 +90,7 @@ affect_aif/
 | 10 | tau3_affect | AffectiveAgent | 3 | Yes |
 
 Preset conditions live in `experiment.conditions.PRESET_CONDITIONS`:
-`lesioned`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`.
+`lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`.
 
 ### Experiment Pipeline Flow
 

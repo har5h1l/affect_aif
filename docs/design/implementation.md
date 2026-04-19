@@ -72,16 +72,15 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 - `ExperimentConfig.horizon_overrides` can target either numeric core conditions or named presets.
 - The supported core sweep is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
-- Named presets (`lesioned`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`) default to the tau-4 base unless overridden.
+- Named presets (`lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`) default to the tau-4 base unless overridden.
 
 ## Affective Update Signal
 
 - The current code tracks unsigned surprise, not signed residual error.
 - Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
-- `ExperimentConfig.beta_mode` now defaults to `"discrete"`, which instantiates the HESP-aligned discrete beta filter.
+- Affective agents use `aif.affect.beta.DiscreteBetaState` (HESP-aligned discrete beta filter).
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
-- The `variational_beta` preset name is retained for experiment metadata and tests, but the shipped runtime currently resolves it through the same `AffectiveAgent` + `DiscreteBetaState` implementation as the standard affective path.
 - `num_beta_levels` is accepted only as a legacy config input alias; serialized configs now emit `beta_num_levels`.
 
 ## Supported vs archived surface

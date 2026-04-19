@@ -65,7 +65,7 @@ def test_core_conditions_are_the_depth_affect_matrix():
 
 
 def test_named_presets_cover_lesion_control_and_clinical_variants():
-    assert {"lesioned", "no_epistemic", "variational_beta", "alexithymia", "borderline", "depression"} <= set(PRESET_CONDITIONS)
+    assert {"lesioned", "no_epistemic", "alexithymia", "borderline", "depression"} <= set(PRESET_CONDITIONS)
 
 
 def test_factory_builds_agents_from_core_conditions_and_presets():

@@ -47,8 +47,8 @@ def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
             row["primary_metric"] = payload.get("payoff_difference_tau4_affect_minus_tau4_no_affect")
             row["secondary_metric"] = payload.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect")
         elif hypothesis_id == "h5":
-            row["primary_metric"] = payload.get("payoff_difference_tau4_affect_minus_reward_average")
-            row["secondary_metric"] = payload.get("detection_latency_difference_reward_average_minus_tau4_affect")
+            row["primary_metric"] = payload.get("payoff_difference_tau4_affect_minus_tau4_no_affect")
+            row["secondary_metric"] = payload.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect")
         rows.append(row)
     return pd.DataFrame(rows)
 
@@ -115,12 +115,12 @@ def main(argv: list[str] | None = None) -> int:
             grouped = (
                 betrayal_comp.groupby(["window"], as_index=False)
                 .agg(
-                    mean_payoff_difference_tau4_affect_minus_reward_average=(
-                        "payoff_difference_tau4_affect_minus_reward_average",
+                    mean_payoff_difference_tau4_affect_minus_tau4_no_affect=(
+                        "payoff_difference_tau4_affect_minus_tau4_no_affect",
                         "mean",
                     ),
-                    mean_stance_accuracy_difference_tau4_affect_minus_reward_average=(
-                        "stance_accuracy_difference_tau4_affect_minus_reward_average",
+                    mean_stance_accuracy_difference_tau4_affect_minus_tau4_no_affect=(
+                        "stance_accuracy_difference_tau4_affect_minus_tau4_no_affect",
                         "mean",
                     ),
                 )
@@ -161,12 +161,12 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 betrayal_comp.groupby(["window"], as_index=False)
                 .agg(
-                    mean_payoff_difference_tau4_affect_minus_reward_average=(
-                        "payoff_difference_tau4_affect_minus_reward_average",
+                    mean_payoff_difference_tau4_affect_minus_tau4_no_affect=(
+                        "payoff_difference_tau4_affect_minus_tau4_no_affect",
                         "mean",
                     ),
-                    mean_stance_accuracy_difference_tau4_affect_minus_reward_average=(
-                        "stance_accuracy_difference_tau4_affect_minus_reward_average",
+                    mean_stance_accuracy_difference_tau4_affect_minus_tau4_no_affect=(
+                        "stance_accuracy_difference_tau4_affect_minus_tau4_no_affect",
                         "mean",
                     ),
                 )

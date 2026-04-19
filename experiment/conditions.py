@@ -14,7 +14,6 @@ class ConditionSpec:
     planning_horizon: int
     agent_kind: str
     use_information_gain: bool = True
-    beta_mode: str | None = None
     lesion_mode: str | None = None
     parameter_overrides: dict[str, float] = field(default_factory=dict)
     aliases: tuple[str, ...] = ()
@@ -47,13 +46,6 @@ PRESET_CONDITIONS: dict[str, ConditionSpec] = {
         planning_horizon=4,
         agent_kind="affective",
         use_information_gain=False,
-    ),
-    "variational_beta": ConditionSpec(
-        "variational_beta",
-        "Tau-4 affective agent with variational beta state",
-        planning_horizon=4,
-        agent_kind="affective",
-        beta_mode="variational",
     ),
     "alexithymia": ConditionSpec(
         "alexithymia",

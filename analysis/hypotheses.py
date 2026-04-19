@@ -305,48 +305,53 @@ def test_h4_betrayal_recovery(results: pd.DataFrame) -> dict:
     }
 
 
-def test_h5_precision_vs_reward(results: pd.DataFrame) -> dict:
-    """Precision tracking should beat reward averaging around stance shifts."""
+def test_h5_affect_vs_no_affect_post_switch(results: pd.DataFrame) -> dict:
+    """Post-switch windows: tau4 affect vs matched-depth tau4 no-affect (control).
+
+    Note: this is the analysis-suite H5 contrast over stance-switch cohorts.
+    It is not the same claim as partner-selection experiments (`h5_partner_selection.json`);
+    those are documented separately in `docs/experiment/design.md`.
+    """
 
     if not has_switch_events(results):
         return {
             "hypothesis": "H5",
-            "label": "precision_vs_reward",
+            "label": "affect_vs_no_affect_post_switch",
             "available": False,
-            "reason": "Tau-4 affect and reward-average preset runs are required.",
+            "reason": "Tau-4 affect and tau4 no-affect runs with switch events are required.",
         }
 
     affect_name = "tau4_affect"
-    reward_name = "reward_average"
+    control_name = "tau4_no_affect"
     affect_payoff = _switch_window_metric(results, affect_name, "mean_payoff", window=5)
-    reward_payoff = _switch_window_metric(results, reward_name, "mean_payoff", window=5)
+    control_payoff = _switch_window_metric(results, control_name, "mean_payoff", window=5)
     affect_detection = _latency_metric(results, affect_name, "detection_latency")
-    reward_detection = _latency_metric(results, reward_name, "detection_latency")
+    control_detection = _latency_metric(results, control_name, "detection_latency")
     affect_stance = _switch_window_metric(results, affect_name, "mean_stance_accuracy", window=5)
-    reward_stance = _switch_window_metric(results, reward_name, "mean_stance_accuracy", window=5)
-    if affect_payoff.size == 0 or reward_payoff.size == 0:
+    control_stance = _switch_window_metric(results, control_name, "mean_stance_accuracy", window=5)
+    if affect_payoff.size == 0 or control_payoff.size == 0:
         return {
             "hypothesis": "H5",
-            "label": "precision_vs_reward",
+            "label": "affect_vs_no_affect_post_switch",
             "available": False,
-            "reason": "Tau-4 affect and reward-average preset runs are required.",
+            "reason": "Tau-4 affect and tau4 no-affect runs with switch events are required.",
         }
 
-    overall_test = _welch_ttest(affect_payoff, reward_payoff)
+    overall_test = _welch_ttest(affect_payoff, control_payoff)
     return {
         "hypothesis": "H5",
-        "label": "precision_vs_reward",
+        "label": "affect_vs_no_affect_post_switch",
         "available": True,
         "mean_post_switch_payoff_tau4_affect": _mean(affect_payoff),
-        "mean_post_switch_payoff_reward_average": _mean(reward_payoff),
-        "payoff_difference_tau4_affect_minus_reward_average": _mean(affect_payoff) - _mean(reward_payoff),
-        "stance_accuracy_difference_tau4_affect_minus_reward_average": _mean(affect_stance) - _mean(reward_stance),
-        "detection_latency_difference_reward_average_minus_tau4_affect": (
-            _mean(reward_detection) - _mean(affect_detection)
+        "mean_post_switch_payoff_tau4_no_affect": _mean(control_payoff),
+        "payoff_difference_tau4_affect_minus_tau4_no_affect": _mean(affect_payoff) - _mean(control_payoff),
+        "stance_accuracy_difference_tau4_affect_minus_tau4_no_affect": _mean(affect_stance) - _mean(control_stance),
+        "detection_latency_difference_tau4_no_affect_minus_tau4_affect": (
+            _mean(control_detection) - _mean(affect_detection)
         ),
         "welch_t_stat": overall_test["t_stat"],
         "welch_p_value": overall_test["p_value"],
-        "cohens_d": _cohen_d(affect_payoff, reward_payoff),
+        "cohens_d": _cohen_d(affect_payoff, control_payoff),
     }
 
 
@@ -358,7 +363,7 @@ def run_all_hypothesis_tests(results: pd.DataFrame) -> dict:
         "h2": test_h2_depth_matters(results),
         "h3": test_h3_lesion_dissociation(results),
         "h4": test_h4_betrayal_recovery(results),
-        "h5": test_h5_precision_vs_reward(results),
+        "h5": test_h5_affect_vs_no_affect_post_switch(results),
     }
     return {"tests": tests}
 

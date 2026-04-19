@@ -9,13 +9,20 @@ The supported experiment surface has moved to the action-dependent stance model 
 - Ground-truth partners now have a fixed type and an evolving stance.
 - The agent jointly infers `type × stance` and plans with action-dependent stance transitions.
 - The trust-game generative model now uses two observation modalities (`o_action`, `o_payoff`) over latent `type × stance`, with `own_action` tracked separately.
-- The default affective path now uses the discrete HESP beta convention (`beta_mode="discrete"`, `initial_beta=1.0`, beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`).
+- The default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`, beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`).
 - The legacy `mu`-weighted shallow-EFE path still exists in the runner; read later mentions of `mu` as current implementation notes, not as the final end-state of the v3 migration.
 - The primary factorial is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
-- Lesion, no-epistemic, variational-label, and clinical runs are named presets layered on top of the `tau4_affect` base.
+- Lesion, no-epistemic, and clinical runs are named presets layered on top of the `tau4_affect` base.
 - Scheduled betrayal should be expressed via `scheduled_stance_switches`, not `scheduled_type_switches`, unless the experiment is explicitly about exogenous type volatility.
 
 Older condition numbering below is retained only as historical context and should not be used for new runs.
+
+### Removed experiment surface (future work)
+
+The following are intentionally **not** in the runnable tree; reintroduce them only with a real implementation and tests:
+
+- **Variational beta** — the old `variational_beta` preset and `beta_mode` experiment field are removed. A variational auxiliary state would be new code (see archived notes under `archive/legacy_discrete_beta/`).
+- **CoGames policy bridge** — `benchmark/aif_policy.py` was an unfinished adapter and has been removed; CvC integration should add a policy class when that track unfreezes.
 
 ---
 
@@ -82,7 +89,7 @@ $$P(s^{(2)}_{k,t+1} | s^{(2)}_{k,t}) = (1 - p_{\text{switch}}) \cdot \mathbb{I}[
 
 Important implementation note: this stochastic type switching is separate from the exploiter's internal `switch_round`. `p_switch` governs when a partner changes latent type altogether; `switch_round` only governs when an **exploiter-type** partner changes from its early cooperative phase to its later exploitative phase after repeated interactions.
 
-**Level 3 transitions (affective state)**: in the default path, beta updates via a discrete predict-then-correct filter over the HESP beta levels using interoceptive observations derived from surprise. The `variational_beta` preset remains available as an alternate compatibility path.
+**Level 3 transitions (affective state)**: in the default path, beta updates via a discrete predict-then-correct filter over the HESP beta levels using interoceptive observations derived from surprise.
 
 ### 2.4 Preference Model (C matrix)
 
@@ -132,8 +139,6 @@ Parameters:
 - $\alpha = 3.0$ — charge sensitivity; expands the sigmoid operating range so correct vs. incorrect predictions separate betas materially
 - $\sigma_0^2$ — baseline expected squared surprise; default `0.25` matches a random binary partner because $(1 - 0.5)^2 = 0.25$
 - sigmoid clamps the charge contribution to $[0, 1]$
-
-The `variational_beta` preset uses the supported variational beta path in place of the EMA update above. That path formalizes beta as an auxiliary posterior state, but it does not turn beta into the primary hidden-state factor of the main experiment pipeline.
 
 The affective precision weight is then:
 

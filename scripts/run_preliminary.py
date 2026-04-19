@@ -84,12 +84,12 @@ def _directional_checks(hypotheses: dict) -> pd.DataFrame:
             if not h5.get("available", False)
             else (
                 "PASS"
-                if h5.get("payoff_difference_tau4_affect_minus_reward_average", float("nan")) > 0.0
-                and h5.get("detection_latency_difference_reward_average_minus_tau4_affect", float("nan")) >= 0.0
+                if h5.get("payoff_difference_tau4_affect_minus_tau4_no_affect", float("nan")) > 0.0
+                and h5.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect", float("nan")) >= 0.0
                 else "FAIL"
             ),
             "criterion": "Precision tracking beats reward averaging after stance shifts",
-            "value": h5.get("payoff_difference_tau4_affect_minus_reward_average"),
+            "value": h5.get("payoff_difference_tau4_affect_minus_tau4_no_affect"),
         },
     ]
     return pd.DataFrame(rows)

@@ -373,8 +373,7 @@ def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
 def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, ...] = (5, 10)) -> pd.DataFrame:
     """Compare paired conditions in post-switch windows.
 
-    Uses the canonical tau-4 affective agent (`tau4_affect`) and the reward
-    average preset when both are present in the results.
+    Uses `tau4_affect` vs `tau4_no_affect` when both are present in the results.
     """
 
     rows: list[pd.DataFrame] = []
@@ -393,21 +392,21 @@ def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, 
         pivot = pivot.reset_index()
         pivot["window"] = int(window)
         pivot["window_label"] = f"1-{int(window)}"
-        pivot["payoff_difference_tau4_affect_minus_reward_average"] = pivot.get(
+        pivot["payoff_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
             "mean_payoff_ctau4_affect", np.nan
         ) - pivot.get(
-            "mean_payoff_creward_average", np.nan
+            "mean_payoff_ctau4_no_affect", np.nan
         )
-        pivot["accuracy_difference_tau4_affect_minus_reward_average"] = pivot.get(
+        pivot["accuracy_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
             "mean_accuracy_ctau4_affect", np.nan
         ) - pivot.get(
-            "mean_accuracy_creward_average",
+            "mean_accuracy_ctau4_no_affect",
             np.nan,
         )
-        pivot["stance_accuracy_difference_tau4_affect_minus_reward_average"] = pivot.get(
+        pivot["stance_accuracy_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
             "mean_stance_accuracy_ctau4_affect",
             np.nan,
-        ) - pivot.get("mean_stance_accuracy_creward_average", np.nan)
+        ) - pivot.get("mean_stance_accuracy_ctau4_no_affect", np.nan)
         rows.append(pivot)
     if not rows:
         return pd.DataFrame()

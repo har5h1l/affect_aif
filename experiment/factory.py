@@ -64,8 +64,6 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
 
     if spec.agent_kind == "base":
         return TrustGameAgent(planning_horizon=planning_horizon, **common)
-    if spec.agent_kind == "reward_average":
-        raise ValueError("reward_average agent kind has been removed. Use 'affective' or 'base' instead.")
     if spec.agent_kind == "lesioned":
         return LesionedAgent(
             planning_horizon=planning_horizon,

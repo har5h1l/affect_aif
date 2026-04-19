@@ -88,7 +88,7 @@ theory. It now includes:
 - Grim Trigger baseline
 - benchmark JSON configs under `affect_aif/configs/`
 - scheduled-switch propagation through benchmark results
-- hard failure for the old `AIFPolicy` stubs instead of silently wrong behavior
+- unfinished CoGames policy adapters are not shipped in `benchmark/` (add one when CvC integration is active)
 
 Recommended trust configs:
 

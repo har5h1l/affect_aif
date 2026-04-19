@@ -61,7 +61,6 @@ class ExperimentConfig:
     alpha_charge: float = 3.0
     sigma_0_sq: float = 0.25
     initial_beta: float = 1.0
-    beta_mode: str = "discrete"
     beta_num_levels: int = 5
     beta_persistence: float = 0.8
 
@@ -120,6 +119,7 @@ class ExperimentConfig:
         else:
             data.pop("num_beta_levels", None)
         data.pop("affect_modulates_precision", None)
+        data.pop("beta_mode", None)
         data.pop("mu", None)
         data.pop("lambda_smooth", None)
         data.pop("calibration_episodes", None)

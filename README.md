@@ -21,9 +21,9 @@ The supported trust-game workflow now uses the action-dependent partner redesign
 - partner behavior depends on latent `type × stance`
 - stance changes are action-dependent and can also be scheduled explicitly with `scheduled_stance_switches`
 - the trust-game generative model now exposes `o_action` and `o_payoff` observations over latent `type × stance`, with `own_action` tracked as a separate control/state factor
-- the default affective config path now uses the discrete HESP beta convention (`beta_mode="discrete"`, `initial_beta=1.0`)
+- the default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`)
 - the core study matrix is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`
-- lesion, no-epistemic, variational-label, and clinical runs are named presets (`lesioned`, `no_epistemic`, `variational_beta`, `alexithymia`, `borderline`, `depression`)
+- lesion, no-epistemic, and clinical runs are named presets (`lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`)
 
 Common entry points:
 
@@ -56,4 +56,4 @@ python scripts/analyze_benchmark.py --results results/benchmark/benchmark_result
 - The main package exposes the supported runner/config entry points at the top level.
 - The trust benchmark is the supported benchmark surface; the local CvC path and the scripted gridworld adapter remain separate compatibility paths.
 - The discrete-beta prototype is archived; the supported affective path uses `aif.affect.beta.DiscreteBetaState`.
-- The `variational_beta` preset name is retained in condition metadata, but the shipped runtime currently resolves it through the standard `AffectiveAgent` surface.
+- Removed experiment surfaces (variational beta preset, `benchmark/aif_policy.py`) are not loaded by the runtime; see `docs/experiment/design.md` for future-work notes.

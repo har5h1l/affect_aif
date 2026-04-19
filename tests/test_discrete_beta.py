@@ -137,10 +137,10 @@ class TestDiscreteContinuousCorrespondence:
 class TestDiscreteAffectiveAgent:
     """Integration test: discrete agent runs through the experiment machinery."""
 
-    def test_variational_beta_preset_is_registered(self):
+    def test_no_epistemic_preset_is_registered(self):
         from experiment.conditions import get_preset_condition
 
-        assert get_preset_condition("variational_beta").name == "variational_beta"
+        assert get_preset_condition("no_epistemic").name == "no_epistemic"
 
     def test_discrete_agent_instantiation(self):
         from trust.model import TrustGameModel
