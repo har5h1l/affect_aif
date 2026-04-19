@@ -54,7 +54,11 @@ _PROTOCOLS: dict[str, type] = {"turn_taking": TurnTakingProtocol}
 
 
 class MultiFocalRunner:
-    """Drive M TrustGameAgents through a multi-focal trust game."""
+    """Drive M TrustGameAgents through a multi-focal trust game.
+
+    ``MultiFocalConfig.num_replications`` / ``logging`` are parsed for future batch
+    drivers; this class only runs one population for ``num_rounds``.
+    """
 
     def __init__(self, config: MultiFocalConfig, agents: list[TrustGameAgent], rng: np.random.Generator):
         self.config = config

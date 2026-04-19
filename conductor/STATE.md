@@ -13,13 +13,19 @@ mode_hint: research
 # Research State
 
 ## Last Updated
-2026-04-18 (Session 107 — apashea-aligned generative model: factorized [1,2,2] controls, policy log-prior, learn_A/B/E flags, tau=3 conditions 9–10; full pytest green)
+2026-04-19 (Session 108 — multi-focal runtime F: runner + configs + tests; full pytest green; slow emergent gated)
 
 ## Session Count
-107
+108
 
 
 <!-- Older entries truncated (was 170 lines) -->
+
+### Session 108 — multi-focal-runtime (F) implementation
+- Added `experiment/multi_focal_runner.py`, `multi_focal_config.py`, `joint_resolution.py`, and `create_agents_from_multi_focal_config` on `experiment/factory.py`. Four configs under `configs/multifocal_*.json`.
+- Strict pomdp_spec §12 turn-taking (single focal per round). `RoundProtocol` extension seam for future all-pairs. Simultaneous-moves resolution (deviation from pomdp_spec §12 step 4 documented as decision F4).
+- Default `pytest` runs unit + deterministic tests; N1/N2/N3 emergent statistical tests are `pytest.mark.slow` unless `RUN_SLOW_TESTS=1`.
+- Spec `docs/superpowers/specs/2026-04-18-multi-focal-runtime-design.md`; plan `docs/superpowers/plans/2026-04-18-multi-focal-runtime-plan.md`. Sub-project D should inventory the four new configs.
 
 ### Session 107 — apashea spec integration (implementation)
 - Implemented factorized `num_controls` for binary trust game (`[1,2,2]` random; `[P,2,2]` agent_choice), 4 planning policies per timestep, env decode via `decode_env_agent_action`

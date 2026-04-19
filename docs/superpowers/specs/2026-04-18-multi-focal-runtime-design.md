@@ -56,9 +56,12 @@ each round in a multi-focal game proceeds as:
 
 4. engaged-partner action (F4 simultaneous, F6 forced active_partner):
    engaged.choose_partner_and_action(active_partner=local_idx_of(focal_global_idx, in engaged's view))
-   _, engaged_social_action = decode_raw_action_to_partner_and_social(
-       engaged.last_raw_action, ..., assignment_mode_code=0, ...)
-   # engaged's own partner-selection is dormant; we force assignment_mode_code=0 in the decode
+   # decode: ``choose_partner_and_action`` still encodes ``last_raw_action`` using the model's
+   # ``assignment_mode`` (agent_choice uses packed indices). for factorized + agent_choice, decode
+   # with ``assignment_mode_code=1`` so ``own_action`` is extracted from ``raw_action``; for
+   # random assignment use ``code=0`` with ``active_partner`` set. ``observe_outcome`` always uses
+   # the focal's local partner index — not the marginal partner slot that may appear inside the
+   # packed raw index under agent_choice.
 
 5. joint resolution (Section 3):
    focal_payoff_obs, focal_payoff_value = joint_resolve(focal_social_action, engaged_social_action, model, role="own")
@@ -225,14 +228,25 @@ class MultiFocalRunner:
         engaged = self.agents[engaged_g]
         local_f_in_engaged = _local_partner_idx(engaged_g, focal_g)
         engaged.choose_partner_and_action(active_partner=local_f_in_engaged)
-        _, engaged_action = decode_raw_action_to_partner_and_social(
-            raw_action=engaged.last_raw_action,
-            active_partner=local_f_in_engaged,
-            assignment_mode_code=0,             # FORCED 0 even if agent's own mode is agent_choice (F6)
-            factorized_policies=engaged.factorized_policies,
-            num_social_actions=engaged.num_social_actions,
-            num_partners=engaged.num_partners,
-        )
+        # see prose in §1 step 4: factorized agent_choice needs code=1 decode on raw; random uses 0
+        if engaged.factorized_policies and engaged.model.assignment_mode == "agent_choice":
+            _, engaged_action = decode_raw_action_to_partner_and_social(
+                raw_action=engaged.last_raw_action,
+                active_partner=0,
+                assignment_mode_code=1,
+                factorized_policies=True,
+                num_social_actions=engaged.num_social_actions,
+                num_partners=engaged.num_partners,
+            )
+        else:
+            _, engaged_action = decode_raw_action_to_partner_and_social(
+                raw_action=engaged.last_raw_action,
+                active_partner=local_f_in_engaged,
+                assignment_mode_code=engaged.assignment_mode_code,
+                factorized_policies=engaged.factorized_policies,
+                num_social_actions=engaged.num_social_actions,
+                num_partners=engaged.num_partners,
+            )
 
         # ---- step 5: joint resolution ----
         focal_payoff_obs, focal_payoff_value = joint_resolve(

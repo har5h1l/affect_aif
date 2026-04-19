@@ -64,7 +64,11 @@ affect_aif/
 │   ├── runner.py          # ExperimentRunner (calibration + primary + sensitivity)
 │   ├── batch.py           # BatchExperimentRunner (multi-config parallel)
 │   ├── logger.py          # MetricLogger (per-round recording)
-│   └── progress.py        # ProgressReporter
+│   ├── progress.py        # ProgressReporter
+│   ├── multi_focal_runner.py   # M TrustGameAgents, turn-taking rounds (sub-project F)
+│   ├── multi_focal_config.py   # Parses heterogeneous `agents: [...]` multi-focal JSON
+│   ├── joint_resolution.py     # Pairwise payoff obs from actions (no TrustGameEnv)
+│   └── factory.py         # Also: `create_agents_from_multi_focal_config`
 ├── analysis/              # Depends on: nothing (operates on DataFrames)
 │   ├── metrics.py         # Summary statistics, betrayal analysis, movement
 │   ├── statistics.py      # ANOVA, pairwise tests
