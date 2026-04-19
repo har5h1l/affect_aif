@@ -6,6 +6,7 @@ from env.graded_trust_game import GradedTrustGameEnv
 from env.trust_game import TrustGameEnv
 from experiment.conditions import resolve_condition_spec
 from experiment.config import ExperimentConfig
+from experiment.multi_focal_config import MultiFocalConfig
 from trust import AffectiveAgent, LesionedAgent, TrustGameAgent, TrustGameModel
 
 
@@ -86,3 +87,45 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
             **common,
         )
     raise ValueError(f"Unknown agent kind '{spec.agent_kind}'.")
+
+
+def create_agents_from_multi_focal_config(
+    config: MultiFocalConfig,
+    seed: int,
+) -> list[TrustGameAgent]:
+    """Build M agents from a multi-focal config (spec Section 2 + 4).
+
+    Each agent gets its own TrustGameModel built from population payoff_mode +
+    per-agent model_overrides. num_partners is forced to M-1 (no self-modeling, F5).
+    """
+    M = config.num_agents()
+    agents: list[TrustGameAgent] = []
+    for i, spec in enumerate(config.agents):
+        overrides = dict(spec.get("model_overrides", {}))
+        overrides.pop("num_partners", None)
+        overrides.pop("assignment_mode", None)
+        overrides.pop("payoff_mode", None)
+        model_cfg: dict = {
+            "payoff_mode": config.payoff_mode,
+            "num_partners": M - 1,
+            "assignment_mode": config.assignment_mode,
+        }
+        model_cfg.update(overrides)
+        model_cfg["payoff_mode"] = config.payoff_mode
+        model_cfg["num_partners"] = M - 1
+        model_cfg["assignment_mode"] = config.assignment_mode
+        model = TrustGameModel(model_cfg)
+
+        kind = spec["kind"]
+        agent_kwargs = {k: v for k, v in spec.items() if k not in {"kind", "model_overrides", "_label"}}
+        if kind == "base":
+            agent = TrustGameAgent(model, seed=seed + i, **agent_kwargs)
+        elif kind == "affective":
+            agent = AffectiveAgent(model, seed=seed + i, **agent_kwargs)
+        elif kind == "lesioned":
+            agent = LesionedAgent(model, seed=seed + i, **agent_kwargs)
+        else:
+            raise ValueError(f"unknown agent kind={kind!r}")
+        agent._kind_label = spec.get("_label", kind)
+        agents.append(agent)
+    return agents
