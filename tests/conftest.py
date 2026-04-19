@@ -1,6 +1,21 @@
+import os
+
 import pytest
 
 from experiment.config import ExperimentConfig
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: multi-minute statistical simulations (set RUN_SLOW_TESTS=1)")
+
+
+def pytest_collection_modifyitems(config, items):
+    if os.environ.get("RUN_SLOW_TESTS", "").strip() in ("1", "true", "yes"):
+        return
+    skip = pytest.mark.skip(reason="slow test; set RUN_SLOW_TESTS=1 to run")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip)
 from experiment.runner import ExperimentRunner
 from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
