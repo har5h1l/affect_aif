@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import itertools
+from typing import Any
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 
 from aif.agent import Agent
@@ -99,13 +102,30 @@ def _sample_action_impl(
     return unique_actions[chosen]
 
 
-def sample_action(agent: Agent, q_pi: np.ndarray, timestep: int = 0):
-    """Sample an action using the agent's policies, mode, and RNG."""
+def _sample_from_policy_posterior(q_pi: Any, rng: Any) -> int:
+    """Sample a policy/action index from a JAX-compatible posterior."""
+
+    if rng is None:
+        raise ValueError("sample_action requires an explicit JAX PRNG key.")
+    probs = jnp.asarray(q_pi)
+    return int(jax.random.categorical(rng, jnp.log(probs)))
+
+
+def sample_action(agent_or_q_pi, q_pi: np.ndarray | None = None, timestep: int = 0, rng: Any = None):
+    """Sample an action from either an Agent path or explicit posterior/key path."""
+
+    if not isinstance(agent_or_q_pi, Agent):
+        if q_pi is not None:
+            raise TypeError("sample_action(q_pi, rng=key) does not accept a second positional posterior.")
+        return _sample_from_policy_posterior(agent_or_q_pi, rng=rng)
+
+    if q_pi is None:
+        raise TypeError("sample_action(agent, q_pi, ...) missing q_pi.")
 
     return _sample_action_impl(
         q_pi=q_pi,
-        policies=agent.policies,
+        policies=agent_or_q_pi.policies,
         timestep=timestep,
-        sampling_mode=agent.action_sampling,
-        rng=agent.rng,
+        sampling_mode=agent_or_q_pi.action_sampling,
+        rng=agent_or_q_pi.rng,
     )
