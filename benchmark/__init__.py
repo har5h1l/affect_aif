@@ -1,7 +1,6 @@
-"""Backend-aware benchmarking for trust-game and CvC evaluation.
+"""Backend-aware benchmarking for external and cross-task evaluation.
 
-The trust backend is the canonical supported benchmark surface for
-the project's current active-inference agents.
+The trust-task evaluation arena lives under ``tasks.trust.evaluation``.
 
 The local CvC backend exists as an experimental proof-of-concept path. It is
 kept separate so the main project can remain on Python 3.10 while that work
@@ -9,7 +8,7 @@ matures on Python 3.12.
 
 The legacy scripted gridworld adapter remains available only as a backward-
 compatibility shim; it is not treated as a real CoGames integration or a peer
-of the trust benchmark.
+of the trust-task evaluation arena.
 """
 
 from __future__ import annotations
@@ -17,14 +16,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from benchmark.baselines import (
-        GrimTriggerAgent,
-        PavlovAgent,
-        QLearningAgent,
-        RandomAgent,
-        TitForTatAgent,
-        WinStayLoseShiftAgent,
-    )
     from benchmark.common_metrics import (
         adaptation_speed,
         cooperation_rate,
@@ -37,12 +28,6 @@ if TYPE_CHECKING:
 __all__ = [
     "cogames_available",
     "mettagrid_available",
-    "RandomAgent",
-    "TitForTatAgent",
-    "WinStayLoseShiftAgent",
-    "PavlovAgent",
-    "GrimTriggerAgent",
-    "QLearningAgent",
     "cooperation_rate",
     "cumulative_payoff",
     "type_identification_accuracy",
@@ -56,17 +41,6 @@ def __getattr__(name: str) -> Any:
         from benchmark import compat
 
         return getattr(compat, name)
-    if name in {
-        "RandomAgent",
-        "TitForTatAgent",
-        "WinStayLoseShiftAgent",
-        "PavlovAgent",
-        "GrimTriggerAgent",
-        "QLearningAgent",
-    }:
-        from benchmark import baselines
-
-        return getattr(baselines, name)
     if name in {
         "cooperation_rate",
         "cumulative_payoff",

@@ -8,9 +8,9 @@ import aif
 from aif.learning import update_transition_dirichlet
 from aif.runtime import generate_observation_sequences
 from aif.utils import obj_array, onehot
-from trust.model import TrustGameModel
-from trust.payoffs import encode_env_action_factorized, encode_instantaneous_index
-from trust.rollout import (
+from tasks.trust.models import TrustGameModel
+from tasks.trust.payoffs import encode_env_action_factorized, encode_instantaneous_index
+from tasks.trust.rollout import (
     _partner_action_distribution,
     build_transition_views,
     decision_step_trust_game,

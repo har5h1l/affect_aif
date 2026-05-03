@@ -7,8 +7,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from experiment.conditions import resolve_condition_spec
-from experiment.config import ExperimentConfig
+from experiments.trust.conditions import resolve_condition_spec
+from experiments.trust.config import ExperimentConfig
 
 
 def annotate_primary_records(

@@ -1,14 +1,14 @@
 import numpy as np
 import pytest
 
-from experiment.conditions import PRESET_CONDITIONS, get_condition_name
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
-from trust import AffectiveAgent, LesionedAgent
+from experiments.trust.conditions import PRESET_CONDITIONS, get_condition_name
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
+from tasks.trust import AffectiveAgent, LesionedAgent
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 

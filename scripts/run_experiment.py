@@ -11,9 +11,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from analysis.visualization import build_run_gifs
-from experiment.batch import BatchExperimentRunner, default_batch_id
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
+from experiments.trust.batch import BatchExperimentRunner, default_batch_id
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
 
 
 def build_parser() -> argparse.ArgumentParser:

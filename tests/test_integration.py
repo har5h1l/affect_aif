@@ -8,10 +8,10 @@ import pandas as pd
 
 from analysis.metrics import post_switch_window_summary
 from analysis.visualization import build_run_gifs, load_results
-from env.trust_game import TrustGameEnv
-from experiment.batch import BatchExperimentRunner
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
+from experiments.trust.batch import BatchExperimentRunner
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
+from tasks.trust.envs import TrustGameEnv
 
 
 def test_full_experiment_runs_and_produces_records(tiny_config):

@@ -6,10 +6,10 @@ from typing import Protocol
 
 import numpy as np
 
-from experiment.joint_resolution import joint_resolve
-from experiment.multi_focal_config import MultiFocalConfig
-from trust import TrustGameAgent
-from trust.rollout import decode_raw_action_to_partner_and_social
+from experiments.multifocal.config import MultiFocalConfig
+from experiments.multifocal.joint_resolution import joint_resolve
+from tasks.trust import TrustGameAgent
+from tasks.trust.rollout import decode_raw_action_to_partner_and_social
 
 
 def _local_partner_idx(focal_global: int, other_global: int) -> int:

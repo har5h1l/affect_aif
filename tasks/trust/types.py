@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from trust.stance import STANCE_ORDER, get_type_stance_cooperation_probability
+from tasks.trust.stance import STANCE_ORDER, get_type_stance_cooperation_probability
 
 PARTNER_TYPE_ORDER = ("cooperator", "reciprocator", "exploiter", "random")
 

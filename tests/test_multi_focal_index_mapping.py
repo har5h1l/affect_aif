@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from experiment.multi_focal_runner import _global_partner_idx, _local_partner_idx
+from experiments.multifocal.runner import _global_partner_idx, _local_partner_idx
 
 
 @pytest.mark.parametrize("M", [2, 3, 4, 5, 8])

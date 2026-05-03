@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from trust.model import TrustGameModel
+from tasks.trust.models import TrustGameModel
 
 
 def joint_resolve(my_action: int, partner_action: int, model: TrustGameModel) -> tuple[int, float]:

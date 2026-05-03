@@ -52,7 +52,7 @@ identically everywhere.
 ### E1: Trust-Task Evaluation Arena
 
 AIF agents versus scripted baselines are a task evaluation surface, not a
-separate trust benchmark.
+separate external benchmark.
 
 ### E2: Multi-Focal Emergent Dynamics
 

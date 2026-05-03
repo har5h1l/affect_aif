@@ -6,9 +6,9 @@ from dataclasses import asdict, is_dataclass
 
 import numpy as np
 
-from env.partner import Partner
-from trust.model import TrustGameModel
-from trust.payoffs import decode_env_agent_action, payoff_to_index
+from tasks.trust.envs.partners import Partner
+from tasks.trust.models import TrustGameModel
+from tasks.trust.payoffs import decode_env_agent_action, payoff_to_index
 
 
 class TrustGameEnv:
@@ -116,7 +116,9 @@ class TrustGameEnv:
                 rng=np.random.default_rng(int(self.rng.integers(2**31 - 1))),
                 num_social_actions=self.model.num_social_actions,
             )
-            for idx, (type_name, stance_name) in enumerate(zip(self._initial_types(), self._initial_stances()))
+            for idx, (type_name, stance_name) in enumerate(
+                zip(self._initial_types(), self._initial_stances(), strict=True)
+            )
         ]
         self.active_partner = self._select_next_active_partner()
         return {

@@ -8,7 +8,7 @@ import numpy as np
 
 from aif.maths import log_stable, softmax
 from aif.utils import obj_array
-from trust.payoffs import (
+from tasks.trust.payoffs import (
     build_graded_payoff_matrix,
     build_payoff_matrix,
     decode_action,
@@ -19,13 +19,13 @@ from trust.payoffs import (
     payoff_distribution,
     payoff_to_index,
 )
-from trust.stance import (
+from tasks.trust.stance import (
     STANCE_ORDER,
     cooperation_evidence_strength,
     get_type_stance_cooperation_table,
     interpolate_stance_transition,
 )
-from trust.types import (
+from tasks.trust.types import (
     PARTNER_TYPE_ORDER,
     PartnerType,
     default_partner_type_params,

@@ -8,8 +8,8 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import final_round_summary
 from analysis.model_comparison import model_comparison_report
 from cli.common import load_results_table
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
 from scripts.run_analysis import _hypothesis_summary_frame
 from scripts.run_model_comparison import main as run_model_comparison_main
 

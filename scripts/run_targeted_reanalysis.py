@@ -15,7 +15,7 @@ from scipy import stats
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from analysis.metrics import final_round_summary
-from experiment.conditions import CONDITIONS, resolve_condition_spec
+from experiments.trust.conditions import CONDITIONS, resolve_condition_spec
 
 H1_TARGET_CONDITIONS = ("tau1_no_affect", "tau1_affect", "tau2_no_affect", "tau2_affect")
 H2_TARGET_CONDITIONS = ("lesioned", "tau4_no_affect", "tau4_affect")

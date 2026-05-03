@@ -1,11 +1,11 @@
 import numpy as np
 
-from experiment.config import ExperimentConfig
-from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
+from experiments.trust.config import ExperimentConfig
+from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 

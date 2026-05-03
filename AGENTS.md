@@ -30,7 +30,7 @@ This document provides comprehensive system documentation for AI agents operatin
 - Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `run_analysis.py` on those paths after.
 - Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
 - State inference (partner-type belief updating) is the analytical solution to VFE minimization (matrix-based Bayes with A and B), not iterative optimization.
-- Benchmark runs use `scripts/run_benchmark.py` plus `docs/operations/benchmark.md` for backends, configs (for example `affect_aif/configs/benchmark_default.json` and `benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
+- Benchmark runs use `scripts/run_benchmark.py` plus `docs/operations/benchmark.md` for backends, configs (for example `configs/benchmark_default.json` and `configs/benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results. Do not add orchestration or deployment scripts to this repo.
 
 ---
@@ -48,36 +48,36 @@ affect_aif/
 │   ├── policies.py        # Policy construction and sampling
 │   ├── runtime.py         # Observation-sequence enumeration + runtime helpers
 │   └── utils.py           # POMDP matrix/object-array helpers
-├── trust/                 # Trust-game domain layer
-│   ├── agent.py           # TrustGameAgent multi-partner composition
-│   ├── affective.py       # AffectiveAgent with per-partner beta state
-│   ├── lesioned.py        # LesionedAgent ablations
-│   ├── rollout.py         # Trust-specific planner / rollout helpers
-│   ├── model.py           # Canonical TrustGameModel
-│   ├── payoffs.py         # Trust-game payoff and action encoding helpers
-│   ├── stance.py          # Stance dynamics
-│   └── types.py           # Partner type metadata
-├── env/                   # Depends on: trust
-│   ├── trust_game.py      # Binary trust game (2 actions × N partners)
-│   └── graded_trust_game.py # Graded investment trust game
-├── experiment/            # Depends on: trust, env
-│   ├── config.py          # ExperimentConfig dataclass
-│   ├── conditions.py      # Condition ID → name mapping
-│   ├── runner.py          # ExperimentRunner (calibration + primary + sensitivity)
-│   ├── batch.py           # BatchExperimentRunner (multi-config parallel)
-│   ├── logger.py          # MetricLogger (per-round recording)
-│   ├── progress.py        # ProgressReporter
-│   ├── multi_focal_runner.py   # M TrustGameAgents, turn-taking rounds (sub-project F)
-│   ├── multi_focal_config.py   # Parses heterogeneous `agents: [...]` multi-focal JSON
-│   ├── joint_resolution.py     # Pairwise payoff obs from actions (no TrustGameEnv)
-│   └── factory.py         # Also: `create_agents_from_multi_focal_config`
+├── tasks/
+│   └── trust/             # Trust-task package
+│       ├── agents/        # TrustGameAgent, AffectiveAgent, and lesions
+│       ├── envs/          # Binary and graded trust-game environments
+│       ├── models/        # Canonical TrustGameModel
+│       ├── evaluation/    # Trust-task evaluation arena and baselines
+│       ├── rollout.py     # Trust-specific planner / rollout helpers
+│       ├── payoffs.py     # Trust-game payoff and action encoding helpers
+│       ├── stance.py      # Stance dynamics
+│       └── types.py       # Partner type metadata
+├── experiments/
+│   ├── trust/             # Depends on: tasks.trust
+│   │   ├── config.py      # ExperimentConfig dataclass
+│   │   ├── conditions.py  # Condition ID → name mapping
+│   │   ├── runner.py      # ExperimentRunner (calibration + primary + sensitivity)
+│   │   ├── batch.py       # BatchExperimentRunner (multi-config parallel)
+│   │   ├── logger.py      # MetricLogger (per-round recording)
+│   │   ├── progress.py    # ProgressReporter
+│   │   └── factory.py     # Agent/model/environment factories
+│   └── multifocal/        # M TrustGameAgents, turn-taking rounds (sub-project F)
+│       ├── config.py      # Parses heterogeneous `agents: [...]` multi-focal JSON
+│       ├── runner.py      # Multi-focal runtime
+│       └── joint_resolution.py # Pairwise payoff obs from actions
 ├── analysis/              # Depends on: nothing (operates on DataFrames)
 │   ├── metrics.py         # Summary statistics, betrayal analysis, movement
 │   ├── statistics.py      # ANOVA, pairwise tests
 │   ├── hypotheses.py      # Current Hesp-extension hypothesis helpers
 │   ├── plots.py           # Matplotlib figure generation
 │   └── visualization.py   # GIF generation
-└── configs/               # JSON experiment configurations
+└── configs/               # External benchmark and CvC JSON configurations
 ```
 
 ### Experiment Conditions
@@ -95,7 +95,7 @@ affect_aif/
 | 9 | tau3_no_affect | TrustGameAgent | 3 | No |
 | 10 | tau3_affect | AffectiveAgent | 3 | Yes |
 
-Preset conditions live in `experiment.conditions.PRESET_CONDITIONS`:
+Preset conditions live in `experiments.trust.conditions.PRESET_CONDITIONS`:
 `lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`.
 
 ### Experiment Pipeline Flow
@@ -149,14 +149,16 @@ agent.observe_outcome(...)
 
 ## Configuration System
 
-Configs are JSON files in `affect_aif/configs/`. Key fields of `ExperimentConfig`:
+Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
+`experiments/multifocal/configs/`, and external benchmark/CvC configs remain in
+`configs/`. Key fields of `ExperimentConfig`:
 
 ### Game Structure
 - `payoff_mode`: "binary" | "graded"
 - `num_partners`: default 4
 - `num_rounds`: default 200
 - `assignment_mode`: "random" | "agent_choice"
-- `scheduled_type_switches`: list of `{partner, from_type, to_type, at_round}`
+- `scheduled_stance_switches`: list of stance-shift events for betrayal-style scenarios
 
 ### Agent Parameters
 - `deep_horizon` / `shallow_horizon`: planning depth

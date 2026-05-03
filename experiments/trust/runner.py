@@ -7,17 +7,17 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from env.trust_game import TrustGameEnv
-from experiment.calibration import (
+from experiments.trust.calibration import (
     build_sensitivity_specs,
 )
-from experiment.conditions import resolve_condition_spec
-from experiment.config import ExperimentConfig
-from experiment.constants import SENSITIVITY_CONDITIONS
-from experiment.factory import create_agent, create_env, create_model
-from experiment.logger import MetricLogger
-from experiment.progress import ProgressReporter, create_progress_reporter
-from trust import TrustGameAgent, TrustGameModel
+from experiments.trust.conditions import resolve_condition_spec
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.constants import SENSITIVITY_CONDITIONS
+from experiments.trust.factory import create_agent, create_env, create_model
+from experiments.trust.logger import MetricLogger
+from experiments.trust.progress import ProgressReporter, create_progress_reporter
+from tasks.trust import TrustGameAgent, TrustGameModel
+from tasks.trust.envs import TrustGameEnv
 
 
 class ExperimentRunner:

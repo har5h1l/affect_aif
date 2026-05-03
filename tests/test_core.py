@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 import numpy as np
 
-import trust.rollout as trust_rollout
+import tasks.trust.rollout as trust_rollout
 from aif.efe import compute_efe_with_terminal_value, compute_expected_free_energy
 from aif.maths import entropy, normalize, softmax
 from aif.policies import construct_policies

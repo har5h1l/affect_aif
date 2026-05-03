@@ -6,14 +6,14 @@ import pytest
 
 
 def test_payoff_mode_required():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     with pytest.raises(ValueError, match="payoff_mode"):
         TrustGameModel({"num_partners": 2})
 
 
 def test_payoff_mode_binary_constructs():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel({"payoff_mode": "binary", "num_partners": 2})
 
@@ -22,7 +22,7 @@ def test_payoff_mode_binary_constructs():
 
 
 def test_payoff_mode_graded_constructs():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel(
         {
@@ -39,35 +39,35 @@ def test_payoff_mode_graded_constructs():
 
 
 def test_unknown_payoff_mode_raises():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     with pytest.raises(ValueError, match="unknown payoff_mode"):
         TrustGameModel({"payoff_mode": "rocket-fuel", "num_partners": 2})
 
 
 def test_variant_key_raises():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     with pytest.raises(ValueError, match="'variant' was removed"):
         TrustGameModel({"payoff_mode": "binary", "variant": "agent_choice"})
 
 
 def test_model_class_key_raises():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     with pytest.raises(ValueError, match="'model_class' was removed"):
         TrustGameModel({"payoff_mode": "binary", "model_class": "TrustGameModel"})
 
 
 def test_binary_with_graded_keys_raises():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     with pytest.raises(ValueError, match="graded-only keys"):
         TrustGameModel({"payoff_mode": "binary", "num_investment_levels": 6})
 
 
 def test_graded_with_binary_keys_raises():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     with pytest.raises(ValueError, match="binary-only keys"):
         TrustGameModel(
@@ -80,7 +80,7 @@ def test_graded_with_binary_keys_raises():
 
 
 def test_build_a_returns_fresh_copy_each_call():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel({"payoff_mode": "binary", "num_partners": 2})
     first = model.build_A()
@@ -92,7 +92,7 @@ def test_build_a_returns_fresh_copy_each_call():
 
 
 def test_build_b_returns_fresh_copy_each_call():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel({"payoff_mode": "binary", "num_partners": 2})
     first = model.build_B()

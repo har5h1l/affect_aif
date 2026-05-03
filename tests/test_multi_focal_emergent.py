@@ -14,9 +14,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from experiment.factory import create_agents_from_multi_focal_config
-from experiment.multi_focal_config import MultiFocalConfig
-from experiment.multi_focal_runner import MultiFocalRunner
+from experiments.multifocal.config import MultiFocalConfig
+from experiments.multifocal.runner import MultiFocalRunner
+from experiments.trust.factory import create_agents_from_multi_focal_config
 
 
 def _build(agents_spec, num_rounds=200, seed=42, assignment_mode="random"):

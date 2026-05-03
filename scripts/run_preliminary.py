@@ -12,8 +12,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import final_round_summary
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
 
 
 def _condition_sort_key(value) -> tuple[int, str]:

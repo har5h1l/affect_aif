@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from experiment.factory import create_agents_from_multi_focal_config
-from experiment.multi_focal_config import MultiFocalConfig
+from experiments.multifocal.config import MultiFocalConfig
+from experiments.trust.factory import create_agents_from_multi_focal_config
 
 _GOOD = {
     "experiment_name": "x",

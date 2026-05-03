@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from experiment.calibration import deserialize_config
-from experiment.runner import ExperimentRunner
+from experiments.trust.calibration import deserialize_config
+from experiments.trust.runner import ExperimentRunner
 
 
 def run_primary_replication_task(

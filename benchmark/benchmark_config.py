@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from experiment.conditions import CONDITIONS, PRESET_CONDITIONS
+from experiments.trust.conditions import CONDITIONS, PRESET_CONDITIONS
 
 DEFAULT_BACKENDS = ["trust"]
 DEFAULT_OUTPUT_DIR = "results/benchmark"

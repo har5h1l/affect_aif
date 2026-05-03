@@ -1,12 +1,12 @@
 import numpy as np
 
-from experiment.config import ExperimentConfig
-from trust.payoffs import build_graded_payoff_matrix, decode_action, encode_action
-from trust.types import PartnerType
+from experiments.trust.config import ExperimentConfig
+from tasks.trust.payoffs import build_graded_payoff_matrix, decode_action, encode_action
+from tasks.trust.types import PartnerType
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 

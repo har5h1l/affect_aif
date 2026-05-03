@@ -1,10 +1,10 @@
 import numpy as np
 
-from experiment.config import ExperimentConfig
+from experiments.trust.config import ExperimentConfig
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 

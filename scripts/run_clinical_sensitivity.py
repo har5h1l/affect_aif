@@ -21,8 +21,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
 
 # Stag Hunt payoffs
 SH_PAYOFFS = {

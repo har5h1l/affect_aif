@@ -7,8 +7,8 @@ import numpy as np
 
 
 def test_each_partner_has_independent_pA():
-    from trust.agent import TrustGameAgent
-    from trust.model import TrustGameModel
+    from tasks.trust.agents import TrustGameAgent
+    from tasks.trust.models import TrustGameModel
 
     cfg = {"payoff_mode": "binary", "num_partners": 3}
     agent = TrustGameAgent(TrustGameModel(cfg), learn_A=True, pA_scale=1.0)
@@ -22,8 +22,8 @@ def test_each_partner_has_independent_pA():
 
 
 def test_each_partner_has_independent_A():
-    from trust.agent import TrustGameAgent
-    from trust.model import TrustGameModel
+    from tasks.trust.agents import TrustGameAgent
+    from tasks.trust.models import TrustGameModel
 
     cfg = {"payoff_mode": "binary", "num_partners": 3}
     agent = TrustGameAgent(TrustGameModel(cfg))
@@ -35,8 +35,8 @@ def test_each_partner_has_independent_A():
 
 
 def test_C_D_shared_by_reference():
-    from trust.agent import TrustGameAgent
-    from trust.model import TrustGameModel
+    from tasks.trust.agents import TrustGameAgent
+    from tasks.trust.models import TrustGameModel
 
     cfg = {"payoff_mode": "binary", "num_partners": 3}
     agent = TrustGameAgent(TrustGameModel(cfg))
@@ -46,8 +46,8 @@ def test_C_D_shared_by_reference():
 
 
 def test_observe_outcome_only_updates_active_partner_pA():
-    from trust.agent import TrustGameAgent
-    from trust.model import TrustGameModel
+    from tasks.trust.agents import TrustGameAgent
+    from tasks.trust.models import TrustGameModel
 
     cfg = {"payoff_mode": "binary", "num_partners": 3, "observation_noise": 0.0}
     agent = TrustGameAgent(TrustGameModel(cfg), learn_A=True)

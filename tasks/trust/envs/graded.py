@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from env.trust_game import TrustGameEnv
-from trust.model import TrustGameModel
+from tasks.trust.envs.binary import TrustGameEnv
+from tasks.trust.models import TrustGameModel
 
 
 class GradedTrustGameEnv(TrustGameEnv):

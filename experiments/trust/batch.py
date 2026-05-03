@@ -14,13 +14,13 @@ import pandas as pd
 
 from analysis.visualization import build_run_gifs
 from cli.common import slugify_name
-from experiment.calibration import (
+from experiments.trust.calibration import (
     build_sensitivity_specs,
     serialize_config,
 )
-from experiment.config import ExperimentConfig
-from experiment.constants import SENSITIVITY_CONDITIONS
-from experiment.tasks import (
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.constants import SENSITIVITY_CONDITIONS
+from experiments.trust.tasks import (
     run_primary_replication_task,
     run_sensitivity_replication_task,
 )

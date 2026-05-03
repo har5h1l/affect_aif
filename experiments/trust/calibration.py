@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 
-from experiment.config import ExperimentConfig
+from experiments.trust.config import ExperimentConfig
 
 
 def build_sensitivity_specs(config: ExperimentConfig) -> list[tuple[str, float]]:

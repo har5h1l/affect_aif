@@ -5,22 +5,22 @@ from pathlib import Path
 
 import pandas as pd
 
-import trust
-from experiment.conditions import (
+import tasks.trust as trust
+from experiments.trust.conditions import (
     get_condition_metadata,
     get_condition_name,
     get_preset_condition,
     normalize_condition_name,
 )
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
-from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
+from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 

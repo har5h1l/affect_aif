@@ -1,12 +1,12 @@
-# Benchmarking Integration: Trust Backend + Experimental CvC
+# Evaluation Integration: Trust-Task Arena + Experimental CvC
 
 ## Status
 
-The benchmark layer is organized around explicit backends rather than a
-trust-game runner with a fake `gridworld` toggle.
+The evaluation layer separates the trust-task arena from external benchmark
+backends rather than treating the trust game as a benchmark peer of CvC.
 
-- `trust` is the canonical, supported benchmark backend for the current
-  affect_aif agents and theory-facing evaluation.
+- `trust` routes to the canonical, supported trust-task evaluation arena for
+  the current affect_aif agents and theory-facing evaluation.
 - `cvc_local` is a real CoGames/CvC backend, but it is still proof-of-concept
   / WIP. It runs through a Python 3.12 worker and uses the same policy class
   path / policy spec shape that can later be packaged for submission.
@@ -50,11 +50,11 @@ Because of that mismatch:
 Legacy config booleans (`run_trust_game`, `run_gridworld`) are still parsed for
 compatibility, but they are converted immediately into backend selections.
 
-### Backends
+### Evaluation Surfaces
 
-- `affect_aif/benchmark/trust_backend.py`
-  Canonical trust benchmark backend. Reuses the current `ExperimentRunner`,
-  `TrustGameEnv`, and benchmark baseline agents.
+- `affect_aif/tasks/trust/evaluation/arena.py`
+  Canonical trust-task evaluation arena. Reuses the current
+  `ExperimentRunner`, `TrustGameEnv`, and trust-task baseline agents.
 - `affect_aif/benchmark/cvc_local_backend.py`
   Real local CvC backend. Launches `python3.12 -m affect_aif.benchmark.cvc_local_worker`.
 - `affect_aif/benchmark/toy_gridworld_backend.py`
@@ -79,28 +79,28 @@ Backends may add extra columns:
 - CvC: `team_reward_mean`, `aligned_junctions`, `hearts_gained`,
   role-specific gains, and other episode summaries
 
-## Trust Backend
+## Trust-Task Evaluation Arena
 
-The trust backend is the main benchmark for the existing active-inference
-theory. It now includes:
+The trust-task evaluation arena is the main comparison surface for the existing
+active-inference theory. It now includes:
 
 - Pavlov baseline
 - Grim Trigger baseline
-- benchmark JSON configs under `affect_aif/configs/`
+- benchmark JSON configs under `configs/`
 - scheduled-switch propagation through benchmark results
 - unfinished CoGames policy adapters are not shipped in `benchmark/` (add one when CvC integration is active)
 
 Recommended trust configs:
 
-- `affect_aif/configs/benchmark_default.json`
-- `affect_aif/configs/benchmark_betrayal.json`
-- `affect_aif/configs/benchmark_full.json`
+- `configs/benchmark_default.json`
+- `configs/benchmark_betrayal.json`
+- `configs/benchmark_full.json`
 
-Scenario defaults now matter for the trust benchmark rather than serving as
-labels only. In particular, `betrayal_arena` now carries its own trust-game
-setup: `assignment_mode="agent_choice"`, `p_switch=0`, an initial roster of
-`["cooperator", "random"]`, and a scheduled `partner 0 -> exploiter` switch
-at round 50 unless a benchmark config overrides those values.
+Scenario defaults now matter for the trust-task evaluation arena rather than
+serving as labels only. In particular, `betrayal_arena` now carries its own
+trust-game setup: `assignment_mode="agent_choice"`, `p_switch=0`, an initial
+roster of `["cooperator", "random"]`, and a scheduled `partner 0 -> exploiter`
+switch at round 50 unless a benchmark config overrides those values.
 
 The legacy `toy_gridworld` adapter now applies the same scenario-level switch
 events, so both benchmark paths expose the same betrayal event by default.
@@ -152,15 +152,15 @@ It does not log in, upload, or submit policies.
 ### Run benchmarks
 
 ```bash
-python scripts/run_benchmark.py --backend trust --config affect_aif/configs/benchmark_default.json
+python scripts/run_benchmark.py --backend trust --config configs/benchmark_default.json
 python scripts/run_benchmark.py --backend trust --agents tau4_affect random tit_for_tat --rounds 50 --replications 3
 # Experimental / WIP: requires Python 3.12 and uses the real CvC local worker.
 python scripts/run_benchmark.py --backend cvc_local --agents teammate_reliability starter --mission machina_1 --max-steps 250 --python-bin python3.12
 ```
 
-For day-to-day benchmark work, prefer the trust backend. The `cvc_local`
+For day-to-day evaluation work, prefer the trust-task arena. The `cvc_local`
 example is included to document the current experimental surface, not to imply
-parity with the supported trust benchmark.
+parity with the supported trust-task evaluation arena.
 
 ### Analyze benchmark results
 

@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from env.graded_trust_game import GradedTrustGameEnv
-from env.trust_game import TrustGameEnv
-from experiment.conditions import resolve_condition_spec
-from experiment.config import ExperimentConfig
-from experiment.multi_focal_config import MultiFocalConfig
-from trust import AffectiveAgent, LesionedAgent, TrustGameAgent, TrustGameModel
+from experiments.multifocal.config import MultiFocalConfig
+from experiments.trust.conditions import resolve_condition_spec
+from experiments.trust.config import ExperimentConfig
+from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent, TrustGameModel
+from tasks.trust.envs import GradedTrustGameEnv, TrustGameEnv
 
 
 def create_model(config: ExperimentConfig) -> TrustGameModel:

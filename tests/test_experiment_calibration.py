@@ -1,5 +1,5 @@
-from experiment.calibration import build_sensitivity_specs
-from experiment.config import ExperimentConfig
+from experiments.trust.calibration import build_sensitivity_specs
+from experiments.trust.config import ExperimentConfig
 
 
 def test_build_sensitivity_specs_returns_all_four_parameters():

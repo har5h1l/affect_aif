@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from trust.affective import AffectiveAgent
+from tasks.trust.agents.affective import AffectiveAgent
 
 
 class LesionedAgent(AffectiveAgent):

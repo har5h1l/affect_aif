@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from experiment.joint_resolution import joint_resolve
-from trust.model import TrustGameModel
+from experiments.multifocal.joint_resolution import joint_resolve
+from tasks.trust.models import TrustGameModel
 
 
 @pytest.fixture

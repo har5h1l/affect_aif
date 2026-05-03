@@ -12,7 +12,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 |------|---------|
 | Run all tests | `python -m pytest tests/ -v` |
 | Run single test | `python -m pytest tests/test_core.py::test_name -v` |
-| Run experiment | `python scripts/run_experiment.py --config configs/<name>.json --output-dir results --batch-name <name>` |
+| Run experiment | `python scripts/run_experiment.py --config experiments/trust/configs/<name>.json --output-dir results --batch-name <name>` |
 | Analyze results | `python scripts/run_analysis.py --results <path>/results.csv --output-dir <path>/figures` |
 | Preliminary check | `python scripts/run_preliminary.py --replications 5 --output results/preliminary.csv` |
 | Generate GIFs | `python scripts/run_visualization.py --results <path>/results.csv --output-dir <path>/gifs` |
@@ -22,15 +22,13 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 
 | Directory | Purpose |
 |-----------|---------|
-| `agent/` | Base, affective, and lesioned AIF agents |
-| `agent/model/` | Trust-game generative model (A/B/C/D/E matrices), partner types, payoffs |
-| `agent/inference/` | Generic active inference math: EFE, rollout, control, policies |
-| `agent/affect/` | Per-partner precision tracking: beta state, interoception |
-| `env/` | Multi-partner trust game (binary and graded) |
-| `experiment/` | Configs, condition factory, logging, runner |
+| `aif/` | Generic active-inference primitives and affect helpers |
+| `tasks/trust/` | Trust-task agents, models, environments, rollout, payoffs, and evaluation arena |
+| `experiments/trust/` | Trust experiment configs, conditions, logging, batch runner, and runner |
+| `experiments/multifocal/` | Multi-focal trust experiment config and runtime |
 | `analysis/` | Metrics, statistics, plotting, hypothesis tests |
-| `benchmark/` | CvC adapters and trust-game benchmark backends |
-| `configs/` | JSON experiment configurations |
+| `benchmark/` | External benchmark adapters and comparison helpers |
+| `configs/` | External benchmark and CvC JSON configurations |
 | `scripts/` | CLI entry points (thin orchestrators) |
 | `tests/` | Unit and integration tests |
 | `docs/` | Theory, experiment design, implementation, results tracking, roadmap |
@@ -157,29 +155,32 @@ STOP and ask the user when:
 
 ### Configuration Templates
 
-Experiments are configured via JSON in `affect_aif/configs/`. Key parameters:
+Trust experiments are configured via JSON in `experiments/trust/configs/`;
+multi-focal experiments live in `experiments/multifocal/configs/`; external
+benchmark and CvC configs remain under `configs/` until the benchmark package
+split lands. Key parameters:
 
 - `conditions`: list of condition IDs to run (see `docs/experiment/design.md` Section 3)
 - `num_replications`: seeds per condition
 - `num_rounds`: rounds per episode
 - `payoff_mode`: "binary" or "graded"
 - `assignment_mode`: "random" or "agent_choice"
-- `scheduled_type_switches`: for betrayal scenarios
+- `scheduled_stance_switches`: supported betrayal/stance-shift scenarios
 
 ---
 
-## Conductor (Autonomous Loop)
+## Project State
 
-The `conductor/` directory provides an automated research loop:
+`docs/state/` is the steering surface for humans and agents:
 
-- `conductor/MISSION.md` — user-written steering file (objective, tasks, constraints)
-- `conductor/STATE.md` — AI-updated research state (findings, experiment status)
-- `conductor/conductor.sh` — the loop script (single session or `--loop 30m`)
-- `conductor/log/` — full session transcripts
+- `docs/state/current/mission.md` — active mission, scope, constraints, and stop conditions
+- `docs/state/current/next_runs.md` — exact experiment queue and run commands
+- `docs/state/current/blockers.md` — unresolved blockers and human decisions
+- `docs/state/decisions/` — settled architecture and experiment decisions
+- `docs/state/handoffs/` — dated handoff snapshots
 
-Launch with `./start_research.sh --loop 30m` (runs tests first, then starts conductor).
-
-See `conductor/USAGE.md` for full documentation.
+Historical conductor state has been salvaged into `docs/state/` and
+`docs/results/historical_findings.md`; it is not a live repo surface.
 
 ## Mango (Session & Cloud Management)
 
@@ -214,9 +215,9 @@ mango agent state affect_aif               # View current state
 
 ### Key Behaviors
 
-- `mango run --cloud` creates a git worktree on the server, checks out the current branch, and launches a Claude Code conductor session
+- `mango run --cloud` creates a git worktree on the server, checks out the current branch, and launches a remote agent session
 - Sessions continue on the **same branch** they were launched on — push your branch to origin before launching
 - When a session stops (even via SIGKILL), mango **automatically removes the worktree**
 - Server's local master is NOT auto-updated by `mango run --cloud`. To sync: `mango cloud sync push affect_aif` or manually pull on server
-- Session logs are in `conductor/log/` on the server
+- Session logs are managed by Mango on the server
 - Results from experiments land in `results/` within the worktree — use `mango cloud sync fetch` to pull them back

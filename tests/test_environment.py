@@ -1,11 +1,9 @@
-from env.graded_trust_game import GradedTrustGameEnv
-from env.partner import Partner
-from env.trust_game import TrustGameEnv
-from experiment.config import ExperimentConfig
+from experiments.trust.config import ExperimentConfig
+from tasks.trust.envs import GradedTrustGameEnv, Partner, TrustGameEnv
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 

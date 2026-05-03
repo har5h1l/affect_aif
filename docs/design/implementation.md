@@ -137,7 +137,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The environment supports `initial_partner_types` to seed a specific partner roster.
 - It also supports `initial_partner_stances` and `scheduled_stance_switches`, a list of `{round, partner_idx, to_stance}` events.
 - Scheduled stance switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the disruption as an unexpected trust violation.
-- See `affect_aif/configs/betrayal_stress.json` for the reference setup.
+- See `experiments/trust/configs/h4_betrayal_volatility.json` for the reference setup.
 - When a config enables `run_sensitivity`, `results.csv` contains both `run_mode="primary"` rows and sensitivity rows. `scripts/run_analysis.py` filters to `run_mode == "primary"` before aggregating so post-hoc summaries do not double-count sensitivity sweeps that reuse the same `(condition, seed)` identifiers.
 - `scripts/run_analysis.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:
   - `betrayal_post_switch_window_1_5.csv`

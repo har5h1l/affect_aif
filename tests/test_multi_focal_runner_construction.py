@@ -5,9 +5,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from experiment.factory import create_agents_from_multi_focal_config
-from experiment.multi_focal_config import MultiFocalConfig
-from experiment.multi_focal_runner import MultiFocalRunner
+from experiments.multifocal.config import MultiFocalConfig
+from experiments.multifocal.runner import MultiFocalRunner
+from experiments.trust.factory import create_agents_from_multi_focal_config
 
 
 def _make_runner(agents_spec, payoff_mode="binary", num_rounds=200):

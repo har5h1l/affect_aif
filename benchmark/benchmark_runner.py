@@ -11,7 +11,7 @@ from benchmark.benchmark_config import BenchmarkConfig
 
 
 def _load_trust_backend():
-    from benchmark.trust_backend import TrustBackend
+    from tasks.trust.evaluation.arena import TrustBackend
 
     return TrustBackend
 

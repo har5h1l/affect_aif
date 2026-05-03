@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from aif.policies import gamma_per_policy
-from trust.payoffs import encode_instantaneous_index
+from tasks.trust.payoffs import encode_instantaneous_index
 
 
 def build_transition_views(B, num_controls, factorized_policies):

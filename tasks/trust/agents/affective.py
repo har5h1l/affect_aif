@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 
 from aif.affect.beta import DiscreteBetaState
-from trust.agent import TrustGameAgent
-from trust.model import TrustGameModel
+from tasks.trust.agents.base import TrustGameAgent
+from tasks.trust.models import TrustGameModel
 
 
 class AffectiveAgent(TrustGameAgent):

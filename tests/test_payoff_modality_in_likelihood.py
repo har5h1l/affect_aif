@@ -7,7 +7,7 @@ import pytest
 
 
 def test_payoff_modality_contributes_to_posterior():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel(
         {
@@ -27,7 +27,7 @@ def test_payoff_modality_contributes_to_posterior():
 
 
 def test_observation_likelihood_requires_own_action():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel({"payoff_mode": "binary", "num_partners": 2})
 
@@ -36,7 +36,7 @@ def test_observation_likelihood_requires_own_action():
 
 
 def test_observation_likelihood_requires_both_modalities():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel({"payoff_mode": "binary", "num_partners": 2})
 
@@ -45,7 +45,7 @@ def test_observation_likelihood_requires_both_modalities():
 
 
 def test_joint_observation_likelihood_multiplies_both_modalities():
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     model = TrustGameModel({"payoff_mode": "binary", "num_partners": 2})
 

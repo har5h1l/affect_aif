@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from experiment.config import ExperimentConfig
+from experiments.trust.config import ExperimentConfig
 
 
 def pytest_configure(config):
@@ -18,12 +18,12 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip)
 
 
-from experiment.runner import ExperimentRunner
-from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
+from experiments.trust.runner import ExperimentRunner
+from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 

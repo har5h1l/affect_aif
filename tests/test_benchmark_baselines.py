@@ -5,7 +5,8 @@ These tests do NOT require cogames or mettagrid.
 
 import numpy as np
 
-from benchmark.baselines import (
+from benchmark.compat import cogames_available, mettagrid_available
+from tasks.trust.evaluation.baselines import (
     GrimTriggerAgent,
     PavlovAgent,
     QLearningAgent,
@@ -13,7 +14,6 @@ from benchmark.baselines import (
     TitForTatAgent,
     WinStayLoseShiftAgent,
 )
-from benchmark.compat import cogames_available, mettagrid_available
 
 
 def test_compat_returns_bool():

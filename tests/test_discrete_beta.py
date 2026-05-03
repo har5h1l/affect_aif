@@ -139,13 +139,13 @@ class TestDiscreteAffectiveAgent:
     """Integration test: discrete agent runs through the experiment machinery."""
 
     def test_no_epistemic_preset_is_registered(self):
-        from experiment.conditions import get_preset_condition
+        from experiments.trust.conditions import get_preset_condition
 
         assert get_preset_condition("no_epistemic").name == "no_epistemic"
 
     def test_discrete_agent_instantiation(self):
-        from trust import AffectiveAgent
-        from trust.model import TrustGameModel
+        from tasks.trust import AffectiveAgent
+        from tasks.trust.models import TrustGameModel
 
         config = {
             "num_partners": 4,

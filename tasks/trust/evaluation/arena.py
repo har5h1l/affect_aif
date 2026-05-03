@@ -1,4 +1,4 @@
-"""Trust-game benchmark backend."""
+"""Trust-task evaluation arena backend."""
 
 from __future__ import annotations
 
@@ -9,14 +9,14 @@ from typing import Any
 
 import numpy as np
 
-from benchmark import baselines
 from benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
 from benchmark.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
 from benchmark.scenarios import get_scenario
-from env.trust_game import TrustGameEnv
-from experiment.conditions import resolve_condition_spec
-from experiment.config import ExperimentConfig
-from experiment.runner import ExperimentRunner
+from experiments.trust.conditions import resolve_condition_spec
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.runner import ExperimentRunner
+from tasks.trust.envs import TrustGameEnv
+from tasks.trust.evaluation import baselines
 
 EXPERIMENT_CONFIG_FIELDS = {field.name for field in fields(ExperimentConfig)}
 
@@ -112,7 +112,7 @@ class TrustBackend(BenchmarkBackend):
 
         agent_name = agent_spec.implementation or agent_spec.name
         if agent_name not in AGENT_REGISTRY:
-            raise ValueError(f"Unknown trust benchmark agent '{agent_name}'.")
+            raise ValueError(f"Unknown trust-task evaluation agent '{agent_name}'.")
 
         experiment_config = self._prepared_config or context.shared.get("trust_experiment_config")
         if experiment_config is None:

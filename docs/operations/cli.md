@@ -56,13 +56,13 @@ Examples:
 
 ```bash
 # single config, timestamped batch dir
-python scripts/run_experiment.py --config affect_aif/configs/default.json
+python scripts/run_experiment.py --config experiments/trust/configs/smoke.json
 
 # single config, named batch, 12 workers
-python scripts/run_experiment.py --config affect_aif/configs/default.json --output-dir results --batch-name primary --workers 12
+python scripts/run_experiment.py --config experiments/trust/configs/h6_shallow_policy_regime.json --output-dir results --batch-name h6_shallow_policy_regime --workers 12
 
-# primary experiment + betrayal stress in one batch
-python scripts/run_experiment.py --config affect_aif/configs/default.json --config affect_aif/configs/betrayal_stress.json --output-dir results --batch-name main_run --workers 12
+# shallow regime + betrayal volatility in one batch
+python scripts/run_experiment.py --config experiments/trust/configs/h6_shallow_policy_regime.json --config experiments/trust/configs/h4_betrayal_volatility.json --output-dir results --batch-name main_run --workers 12
 ```
 
 ## Preliminary Run

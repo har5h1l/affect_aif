@@ -1,14 +1,14 @@
 import numpy as np
 
 from benchmark.benchmark_config import AGENT_REGISTRY
-from experiment.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
-from experiment.config import ExperimentConfig
-from experiment.factory import create_agent
-from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
+from experiments.trust.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.factory import create_agent
+from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 
 def _build_model(config):
-    from trust.model import TrustGameModel
+    from tasks.trust.models import TrustGameModel
 
     return TrustGameModel(config)
 
