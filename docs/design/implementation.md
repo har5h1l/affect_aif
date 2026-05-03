@@ -86,11 +86,17 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## Supported Surface
 
 - The supported CLI wrappers are:
-  - `scripts/run_experiment.py`
+  - `scripts/experiment/run.py`
+  - `scripts/experiment/smoke.py`
+  - `scripts/experiment/inspect.py`
   - `scripts/run_preliminary.py`
-  - `scripts/run_analysis.py`
-  - `scripts/run_visualization.py`
+  - `scripts/analysis/analyze.py`
+  - `scripts/analysis/summarize.py`
+  - `scripts/analysis/visualize.py`
   - `scripts/run_model_comparison.py`
+  - `scripts/benchmark/run_cvc.py`
+  - `scripts/benchmark/package_cvc.py`
+  Compatibility wrappers remain at the old top-level script paths.
 - Historical one-off scripts, archived configs, paper-era claims, and the earlier standalone discrete-beta prototype were salvaged into `docs/results/historical_findings.md` or deleted. They are not runnable workflow surfaces.
 
 ## Verbose Execution Tracing
@@ -101,7 +107,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - `verbosity_include_calibration`
   - `gif_after_run`
   - `gif_output_dir`
-- `scripts/run_experiment.py --verbose --verbosity-mode stage_stream` emits structured stage lines from `ExperimentRunner` rather than ad hoc prints.
+- `scripts/experiment/run.py --verbose --verbosity-mode stage_stream` emits structured stage lines from `ExperimentRunner` rather than ad hoc prints.
 - The current stage stream reports:
   - calibration episode start/end
   - condition start/end
@@ -122,13 +128,13 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## GIF Generation
 
 - `affect_aif.analysis.visualization.build_run_gifs(...)` generates one GIF per primary `(condition, seed)` run from an in-memory or reloaded results table.
-- `scripts/run_experiment.py --make-gifs` calls that helper after writing the results file. `scripts/run_visualization.py` provides the same capability for an existing CSV/parquet file.
+- `scripts/experiment/run.py --make-gifs` calls that helper after writing the results file. `scripts/analysis/visualize.py` provides the same capability for an existing CSV/parquet file.
 - The animation dashboard is intentionally task-facing rather than publication-facing. Each frame shows the current round, partner roster, selected/observed actions, payoff, inferred vs true type, cumulative payoff trajectory, and the per-partner beta or reward-average signal when that signal exists.
 - Non-affective conditions render a disabled signal panel instead of fabricating beta values.
 
 ## Parallelism
 
-- `scripts/run_experiment.py` accepts multiple `--config` paths and a `--workers` count. With more than one config or `workers > 1`, it uses `BatchExperimentRunner` and a `ProcessPoolExecutor` from the standard library.
+- `scripts/experiment/run.py` accepts multiple `--config` paths and a `--workers` count. With more than one config or `workers > 1`, it uses `BatchExperimentRunner` and a `ProcessPoolExecutor` from the standard library.
 - Work is parallelized at replication granularity: calibration episodes, then primary replications (and when `run_sensitivity` is true, sensitivity replications) are submitted to the pool. Each task runs a single replication in a worker process; config and calibration summaries are serialized and passed in. Results are collected in the main process and written per config under `<output-dir>/<batch_id>/<config_slug>/results.csv`.
 - Serial mode (exactly one config and `--workers 1`) runs in the main process and supports `--verbose` stage streaming and `--make-gifs`; batch mode disables per-round verbosity but can still use `--verbose` for completion messages and `--make-gifs` to build GIFs per config after all replications finish.
 
@@ -138,8 +144,8 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - It also supports `initial_partner_stances` and `scheduled_stance_switches`, a list of `{round, partner_idx, to_stance}` events.
 - Scheduled stance switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the disruption as an unexpected trust violation.
 - See `experiments/trust/configs/h4_betrayal_volatility.json` for the reference setup.
-- When a config enables `run_sensitivity`, `results.csv` contains both `run_mode="primary"` rows and sensitivity rows. `scripts/run_analysis.py` filters to `run_mode == "primary"` before aggregating so post-hoc summaries do not double-count sensitivity sweeps that reuse the same `(condition, seed)` identifiers.
-- `scripts/run_analysis.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:
+- When a config enables `run_sensitivity`, `results.csv` contains both `run_mode="primary"` rows and sensitivity rows. `scripts/analysis/analyze.py` filters to `run_mode == "primary"` before aggregating so post-hoc summaries do not double-count sensitivity sweeps that reuse the same `(condition, seed)` identifiers.
+- `scripts/analysis/analyze.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:
   - `betrayal_post_switch_window_1_5.csv`
   - `betrayal_post_switch_window_1_10.csv`
   - `betrayal_condition_comparison.csv`

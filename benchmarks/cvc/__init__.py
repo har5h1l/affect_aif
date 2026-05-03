@@ -1,0 +1,2 @@
+"""CoGames/CvC benchmark integration."""
+

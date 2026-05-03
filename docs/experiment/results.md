@@ -514,12 +514,12 @@ CoGames (Cogs vs Clips) is a real multi-agent territory-control game from Softma
 ### Pipeline
 
 The CvC benchmark pipeline runs end-to-end:
-- Python 3.10 orchestrator (`run_benchmark.py`) loads config and dispatches
-- `CvCLocalBackend` spawns `python3.12 -m affect_aif.benchmark.cvc_local_worker` subprocess
+- Python 3.10 orchestrator (`scripts/benchmark/run_cvc.py`) loads config and dispatches
+- `CvCLocalBackend` spawns `python3.12 -m benchmarks.cvc.local_worker` subprocess
 - Worker imports cogames/mettagrid, resolves mission, runs episode, extracts metrics
 - Results flow back as JSON -> DataFrame -> CSV -> comparison report
 
-Config: `affect_aif/configs/benchmark_cvc_full.json`
+Config: `configs/benchmark_cvc_full.json`
 Output: `results/benchmark_cvc_full/`
 
 ### Results (6 policies x 10 seeds x 10,000 steps, machina_1 mission)
@@ -561,7 +561,7 @@ The trust-game results (Phases 1-7) are the primary evidence for the paper. CvC 
 ## Track 1.2: Precision Modulation Pathway (2026-03-28, Session 13)
 
 **Config:** `affect_aif/configs/graded_betrayal_precision_mod_full.json`
-**Command:** `python scripts/run_experiment.py --config affect_aif/configs/graded_betrayal_precision_mod_full.json --output-dir results/graded_betrayal_precision_mod_full --batch-name precision_mod_full`
+**Command:** `python scripts/experiment/run.py --config affect_aif/configs/graded_betrayal_precision_mod_full.json --output-dir results/graded_betrayal_precision_mod_full --batch-name precision_mod_full`
 **Output:** `results/graded_betrayal_precision_mod_full/`
 **Conditions:** 1 (deep no-affect), 2 (affective shallow), 3 (lesioned), 5 (reward avg)
 **Seeds:** 50, **Rounds:** 120, **Game:** graded betrayal (cooperator→exploiter at round 31)

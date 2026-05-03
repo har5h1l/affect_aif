@@ -432,10 +432,9 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 - Computational cost comparison (Conditions 1 vs. 2): paired t-test on nodes-expanded-per-decision. Under sophisticated inference the depth curve is flat in the current binary-action task, so cost differences between depths are less interpretively central than the affect/no-affect comparison. Retained for completeness but no longer a primary or secondary analysis.
 
 **Execution workflow note**:
-- `scripts/run_experiment.py` accepts repeated `--config` flags and a shared `--workers` pool so multiple experiment configs can be queued in one invocation.
+- `scripts/experiment/run.py` accepts repeated `--config` flags and a shared `--workers` pool so multiple experiment configs can be queued in one invocation.
 - Outputs are written per config under `<output-dir>/<batch-id>/<config-name>/results.csv`, which keeps each experiment variant isolated while still allowing the scheduler to share workers across all queued replications.
-- `affect_aif/configs/horizon_sweep.json` is the reference config for Conditions 1, 2, 4, 6, and 7; analysis now emits a horizon-sweep figure so the affective shallow condition can be read directly against explicit depth.
-- `affect_aif/configs/deep_affect_test.json` is the completed Conditions 1, 2, and 8 comparison; it isolates whether affect adds anything once explicit planning is already deep and supports the orthogonal-augmentation interpretation because `C2` and `C8` are statistically indistinguishable.
+- Current maintained configs are listed in `docs/experiments/manifest.md`. Use `experiments/trust/configs/h6_shallow_policy_regime.json` for the shallow policy-space regime and `experiments/trust/configs/h4_betrayal_volatility.json` for the betrayal volatility check.
 
 ### 6.4 Visualizations
 

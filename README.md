@@ -35,12 +35,12 @@ partner redesign:
 Common entry points:
 
 ```bash
-python scripts/run_experiment.py --config experiments/trust/configs/h6_shallow_policy_regime.json --output-dir results --batch-name h6_shallow_policy_regime --workers 12
+python scripts/experiment/run.py --config experiments/trust/configs/h6_shallow_policy_regime.json --output-dir results --batch-name h6_shallow_policy_regime --workers 12
 python scripts/run_preliminary.py --replications 5 --output results/preliminary.csv
-python scripts/run_analysis.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/figures
-python scripts/run_visualization.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/gifs
+python scripts/analysis/analyze.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/figures
+python scripts/analysis/visualize.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/gifs
 python scripts/run_model_comparison.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/model_comparison
-python scripts/run_benchmark.py --config configs/benchmark_default.json
+python scripts/benchmark/run_cvc.py --config configs/benchmark_default.json
 python scripts/analyze_benchmark.py --results results/benchmark/benchmark_results.csv
 ```
 
@@ -51,7 +51,8 @@ python scripts/analyze_benchmark.py --results results/benchmark/benchmark_result
 - `experiments/trust/`: trust experiment configuration, conditions, and runner surface
 - `experiments/multifocal/`: multi-focal trust experiment configuration and runtime
 - `analysis/`: result loading, metrics, and visualization helpers
-- `benchmark/`: external benchmark backends and comparison helpers
+- `benchmark/`: shared benchmark runner/config/comparison helpers
+- `benchmarks/cvc/`: experimental CvC backend, policies, packaging, and Observatory client
 - `configs/`: external benchmark and CvC JSON configurations
 - `docs/`: theory, experiment, implementation, results, and state notes
 - `scripts/README.md`: supported CLI wrappers

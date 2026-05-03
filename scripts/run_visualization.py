@@ -1,31 +1,28 @@
-"""CLI entry point for experiment GIF generation."""
+"""Compatibility wrapper for the canonical visualization runner."""
 
 from __future__ import annotations
 
-import argparse
-import sys
+import importlib.util
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from analysis.visualization import build_run_gifs, load_results
+from types import ModuleType
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Generate experiment GIFs from saved results.")
-    parser.add_argument("--results", required=True, help="Path to the results CSV or parquet.")
-    parser.add_argument("--output-dir", required=True, help="Directory for generated GIFs.")
-    return parser
+def _load_canonical() -> ModuleType:
+    script_path = Path(__file__).resolve().parent / "analysis" / "visualize.py"
+    spec = importlib.util.spec_from_file_location("scripts_analysis_visualize", script_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not load canonical visualization runner at {script_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
-def main(argv: list[str] | None = None):
-    parser = build_parser()
-    args = parser.parse_args(argv)
+_CANONICAL = _load_canonical()
+build_parser = _CANONICAL.build_parser
 
-    results = load_results(args.results)
-    written = build_run_gifs(results, args.output_dir)
-    print(f"Saved {len(written)} GIFs to {Path(args.output_dir)}")
-    return 0
+
+def main(argv: list[str] | None = None) -> int:
+    return int(_CANONICAL.main(argv))
 
 
 if __name__ == "__main__":

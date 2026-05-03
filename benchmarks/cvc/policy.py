@@ -10,7 +10,7 @@ from mettagrid.policy.policy_env_interface import PolicyEnvInterface
 from mettagrid.simulator import Action
 from mettagrid.simulator.interface import AgentObservation
 
-from benchmark.cvc_navigation import NavigationHelper, NavigationState
+from benchmarks.cvc.navigation import NavigationHelper, NavigationState
 
 GEAR = ("aligner", "scrambler", "miner", "scout")
 ELEMENTS = ("carbon", "oxygen", "germanium", "silicon")

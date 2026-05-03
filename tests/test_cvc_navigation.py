@@ -6,7 +6,7 @@ BFS pathfinding, directional BFS, walkability grid building, and exploration.
 
 from dataclasses import dataclass
 
-from benchmark.cvc_navigation import (
+from benchmarks.cvc.navigation import (
     DIR_NAME_TO_DELTA,
     DIRECTIONS,
     WALL_EXPIRY_STEPS,

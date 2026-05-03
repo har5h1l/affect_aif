@@ -6,7 +6,7 @@ Implements the full CvC scoring sequence:
   3. Deposit at base (navigate to hub/chest, trade ore for hearts)
   4. Align junction (navigate to junction with heart)
 
-Uses BFS pathfinding from cvc_navigation.py for wall avoidance.
+Uses BFS pathfinding from navigation.py for wall avoidance.
 Designed as the baseline policy for measuring the affect mechanism's
 contribution in CvC.
 """
@@ -22,7 +22,7 @@ from mettagrid.policy.policy_env_interface import PolicyEnvInterface
 from mettagrid.simulator import Action
 from mettagrid.simulator.interface import AgentObservation
 
-from benchmark.cvc_navigation import NavigationHelper, NavigationState
+from benchmarks.cvc.navigation import NavigationHelper, NavigationState
 
 GEAR = ("aligner", "scrambler", "miner", "scout")
 ELEMENTS = ("carbon", "oxygen", "germanium", "silicon")

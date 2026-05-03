@@ -27,7 +27,7 @@ def test_agent_specs_accept_explicit_policy_specs_for_cvc_backend():
                     "name": "teammate_reliability",
                     "backend": "cvc_local",
                     "kind": "policy_spec",
-                    "policy_spec": "class=benchmark.cvc_policy.TeammateReliabilityPolicy",
+                    "policy_spec": "class=benchmarks.cvc.policy.TeammateReliabilityPolicy",
                 }
             ],
             "backend_configs": {"cvc_local": {"mission": "machina_1"}},
@@ -39,4 +39,4 @@ def test_agent_specs_accept_explicit_policy_specs_for_cvc_backend():
     assert isinstance(agent, AgentSpec)
     assert agent.backend == "cvc_local"
     assert agent.kind == "policy_spec"
-    assert agent.policy_spec == "class=benchmark.cvc_policy.TeammateReliabilityPolicy"
+    assert agent.policy_spec == "class=benchmarks.cvc.policy.TeammateReliabilityPolicy"

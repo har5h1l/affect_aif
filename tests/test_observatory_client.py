@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from benchmark.observatory import ObservatoryClient
+from benchmarks.cvc.observatory import ObservatoryClient
 
 
 def _fixture(name: str):

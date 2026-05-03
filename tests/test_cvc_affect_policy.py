@@ -3,7 +3,7 @@
 These test the pure-Python beta tracking without requiring mettagrid.
 """
 
-from benchmark.cvc_beta import (
+from benchmarks.cvc.beta import (
     ALPHA_CHARGE,
     COOPERATE_THRESHOLD,
     INDEPENDENT_THRESHOLD,

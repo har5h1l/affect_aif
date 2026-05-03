@@ -1,6 +1,6 @@
 """Pure-Python beta (precision) update helpers for CvC policies.
 
-Separated from cvc_affect_policy.py so they can be tested without mettagrid.
+Separated from affect_policy.py so they can be tested without mettagrid.
 """
 
 from __future__ import annotations

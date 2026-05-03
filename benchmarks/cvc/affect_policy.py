@@ -26,14 +26,14 @@ from mettagrid.policy.policy_env_interface import PolicyEnvInterface
 from mettagrid.simulator import Action
 from mettagrid.simulator.interface import AgentObservation
 
-from benchmark.cvc_beta import (
+from benchmarks.cvc.beta import (
     COOPERATE_THRESHOLD,
     INDEPENDENT_THRESHOLD,
     INITIAL_BETA,
     TEAM_BETA_SMOOTH,
     update_beta,
 )
-from benchmark.cvc_navigation import NavigationHelper, NavigationState
+from benchmarks.cvc.navigation import NavigationHelper, NavigationState
 
 # ---------------------------------------------------------------------------
 # Constants

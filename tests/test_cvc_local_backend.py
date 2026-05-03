@@ -6,7 +6,7 @@ from pathlib import Path
 
 from benchmark.backend import BenchmarkBackendContext
 from benchmark.benchmark_config import BenchmarkConfig
-from benchmark.cvc_local_backend import CvCLocalBackend
+from benchmarks.cvc.local_backend import CvCLocalBackend
 
 
 def test_cvc_local_backend_runs_python_worker_and_reads_standardized_records(monkeypatch, tmp_path):
@@ -18,7 +18,7 @@ def test_cvc_local_backend_runs_python_worker_and_reads_standardized_records(mon
                     "name": "teammate_reliability",
                     "backend": "cvc_local",
                     "kind": "policy_spec",
-                    "policy_spec": "class=benchmark.cvc_policy.TeammateReliabilityPolicy",
+                    "policy_spec": "class=benchmarks.cvc.policy.TeammateReliabilityPolicy",
                 }
             ],
             "backend_configs": {

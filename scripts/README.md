@@ -8,17 +8,24 @@ This directory contains the supported CLI wrappers around the package code.
 
 These wrappers define the stable end-user workflow documented in `docs/operations/cli.md`:
 
-- `run_experiment.py`
+- `experiment/run.py`
+- `experiment/smoke.py`
+- `experiment/inspect.py`
 - `run_preliminary.py`
-- `run_analysis.py`
-- `run_visualization.py`
+- `analysis/analyze.py`
+- `analysis/summarize.py`
+- `analysis/visualize.py`
 - `run_model_comparison.py`
+- `benchmark/run_cvc.py`
+- `benchmark/package_cvc.py`
+
+Top-level `run_experiment.py`, `run_analysis.py`, `run_visualization.py`, and
+`run_benchmark.py` remain as thin compatibility wrappers.
 
 ## Additional Utilities
 
 These scripts remain in the active tree because they support benchmark, paper, clinical, or CvC-specific workflows, but they are not part of the small core CLI contract above:
 
-- `run_benchmark.py`
 - `analyze_benchmark.py`
 - `analyze_benchmark_paper.py`
 - `analyze_clinical_results.py`

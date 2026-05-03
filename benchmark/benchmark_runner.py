@@ -23,7 +23,7 @@ def _load_toy_gridworld_backend():
 
 
 def _load_cvc_backend():
-    from benchmark.cvc_local_backend import CvCLocalBackend
+    from benchmarks.cvc.local_backend import CvCLocalBackend
 
     return CvCLocalBackend
 

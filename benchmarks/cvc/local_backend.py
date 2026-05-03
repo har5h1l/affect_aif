@@ -11,7 +11,7 @@ from typing import Any
 
 from benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
 from benchmark.benchmark_config import AgentSpec, BenchmarkConfig
-from benchmark.observatory import ObservatoryClient
+from benchmarks.cvc.observatory import ObservatoryClient
 
 
 class CvCLocalBackend(BenchmarkBackend):
@@ -88,7 +88,7 @@ class CvCLocalBackend(BenchmarkBackend):
         cmd = [
             self.python_bin,
             "-m",
-            "benchmark.cvc_local_worker",
+            "benchmarks.cvc.local_worker",
             "--output",
             str(output_path),
             "--agent-name",
