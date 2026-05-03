@@ -77,7 +77,7 @@ def test_factory_builds_M_agents_with_correct_num_partners():
 
 
 def test_all_multifocal_configs_load_and_validate():
-    paths = sorted(Path(".").glob("configs/multifocal_*.json"))
+    paths = sorted(Path(".").glob("experiments/multifocal/configs/*.json"))
     assert len(paths) >= 4, f"expected >= 4 configs, found {len(paths)}: {paths}"
     for p in paths:
         raw = json.loads(p.read_text())

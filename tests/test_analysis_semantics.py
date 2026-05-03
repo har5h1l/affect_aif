@@ -14,16 +14,16 @@ from scripts.run_analysis import _hypothesis_summary_frame
 from scripts.run_model_comparison import main as run_model_comparison_main
 
 
-def test_h1_exports_canonical_label_and_summary_frame_uses_it(tiny_config):
+def test_h1_exports_current_label_and_summary_frame_uses_it(tiny_config):
     cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2]})
     results = ExperimentRunner(cfg).run_all()
 
     hypotheses = run_all_hypothesis_tests(results)
-    assert hypotheses["tests"]["h1"]["label"] == "orthogonal_augmentation"
+    assert hypotheses["h1"]["label"] == "model_fitness_not_reward"
 
     summary = _hypothesis_summary_frame(hypotheses)
     h1_row = summary.loc[summary["hypothesis"] == "H1"].iloc[0]
-    assert h1_row["label"] == "orthogonal_augmentation"
+    assert h1_row["label"] == "model_fitness_not_reward"
 
 
 def test_model_comparison_report_uses_predictive_log_score_language(tiny_config):
