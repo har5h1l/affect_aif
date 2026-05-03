@@ -1,7 +1,7 @@
 """Unit tests for joint action resolution (multi-focal F)."""
+
 from __future__ import annotations
 
-import numpy as np
 import pytest
 
 from experiment.joint_resolution import joint_resolve
@@ -65,7 +65,7 @@ def test_graded_symmetric_max_invest(graded_model):
     obs_idx, payoff = joint_resolve(my_action=max_level, partner_action=0, model=graded_model)
     assert obs_idx >= 0
     levels = list(graded_model.payoff_levels)
-    assert any(abs(l - payoff) < 1e-9 for l in levels)
+    assert any(abs(level - payoff) < 1e-9 for level in levels)
 
 
 def test_graded_zero_zero(graded_model):

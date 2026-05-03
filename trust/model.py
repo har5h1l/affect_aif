@@ -31,7 +31,6 @@ from trust.types import (
     default_partner_type_params,
 )
 
-
 _BINARY_KEYS = {"mutual_coop", "sucker", "temptation", "mutual_defect"}
 _GRADED_KEYS = {"num_investment_levels", "endowment", "multiplier"}
 
@@ -50,10 +49,7 @@ class TrustGameModel:
                 "TrustGameModel is now the only model class."
             )
         if "variant" in cfg:
-            raise ValueError(
-                "config key 'variant' was removed in the B+A restructure. "
-                "use 'assignment_mode' instead."
-            )
+            raise ValueError("config key 'variant' was removed in the B+A restructure. use 'assignment_mode' instead.")
         if "payoff_mode" not in cfg:
             raise ValueError(
                 "config must specify payoff_mode={'binary','graded'}. "
@@ -108,9 +104,7 @@ class TrustGameModel:
 
         self.payoff_levels = infer_payoff_levels(self.payoff_matrix)
         self.num_obs = [2, len(self.payoff_levels)]
-        self.num_controls = factorized_num_controls(
-            self.num_partners, self.assignment_mode, self.num_social_actions
-        )
+        self.num_controls = factorized_num_controls(self.num_partners, self.assignment_mode, self.num_social_actions)
 
         self.partner_action_prob_table = self._build_partner_action_prob_table()
         self.payoff_index_table = self._build_payoff_index_table()
@@ -278,9 +272,7 @@ class TrustGameModel:
                 "callers must pass [o_partner_action, o_payoff]."
             )
         if own_action is None:
-            raise ValueError(
-                "observation_likelihood now requires own_action to evaluate the payoff modality."
-            )
+            raise ValueError("observation_likelihood now requires own_action to evaluate the payoff modality.")
         return self.joint_observation_likelihood(
             int(observation[0]),
             payoff_obs=int(observation[1]),

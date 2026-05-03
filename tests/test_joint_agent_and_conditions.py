@@ -16,7 +16,9 @@ def _build_model(config):
 def _make_model_and_agent(agent_cls=TrustGameAgent, **kwargs):
     cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
     model = _build_model(cfg)
-    agent = agent_cls(model=model, planning_horizon=2, gamma=1.0, seed=0, reference_horizon=8, max_policies=64, **kwargs)
+    agent = agent_cls(
+        model=model, planning_horizon=2, gamma=1.0, seed=0, reference_horizon=8, max_policies=64, **kwargs
+    )
     return model, agent
 
 

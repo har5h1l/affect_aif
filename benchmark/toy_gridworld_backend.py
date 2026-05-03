@@ -85,7 +85,11 @@ class ToyGridworldBackend(BenchmarkBackend):
             ticks_per_round=int(self.backend_config.get("ticks_per_round", self.scenario.ticks_per_round)),
         )
         info = AGENT_REGISTRY[agent_name]
-        condition_key = info.get("condition", info.get("preset")) if info["type"] == "aif" else -(config.agents.index(agent_spec) + 1)
+        condition_key = (
+            info.get("condition", info.get("preset"))
+            if info["type"] == "aif"
+            else -(config.agents.index(agent_spec) + 1)
+        )
 
         if info["type"] == "baseline":
             agent = _create_baseline_agent(agent_name, self.scenario.num_partners, seed)
@@ -134,7 +138,9 @@ class ToyGridworldBackend(BenchmarkBackend):
                     "step": round_idx,
                     "reward": float(result["agent_payoff"]),
                     "condition": condition_key,
-                    "condition_name": resolve_condition_spec(condition_key).name if info["type"] == "aif" else agent_spec.name,
+                    "condition_name": resolve_condition_spec(condition_key).name
+                    if info["type"] == "aif"
+                    else agent_spec.name,
                     "partner_idx": partner_idx,
                     "true_partner_type": result.get("true_partner_type", "unknown"),
                     "agent_action": result["agent_action"],

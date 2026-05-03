@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,7 +44,7 @@ def figure_beta_trajectory(c2_df: pd.DataFrame, output_path: str):
     for i, seed in enumerate(seeds):
         seed_df = c2_df[c2_df["seed"] == seed].sort_values("round")
         betas_list = parse_list_col(seed_df["betas"])
-        for j, (_, row_betas) in enumerate(zip(seed_df["round"], betas_list)):
+        for j, (_, row_betas) in enumerate(zip(seed_df["round"], betas_list, strict=False)):
             if j < len(rounds):
                 beta_matrix[i, j] = row_betas[0]  # Partner 0
 
@@ -51,17 +52,19 @@ def figure_beta_trajectory(c2_df: pd.DataFrame, output_path: str):
     se_beta = np.nanstd(beta_matrix, axis=0) / np.sqrt(len(seeds))
     rounds_arr = np.array(rounds)
 
-    ax.fill_between(rounds_arr, mean_beta - se_beta, mean_beta + se_beta,
-                    alpha=0.25, color="#2196F3")
+    ax.fill_between(rounds_arr, mean_beta - se_beta, mean_beta + se_beta, alpha=0.25, color="#2196F3")
     ax.plot(rounds_arr, mean_beta, color="#1565C0", linewidth=1.8, label=r"$\beta_0$ (betrayer)")
 
     # Mark betrayal switch
     ax.axvline(x=31, color="#D32F2F", linestyle="--", linewidth=1.2, alpha=0.8)
-    ax.annotate("Cooperator → Exploiter",
-                xy=(31, mean_beta[min(31, len(mean_beta)-1)]),
-                xytext=(50, 0.85),
-                arrowprops=dict(arrowstyle="->", color="#D32F2F", lw=1.2),
-                fontsize=9, color="#D32F2F")
+    ax.annotate(
+        "Cooperator → Exploiter",
+        xy=(31, mean_beta[min(31, len(mean_beta) - 1)]),
+        xytext=(50, 0.85),
+        arrowprops=dict(arrowstyle="->", color="#D32F2F", lw=1.2),
+        fontsize=9,
+        color="#D32F2F",
+    )
 
     ax.set_xlabel("Round", fontsize=10)
     ax.set_ylabel(r"Affective state $\beta_0$", fontsize=10)
@@ -112,10 +115,8 @@ def figure_clinical_beta(c2_df: pd.DataFrame, clinical_df: pd.DataFrame, output_
         mean_beta = np.nanmean(beta_matrix, axis=0)
         se_beta = np.nanstd(beta_matrix, axis=0) / np.sqrt(len(seeds))
 
-        ax.fill_between(rounds_arr, mean_beta - se_beta, mean_beta + se_beta,
-                        alpha=0.12, color=color)
-        ax.plot(rounds_arr, mean_beta, color=color, linewidth=1.5,
-                linestyle=ls, label=label)
+        ax.fill_between(rounds_arr, mean_beta - se_beta, mean_beta + se_beta, alpha=0.12, color=color)
+        ax.plot(rounds_arr, mean_beta, color=color, linewidth=1.5, linestyle=ls, label=label)
 
     ax.axvline(x=31, color="gray", linestyle="--", linewidth=0.8, alpha=0.6)
     ax.text(32, 0.95, "Switch", fontsize=8, color="gray", alpha=0.8)

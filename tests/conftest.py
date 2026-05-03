@@ -16,6 +16,8 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip)
+
+
 from experiment.runner import ExperimentRunner
 from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 

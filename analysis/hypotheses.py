@@ -15,7 +15,6 @@ from analysis.metrics import (
     post_switch_window_summary,
 )
 
-
 DEPTH_CONDITION_NAMES = {
     1: ("tau1_no_affect", "tau1_affect"),
     2: ("tau2_no_affect", "tau2_affect"),

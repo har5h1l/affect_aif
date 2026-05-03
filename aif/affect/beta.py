@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 
-
 DEFAULT_BETA_LEVELS = np.asarray([0.5, 0.67, 1.0, 1.5, 2.0], dtype=np.float64)
 
 

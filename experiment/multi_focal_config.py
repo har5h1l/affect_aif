@@ -1,8 +1,8 @@
 """Config schema for multi-focal trust-game experiments."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 _VALID_ROUND_MODES = {"turn_taking"}  # F1: extension seam
 _VALID_FOCAL_SELECTIONS = {"round_robin", "random"}  # F2

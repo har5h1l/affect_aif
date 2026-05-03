@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from numbers import Integral, Real
 import sys
+from numbers import Integral, Real
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -29,7 +29,7 @@ def _condition_label(value) -> str:
     if isinstance(value, Integral):
         return f"C{int(value)}"
     if isinstance(value, Real) and float(value).is_integer():
-        return f"C{int(value)}"
+        return f"C{int(float(value))}"
     return str(value)
 
 

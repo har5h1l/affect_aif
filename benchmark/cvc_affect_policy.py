@@ -17,9 +17,9 @@ The beta update mirrors agent/affect/beta.py:
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Iterable, Optional
 
 from mettagrid.policy.policy import MultiAgentPolicy, StatefulAgentPolicy, StatefulPolicyImpl
 from mettagrid.policy.policy_env_interface import PolicyEnvInterface
@@ -43,7 +43,7 @@ GEAR = ("aligner", "scrambler", "miner", "scout")
 ELEMENTS = ("carbon", "oxygen", "germanium", "silicon")
 
 CARGO_THRESHOLD_DEFAULT = 8
-CARGO_THRESHOLD_COOPERATIVE = 5   # deposit sooner when teammates are reliable
+CARGO_THRESHOLD_COOPERATIVE = 5  # deposit sooner when teammates are reliable
 CARGO_THRESHOLD_INDEPENDENT = 12  # stockpile when teammates are unreliable
 
 ROLE_PLAN = ("miner", "miner", "miner", "aligner", "aligner", "miner", "miner", "aligner")
@@ -60,6 +60,7 @@ class ScoringPhase(Enum):
 # State
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class AffectScoringState:
     phase: ScoringPhase = ScoringPhase.GET_GEAR
@@ -75,6 +76,7 @@ class AffectScoringState:
 # ---------------------------------------------------------------------------
 # Policy implementation
 # ---------------------------------------------------------------------------
+
 
 class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
     """State-machine CvC policy with per-teammate beta modulation."""
@@ -98,7 +100,6 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
         self._extractor_tags = self._resolve_tag_ids([f"{element}_extractor" for element in ELEMENTS])
         self._junction_tags = self._resolve_tag_ids(["junction"])
         self._heart_source_tags = self._resolve_tag_ids(["hub", "chest"])
-
 
     # ---- helpers --------------------------------------------------------
 
@@ -131,7 +132,7 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
             if value <= 0:
                 continue
             base = max(int(token.feature.normalization), 1)
-            items[item_name] = items.get(item_name, 0) + value * (base ** power)
+            items[item_name] = items.get(item_name, 0) + value * (base**power)
         return items
 
     def _global_value(self, obs: AgentObservation, feature_name: str, default: float = 0.0) -> float:
@@ -142,10 +143,10 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
             return float(token.value) / norm
         return default
 
-    def _closest_tag_location(self, obs: AgentObservation, tag_ids: set[int]) -> Optional[tuple[int, int]]:
+    def _closest_tag_location(self, obs: AgentObservation, tag_ids: set[int]) -> tuple[int, int] | None:
         if not tag_ids:
             return None
-        best_location: Optional[tuple[int, int]] = None
+        best_location: tuple[int, int] | None = None
         best_distance = 999
         for token in obs.tokens:
             if token.feature.name != "tag":
@@ -161,7 +162,7 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
                 best_location = token.location
         return best_location
 
-    def _current_gear(self, items: dict[str, int]) -> Optional[str]:
+    def _current_gear(self, items: dict[str, int]) -> str | None:
         for gear in GEAR:
             if items.get(gear, 0) > 0:
                 return gear
@@ -172,7 +173,9 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
             return Action(name=name)
         return Action(name=self._fallback_action_name)
 
-    def _navigate_to(self, obs: AgentObservation, state: AffectScoringState, tag_ids: set[int]) -> tuple[Action, AffectScoringState]:
+    def _navigate_to(
+        self, obs: AgentObservation, state: AffectScoringState, tag_ids: set[int]
+    ) -> tuple[Action, AffectScoringState]:
         target = self._closest_tag_location(obs, tag_ids)
         action_name = self._nav.pathfind_toward(obs, state.nav, target)
         if action_name is None:
@@ -229,9 +232,7 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
 
                 # Update beta
                 prev_beta = state.teammate_betas.get(tid, INITIAL_BETA)
-                state.teammate_betas[tid] = update_beta(
-                    predicted, global_pos, prev_beta, self._max_obs_distance
-                )
+                state.teammate_betas[tid] = update_beta(predicted, global_pos, prev_beta, self._max_obs_distance)
             else:
                 # First sighting — initialise
                 state.teammate_velocities[tid] = (0, 0)
@@ -242,10 +243,7 @@ class AffectCvCPolicyImpl(StatefulPolicyImpl[AffectScoringState]):
         # Update team beta EMA
         if state.teammate_betas:
             mean_beta = sum(state.teammate_betas.values()) / len(state.teammate_betas)
-            state.team_beta_ema = (
-                TEAM_BETA_SMOOTH * state.team_beta_ema
-                + (1.0 - TEAM_BETA_SMOOTH) * mean_beta
-            )
+            state.team_beta_ema = TEAM_BETA_SMOOTH * state.team_beta_ema + (1.0 - TEAM_BETA_SMOOTH) * mean_beta
 
         return state
 

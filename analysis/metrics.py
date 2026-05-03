@@ -66,9 +66,7 @@ def _build_scheduled_switch_map(
     scheduled_rows = frame.loc[frame[column].apply(len).gt(0), ["condition", "seed", "round", column]]
     for _, row in scheduled_rows.iterrows():
         for partner_idx in row[column]:
-            schedule_map[(row["condition"], int(row["seed"]), int(partner_idx))].add(
-                (int(row["round"]), switch_kind)
-            )
+            schedule_map[(row["condition"], int(row["seed"]), int(partner_idx))].add((int(row["round"]), switch_kind))
     return schedule_map
 
 
@@ -86,7 +84,9 @@ def _build_observed_switch_map(frame: pd.DataFrame) -> dict[tuple[object, int, i
         if "stance_switched" in frame.columns
         else pd.Series(False, index=frame.index)
     )
-    switch_rows = frame.loc[type_switched | stance_switched, ["condition", "seed", "partner_idx", "round", "switch_kind"]]
+    switch_rows = frame.loc[
+        type_switched | stance_switched, ["condition", "seed", "partner_idx", "round", "switch_kind"]
+    ]
     for _, row in switch_rows.iterrows():
         observed_map[(row["condition"], int(row["seed"]), int(row["partner_idx"]))].add(
             (int(row["round"]), str(row.get("switch_kind", "unknown")))
@@ -193,6 +193,7 @@ def has_switch_events(results: pd.DataFrame) -> bool:
         results["current_partner_scheduled_stance_switch"].fillna(False).astype(bool).any()
     ):
         return True
+
     def _has_nonempty_schedule(column: str) -> bool:
         if column not in results.columns:
             return False
@@ -230,12 +231,8 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
         )
     else:
         frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
-    scheduled_type_map = _build_scheduled_switch_map(
-        frame, "scheduled_switch_partner_ids", "scheduled_type"
-    )
-    scheduled_stance_map = _build_scheduled_switch_map(
-        frame, "scheduled_stance_switch_partner_ids", "scheduled_stance"
-    )
+    scheduled_type_map = _build_scheduled_switch_map(frame, "scheduled_switch_partner_ids", "scheduled_type")
+    scheduled_stance_map = _build_scheduled_switch_map(frame, "scheduled_stance_switch_partner_ids", "scheduled_stance")
     observed_map = _build_observed_switch_map(frame)
     summaries: list[dict] = []
     for (condition, condition_name, seed, partner_idx), group in frame.groupby(
@@ -294,12 +291,8 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
         )
     else:
         frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
-    scheduled_type_map = _build_scheduled_switch_map(
-        frame, "scheduled_switch_partner_ids", "scheduled_type"
-    )
-    scheduled_stance_map = _build_scheduled_switch_map(
-        frame, "scheduled_stance_switch_partner_ids", "scheduled_stance"
-    )
+    scheduled_type_map = _build_scheduled_switch_map(frame, "scheduled_switch_partner_ids", "scheduled_type")
+    scheduled_stance_map = _build_scheduled_switch_map(frame, "scheduled_stance_switch_partner_ids", "scheduled_stance")
     observed_map = _build_observed_switch_map(frame)
 
     records: list[dict] = []
@@ -394,9 +387,7 @@ def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, 
         pivot["window_label"] = f"1-{int(window)}"
         pivot["payoff_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
             "mean_payoff_ctau4_affect", np.nan
-        ) - pivot.get(
-            "mean_payoff_ctau4_no_affect", np.nan
-        )
+        ) - pivot.get("mean_payoff_ctau4_no_affect", np.nan)
         pivot["accuracy_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
             "mean_accuracy_ctau4_affect", np.nan
         ) - pivot.get(

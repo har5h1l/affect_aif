@@ -42,7 +42,6 @@ class TestTransitionMatrix:
             np.testing.assert_allclose(B[j - 1, j], B[j + 1, j], atol=1e-10)
 
 
-
 class TestDiscreteBetaState:
     def test_initial_state(self):
         state = DiscreteBetaState(num_entities=4, initial_beta=1.0)
@@ -117,7 +116,9 @@ class TestDiscreteBetaState:
         assert len(history) == 6  # initial + 5 updates
 
 
-@pytest.mark.skip(reason="AffectiveState removed — superseded by DiscreteBetaState; correspondence tests no longer applicable")
+@pytest.mark.skip(
+    reason="AffectiveState removed — superseded by DiscreteBetaState; correspondence tests no longer applicable"
+)
 class TestDiscreteContinuousCorrespondence:
     """Test that continuous beta and inverse discrete beta track precision similarly."""
 
@@ -143,8 +144,8 @@ class TestDiscreteAffectiveAgent:
         assert get_preset_condition("no_epistemic").name == "no_epistemic"
 
     def test_discrete_agent_instantiation(self):
-        from trust.model import TrustGameModel
         from trust import AffectiveAgent
+        from trust.model import TrustGameModel
 
         config = {
             "num_partners": 4,

@@ -1,4 +1,5 @@
 """Tests for multi-focal config parsing + agent factory (F)."""
+
 from __future__ import annotations
 
 import json

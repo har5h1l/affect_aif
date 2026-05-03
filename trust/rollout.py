@@ -105,9 +105,9 @@ def _joint_likelihood(observed_action: int, partner_action_prob_table: np.ndarra
 
 
 def _predict_next_joint(joint_belief: np.ndarray, B_type: np.ndarray, B_stance: np.ndarray) -> np.ndarray:
-    predictive = np.asarray(B_type, dtype=float) @ np.asarray(joint_belief, dtype=float) @ np.asarray(
-        B_stance, dtype=float
-    ).T
+    predictive = (
+        np.asarray(B_type, dtype=float) @ np.asarray(joint_belief, dtype=float) @ np.asarray(B_stance, dtype=float).T
+    )
     return _normalize(predictive)
 
 

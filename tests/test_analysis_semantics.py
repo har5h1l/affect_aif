@@ -27,9 +27,7 @@ def test_h1_exports_canonical_label_and_summary_frame_uses_it(tiny_config):
 
 
 def test_model_comparison_report_uses_predictive_log_score_language(tiny_config):
-    cfg = ExperimentConfig(
-        **{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 3, "num_rounds": 10}
-    )
+    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 3, "num_rounds": 10})
     results = ExperimentRunner(cfg).run_all()
 
     report = model_comparison_report(results)
@@ -38,15 +36,14 @@ def test_model_comparison_report_uses_predictive_log_score_language(tiny_config)
     assert "pairwise_predictive_log_scores" in report
     assert "log_evidence_summary" in report
     assert "pairwise_bayes_factors" in report
-    assert report["predictive_log_score_summary"][0]["mean_predictive_log_score"] == report[
-        "log_evidence_summary"
-    ][0]["mean_log_evidence"]
+    assert (
+        report["predictive_log_score_summary"][0]["mean_predictive_log_score"]
+        == report["log_evidence_summary"][0]["mean_log_evidence"]
+    )
 
 
 def test_run_model_comparison_cli_uses_predictive_language(tmp_path, capsys, tiny_config):
-    cfg = ExperimentConfig(
-        **{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 3, "num_rounds": 10}
-    )
+    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 3, "num_rounds": 10})
     results = ExperimentRunner(cfg).run_all()
     results_path = tmp_path / "results.csv"
     output_dir = tmp_path / "model"

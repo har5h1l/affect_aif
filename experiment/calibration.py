@@ -10,13 +10,16 @@ from experiment.config import ExperimentConfig
 
 def build_sensitivity_specs(config: ExperimentConfig) -> list[tuple[str, float]]:
     sweep_specs: list[tuple[str, float]] = []
-    for value in config.sensitivity_factors.get("alpha_charge", []):
+    factors = config.sensitivity_factors
+    if not isinstance(factors, dict):
+        factors = {"alpha_charge": factors}
+    for value in factors.get("alpha_charge", []):
         sweep_specs.append(("alpha_charge", float(value)))
-    for value in config.sensitivity_factors.get("sigma_0_sq", []):
+    for value in factors.get("sigma_0_sq", []):
         sweep_specs.append(("sigma_0_sq", float(value)))
-    for value in config.sensitivity_factors.get("beta_persistence", []):
+    for value in factors.get("beta_persistence", []):
         sweep_specs.append(("beta_persistence", float(value)))
-    for value in config.sensitivity_factors.get("initial_beta", []):
+    for value in factors.get("initial_beta", []):
         sweep_specs.append(("initial_beta", float(value)))
     return sweep_specs
 

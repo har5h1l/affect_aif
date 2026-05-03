@@ -14,7 +14,6 @@ import argparse
 import json
 import sys
 import time
-from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
@@ -172,16 +171,12 @@ def analyze_results(combined: pd.DataFrame, output_dir: Path):
         scenario_df = combined[scenario == combined["scenario"]]
 
         # Get per-episode payoffs
-        episode_payoffs = (
-            scenario_df.groupby(["phenotype", "condition", "seed"])["payoff"]
-            .sum()
-            .reset_index()
-        )
+        episode_payoffs = scenario_df.groupby(["phenotype", "condition", "seed"])["payoff"].sum().reset_index()
 
         # Get healthy C2 as reference
-        healthy_c2 = episode_payoffs[
-            (episode_payoffs["phenotype"] == "healthy") & (episode_payoffs["condition"] == 2)
-        ]["payoff"].values
+        healthy_c2 = episode_payoffs[(episode_payoffs["phenotype"] == "healthy") & (episode_payoffs["condition"] == 2)][
+            "payoff"
+        ].values
 
         # Get no-affect C4 as floor
         noaffect_c4 = episode_payoffs[
@@ -210,20 +205,22 @@ def analyze_results(combined: pd.DataFrame, output_dir: Path):
                 (clinical_payoffs.std() ** 2 + noaffect_c4.std() ** 2) / 2
             )
 
-            results.append({
-                "scenario": scenario,
-                "phenotype": phenotype,
-                "condition": cond,
-                "clinical_mean": clinical_payoffs.mean(),
-                "healthy_mean": healthy_c2.mean(),
-                "noaffect_mean": noaffect_c4.mean(),
-                "d_vs_healthy": d_ch,
-                "p_vs_healthy": p_ch,
-                "d_vs_noaffect": d_cn,
-                "p_vs_noaffect": p_cn,
-                "n_clinical": len(clinical_payoffs),
-                "n_healthy": len(healthy_c2),
-            })
+            results.append(
+                {
+                    "scenario": scenario,
+                    "phenotype": phenotype,
+                    "condition": cond,
+                    "clinical_mean": clinical_payoffs.mean(),
+                    "healthy_mean": healthy_c2.mean(),
+                    "noaffect_mean": noaffect_c4.mean(),
+                    "d_vs_healthy": d_ch,
+                    "p_vs_healthy": p_ch,
+                    "d_vs_noaffect": d_cn,
+                    "p_vs_noaffect": p_cn,
+                    "n_clinical": len(clinical_payoffs),
+                    "n_healthy": len(healthy_c2),
+                }
+            )
 
     results_df = pd.DataFrame(results)
     results_path = output_dir / "clinical_sensitivity_stats.csv"
@@ -234,7 +231,11 @@ def analyze_results(combined: pd.DataFrame, output_dir: Path):
     print("=" * 70)
     for _, row in results_df.iterrows():
         print(f"\n{row['scenario']} | {row['phenotype']} (C{row['condition']})")
-        print(f"  Payoff: {row['clinical_mean']:.1f} (clinical) vs {row['healthy_mean']:.1f} (healthy) vs {row['noaffect_mean']:.1f} (no-affect)")
+        print(
+            f"  Payoff: {row['clinical_mean']:.1f} (clinical) vs "
+            f"{row['healthy_mean']:.1f} (healthy) vs "
+            f"{row['noaffect_mean']:.1f} (no-affect)"
+        )
         print(f"  vs healthy: d = {row['d_vs_healthy']:.3f}, p = {row['p_vs_healthy']:.4f}")
         print(f"  vs no-affect: d = {row['d_vs_noaffect']:.3f}, p = {row['p_vs_noaffect']:.4f}")
 
@@ -264,21 +265,15 @@ def analyze_betrayal_windows(combined: pd.DataFrame, output_dir: Path):
 
     results = []
     for window_name, (start, end) in windows.items():
-        window_data = betrayal_data[
-            (betrayal_data["round"] >= start) & (betrayal_data["round"] <= end)
-        ]
+        window_data = betrayal_data[(betrayal_data["round"] >= start) & (betrayal_data["round"] <= end)]
         if len(window_data) == 0:
             continue
 
-        window_payoffs = (
-            window_data.groupby(["phenotype", "condition", "seed"])["payoff"]
-            .mean()
-            .reset_index()
-        )
+        window_payoffs = window_data.groupby(["phenotype", "condition", "seed"])["payoff"].mean().reset_index()
 
-        healthy_c2 = window_payoffs[
-            (window_payoffs["phenotype"] == "healthy") & (window_payoffs["condition"] == 2)
-        ]["payoff"].values
+        healthy_c2 = window_payoffs[(window_payoffs["phenotype"] == "healthy") & (window_payoffs["condition"] == 2)][
+            "payoff"
+        ].values
 
         for phenotype in ["alexithymia", "borderline", "depression"]:
             cond = {"alexithymia": 9, "borderline": 10, "depression": 11}[phenotype]
@@ -293,15 +288,17 @@ def analyze_betrayal_windows(combined: pd.DataFrame, output_dir: Path):
             d = (healthy_c2.mean() - clinical.mean()) / pooled_std if pooled_std > 0 else 0
             _, p = stats.ttest_ind(clinical, healthy_c2)
 
-            results.append({
-                "window": window_name,
-                "phenotype": phenotype,
-                "condition": cond,
-                "clinical_mean": clinical.mean(),
-                "healthy_mean": healthy_c2.mean(),
-                "d_vs_healthy": d,
-                "p_vs_healthy": p,
-            })
+            results.append(
+                {
+                    "window": window_name,
+                    "phenotype": phenotype,
+                    "condition": cond,
+                    "clinical_mean": clinical.mean(),
+                    "healthy_mean": healthy_c2.mean(),
+                    "d_vs_healthy": d,
+                    "p_vs_healthy": p,
+                }
+            )
 
     if results:
         df = pd.DataFrame(results)
@@ -333,19 +330,19 @@ def compute_clinical_bayes_factors(combined: pd.DataFrame, output_dir: Path):
         # Get final-round log-evidence per episode
         final_rounds = sdf.groupby(["phenotype", "condition", "seed"]).last().reset_index()
 
-        healthy_le = final_rounds[
-            (final_rounds["phenotype"] == "healthy") & (final_rounds["condition"] == 2)
-        ]["cumulative_log_evidence"].values
+        healthy_le = final_rounds[(final_rounds["phenotype"] == "healthy") & (final_rounds["condition"] == 2)][
+            "cumulative_log_evidence"
+        ].values
 
-        noaffect_le = final_rounds[
-            (final_rounds["phenotype"] == "healthy") & (final_rounds["condition"] == 4)
-        ]["cumulative_log_evidence"].values
+        noaffect_le = final_rounds[(final_rounds["phenotype"] == "healthy") & (final_rounds["condition"] == 4)][
+            "cumulative_log_evidence"
+        ].values
 
         for phenotype in ["alexithymia", "borderline", "depression"]:
             cond = {"alexithymia": 9, "borderline": 10, "depression": 11}[phenotype]
-            clinical_le = final_rounds[
-                (final_rounds["phenotype"] == phenotype) & (final_rounds["condition"] == cond)
-            ]["cumulative_log_evidence"].values
+            clinical_le = final_rounds[(final_rounds["phenotype"] == phenotype) & (final_rounds["condition"] == cond)][
+                "cumulative_log_evidence"
+            ].values
 
             if len(clinical_le) < 2 or len(healthy_le) < 2:
                 continue
@@ -353,30 +350,42 @@ def compute_clinical_bayes_factors(combined: pd.DataFrame, output_dir: Path):
             # BF: clinical vs healthy (positive = clinical better)
             bf_vs_healthy = (clinical_le.mean() - healthy_le.mean()) / np.log(10)
             # BF: clinical vs no-affect
-            bf_vs_noaffect = (clinical_le.mean() - noaffect_le.mean()) / np.log(10) if len(noaffect_le) > 0 else float("nan")
+            bf_vs_noaffect = (
+                (clinical_le.mean() - noaffect_le.mean()) / np.log(10) if len(noaffect_le) > 0 else float("nan")
+            )
 
-            results.append({
-                "scenario": scenario,
-                "phenotype": phenotype,
-                "condition": cond,
-                "log10_bf_vs_healthy": bf_vs_healthy,
-                "log10_bf_vs_noaffect": bf_vs_noaffect,
-                "mean_le_clinical": clinical_le.mean(),
-                "mean_le_healthy": healthy_le.mean(),
-                "mean_le_noaffect": noaffect_le.mean() if len(noaffect_le) > 0 else float("nan"),
-            })
+            results.append(
+                {
+                    "scenario": scenario,
+                    "phenotype": phenotype,
+                    "condition": cond,
+                    "log10_bf_vs_healthy": bf_vs_healthy,
+                    "log10_bf_vs_noaffect": bf_vs_noaffect,
+                    "mean_le_clinical": clinical_le.mean(),
+                    "mean_le_healthy": healthy_le.mean(),
+                    "mean_le_noaffect": noaffect_le.mean() if len(noaffect_le) > 0 else float("nan"),
+                }
+            )
 
     if results:
         bf_df = pd.DataFrame(results)
         bf_df.to_csv(output_dir / "clinical_bayes_factors.csv", index=False)
         print("\nBayes factors (log10 BF, positive = clinical better):")
         for _, row in bf_df.iterrows():
-            strength = "decisive" if abs(row["log10_bf_vs_healthy"]) > 2 else \
-                       "strong" if abs(row["log10_bf_vs_healthy"]) > 1 else \
-                       "substantial" if abs(row["log10_bf_vs_healthy"]) > 0.5 else "anecdotal"
-            print(f"  {row['scenario']} | {row['phenotype']}: "
-                  f"vs healthy = {row['log10_bf_vs_healthy']:+.2f} ({strength}), "
-                  f"vs no-affect = {row['log10_bf_vs_noaffect']:+.2f}")
+            strength = (
+                "decisive"
+                if abs(row["log10_bf_vs_healthy"]) > 2
+                else "strong"
+                if abs(row["log10_bf_vs_healthy"]) > 1
+                else "substantial"
+                if abs(row["log10_bf_vs_healthy"]) > 0.5
+                else "anecdotal"
+            )
+            print(
+                f"  {row['scenario']} | {row['phenotype']}: "
+                f"vs healthy = {row['log10_bf_vs_healthy']:+.2f} ({strength}), "
+                f"vs no-affect = {row['log10_bf_vs_noaffect']:+.2f}"
+            )
         return bf_df
     return None
 
@@ -384,6 +393,7 @@ def compute_clinical_bayes_factors(combined: pd.DataFrame, output_dir: Path):
 def _parse_betas(betas_str: str, partner_idx: int) -> float:
     """Extract active partner's beta from serialized array."""
     import ast
+
     try:
         betas = ast.literal_eval(betas_str)
         return float(betas[partner_idx])
@@ -404,14 +414,10 @@ def compute_beta_dynamics(combined: pd.DataFrame, output_dir: Path):
             lambda row: _parse_betas(str(row["betas"]), int(row["partner_idx"])), axis=1
         )
     else:
-        combined["active_beta"] = combined["betas"].apply(
-            lambda x: _parse_betas(str(x), 0)
-        )
+        combined["active_beta"] = combined["betas"].apply(lambda x: _parse_betas(str(x), 0))
 
     beta_stats = []
-    for (scenario, phenotype, condition), group in combined.groupby(
-        ["scenario", "phenotype", "condition"]
-    ):
+    for (scenario, phenotype, condition), group in combined.groupby(["scenario", "phenotype", "condition"]):
         beta_vals = group["active_beta"].dropna()
         if len(beta_vals) == 0:
             continue
@@ -419,24 +425,28 @@ def compute_beta_dynamics(combined: pd.DataFrame, output_dir: Path):
         # Per-episode beta volatility (std within each episode)
         per_ep_std = group.groupby("seed")["active_beta"].std().mean()
 
-        beta_stats.append({
-            "scenario": scenario,
-            "phenotype": phenotype,
-            "condition": condition,
-            "beta_mean": beta_vals.mean(),
-            "beta_std": beta_vals.std(),
-            "beta_volatility": per_ep_std,
-            "beta_range": beta_vals.max() - beta_vals.min(),
-            "beta_final_mean": group.groupby("seed")["active_beta"].last().mean(),
-        })
+        beta_stats.append(
+            {
+                "scenario": scenario,
+                "phenotype": phenotype,
+                "condition": condition,
+                "beta_mean": beta_vals.mean(),
+                "beta_std": beta_vals.std(),
+                "beta_volatility": per_ep_std,
+                "beta_range": beta_vals.max() - beta_vals.min(),
+                "beta_final_mean": group.groupby("seed")["active_beta"].last().mean(),
+            }
+        )
 
     if beta_stats:
         beta_df = pd.DataFrame(beta_stats)
         beta_df.to_csv(output_dir / "clinical_beta_dynamics.csv", index=False)
         print("\nBeta dynamics:")
         for _, row in beta_df.iterrows():
-            print(f"  {row['scenario']} | {row['phenotype']} C{row['condition']}: "
-                  f"mean={row['beta_mean']:.3f}, volatility={row['beta_volatility']:.3f}, range={row['beta_range']:.3f}")
+            print(
+                f"  {row['scenario']} | {row['phenotype']} C{row['condition']}: "
+                f"mean={row['beta_mean']:.3f}, volatility={row['beta_volatility']:.3f}, range={row['beta_range']:.3f}"
+            )
         return beta_df
     return None
 
@@ -477,9 +487,9 @@ def main():
 
     all_dfs = []
     for scenario in args.scenarios:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Scenario: {scenario}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         for phenotype in args.phenotypes:
             print(f"\nRunning {phenotype}...")
@@ -491,7 +501,7 @@ def main():
         combined.to_csv(output_dir / "all_clinical.csv", index=False)
         print(f"\nCombined: {len(combined)} rows -> {output_dir / 'all_clinical.csv'}")
 
-        stats_df = analyze_results(combined, output_dir)
+        analyze_results(combined, output_dir)
         compute_clinical_bayes_factors(combined, output_dir)
         analyze_betrayal_windows(combined, output_dir)
         compute_beta_dynamics(combined, output_dir)

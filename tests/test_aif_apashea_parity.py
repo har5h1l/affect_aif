@@ -5,7 +5,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-
 pytest.importorskip("pymdp.pymdp_external_custom", reason="requires Andrew Pescia's notebook pymdp fork")
 pymdp = pytest.importorskip("pymdp")
 
@@ -111,8 +110,9 @@ def _build_apashea_setup():
 
 
 def test_aif_matches_pymdp_first_5_steps():
-    import aif
     from pymdp.agent import Agent as PymdpAgent
+
+    import aif
 
     A, B, C, D, policies = _build_apashea_setup()
     obs_sequence = [[0, 1]] * 5

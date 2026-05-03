@@ -6,7 +6,6 @@ import numpy as np
 
 from aif.affect.beta import DiscreteBetaState
 
-
 _RECORDED_SEQUENCE_BETAS = np.asarray(
     [
         [1.011254406317, 1.0, 1.0],

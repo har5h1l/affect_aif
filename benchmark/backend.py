@@ -31,6 +31,7 @@ class BenchmarkBackend(ABC):
         context: BenchmarkBackendContext,
     ) -> None:
         """Perform backend-level setup before per-agent episodes run."""
+        return None
 
     @abstractmethod
     def run_agent(

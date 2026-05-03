@@ -47,9 +47,7 @@ def test_trust_backend_passes_scheduled_switches_through_to_results():
                     "num_partners": 1,
                     "p_switch": 0.0,
                     "initial_partner_types": ["cooperative"],
-                    "scheduled_type_switches": [
-                        {"partner_idx": 0, "round": 10, "to_type": "exploiter"}
-                    ],
+                    "scheduled_type_switches": [{"partner_idx": 0, "round": 10, "to_type": "exploiter"}],
                 }
             },
         }

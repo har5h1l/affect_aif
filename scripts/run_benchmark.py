@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 import warnings
 from pathlib import Path
@@ -14,7 +13,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from benchmark.benchmark_config import BenchmarkConfig
 from benchmark.benchmark_runner import BenchmarkRunner
 from benchmark.comparison import format_comparison_report
-
 
 CVC_POLICY_ALIASES = {
     "teammate_reliability": "class=benchmark.cvc_policy.TeammateReliabilityPolicy",
@@ -82,8 +80,12 @@ def main():
     parser.add_argument("--python-bin", type=str, default="python3.12", help="Python binary for cvc_local worker.")
     parser.add_argument("--output-dir", type=str, default="results/benchmark", help="Output directory.")
     parser.add_argument("--seed", type=int, default=42, help="Base random seed.")
-    parser.add_argument("--observatory-season", type=str, default=None, help="Optional Observatory season name or 'default'.")
-    parser.add_argument("--observatory-pool", type=str, default=None, help="Optional Observatory pool for config fetch.")
+    parser.add_argument(
+        "--observatory-season", type=str, default=None, help="Optional Observatory season name or 'default'."
+    )
+    parser.add_argument(
+        "--observatory-pool", type=str, default=None, help="Optional Observatory pool for config fetch."
+    )
     args = parser.parse_args()
 
     if args.config:

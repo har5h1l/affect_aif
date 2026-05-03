@@ -25,7 +25,6 @@ if TYPE_CHECKING:
         TitForTatAgent,
         WinStayLoseShiftAgent,
     )
-    from benchmark.compat import cogames_available, mettagrid_available
     from benchmark.common_metrics import (
         adaptation_speed,
         cooperation_rate,
@@ -33,6 +32,7 @@ if TYPE_CHECKING:
         partner_discrimination,
         type_identification_accuracy,
     )
+    from benchmark.compat import cogames_available, mettagrid_available
 
 __all__ = [
     "cogames_available",

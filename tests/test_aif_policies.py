@@ -3,7 +3,8 @@ from __future__ import annotations
 import numpy as np
 
 import aif
-from aif.policies import gamma_per_policy, sample_action as sample_action_from_module
+from aif.policies import gamma_per_policy
+from aif.policies import sample_action as sample_action_from_module
 
 
 def _build_agent(action_sampling: str = "marginal", seed: int = 7) -> aif.Agent:

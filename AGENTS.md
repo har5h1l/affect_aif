@@ -4,9 +4,9 @@ This document provides comprehensive system documentation for AI agents operatin
 
 ## Documentation First
 
-- Read `docs/theory.md` before changing computational claims, affect dynamics, terminal values, or the interpretation of results.
-- Read `docs/experiment.md` before changing task design, configs, conditions, metrics, or sensitivity sweeps.
-- Read `docs/implementation.md` before changing environment semantics, switching logic, or analysis helpers.
+- Read `docs/theory/theory.md` before changing computational claims, affect dynamics, terminal values, or the interpretation of results.
+- Read `docs/experiment/design.md` before changing task design, configs, conditions, metrics, or sensitivity sweeps.
+- Read `docs/design/implementation.md` before changing environment semantics, switching logic, or analysis helpers.
 - Read `README.md` before changing setup, entry points, or repo layout.
 
 ## Required Follow-Through
@@ -28,7 +28,7 @@ This document provides comprehensive system documentation for AI agents operatin
 - Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `run_analysis.py` on those paths after.
 - Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
 - State inference (partner-type belief updating) is the analytical solution to VFE minimization (matrix-based Bayes with A and B), not iterative optimization.
-- Benchmark runs use `scripts/run_benchmark.py` plus `docs/benchmarking_integration.md` for backends, configs (for example `affect_aif/configs/benchmark_default.json` and `benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
+- Benchmark runs use `scripts/run_benchmark.py` plus `docs/operations/benchmark.md` for backends, configs (for example `affect_aif/configs/benchmark_default.json` and `benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results. Do not add orchestration or deployment scripts to this repo.
 
 ---
@@ -205,7 +205,7 @@ python -m pytest tests/test_core.py -v  # isolate to module
 ### Experiment produces unexpected results
 1. Run with `--verbose --verbosity-mode stage_stream` for per-round tracing
 2. Check `calibration_summary` in `batch_metadata.json` — is mu reasonable?
-3. Compare against known baselines in `docs/results_tracking.md`
+3. Compare against known baselines in `docs/experiment/results.md`
 
 ### Analysis script errors
 - Check CSV has expected columns: `condition`, `seed`, `round`, `payoff`, `run_mode`

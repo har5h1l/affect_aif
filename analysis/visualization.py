@@ -156,10 +156,9 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
 
     ax_payoff.plot(rounds[: frame_idx + 1], cumulative_payoff[: frame_idx + 1], color="#1f77b4", linewidth=2)
     ax_payoff.scatter([rounds[frame_idx]], [cumulative_payoff[frame_idx]], color="#d62728", zorder=3)
-    switch_mask = (
-        run.get("type_switched", pd.Series(False, index=run.index)).fillna(False).astype(bool)
-        | run.get("stance_switched", pd.Series(False, index=run.index)).fillna(False).astype(bool)
-    )
+    switch_mask = run.get("type_switched", pd.Series(False, index=run.index)).fillna(False).astype(bool) | run.get(
+        "stance_switched", pd.Series(False, index=run.index)
+    ).fillna(False).astype(bool)
     switch_rounds = run.loc[switch_mask, "round"].to_numpy(dtype=int) + 1
     for switch_round in switch_rounds:
         ax_payoff.axvline(switch_round, color="#ff7f0e", linestyle="--", linewidth=1, alpha=0.6)

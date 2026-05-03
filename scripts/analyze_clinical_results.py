@@ -33,9 +33,9 @@ def main():
             print(f"Skipping {results_dir} — no all_clinical.csv")
             continue
 
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"Analyzing: {results_dir}")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
 
         combined = pd.read_csv(csv_path)
         print(f"Loaded {len(combined)} rows")

@@ -7,6 +7,7 @@ def cogames_available() -> bool:
     """Check if cogames package is installed."""
     try:
         import cogames  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -16,6 +17,7 @@ def mettagrid_available() -> bool:
     """Check if mettagrid package is installed."""
     try:
         import mettagrid  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -33,7 +35,4 @@ def require_cogames():
 def require_mettagrid():
     """Raise ImportError with install instructions if mettagrid is missing."""
     if not mettagrid_available():
-        raise ImportError(
-            "mettagrid is required for benchmark mode. "
-            "Install with: pip install mettagrid"
-        )
+        raise ImportError("mettagrid is required for benchmark mode. Install with: pip install mettagrid")

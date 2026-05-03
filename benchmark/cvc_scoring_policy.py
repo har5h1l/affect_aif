@@ -13,9 +13,9 @@ contribution in CvC.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Iterable, Optional
 
 from mettagrid.policy.policy import MultiAgentPolicy, StatefulAgentPolicy, StatefulPolicyImpl
 from mettagrid.policy.policy_env_interface import PolicyEnvInterface
@@ -98,7 +98,7 @@ class ScoringLoopPolicyImpl(StatefulPolicyImpl[ScoringState]):
             if value <= 0:
                 continue
             base = max(int(token.feature.normalization), 1)
-            items[item_name] = items.get(item_name, 0) + value * (base ** power)
+            items[item_name] = items.get(item_name, 0) + value * (base**power)
         return items
 
     def _global_value(self, obs: AgentObservation, feature_name: str, default: float = 0.0) -> float:
@@ -109,10 +109,10 @@ class ScoringLoopPolicyImpl(StatefulPolicyImpl[ScoringState]):
             return float(token.value) / norm
         return default
 
-    def _closest_tag_location(self, obs: AgentObservation, tag_ids: set[int]) -> Optional[tuple[int, int]]:
+    def _closest_tag_location(self, obs: AgentObservation, tag_ids: set[int]) -> tuple[int, int] | None:
         if not tag_ids:
             return None
-        best_location: Optional[tuple[int, int]] = None
+        best_location: tuple[int, int] | None = None
         best_distance = 999
         for token in obs.tokens:
             if token.feature.name != "tag":
@@ -128,7 +128,7 @@ class ScoringLoopPolicyImpl(StatefulPolicyImpl[ScoringState]):
                 best_location = token.location
         return best_location
 
-    def _current_gear(self, items: dict[str, int]) -> Optional[str]:
+    def _current_gear(self, items: dict[str, int]) -> str | None:
         for gear in GEAR:
             if items.get(gear, 0) > 0:
                 return gear
@@ -139,7 +139,9 @@ class ScoringLoopPolicyImpl(StatefulPolicyImpl[ScoringState]):
             return Action(name=name)
         return Action(name=self._fallback_action_name)
 
-    def _navigate_to(self, obs: AgentObservation, state: ScoringState, tag_ids: set[int]) -> tuple[Action, ScoringState]:
+    def _navigate_to(
+        self, obs: AgentObservation, state: ScoringState, tag_ids: set[int]
+    ) -> tuple[Action, ScoringState]:
         """Navigate toward the closest entity matching tag_ids."""
         target = self._closest_tag_location(obs, tag_ids)
         action_name = self._nav.pathfind_toward(obs, state.nav, target)

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Optional
 
 from mettagrid.policy.policy import MultiAgentPolicy, StatefulAgentPolicy, StatefulPolicyImpl
 from mettagrid.policy.policy_env_interface import PolicyEnvInterface
@@ -117,10 +117,10 @@ class TeammateReliabilityPolicyImpl(StatefulPolicyImpl[ReliabilityCogState]):
             return float(token.value) / norm
         return default
 
-    def _closest_tag_location(self, obs: AgentObservation, tag_ids: set[int]) -> Optional[tuple[int, int]]:
+    def _closest_tag_location(self, obs: AgentObservation, tag_ids: set[int]) -> tuple[int, int] | None:
         if not tag_ids:
             return None
-        best_location: Optional[tuple[int, int]] = None
+        best_location: tuple[int, int] | None = None
         best_distance = 999
         for token in obs.tokens:
             if token.feature.name != "tag":
@@ -152,7 +152,7 @@ class TeammateReliabilityPolicyImpl(StatefulPolicyImpl[ReliabilityCogState]):
     def _move_toward(
         self,
         state: ReliabilityCogState,
-        target: Optional[tuple[int, int]],
+        target: tuple[int, int] | None,
     ) -> tuple[Action, ReliabilityCogState]:
         if target is None:
             return self._wander(state)
@@ -166,7 +166,7 @@ class TeammateReliabilityPolicyImpl(StatefulPolicyImpl[ReliabilityCogState]):
             direction = "east" if delta_col > 0 else "west"
         return self._action(f"move_{direction}"), state
 
-    def _current_gear(self, items: dict[str, int]) -> Optional[str]:
+    def _current_gear(self, items: dict[str, int]) -> str | None:
         for gear in GEAR:
             if items.get(gear, 0) > 0:
                 return gear

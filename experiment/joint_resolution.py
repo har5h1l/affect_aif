@@ -1,4 +1,5 @@
 """Joint action resolution for multi-focal trust-game pairs."""
+
 from __future__ import annotations
 
 import numpy as np

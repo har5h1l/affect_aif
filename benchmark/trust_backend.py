@@ -62,8 +62,7 @@ class TrustBackend(BenchmarkBackend):
         normalized = dict(overrides)
         if "initial_partner_types" in normalized and normalized["initial_partner_types"] is not None:
             normalized["initial_partner_types"] = [
-                self._normalize_partner_type(str(name))
-                for name in normalized["initial_partner_types"]
+                self._normalize_partner_type(str(name)) for name in normalized["initial_partner_types"]
             ]
         if "scheduled_type_switches" in normalized:
             normalized["scheduled_type_switches"] = [
@@ -82,11 +81,7 @@ class TrustBackend(BenchmarkBackend):
             "random_seed": config.random_seed,
         }
         overrides.update(self.scenario.trust_game_defaults())
-        direct_overrides = {
-            key: value
-            for key, value in self.backend_config.items()
-            if key in EXPERIMENT_CONFIG_FIELDS
-        }
+        direct_overrides = {key: value for key, value in self.backend_config.items() if key in EXPERIMENT_CONFIG_FIELDS}
         legacy_overrides = dict(self.backend_config.get("trust_game_overrides", {}))
         overrides.update(self._normalize_overrides({**direct_overrides, **legacy_overrides}))
         return ExperimentConfig(**overrides)
@@ -125,7 +120,11 @@ class TrustBackend(BenchmarkBackend):
 
         env = TrustGameEnv(experiment_config, seed=seed)
         info = AGENT_REGISTRY[agent_name]
-        condition_key = info.get("condition", info.get("preset")) if info["type"] == "aif" else -(config.agents.index(agent_spec) + 1)
+        condition_key = (
+            info.get("condition", info.get("preset"))
+            if info["type"] == "aif"
+            else -(config.agents.index(agent_spec) + 1)
+        )
 
         if info["type"] == "baseline":
             agent = _create_baseline_agent(agent_name, env.num_partners, seed)

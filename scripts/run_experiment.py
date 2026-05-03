@@ -18,10 +18,14 @@ from experiment.runner import ExperimentRunner
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run one or more affect_aif experiments.")
-    parser.add_argument("--config", action="append", required=True, help="Path to a JSON config file. Repeat to queue multiple configs.")
+    parser.add_argument(
+        "--config", action="append", required=True, help="Path to a JSON config file. Repeat to queue multiple configs."
+    )
     parser.add_argument("--output-dir", default="results", help="Root directory for batch output folders.")
     parser.add_argument("--batch-name", help="Stable name for the batch output subdirectory.")
-    parser.add_argument("--workers", type=int, default=os.cpu_count() or 1, help="Shared worker count across the whole batch.")
+    parser.add_argument(
+        "--workers", type=int, default=os.cpu_count() or 1, help="Shared worker count across the whole batch."
+    )
     parser.add_argument("--verbose", action="store_true", help="Print experiment progress.")
     parser.add_argument(
         "--verbosity-mode",
@@ -34,7 +38,9 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Suppress calibration-stage messages when verbose output is enabled in serial mode.",
     )
-    parser.add_argument("--make-gifs", action="store_true", help="Generate one GIF per primary condition-run after saving results.")
+    parser.add_argument(
+        "--make-gifs", action="store_true", help="Generate one GIF per primary condition-run after saving results."
+    )
     return parser
 
 

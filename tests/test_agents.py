@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 
 
 def test_base_agent_plan_returns_valid_action(representative_agents):

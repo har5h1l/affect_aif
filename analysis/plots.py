@@ -52,14 +52,18 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
     trajectory = betrayal_trajectory(results, max_encounters=10)
     if trajectory.empty:
         return
-    trajectory = _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "beta").merge(
-        _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "divergence_beta_minus_reward"),
-        on=["condition_name", "encounters_since_switch"],
-        how="left",
-    ).merge(
-        _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "payoff"),
-        on=["condition_name", "encounters_since_switch"],
-        how="left",
+    trajectory = (
+        _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "beta")
+        .merge(
+            _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "divergence_beta_minus_reward"),
+            on=["condition_name", "encounters_since_switch"],
+            how="left",
+        )
+        .merge(
+            _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "payoff"),
+            on=["condition_name", "encounters_since_switch"],
+            how="left",
+        )
     )
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5), sharex=True)

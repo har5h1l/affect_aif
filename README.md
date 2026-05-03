@@ -15,7 +15,7 @@ pre-commit install
 
 ## Supported Workflow
 
-See [docs/cli.md](docs/cli.md) for the command-line reference and [results/README.md](results/README.md) for the local results layout.
+See [docs/operations/cli.md](docs/operations/cli.md) for the command-line reference and [results/README.md](results/README.md) for the local results layout.
 
 The supported trust-game workflow now uses the action-dependent partner redesign:
 - partner behavior depends on latent `type × stance`

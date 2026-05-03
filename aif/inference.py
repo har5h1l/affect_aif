@@ -6,7 +6,7 @@ import numpy as np
 
 from aif.agent import Agent
 from aif.efe import compute_efe_all_policies
-from aif.maths import log_stable, softmax, spm_dot
+from aif.maths import log_stable, softmax
 
 
 def _get_prior(agent: Agent, action: list[int] | None) -> np.ndarray:
@@ -35,7 +35,9 @@ def _factor_axis_map(likelihood_shape: tuple[int, ...], factor_sizes: list[int])
     used_axes: set[int] = set()
 
     for factor, size in enumerate(factor_sizes):
-        candidates = [axis for axis, axis_size in enumerate(likelihood_shape) if axis_size == size and axis not in used_axes]
+        candidates = [
+            axis for axis, axis_size in enumerate(likelihood_shape) if axis_size == size and axis not in used_axes
+        ]
         if not candidates:
             continue
         if len(candidates) > 1:

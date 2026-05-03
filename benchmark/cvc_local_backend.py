@@ -46,7 +46,9 @@ class CvCLocalBackend(BenchmarkBackend):
         )
         season_name = observatory_config.get("season")
         if season_name in {None, "default"}:
-            default_season = client.discover_default_season(tournament_type=observatory_config.get("tournament_type", "freeplay"))
+            default_season = client.discover_default_season(
+                tournament_type=observatory_config.get("tournament_type", "freeplay")
+            )
             season_name = None if default_season is None else default_season["name"]
         if season_name is None:
             return
@@ -123,16 +125,10 @@ class CvCLocalBackend(BenchmarkBackend):
         try:
             subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=timeout_s, env=env)
         except subprocess.TimeoutExpired as exc:
-            raise RuntimeError(
-                f"CvC local worker timed out after {timeout_s}s.\n"
-                f"Command: {' '.join(cmd)}"
-            ) from exc
+            raise RuntimeError(f"CvC local worker timed out after {timeout_s}s.\nCommand: {' '.join(cmd)}") from exc
         except subprocess.CalledProcessError as exc:
             raise RuntimeError(
-                "CvC local worker failed.\n"
-                f"Command: {' '.join(cmd)}\n"
-                f"stdout:\n{exc.stdout}\n"
-                f"stderr:\n{exc.stderr}"
+                f"CvC local worker failed.\nCommand: {' '.join(cmd)}\nstdout:\n{exc.stdout}\nstderr:\n{exc.stderr}"
             ) from exc
 
         return json.loads(output_path.read_text())

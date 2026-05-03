@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import json
-from typing import Callable
+from collections.abc import Callable
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
-
 
 FetchText = Callable[[str, dict[str, str] | None], str]
 
@@ -63,8 +62,7 @@ class ObservatoryClient:
     def discover_default_season(self, tournament_type: str | None = None):
         seasons = self.list_seasons()
         candidates = [
-            season for season in seasons
-            if tournament_type is None or season.get("tournament_type") == tournament_type
+            season for season in seasons if tournament_type is None or season.get("tournament_type") == tournament_type
         ]
         for season in candidates:
             if season.get("is_default"):

@@ -158,7 +158,7 @@ def encode_instantaneous_index(controls: tuple[int, ...], num_controls: list[int
     """Inverse of decode_instantaneous_index."""
 
     idx = 0
-    for c, n in zip(controls, num_controls):
+    for c, n in zip(controls, num_controls, strict=True):
         idx = idx * int(n) + int(c)
     return int(idx)
 

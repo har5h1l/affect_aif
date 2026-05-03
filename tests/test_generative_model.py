@@ -35,12 +35,16 @@ def test_c_and_d_shapes():
 
 
 def test_partner_type_probabilities():
-    cooperator = PartnerType("cooperator", {"cooperation_probabilities": {"trusting": 0.95, "neutral": 0.8, "hostile": 0.55}})
+    cooperator = PartnerType(
+        "cooperator", {"cooperation_probabilities": {"trusting": 0.95, "neutral": 0.8, "hostile": 0.55}}
+    )
     reciprocator = PartnerType(
         "reciprocator",
         {"cooperation_probabilities": {"trusting": 0.9, "neutral": 0.7, "hostile": 0.3}},
     )
-    exploiter = PartnerType("exploiter", {"cooperation_probabilities": {"trusting": 0.7, "neutral": 0.35, "hostile": 0.1}})
+    exploiter = PartnerType(
+        "exploiter", {"cooperation_probabilities": {"trusting": 0.7, "neutral": 0.35, "hostile": 0.1}}
+    )
     assert np.isclose(cooperator.get_action_probability("neutral"), 0.8)
     assert reciprocator.get_action_probability("trusting") > reciprocator.get_action_probability("hostile")
     assert exploiter.get_action_probability("trusting") > exploiter.get_action_probability("hostile")

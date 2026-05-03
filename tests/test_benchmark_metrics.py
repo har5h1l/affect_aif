@@ -20,38 +20,40 @@ def synthetic_results():
     """Create synthetic results resembling a trust game episode."""
     rng = np.random.default_rng(42)
     n = 100
-    return pd.DataFrame({
-        "condition": [1] * n,
-        "seed": [0] * n,
-        "round": list(range(n)),
-        "partner_idx": rng.integers(0, 4, n).tolist(),
-        "true_partner_type": rng.choice(
-            ["cooperator", "reciprocator", "exploiter", "random"], n
-        ).tolist(),
-        "agent_action": rng.integers(0, 2, n).tolist(),
-        "partner_action": rng.integers(0, 2, n).tolist(),
-        "payoff": rng.choice([-1.0, 1.0, 3.0, 5.0], n).tolist(),
-        "partner_payoff": rng.choice([-1.0, 1.0, 3.0, 5.0], n).tolist(),
-        "inferred_type_correct": rng.choice([True, False], n).tolist(),
-    })
+    return pd.DataFrame(
+        {
+            "condition": [1] * n,
+            "seed": [0] * n,
+            "round": list(range(n)),
+            "partner_idx": rng.integers(0, 4, n).tolist(),
+            "true_partner_type": rng.choice(["cooperator", "reciprocator", "exploiter", "random"], n).tolist(),
+            "agent_action": rng.integers(0, 2, n).tolist(),
+            "partner_action": rng.integers(0, 2, n).tolist(),
+            "payoff": rng.choice([-1.0, 1.0, 3.0, 5.0], n).tolist(),
+            "partner_payoff": rng.choice([-1.0, 1.0, 3.0, 5.0], n).tolist(),
+            "inferred_type_correct": rng.choice([True, False], n).tolist(),
+        }
+    )
 
 
 @pytest.fixture
 def cooperative_results():
     """Results where agent always cooperates."""
     n = 50
-    return pd.DataFrame({
-        "condition": [1] * n,
-        "seed": [0] * n,
-        "round": list(range(n)),
-        "partner_idx": [0] * n,
-        "true_partner_type": ["cooperator"] * n,
-        "agent_action": [0] * n,
-        "partner_action": [0] * n,
-        "payoff": [3.0] * n,
-        "partner_payoff": [3.0] * n,
-        "inferred_type_correct": [True] * n,
-    })
+    return pd.DataFrame(
+        {
+            "condition": [1] * n,
+            "seed": [0] * n,
+            "round": list(range(n)),
+            "partner_idx": [0] * n,
+            "true_partner_type": ["cooperator"] * n,
+            "agent_action": [0] * n,
+            "partner_action": [0] * n,
+            "payoff": [3.0] * n,
+            "partner_payoff": [3.0] * n,
+            "inferred_type_correct": [True] * n,
+        }
+    )
 
 
 def test_cooperation_rate_all_cooperate(cooperative_results):
@@ -103,28 +105,34 @@ def test_social_welfare(cooperative_results):
 
 
 def test_partner_discrimination():
-    df = pd.DataFrame({
-        "true_partner_type": ["cooperator"] * 10 + ["exploiter"] * 10,
-        "agent_action": [0] * 10 + [1] * 10,  # cooperate with coop, defect with exploit
-    })
+    df = pd.DataFrame(
+        {
+            "true_partner_type": ["cooperator"] * 10 + ["exploiter"] * 10,
+            "agent_action": [0] * 10 + [1] * 10,  # cooperate with coop, defect with exploit
+        }
+    )
     disc = partner_discrimination(df)
     assert disc == 1.0  # maximal discrimination
 
 
 def test_partner_discrimination_no_exploiters():
-    df = pd.DataFrame({
-        "true_partner_type": ["cooperator"] * 10,
-        "agent_action": [0] * 10,
-    })
+    df = pd.DataFrame(
+        {
+            "true_partner_type": ["cooperator"] * 10,
+            "agent_action": [0] * 10,
+        }
+    )
     assert np.isnan(partner_discrimination(df))
 
 
 def test_adaptation_speed():
     n = 50
-    df = pd.DataFrame({
-        "round": list(range(n)),
-        "inferred_type_correct": [False] * 20 + [True] * 30,
-    })
+    df = pd.DataFrame(
+        {
+            "round": list(range(n)),
+            "inferred_type_correct": [False] * 20 + [True] * 30,
+        }
+    )
     speed = adaptation_speed(df, switch_round=15, accuracy_threshold=0.8, window=5)
     assert isinstance(speed, float)
     assert speed >= 0
@@ -132,9 +140,11 @@ def test_adaptation_speed():
 
 def test_adaptation_speed_never_recovers():
     n = 50
-    df = pd.DataFrame({
-        "round": list(range(n)),
-        "inferred_type_correct": [False] * n,
-    })
+    df = pd.DataFrame(
+        {
+            "round": list(range(n)),
+            "inferred_type_correct": [False] * n,
+        }
+    )
     speed = adaptation_speed(df, switch_round=10, accuracy_threshold=0.8, window=5)
     assert np.isnan(speed)

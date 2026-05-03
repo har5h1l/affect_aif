@@ -9,7 +9,6 @@ from typing import Any
 
 from experiment.conditions import CONDITIONS, PRESET_CONDITIONS
 
-
 DEFAULT_BACKENDS = ["trust"]
 DEFAULT_OUTPUT_DIR = "results/benchmark"
 SCHEMA_VERSION = 2
@@ -27,7 +26,7 @@ class AgentSpec:
     config: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_raw(cls, raw: str | dict[str, Any], default_backend: str = "trust") -> "AgentSpec":
+    def from_raw(cls, raw: str | dict[str, Any], default_backend: str = "trust") -> AgentSpec:
         if isinstance(raw, str):
             return cls(
                 name=raw,
@@ -85,13 +84,11 @@ class BenchmarkConfig:
             agent if isinstance(agent, AgentSpec) else AgentSpec.from_raw(agent, self.backends[0])
             for agent in self.agents
         ]
-        self.backend_configs = {
-            str(name): dict(config) for name, config in dict(self.backend_configs).items()
-        }
+        self.backend_configs = {str(name): dict(config) for name, config in dict(self.backend_configs).items()}
         self.observatory = None if self.observatory is None else dict(self.observatory)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "BenchmarkConfig":
+    def from_dict(cls, data: dict[str, Any]) -> BenchmarkConfig:
         raw = dict(data)
 
         if "backends" not in raw:
@@ -133,7 +130,7 @@ class BenchmarkConfig:
         return cls(**raw)
 
     @classmethod
-    def from_json(cls, path: str) -> "BenchmarkConfig":
+    def from_json(cls, path: str) -> BenchmarkConfig:
         data = json.loads(Path(path).read_text())
         return cls.from_dict(data)
 

@@ -4,8 +4,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
-import trust
 
+import trust
 from experiment.conditions import (
     get_condition_metadata,
     get_condition_name,
@@ -136,19 +136,110 @@ def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
     for seed in (0, 1):
         h1_rows.extend(
             [
-                {"condition": 1, "condition_name": "tau1_no_affect", "seed": seed, "round": 0, "payoff": 10 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
-                {"condition": 2, "condition_name": "tau1_affect", "seed": seed, "round": 0, "payoff": 14 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
-                {"condition": 3, "condition_name": "tau2_no_affect", "seed": seed, "round": 0, "payoff": 11 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
-                {"condition": 4, "condition_name": "tau2_affect", "seed": seed, "round": 0, "payoff": 15 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 1.0, "inferred_joint_correct": 1.0, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+                {
+                    "condition": 1,
+                    "condition_name": "tau1_no_affect",
+                    "seed": seed,
+                    "round": 0,
+                    "payoff": 10 + seed,
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 1.0,
+                    "inferred_joint_correct": 1.0,
+                    "q_pi_entropy": 0.5,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                },
+                {
+                    "condition": 2,
+                    "condition_name": "tau1_affect",
+                    "seed": seed,
+                    "round": 0,
+                    "payoff": 14 + seed,
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 1.0,
+                    "inferred_joint_correct": 1.0,
+                    "q_pi_entropy": 0.5,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                },
+                {
+                    "condition": 3,
+                    "condition_name": "tau2_no_affect",
+                    "seed": seed,
+                    "round": 0,
+                    "payoff": 11 + seed,
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 1.0,
+                    "inferred_joint_correct": 1.0,
+                    "q_pi_entropy": 0.5,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                },
+                {
+                    "condition": 4,
+                    "condition_name": "tau2_affect",
+                    "seed": seed,
+                    "round": 0,
+                    "payoff": 15 + seed,
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 1.0,
+                    "inferred_joint_correct": 1.0,
+                    "q_pi_entropy": 0.5,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                },
             ]
         )
     h2_rows = []
     for seed in (0, 1):
         h2_rows.extend(
             [
-                {"condition": 5, "condition_name": "tau4_no_affect", "seed": seed, "round": 0, "payoff": 10 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 0.8, "inferred_joint_correct": 0.8, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
-                {"condition": 6, "condition_name": "tau4_affect", "seed": seed, "round": 0, "payoff": 16 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 0.9, "inferred_joint_correct": 0.9, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
-                {"condition": 99, "condition_name": "lesioned", "seed": seed, "round": 0, "payoff": 12 + seed, "inferred_type_correct": 1.0, "inferred_stance_correct": 0.85, "inferred_joint_correct": 0.85, "q_pi_entropy": 0.5, "mean_abs_step_efe": 1.0, "planning_cost": 1.0, "planning_cost_ratio": 1.0},
+                {
+                    "condition": 5,
+                    "condition_name": "tau4_no_affect",
+                    "seed": seed,
+                    "round": 0,
+                    "payoff": 10 + seed,
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 0.8,
+                    "inferred_joint_correct": 0.8,
+                    "q_pi_entropy": 0.5,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                },
+                {
+                    "condition": 6,
+                    "condition_name": "tau4_affect",
+                    "seed": seed,
+                    "round": 0,
+                    "payoff": 16 + seed,
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 0.9,
+                    "inferred_joint_correct": 0.9,
+                    "q_pi_entropy": 0.5,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                },
+                {
+                    "condition": 99,
+                    "condition_name": "lesioned",
+                    "seed": seed,
+                    "round": 0,
+                    "payoff": 12 + seed,
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 0.85,
+                    "inferred_joint_correct": 0.85,
+                    "q_pi_entropy": 0.5,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                },
             ]
         )
     h4_rows = []
@@ -301,5 +392,6 @@ def test_archive_boundary_is_explicit():
     for script_name in supported_scripts:
         assert script_name in cli_doc
     assert "run_precision_modulation.py" in archived_scripts
-    assert 'extend-exclude = ["archive"]' in pyproject_text
+    assert "extend-exclude" in pyproject_text
+    assert '"archive"' in pyproject_text
     assert "archive/configs/" in cli_doc

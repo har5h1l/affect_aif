@@ -17,7 +17,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from analysis.metrics import final_round_summary
 from experiment.conditions import CONDITIONS, resolve_condition_spec
 
-
 H1_TARGET_CONDITIONS = ("tau1_no_affect", "tau1_affect", "tau2_no_affect", "tau2_affect")
 H2_TARGET_CONDITIONS = ("lesioned", "tau4_no_affect", "tau4_affect")
 H4_TARGET_CONDITIONS = ("tau4_no_affect", "tau4_affect")
@@ -119,6 +118,7 @@ def _backfill_condition_columns(frame: pd.DataFrame) -> pd.DataFrame:
     if "condition_name" in prepared.columns:
         prepared["condition_name"] = prepared["condition_name"].astype(str)
     if "condition" not in prepared.columns and "condition_name" in prepared.columns:
+
         def _resolve_condition_value(name: str):
             canonical = resolve_condition_spec(name).name
             return CONDITION_IDS_BY_NAME.get(canonical, canonical)
@@ -252,8 +252,9 @@ def _header(title: str, source_paths: OrderedDict[Path, list[str]], frame: pd.Da
         lines.append("Source files:")
         for source_path, conditions in source_paths.items():
             source_type = "partial checkpoint" if str(source_path).endswith("results_partial.csv") else "final results"
+            condition_summary = ", ".join(conditions) if conditions else "all available"
             lines.append(
-                f"- {source_path} ({source_type}; conditions: {', '.join(conditions) if conditions else 'all available'})"
+                f"- {source_path} ({source_type}; conditions: {condition_summary})"
             )
     lines.extend(_format_coverage(frame))
     return lines
@@ -303,23 +304,24 @@ def _run_h2(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> 
     lines.extend(
         [
             "",
-            "Tau-4 family only. Check whether lesion preserves inference accuracy while losing payoff versus intact affect.",
+            "Tau-4 family only. Check whether lesion preserves inference accuracy "
+            "while losing payoff versus intact affect.",
             "",
-        "Inference accuracy: lesioned vs tau4_no_affect",
-        f"- lesioned mean joint accuracy: {_format_stat(_mean(lesion_accuracy))}",
-        f"- tau4_no_affect mean joint accuracy: {_format_stat(_mean(no_affect_accuracy))}",
-        f"- difference: {_format_stat(_mean(lesion_accuracy) - _mean(no_affect_accuracy))}",
-        f"- Cohen's d: {_format_stat(_cohen_d(lesion_accuracy, no_affect_accuracy))}",
-        f"- Welch p-value: {_format_stat(_welch_p(lesion_accuracy, no_affect_accuracy), digits=6)}",
-        "",
-        "Payoff: lesioned vs tau4_affect",
-        f"- lesioned mean payoff: {_format_stat(_mean(lesion_payoff))}",
-        f"- tau4_affect mean payoff: {_format_stat(_mean(affect_payoff))}",
-        f"- difference: {_format_stat(_mean(lesion_payoff) - _mean(affect_payoff))}",
-        f"- Cohen's d: {_format_stat(_cohen_d(lesion_payoff, affect_payoff))}",
-        f"- Welch p-value: {_format_stat(_welch_p(lesion_payoff, affect_payoff), digits=6)}",
-        "",
-        "Caveat: this read is from the tau=4 regime, which is already partially saturated.",
+            "Inference accuracy: lesioned vs tau4_no_affect",
+            f"- lesioned mean joint accuracy: {_format_stat(_mean(lesion_accuracy))}",
+            f"- tau4_no_affect mean joint accuracy: {_format_stat(_mean(no_affect_accuracy))}",
+            f"- difference: {_format_stat(_mean(lesion_accuracy) - _mean(no_affect_accuracy))}",
+            f"- Cohen's d: {_format_stat(_cohen_d(lesion_accuracy, no_affect_accuracy))}",
+            f"- Welch p-value: {_format_stat(_welch_p(lesion_accuracy, no_affect_accuracy), digits=6)}",
+            "",
+            "Payoff: lesioned vs tau4_affect",
+            f"- lesioned mean payoff: {_format_stat(_mean(lesion_payoff))}",
+            f"- tau4_affect mean payoff: {_format_stat(_mean(affect_payoff))}",
+            f"- difference: {_format_stat(_mean(lesion_payoff) - _mean(affect_payoff))}",
+            f"- Cohen's d: {_format_stat(_cohen_d(lesion_payoff, affect_payoff))}",
+            f"- Welch p-value: {_format_stat(_welch_p(lesion_payoff, affect_payoff), digits=6)}",
+            "",
+            "Caveat: this read is from the tau=4 regime, which is already partially saturated.",
         ]
     )
     return "\n".join(lines)
@@ -331,22 +333,21 @@ def _run_h4(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> 
     if missing:
         raise ValueError(f"H4 results are missing required columns: {', '.join(missing)}")
     window = frame.loc[(frame["round"] >= 30) & (frame["round"] <= 60)].copy()
-    grouped = (
-        window.groupby(["condition_name", "seed"], as_index=False)
-        .agg(mean_window_payoff=("payoff", "mean"))
-    )
+    grouped = window.groupby(["condition_name", "seed"], as_index=False).agg(mean_window_payoff=("payoff", "mean"))
     affect = grouped.loc[grouped["condition_name"] == "tau4_affect", "mean_window_payoff"].to_numpy(dtype=float)
     no_affect = grouped.loc[grouped["condition_name"] == "tau4_no_affect", "mean_window_payoff"].to_numpy(dtype=float)
     lines = _header("H4 betrayal-window reanalysis", source_paths, frame)
-    lines.extend([
-        "",
-        "Compare tau4_affect vs tau4_no_affect over rounds 30-60 using per-seed mean payoff.",
-        f"- tau4_affect mean window payoff: {_format_stat(_mean(affect))}",
-        f"- tau4_no_affect mean window payoff: {_format_stat(_mean(no_affect))}",
-        f"- difference: {_format_stat(_mean(affect) - _mean(no_affect))}",
-        f"- Cohen's d: {_format_stat(_cohen_d(affect, no_affect))}",
-        f"- Welch p-value: {_format_stat(_welch_p(affect, no_affect), digits=6)}",
-    ])
+    lines.extend(
+        [
+            "",
+            "Compare tau4_affect vs tau4_no_affect over rounds 30-60 using per-seed mean payoff.",
+            f"- tau4_affect mean window payoff: {_format_stat(_mean(affect))}",
+            f"- tau4_no_affect mean window payoff: {_format_stat(_mean(no_affect))}",
+            f"- difference: {_format_stat(_mean(affect) - _mean(no_affect))}",
+            f"- Cohen's d: {_format_stat(_cohen_d(affect, no_affect))}",
+            f"- Welch p-value: {_format_stat(_welch_p(affect, no_affect), digits=6)}",
+        ]
+    )
     return "\n".join(lines)
 
 

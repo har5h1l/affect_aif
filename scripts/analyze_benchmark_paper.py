@@ -16,7 +16,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from benchmark.common_metrics import (
     adaptation_speed,
     cooperation_rate,
-    cumulative_payoff,
     mean_payoff,
     partner_discrimination,
     type_identification_accuracy,
@@ -25,9 +24,8 @@ from benchmark.common_metrics import (
 
 def episode_rewards(df: pd.DataFrame) -> pd.DataFrame:
     """Per-episode total reward for each agent and seed."""
-    return (
-        df.groupby(["agent_name", "seed", "episode_id"], as_index=False)
-        .agg(episode_reward=("reward", "sum"), num_rounds=("step", "count"))
+    return df.groupby(["agent_name", "seed", "episode_id"], as_index=False).agg(
+        episode_reward=("reward", "sum"), num_rounds=("step", "count")
     )
 
 
@@ -42,18 +40,20 @@ def agent_summary(df: pd.DataFrame) -> pd.DataFrame:
         std = np.std(rewards, ddof=1)
         se = std / np.sqrt(n)
         ci95 = 1.96 * se
-        rows.append({
-            "agent_name": agent,
-            "n_episodes": n,
-            "mean_reward": mean,
-            "std_reward": std,
-            "ci95_low": mean - ci95,
-            "ci95_high": mean + ci95,
-            "cooperation_rate": cooperation_rate(df[df["agent_name"] == agent]),
-            "mean_payoff": mean_payoff(df[df["agent_name"] == agent]),
-            "partner_discrimination": partner_discrimination(df[df["agent_name"] == agent]),
-            "type_id_accuracy": type_identification_accuracy(df[df["agent_name"] == agent]),
-        })
+        rows.append(
+            {
+                "agent_name": agent,
+                "n_episodes": n,
+                "mean_reward": mean,
+                "std_reward": std,
+                "ci95_low": mean - ci95,
+                "ci95_high": mean + ci95,
+                "cooperation_rate": cooperation_rate(df[df["agent_name"] == agent]),
+                "mean_payoff": mean_payoff(df[df["agent_name"] == agent]),
+                "partner_discrimination": partner_discrimination(df[df["agent_name"] == agent]),
+                "type_id_accuracy": type_identification_accuracy(df[df["agent_name"] == agent]),
+            }
+        )
     return pd.DataFrame(rows).sort_values("mean_reward", ascending=False)
 
 
@@ -63,23 +63,25 @@ def pairwise_tests(df: pd.DataFrame) -> pd.DataFrame:
     agents = sorted(ep["agent_name"].unique())
     rows = []
     for i, a1 in enumerate(agents):
-        for a2 in agents[i + 1:]:
+        for a2 in agents[i + 1 :]:
             r1 = ep[ep["agent_name"] == a1]["episode_reward"].values
             r2 = ep[ep["agent_name"] == a2]["episode_reward"].values
             u_stat, p_val = stats.mannwhitneyu(r1, r2, alternative="two-sided")
             # Effect size: rank-biserial correlation
             n1, n2 = len(r1), len(r2)
             effect_size = 1 - (2 * u_stat) / (n1 * n2)
-            rows.append({
-                "agent_1": a1,
-                "agent_2": a2,
-                "mean_1": np.mean(r1),
-                "mean_2": np.mean(r2),
-                "U_statistic": u_stat,
-                "p_value": p_val,
-                "effect_size_r": effect_size,
-                "significant_005": p_val < 0.05,
-            })
+            rows.append(
+                {
+                    "agent_1": a1,
+                    "agent_2": a2,
+                    "mean_1": np.mean(r1),
+                    "mean_2": np.mean(r2),
+                    "U_statistic": u_stat,
+                    "p_value": p_val,
+                    "effect_size_r": effect_size,
+                    "significant_005": p_val < 0.05,
+                }
+            )
     return pd.DataFrame(rows)
 
 
@@ -127,16 +129,18 @@ def adaptation_analysis(df: pd.DataFrame, switch_round: int = 50) -> pd.DataFram
                 group_with_round["round"] = group_with_round[round_col]
             speed = adaptation_speed(group_with_round, switch_round, accuracy_threshold=0.7, window=5)
 
-        rows.append({
-            "agent_name": agent,
-            "pre_switch_payoff": pre_payoff,
-            "post_switch_payoff": post_payoff,
-            "payoff_drop": pre_payoff - post_payoff,
-            "payoff_recovery_ratio": post_payoff / pre_payoff if pre_payoff != 0 else np.nan,
-            "pre_switch_coop": pre_coop,
-            "post_switch_coop": post_coop,
-            "adaptation_speed": speed,
-        })
+        rows.append(
+            {
+                "agent_name": agent,
+                "pre_switch_payoff": pre_payoff,
+                "post_switch_payoff": post_payoff,
+                "payoff_drop": pre_payoff - post_payoff,
+                "payoff_recovery_ratio": post_payoff / pre_payoff if pre_payoff != 0 else np.nan,
+                "pre_switch_coop": pre_coop,
+                "post_switch_coop": post_coop,
+                "adaptation_speed": speed,
+            }
+        )
     return pd.DataFrame(rows).sort_values("post_switch_payoff", ascending=False)
 
 
@@ -172,15 +176,12 @@ def main():
     ts_payoff.to_csv(output_dir / "time_series_payoff.csv", index=False)
     ts_coop = time_series_cooperation(df)
     ts_coop.to_csv(output_dir / "time_series_cooperation.csv", index=False)
-    print(f"=== Time Series Data ===")
+    print("=== Time Series Data ===")
     print(f"Saved payoff and cooperation time series ({len(ts_payoff)} rows)")
     print()
 
     # 4. Adaptation analysis (for betrayal scenarios with scheduled switches)
-    has_scheduled = (
-        "switch_kind" in df.columns
-        and (df["switch_kind"] == "scheduled").any()
-    )
+    has_scheduled = "switch_kind" in df.columns and (df["switch_kind"] == "scheduled").any()
     if has_scheduled:
         adapt = adaptation_analysis(df, switch_round=args.switch_round)
         adapt.to_csv(output_dir / "adaptation_analysis.csv", index=False)
@@ -191,7 +192,7 @@ def main():
     # 5. Text report
     report_lines = [
         "# Benchmark Analysis Report",
-        f"",
+        "",
         f"Data: {args.results}",
         f"Total records: {len(df)}",
         f"Agents: {sorted(df['agent_name'].unique())}",

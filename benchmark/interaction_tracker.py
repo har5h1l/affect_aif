@@ -7,9 +7,7 @@ that map to the trust game's binary action space.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
-import numpy as np
+from dataclasses import dataclass
 
 
 @dataclass
@@ -59,9 +57,7 @@ class InteractionTracker:
         self.cooperation_threshold = cooperation_threshold
 
         self._current_tick = 0
-        self._round_events: dict[int, list[InteractionEvent]] = {
-            i: [] for i in range(num_partners)
-        }
+        self._round_events: dict[int, list[InteractionEvent]] = {i: [] for i in range(num_partners)}
         self._cumulative_interactions: dict[int, dict[str, int]] = {
             i: {"cooperative": 0, "hostile": 0} for i in range(num_partners)
         }
@@ -70,9 +66,7 @@ class InteractionTracker:
         """Clear all tracked state."""
         self._current_tick = 0
         self._round_events = {i: [] for i in range(self.num_partners)}
-        self._cumulative_interactions = {
-            i: {"cooperative": 0, "hostile": 0} for i in range(self.num_partners)
-        }
+        self._cumulative_interactions = {i: {"cooperative": 0, "hostile": 0} for i in range(self.num_partners)}
 
     def record_event(self, event: InteractionEvent):
         """Record a single interaction event."""

@@ -53,16 +53,13 @@ class CoGamesTrustAdapter:
         self.num_rounds = scenario.num_rounds
         self.assignment_mode = str(scenario.assignment_mode)
         self.available_types = [str(name) for name in scenario.partner_types]
-        initial_types = scenario.initial_partner_types or scenario.partner_types[:self.num_partners]
-        self.initial_partner_types = [str(name) for name in initial_types[:self.num_partners]]
+        initial_types = scenario.initial_partner_types or scenario.partner_types[: self.num_partners]
+        self.initial_partner_types = [str(name) for name in initial_types[: self.num_partners]]
         self.p_switch = float(scenario.p_switch)
         self.scheduled_type_switches = self._parse_scheduled_switches(scenario.scheduled_type_switches)
         self.ticks_per_round = ticks_per_round if ticks_per_round is not None else scenario.ticks_per_round
         seed_rng = np.random.default_rng(self.seed)
-        self._partner_seeds = [
-            int(seed_rng.integers(2**31 - 1))
-            for _ in range(self.num_partners)
-        ]
+        self._partner_seeds = [int(seed_rng.integers(2**31 - 1)) for _ in range(self.num_partners)]
 
         self.tracker = InteractionTracker(
             num_partners=self.num_partners,
@@ -99,8 +96,7 @@ class CoGamesTrustAdapter:
 
     def _reset_partners(self):
         self.partners = [
-            self._create_partner(idx, type_name)
-            for idx, type_name in enumerate(self.initial_partner_types)
+            self._create_partner(idx, type_name) for idx, type_name in enumerate(self.initial_partner_types)
         ]
 
     def _force_partner_type(self, partner_idx: int, new_type: str):
@@ -163,34 +159,42 @@ class CoGamesTrustAdapter:
 
         # Record interaction events
         if agent_event_type == "share":
-            self.tracker.record_event(InteractionEvent(
-                tick=self.round_idx,
-                partner_idx=partner_idx,
-                event_type="share",
-                resource_delta=-1.0,
-            ))
+            self.tracker.record_event(
+                InteractionEvent(
+                    tick=self.round_idx,
+                    partner_idx=partner_idx,
+                    event_type="share",
+                    resource_delta=-1.0,
+                )
+            )
         else:
-            self.tracker.record_event(InteractionEvent(
-                tick=self.round_idx,
-                partner_idx=partner_idx,
-                event_type="attack",
-                resource_delta=0.5,
-            ))
+            self.tracker.record_event(
+                InteractionEvent(
+                    tick=self.round_idx,
+                    partner_idx=partner_idx,
+                    event_type="attack",
+                    resource_delta=0.5,
+                )
+            )
 
         if partner_event_type == "share":
-            self.tracker.record_event(InteractionEvent(
-                tick=self.round_idx,
-                partner_idx=partner_idx,
-                event_type="receive",
-                resource_delta=3.0 if agent_action == 0 else -1.0,
-            ))
+            self.tracker.record_event(
+                InteractionEvent(
+                    tick=self.round_idx,
+                    partner_idx=partner_idx,
+                    event_type="receive",
+                    resource_delta=3.0 if agent_action == 0 else -1.0,
+                )
+            )
         else:
-            self.tracker.record_event(InteractionEvent(
-                tick=self.round_idx,
-                partner_idx=partner_idx,
-                event_type="steal",
-                resource_delta=-1.0,
-            ))
+            self.tracker.record_event(
+                InteractionEvent(
+                    tick=self.round_idx,
+                    partner_idx=partner_idx,
+                    event_type="steal",
+                    resource_delta=-1.0,
+                )
+            )
 
         # Compute payoffs (mirroring trust game payoff structure)
         partner_action = 0 if partner_event_type == "share" else 1
@@ -198,10 +202,10 @@ class CoGamesTrustAdapter:
 
         # Payoff matrix: cooperate/defect x cooperate/defect
         payoff_matrix = {
-            (0, 0): (3.0, 3.0),   # mutual cooperation
+            (0, 0): (3.0, 3.0),  # mutual cooperation
             (0, 1): (-1.0, 5.0),  # sucker
             (1, 0): (5.0, -1.0),  # temptation
-            (1, 1): (1.0, 1.0),   # mutual defection
+            (1, 1): (1.0, 1.0),  # mutual defection
         }
         agent_payoff, partner_payoff = payoff_matrix[(social_action, partner_action)]
 
@@ -274,23 +278,27 @@ class CoGamesTrustAdapter:
         switch_kind = (
             "scheduled"
             if result["partner_idx"] in scheduled_switched
-            else "stochastic" if stochastic_switch else "none"
+            else "stochastic"
+            if stochastic_switch
+            else "none"
         )
 
         self.round_idx += 1
         self.active_partner = self._select_next_active_partner()
 
-        result.update({
-            "observation_partner_idx": result["partner_idx"],
-            "active_partner": self.active_partner,
-            "round": self.round_idx,
-            "type_switched": bool(type_switched),
-            "switch_kind": switch_kind,
-            "current_partner_switched": bool(type_switched),
-            "current_partner_scheduled_switch": bool(result["partner_idx"] in scheduled_switched),
-            "scheduled_switch_partner_ids": sorted(int(idx) for idx in scheduled_switched),
-            "true_types": [p.type_name for p in self.partners],
-        })
+        result.update(
+            {
+                "observation_partner_idx": result["partner_idx"],
+                "active_partner": self.active_partner,
+                "round": self.round_idx,
+                "type_switched": bool(type_switched),
+                "switch_kind": switch_kind,
+                "current_partner_switched": bool(type_switched),
+                "current_partner_scheduled_switch": bool(result["partner_idx"] in scheduled_switched),
+                "scheduled_switch_partner_ids": sorted(int(idx) for idx in scheduled_switched),
+                "true_types": [p.type_name for p in self.partners],
+            }
+        )
 
         self.history.append(result)
         return result
@@ -301,9 +309,9 @@ class CoGamesTrustAdapter:
 
     def get_episode_summary(self) -> dict:
         """Return coarse summary statistics for the current episode."""
-        payoffs = np.asarray(
-            [row["agent_payoff"] for row in self.history], dtype=float
-        ) if self.history else np.asarray([])
+        payoffs = (
+            np.asarray([row["agent_payoff"] for row in self.history], dtype=float) if self.history else np.asarray([])
+        )
         return {
             "num_rounds": len(self.history),
             "cumulative_payoff": float(payoffs.sum()) if len(payoffs) else 0.0,

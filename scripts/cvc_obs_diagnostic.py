@@ -52,7 +52,9 @@ def main():
     center = (pei.obs_height // 2, pei.obs_width // 2)
     print(f"  center: {center}")
 
-    feature_info = defaultdict(lambda: {"count": 0, "min_val": float("inf"), "max_val": float("-inf"), "unique_locs": 0, "locs": set()})
+    feature_info = defaultdict(
+        lambda: {"count": 0, "min_val": float("inf"), "max_val": float("-inf"), "unique_locs": 0, "locs": set()}
+    )
     tag_value_counts = Counter()
     all_cell_features = Counter()
 
@@ -87,15 +89,18 @@ def main():
     for name, info in sorted(feature_info.items(), key=lambda x: -x[1]["count"]):
         n_locs = len(info["locs"])
         info["unique_locs"] = n_locs
-        print(f"  {name:40s}  count={info['count']:6d}  val=[{info['min_val']:.3f}, {info['max_val']:.3f}]  unique_locs={n_locs}")
+        print(
+            f"  {name:40s}  count={info['count']:6d}  "
+            f"val=[{info['min_val']:.3f}, {info['max_val']:.3f}]  unique_locs={n_locs}"
+        )
 
-    print(f"\n=== Tag Value -> Object Type Mapping ===")
+    print("\n=== Tag Value -> Object Type Mapping ===")
     for tag_id, count in sorted(tag_value_counts.items()):
         otype = sim.object_type_names[tag_id] if tag_id < len(sim.object_type_names) else "?"
         pei_tag = pei.tags[tag_id] if tag_id < len(pei.tags) else "?"
         print(f"  tag={tag_id:3d}  count={count:5d}  object_type={otype:25s}  pei_tag={pei_tag}")
 
-    print(f"\n=== Grid Cell Coverage ===")
+    print("\n=== Grid Cell Coverage ===")
     total_cells = pei.obs_height * pei.obs_width
     cells_with_features = len(all_cell_features)
     print(f"  Total grid cells: {total_cells}")
@@ -103,7 +108,7 @@ def main():
     print(f"  Cells without features (walls/out-of-view): {total_cells - cells_with_features}")
 
     # Show aoe_mask grid
-    print(f"\n=== aoe_mask Grid (last step, agent 0) ===")
+    print("\n=== aoe_mask Grid (last step, agent 0) ===")
     last_obs = sim.observations()
     ao = last_obs[0]
     aoe_cells = set()
@@ -141,7 +146,12 @@ def main():
             "object_type_names": [x for x in sim.object_type_names if x],
             "action_names": list(pei.action_names),
             "features": {
-                name: {"count": info["count"], "min_val": info["min_val"], "max_val": info["max_val"], "unique_locs": info["unique_locs"]}
+                name: {
+                    "count": info["count"],
+                    "min_val": info["min_val"],
+                    "max_val": info["max_val"],
+                    "unique_locs": info["unique_locs"],
+                }
                 for name, info in feature_info.items()
             },
             "tag_value_counts": dict(tag_value_counts),

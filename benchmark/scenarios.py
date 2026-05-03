@@ -6,8 +6,8 @@ cooperation dynamics comparable to the trust game.
 
 from __future__ import annotations
 
-from typing import Any
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -21,9 +21,7 @@ class BenchmarkScenario:
     num_partners: int = 4
     num_rounds: int = 100
     ticks_per_round: int = 10
-    partner_types: list[str] = field(default_factory=lambda: [
-        "cooperator", "reciprocator", "exploiter", "random"
-    ])
+    partner_types: list[str] = field(default_factory=lambda: ["cooperator", "reciprocator", "exploiter", "random"])
     assignment_mode: str = "random"
     p_switch: float = 0.05
     initial_partner_types: list[str] | None = None
@@ -86,8 +84,7 @@ BETRAYAL_ARENA = BenchmarkScenario(
 LARGE_GROUP = BenchmarkScenario(
     name="large_group",
     description=(
-        "Larger arena with 8 partners and more complex spatial dynamics. "
-        "Tests scaling of per-partner tracking."
+        "Larger arena with 8 partners and more complex spatial dynamics. Tests scaling of per-partner tracking."
     ),
     grid_width=32,
     grid_height=32,
@@ -95,10 +92,14 @@ LARGE_GROUP = BenchmarkScenario(
     num_rounds=200,
     ticks_per_round=15,
     partner_types=[
-        "cooperator", "cooperator",
-        "reciprocator", "reciprocator",
-        "exploiter", "exploiter",
-        "random", "random",
+        "cooperator",
+        "cooperator",
+        "reciprocator",
+        "reciprocator",
+        "exploiter",
+        "exploiter",
+        "random",
+        "random",
     ],
 )
 

@@ -18,7 +18,6 @@ from experiment.calibration import (
     build_sensitivity_specs,
     serialize_config,
 )
-from experiment.conditions import resolve_condition_spec
 from experiment.config import ExperimentConfig
 from experiment.constants import SENSITIVITY_CONDITIONS
 from experiment.tasks import (

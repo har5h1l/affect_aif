@@ -1,4 +1,5 @@
 """Construction-time validation of the multi-focal runner (F8, F10, F5)."""
+
 from __future__ import annotations
 
 import numpy as np

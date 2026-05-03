@@ -7,6 +7,7 @@ combined with default planning); run::
 
 Default ``pytest tests/`` still executes the fast smoke test below.
 """
+
 from __future__ import annotations
 
 import numpy as np

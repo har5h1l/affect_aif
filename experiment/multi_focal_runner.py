@@ -1,15 +1,15 @@
 """Multi-focal-agent runtime for the trust game (sub-project F)."""
+
 from __future__ import annotations
 
 from typing import Protocol
 
 import numpy as np
 
-from trust import TrustGameAgent
-from trust.rollout import decode_raw_action_to_partner_and_social
-
 from experiment.joint_resolution import joint_resolve
 from experiment.multi_focal_config import MultiFocalConfig
+from trust import TrustGameAgent
+from trust.rollout import decode_raw_action_to_partner_and_social
 
 
 def _local_partner_idx(focal_global: int, other_global: int) -> int:
@@ -80,8 +80,7 @@ class MultiFocalRunner:
         for i, a in enumerate(self.agents):
             if a.num_partners != self.M - 1:
                 raise ValueError(
-                    f"agent[{i}] has num_partners={a.num_partners}; "
-                    f"expected M-1={self.M - 1} (F5: no self-modeling)"
+                    f"agent[{i}] has num_partners={a.num_partners}; expected M-1={self.M - 1} (F5: no self-modeling)"
                 )
 
     def run(self) -> list[dict]:

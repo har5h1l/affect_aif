@@ -19,13 +19,12 @@ def compute_shared_summary(results: pd.DataFrame) -> pd.DataFrame:
     if results.empty:
         return pd.DataFrame()
 
-    episode_rewards = (
-        results.groupby(["backend", "agent_name", "seed", "episode_id"], as_index=False)
-        .agg(
-            episode_reward=("reward", "sum"),
-            scenario=("scenario", "first"),
-            episode_runtime_s=("episode_runtime_s", "max") if "episode_runtime_s" in results.columns else ("reward", lambda s: np.nan),
-        )
+    episode_rewards = results.groupby(["backend", "agent_name", "seed", "episode_id"], as_index=False).agg(
+        episode_reward=("reward", "sum"),
+        scenario=("scenario", "first"),
+        episode_runtime_s=("episode_runtime_s", "max")
+        if "episode_runtime_s" in results.columns
+        else ("reward", lambda s: np.nan),
     )
 
     return (

@@ -4,6 +4,7 @@ Pinned RNG seed 42, M=4 affective agents, planning_horizon=4, random partner
 assignment, round-robin focal. Scalar expectations captured 2026-04-18; any
 change indicates a behavioral regression unless intentionally rebaselined.
 """
+
 from __future__ import annotations
 
 import numpy as np

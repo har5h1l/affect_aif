@@ -18,9 +18,12 @@ def cooperation_rate(results: pd.DataFrame, group_by: str | list[str] | None = N
     Otherwise returns a single float.
     """
     if group_by is not None:
-        return results.groupby(group_by)["agent_action"].apply(
-            lambda s: float((s == 0).mean())
-        ).rename("cooperation_rate").reset_index()
+        return (
+            results.groupby(group_by)["agent_action"]
+            .apply(lambda s: float((s == 0).mean()))
+            .rename("cooperation_rate")
+            .reset_index()
+        )
     return float((results["agent_action"] == 0).mean())
 
 
@@ -44,9 +47,7 @@ def type_identification_accuracy(
     if "inferred_type_correct" not in results.columns:
         return np.nan
     if group_by is not None:
-        return results.groupby(group_by)["inferred_type_correct"].mean().rename(
-            "type_id_accuracy"
-        ).reset_index()
+        return results.groupby(group_by)["inferred_type_correct"].mean().rename("type_id_accuracy").reset_index()
     return float(results["inferred_type_correct"].mean())
 
 
@@ -90,9 +91,7 @@ def partner_discrimination(results: pd.DataFrame) -> float:
     if "true_partner_type" not in results.columns:
         return np.nan
 
-    by_type = results.groupby("true_partner_type")["agent_action"].apply(
-        lambda s: float((s == 0).mean())
-    )
+    by_type = results.groupby("true_partner_type")["agent_action"].apply(lambda s: float((s == 0).mean()))
 
     coop_types = [t for t in by_type.index if "cooperat" in t.lower()]
     exploit_types = [t for t in by_type.index if "exploit" in t.lower()]
@@ -137,9 +136,7 @@ def environment_transfer_gap(
 
     metric_col = [c for c in trust_metrics.columns if c != "condition"][0]
 
-    merged = trust_metrics.merge(
-        grid_metrics, on="condition", suffixes=("_trust", "_grid")
-    )
+    merged = trust_metrics.merge(grid_metrics, on="condition", suffixes=("_trust", "_grid"))
     trust_col = f"{metric_col}_trust"
     grid_col = f"{metric_col}_grid"
     merged["gap"] = merged[trust_col] - merged[grid_col]
@@ -165,9 +162,7 @@ def relative_ranking_preservation(
 
     metric_col = [c for c in trust_metrics.columns if c != "condition"][0]
 
-    merged = trust_metrics.merge(
-        grid_metrics, on="condition", suffixes=("_trust", "_grid")
-    )
+    merged = trust_metrics.merge(grid_metrics, on="condition", suffixes=("_trust", "_grid"))
     if len(merged) < 3:
         return np.nan
 

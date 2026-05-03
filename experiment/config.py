@@ -102,11 +102,11 @@ class ExperimentConfig:
         self.gif_after_run = bool(self.gif_after_run)
         self.gif_output_dir = None if self.gif_output_dir is None else str(self.gif_output_dir)
         normalized_horizon_overrides: dict[int | str, int] = {}
-        for key, value in dict(self.horizon_overrides).items():
-            if isinstance(key, str) and not key.strip().isdigit():
-                normalized_horizon_overrides[str(key).strip()] = int(value)
+        for raw_key, value in dict(self.horizon_overrides).items():
+            if isinstance(raw_key, str) and not raw_key.strip().isdigit():
+                normalized_horizon_overrides[raw_key.strip()] = int(value)
             else:
-                normalized_horizon_overrides[int(key)] = int(value)
+                normalized_horizon_overrides[int(raw_key)] = int(value)
         self.horizon_overrides = normalized_horizon_overrides
 
     @classmethod

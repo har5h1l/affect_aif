@@ -23,7 +23,6 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Optional
 
 # Cardinal directions: (delta_row, delta_col, action_name)
 DIRECTIONS = [
@@ -54,7 +53,7 @@ class NavigationState:
 
     global_row: int = 0
     global_col: int = 0
-    last_action_name: Optional[str] = None
+    last_action_name: str | None = None
     walls: dict[tuple[int, int], int] = field(default_factory=dict)  # coord -> step_added
     visited: set[tuple[int, int]] = field(default_factory=set)
     step_count: int = 0
@@ -137,9 +136,7 @@ class NavigationHelper:
     def _is_in_local_grid(self, row: int, col: int) -> bool:
         return 0 <= row < self._obs_height and 0 <= col < self._obs_width
 
-    def _build_local_walkability(
-        self, obs, state: NavigationState
-    ) -> list[list[bool]]:
+    def _build_local_walkability(self, obs, state: NavigationState) -> list[list[bool]]:
         """Build a walkability grid for the local observation area.
 
         Cells are walkable if they have an aoe_mask token AND are not in
@@ -170,7 +167,7 @@ class NavigationHelper:
         grid: list[list[bool]],
         start: tuple[int, int],
         goal: tuple[int, int],
-    ) -> Optional[list[tuple[int, int]]]:
+    ) -> list[tuple[int, int]] | None:
         """BFS from start to goal on the local walkability grid."""
         if not self._is_in_local_grid(goal[0], goal[1]):
             return None
@@ -187,11 +184,7 @@ class NavigationHelper:
                 return path
             for dr, dc, _ in DIRECTIONS:
                 nr, nc = r + dr, c + dc
-                if (
-                    self._is_in_local_grid(nr, nc)
-                    and (nr, nc) not in visited
-                    and grid[nr][nc]
-                ):
+                if self._is_in_local_grid(nr, nc) and (nr, nc) not in visited and grid[nr][nc]:
                     visited.add((nr, nc))
                     queue.append(((nr, nc), path + [(nr, nc)]))
 
@@ -203,20 +196,19 @@ class NavigationHelper:
         start: tuple[int, int],
         target_dr: int,
         target_dc: int,
-    ) -> Optional[str]:
+    ) -> str | None:
         """BFS to find a path that makes progress toward an off-screen target.
 
         When the target is outside the visible grid, find the reachable edge
         cell closest to the target direction and navigate there.
         """
         # Find the best edge cell in the target direction
-        best_cell: Optional[tuple[int, int]] = None
         best_score = float("-inf")
 
         visited: set[tuple[int, int]] = {start}
         queue: deque[tuple[tuple[int, int], list[tuple[int, int]]]] = deque()
         queue.append((start, [start]))
-        best_path: Optional[list[tuple[int, int]]] = None
+        best_path: list[tuple[int, int]] | None = None
 
         while queue:
             (r, c), path = queue.popleft()
@@ -226,16 +218,11 @@ class NavigationHelper:
             is_edge = r == 0 or r == self._obs_height - 1 or c == 0 or c == self._obs_width - 1
             if is_edge and score > best_score:
                 best_score = score
-                best_cell = (r, c)
                 best_path = path
 
             for dr, dc, _ in DIRECTIONS:
                 nr, nc = r + dr, c + dc
-                if (
-                    self._is_in_local_grid(nr, nc)
-                    and (nr, nc) not in visited
-                    and grid[nr][nc]
-                ):
+                if self._is_in_local_grid(nr, nc) and (nr, nc) not in visited and grid[nr][nc]:
                     visited.add((nr, nc))
                     queue.append(((nr, nc), path + [(nr, nc)]))
 
@@ -254,8 +241,8 @@ class NavigationHelper:
         self,
         obs,
         state: NavigationState,
-        target_local: Optional[tuple[int, int]],
-    ) -> Optional[str]:
+        target_local: tuple[int, int] | None,
+    ) -> str | None:
         """Find the next move action toward a target using BFS.
 
         Args:
@@ -292,7 +279,7 @@ class NavigationHelper:
         self,
         obs,
         state: NavigationState,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Choose a move that explores unvisited cells."""
         grid = self._build_local_walkability(obs, state)
 
@@ -314,11 +301,7 @@ class NavigationHelper:
 
             for dr, dc, _ in DIRECTIONS:
                 nr, nc = r + dr, c + dc
-                if (
-                    self._is_in_local_grid(nr, nc)
-                    and (nr, nc) not in visited_bfs
-                    and grid[nr][nc]
-                ):
+                if self._is_in_local_grid(nr, nc) and (nr, nc) not in visited_bfs and grid[nr][nc]:
                     visited_bfs.add((nr, nc))
                     queue.append(((nr, nc), path + [(nr, nc)]))
 

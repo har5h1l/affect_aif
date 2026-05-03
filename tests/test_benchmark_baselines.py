@@ -4,7 +4,6 @@ These tests do NOT require cogames or mettagrid.
 """
 
 import numpy as np
-import pytest
 
 from benchmark.baselines import (
     GrimTriggerAgent,
@@ -69,7 +68,7 @@ class TestTitForTatAgent:
         agent.plan_and_act(0)
         agent.observe_outcome(0, [1, 0], 0, 1, -1.0)  # partner 0 defected
         agent.plan_and_act(1)
-        agent.observe_outcome(1, [0, 2], 0, 0, 3.0)   # partner 1 cooperated
+        agent.observe_outcome(1, [0, 2], 0, 0, 3.0)  # partner 1 cooperated
 
         assert agent.plan_and_act(0) == 1  # defect vs partner 0
         agent.observe_outcome(0, [0, 0], 1, 0, 5.0)

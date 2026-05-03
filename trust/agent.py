@@ -13,8 +13,8 @@ from trust.payoffs import encode_env_action_factorized, encode_instantaneous_ind
 from trust.rollout import (
     _partner_action_distribution,
     build_transition_views,
-    decode_raw_action_to_partner_and_social,
     decision_step_trust_game,
+    decode_raw_action_to_partner_and_social,
 )
 
 
@@ -185,14 +185,14 @@ class TrustGameAgent:
 
     def _joint_observation_likelihood(self, A: np.ndarray, observation: list[int], own_action: int) -> np.ndarray:
         if len(observation) < 2:
-            raise ValueError(
-                f"TrustGameAgent expects both observation modalities; got {observation!r}."
-            )
+            raise ValueError(f"TrustGameAgent expects both observation modalities; got {observation!r}.")
         action_likelihood = np.asarray(A[0][int(observation[0])], dtype=float)
         payoff_likelihood = np.asarray(A[1][int(observation[1]), int(own_action)], dtype=float)
         return action_likelihood * payoff_likelihood
 
-    def _infer_joint_posterior(self, prior: np.ndarray, observation: list[int], own_action: int, A: np.ndarray) -> np.ndarray:
+    def _infer_joint_posterior(
+        self, prior: np.ndarray, observation: list[int], own_action: int, A: np.ndarray
+    ) -> np.ndarray:
         posterior = self.model.as_joint_belief(prior) * self._joint_observation_likelihood(A, observation, own_action)
         posterior /= max(float(posterior.sum()), 1e-16)
         return posterior

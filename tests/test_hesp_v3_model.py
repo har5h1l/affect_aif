@@ -63,4 +63,3 @@ def test_social_posterior_multiplies_action_and_payoff_modalities():
     posterior = model.infer_joint_posterior(prior, observation=[0, 2], own_action=0)
 
     np.testing.assert_allclose(posterior, expected_posterior)
-

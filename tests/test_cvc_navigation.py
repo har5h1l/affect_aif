@@ -5,23 +5,21 @@ BFS pathfinding, directional BFS, walkability grid building, and exploration.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 from benchmark.cvc_navigation import (
-    DIRECTIONS,
     DIR_NAME_TO_DELTA,
+    DIRECTIONS,
     WALL_EXPIRY_STEPS,
     NavigationHelper,
-    NavigationState,
 )
 
-
 # ── Minimal observation mock ─────────────────────────────────────────────────
+
 
 @dataclass
 class _Token:
     feature: "_Feature"
-    location: Optional[tuple[int, int]]
+    location: tuple[int, int] | None
     value: float = 1.0
 
 
@@ -35,10 +33,7 @@ class _FakeObs:
     """Mimics mettagrid AgentObservation with just enough for navigation."""
 
     def __init__(self, walkable_cells: set[tuple[int, int]]):
-        self.tokens = [
-            _Token(feature=_Feature(name="aoe_mask"), location=(r, c))
-            for r, c in walkable_cells
-        ]
+        self.tokens = [_Token(feature=_Feature(name="aoe_mask"), location=(r, c)) for r, c in walkable_cells]
 
 
 def _all_walkable(height: int, width: int) -> _FakeObs:
@@ -47,6 +42,7 @@ def _all_walkable(height: int, width: int) -> _FakeObs:
 
 
 # ── NavigationState ──────────────────────────────────────────────────────────
+
 
 class TestNavigationState:
     def test_initial_state(self):
@@ -65,6 +61,7 @@ class TestNavigationState:
 
 
 # ── Position tracking ────────────────────────────────────────────────────────
+
 
 class TestPositionTracking:
     def test_successful_move_updates_position(self):
@@ -137,6 +134,7 @@ class TestPositionTracking:
 
 # ── Wall expiry ──────────────────────────────────────────────────────────────
 
+
 class TestWallExpiry:
     def test_walls_expire_after_threshold(self):
         nav = NavigationHelper(5, 5, (2, 2))
@@ -164,6 +162,7 @@ class TestWallExpiry:
 
 
 # ── Coordinate transforms ───────────────────────────────────────────────────
+
 
 class TestCoordinateTransforms:
     def test_local_global_roundtrip(self):
@@ -194,6 +193,7 @@ class TestCoordinateTransforms:
 
 
 # ── BFS pathfinding ──────────────────────────────────────────────────────────
+
 
 class TestBFS:
     def test_adjacent_target(self):
@@ -254,6 +254,7 @@ class TestBFS:
 
 # ── Directional BFS ──────────────────────────────────────────────────────────
 
+
 class TestBFSTowardDirection:
     def test_south_direction(self):
         nav = NavigationHelper(5, 5, (2, 2))
@@ -269,7 +270,7 @@ class TestBFSTowardDirection:
             grid[3][c] = False
             grid[4][c] = False
         # Should still return something (east/west edge) or None if truly stuck
-        action = nav._bfs_toward_direction(grid, (2, 2), target_dr=1, target_dc=0)
+        nav._bfs_toward_direction(grid, (2, 2), target_dr=1, target_dc=0)
         # Can't reach south edge, but north edge is reachable
         # Score for north cells would be negative, so might return None
         # This is acceptable behavior
@@ -283,6 +284,7 @@ class TestBFSTowardDirection:
 
 
 # ── Walkability grid ─────────────────────────────────────────────────────────
+
 
 class TestWalkabilityGrid:
     def test_all_walkable(self):
@@ -318,6 +320,7 @@ class TestWalkabilityGrid:
 
 # ── pathfind_toward integration ──────────────────────────────────────────────
 
+
 class TestPathfindToward:
     def test_adjacent_target_returns_action(self):
         nav = NavigationHelper(5, 5, (2, 2))
@@ -352,6 +355,7 @@ class TestPathfindToward:
 
 # ── explore_action ───────────────────────────────────────────────────────────
 
+
 class TestExploreAction:
     def test_explores_unvisited(self):
         nav = NavigationHelper(5, 5, (2, 2))
@@ -384,6 +388,7 @@ class TestExploreAction:
 
 
 # ── Direction constants ──────────────────────────────────────────────────────
+
 
 class TestDirectionConstants:
     def test_four_cardinal_directions(self):

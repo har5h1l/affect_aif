@@ -6,7 +6,7 @@ This directory contains the supported CLI wrappers around the package code.
 
 ## Core Supported Workflow
 
-These wrappers define the stable end-user workflow documented in `docs/cli.md`:
+These wrappers define the stable end-user workflow documented in `docs/operations/cli.md`:
 
 - `run_experiment.py`
 - `run_preliminary.py`

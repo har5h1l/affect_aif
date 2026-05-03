@@ -1,5 +1,6 @@
 """Decision #9: each per-partner aif.Agent holds its OWN A, B, pA, pB.
 C, D, E remain shared by reference."""
+
 from __future__ import annotations
 
 import numpy as np

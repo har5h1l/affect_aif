@@ -1,11 +1,10 @@
 import numpy as np
-
 import pytest
 
 from experiment.conditions import PRESET_CONDITIONS, get_condition_name
 from experiment.config import ExperimentConfig
 from experiment.runner import ExperimentRunner
-from trust import AffectiveAgent, LesionedAgent, TrustGameAgent
+from trust import AffectiveAgent, LesionedAgent
 
 
 def _build_model(config):
@@ -120,7 +119,12 @@ def test_affect_tracks_precision_not_reward():
 def test_runner_runs_directly_without_calibration():
     cfg = ExperimentConfig(
         payoff_mode="binary",
-        num_rounds=5, num_replications=1, random_seed=0, deep_horizon=4, shallow_horizon=2, conditions=[2]
+        num_rounds=5,
+        num_replications=1,
+        random_seed=0,
+        deep_horizon=4,
+        shallow_horizon=2,
+        conditions=[2],
     )
     runner = ExperimentRunner(cfg)
     results = runner.run_all()

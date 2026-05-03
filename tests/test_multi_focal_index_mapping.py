@@ -1,4 +1,5 @@
 """Round-trip tests for global<->local partner index mapping (F5)."""
+
 from __future__ import annotations
 
 import pytest
@@ -20,10 +21,10 @@ def test_round_trip_global_to_local_to_global(M):
 @pytest.mark.parametrize("M", [2, 3, 4, 8])
 def test_round_trip_local_to_global_to_local(M):
     for g in range(M):
-        for l in range(M - 1):
-            o = _global_partner_idx(g, l, M)
+        for local_idx in range(M - 1):
+            o = _global_partner_idx(g, local_idx, M)
             assert o != g
-            assert _local_partner_idx(g, o) == l
+            assert _local_partner_idx(g, o) == local_idx
 
 
 def test_self_modeling_local_raises():
