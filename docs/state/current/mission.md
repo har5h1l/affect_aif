@@ -23,7 +23,19 @@ docs/state steering.
   approval.
 - Do not add orchestration or deployment scripts to this repo; use Mango for
   remote VM, sync, and merge flows.
-- Do not schedule full experiment reruns until restructure verification passes.
+- Re-run the verification gate in `docs/state/current/next_runs.md` immediately
+  before scheduling full experiment reruns.
+
+## Completion State
+
+- `master` has been fast-forwarded through the reusable-core/task-package
+  restructure.
+- Local verification passed on `master` after the fast-forward merge.
+- The cleaned workspace was synced to the Mango `server` target, with targeted
+  removal of stale remote-only repo surfaces left behind by the non-deleting
+  rsync path.
+- The next research action is the post-restructure experiment queue in
+  `docs/state/current/next_runs.md`.
 
 ## Stop Conditions
 
