@@ -10,7 +10,7 @@ N agents interact in a repeated trust game with turn-taking. Each round, one foc
 
 Precision tracking reads social prediction errors and modulates policy precision, without being part of the POMDP state space. This matches Hesp et al.'s hierarchical approach where precision is inferred from inference dynamics rather than from a dedicated sensory channel.
 
-**Version history**: v1 had F=4, M=3 with non-standard payoff. v2 dropped payoff (M=2). v3 restores payoff as a proper modality via s_own factor and re-parameterizes beta to match Hesp's convention. v4 removes beta from POMDP state space and intero from observations; precision tracking becomes an external module operating on inference dynamics.
+**Version history**: v1 had F=4, M=3 with non-standard payoff. v2 dropped payoff (M=2). v3 restores payoff as a proper modality via s_own factor and re-parameterizes beta to match Hesp's convention. v4 removes beta from POMDP state space and intero from observations; precision tracking becomes an external module operating on inference dynamics. The current implementation also follows the apashea-aligned factorized-control convention described in `docs/theory/apashea_alignment.md`.
 
 ---
 
@@ -43,13 +43,29 @@ Joint state space per partner: 4 types x 3 stances x 2 own_action = 24 states.
 
 ---
 
-## 4. Control Factors (U=1)
+## 4. Control Factors
+
+The current binary trust-game implementation uses apashea-aligned factorized
+controls instead of one flat social-action control during planning.
 
 | Factor | Symbol | Actions | Controls |
 |--------|--------|---------|----------|
-| Social action | `pi_social` | cooperate, defect (2) | `s_stance` transitions (via action-dependent B), `s_own` (deterministic) |
+| Partner choice | `pi_partner` | current partner only in random mode; N partners in agent-choice mode | which partner receives the executed interaction |
+| Stance control | `pi_stance` | cooperate, defect (2) | `s_stance` transitions via action-dependent B |
+| Own action | `pi_own` | cooperate, defect (2) | `s_own` deterministic update and realized payoff |
 
-In agent_choice mode, the action space expands to N x 2 (choose partner x choose social action). Partner selection is handled via action encoding, not as a hidden state transition.
+For random-partner binary games, the instantaneous control shape is `[1, 2, 2]`.
+For agent-choice binary games, the instantaneous control shape is
+`[num_partners, 2, 2]`. Environment action encoding follows
+`partner * 4 + stance * 2 + own`.
+
+Payoff and outcome updates use the executed `own` action. Rollout uses the
+stance-control column for generative stance transitions during planning, while
+partner-observed stance dynamics use the executed own action. This keeps the
+POMDP matrices apashea-aligned without embedding pymdp as a runtime dependency.
+
+Graded trust games keep a single flat social-action control over investment
+levels where that representation is the active task semantics.
 
 ---
 

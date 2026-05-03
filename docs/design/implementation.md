@@ -83,7 +83,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
 - `num_beta_levels` is accepted only as a legacy config input alias; serialized configs now emit `beta_num_levels`.
 
-## Supported vs archived surface
+## Supported Surface
 
 - The supported CLI wrappers are:
   - `scripts/run_experiment.py`
@@ -91,8 +91,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - `scripts/run_analysis.py`
   - `scripts/run_visualization.py`
   - `scripts/run_model_comparison.py`
-- Historical one-off scripts, archived configs, and the earlier standalone discrete-beta prototype live under `archive/`.
-- `archive/` is intentionally excluded from the default lint/type/test surface.
+- Historical one-off scripts, archived configs, paper-era claims, and the earlier standalone discrete-beta prototype were salvaged into `docs/results/historical_findings.md` or deleted. They are not runnable workflow surfaces.
 
 ## Verbose Execution Tracing
 

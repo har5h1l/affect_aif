@@ -31,4 +31,4 @@ These scripts remain in the active tree because they support benchmark, paper, c
 ## Internal / Compatibility Notes
 
 - These wrappers are intentionally thin and defer real work to the package modules.
-- Historical one-off scripts were moved to `archive/scripts/`.
+- Historical one-off scripts were removed after salvage into `docs/results/historical_findings.md`.

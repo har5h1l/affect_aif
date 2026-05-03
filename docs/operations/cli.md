@@ -67,7 +67,7 @@ python scripts/run_experiment.py --config affect_aif/configs/default.json --conf
 
 ## Preliminary Run
 
-`run_preliminary.py` runs a small fixed-condition experiment and prints per-condition summaries plus directional H1-H5 checks.
+`run_preliminary.py` runs a small fixed-condition experiment and prints per-condition summaries.
 
 ```bash
 python scripts/run_preliminary.py [--config <json>] [--replications N] [--rounds N] [--output <path>]
@@ -91,4 +91,4 @@ The input can be CSV or parquet. Outputs include `final_round_summary.csv`, `pai
 
 ## Configs
 
-Supported experiment configs live under `affect_aif/configs/`. The primary supported scenarios are `default.json` and `betrayal_stress.json`, with the other JSON configs serving as variant or sensitivity scenarios. Historical configs and scripts remain under `archive/configs/` and `archive/scripts/` and are intentionally outside the supported workflow.
+Supported trust experiment configs live under `experiments/trust/configs/`. Supported multi-focal configs live under `experiments/multifocal/configs/`. External benchmark and CvC configs remain under `configs/` until the benchmark package split lands. Historical paper/archive/conductor material has been salvaged into `docs/results/historical_findings.md` and is not a runnable workflow surface.

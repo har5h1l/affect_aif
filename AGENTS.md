@@ -4,7 +4,9 @@ This document provides comprehensive system documentation for AI agents operatin
 
 ## Documentation First
 
-- Read `docs/theory/theory.md` before changing computational claims, affect dynamics, terminal values, or the interpretation of results.
+- Read `docs/state/README.md` and `docs/state/current/mission.md` before taking over a research or restructure task.
+- Read `docs/theory/goals.md`, `docs/theory/hypotheses.md`, and `docs/theory/pomdp_spec.md` before changing computational claims, affect dynamics, terminal values, or the interpretation of results.
+- Read `docs/theory/apashea_alignment.md` before changing factorized controls, policy priors, learning hooks, or pymdp/JAX alignment claims.
 - Read `docs/experiment/design.md` before changing task design, configs, conditions, metrics, or sensitivity sweeps.
 - Read `docs/design/implementation.md` before changing environment semantics, switching logic, or analysis helpers.
 - Read `README.md` before changing setup, entry points, or repo layout.
@@ -20,7 +22,7 @@ This document provides comprehensive system documentation for AI agents operatin
 
 - Before updating result-interpretation docs from new experiment outputs, ask the user first.
 - When the user asks about branch state, merge readiness, or pruning stale remote branches, run git (fetch or prune as needed) and summarise concrete outputs instead of only listing commands.
-- For conductor-driven research, treat the active mission file as the source of truth for phase autonomy; do not default to “blocked” framing when the mission tells the agent to proceed or to choose the next phase.
+- For docs/state-driven research, treat `docs/state/current/mission.md` as the source of truth for phase autonomy; do not default to “blocked” framing when the mission tells the agent to proceed or to choose the next phase.
 
 ## Learned Workspace Facts
 
@@ -72,7 +74,7 @@ affect_aif/
 ├── analysis/              # Depends on: nothing (operates on DataFrames)
 │   ├── metrics.py         # Summary statistics, betrayal analysis, movement
 │   ├── statistics.py      # ANOVA, pairwise tests
-│   ├── hypotheses.py      # H1-H5 hypothesis test battery
+│   ├── hypotheses.py      # Current Hesp-extension hypothesis helpers
 │   ├── plots.py           # Matplotlib figure generation
 │   └── visualization.py   # GIF generation
 └── configs/               # JSON experiment configurations
@@ -178,7 +180,7 @@ Configs are JSON files in `affect_aif/configs/`. Key fields of `ExperimentConfig
 |------|----------|
 | `final_round_summary.csv` | Per-seed cumulative payoffs and accuracy |
 | `pairwise_payoff_tests.csv` | All condition pairs: t-stat, p-value, Cohen's d |
-| `hypothesis_tests.json` | H1-H5 structured test results |
+| `hypothesis_tests.json` | Structured hypothesis test results |
 | `hypothesis_summary.csv` | One-row-per-hypothesis overview |
 | `affective_movement_summary.csv` | Beta/terminal-signal range per seed |
 | `statistics_summary.txt` | ANOVA + movement + betrayal summaries |
@@ -205,7 +207,8 @@ python -m pytest tests/test_core.py -v  # isolate to module
 ### Experiment produces unexpected results
 1. Run with `--verbose --verbosity-mode stage_stream` for per-round tracing
 2. Check `calibration_summary` in `batch_metadata.json` — is mu reasonable?
-3. Compare against known baselines in `docs/experiment/results.md`
+3. Check current state in `docs/state/current/blockers.md`
+4. Compare against current and historical status in `docs/results/`
 
 ### Analysis script errors
 - Check CSV has expected columns: `condition`, `seed`, `round`, `payoff`, `run_mode`

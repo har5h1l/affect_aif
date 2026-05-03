@@ -373,7 +373,7 @@ def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_liv
     assert "tau2_no_affect" in h1_text
 
 
-def test_archive_boundary_is_explicit():
+def test_historical_archive_surface_is_removed():
     supported_scripts = {
         "run_experiment.py",
         "run_preliminary.py",
@@ -382,16 +382,14 @@ def test_archive_boundary_is_explicit():
         "run_model_comparison.py",
     }
     all_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
-    archived_scripts = {path.name for path in (REPO_ROOT / "archive" / "scripts").glob("*.py")}
-    pyproject_text = (REPO_ROOT / "pyproject.toml").read_text()
     cli_doc = (REPO_ROOT / "docs" / "operations" / "cli.md").read_text()
+    historical_doc = (REPO_ROOT / "docs" / "results" / "historical_findings.md").read_text()
 
     assert supported_scripts <= all_scripts
     assert "analyze_benchmark.py" in all_scripts
     assert "analyze_benchmark.py" not in supported_scripts
     for script_name in supported_scripts:
         assert script_name in cli_doc
-    assert "run_precision_modulation.py" in archived_scripts
-    assert "extend-exclude" in pyproject_text
-    assert '"archive"' in pyproject_text
-    assert "archive/configs/" in cli_doc
+    assert not (REPO_ROOT / "archive").exists()
+    assert "archive/configs/" not in cli_doc
+    assert "run_precision_modulation.py" in historical_doc
