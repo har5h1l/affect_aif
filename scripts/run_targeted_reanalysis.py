@@ -253,9 +253,7 @@ def _header(title: str, source_paths: OrderedDict[Path, list[str]], frame: pd.Da
         for source_path, conditions in source_paths.items():
             source_type = "partial checkpoint" if str(source_path).endswith("results_partial.csv") else "final results"
             condition_summary = ", ".join(conditions) if conditions else "all available"
-            lines.append(
-                f"- {source_path} ({source_type}; conditions: {condition_summary})"
-            )
+            lines.append(f"- {source_path} ({source_type}; conditions: {condition_summary})")
     lines.extend(_format_coverage(frame))
     return lines
 
