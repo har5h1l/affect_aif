@@ -186,7 +186,7 @@ In the primary experiments in this repository, that precision-modulation path is
 
 ### 3.4 Affective State Dynamics
 
-> **Variational grounding (theory).** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. The **shipped** code path uses the discrete filter in `aif.affect.beta.DiscreteBetaState` only; a separate variational auxiliary-state implementation is not in the runnable tree (see `docs/experiment/design.md` and `archive/legacy_discrete_beta/`).
+> **Variational grounding (theory).** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. The **shipped** code path uses the discrete filter in `aif.affect.beta.DiscreteBetaState` only; a separate variational auxiliary-state implementation is not in the runnable tree (see `docs/experiment/design.md` and `docs/results/historical_findings.md`).
 
 The affective state $\beta_k$ for partner $k$ is updated from a signed affective charge derived from prediction error:
 
@@ -334,7 +334,7 @@ So the present theory should be read as: affect adds a partner-specific precisio
 
 ### 4.9 Discrete variational beta formulation
 
-> **Status.** The experiment preset named `variational_beta` and any separate variational-state runtime have been **removed** from the active codebase to avoid ghost configuration. The discrete formulation below is what `trust.AffectiveAgent` runs today. Historical variational experiments live under `archive/legacy_discrete_beta/`.
+> **Status.** The experiment preset named `variational_beta` and any separate variational-state runtime have been **removed** from the active codebase to avoid ghost configuration. The discrete formulation below is what `trust.AffectiveAgent` runs today. Historical variational context is summarized in `docs/results/historical_findings.md`.
 
 The narrative in §3.4 above described a continuous EMA-style story for intuition. The **implemented** $\beta$ dynamics are the discrete categorical update in the following bullets; partner type remains the primary hidden-state factor.
 

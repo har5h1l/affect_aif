@@ -1,8 +1,4 @@
-"""Predefined MettaGrid/CoGames cooperation scenarios for benchmarking.
-
-Each scenario defines a gridworld configuration designed to test
-cooperation dynamics comparable to the trust game.
-"""
+"""Predefined trust-task evaluation scenarios."""
 
 from __future__ import annotations
 
@@ -16,18 +12,13 @@ class BenchmarkScenario:
 
     name: str
     description: str
-    grid_width: int = 16
-    grid_height: int = 16
     num_partners: int = 4
     num_rounds: int = 100
-    ticks_per_round: int = 10
     partner_types: list[str] = field(default_factory=lambda: ["cooperator", "reciprocator", "exploiter", "random"])
     assignment_mode: str = "random"
     p_switch: float = 0.05
     initial_partner_types: list[str] | None = None
     scheduled_type_switches: list[dict[str, Any]] = field(default_factory=list)
-    resource_spawn_rate: float = 0.1
-    episode_length: int = 1000
 
     def trust_game_defaults(self) -> dict[str, Any]:
         """Return trust-game-compatible defaults for this scenario."""
@@ -45,21 +36,14 @@ class BenchmarkScenario:
         return defaults
 
 
-# Pre-defined scenarios
-
 RESOURCE_SHARING = BenchmarkScenario(
     name="resource_sharing",
     description=(
-        "Small arena with 1 focal agent + 4 partners. Resources spawn "
-        "periodically. Partners follow scripted cooperation/defection policies. "
-        "Tests whether per-partner precision tracking helps identify partner types "
-        "in a spatially-embedded setting."
+        "Trust-task arena with 1 focal agent and 4 partners. Tests whether "
+        "per-partner precision tracking helps identify partner types."
     ),
-    grid_width=16,
-    grid_height=16,
     num_partners=4,
     num_rounds=100,
-    ticks_per_round=10,
     partner_types=["cooperator", "reciprocator", "exploiter", "random"],
 )
 
@@ -67,14 +51,10 @@ BETRAYAL_ARENA = BenchmarkScenario(
     name="betrayal_arena",
     description=(
         "Cooperation scenario with a scheduled betrayal: one partner switches "
-        "from cooperator to exploiter mid-episode. Tests adaptation speed "
-        "in gridworld context."
+        "from cooperator to exploiter mid-episode. Tests adaptation speed."
     ),
-    grid_width=16,
-    grid_height=16,
     num_partners=2,
     num_rounds=100,
-    ticks_per_round=10,
     assignment_mode="agent_choice",
     p_switch=0.0,
     initial_partner_types=["cooperator", "random"],
@@ -83,14 +63,9 @@ BETRAYAL_ARENA = BenchmarkScenario(
 
 LARGE_GROUP = BenchmarkScenario(
     name="large_group",
-    description=(
-        "Larger arena with 8 partners and more complex spatial dynamics. Tests scaling of per-partner tracking."
-    ),
-    grid_width=32,
-    grid_height=32,
+    description="Larger trust-task arena with 8 partners. Tests scaling of per-partner tracking.",
     num_partners=8,
     num_rounds=200,
-    ticks_per_round=15,
     partner_types=[
         "cooperator",
         "cooperator",

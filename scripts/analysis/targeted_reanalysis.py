@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from analysis.metrics import final_round_summary
 from experiments.trust.conditions import CONDITIONS, resolve_condition_spec

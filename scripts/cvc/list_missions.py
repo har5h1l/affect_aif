@@ -2,7 +2,7 @@
 """List available CvC missions from cogames.
 
 Run with Python 3.12 (or conda env with cogames):
-    conda run -n cvc python scripts/cvc_list_missions.py
+    conda run -n cvc python scripts/cvc/list_missions.py
 
 Probes all available missions and reports their properties.
 """

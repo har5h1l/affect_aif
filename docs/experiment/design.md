@@ -21,8 +21,8 @@ Older condition numbering below is retained only as historical context and shoul
 
 The following are intentionally **not** in the runnable tree; reintroduce them only with a real implementation and tests:
 
-- **Variational beta** — the old `variational_beta` preset and `beta_mode` experiment field are removed. A variational auxiliary state would be new code (see archived notes under `archive/legacy_discrete_beta/`).
-- **CoGames policy bridge** — `benchmark/aif_policy.py` was an unfinished adapter and has been removed; CvC integration should add a policy class when that track unfreezes.
+- **Variational beta** — the old `variational_beta` preset and `beta_mode` experiment field are removed. A variational auxiliary state would be new code; historical context is summarized in `docs/results/historical_findings.md`.
+- **CoGames policy bridge** — the unfinished AIFPolicy adapter has been removed; CvC integration should add a policy class under `benchmarks/cvc/` when that track unfreezes.
 
 ---
 

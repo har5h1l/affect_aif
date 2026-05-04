@@ -31,7 +31,7 @@ dev = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["aif*", "tasks*", "experiments*", "analysis*", "benchmark*", "benchmarks*", "cli*"]
+include = ["aif*", "tasks*", "experiments*", "analysis*", "benchmarks*", "cli*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -63,11 +63,11 @@ files = [
   "experiments/trust/config.py",
   "experiments/trust/constants.py",
   "experiments/trust/persistence.py",
-  "scripts/run_analysis.py",
-  "scripts/run_experiment.py",
-  "scripts/run_model_comparison.py",
-  "scripts/run_preliminary.py",
-  "scripts/run_visualization.py",
+  "scripts/analysis/analyze.py",
+  "scripts/analysis/model_comparison.py",
+  "scripts/analysis/visualize.py",
+  "scripts/experiment/preliminary.py",
+  "scripts/experiment/run.py",
 ]
 exclude = []
 ignore_missing_imports = true

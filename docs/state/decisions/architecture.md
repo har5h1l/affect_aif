@@ -29,6 +29,5 @@ does not embed pymdp as a runtime dependency.
 
 ## Legacy Surfaces
 
-`conductor/`, `archive/`, and `docs/paper/` are not current operating surfaces.
-Useful context is salvaged into `docs/state/` and `docs/results/`, then stale
-sources are removed.
+Retired operating surfaces are removed from the runnable tree. Useful context is
+salvaged into `docs/state/` and `docs/results/`, then stale sources are removed.

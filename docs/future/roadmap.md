@@ -117,7 +117,7 @@ The core novelty — beta as metacognitive precision monitoring ("how reliable i
 - **Pitliya et al. (2025)** — ToM = cognitive model of other's inference
 - **This work** — inside-out metacognitive monitoring of one's own social inference channel
 
-The triple dissociation (outside-in empathy / cognitive ToM / inside-out precision monitoring) is the cleanest positioning. Action: update Discussion in `docs/paper/main.tex` and `docs/theory/theory.md` Section 4.
+The triple dissociation (outside-in empathy / cognitive ToM / inside-out precision monitoring) is the cleanest positioning. Action: update the next manuscript draft and `docs/theory/theory.md` Section 4.
 
 **1.2 Precision Modulation Pathway: Test or Cut**
 
@@ -154,7 +154,7 @@ Phase 5 between-profile payoff differences are small (10.324-10.353). The paper 
 ### Track 2: Paper Preparation (active, MEDIUM priority)
 
 **2.1 Docs Consistency Check**
-Verify agreement across `docs/theory/theory.md`, `docs/experiment/results.md`, `docs/experiment/design.md`, and `docs/paper/main.tex` on condition numbering, key numbers, hypothesis status, and phase descriptions.
+Verify agreement across `docs/theory/theory.md`, `docs/experiment/results.md`, and `docs/experiment/design.md` on condition numbering, key numbers, hypothesis status, and phase descriptions.
 
 **2.2 Results Reproducibility Spot-Check**
 Spot-check key configs (5 seeds each): `default.json`, `betrayal_stress.json`, `horizon_sweep.json`.

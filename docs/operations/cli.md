@@ -4,25 +4,27 @@ Supported command-line workflows for `affect_aif`. Commands assume the repo root
 
 ## Supported Scripts
 
-These wrappers are the supported CLI surface:
+These scripts are the supported CLI surface:
 
 | Script | Purpose |
 |--------|---------|
 | `scripts/experiment/run.py` | Run one or more experiment configs and write batch outputs. |
 | `scripts/experiment/smoke.py` | Dry-run the smoke config by default, or run it with `--run`. |
 | `scripts/experiment/inspect.py` | Print a compact JSON summary for an experiment config. |
-| `scripts/run_preliminary.py` | Run a small smoke-test experiment and print directional checks. |
+| `scripts/experiment/preliminary.py` | Run a small smoke-test experiment and print directional checks. |
 | `scripts/analysis/analyze.py` | Generate post-hoc figures, summary tables, and betrayal artifacts. |
 | `scripts/analysis/summarize.py` | Write the final-round summary table for a saved results table. |
 | `scripts/analysis/visualize.py` | Regenerate GIFs from saved results. |
-| `scripts/run_model_comparison.py` | Compare conditions with predictive log-score summaries and RFX-BMS. |
+| `scripts/analysis/model_comparison.py` | Compare conditions with predictive log-score summaries and RFX-BMS. |
+| `scripts/analysis/targeted_reanalysis.py` | Regenerate targeted H1/H2/H4 re-analysis summaries from result CSVs. |
+| `scripts/benchmark/analyze.py` | Derive shared, trust, and CvC benchmark summaries from benchmark CSVs. |
 | `scripts/benchmark/run_cvc.py` | Run backend-aware benchmark comparisons, including experimental CvC. |
 | `scripts/benchmark/package_cvc.py` | Write a submission-shaped local CvC policy bundle. |
+| `scripts/cvc/list_missions.py` | List local CvC mission metadata. |
+| `scripts/cvc/obs_diagnostic.py` | Inspect local CvC observation keys and shapes. |
 
-Top-level `scripts/run_experiment.py`, `scripts/run_analysis.py`,
-`scripts/run_visualization.py`, and `scripts/run_benchmark.py` are compatibility
-wrappers around the canonical paths above. Historical one-off scripts are not
-part of the supported workflow contract.
+Historical one-off scripts and top-level compatibility wrappers are not part of
+the supported workflow contract.
 
 ## Experiment Runner
 
@@ -82,10 +84,10 @@ python scripts/experiment/run.py --config experiments/trust/configs/smoke.json -
 
 ## Preliminary Run
 
-`run_preliminary.py` runs a small fixed-condition experiment and prints per-condition summaries.
+`scripts/experiment/preliminary.py` runs a small fixed-condition experiment and prints per-condition summaries.
 
 ```bash
-python scripts/run_preliminary.py [--config <json>] [--replications N] [--rounds N] [--output <path>]
+python scripts/experiment/preliminary.py [--config <json>] [--replications N] [--rounds N] [--output <path>]
 ```
 
 It always evaluates conditions 1-5, disables sensitivity runs, and writes a CSV results table at `--output`.
@@ -102,13 +104,13 @@ The input can be CSV or parquet. Outputs include `final_round_summary.csv`, `pai
 
 ## Visualization and Model Comparison
 
-`scripts/analysis/visualize.py` and `run_model_comparison.py` also accept CSV or parquet input tables. They write GIFs or model-comparison summaries into the directory passed via `--output-dir`.
+`scripts/analysis/visualize.py` and `scripts/analysis/model_comparison.py` also accept CSV or parquet input tables. They write GIFs or model-comparison summaries into the directory passed via `--output-dir`.
 
 ## Configs
 
 Supported trust experiment configs live under `experiments/trust/configs/`.
 Supported multi-focal configs live under `experiments/multifocal/configs/`.
 External benchmark configs remain under `configs/`; CvC implementation code lives
-under `benchmarks/cvc/`. Historical paper/archive/conductor material has been
-salvaged into `docs/results/historical_findings.md` and is not a runnable
-workflow surface.
+under `benchmarks/cvc/`, with shared runner code under `benchmarks/core/`.
+Historical material has been salvaged into `docs/results/historical_findings.md`
+and is not a runnable workflow surface.

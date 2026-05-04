@@ -90,36 +90,8 @@ class BenchmarkConfig:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> BenchmarkConfig:
         raw = dict(data)
-
-        if "backends" not in raw:
-            run_trust = bool(raw.pop("run_trust_game", True))
-            run_gridworld = bool(raw.pop("run_gridworld", False))
-            backends: list[str] = []
-            if run_trust:
-                backends.append("trust")
-            if run_gridworld:
-                backends.append("toy_gridworld")
-            raw["backends"] = backends or DEFAULT_BACKENDS[:]
-
+        raw["backends"] = [str(name) for name in raw.get("backends", DEFAULT_BACKENDS[:])] or DEFAULT_BACKENDS[:]
         backend_configs = dict(raw.get("backend_configs", {}))
-
-        legacy_scenario = raw.pop("scenario", None)
-        if legacy_scenario is not None:
-            backend_configs.setdefault("trust", {})
-            backend_configs["trust"].setdefault("scenario", legacy_scenario)
-            backend_configs.setdefault("toy_gridworld", {})
-            backend_configs["toy_gridworld"].setdefault("scenario", legacy_scenario)
-
-        legacy_ticks = raw.pop("ticks_per_round", None)
-        if legacy_ticks is not None:
-            backend_configs.setdefault("toy_gridworld", {})
-            backend_configs["toy_gridworld"].setdefault("ticks_per_round", legacy_ticks)
-
-        legacy_trust_overrides = raw.pop("trust_game_overrides", None)
-        if legacy_trust_overrides is not None:
-            backend_configs.setdefault("trust", {})
-            backend_configs["trust"].setdefault("trust_game_overrides", legacy_trust_overrides)
-
         raw["backend_configs"] = backend_configs
 
         default_backend = raw["backends"][0] if raw["backends"] else "trust"
@@ -142,8 +114,8 @@ class BenchmarkConfig:
         target.write_text(json.dumps(payload, indent=2))
 
 
-# Trust and toy-gridworld backends share the same registry because both operate on
-# the trust-game action protocol. Real CvC runs use explicit policy specs instead.
+# Trust-task evaluation agents use the registry. Real CvC runs use explicit
+# policy specs because those policies live in the external CoGames runtime.
 AGENT_REGISTRY = {
     **{spec.name: {"type": "aif", "condition": condition_id} for condition_id, spec in CONDITIONS.items()},
     **{spec.name: {"type": "aif", "preset": preset_name} for preset_name, spec in PRESET_CONDITIONS.items()},

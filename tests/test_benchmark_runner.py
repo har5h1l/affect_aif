@@ -6,8 +6,8 @@ import sys
 
 import numpy as np
 
-from benchmark.benchmark_config import BenchmarkConfig
-from benchmark.benchmark_runner import BenchmarkRunner
+from benchmarks.core.benchmark_config import BenchmarkConfig
+from benchmarks.core.benchmark_runner import BenchmarkRunner
 
 
 def test_runner_uses_numeric_condition_and_condition_name():
@@ -51,14 +51,14 @@ def test_runner_sets_nan_type_accuracy_for_baselines():
 
 
 def test_runner_module_imports_when_optional_backend_module_is_missing(monkeypatch):
-    module_name = "benchmark.benchmark_runner"
+    module_name = "benchmarks.core.benchmark_runner"
     sys.modules.pop(module_name, None)
 
     real_import = builtins.__import__
 
     def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
-        if name == "benchmark.toy_gridworld_backend":
-            raise ModuleNotFoundError("No module named 'benchmark.toy_gridworld_backend'")
+        if name == "benchmarks.cvc.local_backend":
+            raise ModuleNotFoundError("No module named 'benchmarks.cvc.local_backend'")
         return real_import(name, globals, locals, fromlist, level)
 
     monkeypatch.setattr(builtins, "__import__", guarded_import)
@@ -66,4 +66,4 @@ def test_runner_module_imports_when_optional_backend_module_is_missing(monkeypat
     module = importlib.import_module(module_name)
 
     assert module.BenchmarkRunner is not None
-    assert "toy_gridworld" in module.BACKEND_REGISTRY
+    assert set(module.BACKEND_REGISTRY) == {"trust", "cvc_local"}

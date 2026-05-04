@@ -9,9 +9,9 @@ from typing import Any
 
 import numpy as np
 
-from benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
-from benchmark.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
-from benchmark.scenarios import get_scenario
+from benchmarks.core.backend import BenchmarkBackend, BenchmarkBackendContext
+from benchmarks.core.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
+from benchmarks.core.scenarios import get_scenario
 from experiments.trust.conditions import resolve_condition_spec
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner

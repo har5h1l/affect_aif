@@ -1,21 +1,28 @@
 """Tests for benchmark configuration and agent specs."""
 
-from benchmark.benchmark_config import AgentSpec, BenchmarkConfig
+from pathlib import Path
+
+from benchmarks.core.benchmark_config import AgentSpec, BenchmarkConfig
 
 
-def test_legacy_boolean_environment_flags_are_mapped_to_backends():
+def test_trust_registry_agents_default_to_first_backend():
     config = BenchmarkConfig.from_dict(
         {
-            "scenario": "resource_sharing",
+            "backends": ["trust"],
             "agents": ["tau4_affect", "random"],
-            "run_trust_game": True,
-            "run_gridworld": False,
         }
     )
 
     assert config.backends == ["trust"]
     assert [agent.backend for agent in config.agents] == ["trust", "trust"]
     assert [agent.implementation for agent in config.agents] == ["tau4_affect", "random"]
+
+
+def test_checked_in_benchmark_configs_load():
+    for path in sorted(Path("configs").glob("benchmark*.json")):
+        config = BenchmarkConfig.from_json(str(path))
+        assert config.backends
+        assert config.agents
 
 
 def test_agent_specs_accept_explicit_policy_specs_for_cvc_backend():

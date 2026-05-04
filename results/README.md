@@ -16,6 +16,6 @@ Typical experiment outputs include:
 - `batch_metadata.json`
 - `gifs/` when `--make-gifs` is used
 
-The supported experiment CLI writes CSV results. Downstream analysis commands may read CSV or parquet, but parquet is not emitted by `run_experiment.py` or `run_preliminary.py`.
+The supported experiment CLI writes CSV results. Downstream analysis commands may read CSV or parquet, but parquet is not emitted by `scripts/experiment/run.py` or `scripts/experiment/preliminary.py`.
 
 This repository tracks only scaffolding for the directory. Generated outputs remain untracked.

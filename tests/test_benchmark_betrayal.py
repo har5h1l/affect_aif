@@ -1,7 +1,7 @@
 """Tests for betrayal-specific benchmark wiring."""
 
-from benchmark.benchmark_config import BenchmarkConfig
-from benchmark.benchmark_runner import BenchmarkRunner
+from benchmarks.core.benchmark_config import BenchmarkConfig
+from benchmarks.core.benchmark_runner import BenchmarkRunner
 
 
 def test_trust_backend_uses_betrayal_arena_default_switch():

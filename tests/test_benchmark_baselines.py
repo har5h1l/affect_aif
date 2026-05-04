@@ -5,7 +5,7 @@ These tests do NOT require cogames or mettagrid.
 
 import numpy as np
 
-from benchmark.compat import cogames_available, mettagrid_available
+from benchmarks.core.compat import cogames_available, mettagrid_available
 from tasks.trust.evaluation.baselines import (
     GrimTriggerAgent,
     PavlovAgent,

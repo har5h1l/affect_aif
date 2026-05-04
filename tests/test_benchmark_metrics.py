@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from benchmark.common_metrics import (
+from benchmarks.core.common_metrics import (
     adaptation_speed,
     cooperation_rate,
     cumulative_payoff,

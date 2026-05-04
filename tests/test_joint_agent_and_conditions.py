@@ -1,6 +1,6 @@
 import numpy as np
 
-from benchmark.benchmark_config import AGENT_REGISTRY
+from benchmarks.core.benchmark_config import AGENT_REGISTRY
 from experiments.trust.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.factory import create_agent

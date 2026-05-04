@@ -36,12 +36,12 @@ Common entry points:
 
 ```bash
 python scripts/experiment/run.py --config experiments/trust/configs/h6_shallow_policy_regime.json --output-dir results --batch-name h6_shallow_policy_regime --workers 12
-python scripts/run_preliminary.py --replications 5 --output results/preliminary.csv
+python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv
 python scripts/analysis/analyze.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/figures
 python scripts/analysis/visualize.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/gifs
-python scripts/run_model_comparison.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/model_comparison
+python scripts/analysis/model_comparison.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/model_comparison
 python scripts/benchmark/run_cvc.py --config configs/benchmark_default.json
-python scripts/analyze_benchmark.py --results results/benchmark/benchmark_results.csv
+python scripts/benchmark/analyze.py --results results/benchmark/benchmark_results.csv
 ```
 
 ## Repository Layout
@@ -51,7 +51,7 @@ python scripts/analyze_benchmark.py --results results/benchmark/benchmark_result
 - `experiments/trust/`: trust experiment configuration, conditions, and runner surface
 - `experiments/multifocal/`: multi-focal trust experiment configuration and runtime
 - `analysis/`: result loading, metrics, and visualization helpers
-- `benchmark/`: shared benchmark runner/config/comparison helpers
+- `benchmarks/core/`: shared benchmark runner/config/comparison helpers
 - `benchmarks/cvc/`: experimental CvC backend, policies, packaging, and Observatory client
 - `configs/`: external benchmark and CvC JSON configurations
 - `docs/`: theory, experiment, implementation, results, and state notes
@@ -61,7 +61,7 @@ python scripts/analyze_benchmark.py --results results/benchmark/benchmark_result
 ## Compatibility Notes
 
 - The main package exposes the supported runner/config entry points at the top level.
-- The trust-task evaluation arena is the supported task-comparison surface; the local CvC path and the scripted gridworld adapter remain separate compatibility paths.
+- The trust-task evaluation arena is the supported task-comparison surface; the local CvC path remains a separate experimental integration.
 - The discrete-beta prototype is archived; the supported affective path uses `aif.affect.beta.DiscreteBetaState`.
-- Removed experiment surfaces (variational beta preset, `benchmark/aif_policy.py`) are not loaded by the runtime; see `docs/experiment/design.md` for future-work notes.
-- Historical paper/archive/conductor findings are documented in [docs/results/historical_findings.md](docs/results/historical_findings.md) and are not current evidence unless rerun on the current architecture.
+- Removed experiment surfaces (variational beta preset, unfinished AIFPolicy adapter) are not loaded by the runtime; see `docs/experiment/design.md` for future-work notes.
+- Historical findings are documented in [docs/results/historical_findings.md](docs/results/historical_findings.md) and are not current evidence unless rerun on the current architecture.

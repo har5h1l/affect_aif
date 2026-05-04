@@ -4,8 +4,8 @@ import json
 import subprocess
 from pathlib import Path
 
-from benchmark.backend import BenchmarkBackendContext
-from benchmark.benchmark_config import BenchmarkConfig
+from benchmarks.core.backend import BenchmarkBackendContext
+from benchmarks.core.benchmark_config import BenchmarkConfig
 from benchmarks.cvc.local_backend import CvCLocalBackend
 
 

@@ -1,5 +1,4 @@
 {
-  "payoff_mode": "binary",
   "backends": [
     "cvc_local"
   ],

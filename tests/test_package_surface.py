@@ -16,7 +16,7 @@ def test_current_runtime_packages_are_discovered_by_pyproject():
     assert "aif*" in include
     assert "tasks*" in include
     assert "experiments*" in include
-    assert "benchmark*" in include
+    assert "benchmarks*" in include
     assert "trust*" not in include
     assert "env*" not in include
     assert "experiment*" not in include
@@ -30,4 +30,5 @@ def test_current_runtime_packages_are_discovered_by_pyproject():
     assert "tasks.trust.models" in packages
     assert "experiments.trust" in packages
     assert "experiments.multifocal" in packages
-    assert "benchmark" in packages
+    assert "benchmarks.core" in packages
+    assert "benchmark" not in packages

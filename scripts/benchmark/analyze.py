@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from benchmark.comparison import (
+from benchmarks.core.comparison import (
     compute_cvc_summary,
     compute_shared_summary,
     compute_trust_summary,

@@ -10,8 +10,8 @@ from analysis.model_comparison import model_comparison_report
 from cli.common import load_results_table
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner
-from scripts.run_analysis import _hypothesis_summary_frame
-from scripts.run_model_comparison import main as run_model_comparison_main
+from scripts.analysis.analyze import _hypothesis_summary_frame
+from scripts.analysis.model_comparison import main as run_model_comparison_main
 
 
 def test_h1_exports_current_label_and_summary_frame_uses_it(tiny_config):

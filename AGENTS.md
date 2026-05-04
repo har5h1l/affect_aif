@@ -27,10 +27,10 @@ This document provides comprehensive system documentation for AI agents operatin
 ## Learned Workspace Facts
 
 - Use `.venv` in project root; venv should auto-activate when in this folder (direnv with `.envrc`).
-- Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `run_analysis.py` on those paths after.
+- Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `scripts/analysis/analyze.py` on those paths after.
 - Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
 - State inference (partner-type belief updating) is the analytical solution to VFE minimization (matrix-based Bayes with A and B), not iterative optimization.
-- Benchmark runs use `scripts/run_benchmark.py` plus `docs/operations/benchmark.md` for backends, configs (for example `configs/benchmark_default.json` and `configs/benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
+- Benchmark runs use `scripts/benchmark/run_cvc.py` plus `docs/operations/benchmark.md` for backends, configs (for example `configs/benchmark_default.json` and `configs/benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is rsync and does not delete remote-only files under `results/`). Do not add orchestration or deployment scripts to this repo.
 
 ---
@@ -116,7 +116,7 @@ Config JSON → ExperimentRunner
     └── save_results()              # DataFrame → CSV
          │
          ▼
-    run_analysis.py                 # Post-hoc analysis
+    scripts/analysis/analyze.py     # Post-hoc analysis
     ├── final_round_summary()
     ├── cumulative_payoff_anova()
     ├── pairwise_payoff_tests()
@@ -176,7 +176,7 @@ Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
 
 ## Analysis Outputs
 
-`scripts/run_analysis.py --results <csv> --output-dir <dir>` produces:
+`scripts/analysis/analyze.py --results <csv> --output-dir <dir>` produces:
 
 | File | Contents |
 |------|----------|

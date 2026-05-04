@@ -599,7 +599,7 @@ The precision modulation pathway (`γ_k = γ(1 + β_k)`) is mechanistically vali
 
 **Implementation note**: In `decouple` lesion mode, C3 = C2 when modulation is active, because `LesionedAgent.precision_signal()` is not overridden in decouple mode. The lesion blocks terminal value weighting (mu=0) but not the precision channel. This is an intended distinction (vmPFC lesion blocks affect-to-value translation, not precision scaling) but should be noted in the paper.
 
-**Status**: Track 1.2 complete. Results added to paper (docs/paper/main.tex, new subsection "Precision Modulation Pathway Validation").
+**Status**: Track 1.2 complete. Historical manuscript notes were removed from the runnable tree; reuse this result only after reconciling it with a fresh manuscript draft.
 
 ## Execution Record Template
 

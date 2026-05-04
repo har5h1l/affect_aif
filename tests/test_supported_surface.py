@@ -27,7 +27,8 @@ def _build_model(config):
 
 def _load_script_module(script_name: str):
     script_path = REPO_ROOT / "scripts" / script_name
-    spec = importlib.util.spec_from_file_location(script_name.replace(".py", ""), script_path)
+    module_name = script_name.replace("/", "_").replace(".py", "")
+    spec = importlib.util.spec_from_file_location(module_name, script_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -73,13 +74,13 @@ def test_runner_no_epistemic_preset_builds_affective_agent():
     assert set(trust.__all__) >= {"TrustGameAgent", "AffectiveAgent", "LesionedAgent"}
 
 
-def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
-    run_experiment = _load_script_module("run_experiment.py")
-    run_analysis = _load_script_module("run_analysis.py")
-    run_model_comparison = _load_script_module("run_model_comparison.py")
-    run_preliminary = _load_script_module("run_preliminary.py")
-    run_targeted_reanalysis = _load_script_module("run_targeted_reanalysis.py")
-    run_visualization = _load_script_module("run_visualization.py")
+def test_supported_cli_scripts_parse_and_run_smoke(tmp_path):
+    run_experiment = _load_script_module("experiment/run.py")
+    run_analysis = _load_script_module("analysis/analyze.py")
+    run_model_comparison = _load_script_module("analysis/model_comparison.py")
+    run_preliminary = _load_script_module("experiment/preliminary.py")
+    run_targeted_reanalysis = _load_script_module("analysis/targeted_reanalysis.py")
+    run_visualization = _load_script_module("analysis/visualize.py")
 
     config = ExperimentConfig(
         payoff_mode="binary",
@@ -101,7 +102,7 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
 
     batch_name = "smoke_batch"
     sys.argv = [
-        "run_experiment.py",
+        "scripts/experiment/run.py",
         "--config",
         str(config_path),
         "--output-dir",
@@ -130,7 +131,7 @@ def test_supported_cli_wrappers_parse_and_run_smoke(tmp_path):
 
 
 def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
-    run_targeted_reanalysis = _load_script_module("run_targeted_reanalysis.py")
+    run_targeted_reanalysis = _load_script_module("analysis/targeted_reanalysis.py")
 
     h1_rows = []
     for seed in (0, 1):
@@ -291,7 +292,7 @@ def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
 
 
 def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_live_tail(tmp_path):
-    run_targeted_reanalysis = _load_script_module("run_targeted_reanalysis.py")
+    run_targeted_reanalysis = _load_script_module("analysis/targeted_reanalysis.py")
 
     results_root = tmp_path / "results"
     h1_main = results_root / "h1_factorial" / "h1_depth_affect_factorial"
@@ -375,21 +376,42 @@ def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_liv
 
 def test_historical_archive_surface_is_removed():
     supported_scripts = {
-        "run_experiment.py",
-        "run_preliminary.py",
-        "run_analysis.py",
-        "run_visualization.py",
-        "run_model_comparison.py",
+        "experiment/run.py",
+        "experiment/preliminary.py",
+        "experiment/smoke.py",
+        "experiment/inspect.py",
+        "analysis/analyze.py",
+        "analysis/summarize.py",
+        "analysis/visualize.py",
+        "analysis/model_comparison.py",
+        "analysis/targeted_reanalysis.py",
+        "benchmark/analyze.py",
+        "benchmark/run_cvc.py",
+        "benchmark/package_cvc.py",
+        "cvc/list_missions.py",
+        "cvc/obs_diagnostic.py",
     }
-    all_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
+    top_level_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
+    all_scripts = {str(path.relative_to(REPO_ROOT / "scripts")) for path in (REPO_ROOT / "scripts").rglob("*.py")}
     cli_doc = (REPO_ROOT / "docs" / "operations" / "cli.md").read_text()
     historical_doc = (REPO_ROOT / "docs" / "results" / "historical_findings.md").read_text()
 
+    assert top_level_scripts == set()
     assert supported_scripts <= all_scripts
-    assert "analyze_benchmark.py" in all_scripts
-    assert "analyze_benchmark.py" not in supported_scripts
     for script_name in supported_scripts:
         assert script_name in cli_doc
+    for deleted_name in {
+        "run_experiment.py",
+        "run_analysis.py",
+        "run_visualization.py",
+        "run_benchmark.py",
+        "analyze_benchmark.py",
+        "analyze_benchmark_paper.py",
+        "analyze_clinical_results.py",
+        "run_clinical_sensitivity.py",
+        "generate_paper_figures.py",
+    }:
+        assert deleted_name not in all_scripts
     assert not (REPO_ROOT / "archive").exists()
     assert "archive/configs/" not in cli_doc
     assert "run_precision_modulation.py" in historical_doc

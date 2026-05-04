@@ -6,20 +6,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from benchmark.backend import BenchmarkBackendContext
-from benchmark.benchmark_config import BenchmarkConfig
+from benchmarks.core.backend import BenchmarkBackendContext
+from benchmarks.core.benchmark_config import BenchmarkConfig
 
 
 def _load_trust_backend():
     from tasks.trust.evaluation.arena import TrustBackend
 
     return TrustBackend
-
-
-def _load_toy_gridworld_backend():
-    from benchmark.toy_gridworld_backend import ToyGridworldBackend
-
-    return ToyGridworldBackend
 
 
 def _load_cvc_backend():
@@ -30,7 +24,6 @@ def _load_cvc_backend():
 
 BACKEND_REGISTRY = {
     "trust": _load_trust_backend,
-    "toy_gridworld": _load_toy_gridworld_backend,
     "cvc_local": _load_cvc_backend,
 }
 

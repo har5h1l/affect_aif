@@ -9,8 +9,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from benchmark.backend import BenchmarkBackend, BenchmarkBackendContext
-from benchmark.benchmark_config import AgentSpec, BenchmarkConfig
+from benchmarks.core.backend import BenchmarkBackend, BenchmarkBackendContext
+from benchmarks.core.benchmark_config import AgentSpec, BenchmarkConfig
 from benchmarks.cvc.observatory import ObservatoryClient
 
 
@@ -118,7 +118,7 @@ class CvCLocalBackend(BenchmarkBackend):
             )
 
         timeout_s = int(self.backend_config.get("timeout_s", 600))
-        # Ensure the repo root is on PYTHONPATH so the worker can import benchmark
+        # Ensure the repo root is on PYTHONPATH so the worker can import benchmarks.
         repo_root = str(Path(__file__).resolve().parent.parent.parent)
         env = os.environ.copy()
         env["PYTHONPATH"] = repo_root + os.pathsep + env.get("PYTHONPATH", "")

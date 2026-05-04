@@ -10,9 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from benchmark.benchmark_config import BenchmarkConfig
-from benchmark.benchmark_runner import BenchmarkRunner
-from benchmark.comparison import format_comparison_report
+from benchmarks.core.benchmark_config import BenchmarkConfig
+from benchmarks.core.benchmark_runner import BenchmarkRunner
+from benchmarks.core.comparison import format_comparison_report
 
 CVC_POLICY_ALIASES = {
     "teammate_reliability": "class=benchmarks.cvc.policy.TeammateReliabilityPolicy",
@@ -71,7 +71,7 @@ def main():
         help="Benchmark backend to run. Repeatable. Examples: trust, cvc_local.",
     )
     parser.add_argument("--agents", nargs="+", default=None, help="Agent names or policy specs.")
-    parser.add_argument("--scenario", type=str, default="resource_sharing", help="Trust or toy backend scenario label.")
+    parser.add_argument("--scenario", type=str, default="resource_sharing", help="Trust backend scenario label.")
     parser.add_argument("--mission", type=str, default="machina_1", help="CvC mission name for cvc_local.")
     parser.add_argument("--replications", type=int, default=10, help="Number of replications per agent.")
     parser.add_argument("--rounds", type=int, default=100, help="Number of trust-game rounds.")
@@ -102,7 +102,6 @@ def main():
             "random_seed": args.seed,
             "backend_configs": {
                 "trust": {"scenario": args.scenario},
-                "toy_gridworld": {"scenario": args.scenario},
                 "cvc_local": {
                     "mission": args.mission,
                     "num_agents": args.num_agents,
@@ -118,13 +117,12 @@ def main():
             }
         config = BenchmarkConfig.from_dict(config_payload)
 
-    experimental_backends = [backend for backend in config.backends if backend in {"cvc_local", "toy_gridworld"}]
+    experimental_backends = [backend for backend in config.backends if backend == "cvc_local"]
     if experimental_backends:
         warnings.warn(
             "Experimental benchmark backend(s) selected: "
             f"{', '.join(experimental_backends)}. "
-            "Trust is the canonical supported backend; CvC and toy_gridworld "
-            "are WIP/compatibility paths.",
+            "Trust is the canonical supported backend; CvC is a WIP external integration.",
             RuntimeWarning,
             stacklevel=2,
         )

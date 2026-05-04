@@ -10,9 +10,6 @@ backends rather than treating the trust game as a benchmark peer of CvC.
 - `cvc_local` is a real CoGames/CvC backend, but it is still proof-of-concept
   / WIP. It runs through a Python 3.12 worker and uses the same policy class
   path / policy spec shape that can later be packaged for submission.
-- `toy_gridworld` remains only as a backward-compatible scripted adapter around
-  the old trust-like fallback. It is not a real CoGames integration, is not a
-  peer of `trust`, and should not be used for transfer claims.
 
 ## Why the Split Exists
 
@@ -33,7 +30,7 @@ Because of that mismatch:
 
 ### Config model
 
-`benchmark/benchmark_config.py` now uses:
+`benchmarks/core/benchmark_config.py` uses:
 
 - `backends: list[str]`
 - `agents: list[AgentSpec]`
@@ -42,13 +39,10 @@ Because of that mismatch:
 
 `AgentSpec` is backend-specific:
 
-- trust and toy-gridworld use registry-backed agents such as
-  `tau4_affect`, `random`, `pavlov`, `grim_trigger`
+- trust uses registry-backed agents such as `tau4_affect`, `random`,
+  `pavlov`, `grim_trigger`
 - CvC uses explicit policy specs such as
   `class=benchmarks.cvc.policy.TeammateReliabilityPolicy`
-
-Legacy config booleans (`run_trust_game`, `run_gridworld`) are still parsed for
-compatibility, but they are converted immediately into backend selections.
 
 ### Evaluation Surfaces
 
@@ -57,8 +51,6 @@ compatibility, but they are converted immediately into backend selections.
   `ExperimentRunner`, `TrustGameEnv`, and trust-task baseline agents.
 - `benchmarks/cvc/local_backend.py`
   Real local CvC backend. Launches `python3.12 -m benchmarks.cvc.local_worker`.
-- `benchmark/toy_gridworld_backend.py`
-  Deprecated scripted adapter for old experiments only.
 
 ### Shared record schema
 
@@ -88,7 +80,8 @@ active-inference theory. It now includes:
 - Grim Trigger baseline
 - benchmark JSON configs under `configs/`
 - scheduled-switch propagation through benchmark results
-- unfinished CoGames policy adapters are not shipped in `benchmark/` (add one when CvC integration is active)
+- unfinished CoGames policy adapters are not shipped in `benchmarks/core/`
+  (add one under `benchmarks/cvc/` when CvC integration is active)
 
 Recommended trust configs:
 
@@ -101,9 +94,6 @@ serving as labels only. In particular, `betrayal_arena` now carries its own
 trust-game setup: `assignment_mode="agent_choice"`, `p_switch=0`, an initial
 roster of `["cooperator", "random"]`, and a scheduled `partner 0 -> exploiter`
 switch at round 50 unless a benchmark config overrides those values.
-
-The legacy `toy_gridworld` adapter now applies the same scenario-level switch
-events, so both benchmark paths expose the same betrayal event by default.
 
 ## Real CvC Backend
 
@@ -165,7 +155,7 @@ parity with the supported trust-task evaluation arena.
 ### Analyze benchmark results
 
 ```bash
-python scripts/analyze_benchmark.py --results results/benchmark/benchmark_results.csv
+python scripts/benchmark/analyze.py --results results/benchmark/benchmark_results.csv
 ```
 
 Outputs are written next to the CSV by default:
@@ -189,7 +179,7 @@ The full CvC pipeline runs cleanly:
 2. **CvC local backend** spawns `python3.12 -m benchmarks.cvc.local_worker` subprocess
 3. **Worker** imports cogames/mettagrid, resolves mission, runs episode, extracts metrics
 4. **Results** flow back as JSON → DataFrame → CSV → comparison report
-5. **Analysis** pipeline (`analyze_benchmark.py`) computes CvC-specific summaries
+5. **Analysis** pipeline (`scripts/benchmark/analyze.py`) computes CvC-specific summaries
 
 Verified with: `benchmark_cvc_full.json` (6 policies × 10 seeds × 10,000 steps = 60 episodes).
 
@@ -216,11 +206,7 @@ Available CvC policies tested:
    interaction is proximity-based. Scoring requires effective pathfinding which
    the simple “move toward nearest tag” heuristic cannot provide.
 
-3. **The `cogames_adapter.py` `_run_cogames_round()` method is a stub.** It falls
-   back to simulated trust-game rounds. This adapter is only used by the legacy
-   `toy_gridworld` backend, not by the real `cvc_local` backend. Not a blocker.
-
-4. **No direct Python 3.10 tests for `policy.py`** since it requires
+3. **No direct Python 3.10 tests for `policy.py`** since it requires
    mettagrid (Python 3.12 only). The CvC worker subprocess is tested via mock.
 
 ### What's needed to get meaningful CvC results
@@ -240,7 +226,6 @@ Available CvC policies tested:
 
 ## Notes
 
-- Do not claim cross-environment “transfer” based on `toy_gridworld`.
 - Do not reinterpret the CvC policy as an AIF agent unless a real generative
   model and inference loop are added later.
 - Keep trust-specific hypothesis reads in trust analyses and use reward /

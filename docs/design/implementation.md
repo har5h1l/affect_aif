@@ -89,14 +89,14 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - `scripts/experiment/run.py`
   - `scripts/experiment/smoke.py`
   - `scripts/experiment/inspect.py`
-  - `scripts/run_preliminary.py`
+  - `scripts/experiment/preliminary.py`
   - `scripts/analysis/analyze.py`
   - `scripts/analysis/summarize.py`
   - `scripts/analysis/visualize.py`
-  - `scripts/run_model_comparison.py`
+  - `scripts/analysis/model_comparison.py`
   - `scripts/benchmark/run_cvc.py`
   - `scripts/benchmark/package_cvc.py`
-  Compatibility wrappers remain at the old top-level script paths.
+  Top-level script compatibility wrappers have been removed; use the grouped paths above.
 - Historical one-off scripts, archived configs, paper-era claims, and the earlier standalone discrete-beta prototype were salvaged into `docs/results/historical_findings.md` or deleted. They are not runnable workflow surfaces.
 
 ## Verbose Execution Tracing
@@ -118,12 +118,6 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - belief update start/end
   - metric logging end
 - These progress events are observational only. They do not change experiment dynamics, result rows, or analysis semantics.
-
-## Benchmark Observation Classification
-
-- In the benchmark trust adapter, one interaction window can contain both the focal agent's outward act (`share` / `attack`) and the partner's response (`receive` / `steal` / related partner-only events).
-- `InteractionTracker.classify_partner_behavior(...)` therefore treats only partner-originated events as evidence about the partner's action, while `classify_focal_behavior(...)` treats only focal-originated events as evidence about the focal action.
-- This keeps `RoundSummary.partner_action` aligned with the adapter's returned `partner_action` and with `observation[0]`, preventing asymmetric rounds from being mis-encoded as partner cooperation by tie-breaking over mixed-direction events.
 
 ## GIF Generation
 

@@ -12,11 +12,11 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 |------|---------|
 | Run all tests | `python -m pytest tests/ -v` |
 | Run single test | `python -m pytest tests/test_core.py::test_name -v` |
-| Run experiment | `python scripts/run_experiment.py --config experiments/trust/configs/<name>.json --output-dir results --batch-name <name>` |
-| Analyze results | `python scripts/run_analysis.py --results <path>/results.csv --output-dir <path>/figures` |
-| Preliminary check | `python scripts/run_preliminary.py --replications 5 --output results/preliminary.csv` |
-| Generate GIFs | `python scripts/run_visualization.py --results <path>/results.csv --output-dir <path>/gifs` |
-| Batch run (parallel) | `python scripts/run_experiment.py --config <a>.json --config <b>.json --workers 12 --output-dir results --batch-name main_run` |
+| Run experiment | `python scripts/experiment/run.py --config experiments/trust/configs/<name>.json --output-dir results --batch-name <name>` |
+| Analyze results | `python scripts/analysis/analyze.py --results <path>/results.csv --output-dir <path>/figures` |
+| Preliminary check | `python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv` |
+| Generate GIFs | `python scripts/analysis/visualize.py --results <path>/results.csv --output-dir <path>/gifs` |
+| Batch run (parallel) | `python scripts/experiment/run.py --config <a>.json --config <b>.json --workers 12 --output-dir results --batch-name main_run` |
 
 ## Source Layout
 
@@ -27,7 +27,8 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 | `experiments/trust/` | Trust experiment configs, conditions, logging, batch runner, and runner |
 | `experiments/multifocal/` | Multi-focal trust experiment config and runtime |
 | `analysis/` | Metrics, statistics, plotting, hypothesis tests |
-| `benchmark/` | External benchmark adapters and comparison helpers |
+| `benchmarks/core/` | Shared benchmark runner, config, metrics, and comparison helpers |
+| `benchmarks/cvc/` | Experimental CvC backend, policies, packaging, and Observatory client |
 | `configs/` | External benchmark and CvC JSON configurations |
 | `scripts/` | CLI entry points (thin orchestrators) |
 | `tests/` | Unit and integration tests |
@@ -98,7 +99,7 @@ orient -> plan -> code -> test -> experiment -> analyze -> interpret -> document
 
 **Experiment**: Run experiments using the scripts. For exploration, use small replications (5-10 seeds). For confirmation, use full replications (50-100 seeds). Always save results to `results/`.
 
-**Analyze**: Run `scripts/run_analysis.py` on the results. Read the output summary, hypothesis tests, and movement tables.
+**Analyze**: Run `scripts/analysis/analyze.py` on the results. Read the output summary, hypothesis tests, and movement tables.
 
 **Interpret**: Compare results against the hypothesis scorecard in `docs/experiment/results.md`. Does this change the story? If yes, flag it clearly.
 

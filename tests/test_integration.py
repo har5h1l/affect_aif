@@ -85,7 +85,7 @@ def test_betrayal_metrics_and_analysis_outputs(tmp_path, betrayal_config):
 
     command = [
         sys.executable,
-        str(Path("scripts/run_analysis.py")),
+        str(Path("scripts/analysis/analyze.py")),
         "--results",
         str(results_path),
         "--output-dir",
@@ -154,7 +154,7 @@ def test_visualization_handles_non_affective_conditions(tmp_path, tiny_config):
 
 
 def test_run_experiment_parser_accepts_repeated_configs_and_workers():
-    script_path = Path(__file__).resolve().parents[1] / "scripts" / "run_experiment.py"
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "experiment" / "run.py"
     spec = spec_from_file_location("run_experiment_module", script_path)
     module = module_from_spec(spec)
     assert spec.loader is not None

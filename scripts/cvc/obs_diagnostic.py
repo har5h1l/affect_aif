@@ -2,7 +2,7 @@
 """Diagnostic: run a short CvC episode and dump observation feature names.
 
 Run with Python 3.12 (or conda env with cogames):
-    conda run -n cvc python scripts/cvc_obs_diagnostic.py --steps 50
+    conda run -n cvc python scripts/cvc/obs_diagnostic.py --steps 50
 
 Outputs all unique feature names, their value ranges, and spatial distribution.
 Shows how walls/obstacles are encoded in the mettagrid observation.
