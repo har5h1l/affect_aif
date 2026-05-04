@@ -2,8 +2,9 @@
 
 ## Requires Human Decision
 
-- Whether to relaunch or discard the incomplete H5 partner-selection partial run.
-- Whether to relaunch or discard the incomplete clinical-betrayal partial run.
+- Whether to relaunch H5 partner-selection and clinical-betrayal batches (prior
+  partial `results_partial.csv` artifacts were removed in the May 2026 results
+  purge).
 - Whether any historical paper/archive claim should be promoted only after a
   fresh rerun on the current architecture.
 

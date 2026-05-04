@@ -4,6 +4,9 @@ These findings are preserved as historical context only. They may predate the
 apashea-aligned factorized-control model and should not be compared as current
 evidence unless explicitly rerun on the current architecture.
 
+May 2026: raw `results/` batches on local disk and the Mango server were deleted;
+partial CSVs mentioned below are no longer available for inspection.
+
 ## Salvaged Paper-Era Claims
 
 The deleted `docs/paper/` surface framed affect as per-partner metacognitive

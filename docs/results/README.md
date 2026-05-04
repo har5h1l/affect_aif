@@ -6,6 +6,14 @@ This directory records interpreted result status and provenance.
 - `historical_findings.md`: salvaged historical findings that are not current
   evidence unless rerun
 - `runs/`: per-run provenance notes for completed current-architecture runs
+  (directory may be absent until the first post-purge run is documented)
+
+## Artifact hygiene
+
+May 2026: bulk `results/` outputs were removed locally and on the Mango server
+workspace so stale CSVs and figures are not mistaken for current evidence. The
+interpretation files here stay; re-run experiments before refreshing numbers in
+`docs/experiment/results.md`.
 
 ## Evidence Contract
 

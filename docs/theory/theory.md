@@ -392,7 +392,9 @@ When the initial precision prior $\beta_0$ is set low, the agent starts with low
 
 ### Preliminary Empirical Finding: Binary Augmentation Architecture
 
-A systematic exploration of the clinical parameter space (see `results/clinical_sensitivity_synthesis.md`) across four experimental designs and both precision channels found that the affective mechanism operates as a **binary augmentation** in the current trust game: having mu-weighted terminal values provides ~10% payoff improvement, but the specific beta dynamics are behaviorally degenerate. Key findings:
+A systematic exploration of the clinical parameter space (raw synthesis notes
+were under `results/`; that artifact is purged — see `docs/results/historical_findings.md`)
+across four experimental designs and both precision channels found that the affective mechanism operates as a **binary augmentation** in the current trust game: having mu-weighted terminal values provides ~10% payoff improvement, but the specific beta dynamics are behaviorally degenerate. Key findings:
 
 - **Beta dynamics differentiate correctly.** Alexithymia freezes beta at 0.5 (σ=0.001), borderline creates swings from 0.08 to 0.99 (σ=0.113), depression starts at 0.01 and recovers. The parameter-to-phenotype mapping produces the intended dynamical signatures.
 

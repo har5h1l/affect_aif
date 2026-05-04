@@ -1,6 +1,8 @@
 # Current Results
 
-No current result interpretation is promoted in this docs-state reset.
+No current result interpretation is promoted in this docs-state reset. Local
+and server-side `results/` CSV batches were purged in May 2026; do not expect
+paths cited in older docs to exist on disk until new runs are saved.
 
 The next current-evidence runs should happen only after the restructure
 verification gate in `docs/state/current/next_runs.md` passes. Until then, the

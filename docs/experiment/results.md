@@ -2,6 +2,15 @@
 
 This document tracks the empirical status of the project. Update it when new experiments finish.
 
+## Artifact purge (2026-05-03)
+
+Local `results/` CSVs, analysis folders, and figures were deleted, and the same
+cleanup was intended for the Mango `server` workspace (canonical checkout plus
+any disposable worktrees). Nothing in the **Execution Record** paths below is
+reproducible from repo artifacts until you rerun those batches. Treat tables and
+key numbers as **archived narrative**; current steering is
+`docs/results/current.md` and `docs/results/historical_findings.md`.
+
 ## Status Note (2026-04-16)
 
 The supported trust-game surface now uses action-dependent stance dynamics, and the headline interpretation has changed.

@@ -91,10 +91,3 @@ for path in configs:
     print(f"{path} -> {out / 'results.csv'}")
 PY
 ```
-
-## Historical Partial Runs
-
-The detached H5 and clinical-betrayal reruns recorded in the old conductor state
-stopped with `results_partial.csv` files and no final `results.csv`. They are
-salvage context only until the user decides whether to rerun or explicitly
-analyze them as partial historical artifacts.
