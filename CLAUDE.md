@@ -202,7 +202,7 @@ mango review affect_aif                    # Review latest session branch
 mango merge affect_aif                     # Merge session branch to main
 
 # Cloud operations
-mango cloud sync push affect_aif           # Push code to server
+mango cloud sync push affect_aif           # Push code to server (rsync; does not delete remote-only paths under results/)
 mango cloud sync fetch affect_aif          # Fetch results from server
 mango cloud ssh                            # SSH into server
 mango cloud push-infra                     # Sync mango itself to server

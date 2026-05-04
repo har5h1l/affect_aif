@@ -4,9 +4,14 @@ This document tracks the empirical status of the project. Update it when new exp
 
 ## Artifact purge (2026-05-03)
 
-Local `results/` CSVs, analysis folders, and figures were deleted, and the same
-cleanup was intended for the Mango `server` workspace (canonical checkout plus
-any disposable worktrees). Nothing in the **Execution Record** paths below is
+Local `results/` CSVs, analysis folders, and figures were deleted. The Mango
+`server` checkout at `~/repos/affect_aif` was synced via `mango cloud sync push
+affect_aif` (rsync): that updates files present locally but **does not remove
+remote-only** paths under `results/`, so leftover batch directories were removed
+manually over SSH, then `git fetch` + `git reset --hard origin/master` aligned
+the server clone with GitHub. Disposable session worktrees are separate; clean
+those if sessions left outputs outside `~/repos/affect_aif`. Nothing in the
+**Execution Record** paths below is
 reproducible from repo artifacts until you rerun those batches. Treat tables and
 key numbers as **archived narrative**; current steering is
 `docs/results/current.md` and `docs/results/historical_findings.md`.

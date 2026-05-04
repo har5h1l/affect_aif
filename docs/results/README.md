@@ -10,10 +10,13 @@ This directory records interpreted result status and provenance.
 
 ## Artifact hygiene
 
-May 2026: bulk `results/` outputs were removed locally and on the Mango server
-workspace so stale CSVs and figures are not mistaken for current evidence. The
-interpretation files here stay; re-run experiments before refreshing numbers in
-`docs/experiment/results.md`.
+May 2026: bulk `results/` outputs were cleared locally. `mango cloud sync push
+affect_aif` rsyncs to `server:~/repos/affect_aif` but does not delete
+**remote-only** paths under `results/`; after a local purge, remove orphan batch
+dirs on the server over SSH (or they linger). If rsync updated files while git
+was behind, run `git fetch` and `git reset --hard origin/master` on the server so
+HEAD matches GitHub. Interpretation files here stay; re-run experiments before
+refreshing numbers in `docs/experiment/results.md`.
 
 ## Evidence Contract
 
