@@ -1,16 +1,17 @@
 # Architecture Decisions
 
-## Reusable Core
+## Runtime Ownership
 
-`aif/` is the reusable active-inference core. It should remain free of trust,
-experiment, analysis, benchmark, and runtime-orchestration imports.
+The project no longer owns the active-inference engine. Official `pymdp` is the
+runtime dependency; Apashea's notebook/fork is reference material for model
+construction and helper ideas.
 
 ## Dependency Direction
 
 The target dependency direction is:
 
 ```text
-scripts -> experiments -> tasks -> aif
+scripts -> experiments -> tasks -> inferactively-pymdp
 ```
 
 Topology changes should preserve behavior first. Scientific changes belong in
@@ -19,15 +20,19 @@ explicit follow-up work.
 ## Task Packages
 
 Trust-game semantics belong in a trust task package: partners, stances, payoffs,
-trust environments, trust rollout, trust agents, and trust-task evaluation.
+trust environments, trust model construction, pymdp agent wrappers, external
+affective precision tracking, and trust-task evaluation.
 
 ## Apashea Alignment
 
 The apashea notebook remains a reference for factorized controls, policy priors,
-and active-inference matrix conventions. This project keeps a JAX-based core and
-does not embed pymdp as a runtime dependency.
+and active-inference matrix conventions. The supported runtime is official
+`inferactively-pymdp==1.0.0`; Apashea's fork is reference material, not the
+runtime dependency.
 
 ## Legacy Surfaces
 
 Retired operating surfaces are removed from the runnable tree. Useful context is
 salvaged into `docs/state/` and `docs/results/`, then stale sources are removed.
+Do not reintroduce a custom active-inference engine; keep affect and trust logic
+in task-local modules around official `pymdp` agents.

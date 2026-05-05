@@ -60,7 +60,7 @@ Implication for the paper: document action-dependent stance as the supported arc
 
 ### Decision 2: pymdp alignment path (removed)
 
-No pymdp migration path is active. The project will continue on the current implementation and document the supported conventions directly.
+The pymdp hard cutover is the supported path. Future runtime work should extend trust-task wrappers around official `inferactively-pymdp==1.0.0`, not revive a project-owned active-inference engine.
 
 ### Decision 3: Multiplicative vs additive precision weighting
 

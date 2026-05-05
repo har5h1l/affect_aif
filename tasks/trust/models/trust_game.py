@@ -9,8 +9,6 @@ from typing import Any
 import jax.numpy as jnp
 import numpy as np
 
-from aif.maths import log_stable, softmax
-from aif.utils import obj_array
 from tasks.trust.payoffs import (
     build_graded_payoff_matrix,
     build_payoff_matrix,
@@ -37,6 +35,21 @@ from tasks.trust.types import (
 
 _BINARY_KEYS = {"mutual_coop", "sucker", "temptation", "mutual_defect"}
 _GRADED_KEYS = {"num_investment_levels", "endowment", "multiplier"}
+
+
+def _obj_array(num_items: int) -> np.ndarray:
+    return np.empty(int(num_items), dtype=object)
+
+
+def _softmax(values: np.ndarray) -> np.ndarray:
+    array = np.asarray(values, dtype=float)
+    shifted = array - float(np.max(array))
+    exp_values = np.exp(shifted)
+    return exp_values / max(float(exp_values.sum()), 1e-16)
+
+
+def _log_stable(values: np.ndarray) -> np.ndarray:
+    return np.log(np.maximum(np.asarray(values, dtype=float), 1e-16))
 
 
 @dataclass(frozen=True)
@@ -162,7 +175,7 @@ class TrustGameModel:
     def build_A(self) -> np.ndarray:
         """Build a fresh likelihood object-array."""
 
-        A = obj_array(2)
+        A = _obj_array(2)
         partner_action = np.zeros((2, self.num_types, self.num_stances), dtype=float)
         for type_idx in range(self.num_types):
             for stance_idx in range(self.num_stances):
@@ -191,7 +204,7 @@ class TrustGameModel:
     def build_B(self) -> np.ndarray:
         """Build a fresh transition object-array."""
 
-        B = obj_array(3)
+        B = _obj_array(3)
         num_actions_total = int(np.prod(self.num_controls))
 
         type_transition = np.full(
@@ -225,15 +238,15 @@ class TrustGameModel:
         return B
 
     def build_C(self) -> np.ndarray:
-        C = obj_array(2)
+        C = _obj_array(2)
         C[0] = np.zeros(2, dtype=float)
         payoff_values = np.asarray(self.payoff_levels, dtype=float)
         scaled = payoff_values / max(self.preference_temperature, 1e-12)
-        C[1] = log_stable(softmax(scaled, backend="numpy"), backend="numpy")
+        C[1] = _log_stable(_softmax(scaled))
         return C
 
     def build_D(self) -> np.ndarray:
-        D = obj_array(3)
+        D = _obj_array(3)
         D[0] = np.full(self.num_types, 1.0 / self.num_types, dtype=float)
         D[1] = np.asarray([0.2, 0.6, 0.2], dtype=float)
         D[2] = np.full(self.num_social_actions, 1.0 / self.num_social_actions, dtype=float)
@@ -329,7 +342,7 @@ class TrustGameModel:
     def build_pA(self, scale: float = 1.0) -> np.ndarray:
         """Dirichlet prior hyperparameters for observation likelihoods."""
 
-        pA = obj_array(len(self.A))
+        pA = _obj_array(len(self.A))
         for modality in range(len(self.A)):
             pA[modality] = float(scale) * np.asarray(self.A[modality], dtype=float).copy()
         return pA
@@ -337,7 +350,7 @@ class TrustGameModel:
     def build_pB(self, scale: float = 10.0) -> np.ndarray:
         """Dirichlet prior hyperparameters for transition tensors."""
 
-        pB = obj_array(len(self.B))
+        pB = _obj_array(len(self.B))
         for factor in range(len(self.B)):
             pB[factor] = float(scale) * np.asarray(self.B[factor], dtype=float).copy()
         return pB

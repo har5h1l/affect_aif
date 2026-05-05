@@ -1,6 +1,6 @@
 # affect_aif
 
-Repository for reusable active-inference primitives, trust-task packages, experiment runners, and analysis scripts.
+Repository for trust-task wrappers, experiment runners, logging, and analysis built on official `inferactively-pymdp==1.0.0`.
 
 ## Setup
 
@@ -21,6 +21,10 @@ See [docs/state/README.md](docs/state/README.md) for current project state,
 Hesp-extension framing, [docs/operations/cli.md](docs/operations/cli.md) for
 the command-line reference, and [docs/results/README.md](docs/results/README.md)
 for result status and provenance rules.
+
+The supported trust-game runtime is built on official `inferactively-pymdp==1.0.0`.
+Project code owns trust-game model construction, affective precision tracking,
+experiments, logging, and analysis.
 
 The supported trust-game workflow uses the action-dependent, apashea-aligned
 partner redesign:
@@ -46,7 +50,7 @@ python scripts/benchmark/analyze.py --results results/benchmark/benchmark_result
 
 ## Repository Layout
 
-- `aif/`: generic active-inference primitives
+- `inferactively-pymdp==1.0.0`: supported active-inference runtime dependency
 - `tasks/trust/`: canonical trust-game model, rollout helpers, agents, environments, and evaluation arena
 - `experiments/trust/`: trust experiment configuration, conditions, and runner surface
 - `experiments/multifocal/`: multi-focal trust experiment configuration and runtime
@@ -62,6 +66,6 @@ python scripts/benchmark/analyze.py --results results/benchmark/benchmark_result
 
 - The main package exposes the supported runner/config entry points at the top level.
 - The trust-task evaluation arena is the supported task-comparison surface; the local CvC path remains a separate experimental integration.
-- The discrete-beta prototype is archived; the supported affective path uses `aif.affect.beta.DiscreteBetaState`.
+- The legacy `aif/` runtime and discrete-beta prototype are archived; the supported affective path is task-local precision tracking around official `pymdp` agents.
 - Removed experiment surfaces (variational beta preset, unfinished AIFPolicy adapter) are not loaded by the runtime; see `docs/experiment/design.md` for future-work notes.
 - Historical findings are documented in [docs/results/historical_findings.md](docs/results/historical_findings.md) and are not current evidence unless rerun on the current architecture.

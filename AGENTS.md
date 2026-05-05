@@ -29,7 +29,8 @@ This document provides comprehensive system documentation for AI agents operatin
 - Use `.venv` in project root; venv should auto-activate when in this folder (direnv with `.envrc`).
 - Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `scripts/analysis/analyze.py` on those paths after.
 - Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
-- State inference (partner-type belief updating) is the analytical solution to VFE minimization (matrix-based Bayes with A and B), not iterative optimization.
+- Official `inferactively-pymdp==1.0.0` is the supported runtime. Do not reintroduce a custom active-inference engine; keep affect and trust logic in task modules.
+- State inference (partner-type belief updating) is handled through the pymdp-backed trust wrappers and logged as matrix-based belief updates.
 - Benchmark runs use `scripts/benchmark/run_cvc.py` plus `docs/operations/benchmark.md` for backends, configs (for example `configs/benchmark_default.json` and `configs/benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is rsync and does not delete remote-only files under `results/`). Do not add orchestration or deployment scripts to this repo.
 
@@ -41,20 +42,13 @@ This document provides comprehensive system documentation for AI agents operatin
 
 ```
 affect_aif/
-├── aif/                   # Generic active-inference primitives
-│   ├── agent.py           # Lightweight Agent dataclass
-│   ├── inference.py       # Generic Bayes / policy posterior helpers
-│   ├── learning.py        # Dirichlet learning helpers
-│   ├── policies.py        # Policy construction and sampling
-│   ├── runtime.py         # Observation-sequence enumeration + runtime helpers
-│   └── utils.py           # POMDP matrix/object-array helpers
+├── inferactively-pymdp==1.0.0  # Supported active-inference runtime dependency
 ├── tasks/
 │   └── trust/             # Trust-task package
-│       ├── agents/        # TrustGameAgent, AffectiveAgent, and lesions
+│       ├── agents/        # pymdp.Agent wrappers, AffectiveAgent, and lesions
 │       ├── envs/          # Binary and graded trust-game environments
-│       ├── models/        # Canonical TrustGameModel
+│       ├── models/        # Canonical TrustGameModel and pymdp matrix construction
 │       ├── evaluation/    # Trust-task evaluation arena and baselines
-│       ├── rollout.py     # Trust-specific planner / rollout helpers
 │       ├── payoffs.py     # Trust-game payoff and action encoding helpers
 │       ├── stance.py      # Stance dynamics
 │       └── types.py       # Partner type metadata
@@ -203,7 +197,7 @@ Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
 ### Tests fail after code change
 ```bash
 python -m pytest tests/ -v --tb=short
-python -m pytest tests/test_core.py -v  # isolate to module
+.venv/bin/python -m pytest tests/test_package_surface.py tests/test_supported_surface.py -q  # supported package surface
 ```
 
 ### Experiment produces unexpected results

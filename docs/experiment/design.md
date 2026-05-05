@@ -399,7 +399,7 @@ Both lesion variants (3a, 3b) should be tested. 3b is the cleaner analog — the
 
 ### 6.1 Framework
 
-Primary implementation is a custom active-inference stack in this repository. Generic active inference math and control live under `aif/`, trust-game-specific matrices, rollout helpers, and agent composition live under `trust/`, and the affective state is implemented as an auxiliary per-partner summary outside the main belief update loop, modulating policy evaluation through partner-specific beta summaries.
+Primary implementation uses official `inferactively-pymdp==1.0.0` for active-inference policy inference. Project-owned trust-game modules construct the POMDP matrices, wrap `pymdp.Agent`, and maintain affective beta as an external per-partner precision tracker that modulates policy evaluation without becoming part of the generative model.
 
 Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://github.com/CasperHesp/deeplyfeltaffect) for the single-agent affective architecture. This will be extended to the multi-partner setting.
 

@@ -22,8 +22,8 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 
 | Directory | Purpose |
 |-----------|---------|
-| `aif/` | Generic active-inference primitives and affect helpers |
-| `tasks/trust/` | Trust-task agents, models, environments, rollout, payoffs, and evaluation arena |
+| `inferactively-pymdp==1.0.0` | Supported active-inference runtime dependency |
+| `tasks/trust/` | Trust-task pymdp model, agent, environment, and task-local affect/trust wrappers |
 | `experiments/trust/` | Trust experiment configs, conditions, logging, batch runner, and runner |
 | `experiments/multifocal/` | Multi-focal trust experiment config and runtime |
 | `analysis/` | Metrics, statistics, plotting, hypothesis tests |

@@ -1,9 +1,9 @@
 # Apashea Alignment
 
 The apashea trust notebook is a reference for active-inference matrix
-conventions and selected trust-game design choices. It is not a runtime
-dependency, and this project remains committed to a reusable JAX-based `aif/`
-core.
+conventions and selected trust-game design choices. The supported runtime is
+official `inferactively-pymdp==1.0.0`; Apashea's notebook and fork remain
+reference material for model construction and helper ideas.
 
 ## Adopted Alignment
 
@@ -19,9 +19,9 @@ core.
 
 ## Deliberate Deviations
 
-- The project does not embed pymdp.
-- The active core is JAX-oriented and should pass randomness through explicit
-  keys where random policy sampling is part of a public core API.
+- Official `inferactively-pymdp==1.0.0` is the active runtime dependency.
+- Trust-task wrappers own model construction, task semantics, and any adapter
+  logic needed around `pymdp.Agent`.
 - Pandas and NumPy are acceptable at analysis, logging, CLI, and compatibility
   boundaries.
 - Historical paper and archive claims are not promoted as current evidence until

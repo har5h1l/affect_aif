@@ -1,17 +1,17 @@
 # Current Mission
 
-Re-ground affect_aif around a reusable JAX-based `aif/` core, task packages,
-current Hesp-extension hypotheses, canonical script-driven experiments, and
-docs/state steering.
+Re-ground affect_aif around official `inferactively-pymdp==1.0.0`, trust-task
+wrappers, external affective precision tracking, canonical script-driven
+experiments, and docs/state steering.
 
 ## Scope
 
-- Preserve `aif/` as the reusable active-inference core.
-- Move trust-game semantics toward task packages without changing scientific
-  behavior inside topology-only phases.
-- Replace the old H1-H5 narrative with the Hesp-extension H1-H7 spine in
-  `docs/theory/hypotheses.md`.
+- Use official `inferactively-pymdp==1.0.0` as the supported active-inference runtime.
+- Keep trust-game model construction, affective precision tracking, experiment
+  runners, logging, and analysis in project-owned task and experiment modules.
+- Do not reintroduce a custom active-inference engine or supported `aif/` runtime.
 - Keep scripts as the canonical experiment and analysis entry points.
+- Preserve the Hesp-extension H1-H7 spine in `docs/theory/hypotheses.md`.
 - Salvage useful conductor, archive, and paper context into current docs before
   deleting stale surfaces.
 
@@ -28,14 +28,10 @@ docs/state steering.
 
 ## Completion State
 
-- `master` has been fast-forwarded through the reusable-core/task-package
-  restructure.
-- Local verification passed on `master` after the fast-forward merge.
-- The cleaned workspace was synced to the Mango `server` target, with targeted
-  removal of stale remote-only repo surfaces left behind by the non-deleting
-  rsync path.
-- The next research action is the post-restructure experiment queue in
-  `docs/state/current/next_runs.md`.
+- The active runtime cutover targets official `inferactively-pymdp==1.0.0` plus
+  project-owned trust-task wrappers and external affective precision tracking.
+- The next research action is the post-cutover experiment queue in
+  `docs/state/current/next_runs.md` after the focused verification gate passes.
 
 ## Stop Conditions
 

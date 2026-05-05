@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from tasks.trust.affect import DiscreteBetaState
+from tasks.trust.rollout import gamma_per_policy
 
 
 def test_discrete_beta_state_starts_at_requested_level() -> None:
@@ -63,3 +64,16 @@ def test_discrete_beta_state_rejects_nonfinite_surprise_without_state_change() -
 
     np.testing.assert_allclose(state.expected_beta(), before_betas)
     assert len(state.beta_history) == before_history_len
+
+
+def test_gamma_per_policy_uses_inverse_beta_expectation() -> None:
+    first_partners = np.asarray([0, 1, 0, 1], dtype=int)
+    precision_signal = np.asarray([0.5, 2.0], dtype=float)
+
+    gamma_values = gamma_per_policy(
+        gamma_base=1.0,
+        first_partners=first_partners,
+        precision_signal=precision_signal,
+    )
+
+    np.testing.assert_allclose(gamma_values, np.asarray([2.0, 0.5, 2.0, 0.5]))

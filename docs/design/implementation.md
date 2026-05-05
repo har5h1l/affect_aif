@@ -14,7 +14,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - `switch_round`, exploiter early/late phases, and `last_action × phase` likelihood conditioning are no longer part of the supported trust-game semantics.
 - `TrustGameModel` is the canonical trust-game model for both binary and graded payoffs (`payoff_mode={"binary","graded"}`).
 - The shipped trust-game matrices expose two observation modalities (`o_action`, `o_payoff`) and three hidden/control factors (`type`, `stance`, `own_action`).
-- `TrustGameAgent` composes one `aif.Agent` per tracked partner, each with its own `A/B/pA/pB`, while logging shared per-partner joint beliefs over `4 types × 3 stances`.
+- `TrustGameAgent` wraps official `pymdp.Agent` instances for tracked partners, with project-owned trust-game `A/B/C/D/E` construction and logging of per-partner joint beliefs over `4 types × 3 stances`.
 - The affective helper path now defaults to a discrete HESP beta state with levels `[0.5, 0.67, 1.0, 1.5, 2.0]` and baseline `initial_beta = 1.0`.
 - `ExperimentConfig` supports `initial_partner_stances`, `scheduled_stance_switches`, and named `presets`.
 - The enforced minimum full-run `mu` calibration count is now `3`, and calibration uses the deepest relevant no-affect condition for the current config rather than always forcing tau-8.
@@ -48,7 +48,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## Sophisticated rollout inference
 
 - The trust-game planner now uses observation-branching sophisticated inference for **all** conditions and horizons.
-- Implementation-wise, the supported control surface is split across `aif/policies.py`, `aif/efe.py`, `aif/runtime.py`, and `trust/rollout.py`. The rollout path precomputes all binary observation sequences of length `planning_horizon - 1`, evaluates each `(policy, observation-sequence)` path, updates the acted-on partner belief after each hypothetical observation by Bayes rule, and then sums the pathwise EFE under the path probabilities.
+- Implementation-wise, the supported control surface is official `pymdp.Agent` wrapped by task-local trust agents and helpers. The trust wrapper builds the task-specific A/B/C/D/E matrices, enumerates trust-game policies and hypothetical observation branches where needed, updates the acted-on partner belief after each hypothetical observation, and delegates policy-inference semantics to the pymdp-backed runtime path.
 - The old mean-field rollout is retained only as an internal comparison path for tests; it is no longer the default decision rule. That retained path now uses observation-weighted expected information gain on non-terminal steps rather than negative ambiguity alone.
 - This keeps the planning-method axis controlled across Conditions 1-8, so horizon comparisons are not confounded with different rollout approximations.
 
@@ -79,7 +79,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The current code tracks unsigned surprise, not signed residual error.
 - Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
-- Affective agents use `aif.affect.beta.DiscreteBetaState` (HESP-aligned discrete beta filter).
+- Affective agents use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
 - `num_beta_levels` is accepted only as a legacy config input alias; serialized configs now emit `beta_num_levels`.
 

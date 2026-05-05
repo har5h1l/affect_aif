@@ -4,8 +4,16 @@ from __future__ import annotations
 
 import numpy as np
 
-from aif.policies import gamma_per_policy
 from tasks.trust.payoffs import encode_instantaneous_index
+
+
+def gamma_per_policy(gamma_base: float, first_partners: np.ndarray, precision_signal: np.ndarray) -> np.ndarray:
+    """Map partner beta expectations to policy precision using the HESP inverse-beta convention."""
+
+    partners = np.asarray(first_partners, dtype=int)
+    signal = np.asarray(precision_signal, dtype=float)
+    partner_beta = np.maximum(signal[partners], 1e-16)
+    return float(gamma_base) / partner_beta
 
 
 def build_transition_views(B, num_controls, factorized_policies):

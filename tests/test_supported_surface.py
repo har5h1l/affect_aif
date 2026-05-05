@@ -6,6 +6,8 @@ from pathlib import Path
 import pandas as pd
 
 import tasks.trust as trust
+import tasks.trust.affect
+import tasks.trust.pymdp_helpers
 from experiments.trust.conditions import (
     get_condition_metadata,
     get_condition_name,
@@ -17,6 +19,14 @@ from experiments.trust.runner import ExperimentRunner
 from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_supported_trust_runtime_imports_are_exposed():
+    assert tasks.trust.affect.DiscreteBetaState is trust.DiscreteBetaState
+    assert tasks.trust.pymdp_helpers.create_agent is not None
+    assert trust.TrustGameAgent is TrustGameAgent
+    assert trust.AffectiveAgent is AffectiveAgent
+    assert trust.LesionedAgent is LesionedAgent
 
 
 def _build_model(config):

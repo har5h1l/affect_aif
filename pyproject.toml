@@ -32,7 +32,7 @@ dev = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["aif*", "tasks*", "experiments*", "analysis*", "benchmarks*", "cli*"]
+include = ["tasks*", "experiments*", "analysis*", "benchmarks*", "cli*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

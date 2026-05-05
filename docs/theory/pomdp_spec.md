@@ -62,7 +62,7 @@ For agent-choice binary games, the instantaneous control shape is
 Payoff and outcome updates use the executed `own` action. Rollout uses the
 stance-control column for generative stance transitions during planning, while
 partner-observed stance dynamics use the executed own action. This keeps the
-POMDP matrices apashea-aligned without embedding pymdp as a runtime dependency.
+POMDP matrices apashea-aligned while using official `pymdp` as the runtime dependency.
 
 Graded trust games keep a single flat social-action control over investment
 levels where that representation is the active task semantics.

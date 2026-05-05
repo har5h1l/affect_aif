@@ -186,7 +186,7 @@ In the primary experiments in this repository, that precision-modulation path is
 
 ### 3.4 Affective State Dynamics
 
-> **Variational grounding (theory).** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. The **shipped** code path uses the discrete filter in `aif.affect.beta.DiscreteBetaState` only; a separate variational auxiliary-state implementation is not in the runnable tree (see `docs/experiment/design.md` and `docs/results/historical_findings.md`).
+> **Variational grounding (theory).** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. The **shipped** code path uses the discrete filter in task-local external precision tracker only; a separate variational auxiliary-state implementation is not in the runnable tree (see `docs/experiment/design.md` and `docs/results/historical_findings.md`).
 
 The affective state $\beta_k$ for partner $k$ is updated from a signed affective charge derived from prediction error:
 
