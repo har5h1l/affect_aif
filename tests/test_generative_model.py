@@ -2,13 +2,12 @@ import numpy as np
 
 from experiments.trust.config import ExperimentConfig
 from tasks.trust.payoffs import build_graded_payoff_matrix, decode_action, encode_action
+from tasks.trust.pomdp import build_trust_pomdp_template
 from tasks.trust.types import PartnerType
 
 
 def _build_model(config):
-    from tasks.trust.models import TrustGameModel
-
-    return TrustGameModel(config)
+    return build_trust_pomdp_template(config, planning_horizon=1)
 
 
 def test_a_matrix_column_normalized():
@@ -80,12 +79,12 @@ def test_graded_model_construction():
     model = _build_model(cfg)
     assert model.num_social_actions == 6
     assert model.payoff_matrix.shape == (6, 2, 2)
-    assert model.num_controls == [24]  # 6 levels × 4 partners
+    assert model.num_controls == (6,)
     assert model.payoff_index_table.shape == (6, 2)
     # A, B, C, D should all be constructable
     A, B, C, D = model.get_matrices()
     assert A[0].shape[0] == 2  # partner action obs is binary
-    assert B[0].shape[2] == 24  # transitions for each action
+    assert B[0].shape[2] == 6
     assert D[0].shape[0] == model.num_types
     assert D[1].shape[0] == model.num_stances
     assert D[2].shape[0] == model.num_social_actions

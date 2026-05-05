@@ -1,61 +1,65 @@
 import numpy as np
-import pytest
 
 from experiments.trust.conditions import PRESET_CONDITIONS, get_condition_name
 from experiments.trust.config import ExperimentConfig
+from experiments.trust.factory import create_native_runtime
 from experiments.trust.runner import ExperimentRunner
-from tasks.trust import AffectiveAgent, LesionedAgent
-
-
-def _build_model(config):
-    from tasks.trust.models import TrustGameModel
-
-    return TrustGameModel(config)
-
-
-def make_agent(agent_cls, **kwargs):
-    cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
-    model = _build_model(cfg)
-    return agent_cls(
-        model=model,
-        planning_horizon=2,
-        gamma=1.0,
-        seed=0,
-        reference_horizon=cfg.deep_horizon,
-        max_policies=64,
-        **kwargs,
-    )
+from tasks.trust.runtime import update_beta_after_observation
 
 
 def test_affective_beta_decreases_under_consistent_accuracy():
-    agent = make_agent(AffectiveAgent, initial_beta=1.0)
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0, initial_beta=1.0),
+        condition=2,
+        seed=0,
+    )
+    beta = runtime.partner_bank.beta
+    assert beta is not None
     for _ in range(5):
-        agent.pending_prediction_partner = 0
-        agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
-        agent.observe_outcome(partner_idx=0, observation=[0, 2], action_taken=0, partner_action=0, payoff=3.0)
-    assert agent.get_betas()[0] < 1.0
+        update_beta_after_observation(
+            bank=runtime.partner_bank,
+            partner_idx=0,
+            predicted_partner_action_probs=np.asarray([0.95, 0.05], dtype=float),
+            observed_partner_action=0,
+            affect_mode=runtime.affect_mode,
+        )
+    assert beta.expected_beta()[0] < 1.0
 
 
 def test_affective_beta_increases_under_consistent_surprise():
-    agent = make_agent(AffectiveAgent, initial_beta=1.0)
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0, initial_beta=1.0),
+        condition=2,
+        seed=0,
+    )
+    beta = runtime.partner_bank.beta
+    assert beta is not None
     for _ in range(3):
-        agent.pending_prediction_partner = 0
-        agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
-        agent.observe_outcome(partner_idx=0, observation=[1, 0], action_taken=0, partner_action=1, payoff=-1.0)
-    assert agent.get_betas()[0] > 1.0
+        update_beta_after_observation(
+            bank=runtime.partner_bank,
+            partner_idx=0,
+            predicted_partner_action_probs=np.asarray([0.95, 0.05], dtype=float),
+            observed_partner_action=1,
+            affect_mode=runtime.affect_mode,
+        )
+    assert beta.expected_beta()[0] > 1.0
 
 
 def test_lesion_freeze_constant_beta():
-    agent = make_agent(LesionedAgent, initial_beta=0.5, lesion_mode="freeze")
-    agent.pending_prediction_partner = 0
-    agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
-    agent.observe_outcome(partner_idx=0, observation=[0, 2], action_taken=0, partner_action=0, payoff=3.0)
-    assert np.allclose(agent.get_betas(), 0.5)
-
-
-@pytest.mark.skip(reason="RewardAvgAgent removed in restructuring")
-def test_reward_avg_precision_signal_zeros():
-    pass
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0, initial_beta=0.5),
+        condition="lesioned",
+        seed=0,
+    )
+    update_beta_after_observation(
+        bank=runtime.partner_bank,
+        partner_idx=0,
+        predicted_partner_action_probs=np.asarray([0.95, 0.05], dtype=float),
+        observed_partner_action=0,
+        affect_mode="fixed",
+    )
+    assert runtime.partner_bank.beta is not None
+    assert np.allclose(runtime.partner_bank.beta.expected_beta(), 0.5)
 
 
 def test_affective_outperforms_shallow_baseline():
@@ -70,12 +74,10 @@ def test_affective_outperforms_shallow_baseline():
         initial_partner_stances=["trusting", "neutral", "neutral", "neutral"],
         scheduled_stance_switches=[{"round": 26, "partner_idx": 0, "to_stance": "hostile"}],
     )
-    runner = ExperimentRunner(cfg)
-    results = runner.run_all()
+    results = ExperimentRunner(cfg).run_all()
     summary = results.groupby("condition", as_index=False).agg(mean_payoff=("payoff", "mean"))
     c5 = float(summary.loc[summary["condition"] == 5, "mean_payoff"].iloc[0])
     c6 = float(summary.loc[summary["condition"] == 6, "mean_payoff"].iloc[0])
-    # Affective should at least be competitive with no-affect (within 0.1 tolerance)
     assert c6 >= c5 - 0.1
 
 
@@ -94,26 +96,16 @@ def test_betrayal_run_affect_mechanism_is_active():
         initial_partner_stances=["trusting", "neutral", "neutral", "neutral"],
         scheduled_stance_switches=[{"round": 4, "partner_idx": 0, "to_stance": "hostile"}],
     )
-    results = ExperimentRunner(cfg).run_all()
-    primary = results[results["run_mode"] == "primary"].copy()
+    primary = ExperimentRunner(cfg).run_all().query("run_mode == 'primary'").copy()
 
     c7 = primary[primary["condition"] == 7].sort_values("round")
     c8 = primary[primary["condition"] == 8].sort_values("round")
 
-    # Base agent (c7) betas are all NaN; affective agent (c8) has real values
     c7_betas_0 = c7["betas"].apply(lambda b: b[0])
     c8_betas_0 = c8["betas"].apply(lambda b: b[0])
     assert c7_betas_0.isna().all() or np.isnan(c7_betas_0.values).all()
     assert not np.isnan(c8_betas_0.values).all()
-
-    # optional: beta trajectory for partner 0 post-betrayal (factorized policies can starve partner 0)
-    post_betrayal_betas = c8_betas_0[c8["round"] >= 4].dropna().values
-    assert len(post_betrayal_betas) > 0
-
-
-@pytest.mark.skip(reason="RewardAvgAgent removed in restructuring")
-def test_affect_tracks_precision_not_reward():
-    pass
+    assert len(c8_betas_0[c8["round"] >= 4].dropna().values) > 0
 
 
 def test_runner_runs_directly_without_calibration():
@@ -126,8 +118,7 @@ def test_runner_runs_directly_without_calibration():
         shallow_horizon=2,
         conditions=[2],
     )
-    runner = ExperimentRunner(cfg)
-    results = runner.run_all()
+    results = ExperimentRunner(cfg).run_all()
     assert len(results) > 0
     assert "condition" in results.columns
     assert "payoff" in results.columns
@@ -141,9 +132,7 @@ def test_full_run_produces_primary_records():
         random_seed=0,
         conditions=[2],
     )
-    runner = ExperimentRunner(cfg)
-    results = runner.run_all()
-    primary = results[results["run_mode"] == "primary"]
+    primary = ExperimentRunner(cfg).run_all().query("run_mode == 'primary'")
     assert len(primary) == 5
 
 
@@ -156,13 +145,11 @@ def test_horizon_override_and_core_and_preset_affective_conditions():
         presets=["no_epistemic"],
         horizon_overrides={6: 3, 7: 4, "no_epistemic": 5},
     )
-    runner = ExperimentRunner(cfg)
-    model = _build_model(cfg)
 
-    c6 = runner._create_agent(condition=6, model=model, seed=0)
-    c7 = runner._create_agent(condition=7, model=model, seed=0)
-    c8 = runner._create_agent(condition=8, model=model, seed=0)
-    no_epi = runner._create_agent(condition="no_epistemic", model=model, seed=0)
+    c6 = create_native_runtime(cfg, condition=6, seed=0)
+    c7 = create_native_runtime(cfg, condition=7, seed=0)
+    c8 = create_native_runtime(cfg, condition=8, seed=0)
+    no_epi = create_native_runtime(cfg, condition="no_epistemic", seed=0)
 
     assert c6.planning_horizon == 3
     assert c7.planning_horizon == 4
@@ -170,66 +157,21 @@ def test_horizon_override_and_core_and_preset_affective_conditions():
     assert no_epi.planning_horizon == 5
 
 
-def test_clinical_alexithymia_preset():
-    """Alexithymia preset creates an AffectiveAgent with blunted alpha_charge."""
-    cfg = ExperimentConfig(
-        payoff_mode="binary",
-        num_rounds=2,
-        num_replications=1,
-        random_seed=0,
-        conditions=[],
-        presets=["alexithymia"],
-        alpha_charge=0.1,
-    )
-    runner = ExperimentRunner(cfg)
-    model = _build_model(cfg)
-    agent = runner._create_agent(condition="alexithymia", model=model, seed=0)
-    assert isinstance(agent, AffectiveAgent)
-    assert agent.affect.alpha_charge == 0.1
-    assert agent.planning_horizon == 4
+def test_clinical_presets_configure_native_beta_path():
+    alex = create_native_runtime(ExperimentConfig(alpha_charge=0.1), condition="alexithymia", seed=0)
+    border = create_native_runtime(ExperimentConfig(alpha_charge=12.0), condition="borderline", seed=0)
+    depressed = create_native_runtime(ExperimentConfig(initial_beta=2.0), condition="depression", seed=0)
 
-
-def test_clinical_borderline_preset():
-    """Borderline preset amplifies charge sensitivity in the discrete HESP beta path."""
-    cfg = ExperimentConfig(
-        payoff_mode="binary",
-        num_rounds=2,
-        num_replications=1,
-        random_seed=0,
-        conditions=[],
-        presets=["borderline"],
-        alpha_charge=12.0,
-    )
-    runner = ExperimentRunner(cfg)
-    model = _build_model(cfg)
-    agent = runner._create_agent(condition="borderline", model=model, seed=0)
-    assert isinstance(agent, AffectiveAgent)
-    assert agent.affect.alpha_charge == 12.0
-    assert agent.planning_horizon == 4
-
-
-def test_clinical_depression_preset():
-    """Depression preset biases the discrete beta prior toward high beta / low precision."""
-    cfg = ExperimentConfig(
-        payoff_mode="binary",
-        num_rounds=2,
-        num_replications=1,
-        random_seed=0,
-        conditions=[],
-        presets=["depression"],
-        initial_beta=2.0,
-    )
-    runner = ExperimentRunner(cfg)
-    model = _build_model(cfg)
-    agent = runner._create_agent(condition="depression", model=model, seed=0)
-    assert isinstance(agent, AffectiveAgent)
-    assert agent.affect.initial_beta == 2.0
-    assert np.allclose(agent.get_betas(), 2.0)
-    assert agent.planning_horizon == 4
+    assert alex.partner_bank.beta is not None
+    assert border.partner_bank.beta is not None
+    assert depressed.partner_bank.beta is not None
+    assert alex.partner_bank.beta.alpha_charge == 0.1
+    assert border.partner_bank.beta.alpha_charge == 12.0
+    assert depressed.partner_bank.beta.initial_beta == 2.0
+    assert np.allclose(depressed.partner_bank.beta.expected_beta(), 2.0)
 
 
 def test_get_condition_name_all_conditions():
-    """All core conditions and named presets expose stable names."""
     for condition_id in range(1, 9):
         name = get_condition_name(condition_id)
         assert isinstance(name, str)

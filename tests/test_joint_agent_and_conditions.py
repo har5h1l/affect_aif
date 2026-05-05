@@ -3,53 +3,47 @@ import numpy as np
 from benchmarks.core.benchmark_config import AGENT_REGISTRY
 from experiments.trust.conditions import CONDITIONS, PRESET_CONDITIONS, get_condition_name
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.factory import create_agent
-from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
+from experiments.trust.factory import create_native_runtime
+from tasks.trust.runtime import snapshot_partner_bank, update_partner_after_observation
 
 
-def _build_model(config):
-    from tasks.trust.models import TrustGameModel
-
-    return TrustGameModel(config)
-
-
-def _make_model_and_agent(agent_cls=TrustGameAgent, **kwargs):
-    cfg = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
-    model = _build_model(cfg)
-    agent = agent_cls(
-        model=model, planning_horizon=2, gamma=1.0, seed=0, reference_horizon=8, max_policies=64, **kwargs
+def test_partner_bank_tracks_joint_type_and_stance_beliefs():
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0),
+        condition=1,
+        seed=0,
     )
-    return model, agent
+    snapshot = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template)
+
+    assert snapshot.partner_joint_beliefs.shape == (
+        runtime.template.num_partners,
+        runtime.template.num_types,
+        runtime.template.num_stances,
+    )
+    assert snapshot.partner_joint_posteriors.shape == snapshot.partner_joint_beliefs.shape
+    np.testing.assert_allclose(snapshot.partner_type_beliefs[0], np.asarray(runtime.template.D[0], dtype=float))
+    np.testing.assert_allclose(snapshot.partner_stance_beliefs[0], np.asarray(runtime.template.D[1], dtype=float))
 
 
-def test_base_agent_tracks_joint_type_and_stance_beliefs():
-    model, agent = _make_model_and_agent()
+def test_observation_update_changes_active_partner_stance_belief():
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0),
+        condition=1,
+        seed=0,
+    )
+    before = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template).partner_stance_beliefs[0]
+    sucker_idx = runtime.template.payoff_levels.index(-1.0)
 
-    assert agent.partner_joint_beliefs.shape == (agent.num_partners, model.num_types, model.num_stances)
-    assert agent.partner_joint_posteriors.shape == (agent.num_partners, model.num_types, model.num_stances)
-    np.testing.assert_allclose(agent.partner_beliefs[0], model.D[0])
-    np.testing.assert_allclose(agent.partner_stance_beliefs[0], model.D[1])
+    update_partner_after_observation(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        partner_idx=0,
+        obs=[1, sucker_idx],
+        own_action=0,
+    )
+    after = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template).partner_stance_beliefs[0]
 
-
-def test_observe_outcome_updates_stance_belief_after_surprising_defection():
-    model, agent = _make_model_and_agent()
-    cooperator = model.partner_type_names.index("cooperator")
-    trusting = model.stance_names.index("trusting")
-    hostile = model.stance_names.index("hostile")
-
-    focused = np.zeros((model.num_types, model.num_stances), dtype=float)
-    focused[cooperator] = np.asarray([0.7, 0.2, 0.1], dtype=float)
-    agent.partner_joint_beliefs[0] = focused
-    agent.partner_beliefs[0] = focused.sum(axis=1)
-    agent.partner_stance_beliefs[0] = focused.sum(axis=0)
-    agent.pending_prediction_partner = 0
-    agent.pending_prediction_probs = np.asarray([0.95, 0.05], dtype=float)
-
-    sucker_idx = model.payoff_levels.index(-1.0)
-    agent.observe_outcome(partner_idx=0, observation=[1, sucker_idx], action_taken=0, partner_action=1, payoff=-1.0)
-
-    stance_posterior = agent.partner_joint_posteriors[0].sum(axis=0)
-    assert stance_posterior[hostile] > stance_posterior[trusting]
+    assert not np.allclose(after, before)
 
 
 def test_core_conditions_are_the_depth_affect_matrix():
@@ -70,15 +64,14 @@ def test_named_presets_cover_lesion_control_and_clinical_variants():
     assert {"lesioned", "no_epistemic", "alexithymia", "borderline", "depression"} <= set(PRESET_CONDITIONS)
 
 
-def test_factory_builds_agents_from_core_conditions_and_presets():
+def test_factory_builds_native_runtimes_from_core_conditions_and_presets():
     config = ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0)
-    model = _build_model(config)
 
-    tau4_affect = create_agent(config, 6, model, seed=0)
-    lesioned = create_agent(config, "lesioned", model, seed=0)
+    tau4_affect = create_native_runtime(config, 6, seed=0)
+    lesioned = create_native_runtime(config, "lesioned", seed=0)
 
-    assert isinstance(tau4_affect, AffectiveAgent)
-    assert isinstance(lesioned, LesionedAgent)
+    assert tau4_affect.affect_mode == "normal"
+    assert lesioned.affect_mode == "decouple"
     assert tau4_affect.planning_horizon == 4
     assert get_condition_name(6) == "tau4_affect"
 

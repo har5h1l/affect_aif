@@ -1,11 +1,10 @@
 from experiments.trust.config import ExperimentConfig
 from tasks.trust.envs import GradedTrustGameEnv, Partner, TrustGameEnv
+from tasks.trust.pomdp import build_trust_pomdp_template
 
 
 def _build_model(config):
-    from tasks.trust.models import TrustGameModel
-
-    return TrustGameModel(config)
+    return build_trust_pomdp_template(config, planning_horizon=1)
 
 
 def test_cooperator_mostly_cooperates():
@@ -16,7 +15,7 @@ def test_cooperator_mostly_cooperates():
         type_name="cooperator",
         stance_name="neutral",
         type_lookup=lookup,
-        rng=model.config.get("rng", None) or __import__("numpy").random.default_rng(0),
+        rng=__import__("numpy").random.default_rng(0),
     )
     actions = [partner.sample_action() for _ in range(200)]
     assert sum(actions) < 80

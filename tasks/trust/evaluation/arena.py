@@ -14,9 +14,16 @@ from benchmarks.core.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, Age
 from benchmarks.core.scenarios import get_scenario
 from experiments.trust.conditions import resolve_condition_spec
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.runner import ExperimentRunner
+from experiments.trust.factory import create_native_runtime
 from tasks.trust.envs import TrustGameEnv
 from tasks.trust.evaluation import baselines
+from tasks.trust.runtime import (
+    predictive_log_likelihood,
+    select_decision,
+    snapshot_partner_bank,
+    update_beta_after_observation,
+    update_partner_after_observation,
+)
 
 EXPERIMENT_CONFIG_FIELDS = {field.name for field in fields(ExperimentConfig)}
 
@@ -29,9 +36,7 @@ def _create_baseline_agent(agent_name: str, num_partners: int, seed: int):
 
 
 def _create_aif_agent(condition: int | str, config: ExperimentConfig, seed: int):
-    runner = ExperimentRunner(config)
-    model = runner._create_model()
-    return runner._create_agent(condition, model, seed), model
+    return create_native_runtime(config, condition, seed)
 
 
 class TrustBackend(BenchmarkBackend):
@@ -129,43 +134,82 @@ class TrustBackend(BenchmarkBackend):
         if info["type"] == "baseline":
             agent = _create_baseline_agent(agent_name, env.num_partners, seed)
         else:
-            agent, _ = _create_aif_agent(condition_key, experiment_config, seed)
+            agent = _create_aif_agent(condition_key, experiment_config, seed)
 
         context_payload = env.reset()
-        agent.reset()
+        if hasattr(agent, "reset"):
+            agent.reset()
         records: list[dict[str, Any]] = []
         episode_id = f"{self.backend_name}:{agent_spec.name}:{seed}"
         started = time.perf_counter()
 
         for round_idx in range(config.num_rounds):
             active_partner = context_payload.get("active_partner")
-            raw_action = agent.plan_and_act(active_partner)
+            if info["type"] == "baseline":
+                raw_action = agent.plan_and_act(active_partner)
+            else:
+                decision = select_decision(
+                    bank=agent.partner_bank,
+                    template=agent.template,
+                    active_partner=active_partner,
+                    assignment_mode=experiment_config.assignment_mode,
+                    base_gamma=agent.base_gamma,
+                    action_selection=agent.action_selection,
+                    rng=agent.rng,
+                    affect_mode=agent.affect_mode,
+                )
+                raw_action = decision.raw_action
             result = env.step(raw_action)
 
             partner_idx = result["partner_idx"]
-            observe_kwargs = dict(
-                partner_idx=partner_idx,
-                observation=result["observation"],
-                action_taken=result["agent_action"],
-                partner_action=result["partner_action"],
-                payoff=result["agent_payoff"],
-            )
-            if info["type"] == "aif":
-                observe_kwargs["true_partner_type"] = result.get("true_partner_type")
-                observe_kwargs["true_partner_stance"] = result.get("true_partner_stance")
-            agent.observe_outcome(**observe_kwargs)
+            if info["type"] == "baseline":
+                agent.observe_outcome(
+                    partner_idx=partner_idx,
+                    observation=result["observation"],
+                    action_taken=result["agent_action"],
+                    partner_action=result["partner_action"],
+                    payoff=result["agent_payoff"],
+                )
+            else:
+                log_lik = predictive_log_likelihood(decision.predicted_partner_action_probs, result["partner_action"])
+                agent.partner_bank.round_log_evidence = log_lik
+                agent.partner_bank.cumulative_log_evidence += log_lik
+                update_beta_after_observation(
+                    bank=agent.partner_bank,
+                    partner_idx=partner_idx,
+                    predicted_partner_action_probs=decision.predicted_partner_action_probs,
+                    observed_partner_action=result["partner_action"],
+                    affect_mode=agent.affect_mode,
+                )
+                update_partner_after_observation(
+                    bank=agent.partner_bank,
+                    template=agent.template,
+                    partner_idx=partner_idx,
+                    obs=result["observation"],
+                    own_action=result["agent_action"],
+                )
 
             inferred_type = "unknown"
             inferred_correct = np.nan
             inferred_stance = "unknown"
             inferred_stance_correct = np.nan
-            if hasattr(agent, "get_partner_type_belief"):
+            if info["type"] == "aif":
+                snapshot = snapshot_partner_bank(bank=agent.partner_bank, template=agent.template)
+                belief = snapshot.partner_type_beliefs[partner_idx]
+                inferred_idx = int(np.argmax(belief))
+                inferred_type = agent.template.partner_type_names[inferred_idx]
+                inferred_correct = inferred_type == result.get("true_partner_type", "")
+                stance_belief = snapshot.partner_stance_beliefs[partner_idx]
+                inferred_stance_idx = int(np.argmax(stance_belief))
+                inferred_stance = agent.template.stance_names[inferred_stance_idx]
+                inferred_stance_correct = inferred_stance == result.get("true_partner_stance", "")
+            elif hasattr(agent, "get_partner_type_belief"):
                 belief = agent.get_partner_type_belief(partner_idx)
                 if hasattr(agent, "model") and hasattr(agent.model, "partner_type_names"):
                     inferred_idx = int(np.argmax(belief))
                     inferred_type = agent.model.partner_type_names[inferred_idx]
                     inferred_correct = inferred_type == result.get("true_partner_type", "")
-            if hasattr(agent, "get_partner_stance_belief"):
+            if info["type"] == "baseline" and hasattr(agent, "get_partner_stance_belief"):
                 belief = agent.get_partner_stance_belief(partner_idx)
                 if hasattr(agent, "model") and hasattr(agent.model, "stance_names"):
                     inferred_idx = int(np.argmax(belief))

@@ -135,8 +135,8 @@ class TestDiscreteContinuousCorrespondence:
         pass
 
 
-class TestDiscreteAffectiveAgent:
-    """Integration test: discrete agent runs through the experiment machinery."""
+class TestDiscreteAffectiveRuntime:
+    """Integration test: discrete beta runs through the native runtime machinery."""
 
     def test_no_epistemic_preset_is_registered(self):
         from experiments.trust.conditions import get_preset_condition
@@ -144,10 +144,11 @@ class TestDiscreteAffectiveAgent:
         assert get_preset_condition("no_epistemic").name == "no_epistemic"
 
     def test_discrete_agent_instantiation(self):
-        from tasks.trust import AffectiveAgent
-        from tasks.trust.models import TrustGameModel
+        from experiments.trust.config import ExperimentConfig
+        from experiments.trust.factory import create_native_runtime
+        from tasks.trust.runtime import select_decision
 
-        config = {
+        config = ExperimentConfig.from_dict({
             "num_partners": 4,
             "p_switch": 0.05,
             "assignment_mode": "random",
@@ -156,23 +157,25 @@ class TestDiscreteAffectiveAgent:
             "sucker": (-1.0, 5.0),
             "temptation": (5.0, -1.0),
             "mutual_defect": (1.0, 1.0),
-        }
-        model = TrustGameModel(config)
-        # DiscreteAffectiveAgent is absorbed into AffectiveAgent (discrete mode is default)
-        agent = AffectiveAgent(
-            model=model,
-            planning_horizon=2,
-            num_levels=5,
-            persistence=0.8,
-            sigma_0_sq=0.25,
-            initial_beta=0.5,
+            "initial_beta": 0.5,
+            "horizon_overrides": {2: 2},
+            "max_policies": 64,
+        })
+        runtime = create_native_runtime(config, condition=2, seed=0)
+        decision = select_decision(
+            bank=runtime.partner_bank,
+            template=runtime.template,
+            active_partner=0,
+            assignment_mode="random",
+            base_gamma=runtime.base_gamma,
+            action_selection="deterministic",
+            rng=runtime.rng,
+            affect_mode=runtime.affect_mode,
         )
-        # Should be able to plan
-        action = agent.plan_and_act(active_partner=0)
-        assert isinstance(action, int)
-        assert 0 <= action < agent.num_actions
+        assert isinstance(decision.raw_action, int)
+        assert 0 <= decision.raw_action < 2
 
-        # Check that beta beliefs are available
-        beliefs = agent.affect.get_all_beliefs()
+        assert runtime.partner_bank.beta is not None
+        beliefs = runtime.partner_bank.beta.get_all_beliefs()
         assert beliefs.shape == (4, 5)
         np.testing.assert_allclose(beliefs.sum(axis=1), 1.0, atol=1e-6)

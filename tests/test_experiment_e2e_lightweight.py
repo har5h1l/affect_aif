@@ -9,9 +9,14 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from experiments.multifocal.config import MultiFocalConfig
 from experiments.multifocal.runner import MultiFocalRunner
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.factory import create_agent, create_agents_from_multi_focal_config, create_env, create_model
+from experiments.trust.factory import create_agents_from_multi_focal_config, create_env, create_native_runtime
 from experiments.trust.logger import MetricLogger
 from experiments.trust.runner import ExperimentRunner
+from tasks.trust.runtime import (
+    select_decision,
+    update_beta_after_observation,
+    update_partner_after_observation,
+)
 
 
 def test_tiny_trust_config_constructs_and_runs_one_round():
@@ -24,21 +29,34 @@ def test_tiny_trust_config_constructs_and_runs_one_round():
         max_policies=64,
         horizon_overrides={1: 1},
     )
-    model = create_model(config)
     env = create_env(config, seed=0)
-    agent = create_agent(config, 1, model, seed=0)
+    runtime = create_native_runtime(config, 1, seed=0)
 
     context = env.reset()
-    action = agent.plan_and_act(active_partner=context["active_partner"])
-    result = env.step(action)
-    agent.observe_outcome(
+    decision = select_decision(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        active_partner=context["active_partner"],
+        assignment_mode=config.assignment_mode,
+        base_gamma=runtime.base_gamma,
+        action_selection=runtime.action_selection,
+        rng=runtime.rng,
+        affect_mode=runtime.affect_mode,
+    )
+    result = env.step(decision.raw_action)
+    update_beta_after_observation(
+        bank=runtime.partner_bank,
         partner_idx=result["partner_idx"],
-        observation=result["observation"],
-        action_taken=result["agent_action"],
-        partner_action=result["partner_action"],
-        payoff=result["agent_payoff"],
-        true_partner_type=result["true_partner_type"],
-        true_partner_stance=result["true_partner_stance"],
+        predicted_partner_action_probs=decision.predicted_partner_action_probs,
+        observed_partner_action=result["partner_action"],
+        affect_mode=runtime.affect_mode,
+    )
+    update_partner_after_observation(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        partner_idx=result["partner_idx"],
+        obs=result["observation"],
+        own_action=result["agent_action"],
     )
 
     assert {"agent_payoff", "partner_idx", "observation"}.issubset(result)

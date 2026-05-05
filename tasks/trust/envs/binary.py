@@ -7,8 +7,8 @@ from dataclasses import asdict, is_dataclass
 import numpy as np
 
 from tasks.trust.envs.partners import Partner
-from tasks.trust.models import TrustGameModel
 from tasks.trust.payoffs import decode_env_agent_action, payoff_to_index
+from tasks.trust.pomdp import build_trust_pomdp_template
 
 
 class TrustGameEnv:
@@ -19,7 +19,13 @@ class TrustGameEnv:
         self.config = cfg
         self.seed = int(seed if seed is not None else cfg.get("random_seed", 42))
         self.rng = np.random.default_rng(self.seed)
-        self.model = TrustGameModel(config)
+        self.template = build_trust_pomdp_template(
+            config,
+            planning_horizon=1,
+            max_policies=cfg.get("max_policies"),
+            rng=np.random.default_rng(self.seed),
+        )
+        self.model = self.template
         self.num_partners = int(cfg.get("num_partners", 4))
         self.num_rounds = int(cfg.get("num_rounds", 200))
         self.assignment_mode = str(cfg.get("assignment_mode", "random"))

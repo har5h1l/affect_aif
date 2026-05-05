@@ -22,19 +22,13 @@ def test_current_runtime_packages_are_discovered_by_pyproject():
     assert "experiment*" not in include
     packages = set(find_packages(where=str(ROOT), include=include))
     assert "tasks.trust" in packages
-    assert "tasks.trust.agents" in packages
     assert "tasks.trust.envs" in packages
     assert "tasks.trust.evaluation" in packages
-    assert "tasks.trust.models" in packages
     assert "experiments.trust" in packages
     assert "experiments.multifocal" in packages
     assert "benchmarks.core" in packages
     assert "benchmark" not in packages
 
     importlib.import_module("tasks.trust.affect")
-    importlib.import_module("tasks.trust.pymdp_helpers")
-    from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
-
-    assert TrustGameAgent is not None
-    assert AffectiveAgent is not None
-    assert LesionedAgent is not None
+    importlib.import_module("tasks.trust.pomdp")
+    importlib.import_module("tasks.trust.runtime")

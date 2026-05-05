@@ -44,7 +44,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--no-verbose-calibration",
         action="store_true",
-        help="Suppress calibration-stage messages when verbose output is enabled in serial mode.",
+        help="Legacy no-op retained for old invocations; the native runtime has no calibration stage.",
     )
     parser.add_argument(
         "--make-gifs", action="store_true", help="Generate one GIF per primary condition-run after saving results."

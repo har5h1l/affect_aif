@@ -1,4 +1,4 @@
-"""End-to-end: multi-focal rounds with AffectiveAgents and base agents."""
+"""End-to-end: multi-focal rounds with native affective and base runtimes."""
 
 from __future__ import annotations
 

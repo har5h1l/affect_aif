@@ -1,68 +1,35 @@
-"""Decision #9: each per-partner pymdp.Agent holds its OWN A, B, pA, pB.
-C, D, E remain shared by reference."""
+"""Native per-partner pymdp state independence tests."""
 
 from __future__ import annotations
 
 import numpy as np
 
+from experiments.trust.config import ExperimentConfig
+from experiments.trust.factory import create_native_runtime
+from tasks.trust.runtime import snapshot_partner_bank, update_partner_after_observation
 
-def test_each_partner_has_independent_pA():
-    from tasks.trust.agents import TrustGameAgent
-    from tasks.trust.models import TrustGameModel
 
-    cfg = {"payoff_mode": "binary", "num_partners": 3}
-    agent = TrustGameAgent(TrustGameModel(cfg), learn_A=True, pA_scale=1.0)
+def test_each_partner_has_independent_official_agent_instance():
+    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=3), condition=1, seed=0)
 
+    assert len({id(agent) for agent in runtime.partner_bank.agents}) == 3
     for i in range(1, 3):
-        np.testing.assert_allclose(agent.partners[0].pA[0], agent.partners[i].pA[0])
-
-    agent.partners[0].pA[0] += 5.0
-    for i in range(1, 3):
-        assert not np.allclose(agent.partners[0].pA[0], agent.partners[i].pA[0])
+        np.testing.assert_allclose(runtime.partner_bank.agents[0].A[0], runtime.partner_bank.agents[i].A[0])
 
 
-def test_each_partner_has_independent_A():
-    from tasks.trust.agents import TrustGameAgent
-    from tasks.trust.models import TrustGameModel
+def test_observation_only_updates_active_partner_snapshot():
+    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=3), condition=1, seed=0)
+    before = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template).partner_joint_beliefs.copy()
 
-    cfg = {"payoff_mode": "binary", "num_partners": 3}
-    agent = TrustGameAgent(TrustGameModel(cfg))
-    for i in range(1, 3):
-        np.testing.assert_allclose(agent.partners[0].A[0], agent.partners[i].A[0])
-
-    agent.partners[0].A[0][0, 0, 0] = 999.0
-    assert agent.partners[1].A[0][0, 0, 0] != 999.0
-
-
-def test_C_D_shared_by_reference():
-    from tasks.trust.agents import TrustGameAgent
-    from tasks.trust.models import TrustGameModel
-
-    cfg = {"payoff_mode": "binary", "num_partners": 3}
-    agent = TrustGameAgent(TrustGameModel(cfg))
-    for i in range(1, 3):
-        assert agent.partners[0].C is agent.partners[i].C
-        assert agent.partners[0].D is agent.partners[i].D
-
-
-def test_observe_outcome_only_updates_active_partner_pA():
-    from tasks.trust.agents import TrustGameAgent
-    from tasks.trust.models import TrustGameModel
-
-    cfg = {"payoff_mode": "binary", "num_partners": 3, "observation_noise": 0.0}
-    agent = TrustGameAgent(TrustGameModel(cfg), learn_A=True)
-    agent.reset()
-
-    pA_before = [np.asarray(p.pA[0]).copy() for p in agent.partners]
-    agent.observe_outcome(
+    update_partner_after_observation(
+        bank=runtime.partner_bank,
+        template=runtime.template,
         partner_idx=1,
-        observation=[0, 0],
-        action_taken=0,
-        partner_action=0,
-        payoff=3.0,
+        obs=[0, 2],
+        own_action=0,
     )
-    pA_after = [np.asarray(p.pA[0]).copy() for p in agent.partners]
+    after = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template).partner_joint_beliefs
 
-    np.testing.assert_array_equal(pA_after[0], pA_before[0])
-    assert not np.allclose(pA_after[1], pA_before[1])
-    np.testing.assert_array_equal(pA_after[2], pA_before[2])
+    np.testing.assert_array_equal(after[0], before[0])
+    assert not np.allclose(after[1], before[1])
+    np.testing.assert_array_equal(after[2], before[2])

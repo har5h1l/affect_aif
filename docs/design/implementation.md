@@ -12,12 +12,12 @@
 The shipped trust-game path now uses the action-dependent stance redesign.
 
 - `switch_round`, exploiter early/late phases, and `last_action × phase` likelihood conditioning are no longer part of the supported trust-game semantics.
-- `TrustGameModel` is the canonical trust-game model for both binary and graded payoffs (`payoff_mode={"binary","graded"}`).
+- `tasks.trust.pomdp.build_trust_pomdp_template(...)` is the canonical trust-game matrix surface for both binary and graded payoffs (`payoff_mode={"binary","graded"}`).
 - The shipped trust-game matrices expose two observation modalities (`o_action`, `o_payoff`) and three hidden/control factors (`type`, `stance`, `own_action`).
-- `TrustGameAgent` wraps official `pymdp.Agent` instances for tracked partners, with project-owned trust-game `A/B/C/D/E` construction and logging of per-partner joint beliefs over `4 types × 3 stances`.
+- Experiments instantiate one official `pymdp.Agent` per tracked partner and hold them in a `PartnerBank`, with project-owned trust-game `A/B/C/D/E` construction and logging of per-partner joint beliefs over `4 types × 3 stances`.
 - The affective helper path now defaults to a discrete HESP beta state with levels `[0.5, 0.67, 1.0, 1.5, 2.0]` and baseline `initial_beta = 1.0`.
 - `ExperimentConfig` supports `initial_partner_stances`, `scheduled_stance_switches`, and named `presets`.
-- The enforced minimum full-run `mu` calibration count is now `3`, and calibration uses the deepest relevant no-affect condition for the current config rather than always forcing tau-8.
+- Legacy config keys for the removed `mu` calibration path are ignored when old JSON files are loaded; supported affective runs use beta-driven native policy precision instead.
 
 ## Switching Semantics
 
@@ -25,19 +25,16 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - `scheduled_stance_switches` is the supported way to induce betrayal-like disruptions in the redesigned task.
 - Stance persists across type switches because stance tracks the partner's posterior over the agent, not the exogenous fixed type.
 
-## Partner Interface Seam
+## Partner Environment Interface
 
-- Scripted `Partner` instances now expose the same minimal lifecycle as agent implementations:
-  - `plan_and_act(...)`
-  - `observe_outcome(...)`
-- This does not change current experiment semantics. Partners are still environment-owned stochastic policies with latent type switching.
-- The purpose is architectural: `TrustGameEnv` no longer depends on partner-specific helper names, which makes a later swap to agent-like peers much cleaner.
+- Scripted `Partner` instances remain environment-owned stochastic policies with latent type switching.
+- Their small environment-facing protocol is separate from the active-inference runtime. Official `pymdp.Agent` objects are used only on the focal experiment side.
 
 ## Precision Modulation
 
-- `affect_modulates_precision=False` by default.
-- When enabled, the current implementation uses the HESP inverse-beta mapping `gamma_k = gamma_base / E[beta_k]`.
+- Affective native runtimes use the HESP inverse-beta mapping `gamma_k = gamma_base / E[beta_k]`.
 - That means low beta (high expected precision) sharpens the policy posterior, while high beta (low expected precision) softens it below the base `gamma`.
+- Lesioned runtimes use `affect_mode="decouple"` to leave beta updates intact while forcing `gamma_k = gamma_base`.
 
 ## Belief updating (state inference)
 
@@ -48,7 +45,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## Sophisticated rollout inference
 
 - The trust-game planner now uses observation-branching sophisticated inference for **all** conditions and horizons.
-- Implementation-wise, the supported control surface is official `pymdp.Agent` wrapped by task-local trust agents and helpers. The trust wrapper builds the task-specific A/B/C/D/E matrices, enumerates trust-game policies and hypothetical observation branches where needed, updates the acted-on partner belief after each hypothetical observation, and delegates policy-inference semantics to the pymdp-backed runtime path.
+- Implementation-wise, the supported control surface is official `pymdp.Agent` plus procedural task helpers. `tasks.trust.pomdp` builds the task-specific A/B/C/D/E matrices, `tasks.trust.runtime` evaluates partner-local agents, updates the acted-on partner belief after each observation, and records snapshots for logging.
 - The old mean-field rollout is retained only as an internal comparison path for tests; it is no longer the default decision rule. That retained path now uses observation-weighted expected information gain on non-terminal steps rather than negative ambiguity alone.
 - This keeps the planning-method axis controlled across Conditions 1-8, so horizon comparisons are not confounded with different rollout approximations.
 
@@ -58,15 +55,13 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - This is an implementation of ordinary parameter learning over the observation model, not a separate trust variable matching the $\tau_k$ notation in [docs/theory.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/theory.md).
 - In other words:
   - learned likelihood parameters capture how the agent updates beliefs from evidence
-  - affective `beta_k` captures the slow per-partner summary used for shallow-EFE weighting (and optionally precision modulation)
+  - affective `beta_k` captures the slow per-partner summary used for partner-local policy precision
 - The current code therefore keeps trust-like evidence accumulation and affective deployment distinct, rather than instantiating a dedicated trust scalar alongside `beta_k`.
 
-## Policy Weighting and Calibration
+## Native Precision Surface
 
-- Full experiment runs still enforce a minimum of `3` calibration episodes when deriving shared calibration terms such as `mu`, even if the config requests fewer.
-- `ExperimentRunner.calibrate_mu()` can still be called directly with fewer episodes for fast unit tests or notebooks.
 - The shipped affective runtime no longer exposes a supported `RewardAvgAgent`; the `reward_avgs` metric key remains in the logged schema as a placeholder (`NaN`) for compatibility with historical analysis surfaces.
-- Policy differentiation in the current trust runtime is carried by sophisticated rollout plus optional inverse-beta precision modulation (`gamma_k = gamma_base / E[beta_k]`), not by a separate reward-average control path.
+- Policy differentiation in the current trust runtime is carried by native pymdp policy inference plus inverse-beta precision modulation for affective runtimes (`gamma_k = gamma_base / E[beta_k]`), not by a separate reward-average control path.
 
 ## Condition-specific horizons
 
@@ -79,7 +74,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The current code tracks unsigned surprise, not signed residual error.
 - Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
 - The existing `prediction_errors` logging field is kept for backward compatibility, but its semantics are surprise magnitude.
-- Affective agents use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
+- Affective conditions use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
 - `num_beta_levels` is accepted only as a legacy config input alias; serialized configs now emit `beta_num_levels`.
 
@@ -104,12 +99,10 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - `ExperimentConfig` now includes execution-only controls for live tracing and post-run GIF generation:
   - `verbose`
   - `verbosity_mode`
-  - `verbosity_include_calibration`
   - `gif_after_run`
   - `gif_output_dir`
 - `scripts/experiment/run.py --verbose --verbosity-mode stage_stream` emits structured stage lines from `ExperimentRunner` rather than ad hoc prints.
 - The current stage stream reports:
-  - calibration episode start/end
   - condition start/end
   - replication start/end
   - round start
@@ -118,6 +111,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - belief update start/end
   - metric logging end
 - These progress events are observational only. They do not change experiment dynamics, result rows, or analysis semantics.
+- Legacy configs may still include `verbosity_include_calibration`; it has no effect in the native runtime because the calibration stage was removed.
 
 ## GIF Generation
 
@@ -129,7 +123,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## Parallelism
 
 - `scripts/experiment/run.py` accepts multiple `--config` paths and a `--workers` count. With more than one config or `workers > 1`, it uses `BatchExperimentRunner` and a `ProcessPoolExecutor` from the standard library.
-- Work is parallelized at replication granularity: calibration episodes, then primary replications (and when `run_sensitivity` is true, sensitivity replications) are submitted to the pool. Each task runs a single replication in a worker process; config and calibration summaries are serialized and passed in. Results are collected in the main process and written per config under `<output-dir>/<batch_id>/<config_slug>/results.csv`.
+- Work is parallelized at replication granularity: primary replications, and when `run_sensitivity` is true, sensitivity replications are submitted to the pool. Each task runs a single replication in a worker process; config metadata is serialized and passed in. Results are collected in the main process and written per config under `<output-dir>/<batch_id>/<config_slug>/results.csv`.
 - Serial mode (exactly one config and `--workers 1`) runs in the main process and supports `--verbose` stage streaming and `--make-gifs`; batch mode disables per-round verbosity but can still use `--verbose` for completion messages and `--make-gifs` to build GIFs per config after all replications finish.
 
 ## Betrayal Stress Experiment

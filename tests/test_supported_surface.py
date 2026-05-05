@@ -7,7 +7,8 @@ import pandas as pd
 
 import tasks.trust as trust
 import tasks.trust.affect
-import tasks.trust.pymdp_helpers
+import tasks.trust.pomdp
+import tasks.trust.runtime
 from experiments.trust.conditions import (
     get_condition_metadata,
     get_condition_name,
@@ -15,24 +16,16 @@ from experiments.trust.conditions import (
     normalize_condition_name,
 )
 from experiments.trust.config import ExperimentConfig
+from experiments.trust.factory import create_native_runtime
 from experiments.trust.runner import ExperimentRunner
-from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_supported_trust_runtime_imports_are_exposed():
     assert tasks.trust.affect.DiscreteBetaState is trust.DiscreteBetaState
-    assert tasks.trust.pymdp_helpers.create_agent is not None
-    assert trust.TrustGameAgent is TrustGameAgent
-    assert trust.AffectiveAgent is AffectiveAgent
-    assert trust.LesionedAgent is LesionedAgent
-
-
-def _build_model(config):
-    from tasks.trust.models import TrustGameModel
-
-    return TrustGameModel(config)
+    assert tasks.trust.pomdp.build_trust_pomdp_template is trust.build_trust_pomdp_template
+    assert tasks.trust.runtime.PartnerBank is trust.PartnerBank
 
 
 def _load_script_module(script_name: str):
@@ -64,7 +57,7 @@ def test_condition_metadata_and_presets_normalize_current_names():
     assert normalize_condition_name("no_epistemic") == "no_epistemic"
 
 
-def test_runner_no_epistemic_preset_builds_affective_agent():
+def test_runner_no_epistemic_preset_builds_native_affective_runtime():
     config = ExperimentConfig(
         payoff_mode="binary",
         num_rounds=2,
@@ -73,15 +66,12 @@ def test_runner_no_epistemic_preset_builds_affective_agent():
         presets=["no_epistemic"],
         random_seed=0,
     )
-    runner = ExperimentRunner(config)
-    model = _build_model(config)
-    agent = runner._create_agent(condition="no_epistemic", model=model, seed=0)
+    runtime = create_native_runtime(config, condition="no_epistemic", seed=0)
 
-    assert isinstance(agent, trust.AffectiveAgent)
-    assert trust.TrustGameAgent is TrustGameAgent
-    assert trust.AffectiveAgent is AffectiveAgent
-    assert trust.LesionedAgent is LesionedAgent
-    assert set(trust.__all__) >= {"TrustGameAgent", "AffectiveAgent", "LesionedAgent"}
+    assert runtime.agent_kind == "affective"
+    assert runtime.affect_mode == "normal"
+    assert runtime.partner_bank.beta is not None
+    assert set(trust.__all__) >= {"TrustPomdpTemplate", "PartnerBank", "build_trust_pomdp_template"}
 
 
 def test_supported_cli_scripts_parse_and_run_smoke(tmp_path):

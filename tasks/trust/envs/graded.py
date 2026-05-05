@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from tasks.trust.envs.binary import TrustGameEnv
-from tasks.trust.models import TrustGameModel
+from tasks.trust.pomdp import build_trust_pomdp_template
 
 
 class GradedTrustGameEnv(TrustGameEnv):
@@ -11,4 +11,10 @@ class GradedTrustGameEnv(TrustGameEnv):
 
     def __init__(self, config: dict, seed: int | None = None):
         super().__init__(config, seed=seed)
-        self.model = TrustGameModel(config)
+        self.template = build_trust_pomdp_template(
+            config,
+            planning_horizon=1,
+            max_policies=self.config.get("max_policies"),
+            rng=self.rng,
+        )
+        self.model = self.template

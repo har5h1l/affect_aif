@@ -13,11 +13,19 @@ from experiments.trust.calibration import (
 from experiments.trust.conditions import resolve_condition_spec
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.constants import SENSITIVITY_CONDITIONS
-from experiments.trust.factory import create_agent, create_env, create_model
+from experiments.trust.factory import NativeTrustRuntime, create_env, create_native_runtime
 from experiments.trust.logger import MetricLogger
 from experiments.trust.progress import ProgressReporter, create_progress_reporter
-from tasks.trust import TrustGameAgent, TrustGameModel
 from tasks.trust.envs import TrustGameEnv
+from tasks.trust.runtime import (
+    Decision,
+    PartnerSnapshot,
+    predictive_log_likelihood,
+    select_decision,
+    snapshot_partner_bank,
+    update_beta_after_observation,
+    update_partner_after_observation,
+)
 
 
 class ExperimentRunner:
@@ -31,14 +39,11 @@ class ExperimentRunner:
             include_calibration=self.config.verbosity_include_calibration,
         )
 
-    def _create_model(self) -> TrustGameModel:
-        return create_model(self.config)
-
     def _create_env(self, seed: int) -> TrustGameEnv:
         return create_env(self.config, seed=seed)
 
-    def _create_agent(self, condition: int | str, model: TrustGameModel, seed: int) -> TrustGameAgent:
-        return create_agent(self.config, condition, model, seed)
+    def _create_runtime(self, condition: int | str, seed: int) -> NativeTrustRuntime:
+        return create_native_runtime(self.config, condition, seed)
 
     def _annotate_primary_records(
         self,
@@ -59,7 +64,7 @@ class ExperimentRunner:
 
     def _run_episode(
         self,
-        agent: TrustGameAgent,
+        runtime: NativeTrustRuntime,
         env: TrustGameEnv,
         seed: int,
         condition: int | str,
@@ -86,8 +91,17 @@ class ExperimentRunner:
                 round_count=self.config.num_rounds,
                 active_partner=active_partner,
             )
-            action = agent.plan_and_act(active_partner=active_partner)
-            planning_metrics = self._agent_diagnostics(agent, agent.get_metrics())
+            decision = select_decision(
+                bank=runtime.partner_bank,
+                template=runtime.template,
+                active_partner=active_partner,
+                assignment_mode=self.config.assignment_mode,
+                base_gamma=runtime.base_gamma,
+                action_selection=runtime.action_selection,
+                rng=runtime.rng,
+                affect_mode=runtime.affect_mode,
+            )
+            planning_metrics = self._decision_diagnostics(runtime, decision, None, None)
             self.progress.emit(
                 "planning_end",
                 condition=condition,
@@ -105,9 +119,9 @@ class ExperimentRunner:
                 replication=replication,
                 round_idx=round_idx,
                 round_count=self.config.num_rounds,
-                raw_action=action,
+                raw_action=decision.raw_action,
             )
-            result = env.step(action)
+            result = env.step(decision.raw_action)
             result["active_partner_start"] = active_partner
             self.progress.emit(
                 "environment_step_end",
@@ -129,23 +143,34 @@ class ExperimentRunner:
                 round_count=self.config.num_rounds,
                 partner_idx=result["partner_idx"],
             )
-            predictive_log_lik = agent.get_predictive_log_likelihood(result["partner_action"])
-            agent.observe_outcome(
-                partner_idx=result["partner_idx"],
-                observation=result["observation"],
-                action_taken=result["agent_action"],
-                partner_action=result["partner_action"],
-                payoff=result["agent_payoff"],
-                true_partner_type=result["true_partner_type"],
-                true_partner_stance=result.get("true_partner_stance"),
+            predictive_log_lik = predictive_log_likelihood(
+                decision.predicted_partner_action_probs,
+                result["partner_action"],
             )
-            partner_belief = agent.get_partner_type_belief(result["partner_idx"])
+            runtime.partner_bank.round_log_evidence = predictive_log_lik
+            runtime.partner_bank.cumulative_log_evidence += predictive_log_lik
+            update_beta_after_observation(
+                bank=runtime.partner_bank,
+                partner_idx=result["partner_idx"],
+                predicted_partner_action_probs=decision.predicted_partner_action_probs,
+                observed_partner_action=result["partner_action"],
+                affect_mode=runtime.affect_mode,
+            )
+            update_partner_after_observation(
+                bank=runtime.partner_bank,
+                template=runtime.template,
+                partner_idx=result["partner_idx"],
+                obs=result["observation"],
+                own_action=result["agent_action"],
+            )
+            snapshot = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template)
+            partner_belief = snapshot.partner_type_beliefs[result["partner_idx"]]
             inferred_type_idx = int(np.argmax(partner_belief))
-            inferred_type = agent.model.partner_type_names[inferred_type_idx]
+            inferred_type = runtime.template.partner_type_names[inferred_type_idx]
             inferred_correct = inferred_type == result["true_partner_type"]
-            stance_belief = agent.get_partner_stance_belief(result["partner_idx"])
+            stance_belief = snapshot.partner_stance_beliefs[result["partner_idx"]]
             inferred_stance_idx = int(np.argmax(stance_belief))
-            inferred_stance = agent.model.stance_names[inferred_stance_idx]
+            inferred_stance = runtime.template.stance_names[inferred_stance_idx]
             inferred_stance_correct = inferred_stance == result.get("true_partner_stance")
             self.progress.emit(
                 "belief_update_end",
@@ -158,7 +183,7 @@ class ExperimentRunner:
                 inferred_type_correct=inferred_correct,
             )
 
-            agent_metrics = self._agent_diagnostics(agent, agent.get_metrics())
+            agent_metrics = self._decision_diagnostics(runtime, decision, snapshot, result)
             agent_metrics["inferred_type"] = inferred_type
             agent_metrics["inferred_type_correct"] = inferred_correct
             agent_metrics["inferred_stance"] = inferred_stance
@@ -186,29 +211,61 @@ class ExperimentRunner:
 
         return logger.records
 
-    def _agent_diagnostics(self, agent: TrustGameAgent, metrics: dict) -> dict:
-        """Expose pymdp-backed public diagnostics under experiment column names."""
+    def _decision_diagnostics(
+        self,
+        runtime: NativeTrustRuntime,
+        decision: Decision,
+        snapshot: PartnerSnapshot | None,
+        env_result: dict | None,
+    ) -> dict:
+        """Expose native pymdp decisions under experiment column names."""
 
-        diagnostics = dict(metrics)
-        for column, attr in (
-            ("q_pi", "q_pi"),
-            ("G", "policy_scores"),
-            ("best_policy_idx", "best_policy_idx"),
-            ("selected_partner", "selected_partner"),
-            ("selected_action", "selected_action"),
-            ("raw_action", "last_raw_action"),
-            ("partner_beliefs", "partner_beliefs"),
-        ):
-            if diagnostics.get(column) is None and hasattr(agent, attr):
-                diagnostics[column] = getattr(agent, attr)
-        if hasattr(agent, "latest_surprise_by_partner"):
-            diagnostics["latest_surprise_by_partner"] = getattr(agent, "latest_surprise_by_partner")
-            diagnostics["prediction_errors"] = getattr(agent, "latest_surprise_by_partner")
-        if "betas" not in diagnostics and hasattr(agent, "get_betas"):
-            diagnostics["betas"] = agent.get_betas()
-        if "terminal_signal" not in diagnostics:
-            diagnostics["terminal_signal"] = diagnostics.get("betas", np.full((agent.num_partners,), np.nan))
-        return diagnostics
+        del env_result
+        q_pi = np.asarray(decision.q_pi, dtype=float)
+        entropy = float(-(q_pi * np.log(q_pi + 1e-16)).sum()) if q_pi.size else np.nan
+        num_step_controls = int(np.prod(runtime.template.num_controls))
+        planning_cost = float((num_step_controls**runtime.planning_horizon) * runtime.planning_horizon)
+        planning_cost_ratio = float(
+            (num_step_controls**self.config.deep_horizon) / max(num_step_controls**runtime.planning_horizon, 1)
+        )
+        default_vector = np.full((self.config.num_partners,), np.nan, dtype=float)
+        betas = (
+            np.asarray(runtime.partner_bank.beta.expected_beta(), dtype=float)
+            if runtime.partner_bank.beta is not None
+            else default_vector
+        )
+        prediction_errors = (
+            np.asarray(runtime.partner_bank.latest_surprise, dtype=float)
+            if runtime.partner_bank.latest_surprise is not None
+            else default_vector
+        )
+        if snapshot is None:
+            snapshot = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template)
+        return {
+            "q_pi": q_pi,
+            "G": np.asarray(decision.policy_scores, dtype=float),
+            "best_policy_step_costs": np.asarray([], dtype=float),
+            "mean_abs_step_efe": float(np.mean(np.abs(decision.policy_scores))) if decision.policy_scores.size else np.nan,
+            "best_policy_idx": int(decision.best_policy_idx),
+            "selected_partner": int(decision.selected_partner),
+            "selected_action": int(decision.selected_action),
+            "raw_action": int(decision.raw_action),
+            "q_pi_entropy": entropy,
+            "betas": betas,
+            "prediction_errors": prediction_errors,
+            "latest_surprise_by_partner": prediction_errors,
+            "terminal_signal": betas,
+            "reward_avgs": default_vector,
+            "partner_beliefs": snapshot.partner_type_beliefs,
+            "partner_posteriors": snapshot.partner_joint_posteriors.sum(axis=2),
+            "partner_joint_beliefs": snapshot.partner_joint_beliefs,
+            "partner_joint_posteriors": snapshot.partner_joint_posteriors,
+            "partner_stance_beliefs": snapshot.partner_stance_beliefs,
+            "planning_cost": planning_cost,
+            "planning_cost_ratio": planning_cost_ratio,
+            "round_log_evidence": runtime.partner_bank.round_log_evidence,
+            "cumulative_log_evidence": runtime.partner_bank.cumulative_log_evidence,
+        }
 
     def run_replication(
         self,
@@ -226,11 +283,10 @@ class ExperimentRunner:
             replication=replication,
             seed=seed,
         )
-        model = self._create_model()
         env = self._create_env(seed=seed)
-        agent = self._create_agent(condition=condition, model=model, seed=seed)
+        runtime = self._create_runtime(condition=condition, seed=seed)
         episode_records = self._run_episode(
-            agent=agent,
+            runtime=runtime,
             env=env,
             seed=seed,
             condition=condition,
@@ -350,10 +406,9 @@ class ExperimentRunner:
         original_initial_beta = self.config.initial_beta
         try:
             self._apply_sensitivity_override(parameter_name, float(parameter_value))
-            model = self._create_model()
             env = self._create_env(seed=seed)
-            agent = self._create_agent(condition=condition, model=model, seed=seed)
-            rows = self._run_episode(agent=agent, env=env, seed=seed, condition=condition, replication=replication)
+            runtime = self._create_runtime(condition=condition, seed=seed)
+            rows = self._run_episode(runtime=runtime, env=env, seed=seed, condition=condition, replication=replication)
             for row in rows:
                 row["condition_name"] = resolve_condition_spec(condition).name
                 row["sensitivity_parameter"] = parameter_name

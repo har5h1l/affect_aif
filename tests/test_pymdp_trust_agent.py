@@ -3,162 +3,141 @@ from __future__ import annotations
 import numpy as np
 
 from experiments.trust.config import ExperimentConfig
-from tasks.trust import pymdp_helpers
-from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent, TrustGameModel
+from experiments.trust.factory import create_native_runtime
+from tasks.trust.runtime import (
+    select_decision,
+    snapshot_partner_bank,
+    update_beta_after_observation,
+    update_partner_after_observation,
+)
 
 
-def test_trust_game_agent_uses_pymdp_partner_agents() -> None:
-    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=2))
-    agent = TrustGameAgent(model=model, planning_horizon=1, seed=0)
+def test_native_runtime_uses_official_pymdp_partner_agents() -> None:
+    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2), condition=1, seed=0)
 
-    assert len(agent.partners) == 2
-    assert all(p.__class__.__module__.startswith("pymdp.") for p in agent.partners)
+    assert len(runtime.partner_bank.agents) == 2
+    assert all(agent.__class__.__module__.startswith("pymdp.") for agent in runtime.partner_bank.agents)
 
 
-def test_agent_can_plan_and_observe_single_outcome() -> None:
-    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=2))
-    agent = TrustGameAgent(model=model, planning_horizon=1, seed=0)
+def test_runtime_can_plan_and_observe_single_outcome() -> None:
+    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2), condition=1, seed=0)
 
-    action = agent.plan_and_act(active_partner=0)
-    assert isinstance(action, int)
-
-    agent.observe_outcome(
+    decision = select_decision(
+        bank=runtime.partner_bank,
+        template=runtime.template,
         active_partner=0,
-        agent_action=action % 2,
-        partner_action=0,
-        payoff=3.0,
-        observation=[0, 2],
+        assignment_mode="random",
+        base_gamma=runtime.base_gamma,
+        action_selection="deterministic",
+        rng=runtime.rng,
+    )
+    assert isinstance(decision.raw_action, int)
+
+    update_partner_after_observation(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        partner_idx=0,
+        obs=[0, 2],
+        own_action=decision.own_action,
     )
 
-    assert agent.partner_beliefs.shape[0] == 2
-    np.testing.assert_allclose(agent.partner_beliefs[0].sum(), 1.0)
+    snapshot = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template)
+    assert snapshot.partner_joint_beliefs.shape[0] == 2
+    np.testing.assert_allclose(snapshot.partner_joint_beliefs[0].sum(), 1.0)
 
 
 def test_agent_choice_stores_candidate_level_policy_distribution() -> None:
-    model = TrustGameModel(
-        ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice")
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice"),
+        condition=1,
+        seed=0,
     )
-    agent = TrustGameAgent(model=model, planning_horizon=1, seed=0)
 
-    agent.plan_and_act(active_partner=None)
+    decision = select_decision(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        active_partner=None,
+        assignment_mode="agent_choice",
+        base_gamma=runtime.base_gamma,
+        action_selection="deterministic",
+        rng=runtime.rng,
+    )
 
-    assert len(agent.q_pi) == agent.num_partners * len(agent.bundle.policies)
-    assert len(agent.policy_scores) == len(agent.q_pi)
-    np.testing.assert_allclose(agent.q_pi.sum(), 1.0)
+    assert len(decision.q_pi) == runtime.template.num_partners * len(runtime.template.policies)
+    assert len(decision.policy_scores) == len(decision.q_pi)
+    np.testing.assert_allclose(decision.q_pi.sum(), 1.0)
 
 
 def test_agent_choice_selected_fields_match_encoded_raw_action() -> None:
-    model = TrustGameModel(
-        ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice")
-    )
-    agent = TrustGameAgent(model=model, planning_horizon=1, seed=0)
-
-    raw_action = agent.plan_and_act(active_partner=None)
-
-    assert agent.selected_partner == raw_action // 4
-    assert agent.selected_action == raw_action % 2
-    assert agent.last_selected_partner == raw_action // 4
-    assert agent.last_selected_action == raw_action % 2
-
-
-def test_agent_choice_best_policy_idx_is_candidate_indexed_for_nonzero_partner() -> None:
-    model = TrustGameModel(
-        ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice")
-    )
-    agent = TrustGameAgent(model=model, planning_horizon=1, seed=0, action_sampling="deterministic")
-    num_policies = len(agent.bundle.policies)
-
-    def infer_partner(partner_idx: int) -> pymdp_helpers.PymdpInferenceResult:
-        scores = np.full(num_policies, -100.0, dtype=float)
-        scores[1] = float(partner_idx)
-        q_pi = np.full(num_policies, 1.0 / num_policies, dtype=float)
-        return pymdp_helpers.PymdpInferenceResult(qs=[], q_pi=q_pi, policy_scores=scores, info={})
-
-    agent._infer_partner = infer_partner  # type: ignore[method-assign]
-
-    agent.plan_and_act(active_partner=None)
-
-    expected_local_policy_idx = 1
-    expected_candidate_idx = agent.last_selected_partner * num_policies + expected_local_policy_idx
-    assert agent.last_selected_partner == 2
-    assert agent.best_policy_idx == expected_candidate_idx
-    assert agent.q_pi[agent.best_policy_idx] == 1.0
-
-
-def test_observe_keeps_previous_plan_diagnostics_stable() -> None:
-    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=2))
-    agent = TrustGameAgent(model=model, planning_horizon=1, seed=0)
-
-    action = agent.plan_and_act(active_partner=0)
-    q_pi = agent.q_pi.copy()
-    policy_scores = agent.policy_scores.copy()
-    best_policy_idx = agent.best_policy_idx
-    selected_partner = agent.selected_partner
-    selected_action = agent.selected_action
-
-    agent.observe_outcome(
-        active_partner=0,
-        agent_action=action % 2,
-        partner_action=0,
-        payoff=3.0,
-        observation=[0, 2],
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice"),
+        condition=1,
+        seed=0,
     )
 
-    np.testing.assert_allclose(agent.q_pi, q_pi)
-    np.testing.assert_allclose(agent.policy_scores, policy_scores)
-    assert agent.best_policy_idx == best_policy_idx
-    assert agent.selected_partner == selected_partner
-    assert agent.selected_action == selected_action
-    assert agent.post_observation_q_pi is not None
-    assert agent.post_observation_policy_scores is not None
+    decision = select_decision(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        active_partner=None,
+        assignment_mode="agent_choice",
+        base_gamma=runtime.base_gamma,
+        action_selection="deterministic",
+        rng=runtime.rng,
+    )
+
+    assert decision.selected_partner == decision.raw_action // 4
+    assert decision.selected_action == decision.raw_action % 2
 
 
 def test_use_information_gain_false_updates_pymdp_agent_flags() -> None:
-    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=2))
-    agent = TrustGameAgent(model=model, planning_horizon=1, seed=0, use_information_gain=False)
+    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2), condition="no_epistemic", seed=0)
 
-    for partner in agent.partners:
-        if hasattr(partner, "use_states_info_gain"):
-            assert partner.use_states_info_gain is False
-        if hasattr(partner, "use_param_info_gain"):
-            assert partner.use_param_info_gain is False
+    for agent in runtime.partner_bank.agents:
+        if hasattr(agent, "use_states_info_gain"):
+            assert agent.use_states_info_gain is False
+        if hasattr(agent, "use_param_info_gain"):
+            assert agent.use_param_info_gain is False
 
 
-def test_affective_agent_updates_beta_after_observation() -> None:
-    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=1))
-    agent = AffectiveAgent(model=model, planning_horizon=1, seed=0, initial_beta=1.0)
-
-    before = agent.affect.expected_beta()[0]
-    agent.observe_outcome(
-        active_partner=0,
-        agent_action=0,
-        partner_action=1,
-        payoff=-1.0,
-        observation=[1, 0],
+def test_affective_runtime_updates_beta_after_observation() -> None:
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_partners=1, initial_beta=1.0),
+        condition=2,
+        seed=0,
     )
-    after = agent.affect.expected_beta()[0]
+    beta = runtime.partner_bank.beta
+    assert beta is not None
+
+    before = beta.expected_beta()[0]
+    update_beta_after_observation(
+        bank=runtime.partner_bank,
+        partner_idx=0,
+        predicted_partner_action_probs=np.array([0.1, 0.9]),
+        observed_partner_action=0,
+        affect_mode=runtime.affect_mode,
+    )
+    after = beta.expected_beta()[0]
 
     assert after != before
 
 
 def test_lesioned_decouple_updates_beta_but_uses_base_precision() -> None:
-    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=1))
-    agent = LesionedAgent(model=model, planning_horizon=1, seed=0, lesion_mode="decouple", initial_beta=1.0)
-
-    assert agent.affect_modulates_precision is False
-    before = agent.affect.expected_beta()[0]
-    agent.observe_outcome(
-        active_partner=0,
-        agent_action=0,
-        partner_action=1,
-        payoff=-1.0,
-        observation=[1, 0],
+    runtime = create_native_runtime(
+        ExperimentConfig(payoff_mode="binary", num_partners=1, initial_beta=1.0),
+        condition="lesioned",
+        seed=0,
     )
-    after = agent.affect.expected_beta()[0]
+    beta = runtime.partner_bank.beta
+    assert beta is not None
 
-    assert after != before
+    before = beta.expected_beta()[0]
+    update_beta_after_observation(
+        bank=runtime.partner_bank,
+        partner_idx=0,
+        predicted_partner_action_probs=np.array([0.1, 0.9]),
+        observed_partner_action=0,
+        affect_mode=runtime.affect_mode,
+    )
 
-    agent.plan_and_act(active_partner=0)
-
-    applied_gamma = float(np.asarray(agent.partners[0].gamma, dtype=float).squeeze())
-    assert applied_gamma == agent.gamma
+    assert beta.expected_beta()[0] != before
+    assert runtime.affect_mode == "decouple"

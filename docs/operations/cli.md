@@ -34,7 +34,7 @@ the supported workflow contract.
 python scripts/experiment/run.py --config <path-to-json> [--config <path> ...] [--output-dir DIR] [--batch-name NAME] [--workers N]
 ```
 
-It calibrates `mu` when needed, runs all configured conditions, and writes one output directory per config. A single config with `--workers 1` is the serial path; all other combinations use the batch runner, but the output layout is the same.
+It runs all configured conditions with the native pymdp trust runtime and writes one output directory per config. A single config with `--workers 1` is the serial path; all other combinations use the batch runner, but the output layout is the same.
 With `--dry-run`, it parses configs, resolves paths, writes
 `<output-dir>/<batch-name>/manifest.json`, and exits without running primary
 experiments.
@@ -49,7 +49,7 @@ Important flags:
 | `--workers` | CPU count | Must be at least 1. |
 | `--verbose` | false | Enables progress output. |
 | `--verbosity-mode` | `stage_stream` | Only supported mode. |
-| `--no-verbose-calibration` | false | Suppresses calibration-stage messages in serial verbose runs. |
+| `--no-verbose-calibration` | false | Legacy no-op retained for old invocations; the native runtime has no calibration stage. |
 | `--make-gifs` | false | Writes per-run GIFs after results are saved. |
 | `--dry-run` | false | Writes a provenance manifest without executing experiments. |
 

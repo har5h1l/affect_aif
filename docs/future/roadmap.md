@@ -15,7 +15,7 @@ The first major iteration established the core finding and produced a paper draf
 - **Cross-game generalization:** Augmentation holds across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions.
 - **Clinical sensitivity:** Requires graded/betrayal environments (binary games saturate softmax). Graded betrayal produces 80.5-point between-clinical spread. Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
 - **Predictive score comparison:** C2 decisively preferred under betrayal stress (log10 proxy = 3.0 vs C1). Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **Variational beta:** Supported auxiliary variational-beta path in Condition 12 is behaviorally equivalent to continuous EMA in stable environments (d=0.001). Moderate divergence under betrayal (d=0.41).
+- **Discrete beta:** The native runtime now uses `DiscreteBetaState` inside the standard affective path. The older Condition 12 variational-beta prototype is archived historical evidence, not a supported condition.
 - **CvC benchmark:** Early WIP / proof-of-concept. Navigation-only baseline works (BFS + wall detection, 84-91% move success). Reward results minimal. Not publication-ready.
 - **Paper:** Draft complete (theory gaps addressed, results integrated, figures included). Architecture needs justification of departures from standard AIF before submission.
 
@@ -23,12 +23,12 @@ The first major iteration established the core finding and produced a paper draf
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| Phase 4 | Variational Beta Reformulation | Complete |
+| Phase 4 | Discrete Beta Reformulation | Complete; native helper supported |
 | Phase 5 | Clinical Parameter Sensitivity | Complete |
 | Phase 6 | Bayesian Model Comparison | Complete |
 | Phase 7 | Cross-Game Generalization | Complete |
 
-**Phase 4 details:** Discrete Bayesian beta formulation implemented and validated. Behaviorally equivalent to continuous EMA in stable environments (d = 0.001). Moderate divergence under betrayal (d = 0.41) due to transition matrix persistence.
+**Phase 4 details:** Discrete Bayesian beta tracking is implemented through `DiscreteBetaState` and deployed through partner-local gamma. Older Condition 12 validation runs remain archived historical context.
 
 **Phase 5 details:** Graded betrayal environment identified as the critical test bed. Between-clinical spread: 80.5 points (2700x improvement over graded default). Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects within ~30 rounds.
 
@@ -62,12 +62,12 @@ Implication for the paper: document action-dependent stance as the supported arc
 
 The pymdp hard cutover is the supported path. Future runtime work should extend trust-task wrappers around official `inferactively-pymdp==1.0.0`, not revive a project-owned active-inference engine.
 
-### Decision 3: Multiplicative vs additive precision weighting
+### Decision 3: Partner-local precision deployment (resolved)
 
-Current: `G(π) * (1 + μβ)` — multiplicative. Standard AIF would add a terminal value: `G(π) + μβ`. The multiplicative form means high-beta partners amplify the *entire* EFE, not just add a fixed bias. This is theoretically motivated (precision should scale the whole estimate, not add to it) but non-standard. Options:
-- (a) Keep multiplicative, add theoretical justification
-- (b) Test additive form and compare
-- (c) Implement both, let experiments decide
+The native runtime deploys affect by setting partner-local pymdp policy precision:
+`gamma_k = gamma_base / E[beta_k]`. The removed policy-score weighting path is
+historical prototype context only and should not be revived as the supported
+trust-game runtime surface.
 
 ### Decision 4: AIF partners vs rule-based partners
 
@@ -78,17 +78,17 @@ Currently all partners are rule-based (cooperator, reciprocator, exploiter, rand
 Work that can proceed without waiting for the decisions above, organized by category:
 
 **Area 1: Code Correctness Fixes**
-1. **Fix mean-field epistemic term** — `_rollout_policy_trust_game_mean_field()` in `core/rollout.py` line 136 uses channel ambiguity (`-expected_ambiguity`) instead of true information gain. Replace with proper expected entropy reduction. All published results use sophisticated inference (correct), so existing findings are unaffected.
-2. **Single-factor documentation** — The model defines two hidden state factors (partner type + interaction context) but only infers over partner type. Context is directly observed, so this is correct — but it should be documented as a single-factor POMDP with partner-indexed beliefs.
+1. **Native pymdp boundary checks** — keep policy/state inference inside official `pymdp.Agent` and keep repository code focused on matrix construction, partner banking, beta tracking, and logging.
+2. **Factorized-state documentation** — document the native `type × stance` hidden state and `own_action` control factor so theory, tests, and matrix construction stay aligned.
 
 **Area 2: Test Coverage**
-3. **EFE unit tests** — Direct tests for EFE computation: epistemic value is positive for uncertain beliefs and approaches zero for sharp beliefs; pragmatic value aligns with C matrix preferences; terminal value adjustment works correctly; sophisticated and mean-field rollouts agree for sharp beliefs.
-4. **Affective state convergence tests** — Beta converges toward 1.0 under consistent correct predictions, toward 0.0 under consistent surprise. Clinical parameter regimes produce different trajectories.
+3. **Native policy tests** — Direct tests that `pymdp.Agent.infer_policies(...)` receives task matrices with aligned preferences, controls, and partner-local priors.
+4. **Affective state convergence tests** — Beta moves toward low-beta/high-precision levels under consistent correct predictions and toward high-beta/low-precision levels under consistent surprise. Clinical parameter regimes produce different trajectories.
 5. **Generative model likelihood tests** — Verify A matrix produces correct observation probabilities for each partner type under each action.
 
 **Area 3: Documentation & Theory**
-6. **Document architectural departures** — Add a section to theory.md explicitly addressing: why single-factor inference is sufficient, why B is action-independent, why precision weighting is multiplicative, why one-step Bayes IS VFE minimization for categorical distributions.
-7. **Soften depth claims pending Decision 1** — Current paper says depth is "irrelevant." If the flat curve is a structural artifact of action-independent B, the claim needs hedging.
+6. **Document architectural departures** — Add a section to theory.md explicitly addressing: why beta remains outside the POMDP state space, why partner-local `gamma_k` is the deployment path, and why one-step categorical Bayes is the closed-form VFE optimum for state inference.
+7. **Soften depth claims after stance redesign** — Current paper says depth is "irrelevant." The action-dependent stance path needs a narrower claim: depth can matter, while beta supplies orthogonal partner-local precision.
 8. **Narrow H3 framing** — Reframe precision-vs-reward-averaging as context-dependent: precision tracking benefits arise specifically when prediction error and reward dissociate (binary betrayal), not universally.
 
 **Area 4: Benchmark & CvC**
@@ -96,9 +96,9 @@ Work that can proceed without waiting for the decisions above, organized by cate
 10. **CvC navigation improvements** — Current BFS heuristic achieves 84-91% move success. Full scoring loop (gear → ore → hearts → aligned junctions) is incomplete. Kept as a future direction, not an active track.
 
 **Area 5: Experimental Re-runs (after architecture decisions)**
-11. **Re-run core experiments** after any architecture changes from Decisions 1-3. Use same configs but on updated codebase.
-12. **Test action-dependent B** (if Decision 1 = option b or c) — Small experiment (10 seeds, 100 rounds) to see if depth separates when B is action-dependent.
-13. **Test additive precision weighting** (if Decision 3 = option b or c) — Compare multiplicative vs additive forms on default + betrayal configs.
+11. **Re-run core experiments** after native-runtime changes. Use the maintained configs and confirm result schemas still match analysis.
+12. **Stress-test action-dependent stance** — Small experiment (10 seeds, 100 rounds) to check whether depth separates under stance-switch scenarios.
+13. **Gamma-channel sensitivity** — Compare `gamma`, `alpha_charge`, `beta_persistence`, and `initial_beta` sweeps on default + betrayal configs.
 
 ---
 
@@ -179,7 +179,7 @@ These are post-tightening priorities, roughly ordered by likely sequencing.
 
 **Scope:**
 - Obtain trust-game behavioral data from healthy participants and vmPFC-lesioned patients
-- Estimate individual-difference parameters (alpha_charge, lambda_smooth, beta_0) from action sequences
+- Estimate individual-difference parameters (`alpha_charge`, `beta_persistence`, `initial_beta`) from action sequences
 - Test whether the affect-on/affect-off distinction predicts patient/control behavioral split
 - Examine whether fitted parameters cluster with known individual differences (trait empathy, interoceptive accuracy)
 

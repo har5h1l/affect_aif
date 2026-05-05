@@ -46,12 +46,14 @@ The active task is no longer deciding whether to redesign the trust-game surface
 
 As of 2026-04-16, the first post-restructure binary experiment families are complete, but several claims now depend on targeted re-analysis before they should be treated as final:
 
-### Phase 4: Variational Beta Validation (supported path)
+### Archived Phase 4: Variational Beta Validation
 
-- `discrete_beta_confirm_default`: 50 replications × 200 rounds, random assignment, conditions 2, 4, 12
-- `discrete_beta_confirm_betrayal`: 50 replications × 120 rounds, agent-chosen partner, scheduled betrayal, conditions 2, 4, 12
+This subsection records the pre-native Condition 12 / variational-beta prototype. The native supported surface now uses `DiscreteBetaState` inside the standard affective runtime rather than a separate Condition 12.
 
-**Key finding:** The supported variational beta path used by Condition 12 is behaviorally equivalent to the continuous EMA (Condition 2) in stable environments (d = 0.001, p = 0.99) and both outperform the baseline (d ≈ 0.6, p = 0.003). In the betrayal condition, the variational formulation underperforms the continuous one by a moderate effect (d = 0.41, p = 0.04) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperform the no-affect baseline. This divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
+- `discrete_beta_confirm_default`: 50 replications × 200 rounds, random assignment, historical conditions 2, 4, 12
+- `discrete_beta_confirm_betrayal`: 50 replications × 120 rounds, agent-chosen partner, scheduled betrayal, historical conditions 2, 4, 12
+
+**Historical key finding:** The variational beta prototype used by Condition 12 was behaviorally equivalent to the continuous EMA (Condition 2) in stable environments (d = 0.001, p = 0.99) and both outperformed the baseline (d ≈ 0.6, p = 0.003). In the betrayal condition, the variational formulation underperformed the continuous one by a moderate effect (d = 0.41, p = 0.04) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperformed the no-affect baseline. This divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
 
 ### Prior experiment families (Phases 1-3)
 
@@ -223,16 +225,20 @@ Current read:
 
 ### Context
 
+This subsection is archived pre-native result context. It records the older
+policy-weighting/calibration branch and should not be read as current runtime
+behavior.
+
 The binary trust game produced strong results for the core claim (affect provides orthogonal augmentation), but clinical sensitivity analysis showed the binary game is too unambiguous — EFE gaps of ~10.83 make softmax a hard argmax, so clinical parameter variations produce <0.5% behavioral effects. The graded investment trust game (6 investment levels × 4 partners = 24 actions) was designed to create a more ambiguous decision landscape where precision modulation can differentiate conditions.
 
-**Key fix**: the mu calibration formula returned 0 when `deep_horizon == shallow_horizon` (both must be 2 in the graded game due to combinatorial explosion). Fixed by using `max(1, horizon_gap)` so mu scales by 1× mean EFE magnitude when horizons are equal.
+**Historical key fix**: the old calibration formula returned 0 when `deep_horizon == shallow_horizon` (both had to be 2 in the graded game due to combinatorial explosion). The prototype fixed this by using `max(1, horizon_gap)` so the legacy policy-weighting term scaled by 1× mean EFE magnitude when horizons were equal.
 
 ### Graded Default (agent_choice, all horizons = 2)
 
 - config: `affect_aif/configs/graded_trust.json`
 - output: `results/graded_trust_default.csv`
 - 5 conditions × 100 replications × 200 rounds
-- calibrated mu: ~2.36
+- historical calibration term: ~2.36
 
 | Condition | Mean payoff | q_pi_entropy | vs C4 diff | Cohen's d | p |
 |---|---|---|---|---|---|
@@ -514,7 +520,7 @@ The breakthrough came from combining the graded game's ambiguous EFE landscape (
 The clinical sensitivity analysis reveals that the affect parameters map to distinct behavioral phenotypes **only under the right environmental conditions**. The mapping is:
 
 - **alpha_charge controls the gain of the affective channel.** Too low (alexithymia): stable but under-responsive. Too high (borderline): responsive but noisy. The optimal regime is in between.
-- **lambda_smooth controls temporal integration.** Low lambda (borderline) creates noisy updates that compound into progressive deterioration.
+- **Historical smoothing parameter controls temporal integration in this archived run.** Low smoothing (borderline) creates noisy updates that compound into progressive deterioration.
 - **initial_beta controls the prior.** This is the weakest parameter — evidence quickly corrects the initial pessimism, making depression a transient rather than persistent perturbation.
 
 The theoretical implication is that the per-partner metacognitive precision tracking mechanism has a **sweet spot**: enough responsiveness to track genuine changes in partner reliability, but enough smoothing to avoid noise amplification. Clinical phenotypes represent systematic deviations from this sweet spot, and the graded betrayal environment makes these deviations behaviorally visible.
@@ -579,7 +585,7 @@ The trust-game results (Phases 1-7) are the primary evidence for the paper. CvC 
 **Output:** `results/graded_betrayal_precision_mod_full/`
 **Conditions:** 1 (deep no-affect), 2 (affective shallow), 3 (lesioned), 5 (reward avg)
 **Seeds:** 50, **Rounds:** 120, **Game:** graded betrayal (cooperator→exploiter at round 31)
-**affect_modulates_precision:** true, **mu:** derived=0.0 (deep_horizon=shallow_horizon=2 → horizon_gap=0)
+**Archived config fields:** `affect_modulates_precision=true`, `mu=0.0` (legacy deep_horizon=shallow_horizon=2 calibration path)
 
 ### Key Result: Mechanism Confirmed, Effect Small
 
@@ -591,13 +597,13 @@ The trust-game results (Phases 1-7) are the primary evidence for the paper. CvC 
 
 - **Delta**: C2-mod vs C1: +5.38 points, d=0.21, p=0.31 (n=50) — directionally positive, non-significant
 - **Entropy reduction confirmed**: 5.90 → 5.46 nats (Δ=0.44) — precision modulation sharpens softmax for high-beta partners
-- **Control**: without modulation and mu=0 (due to horizon_gap=0), C2 = C1 exactly — the betas have zero effect, isolating the modulation pathway
+- **Historical control**: without the archived modulation path and with the legacy calibration term at zero, C2 = C1 exactly — the betas have zero effect, isolating that prototype pathway
 
 ### Interpretation
 
-The precision modulation pathway (`γ_k = γ(1 + β_k)`) is mechanistically valid: betas vary (range ~0.17, fraction_moved=1.0) and provably reduce policy entropy. The payoff effect is positive but small (~0.4% improvement) and non-significant at n=50. This is an informative result for the paper: the pathway works, but the graded betrayal environment does not amplify precision modulation into large payoff differences. The moderate EFE gradients (~10–12 per round) limit how much policy sharpness translates to reward gains.
+The archived precision-modulation pathway was mechanistically informative: betas varied and reduced policy entropy. The payoff effect was positive but small (~0.4% improvement) and non-significant at n=50. Reuse this result only as historical evidence; the native runtime now deploys beta through `gamma_k = gamma_base / E[beta_k]`.
 
-**Implementation note**: In `decouple` lesion mode, C3 = C2 when modulation is active, because `LesionedAgent.precision_signal()` is not overridden in decouple mode. The lesion blocks terminal value weighting (mu=0) but not the precision channel. This is an intended distinction (vmPFC lesion blocks affect-to-value translation, not precision scaling) but should be noted in the paper.
+**Historical implementation note**: Earlier wrapper-based lesion behavior distinguished terminal value weighting from precision scaling. In the native runtime, lesion modes are represented by the external beta update/modulation mode passed to `tasks.trust.runtime`.
 
 **Status**: Track 1.2 complete. Historical manuscript notes were removed from the runnable tree; reuse this result only after reconciling it with a fresh manuscript draft.
 
@@ -609,6 +615,6 @@ When the user asks to refresh this file after a run, append:
 - config name
 - command used
 - output directory
-- derived `mu`
+- beta/gamma settings
 - short read on H1-H5
 - whether the recommended next step changed

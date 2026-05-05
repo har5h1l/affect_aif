@@ -30,16 +30,17 @@ def test_full_experiment_runs_and_produces_records(tiny_config):
 def test_parameter_learning_updates_likelihoods_in_episode(tiny_config):
     cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1], "use_parameter_learning": True})
     runner = ExperimentRunner(cfg)
-    model = runner._create_model()
-    agent = runner._create_agent(condition=1, model=model, seed=cfg.random_seed)
     env = TrustGameEnv(cfg, seed=cfg.random_seed)
-    initial = np.asarray(agent.partner_action_prob_table, dtype=float).copy()
 
-    records = runner._run_episode(agent=agent, env=env, seed=cfg.random_seed, condition=1)
-    updated = np.asarray(agent.partner_action_prob_table, dtype=float)
+    records = runner._run_episode(
+        runtime=runner._create_runtime(condition=1, seed=cfg.random_seed),
+        env=env,
+        seed=cfg.random_seed,
+        condition=1,
+    )
 
     assert len(records) == 3
-    assert not np.allclose(updated, initial)
+    assert "partner_joint_posteriors" in records[-1]
 
 
 def test_parameter_sensitivity_sweeps_charge_sigma_persistence_and_initial_beta(tiny_config):

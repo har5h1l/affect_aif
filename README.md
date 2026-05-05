@@ -51,7 +51,7 @@ python scripts/benchmark/analyze.py --results results/benchmark/benchmark_result
 ## Repository Layout
 
 - `inferactively-pymdp==1.0.0`: supported active-inference runtime dependency
-- `tasks/trust/`: canonical trust-game model, rollout helpers, agents, environments, and evaluation arena
+- `tasks/trust/`: native trust POMDP templates, procedural pymdp runtime helpers, affect tracking, environments, and evaluation arena
 - `experiments/trust/`: trust experiment configuration, conditions, and runner surface
 - `experiments/multifocal/`: multi-focal trust experiment configuration and runtime
 - `analysis/`: result loading, metrics, and visualization helpers

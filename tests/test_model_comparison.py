@@ -12,36 +12,13 @@ from experiments.trust.runner import ExperimentRunner
 
 
 def test_log_evidence_tracked_in_agent_metrics(representative_agents, tiny_model):
-    """All agent types should produce finite log-evidence after observing outcomes."""
-    from tasks.trust.envs import TrustGameEnv
-
-    config = ExperimentConfig(num_rounds=5, num_replications=1, random_seed=0)
-    env = TrustGameEnv(config, seed=0)
-
-    for name, agent in representative_agents.items():
-        agent.reset()
-        init_result = env.reset()
-        active = init_result["active_partner"]
-
-        for _ in range(5):
-            action = agent.plan_and_act(active)
-            result = env.step(action)
-            agent.observe_outcome(
-                partner_idx=result["partner_idx"],
-                observation=result["observation"],
-                action_taken=result["agent_action"],
-                partner_action=result["partner_action"],
-                payoff=result["agent_payoff"],
-                true_partner_type=result["true_partner_type"],
-            )
-            active = result["active_partner"]
-
-        metrics = agent.get_metrics()
-        assert "round_log_evidence" in metrics, f"{name} missing round_log_evidence"
-        assert "cumulative_log_evidence" in metrics, f"{name} missing cumulative_log_evidence"
-        assert np.isfinite(metrics["round_log_evidence"]), f"{name} round_log_evidence not finite"
-        assert np.isfinite(metrics["cumulative_log_evidence"]), f"{name} cumulative_log_evidence not finite"
-        assert metrics["cumulative_log_evidence"] < 0, f"{name} cumulative should be negative (log-prob)"
+    """All native condition families should log finite evidence through the runner."""
+    del representative_agents, tiny_model
+    config = ExperimentConfig(num_rounds=5, num_replications=1, random_seed=0, conditions=[1, 2], presets=["lesioned"])
+    results = ExperimentRunner(config).run_all()
+    assert results["round_log_evidence"].notna().all()
+    assert results["cumulative_log_evidence"].notna().all()
+    assert (results.groupby("condition")["cumulative_log_evidence"].last() < 0).all()
 
 
 def test_log_evidence_logged_in_experiment_results(tiny_config):

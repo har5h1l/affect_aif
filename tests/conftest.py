@@ -19,13 +19,12 @@ def pytest_collection_modifyitems(config, items):
 
 
 from experiments.trust.runner import ExperimentRunner
-from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent
+from experiments.trust.factory import create_native_runtime
+from tasks.trust.pomdp import build_trust_pomdp_template
 
 
 def _build_model(config):
-    from tasks.trust.models import TrustGameModel
-
-    return TrustGameModel(config)
+    return build_trust_pomdp_template(config, planning_horizon=1, max_policies=64)
 
 
 @pytest.fixture
@@ -64,27 +63,23 @@ def tiny_model(tiny_config):
 
 
 @pytest.fixture
-def agent_factory(tiny_config, tiny_model):
-    def _make(agent_cls, **kwargs):
-        return agent_cls(
-            model=tiny_model,
-            planning_horizon=2,
-            gamma=1.0,
-            seed=0,
-            reference_horizon=tiny_config.deep_horizon,
-            max_policies=64,
-            **kwargs,
-        )
+def agent_factory(tiny_config):
+    def _make(condition=1, **kwargs):
+        config = tiny_config
+        for key, value in kwargs.items():
+            if hasattr(config, key):
+                setattr(config, key, value)
+        return create_native_runtime(config, condition=condition, seed=0)
 
     return _make
 
 
 @pytest.fixture
-def representative_agents(agent_factory, tiny_model):
+def representative_agents(agent_factory):
     return {
-        "base": agent_factory(TrustGameAgent),
-        "affective": agent_factory(AffectiveAgent),
-        "lesioned": agent_factory(LesionedAgent, lesion_mode="decouple"),
+        "base": agent_factory(1),
+        "affective": agent_factory(2),
+        "lesioned": agent_factory("lesioned"),
     }
 
 
