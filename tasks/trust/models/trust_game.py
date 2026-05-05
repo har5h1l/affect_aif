@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
+from dataclasses import asdict, dataclass, is_dataclass
+from itertools import product
+from typing import Any
 
+import jax.numpy as jnp
 import numpy as np
 
 from aif.maths import log_stable, softmax
@@ -12,6 +15,7 @@ from tasks.trust.payoffs import (
     build_graded_payoff_matrix,
     build_payoff_matrix,
     decode_action,
+    encode_instantaneous_index,
     decode_instantaneous_index,
     expected_agent_payoff,
     factorized_num_controls,
@@ -33,6 +37,21 @@ from tasks.trust.types import (
 
 _BINARY_KEYS = {"mutual_coop", "sucker", "temptation", "mutual_defect"}
 _GRADED_KEYS = {"num_investment_levels", "endowment", "multiplier"}
+
+
+@dataclass(frozen=True)
+class PymdpTrustModelBundle:
+    A: Any
+    B: Any
+    C: Any
+    D: Any
+    E: Any
+    policies: np.ndarray
+    control_fac_idx: list[int]
+    num_obs: list[int]
+    num_states: list[int]
+    num_controls: list[int]
+    payoff_values: list[float]
 
 
 class TrustGameModel:
@@ -222,6 +241,90 @@ class TrustGameModel:
 
     def get_matrices(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         return self.A, self.B, self.C, self.D
+
+    def to_pymdp_bundle(
+        self,
+        planning_horizon: int = 1,
+        max_policies: int | None = None,
+        rng: np.random.Generator | None = None,
+    ) -> PymdpTrustModelBundle:
+        planning_horizon = int(planning_horizon)
+        if planning_horizon < 1:
+            raise ValueError("planning_horizon must be >= 1.")
+        if max_policies is not None and int(max_policies) < 1:
+            raise ValueError("max_policies must be >= 1 when provided.")
+
+        num_states = [self.num_types, self.num_stances, self.num_social_actions]
+        num_controls = list(self.num_controls)
+
+        partner_action = np.repeat(np.asarray(self.A[0], dtype=float)[..., None], self.num_social_actions, axis=-1)
+        payoff_obs = np.transpose(np.asarray(self.A[1], dtype=float), (0, 2, 3, 1))
+        A = [jnp.asarray(partner_action), jnp.asarray(payoff_obs)]
+
+        if self.uses_factorized_controls:
+            type_transition = np.asarray(self.B[0], dtype=float)[:, :, :1]
+            stance_transition = np.zeros((self.num_stances, self.num_stances, num_controls[1]), dtype=float)
+            own_transition = np.zeros((self.num_social_actions, self.num_social_actions, num_controls[2]), dtype=float)
+            for stance_action in range(num_controls[1]):
+                flat_idx = encode_instantaneous_index((0, stance_action, 0), num_controls)
+                stance_transition[:, :, stance_action] = np.asarray(self.B[1], dtype=float)[:, :, flat_idx]
+            for own_action in range(num_controls[2]):
+                flat_idx = encode_instantaneous_index((0, 0, own_action), num_controls)
+                own_transition[:, :, own_action] = np.asarray(self.B[2], dtype=float)[:, :, flat_idx]
+            B = [jnp.asarray(type_transition), jnp.asarray(stance_transition), jnp.asarray(own_transition)]
+        else:
+            B = [jnp.asarray(np.asarray(B_f, dtype=float)) for B_f in self.B]
+
+        policies = self._build_pymdp_policies(
+            planning_horizon=planning_horizon,
+            max_policies=max_policies,
+            rng=rng,
+        )
+        E = jnp.full((policies.shape[0],), 1.0 / max(policies.shape[0], 1), dtype=float)
+
+        return PymdpTrustModelBundle(
+            A=A,
+            B=B,
+            C=[jnp.asarray(np.asarray(C_m, dtype=float)) for C_m in self.C],
+            D=[jnp.asarray(np.asarray(D_f, dtype=float)) for D_f in self.D],
+            E=E,
+            policies=policies,
+            control_fac_idx=[1, 2],
+            num_obs=list(self.num_obs),
+            num_states=num_states,
+            num_controls=num_controls,
+            payoff_values=[float(value) for value in self.payoff_levels],
+        )
+
+    def _build_pymdp_policies(
+        self,
+        planning_horizon: int,
+        max_policies: int | None,
+        rng: np.random.Generator | None,
+    ) -> np.ndarray:
+        instantaneous_controls = np.asarray(
+            list(product(*(range(int(size)) for size in self.num_controls))),
+            dtype=int,
+        )
+        num_step_controls = int(instantaneous_controls.shape[0])
+        num_factors = len(self.num_controls)
+        total_policies = num_step_controls**int(planning_horizon)
+        requested = total_policies if max_policies is None else min(int(max_policies), total_policies)
+
+        if requested == total_policies:
+            policy_indices = range(total_policies)
+        elif rng is None:
+            policy_indices = range(requested)
+        else:
+            policy_indices = rng.choice(total_policies, size=requested, replace=False)
+
+        policies = np.zeros((requested, int(planning_horizon), num_factors), dtype=int)
+        for policy_row, policy_idx in enumerate(policy_indices):
+            idx = int(policy_idx)
+            for timestep in range(int(planning_horizon) - 1, -1, -1):
+                policies[policy_row, timestep] = instantaneous_controls[idx % num_step_controls]
+                idx //= num_step_controls
+        return policies
 
     def build_pA(self, scale: float = 1.0) -> np.ndarray:
         """Dirichlet prior hyperparameters for observation likelihoods."""
