@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from aif.affect.beta import DiscreteBetaState
+from tasks.trust.affect import DiscreteBetaState
 from tasks.trust.agents.base import TrustGameAgent
 from tasks.trust.models import TrustGameModel
 
@@ -26,9 +26,12 @@ class AffectiveAgent(TrustGameAgent):
     ):
         del num_partners
         super().__init__(model, **kwargs)
+        beta_levels = None
+        if num_levels != 5:
+            beta_levels = np.linspace(0.5, 2.0, int(num_levels), dtype=np.float64)
         self.affect = DiscreteBetaState(
             num_entities=self.num_partners,
-            num_levels=num_levels,
+            beta_levels=beta_levels,
             persistence=persistence,
             alpha_charge=alpha_charge,
             sigma_0_sq=sigma_0_sq,
@@ -47,10 +50,11 @@ class AffectiveAgent(TrustGameAgent):
         del payoff
         if self.pending_prediction_partner != partner_idx:
             return
+        predicted_action_probs = np.asarray(self.pending_prediction_probs, dtype=np.float64)
+        surprise = 1.0 - predicted_action_probs[int(partner_action)]
         self.affect.update(
-            entity_idx=partner_idx,
-            predicted_action_probs=self.pending_prediction_probs,
-            observed_action=partner_action,
+            entity=partner_idx,
+            surprise=surprise,
         )
 
     def get_betas(self) -> np.ndarray:
