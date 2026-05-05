@@ -4,7 +4,7 @@ import numpy as np
 
 from experiments.trust.config import ExperimentConfig
 from tasks.trust import pymdp_helpers
-from tasks.trust import TrustGameAgent, TrustGameModel
+from tasks.trust import AffectiveAgent, LesionedAgent, TrustGameAgent, TrustGameModel
 
 
 def test_trust_game_agent_uses_pymdp_partner_agents() -> None:
@@ -122,3 +122,43 @@ def test_use_information_gain_false_updates_pymdp_agent_flags() -> None:
             assert partner.use_states_info_gain is False
         if hasattr(partner, "use_param_info_gain"):
             assert partner.use_param_info_gain is False
+
+
+def test_affective_agent_updates_beta_after_observation() -> None:
+    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=1))
+    agent = AffectiveAgent(model=model, planning_horizon=1, seed=0, initial_beta=1.0)
+
+    before = agent.affect.expected_beta()[0]
+    agent.observe_outcome(
+        active_partner=0,
+        agent_action=0,
+        partner_action=1,
+        payoff=-1.0,
+        observation=[1, 0],
+    )
+    after = agent.affect.expected_beta()[0]
+
+    assert after != before
+
+
+def test_lesioned_decouple_updates_beta_but_uses_base_precision() -> None:
+    model = TrustGameModel(ExperimentConfig(payoff_mode="binary", num_partners=1))
+    agent = LesionedAgent(model=model, planning_horizon=1, seed=0, lesion_mode="decouple", initial_beta=1.0)
+
+    assert agent.affect_modulates_precision is False
+    before = agent.affect.expected_beta()[0]
+    agent.observe_outcome(
+        active_partner=0,
+        agent_action=0,
+        partner_action=1,
+        payoff=-1.0,
+        observation=[1, 0],
+    )
+    after = agent.affect.expected_beta()[0]
+
+    assert after != before
+
+    agent.plan_and_act(active_partner=0)
+
+    applied_gamma = float(np.asarray(agent.partners[0].gamma, dtype=float).squeeze())
+    assert applied_gamma == agent.gamma
