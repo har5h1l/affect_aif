@@ -1,25 +1,25 @@
-"""Trust-game agent composition layer."""
+"""pymdp-backed trust-game agent composition layer."""
 
 from __future__ import annotations
 
+from dataclasses import replace
+from typing import Any
+
 import numpy as np
 
-import aif
-from aif.learning import update_transition_dirichlet
-from aif.runtime import generate_observation_sequences
-from aif.utils import obj_array, onehot
+from tasks.trust import pymdp_helpers
 from tasks.trust.models import TrustGameModel
-from tasks.trust.payoffs import encode_env_action_factorized, encode_instantaneous_index
-from tasks.trust.rollout import (
-    _partner_action_distribution,
-    build_transition_views,
-    decision_step_trust_game,
-    decode_raw_action_to_partner_and_social,
-)
+from tasks.trust.payoffs import encode_env_action_factorized
 
 
 class TrustGameAgent:
-    """Active-inference agent for the multi-partner trust game."""
+    """Active-inference agent for the multi-partner trust game.
+
+    The experiment-facing object owns one official ``pymdp.Agent`` per partner.
+    Each local pymdp agent models a single partner using the shared trust-game
+    model bundle; this wrapper handles partner selection, raw environment action
+    encoding, and diagnostics expected by runners/loggers.
+    """
 
     def __init__(
         self,
@@ -42,11 +42,12 @@ class TrustGameAgent:
         pB_scale: float = 10.0,
         lr_E: float = 0.5,
     ):
+        del pA_scale, pB_scale
         self.model = model
         self.num_partners = int(model.num_partners)
         self.num_types = int(model.num_types)
         self.num_stances = int(model.num_stances)
-        self.num_controls = list(int(x) for x in model.num_controls)
+        self.num_controls = [int(x) for x in model.num_controls]
         self.num_planning_instantaneous = int(np.prod(self.num_controls))
         self.num_social_actions = int(model.num_social_actions)
         self.factorized_policies = bool(model.uses_factorized_controls)
@@ -55,6 +56,7 @@ class TrustGameAgent:
         self.gamma = float(gamma)
         self.lr = float(lr)
         self.action_sampling = str(action_sampling)
+        self.action_selection = str(action_sampling)
         self.use_utility = bool(use_utility)
         self.use_information_gain = bool(use_information_gain)
         self.max_policies = max_policies
@@ -64,43 +66,23 @@ class TrustGameAgent:
         self.learn_A = bool(learn_A)
         self.learn_B = bool(learn_B)
         self.learn_E = bool(learn_E)
-        self.pA_scale = float(pA_scale)
-        self.pB_scale = float(pB_scale)
         self.lr_E = float(lr_E)
+        self.rng = np.random.default_rng(self.seed)
 
-        policy_rng = np.random.default_rng(self.seed)
-        self.policies = np.asarray(
-            aif.construct_policies(
-                num_controls=model.num_controls,
-                planning_horizon=self.planning_horizon,
-                max_policies=self.max_policies,
-                rng=policy_rng,
-            ),
-            dtype=int,
+        self.bundle = model.to_pymdp_bundle(
+            planning_horizon=self.planning_horizon,
+            max_policies=self.max_policies,
+            rng=self.rng,
         )
-        self.observation_sequences = np.asarray(generate_observation_sequences(self.planning_horizon), dtype=int)
-
-        shared_C = model.C
-        shared_D = model.D
-        self.partners: list[aif.Agent] = []
-        for idx in range(self.num_partners):
-            self.partners.append(
-                aif.Agent(
-                    A=model.build_A(),
-                    B=model.build_B(),
-                    C=shared_C,
-                    D=shared_D,
-                    E=None,
-                    policies=self.policies,
-                    pA=model.build_pA(self.pA_scale) if self.learn_A else None,
-                    pB=model.build_pB(self.pB_scale) if self.learn_B else None,
-                    gamma=self.gamma,
-                    use_utility=self.use_utility,
-                    use_information_gain=self.use_information_gain,
-                    action_sampling=self.action_sampling,
-                    rng=np.random.default_rng(self.seed + 1 + idx),
-                )
+        if not self.use_utility or not self.use_information_gain:
+            self.bundle = replace(
+                self.bundle,
+                C=self.bundle.C if self.use_utility else [np.zeros_like(np.asarray(c, dtype=float)) for c in self.bundle.C],
             )
+        self.policies = np.asarray(self.bundle.policies, dtype=int)
+        self.partners = [pymdp_helpers.create_agent(self.bundle, gamma=self.gamma) for _ in range(self.num_partners)]
+        for idx in range(self.num_partners):
+            self._refresh_partner_agent(idx, use_information_gain=self.use_information_gain)
 
         self.partner_action_preferences = np.asarray(self.model.C[0], dtype=float)
         self.payoff_preferences = np.asarray(self.model.C[1], dtype=float)
@@ -119,20 +101,11 @@ class TrustGameAgent:
 
     @property
     def qs_per_partner(self) -> np.ndarray:
-        out = np.zeros((self.num_partners, self.num_types, self.num_stances), dtype=float)
-        for idx, partner in enumerate(self.partners):
-            if partner.qs is None or len(partner.qs) == 0:
-                out[idx] = np.asarray(self.partner_joint_beliefs[idx], dtype=float)
-                continue
-            out[idx] = self.model.as_joint_belief(partner.qs[0])
-        return out
+        return np.asarray(self.partner_beliefs, dtype=float)
 
     @property
     def partner_action_prob_tables(self) -> np.ndarray:
-        out = np.zeros((self.num_partners, self.num_types, self.num_stances), dtype=float)
-        for idx, partner in enumerate(self.partners):
-            out[idx] = np.asarray(partner.A[0][0], dtype=float)
-        return out
+        return np.repeat(np.asarray(self.model.partner_action_prob_table, dtype=float)[None, :, :], self.num_partners, axis=0)
 
     @property
     def partner_action_prob_table(self) -> np.ndarray:
@@ -141,16 +114,29 @@ class TrustGameAgent:
     def reset(self):
         type_prior = np.asarray(self.model.D[0], dtype=float)
         stance_prior = np.asarray(self.model.D[1], dtype=float)
+        own_prior = np.asarray(self.model.D[2], dtype=float)
         joint_prior = np.outer(type_prior, stance_prior)
         joint_prior /= max(float(joint_prior.sum()), 1e-16)
-        self.partner_joint_beliefs = np.repeat(joint_prior[None, :, :], self.num_partners, axis=0)
-        self.partner_joint_posteriors = np.repeat(joint_prior[None, :, :], self.num_partners, axis=0)
-        self.partner_beliefs = np.repeat(type_prior[None, :], self.num_partners, axis=0)
-        self.partner_stance_beliefs = np.repeat(stance_prior[None, :], self.num_partners, axis=0)
 
+        self.partner_beliefs = np.repeat(joint_prior[None, :, :], self.num_partners, axis=0)
+        self.partner_joint_beliefs = self.partner_beliefs.copy()
+        self.partner_joint_posteriors = self.partner_beliefs.copy()
+        self.partner_stance_beliefs = np.repeat(stance_prior[None, :], self.num_partners, axis=0)
+        self.partner_type_beliefs = np.repeat(type_prior[None, :], self.num_partners, axis=0)
+
+        self._partner_qs: list[Any] = [None for _ in range(self.num_partners)]
         for partner in self.partners:
-            partner.reset()
-            self._set_partner_qs(partner, joint_prior)
+            if hasattr(partner, "reset"):
+                partner.reset()
+        for idx in range(self.num_partners):
+            self._set_partner_prior(idx, joint_prior, own_prior)
+
+        self.q_pi = None
+        self.policy_scores = None
+        self.best_policy_idx = None
+        self.selected_partner = None
+        self.selected_action = None
+        self.last_qs = None
 
         self.pending_prediction_partner: int | None = None
         self.pending_prediction_probs = np.asarray([0.5, 0.5], dtype=float)
@@ -172,162 +158,233 @@ class TrustGameAgent:
         self.last_round_log_evidence: float = np.nan
         self.cumulative_log_evidence: float = 0.0
         self.log_policy_prior = np.zeros(len(self.policies), dtype=float)
-        default_action = int(np.argmax(np.asarray(self.model.D[2], dtype=float)))
+        default_action = int(np.argmax(own_prior))
         self._prev_own_actions = np.full((self.num_partners,), default_action, dtype=int)
+        self.post_observation_qs = None
+        self.post_observation_q_pi = None
+        self.post_observation_policy_scores = None
+        self.post_observation_info: dict[str, Any] = {}
 
     def precision_signal(self):
         return np.ones((self.num_partners,), dtype=float)
 
-    def _set_partner_qs(self, partner: aif.Agent, joint_belief: np.ndarray) -> None:
-        qs = obj_array(1)
-        qs[0] = self.model.as_joint_belief(joint_belief)
-        partner.qs = qs
+    def _as_backend_array(self, values: np.ndarray) -> Any:
+        try:
+            import jax.numpy as jnp
 
-    def _joint_observation_likelihood(self, A: np.ndarray, observation: list[int], own_action: int) -> np.ndarray:
-        if len(observation) < 2:
-            raise ValueError(f"TrustGameAgent expects both observation modalities; got {observation!r}.")
-        action_likelihood = np.asarray(A[0][int(observation[0])], dtype=float)
-        payoff_likelihood = np.asarray(A[1][int(observation[1]), int(own_action)], dtype=float)
-        return action_likelihood * payoff_likelihood
+            return jnp.asarray(values, dtype=float)
+        except Exception:  # pragma: no cover - jax is a project dependency, but numpy is safe here.
+            return np.asarray(values, dtype=float)
 
-    def _infer_joint_posterior(
-        self, prior: np.ndarray, observation: list[int], own_action: int, A: np.ndarray
-    ) -> np.ndarray:
-        posterior = self.model.as_joint_belief(prior) * self._joint_observation_likelihood(A, observation, own_action)
-        posterior /= max(float(posterior.sum()), 1e-16)
-        return posterior
+    def _onehot(self, idx: int, size: int) -> np.ndarray:
+        out = np.zeros(int(size), dtype=float)
+        out[int(idx)] = 1.0
+        return out
 
-    def _predict_next_joint_belief(self, joint_belief: np.ndarray, action: int, B: np.ndarray) -> np.ndarray:
+    def _normalize(self, values: np.ndarray) -> np.ndarray:
+        array = np.asarray(values, dtype=float)
+        total = float(array.sum())
+        if not np.isfinite(total) or total <= 0.0:
+            return np.full(array.shape, 1.0 / max(array.size, 1), dtype=float)
+        return array / total
+
+    def _softmax(self, logits: np.ndarray) -> np.ndarray:
+        logits = np.asarray(logits, dtype=float)
+        if logits.size == 0:
+            return logits
+        shifted = logits - float(np.max(logits))
+        exp = np.exp(shifted)
+        return self._normalize(exp)
+
+    def _set_partner_prior(
+        self,
+        partner_idx: int,
+        joint_belief: np.ndarray,
+        own_belief: np.ndarray | None = None,
+    ) -> None:
         joint = self.model.as_joint_belief(joint_belief)
-        type_action = 0 if self.factorized_policies else int(action)
-        type_transition = np.asarray(B[0][:, :, type_action], dtype=float)
-        if self.factorized_policies:
-            stance_transition = self.model.stance_transition_for_executed_own_action(int(action))
-        else:
-            stance_transition = np.asarray(B[1][:, :, int(action)], dtype=float)
-        predictive = type_transition @ joint @ np.asarray(stance_transition, dtype=float).T
-        predictive /= max(float(predictive.sum()), 1e-16)
-        return predictive
+        type_belief = self._normalize(joint.sum(axis=1))
+        stance_belief = self._normalize(joint.sum(axis=0))
+        own = self._normalize(np.asarray(own_belief if own_belief is not None else self.model.D[2], dtype=float))
+        D = [
+            self._as_backend_array(type_belief[None, :]),
+            self._as_backend_array(stance_belief[None, :]),
+            self._as_backend_array(own[None, :]),
+        ]
+        self._refresh_partner_agent(int(partner_idx), D=D)
+        self._partner_qs[int(partner_idx)] = [self._as_backend_array(np.asarray(factor, dtype=float)[:, None, :]) for factor in D]
 
-    def _refresh_partner_payoff_likelihood(self, partner: aif.Agent) -> None:
-        payoff_obs = np.zeros(
-            (len(self.model.payoff_levels), self.num_social_actions, self.num_types, self.num_stances),
-            dtype=float,
-        )
-        partner_table = np.asarray(partner.A[0][0], dtype=float)
-        for agent_action in range(self.num_social_actions):
-            coop_idx = int(self.model.payoff_index_table[agent_action, 0])
-            defect_idx = int(self.model.payoff_index_table[agent_action, 1])
-            payoff_obs[coop_idx, agent_action] += partner_table
-            payoff_obs[defect_idx, agent_action] += 1.0 - partner_table
-        partner.A[1] = payoff_obs
+    def _refresh_partner_agent(
+        self,
+        partner_idx: int,
+        *,
+        D: Any | None = None,
+        gamma: float | None = None,
+        use_information_gain: bool | None = None,
+    ) -> None:
+        """Refresh mutable runtime fields on official frozen pymdp agents in one place."""
 
-    def _apply_parameter_learning(self, partner_idx: int, posterior: np.ndarray, observed_partner_action: int) -> None:
         partner = self.partners[int(partner_idx)]
-        table = np.asarray(partner.A[0][0], dtype=float)
-        target = 1.0 if int(observed_partner_action) == 0 else 0.0
-        updated = (1.0 - self.lr * posterior) * table + (self.lr * posterior) * target
-        partner.A[0] = np.asarray([updated, 1.0 - updated], dtype=float)
-        self._refresh_partner_payoff_likelihood(partner)
+        if D is not None:
+            object.__setattr__(partner, "D", D)
+        if gamma is not None:
+            object.__setattr__(partner, "gamma", self._as_backend_array(np.asarray([float(gamma)], dtype=float)))
+        if use_information_gain is not None:
+            supported_fields = [field for field in ("use_states_info_gain", "use_param_info_gain") if hasattr(partner, field)]
+            if not supported_fields and not bool(use_information_gain):
+                raise NotImplementedError(
+                    "use_information_gain=False cannot be represented by this pymdp.Agent API."
+                )
+            if hasattr(partner, "use_states_info_gain"):
+                object.__setattr__(partner, "use_states_info_gain", bool(use_information_gain))
+            if hasattr(partner, "use_param_info_gain"):
+                has_parameter_posteriors = getattr(partner, "pA", None) is not None or getattr(partner, "pB", None) is not None
+                object.__setattr__(partner, "use_param_info_gain", bool(use_information_gain and has_parameter_posteriors))
 
-    def _build_transition_stacks(self) -> tuple[np.ndarray, np.ndarray]:
-        B_type_stack = []
-        B_stance_stack = []
-        for partner in self.partners:
-            B_type, B_stance_by_action = build_transition_views(
-                partner.B,
-                self.num_controls,
-                factorized_policies=self.factorized_policies,
-            )
-            B_type_stack.append(B_type)
-            B_stance_stack.append(B_stance_by_action)
-        return np.stack(B_type_stack), np.stack(B_stance_stack)
+    def _qs_to_joint(self, qs: Any) -> np.ndarray:
+        type_belief = self._normalize(np.asarray(qs[0], dtype=float).squeeze())
+        stance_belief = self._normalize(np.asarray(qs[1], dtype=float).squeeze())
+        joint = np.outer(type_belief, stance_belief)
+        return self.model.as_joint_belief(joint)
+
+    def _unpack_policy_result(self, policy_result: Any) -> tuple[np.ndarray, np.ndarray]:
+        if not isinstance(policy_result, tuple) or len(policy_result) < 2:
+            raise TypeError("partner.infer_policies(qs) must return (q_pi, policy_scores).")
+        q_pi = np.asarray(policy_result[0], dtype=float).squeeze()
+        policy_scores = np.asarray(policy_result[1], dtype=float).squeeze()
+        if q_pi.ndim != 1 or policy_scores.ndim != 1:
+            raise ValueError("pymdp policy diagnostics must be one-dimensional after squeezing.")
+        return self._normalize(q_pi), policy_scores
+
+    def _infer_partner(self, partner_idx: int) -> pymdp_helpers.PymdpInferenceResult:
+        partner_idx = int(partner_idx)
+        partner = self.partners[partner_idx]
+        qs = self._partner_qs[partner_idx] if self._partner_qs[partner_idx] is not None else partner.D
+        precision = float(np.asarray(self.precision_signal(), dtype=float)[partner_idx])
+        if np.isfinite(precision) and precision > 0.0 and hasattr(partner, "gamma"):
+            self._refresh_partner_agent(partner_idx, gamma=self.gamma / precision)
+        policy_result = partner.infer_policies(qs)
+        q_pi, policy_scores = self._unpack_policy_result(policy_result)
+        return pymdp_helpers.PymdpInferenceResult(qs=qs, q_pi=q_pi, policy_scores=policy_scores, info={})
+
+    def _choose_index(self, probabilities: np.ndarray, deterministic: bool) -> int:
+        probs = self._normalize(probabilities)
+        if deterministic:
+            return int(np.argmax(probs))
+        return int(self.rng.choice(len(probs), p=probs))
+
+    def _deterministic_action_selection(self) -> bool:
+        return self.action_selection in {"deterministic", "argmax", "mode"}
+
+    def _encode_policy_action(self, partner_idx: int, first_step: np.ndarray) -> tuple[int, int, int]:
+        controls = np.asarray(first_step, dtype=int).ravel()
+        if self.factorized_policies:
+            stance_action = int(controls[-2])
+            own_action = int(controls[-1])
+        else:
+            stance_action = int(controls[0])
+            own_action = int(controls[0])
+        raw_action = encode_env_action_factorized(
+            int(partner_idx),
+            stance_action,
+            own_action,
+            self.model.assignment_mode,
+            self.num_partners,
+            self.num_controls,
+        )
+        return int(raw_action), stance_action, own_action
 
     def choose_partner_and_action(self, active_partner: int | None = None) -> int:
-        """Evaluate all policies and return the selected raw action."""
+        """Plan with official pymdp and return the raw environment action."""
 
-        active_partner_idx = -1 if active_partner is None else int(active_partner)
-        B_type_stack, B_stance_stack = self._build_transition_stacks()
-        decision = decision_step_trust_game(
-            beliefs=self.partner_joint_beliefs,
-            active_partner=active_partner_idx,
-            policies=self.policies,
-            observation_sequences=self.observation_sequences,
-            B_type=B_type_stack,
-            B_stance_by_action=B_stance_stack,
-            partner_action_prob_tables=self.partner_action_prob_tables,
-            payoff_index_table=self.model.payoff_index_table,
-            agent_payoff_table=self.model.agent_payoff_table,
-            payoff_preferences=self.payoff_preferences,
-            partner_action_preferences=self.partner_action_preferences,
-            precision_signal=self.precision_signal(),
-            assignment_mode_code=self.assignment_mode_code,
-            gamma=self.gamma,
-            use_utility_flag=float(self.use_utility),
-            use_information_gain_flag=float(self.use_information_gain),
-            num_social_actions=self.num_social_actions,
-            log_policy_prior=self.log_policy_prior,
-        )
-
-        q_pi = np.asarray(decision["q_pi"], dtype=float)
-        sampled = aif.sample_action(self.partners[0], q_pi=q_pi, timestep=0)
-        if isinstance(sampled, np.ndarray):
-            row = np.asarray(sampled, dtype=int).ravel()
-            if self.assignment_mode_code == 1:
-                partner_sel = int(row[0])
-                stance_a = int(row[1])
-                own_a = int(row[2])
-                raw_action = encode_env_action_factorized(
-                    partner_sel,
-                    stance_a,
-                    own_a,
-                    self.model.assignment_mode,
-                    self.num_partners,
-                    self.num_controls,
-                )
-                selected_partner, selected_social_action = partner_sel, own_a
-            else:
-                stance_a = int(row[1])
-                own_a = int(row[2])
-                selected_partner = int(active_partner) if active_partner is not None else 0
-                raw_action = encode_env_action_factorized(
-                    selected_partner,
-                    stance_a,
-                    own_a,
-                    self.model.assignment_mode,
-                    self.num_partners,
-                    self.num_controls,
-                )
-                selected_social_action = own_a
-        else:
-            raw_action = int(sampled)
-            selected_partner, selected_social_action = decode_raw_action_to_partner_and_social(
-                raw_action=raw_action,
-                active_partner=0 if active_partner is None else int(active_partner),
-                assignment_mode_code=self.assignment_mode_code,
-                factorized_policies=self.factorized_policies,
-                num_social_actions=self.num_social_actions,
-                num_partners=self.num_partners,
+        deterministic = self._deterministic_action_selection()
+        if active_partner is not None:
+            partner_idx = int(active_partner)
+            result = self._infer_partner(partner_idx)
+            q_pi = np.asarray(result.q_pi, dtype=float)
+            first_step = pymdp_helpers.select_first_timestep_action(
+                self.policies,
+                q_pi,
+                deterministic=deterministic,
+                rng=self.rng,
             )
+            policy_idx = int(np.argmax(q_pi)) if deterministic else self._policy_index_for_first_step(first_step, q_pi)
+            raw_action, _, own_action = self._encode_policy_action(partner_idx, first_step)
+            selected_partner = partner_idx
+            selected_social_action = own_action
+            self._store_decision_diagnostics(result, q_pi, policy_idx, selected_partner, selected_social_action, raw_action)
+            return raw_action
 
-        predicted_partner_action_probs = _partner_action_distribution(
-            self.partner_joint_beliefs[selected_partner],
-            self.partner_action_prob_tables[selected_partner],
+        candidates: list[tuple[int, int, np.ndarray, float]] = []
+        partner_results: dict[int, pymdp_helpers.PymdpInferenceResult] = {}
+        for partner_idx in range(self.num_partners):
+            result = self._infer_partner(partner_idx)
+            partner_results[partner_idx] = result
+            for policy_idx, score in enumerate(np.asarray(result.policy_scores, dtype=float)):
+                prior = self.log_policy_prior[policy_idx] if policy_idx < len(self.log_policy_prior) else 0.0
+                first = np.asarray(self.policies[policy_idx, 0], dtype=int)
+                candidates.append((partner_idx, policy_idx, first, float(score + prior)))
+
+        candidate_scores = np.asarray([candidate[3] for candidate in candidates], dtype=float)
+        candidate_probs = self._softmax(candidate_scores)
+        candidate_idx = self._choose_index(candidate_probs, deterministic=deterministic)
+        selected_partner, policy_idx, first_step, _ = candidates[candidate_idx]
+        raw_action, _, own_action = self._encode_policy_action(selected_partner, first_step)
+
+        result = partner_results[selected_partner]
+        q_pi = np.zeros(len(candidates), dtype=float) if deterministic else candidate_probs
+        if deterministic:
+            q_pi[candidate_idx] = 1.0
+        self._store_decision_diagnostics(
+            result,
+            q_pi,
+            candidate_idx,
+            selected_partner,
+            own_action,
+            raw_action,
+            policy_scores=candidate_scores,
         )
-        best_policy_idx = int(np.argmax(q_pi))
-
-        self.last_q_pi = q_pi
-        self.last_G = np.asarray(decision["G"], dtype=float)
-        self.last_best_policy_step_costs = np.asarray(decision["step_costs"][best_policy_idx], dtype=float)
-        self.last_mean_abs_step_efe = float(decision["mean_abs_step_efe"])
-        self.last_best_policy_idx = best_policy_idx
-        self.pending_prediction_partner = selected_partner
-        self.pending_prediction_probs = np.asarray(predicted_partner_action_probs, dtype=float)
-        self.pending_social_action = selected_social_action
-        self.last_raw_action = raw_action
-        self.last_selected_partner = selected_partner
-        self.last_selected_action = selected_social_action
         return raw_action
+
+    def _policy_index_for_first_step(self, first_step: np.ndarray, q_pi: np.ndarray) -> int:
+        matches = np.flatnonzero(np.all(self.policies[:, 0, :] == np.asarray(first_step, dtype=int), axis=1))
+        if matches.size == 0:
+            return int(np.argmax(q_pi))
+        best_local = int(matches[np.argmax(np.asarray(q_pi, dtype=float)[matches])])
+        return best_local
+
+    def _store_decision_diagnostics(
+        self,
+        result: pymdp_helpers.PymdpInferenceResult,
+        q_pi: np.ndarray,
+        best_policy_idx: int,
+        selected_partner: int,
+        selected_social_action: int,
+        raw_action: int,
+        policy_scores: np.ndarray | None = None,
+    ) -> None:
+        predicted_partner_action_probs = self.model.partner_action_distribution(self.partner_beliefs[int(selected_partner)])
+        self.q_pi = np.asarray(q_pi, dtype=float)
+        self.policy_scores = np.asarray(
+            result.policy_scores if policy_scores is None else policy_scores,
+            dtype=float,
+        )
+        self.best_policy_idx = int(best_policy_idx)
+        self.selected_partner = int(selected_partner)
+        self.selected_action = int(selected_social_action)
+        self.last_qs = result.qs
+
+        self.last_q_pi = self.q_pi
+        self.last_G = self.policy_scores
+        self.last_best_policy_step_costs = np.asarray([], dtype=float)
+        self.last_mean_abs_step_efe = float(np.mean(np.abs(self.policy_scores))) if self.policy_scores.size else np.nan
+        self.last_best_policy_idx = self.best_policy_idx
+        self.pending_prediction_partner = self.selected_partner
+        self.pending_prediction_probs = np.asarray(predicted_partner_action_probs, dtype=float)
+        self.pending_social_action = self.selected_action
+        self.last_raw_action = int(raw_action)
+        self.last_selected_partner = self.selected_partner
+        self.last_selected_action = self.selected_action
 
     def plan_and_act(self, active_partner: int | None) -> int:
         return self.choose_partner_and_action(active_partner=active_partner)
@@ -339,90 +396,76 @@ class TrustGameAgent:
 
     def observe_outcome(
         self,
-        partner_idx: int,
-        observation: list[int],
-        action_taken: int,
-        partner_action: int,
-        payoff: float,
+        partner_idx: int | None = None,
+        observation: list[int] | None = None,
+        action_taken: int | None = None,
+        partner_action: int | None = None,
+        payoff: float = np.nan,
         true_partner_type: str | None = None,
         true_partner_stance: str | None = None,
+        *,
+        active_partner: int | None = None,
+        agent_action: int | None = None,
     ) -> None:
-        """Update beliefs and auxiliary state summaries from a realized interaction."""
+        """Update partner-local pymdp beliefs and experiment diagnostics."""
+
+        if partner_idx is None:
+            partner_idx = active_partner
+        if action_taken is None:
+            action_taken = agent_action
+        if partner_idx is None:
+            raise ValueError("observe_outcome requires partner_idx or active_partner.")
+        if observation is None:
+            raise ValueError("observe_outcome requires observation=[partner_action, payoff_obs].")
+        if action_taken is None:
+            raise ValueError("observe_outcome requires action_taken or agent_action.")
+        if partner_action is None:
+            partner_action = int(observation[0])
 
         partner_idx = int(partner_idx)
-        active = self.partners[partner_idx]
+        action_taken = int(action_taken)
+        partner_action = int(partner_action)
         round_log_ev = self._compute_round_log_evidence(partner_action)
         self.last_round_log_evidence = round_log_ev
         self.cumulative_log_evidence += round_log_ev
 
-        prior = np.asarray(self.partner_joint_beliefs[partner_idx], dtype=float)
-        posterior = self._infer_joint_posterior(
-            prior,
-            observation=observation,
-            own_action=int(action_taken),
-            A=active.A,
-        )
-        self._set_partner_qs(active, posterior)
+        prior_joint = np.asarray(self.partner_beliefs[partner_idx], dtype=float)
+        self._set_partner_prior(partner_idx, prior_joint, self._onehot(action_taken, self.num_social_actions))
+        result = pymdp_helpers.infer_once(self.partners[partner_idx], [int(observation[0]), int(observation[1])], self.bundle)
+        posterior = self._qs_to_joint(result.qs)
+        self._partner_qs[partner_idx] = result.qs
+        self.post_observation_qs = result.qs
+        self.post_observation_q_pi = np.asarray(result.q_pi, dtype=float)
+        self.post_observation_policy_scores = np.asarray(result.policy_scores, dtype=float)
+        self.post_observation_info = dict(result.info)
 
-        if self.learn_A:
-            aif.update_pA(active, obs=[int(observation[0]), int(observation[1])], learning_rate=self.lr)
-        elif self.use_parameter_learning:
-            self._apply_parameter_learning(
-                partner_idx=partner_idx,
-                posterior=posterior,
-                observed_partner_action=int(partner_action),
-            )
+        predictive_next = self.model.predict_next_joint_belief(posterior, action_taken)
+        self._prev_own_actions[partner_idx] = action_taken
+        self._update_auxiliary_states(partner_idx=partner_idx, partner_action=partner_action, payoff=float(payoff))
 
-        if self.learn_B and active.pB is not None:
-            comp = (
-                encode_instantaneous_index((0, int(action_taken), int(action_taken)), self.num_controls)
-                if self.factorized_policies
-                else int(action_taken)
-            )
-            qs_curr = obj_array(3)
-            qs_curr[0] = posterior.sum(axis=1)
-            qs_curr[1] = posterior.sum(axis=0)
-            qs_curr[2] = onehot(int(action_taken), self.num_social_actions)
-            qs_prev = obj_array(3)
-            qs_prev[0] = prior.sum(axis=1)
-            qs_prev[1] = prior.sum(axis=0)
-            qs_prev[2] = onehot(int(self._prev_own_actions[partner_idx]), self.num_social_actions)
-            active.pB = update_transition_dirichlet(active.pB, [comp, comp, comp], qs_curr, qs_prev)
-            for factor in range(len(active.B)):
-                conc = np.asarray(active.pB[factor], dtype=float)
-                for action in range(conc.shape[2]):
-                    sl = conc[:, :, action]
-                    active.B[factor][:, :, action] = sl / np.maximum(sl.sum(axis=0, keepdims=True), 1e-16)
+        self.partner_joint_posteriors[partner_idx] = posterior
+        self.partner_beliefs[partner_idx] = predictive_next
+        self.partner_joint_beliefs[partner_idx] = predictive_next
+        self.partner_type_beliefs[partner_idx] = predictive_next.sum(axis=1)
+        self.partner_stance_beliefs[partner_idx] = predictive_next.sum(axis=0)
+        self._set_partner_prior(partner_idx, predictive_next, self._onehot(action_taken, self.num_social_actions))
 
-        if self.learn_E and self.last_q_pi.size:
-            log_q = np.log(np.asarray(self.last_q_pi, dtype=float) + 1e-16)
+        if self.learn_E and self.post_observation_q_pi.size == self.log_policy_prior.size:
+            log_q = np.log(np.asarray(self.post_observation_q_pi, dtype=float) + 1e-16)
             self.log_policy_prior = (1.0 - self.lr_E) * self.log_policy_prior + self.lr_E * log_q
             self.log_policy_prior -= float(np.mean(self.log_policy_prior))
 
-        predictive_next = self._predict_next_joint_belief(
-            posterior,
-            action=int(action_taken),
-            B=active.B,
-        )
-        self._prev_own_actions[partner_idx] = int(action_taken)
-        self._update_auxiliary_states(partner_idx=partner_idx, partner_action=int(partner_action), payoff=float(payoff))
-
-        self.partner_joint_posteriors[partner_idx] = posterior
-        self.partner_joint_beliefs[partner_idx] = predictive_next
-        self.partner_beliefs[partner_idx] = predictive_next.sum(axis=1)
-        self.partner_stance_beliefs[partner_idx] = predictive_next.sum(axis=0)
-        self._set_partner_qs(active, predictive_next)
         self.last_observation_partner = partner_idx
         self.last_true_partner_type = true_partner_type
         self.last_true_partner_stance = true_partner_stance
-        self.last_partner_action = int(partner_action)
+        self.last_partner_action = partner_action
         self.last_payoff = float(payoff)
 
     def get_partner_type_belief(self, partner_idx: int) -> np.ndarray:
-        return np.asarray(self.partner_beliefs[int(partner_idx)], dtype=float)
+        return np.asarray(self.partner_beliefs[int(partner_idx)].sum(axis=1), dtype=float)
 
     def get_partner_stance_belief(self, partner_idx: int) -> np.ndarray:
-        return np.asarray(self.partner_stance_beliefs[int(partner_idx)], dtype=float)
+        return np.asarray(self.partner_beliefs[int(partner_idx)].sum(axis=0), dtype=float)
 
     def get_predictive_log_likelihood(self, partner_action: int) -> float:
         probs = np.asarray(self.pending_prediction_probs, dtype=float)
@@ -461,7 +504,7 @@ class TrustGameAgent:
             "reward_avgs": self.get_reward_avgs(),
             "partner_beliefs": np.asarray(self.partner_beliefs, dtype=float),
             "partner_posteriors": np.asarray(self.partner_joint_posteriors.sum(axis=2), dtype=float),
-            "partner_joint_beliefs": np.asarray(self.partner_joint_beliefs, dtype=float),
+            "partner_joint_beliefs": np.asarray(self.partner_beliefs, dtype=float),
             "partner_joint_posteriors": np.asarray(self.partner_joint_posteriors, dtype=float),
             "partner_stance_beliefs": np.asarray(self.partner_stance_beliefs, dtype=float),
             "planning_cost": self.planning_cost,
