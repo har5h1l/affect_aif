@@ -9,7 +9,6 @@ import numpy as np
 from experiments.multifocal.config import MultiFocalConfig
 from experiments.multifocal.joint_resolution import joint_resolve
 from tasks.trust import TrustGameAgent
-from tasks.trust.rollout import decode_raw_action_to_partner_and_social
 
 
 def _local_partner_idx(focal_global: int, other_global: int) -> int:
@@ -95,56 +94,23 @@ class MultiFocalRunner:
         focal = self.agents[focal_g]
 
         if self.config.assignment_mode == "agent_choice":
-            focal.choose_partner_and_action()
-            local_p, focal_action = decode_raw_action_to_partner_and_social(
-                raw_action=focal.last_raw_action,
-                active_partner=0,
-                assignment_mode_code=1,
-                factorized_policies=focal.factorized_policies,
-                num_social_actions=focal.num_social_actions,
-                num_partners=focal.num_partners,
-            )
+            focal.plan_and_act(active_partner=None)
+            local_p = int(focal.selected_partner)
+            focal_action = int(focal.selected_action)
             engaged_g = _global_partner_idx(focal_g, local_p, self.M)
         elif self.config.assignment_mode == "random":
             other_globals = [g for g in range(self.M) if g != focal_g]
             engaged_g = int(self.rng.choice(other_globals))
             local_p = _local_partner_idx(focal_g, engaged_g)
-            focal.choose_partner_and_action(active_partner=local_p)
-            _, focal_action = decode_raw_action_to_partner_and_social(
-                raw_action=focal.last_raw_action,
-                active_partner=local_p,
-                assignment_mode_code=0,
-                factorized_policies=focal.factorized_policies,
-                num_social_actions=focal.num_social_actions,
-                num_partners=focal.num_partners,
-            )
+            focal.plan_and_act(active_partner=local_p)
+            focal_action = int(focal.selected_action)
         else:
             raise ValueError(f"unknown assignment_mode={self.config.assignment_mode!r}")
 
         engaged = self.agents[engaged_g]
         local_f_in_engaged = _local_partner_idx(engaged_g, focal_g)
-        engaged.choose_partner_and_action(active_partner=local_f_in_engaged)
-        # under agent_choice+factorized, policy rows still carry a partner slot; planning may
-        # optimize another slot while active_partner constrains rollouts inconsistently. for
-        # joint play vs focal, take own-action bits from the same raw encoding as decode (F6).
-        if engaged.factorized_policies and engaged.model.assignment_mode == "agent_choice":
-            _, engaged_action = decode_raw_action_to_partner_and_social(
-                raw_action=engaged.last_raw_action,
-                active_partner=0,
-                assignment_mode_code=1,
-                factorized_policies=True,
-                num_social_actions=engaged.num_social_actions,
-                num_partners=engaged.num_partners,
-            )
-        else:
-            _, engaged_action = decode_raw_action_to_partner_and_social(
-                raw_action=engaged.last_raw_action,
-                active_partner=local_f_in_engaged,
-                assignment_mode_code=engaged.assignment_mode_code,
-                factorized_policies=engaged.factorized_policies,
-                num_social_actions=engaged.num_social_actions,
-                num_partners=engaged.num_partners,
-            )
+        engaged.plan_and_act(active_partner=local_f_in_engaged)
+        engaged_action = int(engaged.selected_action)
 
         focal_payoff_obs, focal_payoff_value = joint_resolve(focal_action, engaged_action, focal.model)
         engaged_payoff_obs, engaged_payoff_value = joint_resolve(engaged_action, focal_action, engaged.model)
@@ -184,6 +150,7 @@ class MultiFocalRunner:
     ) -> dict:
         metrics = agent.get_metrics()
         scalars = {k: v for k, v in metrics.items() if not _is_array(v)}
+        arrays = {k: np.asarray(v, dtype=float).tolist() for k, v in metrics.items() if _is_array(v)}
         return {
             "round": t,
             "focal_idx": focal_g,
@@ -192,6 +159,7 @@ class MultiFocalRunner:
             "agent_kind": getattr(agent, "_kind_label", "base"),
             "is_focal_this_round": bool(is_focal),
             **scalars,
+            **arrays,
         }
 
 

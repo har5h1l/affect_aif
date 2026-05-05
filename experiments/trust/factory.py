@@ -51,8 +51,6 @@ def create_agent(config: ExperimentConfig, condition: int | str, model: TrustGam
         learn_A=config.learn_A,
         learn_B=config.learn_B,
         learn_E=config.learn_E,
-        pA_scale=config.pA_scale,
-        pB_scale=config.pB_scale,
         lr_E=config.lr_E,
     )
     params = {
@@ -99,8 +97,35 @@ def create_agents_from_multi_focal_config(
     """
     M = config.num_agents()
     agents: list[TrustGameAgent] = []
+    supported_agent_keys = {
+        "planning_horizon",
+        "gamma",
+        "lr",
+        "action_sampling",
+        "use_utility",
+        "use_information_gain",
+        "max_policies",
+        "reference_horizon",
+        "use_parameter_learning",
+        "learn_A",
+        "learn_B",
+        "learn_E",
+        "lr_E",
+        "alpha_charge",
+        "sigma_0_sq",
+        "initial_beta",
+        "num_levels",
+        "persistence",
+        "affect_modulates_precision",
+        "lesion_mode",
+    }
     for i, spec in enumerate(config.agents):
         overrides = dict(spec.get("model_overrides", {}))
+        if "num_partners" in overrides:
+            raise ValueError(
+                "multi-focal model_overrides must not set 'num_partners'; "
+                "each agent model is forced to M - 1 partners."
+            )
         overrides.pop("num_partners", None)
         overrides.pop("assignment_mode", None)
         overrides.pop("payoff_mode", None)
@@ -116,7 +141,16 @@ def create_agents_from_multi_focal_config(
         model = TrustGameModel(model_cfg)
 
         kind = spec["kind"]
-        agent_kwargs = {k: v for k, v in spec.items() if k not in {"kind", "model_overrides", "_label"}}
+        if "num_partners" in spec:
+            raise ValueError(
+                "multi-focal agent specs must not set 'num_partners'; "
+                "each agent model is forced to M - 1 partners."
+            )
+        agent_kwargs = {
+            k: v
+            for k, v in spec.items()
+            if k not in {"kind", "model_overrides", "_label"} and k in supported_agent_keys
+        }
         if kind == "base":
             agent = TrustGameAgent(model, seed=seed + i, **agent_kwargs)
         elif kind == "affective":

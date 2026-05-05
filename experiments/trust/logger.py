@@ -27,6 +27,44 @@ class MetricLogger:
         def _to_float_list(values):
             return [float(item) for item in np.asarray(values, dtype=float).tolist()]
 
+        def _metric(name: str, default=None):
+            value = agent_metrics.get(name, default)
+            return default if value is None else value
+
+        def _float_metric(name: str, default: float = float("nan")) -> float:
+            value = _metric(name, default)
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return float(default)
+
+        def _int_metric(name: str, default: int = -1) -> int:
+            value = _metric(name, default)
+            try:
+                if isinstance(value, float) and not np.isfinite(value):
+                    return int(default)
+                return int(value)
+            except (TypeError, ValueError):
+                return int(default)
+
+        def _array_metric(name: str, default):
+            return np.asarray(_metric(name, default), dtype=float)
+
+        default_partner_vector = np.full((self.num_partners,), np.nan, dtype=float)
+        default_partner_beliefs = np.full((self.num_partners, 0), np.nan, dtype=float)
+        default_posteriors = np.asarray([], dtype=float)
+        partner_beliefs = _array_metric("partner_beliefs", default_partner_beliefs)
+        partner_posteriors = _array_metric("partner_posteriors", default_posteriors)
+        partner_joint_beliefs = _array_metric("partner_joint_beliefs", partner_beliefs)
+        partner_joint_posteriors = _array_metric("partner_joint_posteriors", default_posteriors)
+        partner_stance_beliefs = _array_metric("partner_stance_beliefs", default_partner_beliefs)
+        betas = _array_metric("betas", default_partner_vector)
+        terminal_signal = _array_metric("terminal_signal", betas)
+        prediction_errors = _array_metric(
+            "latest_surprise_by_partner",
+            _metric("prediction_errors", default_partner_vector),
+        )
+
         record = {
             "condition": condition,
             "seed": int(seed),
@@ -62,25 +100,27 @@ class MetricLogger:
             "inferred_stance": str(agent_metrics.get("inferred_stance", "unknown")),
             "inferred_stance_correct": bool(agent_metrics.get("inferred_stance_correct", False)),
             "inferred_joint_correct": bool(agent_metrics.get("inferred_joint_correct", False)),
-            "selected_partner": int(agent_metrics["selected_partner"]),
-            "selected_action": int(agent_metrics["selected_action"]),
-            "best_policy_idx": int(agent_metrics["best_policy_idx"]),
-            "q_pi_entropy": float(agent_metrics["q_pi_entropy"]),
-            "mean_abs_step_efe": float(agent_metrics["mean_abs_step_efe"]),
-            "planning_cost": float(agent_metrics["planning_cost"]),
-            "planning_cost_ratio": float(agent_metrics["planning_cost_ratio"]),
-            "betas": _to_float_list(agent_metrics["betas"]),
-            "prediction_errors": _to_float_list(agent_metrics["prediction_errors"]),
-            "reward_avgs": _to_float_list(agent_metrics["reward_avgs"]),
-            "G": _to_float_list(agent_metrics["G"]),
-            "q_pi": _to_float_list(agent_metrics["q_pi"]),
-            "best_policy_step_costs": _to_float_list(agent_metrics["best_policy_step_costs"]),
+            "selected_partner": _int_metric("selected_partner"),
+            "selected_action": _int_metric("selected_action"),
+            "best_policy_idx": _int_metric("best_policy_idx"),
+            "q_pi_entropy": _float_metric("q_pi_entropy"),
+            "mean_abs_step_efe": _float_metric("mean_abs_step_efe"),
+            "planning_cost": _float_metric("planning_cost"),
+            "planning_cost_ratio": _float_metric("planning_cost_ratio"),
+            "betas": _to_float_list(betas),
+            "beta": _to_float_list(betas),
+            "terminal_signal": _to_float_list(terminal_signal),
+            "prediction_errors": _to_float_list(prediction_errors),
+            "reward_avgs": _to_float_list(_metric("reward_avgs", default_partner_vector)),
+            "G": _to_float_list(_metric("G", [])),
+            "q_pi": _to_float_list(_metric("q_pi", [])),
+            "best_policy_step_costs": _to_float_list(_metric("best_policy_step_costs", [])),
             "predictive_log_lik": float(agent_metrics.get("predictive_log_lik", float("nan"))),
-            "partner_beliefs": np.asarray(agent_metrics["partner_beliefs"], dtype=float).tolist(),
-            "partner_posteriors": np.asarray(agent_metrics["partner_posteriors"], dtype=float).tolist(),
-            "partner_joint_beliefs": np.asarray(agent_metrics["partner_joint_beliefs"], dtype=float).tolist(),
-            "partner_joint_posteriors": np.asarray(agent_metrics["partner_joint_posteriors"], dtype=float).tolist(),
-            "partner_stance_beliefs": np.asarray(agent_metrics["partner_stance_beliefs"], dtype=float).tolist(),
+            "partner_beliefs": partner_beliefs.tolist(),
+            "partner_posteriors": partner_posteriors.tolist(),
+            "partner_joint_beliefs": partner_joint_beliefs.tolist(),
+            "partner_joint_posteriors": partner_joint_posteriors.tolist(),
+            "partner_stance_beliefs": partner_stance_beliefs.tolist(),
             "round_log_evidence": float(agent_metrics.get("round_log_evidence", float("nan"))),
             "cumulative_log_evidence": float(agent_metrics.get("cumulative_log_evidence", 0.0)),
         }

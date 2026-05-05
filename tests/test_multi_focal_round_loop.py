@@ -63,6 +63,44 @@ def test_agent_choice_mode_runs_without_error():
         assert r["engaged_partner_global_idx"] != r["focal_idx"]
 
 
+def test_agent_specs_reject_num_partners_override():
+    cfg = MultiFocalConfig.from_dict(
+        {
+            "experiment_name": "bad_num_partners",
+            "num_rounds": 1,
+            "agents": [
+                {"kind": "base", "planning_horizon": 1, "num_partners": 99},
+                {"kind": "base", "planning_horizon": 1},
+            ],
+        }
+    )
+    try:
+        create_agents_from_multi_focal_config(cfg, seed=0)
+    except ValueError as exc:
+        assert "must not set 'num_partners'" in str(exc)
+    else:
+        raise AssertionError("expected per-agent num_partners override to be rejected")
+
+
+def test_agent_model_overrides_reject_num_partners_override():
+    cfg = MultiFocalConfig.from_dict(
+        {
+            "experiment_name": "bad_model_num_partners",
+            "num_rounds": 1,
+            "agents": [
+                {"kind": "base", "planning_horizon": 1, "model_overrides": {"num_partners": 99}},
+                {"kind": "base", "planning_horizon": 1},
+            ],
+        }
+    )
+    try:
+        create_agents_from_multi_focal_config(cfg, seed=0)
+    except ValueError as exc:
+        assert "model_overrides must not set 'num_partners'" in str(exc)
+    else:
+        raise AssertionError("expected model_overrides num_partners override to be rejected")
+
+
 def test_metrics_columns_propagate():
     runner = _make_runner(M=2, num_rounds=1, seed=2)
     rows = runner.run()
@@ -83,5 +121,6 @@ def test_metrics_columns_propagate():
         "round_log_evidence",
         "cumulative_log_evidence",
         "mean_abs_step_efe",
+        "partner_beliefs",
     }
     assert expected_keys.issubset(rows[0].keys())

@@ -87,7 +87,7 @@ class ExperimentRunner:
                 active_partner=active_partner,
             )
             action = agent.plan_and_act(active_partner=active_partner)
-            planning_metrics = agent.get_metrics()
+            planning_metrics = self._agent_diagnostics(agent, agent.get_metrics())
             self.progress.emit(
                 "planning_end",
                 condition=condition,
@@ -158,7 +158,7 @@ class ExperimentRunner:
                 inferred_type_correct=inferred_correct,
             )
 
-            agent_metrics = agent.get_metrics()
+            agent_metrics = self._agent_diagnostics(agent, agent.get_metrics())
             agent_metrics["inferred_type"] = inferred_type
             agent_metrics["inferred_type_correct"] = inferred_correct
             agent_metrics["inferred_stance"] = inferred_stance
@@ -185,6 +185,30 @@ class ExperimentRunner:
             context = {"active_partner": result["active_partner"]}
 
         return logger.records
+
+    def _agent_diagnostics(self, agent: TrustGameAgent, metrics: dict) -> dict:
+        """Expose pymdp-backed public diagnostics under experiment column names."""
+
+        diagnostics = dict(metrics)
+        for column, attr in (
+            ("q_pi", "q_pi"),
+            ("G", "policy_scores"),
+            ("best_policy_idx", "best_policy_idx"),
+            ("selected_partner", "selected_partner"),
+            ("selected_action", "selected_action"),
+            ("raw_action", "last_raw_action"),
+            ("partner_beliefs", "partner_beliefs"),
+        ):
+            if diagnostics.get(column) is None and hasattr(agent, attr):
+                diagnostics[column] = getattr(agent, attr)
+        if hasattr(agent, "latest_surprise_by_partner"):
+            diagnostics["latest_surprise_by_partner"] = getattr(agent, "latest_surprise_by_partner")
+            diagnostics["prediction_errors"] = getattr(agent, "latest_surprise_by_partner")
+        if "betas" not in diagnostics and hasattr(agent, "get_betas"):
+            diagnostics["betas"] = agent.get_betas()
+        if "terminal_signal" not in diagnostics:
+            diagnostics["terminal_signal"] = diagnostics.get("betas", np.full((agent.num_partners,), np.nan))
+        return diagnostics
 
     def run_replication(
         self,
