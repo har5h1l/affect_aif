@@ -1,9 +1,7 @@
 # Next Runs
 
-The reusable-core/task-package restructure is locally verified and synced to the
-Mango `server` workspace. Re-run the verification gate below immediately before
-launching full statistical experiments so the queued runs carry fresh local
-provenance.
+Re-run the verification gate below immediately before launching full
+statistical experiments so queued runs carry fresh local provenance.
 
 ## Verification Gate
 
@@ -18,65 +16,49 @@ git diff --check
 
 ## Post-Verification Queue
 
-### 1. H0 Openness Gate / Shallow Tau 1-3
+### 1. H0 Openness Gate
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --output-dir results --batch-name h0_openness_gate --workers 12
-python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/analysis
+python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 12
 ```
 
 ### 2. H1 Model Fitness / Reliability vs Reward
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h1_model_fitness_factorial.json --output-dir results --batch-name h1_model_fitness --workers 12
-python scripts/analysis/analyze.py --results results/h1_model_fitness/h1_model_fitness_factorial/results.csv --output-dir results/h1_model_fitness/h1_model_fitness_factorial/analysis
+python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --output-dir results --batch-name h1_model_fitness --workers 12
 ```
 
 ### 3. H2 Deployment / Lesion
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h2_deployment_lesion.json --output-dir results --batch-name h2_deployment --workers 12
-python scripts/analysis/analyze.py --results results/h2_deployment/h2_deployment_lesion/results.csv --output-dir results/h2_deployment/h2_deployment_lesion/analysis
+python scripts/experiment/run.py --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name h2_deployment --workers 12
 ```
 
 ### 4. H3 Stress Response / Betrayal Stance Switch
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h3_betrayal_volatility.json --output-dir results --batch-name h3_stress_response --workers 12
-python scripts/analysis/analyze.py --results results/h3_stress_response/h3_betrayal_volatility/results.csv --output-dir results/h3_stress_response/h3_betrayal_volatility/analysis
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 12
 ```
 
 ### 5. H4 Social Choice / Partner Selection
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h4_social_choice.json --output-dir results --batch-name h4_social_choice --workers 12
-python scripts/analysis/analyze.py --results results/h4_social_choice/h4_social_choice/results.csv --output-dir results/h4_social_choice/h4_social_choice/analysis
+python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name h4_social_choice --workers 12
 ```
 
 ### 6. H5 Perturbation Phenotypes / Clinical-Like Variants
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h5_clinical_betrayal.json --config experiments/trust/configs/h5_clinical_phenotypes.json --config experiments/trust/configs/h5_sensitivity_sweep.json --output-dir results --batch-name h5_perturbation_phenotypes --workers 12
-python scripts/analysis/analyze.py --results results/h5_perturbation_phenotypes/h5_clinical_betrayal/results.csv --output-dir results/h5_perturbation_phenotypes/h5_clinical_betrayal/analysis
-python scripts/analysis/analyze.py --results results/h5_perturbation_phenotypes/h5_clinical_phenotypes/results.csv --output-dir results/h5_perturbation_phenotypes/h5_clinical_phenotypes/analysis
-python scripts/analysis/analyze.py --results results/h5_perturbation_phenotypes/h5_sensitivity_sweep/results.csv --output-dir results/h5_perturbation_phenotypes/h5_sensitivity_sweep/analysis
+python scripts/experiment/run.py --config configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml --config configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml --config configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml --output-dir results --batch-name h5_perturbation --workers 12
 ```
 
-### 7. H0 Openness Gate / Graded Precision-Channel Tests
-
-```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h0_graded_policy_regime.json --config experiments/trust/configs/h0_graded_betrayal.json --output-dir results --batch-name h0_openness_gate --workers 12
-python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_graded_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_graded_policy_regime/analysis
-python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_graded_betrayal/results.csv --output-dir results/h0_openness_gate/h0_graded_betrayal/analysis
-```
-
-### 8. Optional Factorization Ablation
+### 7. Optional Factorization Ablation
 
 A future global-beta ablation can compare per-partner beta against a shared
 precision state. Keep it outside the core H0-H5 queue unless we decide the
 factorization claim needs direct model-comparison evidence.
 
-### 9. Multi-Focal Descriptive Runs
+### 8. Multi-Focal Descriptive Runs
 
 Multi-focal configs currently use the package API directly; E2 analysis remains
 descriptive until a dedicated multi-focal analysis script exists.

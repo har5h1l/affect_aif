@@ -1,112 +1,121 @@
 # CLI Workflow Contract
 
-Supported command-line workflows for `affect_aif`. Commands assume the repo root as the working directory and an activated virtualenv with dependencies installed (`pip install -e ".[dev]"`).
+Supported command-line workflows for `affect_aif`. Commands assume the repo root
+as the working directory and an activated virtualenv with dependencies installed
+(`pip install -e ".[dev]"`).
 
 ## Supported Scripts
 
-These scripts are the supported CLI surface:
-
 | Script | Purpose |
 |--------|---------|
-| `scripts/experiment/run.py` | Run one or more experiment configs and write batch outputs. |
-| `scripts/experiment/smoke.py` | Dry-run the smoke config by default, or run it with `--run`. |
-| `scripts/experiment/inspect.py` | Print a compact JSON summary for an experiment config. |
-| `scripts/experiment/preliminary.py` | Run a small smoke-test experiment and print directional checks. |
-| `scripts/analysis/analyze.py` | Generate post-hoc figures, summary tables, and betrayal artifacts. |
+| `scripts/experiment/run.py` | Run one or more TOML experiment specs and write batch outputs. |
+| `scripts/experiment/smoke.py` | Dry-run the smoke TOML spec by default, or run it with `--run`. |
+| `scripts/experiment/inspect.py` | Print a compact JSON summary for a TOML spec. |
+| `scripts/experiment/preliminary.py` | Run a small smoke-test experiment. |
+| `scripts/analysis/analyze.py` | Generate post-hoc figures, summary tables, and betrayal artifacts from saved results. |
 | `scripts/analysis/summarize.py` | Write the final-round summary table for a saved results table. |
 | `scripts/analysis/visualize.py` | Regenerate GIFs from saved results. |
-| `scripts/analysis/model_comparison.py` | Compare conditions with predictive log-score summaries and RFX-BMS. |
-| `scripts/analysis/targeted_reanalysis.py` | Regenerate targeted H0/H2/H3 re-analysis summaries from result CSVs. |
+| `scripts/analysis/model_comparison.py` | Compare variants with predictive log-score summaries and RFX-BMS. |
 | `scripts/benchmark/analyze.py` | Derive shared, trust, and CvC benchmark summaries from benchmark CSVs. |
 | `scripts/benchmark/run_cvc.py` | Run backend-aware benchmark comparisons, including experimental CvC. |
 | `scripts/benchmark/package_cvc.py` | Write a submission-shaped local CvC policy bundle. |
 | `scripts/cvc/list_missions.py` | List local CvC mission metadata. |
 | `scripts/cvc/obs_diagnostic.py` | Inspect local CvC observation keys and shapes. |
 
-Only the grouped script paths above are part of the supported workflow contract.
-
 ## Experiment Runner
 
-`scripts/experiment/run.py` accepts one or more JSON configs:
+`scripts/experiment/run.py` accepts one or more TOML experiment specs:
 
 ```bash
-python scripts/experiment/run.py --config <path-to-json> [--config <path> ...] [--output-dir DIR] [--batch-name NAME] [--workers N]
+python scripts/experiment/run.py --config <path-to-toml> [--config <path> ...] [--output-dir DIR] [--batch-name NAME] [--workers N]
 ```
 
-It runs all configured conditions with the native pymdp trust runtime and writes one output directory per config. A single config with `--workers 1` is the serial path; all other combinations use the batch runner, but the output layout is the same.
-With `--dry-run`, it parses configs, resolves paths, writes
-`<output-dir>/<batch-name>/manifest.json`, and exits without running primary
-experiments.
+One spec defines one experiment. The runner expands:
+
+```text
+experiment x variants x sweeps x replications
+```
+
+Each expanded run is one full episode with its own seed. Result rows include
+`hypothesis_id`, `experiment_id`, `variant_id`, `replication`, `seed`, and
+`round`; the old numeric `condition` field is not part of the new TOML output
+surface.
+
+With `--dry-run`, the CLI parses specs, resolves paths, writes
+`<output-dir>/<batch-name>/manifest.json`, and exits without running episodes.
 
 Important flags:
 
 | Argument | Default | Notes |
 |----------|---------|-------|
-| `--config` | required | Repeatable. Each path must point to a JSON config. |
+| `--config` | required | Repeatable TOML experiment spec. |
 | `--output-dir` | `results` | Root directory for batch outputs. |
 | `--batch-name` | timestamped batch id | Subdirectory under `--output-dir`. |
 | `--workers` | CPU count | Must be at least 1. |
-| `--verbose` | false | Enables progress output. |
+| `--verbose` | false | Enables progress output for supported serial paths. |
 | `--verbosity-mode` | `stage_stream` | Only supported mode. |
-| `--make-gifs` | false | Writes per-run GIFs after results are saved. |
+| `--make-gifs` | false | Writes per-run GIFs for variant outputs after results are saved. |
 | `--dry-run` | false | Writes a provenance manifest without executing experiments. |
 
-Output layout:
+Default TOML output layout:
 
 ```text
-<output-dir>/<batch_name>/<config_slug>/
+<output-dir>/<batch_name>/<hypothesis_id>/<experiment_id>/
   results.csv
   results_partial.csv
-  config.json
+  config.toml
   batch_metadata.json
-  gifs/            # only when --make-gifs is used
+  analysis/
+    raw/
+    figures/
+    report/
 ```
 
-`results_partial.csv` is a checkpoint artifact and may remain after the run completes. The final experiment output written by the CLI is `results.csv`; the runner does not emit parquet files.
+`analysis/` is written automatically when the spec sets `analysis.auto = true`.
+The standalone `scripts/analysis/analyze.py` remains available for direct
+post-hoc analysis of a saved CSV or parquet file.
 
 Examples:
 
 ```bash
-# single config, timestamped batch dir
-python scripts/experiment/run.py --config experiments/trust/configs/smoke.json
+# smoke dry run
+python scripts/experiment/run.py --config configs/trust/smoke/smoke.toml --output-dir results --batch-name dry_run --dry-run
 
-# single config, named batch, 12 workers
-python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --output-dir results --batch-name h0_openness_gate --workers 12
+# H3 betrayal stress response
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 12
 
-# shallow regime + betrayal volatility in one batch
-python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --config experiments/trust/configs/h3_betrayal_volatility.json --output-dir results --batch-name h0_h3_current_evidence --workers 12
-
-# provenance-only dry run
-python scripts/experiment/run.py --config experiments/trust/configs/smoke.json --output-dir results --batch-name dry_run --dry-run
+# multiple H0 openness experiments in one batch
+python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 12
 ```
 
 ## Preliminary Run
 
-`scripts/experiment/preliminary.py` runs a small version of a maintained config and prints per-condition summaries plus H0-H5 behavior-card checks.
+`scripts/experiment/preliminary.py` defaults to the TOML smoke spec:
 
 ```bash
-python scripts/experiment/preliminary.py [--config <json>] [--replications N] [--rounds N] [--output <path>]
+python scripts/experiment/preliminary.py [--config <toml>] [--replications N] [--rounds N] [--output <path>]
 ```
-
-It preserves the config's conditions and presets, overrides only replications and rounds, disables sensitivity runs, and writes a CSV results table at `--output`.
 
 ## Post-hoc Analysis
 
-`scripts/analysis/analyze.py` consumes a saved results table and writes figures plus summary tables:
+`scripts/analysis/analyze.py` consumes a saved results table and writes figures
+plus summary tables:
 
 ```bash
 python scripts/analysis/analyze.py --results <path-to-csv-or-parquet> --output-dir <directory>
 ```
 
-The input can be CSV or parquet. Outputs include `final_round_summary.csv`, `pairwise_payoff_tests.csv`, `hypothesis_tests.json`, `hypothesis_summary.csv`, `affective_movement_summary.csv`, `statistics_summary.txt`, and, when switch events are present, the betrayal-specific CSVs.
-
-## Visualization and Model Comparison
-
-`scripts/analysis/visualize.py` and `scripts/analysis/model_comparison.py` also accept CSV or parquet input tables. They write GIFs or model-comparison summaries into the directory passed via `--output-dir`.
+The input can be CSV or parquet. Variant-shaped results produce
+`final_round_summary.csv`, `pairwise_payoff_tests.csv`,
+`hypothesis_tests.json`, `hypothesis_summary.csv`,
+`affective_movement_summary.csv`, `statistics_summary.txt`, and betrayal CSVs
+when switch events are present.
 
 ## Configs
 
-Supported trust experiment configs live under `experiments/trust/configs/`.
-Supported multi-focal configs live under `experiments/multifocal/configs/`.
-External benchmark configs remain under `configs/`; CvC implementation code lives
-under `benchmarks/cvc/`, with shared runner code under `benchmarks/core/`.
+Maintained trust experiment specs live under `configs/trust/hypotheses/`, with
+smoke specs under `configs/trust/smoke/`. Benchmark-family TOML specs live
+under `configs/benchmark/` and run through `scripts/benchmark/run_cvc.py`.
+Supported multi-focal configs still live under `experiments/multifocal/configs/`
+until the multifocal family is migrated. CvC implementation code lives under
+`benchmarks/cvc/`, with shared runner code under `benchmarks/core/`.

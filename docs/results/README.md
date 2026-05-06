@@ -24,7 +24,7 @@ and analysis entry point.
 
 Primary trust-task outputs should use the card-root layout documented in
 `docs/experiments/manifest.md`, for example
-`results/h0_openness_gate/h0_shallow_policy_regime/results.csv`.
+`results/h0_openness/h0/shallow_binary/results.csv`.
 
 Partial runs are not current evidence.
 

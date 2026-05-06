@@ -7,7 +7,7 @@ This document provides comprehensive system documentation for AI agents operatin
 - Read `docs/state/README.md` and `docs/state/current/mission.md` before taking over a research or restructure task.
 - Read `docs/theory/goals.md`, `docs/theory/hypotheses.md`, and `docs/theory/pomdp_spec.md` before changing computational claims, affect dynamics, terminal values, or the interpretation of results.
 - Read `docs/theory/apashea_alignment.md` before changing factorized controls, policy priors, learning hooks, or pymdp/JAX alignment claims.
-- Read `docs/experiment/design.md` before changing task design, configs, conditions, metrics, or sensitivity sweeps.
+- Read `docs/experiment/design.md` before changing task design, configs, variants, metrics, or sensitivity sweeps.
 - Read `docs/design/implementation.md` before changing environment semantics, switching logic, or analysis helpers.
 - Read `README.md` before changing setup, entry points, or repo layout.
 
@@ -27,13 +27,13 @@ This document provides comprehensive system documentation for AI agents operatin
 ## Learned Workspace Facts
 
 - Use `.venv` in project root; venv should auto-activate when in this folder (direnv with `.envrc`).
-- Recommended experiment run: default + betrayal_stress in one batch with `--workers 12`; results go under `results/<batch_name>/<config_slug>/results.csv`; run `scripts/analysis/analyze.py` on those paths after.
-- Default config (random partner) does not discriminate conditions; use betrayal_stress (agent-choice, scheduled switch) for hypothesis-relevant results.
+- Recommended experiment run: queue the relevant TOML specs under `experiments/trust/hypotheses/` in one batch with `--workers 12`; results go under `results/<batch_name>/<hypothesis_id>/<experiment_id>/results.csv`; run `scripts/analysis/analyze.py` on those paths after.
+- Random-assignment specs are weak discriminators for the current hypothesis spine; use agent-choice scheduled-stance-switch specs for stress-response results.
 - Official `inferactively-pymdp==1.0.0` is the supported runtime. Do not reintroduce a custom active-inference engine; keep affect and trust logic in task modules.
 - State inference (partner-type belief updating) is handled by official
   `pymdp.Agent` instances created from `tasks.trust.pomdp` templates and logged
   as matrix-based belief updates.
-- Benchmark runs use `scripts/benchmark/run_cvc.py` plus `docs/operations/benchmark.md` for backends, configs (for example `configs/benchmark_default.json` and `configs/benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
+- Benchmark runs use `scripts/benchmark/run_cvc.py` plus `docs/operations/benchmark.md` for backends, TOML configs (for example `configs/benchmark_default.toml` and `configs/benchmark_betrayal.toml`), and Python 3.12 CvC worker notes.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is rsync and does not delete remote-only files under `results/`). Do not add orchestration or deployment scripts to this repo.
 
 ---
@@ -57,9 +57,9 @@ affect_aif/
 │       └── types.py       # Partner type metadata
 ├── experiments/
 │   ├── trust/             # Depends on: tasks.trust
-│   │   ├── config.py      # ExperimentConfig dataclass
-│   │   ├── conditions.py  # Condition ID → name mapping
-│   │   ├── runner.py      # ExperimentRunner (primary + sensitivity)
+│   │   ├── config.py      # ExperimentConfig runtime dataclass
+│   │   ├── spec.py        # TOML ExperimentSpec and variant expansion
+│   │   ├── runner.py      # ExperimentRunner for expanded variant runs
 │   │   ├── batch.py       # BatchExperimentRunner (multi-config parallel)
 │   │   ├── logger.py      # MetricLogger (per-round recording)
 │   │   ├── progress.py    # ProgressReporter
@@ -74,35 +74,32 @@ affect_aif/
 │   ├── hypotheses.py      # Current Hesp-extension hypothesis helpers
 │   ├── plots.py           # Matplotlib figure generation
 │   └── visualization.py   # GIF generation
-└── configs/               # External benchmark and CvC JSON configurations
+└── configs/               # External benchmark and CvC TOML configurations
 ```
 
-### Experiment Conditions
+### Experiment Variants
 
-| ID | Name | Runtime | Horizon | Affect |
-|----|------|-------|---------|--------|
-| 1 | tau1_no_affect | Native pymdp runtime | 1 | No |
-| 2 | tau1_affect | Native pymdp runtime + beta | 1 | Yes |
-| 3 | tau2_no_affect | Native pymdp runtime | 2 | No |
-| 4 | tau2_affect | Native pymdp runtime + beta | 2 | Yes |
-| 5 | tau4_no_affect | Native pymdp runtime | 4 | No |
-| 6 | tau4_affect | Native pymdp runtime + beta | 4 | Yes |
-| 7 | tau8_no_affect | Native pymdp runtime | 8 | No |
-| 8 | tau8_affect | Native pymdp runtime + beta | 8 | Yes |
-| 9 | tau3_no_affect | Native pymdp runtime | 3 | No |
-| 10 | tau3_affect | Native pymdp runtime + beta | 3 | Yes |
+Trust experiments are declared as TOML specs under
+`experiments/trust/hypotheses/`. Each spec expands explicit `[[variants]]`
+instead of numeric condition IDs or presets.
 
-Preset conditions live in `experiments.trust.conditions.PRESET_CONDITIONS`:
-`lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`.
+Core maintained variant knobs:
+
+| Field | Examples | Meaning |
+|----|------|-------|
+| `affect` | `none`, `precision`, `tracked_only` | Runtime affect mode |
+| `planning_horizon` | `1`, `2`, `4`, `8` | Native pymdp policy horizon |
+| `epistemic_value` | `true`, `false` | Whether policy inference uses information gain |
+| `alpha_charge`, `initial_beta`, `beta_persistence`, `beta_levels` | numeric / arrays | Affective precision dynamics |
 
 ### Experiment Pipeline Flow
 
 ```
-Config JSON → ExperimentRunner
+TOML ExperimentSpec → expanded variant runs → ExperimentRunner
     │
-    ├── run_all()                   # All conditions × all seeds
-    │   └── run_replication()       # Single condition × single seed
-    │       ├── create_native_runtime() # Trust POMDP template + PartnerBank
+    ├── run_all()                   # All expanded variant runs
+    │   └── run_replication()       # Single variant × single seed
+    │       ├── create_native_runtime_from_run() # Trust POMDP template + PartnerBank
     │       ├── _create_env()       # TrustGameEnv or GradedTrustGameEnv
     │       └── _run_episode()      # Main loop: infer policies → step → update
     │
@@ -143,9 +140,10 @@ update_partner_after_observation(...)
 
 ## Configuration System
 
-Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
-`experiments/multifocal/configs/`, and external benchmark/CvC configs remain in
-`configs/`. Key fields of `ExperimentConfig`:
+Trust specs live in `experiments/trust/hypotheses/`, multi-focal configs live in
+`experiments/multifocal/configs/`, and external benchmark/CvC configs live in
+`configs/`. `ExperimentConfig` is now an internal runtime adapter derived from
+expanded TOML runs. Key runtime fields:
 
 ### Game Structure
 - `payoff_mode`: "binary" | "graded"
@@ -155,7 +153,7 @@ Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
 - `scheduled_stance_switches`: list of stance-shift events for betrayal-style scenarios
 
 ### Agent Parameters
-- `deep_horizon` / `shallow_horizon`: planning depth
+- `planning_horizon`: planning depth, supplied by each variant before runtime construction
 - `alpha_charge`: prediction error scaling (3.0)
 - `sigma_0_sq`: prior variance (0.25)
 - `initial_beta`: starting precision prior (1.0)
@@ -164,9 +162,9 @@ Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
 - `gamma`: base policy precision before partner-local beta modulation
 
 ### Run Parameters
-- `conditions`: list of condition IDs
-- `num_replications`: seeds per condition
+- `replications`: seeds per variant in TOML experiment metadata
 - `random_seed`: base seed
+- `[[sweeps]]`: optional explicit variant-parameter expansion
 
 ## Analysis Outputs
 
@@ -175,7 +173,7 @@ Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
 | File | Contents |
 |------|----------|
 | `final_round_summary.csv` | Per-seed cumulative payoffs and accuracy |
-| `pairwise_payoff_tests.csv` | All condition pairs: t-stat, p-value, Cohen's d |
+| `pairwise_payoff_tests.csv` | All variant pairs: t-stat, p-value, Cohen's d |
 | `hypothesis_tests.json` | Structured hypothesis test results |
 | `hypothesis_summary.csv` | One-row-per-hypothesis overview |
 | `affective_movement_summary.csv` | Beta / precision-signal range per seed |
@@ -188,7 +186,7 @@ Trust configs live in `experiments/trust/configs/`, multi-focal configs live in
 1. **Sophisticated inference**: Policy evaluation uses observation-branching, not mean-field rollout
 2. **Native pymdp boundary**: policy/state inference stays inside official `pymdp.Agent`; task code only constructs matrices and manages partner-local beta/gamma
 3. **Deterministic seeds**: `random_seed + replication_index` ensures reproducibility
-4. **Condition equality**: C1=C3=C4 in same-horizon tasks confirms clean implementation
+4. **Variant equality**: same-horizon no-affect and tracked-only variants should match when precision is decoupled
 5. **Binary saturation**: EFE gaps ~10.83 in binary game → softmax is hard argmax → precision modulation inert
 6. **Graded activation**: q_pi_entropy ~5.8 in graded game → precision modulation channel active
 
@@ -207,5 +205,5 @@ python -m pytest tests/ -v --tb=short
 4. Compare against current and historical status in `docs/results/`
 
 ### Analysis script errors
-- Check CSV has expected columns: `condition`, `seed`, `round`, `payoff`, `run_mode`
-- Filter to `run_mode == "primary"` before analysis
+- Check CSV has expected columns: `variant_id`, `seed`, `round`, and `payoff`
+- Filter or group by `variant_id` for hypothesis comparisons

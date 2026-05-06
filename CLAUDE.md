@@ -12,11 +12,11 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 |------|---------|
 | Run all tests | `python -m pytest tests/ -v` |
 | Run single test | `python -m pytest tests/test_core.py::test_name -v` |
-| Run experiment | `python scripts/experiment/run.py --config experiments/trust/configs/<name>.json --output-dir results --batch-name <name>` |
+| Run experiment | `python scripts/experiment/run.py --config experiments/trust/hypotheses/<hypothesis>/<experiment>.toml --output-dir results --batch-name <name>` |
 | Analyze results | `python scripts/analysis/analyze.py --results <path>/results.csv --output-dir <path>/figures` |
 | Preliminary check | `python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv` |
 | Generate GIFs | `python scripts/analysis/visualize.py --results <path>/results.csv --output-dir <path>/gifs` |
-| Batch run (parallel) | `python scripts/experiment/run.py --config <a>.json --config <b>.json --workers 12 --output-dir results --batch-name main_run` |
+| Batch run (parallel) | `python scripts/experiment/run.py --config <a>.toml --config <b>.toml --workers 12 --output-dir results --batch-name main_run` |
 
 ## Source Layout
 
@@ -24,12 +24,12 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 |-----------|---------|
 | `inferactively-pymdp==1.0.0` | Supported active-inference runtime dependency |
 | `tasks/trust/` | Trust-task pymdp model, agent, environment, and task-local affect/trust wrappers |
-| `experiments/trust/` | Trust experiment configs, conditions, logging, batch runner, and runner |
+| `experiments/trust/` | Trust TOML specs, variants, logging, batch runner, and runner |
 | `experiments/multifocal/` | Multi-focal trust experiment config and runtime |
 | `analysis/` | Metrics, statistics, plotting, hypothesis tests |
 | `benchmarks/core/` | Shared benchmark runner, config, metrics, and comparison helpers |
 | `benchmarks/cvc/` | Experimental CvC backend, policies, packaging, and Observatory client |
-| `configs/` | External benchmark and CvC JSON configurations |
+| `configs/` | External benchmark and CvC TOML configurations |
 | `scripts/` | CLI entry points (thin orchestrators) |
 | `tests/` | Unit and integration tests |
 | `docs/` | Theory, experiment design, implementation, results tracking, roadmap |
@@ -45,7 +45,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 | Setup or usage | `README.md` |
 | Current results and hypothesis status | `docs/experiment/results.md` |
 | Phase roadmap and what's next | `docs/future/roadmap.md` |
-| Experimental design and conditions | `docs/experiment/design.md` |
+| Experimental design and variants | `docs/experiment/design.md` |
 | Partner stance redesign | `docs/design/partner_stance.md` |
 | CLI reference | `docs/operations/cli.md` |
 | Benchmark integration | `docs/operations/benchmark.md` |
@@ -156,17 +156,17 @@ STOP and ask the user when:
 
 ### Configuration Templates
 
-Trust experiments are configured via JSON in `experiments/trust/configs/`;
-multi-focal experiments live in `experiments/multifocal/configs/`; external
-benchmark and CvC configs remain under `configs/` until the benchmark package
-split lands. Key parameters:
+Trust experiments are configured via TOML specs in
+`experiments/trust/hypotheses/`; multi-focal experiments live in
+`experiments/multifocal/configs/`; external benchmark and CvC configs live as
+TOML under `configs/`. Key trust-spec fields:
 
-- `conditions`: list of condition IDs to run (see `docs/experiment/design.md` Section 3)
-- `num_replications`: seeds per condition
-- `num_rounds`: rounds per episode
-- `payoff_mode`: "binary" or "graded"
-- `assignment_mode`: "random" or "agent_choice"
-- `scheduled_stance_switches`: supported betrayal/stance-shift scenarios
+- `[[variants]]`: explicit agent/runtime variants to run
+- `[experiment] replications`: seeds per variant
+- `[experiment] rounds`: rounds per episode
+- `[scenario] payoff`: "binary" or "graded"
+- `[scenario] assignment`: "random" or "agent_choice"
+- `[[scenario.stance_switches]]`: supported betrayal/stance-shift scenarios
 
 ---
 

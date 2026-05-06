@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -53,15 +54,15 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
     if trajectory.empty:
         return
     trajectory = (
-        _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "beta")
+        _mean_sd_frame(trajectory, ["variant_id", "encounters_since_switch"], "beta")
         .merge(
-            _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "divergence_beta_minus_reward"),
-            on=["condition_name", "encounters_since_switch"],
+            _mean_sd_frame(trajectory, ["variant_id", "encounters_since_switch"], "divergence_beta_minus_reward"),
+            on=["variant_id", "encounters_since_switch"],
             how="left",
         )
         .merge(
-            _mean_sd_frame(trajectory, ["condition_name", "encounters_since_switch"], "payoff"),
-            on=["condition_name", "encounters_since_switch"],
+            _mean_sd_frame(trajectory, ["variant_id", "encounters_since_switch"], "payoff"),
+            on=["variant_id", "encounters_since_switch"],
             how="left",
         )
     )
@@ -72,7 +73,7 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
         trajectory,
         x_col="encounters_since_switch",
         y_col="beta",
-        hue_col="condition_name",
+        hue_col="variant_id",
     )
     axes[0].set_title("Post-Betrayal Beta Trajectory")
     axes[0].set_xlabel("Encounters Since Switch")
@@ -89,7 +90,7 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
         trajectory,
         x_col="encounters_since_switch",
         y_col="divergence_beta_minus_reward",
-        hue_col="condition_name",
+        hue_col="variant_id",
     )
     ax.set_title("Post-Betrayal Beta vs Reward Divergence")
     ax.set_xlabel("Encounters Since Switch")
@@ -105,7 +106,7 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
         trajectory,
         x_col="encounters_since_switch",
         y_col="payoff",
-        hue_col="condition_name",
+        hue_col="variant_id",
     )
     ax.set_title("Post-Betrayal Payoff Recovery")
     ax.set_xlabel("Encounters Since Switch")
@@ -117,22 +118,16 @@ def _save_betrayal_figures(results: pd.DataFrame, out: Path):
 
 
 def _save_horizon_sweep_figure(summary: pd.DataFrame, out: Path):
-    horizon_map = {
-        "tau1_no_affect": (1, "No affect"),
-        "tau1_affect": (1, "Affect"),
-        "tau2_no_affect": (2, "No affect"),
-        "tau2_affect": (2, "Affect"),
-        "tau4_no_affect": (4, "No affect"),
-        "tau4_affect": (4, "Affect"),
-        "tau8_no_affect": (8, "No affect"),
-        "tau8_affect": (8, "Affect"),
-    }
-    sweep = summary[summary["condition_name"].isin(horizon_map)].copy()
-    if sweep["condition_name"].nunique() < 2:
+    sweep = summary[summary["variant_id"].astype(str).str.contains("__planning_horizon_")].copy()
+    if sweep["variant_id"].nunique() < 2:
         return
 
-    sweep["planning_horizon"] = sweep["condition_name"].map(lambda name: horizon_map[name][0])
-    sweep["signal_family"] = sweep["condition_name"].map(lambda name: horizon_map[name][1])
+    sweep["planning_horizon"] = sweep["variant_id"].map(
+        lambda name: int(re.search(r"__planning_horizon_(\d+)", str(name)).group(1))
+    )
+    sweep["signal_family"] = sweep["variant_id"].map(
+        lambda name: "No affect" if str(name).startswith("no_affect") else "Affect"
+    )
     fig, ax = plt.subplots(figsize=(8, 5))
     sns.lineplot(
         data=sweep,
@@ -164,8 +159,8 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     partner_summary = payoff_by_partner_type(results)
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(data=summary, x="condition_name", y="total_payoff", ax=ax, errorbar="sd")
-    ax.set_title("Cumulative Payoff by Condition")
+    sns.barplot(data=summary, x="variant_id", y="total_payoff", ax=ax, errorbar="sd")
+    ax.set_title("Cumulative Payoff by Variant")
     ax.set_xlabel("")
     ax.tick_params(axis="x", rotation=45)
     fig.tight_layout()
@@ -174,7 +169,7 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
 
     fig, ax = plt.subplots(figsize=(8, 5))
     accuracy_column = "mean_joint_accuracy" if "mean_joint_accuracy" in summary.columns else "mean_accuracy"
-    sns.barplot(data=summary, x="condition_name", y=accuracy_column, ax=ax, errorbar="sd")
+    sns.barplot(data=summary, x="variant_id", y=accuracy_column, ax=ax, errorbar="sd")
     ax.set_title("Joint Type-Stance Identification Accuracy")
     ax.set_xlabel("")
     ax.tick_params(axis="x", rotation=45)
@@ -183,14 +178,14 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(data=partner_summary, x="true_partner_type", y="mean_payoff", hue="condition_name", ax=ax)
+    sns.barplot(data=partner_summary, x="true_partner_type", y="mean_payoff", hue="variant_id", ax=ax)
     ax.set_title("Payoff by True Partner Type")
     fig.tight_layout()
     fig.savefig(out / "figure_3_partner_type_payoff.png", dpi=180)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(data=summary, x="condition_name", y="planning_cost_ratio", ax=ax)
+    sns.barplot(data=summary, x="variant_id", y="planning_cost_ratio", ax=ax)
     ax.set_title("Deterministic Planning Cost Ratio")
     ax.set_xlabel("")
     ax.tick_params(axis="x", rotation=45)
@@ -199,9 +194,9 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     plt.close(fig)
 
     divergence = beta_reward_divergence(results)
-    divergence = _mean_sd_frame(divergence, ["condition_name", "round"], "divergence")
+    divergence = _mean_sd_frame(divergence, ["variant_id", "round"], "divergence")
     fig, ax = plt.subplots(figsize=(8, 5))
-    _plot_mean_sd_lines(ax, divergence, x_col="round", y_col="divergence", hue_col="condition_name")
+    _plot_mean_sd_lines(ax, divergence, x_col="round", y_col="divergence", hue_col="variant_id")
     ax.set_title("Beta vs Reward-Average Divergence")
     ax.legend(loc="best")
     fig.tight_layout()
@@ -209,7 +204,7 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(data=summary, x="condition_name", y="mean_abs_step_efe", ax=ax, errorbar="sd")
+    sns.barplot(data=summary, x="variant_id", y="mean_abs_step_efe", ax=ax, errorbar="sd")
     ax.set_title("Mean |EFE| per Deep-Policy Step")
     ax.set_xlabel("")
     ax.tick_params(axis="x", rotation=45)

@@ -71,14 +71,14 @@ def _slugify(text: str) -> str:
     return slug or "run"
 
 
-def _condition_slug(value) -> str:
+def _variant_slug(value) -> str:
     if isinstance(value, (int, np.integer)):
         return f"{int(value):02d}"
     text = _slugify(str(value))
-    return text or "condition"
+    return text or "variant"
 
 
-def _condition_sort_key(value) -> tuple[int, str]:
+def _variant_sort_key(value) -> tuple[int, str]:
     if isinstance(value, (int, np.integer)):
         return (0, f"{int(value):04d}")
     return (1, str(value))
@@ -121,7 +121,7 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
     ax_signal = fig.add_subplot(grid[:, 1])
 
     fig.suptitle(
-        f"{row['condition_name']} | seed {int(row['seed'])} | round {int(row['round']) + 1}/{len(run)}",
+        f"{row['variant_id']} | seed {int(row['seed'])} | round {int(row['round']) + 1}/{len(run)}",
         fontsize=16,
         fontweight="bold",
     )
@@ -176,7 +176,7 @@ def _make_frame(run: pd.DataFrame, frame_idx: int) -> Image.Image:
     positions = np.arange(len(true_types))
     if signal is None:
         ax_signal.axis("off")
-        ax_signal.text(0.5, 0.5, "No partner signal for this condition", ha="center", va="center", fontsize=13)
+        ax_signal.text(0.5, 0.5, "No partner signal for this variant", ha="center", va="center", fontsize=13)
     else:
         colors = ["#d62728" if idx == current_partner else "#4c78a8" for idx in positions]
         ax_signal.bar(positions, signal, color=colors, alpha=0.9)
@@ -202,13 +202,9 @@ def build_run_gifs(
     frame_duration_ms: int = 350,
     reporter=None,
 ) -> list[Path]:
-    """Create one GIF per primary condition/seed run."""
+    """Create one GIF per primary variant/seed run."""
 
-    normalized = _normalize_results(results)
-    if "run_mode" in normalized.columns:
-        primary = normalized[normalized["run_mode"] == "primary"].copy()
-    else:
-        primary = normalized.copy()
+    primary = _normalize_results(results)
     if primary.empty:
         return []
 
@@ -218,16 +214,15 @@ def build_run_gifs(
         reporter.emit("gif_generation_start", output_dir=str(output))
 
     written: list[Path] = []
-    primary["_condition_sort"] = primary["condition"].apply(_condition_sort_key)
+    primary["_variant_sort"] = primary["variant_id"].apply(_variant_sort_key)
     grouped = (
-        primary.sort_values(["_condition_sort", "seed", "round"])
-        .drop(columns="_condition_sort")
-        .groupby(["condition", "seed"], sort=True)
+        primary.sort_values(["_variant_sort", "seed", "round"])
+        .drop(columns="_variant_sort")
+        .groupby(["variant_id", "seed"], sort=True)
     )
-    for (condition, seed), run in grouped:
+    for (variant, seed), run in grouped:
         frames = [_make_frame(run.reset_index(drop=True), idx) for idx in range(len(run))]
-        condition_name = str(run["condition_name"].iloc[0])
-        target = output / f"{_condition_slug(condition)}_{_slugify(condition_name)}_seed_{int(seed)}.gif"
+        target = output / f"{_variant_slug(variant)}_seed_{int(seed)}.gif"
         first, *rest = frames
         first.save(
             target,

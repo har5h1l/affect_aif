@@ -15,25 +15,12 @@ def slugify_name(text: str) -> str:
     return slug or "run"
 
 
-def _normalize_condition_value(value):
-    """Canonicalize mixed numeric/string condition identifiers from CSV loads."""
-
-    if pd.isna(value):
-        return value
-    text = str(value).strip()
-    if re.fullmatch(r"-?\d+", text):
-        return int(text)
-    return text
-
-
 def normalize_results_table(results: pd.DataFrame) -> pd.DataFrame:
-    """Normalize loaded results so mixed condition ids do not fragment analysis groups."""
+    """Normalize loaded variant-shaped results."""
 
     frame = results.copy()
-    if "condition" in frame.columns:
-        frame["condition"] = frame["condition"].map(_normalize_condition_value)
-    if "condition_name" in frame.columns:
-        frame["condition_name"] = frame["condition_name"].astype(str)
+    if "variant_id" in frame.columns:
+        frame["variant_id"] = frame["variant_id"].astype(str)
     return frame
 
 
@@ -47,9 +34,6 @@ def load_results_table(path: str | Path) -> pd.DataFrame:
 
 
 def filter_primary_runs(results: pd.DataFrame) -> pd.DataFrame:
-    """Restrict a results table to primary runs when the run-mode column exists."""
+    """Return results unchanged; TOML specs emit only primary variant runs."""
 
-    if "run_mode" not in results.columns:
-        return results
-    primary = results[results["run_mode"] == "primary"].copy()
-    return primary if not primary.empty else results
+    return results

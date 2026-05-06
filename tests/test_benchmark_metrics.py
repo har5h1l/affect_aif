@@ -22,7 +22,7 @@ def synthetic_results():
     n = 100
     return pd.DataFrame(
         {
-            "condition": [1] * n,
+            "variant_id": [1] * n,
             "seed": [0] * n,
             "round": list(range(n)),
             "partner_idx": rng.integers(0, 4, n).tolist(),
@@ -42,7 +42,7 @@ def cooperative_results():
     n = 50
     return pd.DataFrame(
         {
-            "condition": [1] * n,
+            "variant_id": [1] * n,
             "seed": [0] * n,
             "round": list(range(n)),
             "partner_idx": [0] * n,
@@ -82,7 +82,7 @@ def test_cumulative_payoff(cooperative_results):
 
 
 def test_cumulative_payoff_grouped(synthetic_results):
-    result = cumulative_payoff(synthetic_results, group_by="condition")
+    result = cumulative_payoff(synthetic_results, group_by="variant_id")
     assert isinstance(result, pd.DataFrame)
     assert "cumulative_payoff" in result.columns
 

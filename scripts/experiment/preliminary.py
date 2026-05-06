@@ -6,75 +6,20 @@ import argparse
 import sys
 from pathlib import Path
 
-import pandas as pd
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from analysis.hypotheses import run_all_hypothesis_tests
-from analysis.metrics import final_round_summary
-from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner
-
-
-def _condition_sort_key(value) -> tuple[int, str]:
-    if isinstance(value, int):
-        return (0, f"{value:04d}")
-    return (1, str(value))
-
-
-def _condition_summary_table(results: pd.DataFrame) -> pd.DataFrame:
-    summary = final_round_summary(results)
-    grouped = summary.groupby(["condition", "condition_name"], as_index=False).agg(
-        mean_payoff=("total_payoff", "mean"),
-        std_payoff=("total_payoff", "std"),
-        mean_accuracy=("mean_accuracy", "mean"),
-        mean_planning_cost_ratio=("planning_cost_ratio", "mean"),
-    )
-    grouped["_condition_sort"] = grouped["condition"].apply(_condition_sort_key)
-    return grouped.sort_values("_condition_sort").drop(columns="_condition_sort")
-
-
-def _directional_checks(hypotheses: dict) -> pd.DataFrame:
-    tests = hypotheses.get("tests", hypotheses)
-    rows = []
-    for card_id, payload in tests.items():
-        evidence = payload.get("evidence", {})
-        rows.append(
-            {
-                "card": card_id.upper(),
-                "label": payload.get("label", ""),
-                "available": bool(payload.get("available", False)),
-                "claim": payload.get("summary", {}).get("claim", ""),
-                "primary_metric": _primary_metric(card_id, evidence),
-            }
-        )
-    return pd.DataFrame(rows)
-
-
-def _primary_metric(card_id: str, evidence: dict) -> object:
-    if card_id == "h0":
-        return evidence.get("mean_affect_payoff_gain")
-    if card_id == "h1":
-        return len(evidence.get("beta_signal_columns", []))
-    if card_id == "h2":
-        return evidence.get("payoff_difference_lesioned_minus_tau4_affect")
-    if card_id == "h3":
-        return evidence.get("payoff_difference_tau4_affect_minus_tau4_no_affect")
-    if card_id == "h4":
-        return len(evidence.get("partner_selection_counts", {}))
-    if card_id == "h5":
-        return len(evidence.get("clinical_conditions", []))
-    return None
+from experiments.trust.spec import ExperimentSpec
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a small preliminary affect_aif experiment.")
     parser.add_argument(
         "--config",
-        default="experiments/trust/configs/h0_shallow_policy_regime.json",
-        help="Path to a JSON config file.",
+        default="configs/trust/smoke/smoke.toml",
+        help="Path to a TOML experiment spec.",
     )
-    parser.add_argument("--replications", type=int, default=5, help="Number of replications per condition.")
+    parser.add_argument("--replications", type=int, default=5, help="Number of replications per variant.")
     parser.add_argument("--rounds", type=int, default=200, help="Rounds per replication.")
     parser.add_argument(
         "--output",
@@ -88,26 +33,19 @@ def main(argv: list[str] | None = None):
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    config = ExperimentConfig.from_json(args.config)
-    config.num_replications = int(args.replications)
-    config.num_rounds = int(args.rounds)
-    config.run_sensitivity = False
-
-    runner = ExperimentRunner(config)
+    spec = ExperimentSpec.from_toml(args.config).with_overrides(
+        rounds=int(args.rounds),
+        replications=int(args.replications),
+    )
+    runner = ExperimentRunner.from_spec(spec)
     results = runner.run_all()
     runner.save_results(results, args.output)
 
-    summary_table = _condition_summary_table(results)
-    hypotheses = run_all_hypothesis_tests(results)
-    directional = _directional_checks(hypotheses)
-
     print(f"Saved {len(results)} rows to {Path(args.output)}")
-
-    print("\nPer-condition summary")
-    print(summary_table.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))
-
-    print("\nBehavior-card checks")
-    print(directional.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))
+    if {"variant_id", "payoff"}.issubset(results.columns):
+        summary = results.groupby("variant_id", as_index=False).agg(total_payoff=("payoff", "sum"))
+        print("\nPer-variant payoff")
+        print(summary.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))
     return 0
 
 

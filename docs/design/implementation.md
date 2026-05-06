@@ -16,7 +16,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The shipped trust-game matrices expose two observation modalities (`o_action`, `o_payoff`) and three hidden/control factors (`type`, `stance`, `own_action`).
 - Experiments instantiate one official `pymdp.Agent` per tracked partner and hold them in a `PartnerBank`, with project-owned trust-game `A/B/C/D/E` construction and logging of per-partner joint beliefs over `4 types × 3 stances`.
 - The affective helper path now defaults to a discrete HESP beta state with levels `[0.5, 0.67, 1.0, 1.5, 2.0]` and baseline `initial_beta = 1.0`.
-- `ExperimentConfig` supports `initial_partner_stances`, `scheduled_stance_switches`, and named `presets`.
+- TOML `ExperimentSpec` files under `configs/` are the maintained public experiment surface. Trust specs use `experiment.family = "trust"` under `configs/trust/`; benchmark specs use `experiment.family = "benchmark"` under `configs/benchmark/`. `ExperimentConfig` remains the internal trust runtime adapter for environment and POMDP construction.
 
 ## Switching Semantics
 
@@ -43,10 +43,10 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 ## Sophisticated rollout inference
 
-- The trust-game planner now uses observation-branching sophisticated inference for **all** conditions and horizons.
+- The trust-game planner now uses observation-branching sophisticated inference for **all** variants and horizons.
 - Implementation-wise, the supported control surface is official `pymdp.Agent` plus procedural task helpers. `tasks.trust.pomdp` builds the task-specific A/B/C/D/E matrices, `tasks.trust.runtime` evaluates partner-local agents, updates the acted-on partner belief after each observation, and records snapshots for logging.
 - The internal rollout comparison path used by tests is not the default decision rule. That path uses observation-weighted expected information gain on non-terminal steps rather than negative ambiguity alone.
-- This keeps the planning-method axis controlled across Conditions 1-8, so horizon comparisons are not confounded with different rollout approximations.
+- This keeps the planning-method axis controlled across variants, so horizon comparisons are not confounded with different rollout approximations.
 
 ## Trust vs Affect
 
@@ -61,18 +61,26 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 - Policy differentiation in the current trust runtime is carried by native pymdp policy inference plus inverse-beta precision modulation for affective runtimes (`gamma_k = gamma_base / E[beta_k]`), not by a separate reward-average control path.
 
-## Condition-specific horizons
+## TOML Experiment Expansion
 
-- `ExperimentConfig.horizon_overrides` can target either numeric core conditions or named presets.
-- The supported core sweep is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
-- Named presets (`lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`) default to the tau-4 base unless overridden.
+- `experiments.trust.spec.ExperimentSpec` parses the hierarchy
+  `hypothesis -> experiment -> scenario -> variants -> sweeps`.
+- `ExperimentSpec.expand_runs()` schedules
+  `experiment x variants x sweeps x replications`.
+- Each expanded run adapts to `ExperimentConfig` immediately before environment
+  and `pymdp.Agent` construction.
+- Planning horizon is a normal variant knob (`planning_horizon`) rather than a
+  numeric condition category.
+- `affect = "none"` builds a base runtime, `affect = "precision"` builds the
+  normal beta-to-gamma runtime, and `affect = "tracked_only"` builds the beta
+  tracker while decoupling it from policy precision.
 
 ## Affective Update Signal
 
 - The current code tracks unsigned surprise, not signed residual error.
 - Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
 - The `prediction_errors` logging field records surprise magnitude.
-- Affective conditions use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
+- Affective variants use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
 
 ## Supported Surface
@@ -92,14 +100,10 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 ## Verbose Execution Tracing
 
-- `ExperimentConfig` now includes execution-only controls for live tracing and post-run GIF generation:
-  - `verbose`
-  - `verbosity_mode`
-  - `gif_after_run`
-  - `gif_output_dir`
-- `scripts/experiment/run.py --verbose --verbosity-mode stage_stream` emits structured stage lines from `ExperimentRunner` rather than ad hoc prints.
+- Execution-only controls for live tracing and post-run GIF generation are owned by CLI flags, not by TOML `ExperimentSpec` or runtime `ExperimentConfig`.
+- `scripts/experiment/run.py --verbose --verbosity-mode stage_stream` emits structured stage lines from `ExperimentRunner` rather than ad hoc prints on supported serial paths.
 - The current stage stream reports:
-  - condition start/end
+  - variant start/end
   - replication start/end
   - round start
   - planning start/end
@@ -110,15 +114,16 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 ## GIF Generation
 
-- `affect_aif.analysis.visualization.build_run_gifs(...)` generates one GIF per primary `(condition, seed)` run from an in-memory or reloaded results table.
+- `affect_aif.analysis.visualization.build_run_gifs(...)` generates one GIF per `(variant_id, seed)` run from an in-memory or reloaded results table.
 - `scripts/experiment/run.py --make-gifs` calls that helper after writing the results file. `scripts/analysis/visualize.py` provides the same capability for an existing CSV/parquet file.
 - The animation dashboard is intentionally task-facing rather than publication-facing. Each frame shows the current round, partner roster, selected/observed actions, payoff, inferred vs true type, cumulative payoff trajectory, and the per-partner beta or reward-average signal when that signal exists.
-- Non-affective conditions render a disabled signal panel instead of fabricating beta values.
+- Non-affective variants render a disabled signal panel instead of fabricating beta values.
 
 ## Parallelism
 
-- `scripts/experiment/run.py` accepts multiple `--config` paths and a `--workers` count. With more than one config or `workers > 1`, it uses `BatchExperimentRunner` and a `ProcessPoolExecutor` from the standard library.
-- Work is parallelized at replication granularity: primary replications, and when `run_sensitivity` is true, sensitivity replications are submitted to the pool. Each task runs a single replication in a worker process; config metadata is serialized and passed in. Results are collected in the main process and written per config under `<output-dir>/<card_root>/<config_slug>/results.csv` for maintained hypothesis runs. The runner accepts any `--batch-name`; use the card roots in `docs/experiments/manifest.md` for current evidence.
+- `scripts/experiment/run.py` accepts multiple TOML `--config` paths and a `--workers` count. With more than one config or `workers > 1`, it uses `BatchExperimentRunner` and a `ProcessPoolExecutor` from the standard library.
+- Work is parallelized at expanded-run granularity. Each worker receives a serialized experiment spec plus a serialized `ExpandedRunSpec`; results are collected in the main process and written under `<output-dir>/<batch_name>/<hypothesis_id>/<experiment_id>/results.csv`.
+- Sweeps are expanded into concrete variant runs, so the old sensitivity worker path is no longer part of maintained TOML execution.
 - Serial mode (exactly one config and `--workers 1`) runs in the main process and supports `--verbose` stage streaming and `--make-gifs`; batch mode disables per-round verbosity but can still use `--verbose` for completion messages and `--make-gifs` to build GIFs per config after all replications finish.
 
 ## Betrayal Stress Experiment
@@ -126,12 +131,15 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The environment supports `initial_partner_types` to seed a specific partner roster.
 - It also supports `initial_partner_stances` and `scheduled_stance_switches`, a list of `{round, partner_idx, to_stance}` events.
 - Scheduled stance switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the disruption as an unexpected trust violation.
-- See `experiments/trust/configs/h3_betrayal_volatility.json` for the reference setup.
-- When a config enables `run_sensitivity`, `results.csv` contains both `run_mode="primary"` rows and sensitivity rows. `scripts/analysis/analyze.py` filters to `run_mode == "primary"` before aggregating so post-hoc summaries do not double-count sensitivity sweeps that reuse the same `(condition, seed)` identifiers.
+- See `configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml`
+  for the reference setup.
+- Sensitivity-style studies should use explicit `[[sweeps]]` blocks in TOML.
+  Expanded sweep runs are ordinary variant runs with concrete `variant_id`
+  values.
 - `scripts/analysis/analyze.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:
   - `betrayal_post_switch_window_1_5.csv`
   - `betrayal_post_switch_window_1_10.csv`
-  - `betrayal_condition_comparison.csv`
+  - `betrayal_variant_comparison.csv`
   - `betrayal_detection_latency.csv`
   - `betrayal_trajectories.csv`
   - `affective_movement_summary.csv`

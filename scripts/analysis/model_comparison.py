@@ -25,7 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _condition_label(value) -> str:
+def _variant_label(value) -> str:
     if isinstance(value, Integral):
         return f"C{int(value)}"
     if isinstance(value, Real) and float(value).is_integer():
@@ -49,14 +49,14 @@ def main(argv: list[str] | None = None) -> int:
     # Predictive log-score summary
     le_summary = log_score_summary(results)
     le_summary.to_csv(output_dir / "predictive_log_score_summary.csv", index=False)
-    print("Predictive log-score summary per condition:")
+    print("Predictive log-score summary per variant:")
     print(le_summary.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
 
     # Pairwise predictive log-score differences
     bf_table = pairwise_predictive_log_scores(results)
     bf_table.to_csv(output_dir / "pairwise_predictive_log_scores.csv", index=False)
     print("\nPairwise predictive log-score differences (log10 scale):")
-    cols = ["condition_a", "condition_b", "log10_predictive_log_score_difference", "prop_a_preferred", "p_value"]
+    cols = ["variant_a", "variant_b", "log10_predictive_log_score_difference", "prop_a_preferred", "p_value"]
     print(bf_table[cols].to_string(index=False, float_format=lambda v: f"{v:.4f}"))
 
     # Heuristic interpretation of score differences
@@ -71,10 +71,10 @@ def main(argv: list[str] | None = None) -> int:
             strength = "large"
         else:
             strength = "very large"
-        favored = row["condition_a"] if row["log10_predictive_log_score_difference"] > 0 else row["condition_b"]
+        favored = row["variant_a"] if row["log10_predictive_log_score_difference"] > 0 else row["variant_b"]
         print(
-            f"  {_condition_label(row['condition_a'])} vs {_condition_label(row['condition_b'])}: "
-            f"|log10 score diff| = {abs_score_diff:.2f} ({strength}), favors C{favored}"
+            f"  {_variant_label(row['variant_a'])} vs {_variant_label(row['variant_b'])}: "
+            f"|log10 score diff| = {abs_score_diff:.2f} ({strength}), favors {favored}"
         )
 
     # Full report with RFX-BMS
@@ -84,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
     bms = report["random_effects_bms"]
     if "error" not in bms:
         print(f"\nRandom-effects BMS over predictive log scores ({bms['n_valid_seeds']} seeds):")
-        print(f"  Conditions: {bms['conditions']}")
+        print(f"  Variants: {bms['variants']}")
         print(f"  Expected frequencies: {[f'{f:.3f}' for f in bms['expected_frequency']]}")
         print(f"  Protected exceedance: {[f'{p:.3f}' for p in bms['protected_exceedance_probability']]}")
         print(f"  Bayesian omnibus risk: {bms['bayesian_omnibus_risk']:.4f}")

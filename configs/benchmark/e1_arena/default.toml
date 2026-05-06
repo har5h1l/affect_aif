@@ -1,0 +1,69 @@
+[hypothesis]
+id = "e1"
+name = "benchmark_arena"
+
+[experiment]
+id = "benchmark_default"
+family = "benchmark"
+rounds = 100
+replications = 10
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "random"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+
+[[variants]]
+id = "benchmark"
+affect = "none"
+planning_horizon = 1
+
+[analysis]
+auto = false
+primary = "e1_benchmark_arena"
+
+[benchmark]
+backends = ["trust"]
+agents = []
+
+[[benchmark.agent_specs]]
+name = "tau4_affect"
+backend = "trust"
+kind = "registry"
+implementation = "affect"
+
+[[benchmark.agent_specs]]
+name = "tau4_no_affect"
+backend = "trust"
+kind = "registry"
+implementation = "no_affect"
+
+[[benchmark.agent_specs]]
+name = "random"
+backend = "trust"
+kind = "registry"
+implementation = "random"
+
+[[benchmark.agent_specs]]
+name = "tit_for_tat"
+backend = "trust"
+kind = "registry"
+implementation = "tit_for_tat"
+
+[[benchmark.agent_specs]]
+name = "win_stay_lose_shift"
+backend = "trust"
+kind = "registry"
+implementation = "win_stay_lose_shift"
+
+[[benchmark.agent_specs]]
+name = "q_learning"
+backend = "trust"
+kind = "registry"
+implementation = "q_learning"
+
+[benchmark.trust]
+scenario = "resource_sharing"

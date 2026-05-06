@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from runtime_helpers import build_runtime
 
 from analysis.hypotheses import run_all_hypothesis_tests
 from experiments.multifocal.config import MultiFocalConfig
 from experiments.multifocal.runner import MultiFocalRunner
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.factory import create_agents_from_multi_focal_config, create_env, create_native_runtime
+from experiments.trust.factory import create_agents_from_multi_focal_config, create_env
 from experiments.trust.logger import MetricLogger
 from experiments.trust.runner import ExperimentRunner
 from tasks.trust.runtime import (
@@ -24,13 +25,11 @@ def test_tiny_trust_config_constructs_and_runs_one_round():
         num_partners=2,
         num_rounds=1,
         num_replications=1,
-        conditions=[1],
         random_seed=0,
         max_policies=64,
-        horizon_overrides={1: 1},
     )
     env = create_env(config, seed=0)
-    runtime = create_native_runtime(config, 1, seed=0)
+    runtime = build_runtime(config, planning_horizon=1, seed=0)
 
     context = env.reset()
     decision = select_decision(
@@ -62,17 +61,8 @@ def test_tiny_trust_config_constructs_and_runs_one_round():
     assert {"agent_payoff", "partner_idx", "observation"}.issubset(result)
 
 
-def test_tiny_trust_runner_logs_pymdp_diagnostics():
-    config = ExperimentConfig(
-        num_partners=2,
-        num_rounds=1,
-        num_replications=1,
-        conditions=[1],
-        random_seed=0,
-        max_policies=64,
-        horizon_overrides={1: 1},
-    )
-    results = ExperimentRunner(config).run_all()
+def test_tiny_trust_runner_logs_pymdp_diagnostics(tiny_spec):
+    results = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=1, replications=1)).run_all()
 
     assert "q_pi_entropy" in results.columns
     assert "partner_beliefs" in results.columns
@@ -85,7 +75,6 @@ def test_logger_does_not_fallback_posteriors_to_decision_beliefs():
     decision_beliefs = np.asarray([[[0.2, 0.8]]], dtype=float)
     logger.log_round(
         round_idx=0,
-        condition=1,
         seed=0,
         agent_metrics={
             "inferred_type": "cooperator",
@@ -156,8 +145,8 @@ def test_tiny_multifocal_round_loop_schema():
 def test_analysis_runs_on_tiny_results():
     frame = pd.DataFrame(
         [
-            {"condition": 1, "condition_name": "tau1_no_affect", "seed": 0, "round": 0, "payoff": 1.0},
-            {"condition": 2, "condition_name": "tau1_affect", "seed": 0, "round": 0, "payoff": 2.0},
+            {"variant_id": "no_affect__planning_horizon_1", "seed": 0, "round": 0, "payoff": 1.0},
+            {"variant_id": "affect__planning_horizon_1", "seed": 0, "round": 0, "payoff": 2.0},
         ]
     )
 

@@ -12,8 +12,8 @@ described in `docs/theory/pomdp_spec.md` and `docs/design/implementation.md`.
 - The trust-game generative model now uses two observation modalities (`o_action`, `o_payoff`) over latent `type × stance`, with `own_action` tracked separately.
 - The default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`, beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`).
 - Policy inference is performed by official `pymdp.Agent` instances built from `tasks.trust.pomdp`; affect modulates partner-local policy precision as `gamma_k = gamma_base / E[beta_k]`.
-- The primary factorial is Conditions `1-8` = `{tau=1,2,4,8} × {no_affect, affect}`.
-- Lesion, no-epistemic, and clinical runs are named presets layered on top of the `tau4_affect` base.
+- The primary maintained experiment surface is now TOML specs under `configs/trust/hypotheses/`.
+- Planning horizon, affect mode, lesions, no-epistemic variants, and clinical-like perturbations are explicit `[[variants]]` rather than numeric conditions or presets.
 - Scheduled betrayal should be expressed via `scheduled_stance_switches`, not `scheduled_type_switches`, unless the experiment is explicitly about exogenous type volatility.
 
 ### Future-work experiment surfaces
@@ -118,9 +118,9 @@ This creates the standard tension: mutual cooperation is collectively optimal bu
 
 **Actions**: {Cooperate, Defect} per round, for each partner interaction.
 
-**Planning horizon**: varies by condition (this is the key manipulation).
-- Deep planner: $T = 8$ steps ahead
-- Shallow planner: $\tau = 2$ steps ahead
+**Planning horizon**: varies by explicit variant (`planning_horizon`).
+- Deeper planners can evaluate up to 8 steps ahead in benchmark comparisons.
+- Shallow planners use shorter horizons such as 1 or 2 steps.
 
 **Policy evaluation**: official `pymdp.Agent.infer_policies(...)` computes the policy posterior over the task-local policy set built by `tasks.trust.pomdp`. The repository-owned code constructs the matrices and partner-local priors, but policy inference itself is native pymdp rather than a custom rollout engine. For affective runtimes, the external beta tracker sets the active partner's precision before inference as `gamma_k = gamma_base / E[beta_k]`; no separate shallow-EFE multiplier is applied.
 
@@ -196,34 +196,27 @@ Two of the four partners are secretly correlated — partner C copies partner B'
 
 **Variant E: Betrayal stress test**
 Use agent-chosen partners, disable stochastic type switches (`p_switch = 0`), seed a clearly cooperative partner at the start of the episode, then force a scheduled switch from `cooperator` to `exploiter` mid-episode. The key readout is payoff, action choice, and inferred-type accuracy in the first 5-10 encounters after the betrayal event. This is the cleanest way to separate precision tracking from reward averaging, because the partner's past reward history remains attractive while the predictive model becomes sharply wrong.
-The repository now treats this as the primary diagnostic benchmark for condition comparison because it is the most direct test of whether per-partner beta dynamics do computational work beyond cached value.
+The repository now treats this as the primary diagnostic benchmark for variant comparison because it is the most direct test of whether per-partner beta dynamics do computational work beyond cached value.
 
 ---
 
-## 4. Experimental Conditions
+## 4. Experiment Specs And Variants
 
-The supported condition ids are defined in `experiments.trust.conditions` and built by `create_native_runtime(...)`.
+Maintained trust experiments use the hierarchy:
 
-| ID | Name | Horizon | Affect |
-|---|---|---:|---|
-| 1 | `tau1_no_affect` | 1 | none |
-| 2 | `tau1_affect` | 1 | discrete beta -> partner-local gamma |
-| 3 | `tau2_no_affect` | 2 | none |
-| 4 | `tau2_affect` | 2 | discrete beta -> partner-local gamma |
-| 5 | `tau4_no_affect` | 4 | none |
-| 6 | `tau4_affect` | 4 | discrete beta -> partner-local gamma |
-| 7 | `tau8_no_affect` | 8 | none |
-| 8 | `tau8_affect` | 8 | discrete beta -> partner-local gamma |
-| 9 | `tau3_no_affect` | 3 | none |
-| 10 | `tau3_affect` | 3 | discrete beta -> partner-local gamma |
+```text
+hypothesis -> experiment -> scenario -> variants -> sweeps -> replications -> rounds
+```
 
-Named presets are layered on the native runtime:
+Core variant fields include:
 
-- `lesioned`: builds the beta tracker but decouples it from policy precision.
-- `no_epistemic`: disables state-information gain while keeping the affective runtime.
-- `alexithymia`: lowers `alpha_charge` to blunt beta updates.
-- `borderline`: raises `alpha_charge` to amplify beta volatility.
-- `depression`: starts from a pessimistic `initial_beta`.
+- `affect = "none"` for the base runtime
+- `affect = "precision"` for the normal discrete-beta precision runtime
+- `affect = "tracked_only"` for the lesion where beta updates continue but policy precision remains at baseline
+- `planning_horizon`
+- `epistemic_value`
+- affect hyperparameters such as `alpha_charge`, `sigma_0_sq`, `initial_beta`,
+  `beta_persistence`, and explicit `beta_levels`
 
 Reward averaging and variational beta are not part of the runnable supported
 surface.
@@ -386,13 +379,13 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 | Rounds ($N$) | 200 | Long enough for multiple type switches and learning |
 | Type switch probability ($p_{\text{switch}}$) | 0.05/trial | Expected block length ~20 rounds |
 | Partner types | 4 (Cooperator, Reciprocator, Exploiter, Random) | Covers key strategic diversity |
-| Deep planning horizon ($T$) | 8 | Sufficient for ~optimal play in this game |
-| Shallow planning horizon ($\tau$) | 2 | Minimal deliberation |
-| Intermediate planning horizons | 3, 4 | Additional depth-comparison points for Conditions 6 and 7 |
+| Deep planning horizon | 8 | Sufficient for ~optimal play in this game |
+| Shallow planning horizon | 2 | Minimal deliberation |
+| Intermediate planning horizons | 3, 4 | Additional explicit variant depth-comparison points |
 | Beta persistence | 0.8 | Tridiagonal persistence for the discrete beta posterior; higher values make beta less reactive |
 | Beta levels | `[0.5, 0.67, 1.0, 1.5, 2.0]` | HESP-style inverse-beta support for partner-local precision |
 | Policy precision | `gamma_base / E[beta_k]` | Native pymdp policy precision set before each partner-local policy inference |
-| Replications per condition | 100 | Sufficient for reliable statistics |
+| Replications per variant | 100 | Sufficient for reliable statistics |
 
 ### 6.3 Analysis Plan
 
@@ -423,9 +416,13 @@ alone.
   `initial_beta`, and `p_switch`
 
 **Execution workflow note**:
-- `scripts/experiment/run.py` accepts repeated `--config` flags and a shared `--workers` pool so multiple experiment configs can be queued in one invocation.
-- Outputs are written per config under `<output-dir>/<card-root>/<config-name>/results.csv`; use the card-root layout in `docs/experiments/manifest.md`.
-- Current maintained configs are listed in `docs/experiments/manifest.md`. Use `experiments/trust/configs/h0_shallow_policy_regime.json` for the shallow policy-space regime and `experiments/trust/configs/h3_betrayal_volatility.json` for the betrayal volatility check.
+- `scripts/experiment/run.py` accepts repeated `--config` flags and a shared
+  `--workers` pool so multiple TOML experiment specs can be queued in one
+  invocation.
+- Outputs are written per experiment under
+  `<output-dir>/<batch-name>/<hypothesis-id>/<experiment-id>/results.csv`; use
+  the layout in `docs/experiments/manifest.md`.
+- Current maintained specs are listed in `docs/experiments/manifest.md`.
 
 ### 6.4 Visualizations
 
@@ -452,10 +449,10 @@ These phases describe the original build sequence. For future research phases (t
 
 | Phase | Tasks | Duration | Status |
 |---|---|---|---|
-| Build 1 | Implement basic multi-partner POMDP in the repository's JAX-first stack (Conditions 1, 4) | 2 weeks | Done |
+| Build 1 | Implement basic multi-partner POMDP in the repository's JAX-first stack | 2 weeks | Done |
 | Build 2 | Implement affective state and partner-local precision modulation | 1-2 weeks | Done |
-| Build 3 | Implement lesion and reward-average conditions (Conditions 3, 5) | 1 week | Done |
-| Build 4 | Run primary simulations (Variant A, all conditions, 100 replications) | 1 week | Done |
+| Build 3 | Implement lesion and reward-comparison variants | 1 week | Done |
+| Build 4 | Run primary simulations (Variant A, explicit variants, 100 replications) | 1 week | Done |
 | Build 5 | Analysis and visualization of primary results | 1 week | Done |
 | Build 6 | Run Variants B, C, D | 2 weeks | Partial (B, E done) |
 | Build 7 | Sensitivity analyses and parameter sweeps | 1 week | Partial (horizon sweep done) |

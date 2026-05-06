@@ -1,0 +1,33 @@
+[hypothesis]
+id = "h1"
+name = "model_fitness"
+
+[experiment]
+id = "reliability_vs_reward"
+family = "trust"
+rounds = 200
+replications = 100
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[analysis]
+auto = true
+primary = "h1_model_fitness"
+compare = ["affect", "no_affect"]
+metrics = ["payoff", "precision", "stance_accuracy"]

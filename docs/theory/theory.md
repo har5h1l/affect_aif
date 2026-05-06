@@ -297,7 +297,7 @@ The model predicts that disruption at each level produces qualitatively differen
 
 ### 4.5 Depth Flatness Under the Shipped Binary Task
 
-The most important empirical update is that explicit planning depth is empirically flat in the shipped binary-action trust game once all conditions use the same observation-branching sophisticated inference. In the `horizon_sweep` run, the non-affective planners are flat: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, and every pairwise comparison among those four conditions has `p > 0.93`.
+The most important empirical update is that explicit planning depth is empirically flat in the shipped binary-action trust game once all variants use the same observation-branching sophisticated inference. In the archived `horizon_sweep` run, the non-affective planner variants were flat across the tested horizons, and every pairwise comparison among those variants had `p > 0.93`.
 
 Once hypothetical observations are integrated correctly and partner-type beliefs
 are updated pathwise, extending the explicit horizon from `τ = 2` to `τ = 8`
@@ -309,19 +309,19 @@ That does not imply depth is universally irrelevant in active inference. It impl
 
 ### 4.6 Affect as Augmentation, Not Compensation
 
-Under that flat depth curve, Condition 2 should not be read as a cheap approximation to Condition 1. It is better read as a planner with an additional evaluative factor: partner-specific precision weighting. Affect therefore acts as **augmentation**, not **compensation**. It changes how the shallow rollout is interpreted, rather than merely filling in missing future steps.
+Under that flat depth curve, the affective shallow variant should not be read as a cheap approximation to the deeper non-affective variant. It is better read as a planner with an additional evaluative factor: partner-specific precision weighting. Affect therefore acts as **augmentation**, not **compensation**. It changes how the shallow rollout is interpreted, rather than merely filling in missing future steps.
 
 This yields a stronger theoretical claim than the original one. If the non-affective depth curve were steep, an affective shallow planner beating a shallow baseline could still be dismissed as a crude proxy for deeper search. The new result rules that out for the shipped task: all non-affective depths are behaviorally identical, yet the affective condition still improves payoff. The added value must therefore come from the partner-specific precision signal, not from hidden effective depth.
 
-The `deep_affect_test` result strengthens that claim further. Condition 8 adds the same affective mechanism to the deep planner and lands at essentially the same payoff as Condition 2 (`C2` vs `C8: p = 0.94`). So affect is not rescuing shallow lookahead by approximating what the deep planner would have done anyway. It is contributing an evaluative signal that survives even when explicit planning is already deep.
+The archived `deep_affect_test` result strengthens that claim further. The deep affective variant added the same affective mechanism to the deep planner and landed at essentially the same payoff as the shallow affective variant. So affect is not rescuing shallow lookahead by approximating what the deep planner would have done anyway. It is contributing an evaluative signal that survives even when explicit planning is already deep.
 
-The lesion result reinforces this interpretation. In the `default` run, `C3` and `C4` are exactly identical in both payoff and inferred-type accuracy. That is the expected signature of a pure affect-to-action disconnection: belief updating remains intact, but removing the affective weighting collapses the agent back onto the non-affective planner.
+The lesion result reinforces this interpretation. In the archived `default` run, tracked-only and no-affect variants were exactly identical in both payoff and inferred-type accuracy. That is the expected signature of a pure affect-to-action disconnection: belief updating remains intact, but removing the affective weighting collapses the agent back onto the non-affective planner.
 
 ### 4.7 When Precision Diverges From Reward
 
-The precision-versus-reward story is now conditional rather than uniformly null. In the default random-assignment task, Condition 2 and Condition 5 remain tied (`575.06` vs `574.42`, `d = 0.009`, `p = 0.95`). There, identifying partner type quickly tells the agent how to act for reward, so predictive calibration and reward history mostly co-move.
+The precision-versus-reward story is now conditional rather than uniformly null. In the archived default random-assignment task, the precision-tracking and reward-average prototypes remained tied (`575.06` vs `574.42`, `d = 0.009`, `p = 0.95`). There, identifying partner type quickly tells the agent how to act for reward, so predictive calibration and reward history mostly co-move.
 
-In `betrayal_stress`, however, the environment temporarily breaks that alignment. A previously cooperative partner switches to exploiter under scheduled betrayal, so recent reward still looks attractive while prediction error spikes. Under those conditions, Condition 2 outperforms Condition 5 (`481.88` vs `428.32`, `d = 0.59`, `p = 0.004`). This is exactly the prediction-reward dissociation regime where a precision-tracking signal should matter.
+In the archived `betrayal_stress` setup, however, the environment temporarily breaks that alignment. A previously cooperative partner switches to exploiter under scheduled betrayal, so recent reward still looks attractive while prediction error spikes. In that setup, the precision-tracking prototype outperformed the reward-average prototype (`481.88` vs `428.32`, `d = 0.59`, `p = 0.004`). This is exactly the prediction-reward dissociation regime where a precision-tracking signal should matter.
 
 The theoretical distinction should therefore surface when model calibration and reward decouple. Three cases matter most:
 
@@ -374,16 +374,16 @@ This is the same predict-then-correct scheme used for the level-2 partner-type i
 
 **Formal correspondence to the continuous EMA.** The continuous update $\beta_k^{(t+1)} = \lambda \beta_k^{(t)} + (1 - \lambda) \sigma(\alpha(\sigma_0^2 - \epsilon^2))$ is a point-estimate analogue of the discrete posterior mean. The smoothing parameter $\lambda$ maps to the persistence of the transition matrix (both control the timescale), and the charge amplitude $\alpha$ controls the strength of a single observation's influence (the likelihood's informativeness). In the limit $L \to \infty$ with appropriate scaling, the discrete posterior mean converges to the EMA update. In practice with $L = 5$, the qualitative behavior matches exactly: low surprise increases $\beta$, high surprise decreases it, and the timescale is governed by the transition matrix rather than the smoothing parameter.
 
-**Empirical validation (50 seeds per condition):**
+**Archived empirical validation (50 seeds per variant):**
 
-| Setting | C2 (continuous) | C12 (discrete) | C4 (baseline) | C2 vs C12 |
+| Setting | Continuous prototype | Discrete prototype | No-affect baseline | Prototype comparison |
 |---------|----------------|----------------|---------------|-----------|
 | Default | 574.8 ± 81.3 | 574.7 ± 81.3 | 527.3 ± 75.1 | d=0.001, p=0.99 |
 | Betrayal | 481.9 ± 76.6 | 448.1 ± 88.5 | 419.4 ± 25.9 | d=0.41, p=0.04 |
 
-In the default (stable) condition, the two formulations produce *indistinguishable* payoffs (Cohen's d = 0.001). Both significantly outperform the no-affect baseline (d ≈ 0.6). This confirms that the discrete formulation captures the same augmentation mechanism as the continuous EMA.
+In the default stable setting, the two formulations produce *indistinguishable* payoffs (Cohen's d = 0.001). Both significantly outperform the no-affect baseline (d ≈ 0.6). This confirms that the discrete formulation captures the same augmentation mechanism as the continuous EMA.
 
-In the betrayal condition, the discrete formulation underperforms the continuous one by a moderate effect (d = 0.41, p = 0.04), while still outperforming the baseline (d = 0.44, p = 0.03). The divergence arises from the transition matrix's persistence: after a sudden strategy switch, the discrete posterior shifts more slowly because the tridiagonal transition matrix constrains how far the belief can move in a single step. The continuous EMA, by contrast, applies the sigmoid-squashed charge directly, allowing larger single-step jumps. This is a *feature* of the discrete formulation — it embeds a stronger prior on precision stability — but it comes at the cost of slower betrayal adaptation.
+In the betrayal setting, the discrete formulation underperforms the continuous one by a moderate effect (d = 0.41, p = 0.04), while still outperforming the baseline (d = 0.44, p = 0.03). The divergence arises from the transition matrix's persistence: after a sudden strategy switch, the discrete posterior shifts more slowly because the tridiagonal transition matrix constrains how far the belief can move in a single step. The continuous EMA, by contrast, applies the sigmoid-squashed charge directly, allowing larger single-step jumps. This is a *feature* of the discrete formulation — it embeds a stronger prior on precision stability — but it comes at the cost of slower betrayal adaptation.
 
 **Implication:** The continuous EMA and discrete Bayesian formulations are equivalent representations of the same mechanism in stable environments. In volatile environments, the discrete formulation's transition dynamics impose an additional constraint (one-step moves only) that slows adaptation. The choice between them is therefore a modeling decision about the prior on precision volatility, not a difference in the underlying mechanism.
 

@@ -1,0 +1,38 @@
+[hypothesis]
+id = "h0"
+name = "openness"
+
+[experiment]
+id = "shallow_binary"
+family = "trust"
+rounds = 200
+replications = 100
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "random"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 1
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 1
+
+[[sweeps]]
+parameter = "planning_horizon"
+values = [1, 2, 3, 4, 8]
+applies_to = ["no_affect", "affect"]
+
+[analysis]
+auto = true
+primary = "h0_openness"
+compare = ["affect", "no_affect"]
+metrics = ["payoff", "precision", "q_pi_entropy"]

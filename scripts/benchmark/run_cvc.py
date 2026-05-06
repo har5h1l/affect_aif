@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from benchmarks.core.benchmark_config import BenchmarkConfig
 from benchmarks.core.benchmark_runner import BenchmarkRunner
 from benchmarks.core.comparison import format_comparison_report
+from experiments.trust.spec import ExperimentSpec
 
 CVC_POLICY_ALIASES = {
     "teammate_reliability": "class=benchmarks.cvc.policy.TeammateReliabilityPolicy",
@@ -60,9 +61,9 @@ def _coerce_agents(raw_agents: list[str], backends: list[str]):
     raise ValueError("When using multiple backends, provide a config file with explicit agent specs.")
 
 
-def main():
+def main(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description="Run benchmark comparisons across benchmark backends.")
-    parser.add_argument("--config", type=str, default=None, help="Path to benchmark config JSON.")
+    parser.add_argument("--config", type=str, default=None, help="Path to benchmark-family TOML spec.")
     parser.add_argument(
         "--backend",
         action="append",
@@ -78,7 +79,7 @@ def main():
     parser.add_argument("--max-steps", type=int, default=1000, help="Maximum CvC steps for cvc_local.")
     parser.add_argument("--num-agents", type=int, default=8, help="Number of CvC agents.")
     parser.add_argument("--python-bin", type=str, default="python3.12", help="Python binary for cvc_local worker.")
-    parser.add_argument("--output-dir", type=str, default="results/benchmark", help="Output directory.")
+    parser.add_argument("--output-dir", type=str, default=None, help="Output directory.")
     parser.add_argument("--seed", type=int, default=42, help="Base random seed.")
     parser.add_argument(
         "--observatory-season", type=str, default=None, help="Optional Observatory season name or 'default'."
@@ -86,19 +87,27 @@ def main():
     parser.add_argument(
         "--observatory-pool", type=str, default=None, help="Optional Observatory pool for config fetch."
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.config:
-        config = BenchmarkConfig.from_json(args.config)
+        config_path = Path(args.config)
+        if config_path.suffix != ".toml":
+            parser.error("--config must point to a benchmark-family TOML spec")
+        spec = ExperimentSpec.from_toml(config_path)
+        if spec.experiment.family != "benchmark":
+            parser.error("--config must point to a benchmark-family TOML spec")
+        config = BenchmarkConfig.from_experiment_spec(spec)
+        if args.output_dir is not None:
+            config.output_dir = args.output_dir
     else:
         backends = args.backends or ["trust"]
-        agents = _coerce_agents(args.agents or ["tau4_affect", "tau4_no_affect", "random", "tit_for_tat"], backends)
+        agents = _coerce_agents(args.agents or ["affect", "no_affect", "random", "tit_for_tat"], backends)
         config_payload = {
             "backends": backends,
             "agents": agents,
             "num_replications": args.replications,
             "num_rounds": args.rounds,
-            "output_dir": args.output_dir,
+            "output_dir": args.output_dir or "results/benchmark",
             "random_seed": args.seed,
             "backend_configs": {
                 "trust": {"scenario": args.scenario},
@@ -145,8 +154,8 @@ def main():
 
     report_path = Path(config.output_dir) / "benchmark_report.txt"
     report_path.write_text(report)
-    config_path = Path(config.output_dir) / "benchmark_config.resolved.json"
-    config.to_json(str(config_path))
+    config_path = Path(config.output_dir) / "benchmark_config.resolved.toml"
+    config.to_toml(config_path)
     print(f"\nReport saved to: {report_path}")
     print(f"Resolved config saved to: {config_path}")
 

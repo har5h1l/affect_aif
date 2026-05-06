@@ -7,24 +7,20 @@ from analysis.model_comparison import (
     model_comparison_report,
     pairwise_predictive_log_scores,
 )
-from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner
 
 
-def test_log_evidence_tracked_in_agent_metrics(representative_agents, tiny_model):
-    """All native condition families should log finite evidence through the runner."""
-    del representative_agents, tiny_model
-    config = ExperimentConfig(num_rounds=5, num_replications=1, random_seed=0, conditions=[1, 2], presets=["lesioned"])
-    results = ExperimentRunner(config).run_all()
+def test_log_evidence_tracked_in_agent_metrics(tiny_spec):
+    """All native variant families should log finite evidence through the runner."""
+    results = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=5, replications=1)).run_all()
     assert results["round_log_evidence"].notna().all()
     assert results["cumulative_log_evidence"].notna().all()
-    assert (results.groupby("condition")["cumulative_log_evidence"].last() < 0).all()
+    assert (results.groupby("variant_id")["cumulative_log_evidence"].last() < 0).all()
 
 
-def test_log_evidence_logged_in_experiment_results(tiny_config):
+def test_log_evidence_logged_in_experiment_results(tiny_spec):
     """ExperimentRunner should log log-evidence columns in results."""
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2]})
-    runner = ExperimentRunner(cfg)
+    runner = ExperimentRunner.from_spec(tiny_spec)
     results = runner.run_all()
     assert "round_log_evidence" in results.columns
     assert "cumulative_log_evidence" in results.columns
@@ -32,14 +28,13 @@ def test_log_evidence_logged_in_experiment_results(tiny_config):
     assert results["cumulative_log_evidence"].notna().all()
 
 
-def test_log_evidence_accumulates_correctly(tiny_config):
+def test_log_evidence_accumulates_correctly(tiny_spec):
     """Cumulative log-evidence at the last round should equal sum of per-round values."""
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [2], "num_rounds": 10})
-    runner = ExperimentRunner(cfg)
+    runner = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=10, replications=1))
     results = runner.run_all()
 
-    for seed in results["seed"].unique():
-        seed_data = results[results["seed"] == seed].sort_values("round")
+    for _, seed_data in results.groupby(["variant_id", "seed"]):
+        seed_data = seed_data.sort_values("round")
         cumulative_last = seed_data["cumulative_log_evidence"].iloc[-1]
         sum_rounds = seed_data["round_log_evidence"].sum()
         assert abs(cumulative_last - sum_rounds) < 1e-6, (
@@ -47,26 +42,24 @@ def test_log_evidence_accumulates_correctly(tiny_config):
         )
 
 
-def test_final_round_summary_includes_log_evidence(tiny_config):
+def test_final_round_summary_includes_log_evidence(tiny_spec):
     """final_round_summary should include total_log_evidence when available."""
     from analysis.metrics import final_round_summary
 
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2]})
-    runner = ExperimentRunner(cfg)
+    runner = ExperimentRunner.from_spec(tiny_spec)
     results = runner.run_all()
     summary = final_round_summary(results)
     assert "total_log_evidence" in summary.columns
     assert summary["total_log_evidence"].notna().all()
 
 
-def test_pairwise_predictive_log_scores_runs(tiny_config):
+def test_pairwise_predictive_log_scores_runs(tiny_spec):
     """pairwise_predictive_log_scores should produce valid output."""
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2, 4], "num_replications": 3, "num_rounds": 10})
-    runner = ExperimentRunner(cfg)
+    runner = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=10, replications=3))
     results = runner.run_all()
     bf_table = pairwise_predictive_log_scores(results)
 
-    assert len(bf_table) == 3  # C(3,2) = 3 pairs
+    assert len(bf_table) == 1
     assert "mean_predictive_log_score_difference" in bf_table.columns
     assert "log10_predictive_log_score_difference" in bf_table.columns
     assert bf_table["mean_predictive_log_score_difference"].notna().all()
@@ -102,15 +95,14 @@ def test_spm_bms_indistinguishable_models():
     assert abs(freq[0] - freq[1]) < 0.3, "Indistinguishable models should have similar frequencies"
 
 
-def test_model_comparison_report_structure(tiny_config):
+def test_model_comparison_report_structure(tiny_spec):
     """model_comparison_report should return the expected structure."""
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 5, "num_rounds": 10})
-    runner = ExperimentRunner(cfg)
+    runner = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=10, replications=5))
     results = runner.run_all()
     report = model_comparison_report(results)
 
     assert "predictive_log_score_summary" in report
     assert "pairwise_predictive_log_scores" in report
     assert "random_effects_bms" in report
-    assert len(report["predictive_log_score_summary"]) == 2  # 2 conditions
-    assert len(report["pairwise_predictive_log_scores"]) == 1  # 1 pair
+    assert len(report["predictive_log_score_summary"]) == 2
+    assert len(report["pairwise_predictive_log_scores"]) == 1

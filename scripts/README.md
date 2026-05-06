@@ -16,7 +16,6 @@ These wrappers define the stable end-user workflow documented in `docs/operation
 - `analysis/summarize.py`
 - `analysis/visualize.py`
 - `analysis/model_comparison.py`
-- `analysis/targeted_reanalysis.py`
 - `benchmark/analyze.py`
 - `benchmark/run_cvc.py`
 - `benchmark/package_cvc.py`

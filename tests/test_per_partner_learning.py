@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import numpy as np
+from runtime_helpers import build_runtime
 
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.factory import create_native_runtime
 from tasks.trust.runtime import snapshot_partner_bank, update_partner_after_observation
 
 
 def test_each_partner_has_independent_official_agent_instance():
-    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=3), condition=1, seed=0)
+    runtime = build_runtime(ExperimentConfig(payoff_mode="binary", num_partners=3))
 
     assert len({id(agent) for agent in runtime.partner_bank.agents}) == 3
     for i in range(1, 3):
@@ -18,7 +18,7 @@ def test_each_partner_has_independent_official_agent_instance():
 
 
 def test_observation_only_updates_active_partner_snapshot():
-    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=3), condition=1, seed=0)
+    runtime = build_runtime(ExperimentConfig(payoff_mode="binary", num_partners=3))
     before = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template).partner_joint_beliefs.copy()
 
     update_partner_after_observation(

@@ -18,7 +18,7 @@ Current evidence must use the apashea-aligned model surface:
 - factorized binary controls
 - policy log-priors
 - optional Dirichlet learning hooks where configured
-- conditions 9 and 10 for tau=3 shallow-policy checks
+- explicit `planning_horizon = 3` variants for shallow-policy checks
 - current Hesp-extension H0-H5 behavior cards
 
 ## Interpretation Guard

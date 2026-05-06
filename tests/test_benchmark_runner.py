@@ -4,17 +4,15 @@ import builtins
 import importlib
 import sys
 
-import numpy as np
-
 from benchmarks.core.benchmark_config import BenchmarkConfig
 from benchmarks.core.benchmark_runner import BenchmarkRunner
 
 
-def test_runner_uses_numeric_condition_and_condition_name():
+def test_runner_uses_variant_id():
     config = BenchmarkConfig.from_dict(
         {
             "backends": ["trust"],
-            "agents": ["tau4_affect", "random"],
+            "agents": ["affect", "random"],
             "num_replications": 1,
             "num_rounds": 5,
             "random_seed": 1,
@@ -26,13 +24,12 @@ def test_runner_uses_numeric_condition_and_condition_name():
     assert set(["schema_version", "backend", "scenario", "episode_id", "step", "reward"]).issubset(results.columns)
     assert set(results["backend"].unique()) == {"trust"}
     assert set(results["scenario"].unique()) == {"resource_sharing"}
-    assert np.issubdtype(results["condition"].dtype, np.integer)
-    affective_rows = results[results["agent_name"] == "tau4_affect"]
+    assert "condition" not in results.columns
+    assert "condition_name" not in results.columns
+    affective_rows = results[results["agent_name"] == "affect"]
     random_rows = results[results["agent_name"] == "random"]
-    assert set(affective_rows["condition"].unique()) == {6}
-    assert set(affective_rows["condition_name"].unique()) == {"tau4_affect"}
-    assert set(random_rows["condition"].unique()) == {-2}
-    assert set(random_rows["condition_name"].unique()) == {"random"}
+    assert set(affective_rows["variant_id"].unique()) == {"affect"}
+    assert set(random_rows["variant_id"].unique()) == {"random"}
 
 
 def test_runner_sets_nan_type_accuracy_for_baselines():

@@ -139,13 +139,14 @@ class TestDiscreteAffectiveRuntime:
     """Integration test: discrete beta runs through the native runtime machinery."""
 
     def test_no_epistemic_preset_is_registered(self):
-        from experiments.trust.conditions import get_preset_condition
+        from experiments.trust.spec import VariantSpec
 
-        assert get_preset_condition("no_epistemic").name == "no_epistemic"
+        assert VariantSpec(id="no_epistemic", affect="none", planning_horizon=2, epistemic_value=False).id
 
     def test_discrete_agent_instantiation(self):
+        from runtime_helpers import build_runtime
+
         from experiments.trust.config import ExperimentConfig
-        from experiments.trust.factory import create_native_runtime
         from tasks.trust.runtime import select_decision
 
         config = ExperimentConfig.from_dict({
@@ -158,10 +159,9 @@ class TestDiscreteAffectiveRuntime:
             "temptation": (5.0, -1.0),
             "mutual_defect": (1.0, 1.0),
             "initial_beta": 0.5,
-            "horizon_overrides": {2: 2},
             "max_policies": 64,
         })
-        runtime = create_native_runtime(config, condition=2, seed=0)
+        runtime = build_runtime(config, variant_id="affect", affect="precision", planning_horizon=2, seed=0)
         decision = select_decision(
             bank=runtime.partner_bank,
             template=runtime.template,
