@@ -34,6 +34,7 @@ This document provides comprehensive system documentation for AI agents operatin
   `pymdp.Agent` instances created from `tasks.trust.pomdp` templates and logged
   as matrix-based belief updates.
 - Benchmark runs use `scripts/benchmark/run_cvc.py` plus `docs/operations/benchmark.md` for backends, configs (for example `configs/benchmark_default.json` and `configs/benchmark_betrayal.json`), and Python 3.12 CvC worker notes.
+- Primary trust-hypothesis configs are under `experiments/trust/configs/` (and multi-focal under `experiments/multifocal/configs/`); repo-root `configs/benchmark*.json` is for the benchmark/CvC track, not the main H-spine configs—see `docs/experiments/manifest.md`.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is rsync and does not delete remote-only files under `results/`). Do not add orchestration or deployment scripts to this repo.
 
 ---
