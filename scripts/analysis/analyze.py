@@ -11,6 +11,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from analysis.configured import run_configured_analysis
 from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
     affective_movement_summary,
@@ -18,12 +19,13 @@ from analysis.metrics import (
     betrayal_trajectory,
     final_round_summary,
     has_switch_events,
-    post_switch_condition_comparison,
+    post_switch_variant_comparison,
     post_switch_window_summary,
 )
 from analysis.plots import save_all_figures
 from analysis.statistics import cumulative_payoff_anova, pairwise_payoff_tests
 from cli.common import filter_primary_runs, load_results_table
+from experiments.trust.spec import ExperimentSpec
 
 
 def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
@@ -39,21 +41,21 @@ def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
         }
         if hypothesis_id == "h0":
             row["primary_metric"] = evidence.get("mean_affect_payoff_gain")
-            row["secondary_metric"] = len(evidence.get("mean_q_pi_entropy_by_condition", {}))
+            row["secondary_metric"] = len(evidence.get("mean_q_pi_entropy_by_variant", {}))
         elif hypothesis_id == "h1":
             row["primary_metric"] = len(evidence.get("beta_signal_columns", []))
-            row["secondary_metric"] = len(evidence.get("reward_control_conditions", []))
+            row["secondary_metric"] = len(evidence.get("reward_control_variants", []))
         elif hypothesis_id == "h2":
-            row["primary_metric"] = evidence.get("payoff_difference_lesioned_minus_tau4_affect")
-            row["secondary_metric"] = evidence.get("accuracy_difference_lesioned_minus_tau4_affect")
+            row["primary_metric"] = evidence.get("payoff_difference_lesioned_minus_affect")
+            row["secondary_metric"] = evidence.get("accuracy_difference_lesioned_minus_affect")
         elif hypothesis_id == "h3":
-            row["primary_metric"] = evidence.get("payoff_difference_tau4_affect_minus_tau4_no_affect")
-            row["secondary_metric"] = evidence.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect")
+            row["primary_metric"] = evidence.get("payoff_difference_affect_minus_no_affect")
+            row["secondary_metric"] = evidence.get("detection_latency_difference_no_affect_minus_affect")
         elif hypothesis_id == "h4":
             row["primary_metric"] = len(evidence.get("partner_selection_counts", {}))
             row["secondary_metric"] = evidence.get("partner_column")
         elif hypothesis_id == "h5":
-            row["primary_metric"] = len(evidence.get("clinical_conditions", []))
+            row["primary_metric"] = len(evidence.get("clinical_variants", []))
             row["secondary_metric"] = None
         rows.append(row)
     return pd.DataFrame(rows)
@@ -63,6 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Analyze affect_aif results.")
     parser.add_argument("--results", required=True, help="Path to the results CSV or parquet.")
     parser.add_argument("--output-dir", required=True, help="Directory for figures and summary tables.")
+    parser.add_argument("--config", help="Optional TOML experiment spec for configured analysis dispatch.")
     return parser
 
 
@@ -72,6 +75,10 @@ def main(argv: list[str] | None = None) -> int:
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    if args.config and str(args.config).endswith(".toml"):
+        spec = ExperimentSpec.from_toml(args.config)
+        run_configured_analysis(spec, args.results, output_dir)
+        return 0
     results = filter_primary_runs(load_results_table(args.results))
     switch_events_present = has_switch_events(results)
 
@@ -92,13 +99,13 @@ def main(argv: list[str] | None = None) -> int:
     if switch_events_present:
         post_switch_5 = post_switch_window_summary(results, window=5)
         post_switch_10 = post_switch_window_summary(results, window=10)
-        betrayal_comp = post_switch_condition_comparison(results, windows=(5, 10))
+        betrayal_comp = post_switch_variant_comparison(results, windows=(5, 10))
         betrayal_latencies = betrayal_latency_summary(results, max_encounters=10)
         betrayal_traj = betrayal_trajectory(results, max_encounters=10)
 
         post_switch_5.to_csv(output_dir / "betrayal_post_switch_window_1_5.csv", index=False)
         post_switch_10.to_csv(output_dir / "betrayal_post_switch_window_1_10.csv", index=False)
-        betrayal_comp.to_csv(output_dir / "betrayal_condition_comparison.csv", index=False)
+        betrayal_comp.to_csv(output_dir / "betrayal_variant_comparison.csv", index=False)
         betrayal_latencies.to_csv(output_dir / "betrayal_detection_latency.csv", index=False)
         betrayal_traj.to_csv(output_dir / "betrayal_trajectories.csv", index=False)
 
@@ -106,7 +113,7 @@ def main(argv: list[str] | None = None) -> int:
     movement_lines = []
     if not movement.empty:
         grouped = (
-            movement.groupby(["condition", "condition_name"], as_index=False)
+            movement.groupby(["variant_id"], as_index=False)
             .agg(
                 mean_beta_range=("beta_range", "mean"),
                 fraction_beta_moved=("beta_moved_materially", "mean"),
@@ -116,20 +123,11 @@ def main(argv: list[str] | None = None) -> int:
         movement_lines = ["\nAffective movement (beta) summary\n", grouped, "\n"]
     betrayal_lines = []
     if switch_events_present:
-        betrayal_comp = post_switch_condition_comparison(results, windows=(5, 10))
+        betrayal_comp = post_switch_variant_comparison(results, windows=(5, 10))
         if not betrayal_comp.empty:
             grouped = (
                 betrayal_comp.groupby(["window"], as_index=False)
-                .agg(
-                    mean_payoff_difference_tau4_affect_minus_tau4_no_affect=(
-                        "payoff_difference_tau4_affect_minus_tau4_no_affect",
-                        "mean",
-                    ),
-                    mean_stance_accuracy_difference_tau4_affect_minus_tau4_no_affect=(
-                        "stance_accuracy_difference_tau4_affect_minus_tau4_no_affect",
-                        "mean",
-                    ),
-                )
+                .mean(numeric_only=True)
                 .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
             )
             betrayal_lines = ["\nBetrayal post-switch comparison\n", grouped, "\n"]
@@ -138,9 +136,9 @@ def main(argv: list[str] | None = None) -> int:
         f"F = {anova['f_stat']:.6f}\n"
         f"p = {anova['p_value']:.6g}\n" + "".join(movement_lines) + "".join(betrayal_lines)
     )
-    print("Per-condition final summary")
+    print("Per-variant final summary")
     print(
-        summary.groupby(["condition", "condition_name"], as_index=False)
+        summary.groupby(["variant_id"], as_index=False)
         .agg(
             mean_total_payoff=("total_payoff", "mean"),
             std_total_payoff=("total_payoff", "std"),
@@ -153,7 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     if not movement.empty:
         print("\nAffective movement summary")
         print(
-            movement.groupby(["condition", "condition_name"], as_index=False)
+            movement.groupby(["variant_id"], as_index=False)
             .agg(
                 mean_beta_range=("beta_range", "mean"),
                 fraction_beta_moved=("beta_moved_materially", "mean"),
@@ -161,21 +159,12 @@ def main(argv: list[str] | None = None) -> int:
             .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
         )
     if switch_events_present:
-        betrayal_comp = post_switch_condition_comparison(results, windows=(5, 10))
+        betrayal_comp = post_switch_variant_comparison(results, windows=(5, 10))
         if not betrayal_comp.empty:
             print("\nBetrayal post-switch comparison")
             print(
                 betrayal_comp.groupby(["window"], as_index=False)
-                .agg(
-                    mean_payoff_difference_tau4_affect_minus_tau4_no_affect=(
-                        "payoff_difference_tau4_affect_minus_tau4_no_affect",
-                        "mean",
-                    ),
-                    mean_stance_accuracy_difference_tau4_affect_minus_tau4_no_affect=(
-                        "stance_accuracy_difference_tau4_affect_minus_tau4_no_affect",
-                        "mean",
-                    ),
-                )
+                .mean(numeric_only=True)
                 .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
             )
     print(f"\nSaved figures and statistics to {output_dir}")

@@ -1,0 +1,49 @@
+[hypothesis]
+id = "h5"
+name = "perturbation"
+
+[experiment]
+id = "clinical_betrayal"
+family = "trust"
+rounds = 120
+replications = 100
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+initial_types = ["cooperator", "reciprocator", "cooperator", "random"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+
+[[scenario.stance_switches]]
+round = 31
+partner = 0
+to = "hostile"
+
+[[variants]]
+id = "alexithymia"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.1
+
+[[variants]]
+id = "borderline"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 12.0
+
+[[variants]]
+id = "depression"
+affect = "precision"
+planning_horizon = 4
+initial_beta = 2.0
+
+[analysis]
+auto = true
+primary = "h5_perturbation"
+compare = ["alexithymia", "borderline", "depression"]
+switch_window = [1, 10]
+metrics = ["payoff", "precision", "stance_accuracy"]

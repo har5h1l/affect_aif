@@ -17,6 +17,7 @@ dependencies = [
   "pillow>=10.0",
   "scipy>=1.11",
   "seaborn>=0.13",
+  "tomli>=2.0; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
@@ -25,7 +26,6 @@ dev = [
   "pre-commit>=3.7",
   "pytest>=8.0",
   "ruff>=0.5",
-  "tomli>=2.0; python_version < '3.11'",
 ]
 
 [tool.setuptools]
@@ -59,11 +59,14 @@ select = [
 python_version = "3.10"
 files = [
   "cli",
-  "experiments/trust/calibration.py",
-  "experiments/trust/conditions.py",
   "experiments/trust/config.py",
-  "experiments/trust/constants.py",
-  "experiments/trust/persistence.py",
+  "experiments/trust/spec.py",
+  "analysis/configured.py",
+  "analysis/core/loading.py",
+  "analysis/core/plots.py",
+  "analysis/core/statistics.py",
+  "analysis/core/summaries.py",
+  "analysis/core/windows.py",
   "scripts/analysis/analyze.py",
   "scripts/analysis/model_comparison.py",
   "scripts/analysis/visualize.py",

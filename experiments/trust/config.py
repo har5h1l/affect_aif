@@ -1,24 +1,15 @@
-"""Experiment configuration."""
+"""Runtime configuration for trust experiments."""
 
 from __future__ import annotations
 
-import json
-from dataclasses import asdict, dataclass, field
-from pathlib import Path
+from dataclasses import dataclass, field
 
 from tasks.trust.types import PARTNER_TYPE_ORDER
-
-DEFAULT_SENSITIVITY_FACTORS = {
-    "alpha_charge": [0.5, 1.0, 2.0, 3.0, 5.0, 8.0],
-    "sigma_0_sq": [0.1, 0.25, 0.4, 0.6],
-    "beta_persistence": [0.5, 0.7, 0.8, 0.9, 0.95],
-    "initial_beta": [0.5, 0.67, 1.0, 1.5, 2.0],
-}
 
 
 @dataclass
 class ExperimentConfig:
-    """All experiment hyperparameters in one place."""
+    """Concrete runtime hyperparameters after TOML spec expansion."""
 
     num_partners: int = 4
     num_rounds: int = 200
@@ -43,69 +34,25 @@ class ExperimentConfig:
     mutual_defect: tuple[float, float] = (1.0, 1.0)
 
     gamma: float = 1.0
-    lr: float = 0.1
     action_sampling: str = "marginal"
-    use_parameter_learning: bool = False
-    learn_A: bool = False
-    learn_B: bool = False
-    learn_E: bool = False
-    pA_scale: float = 1.0
-    pB_scale: float = 10.0
-    lr_E: float = 0.5
-
-    deep_horizon: int = 8
-    shallow_horizon: int = 2
-    horizon_overrides: dict[int | str, int] = field(default_factory=dict)
     max_policies: int = 4096
 
     alpha_charge: float = 3.0
     sigma_0_sq: float = 0.25
     initial_beta: float = 1.0
     beta_num_levels: int = 5
+    beta_levels: list[float] | None = None
     beta_persistence: float = 0.8
 
-    lesion_mode: str = "decouple"
-
-    num_replications: int = 100
+    num_replications: int = 1
     random_seed: int = 42
-    conditions: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 5, 6, 7, 8])
-    presets: list[str] = field(default_factory=list)
     partner_types: list[str] = field(default_factory=lambda: list(PARTNER_TYPE_ORDER))
 
-    run_sensitivity: bool = False
-    sensitivity_factors: dict[str, list[float]] | list[float] = field(
-        default_factory=lambda: {name: values[:] for name, values in DEFAULT_SENSITIVITY_FACTORS.items()}
-    )
-    experiment_name: str = "primary"
-    verbose: bool = False
-    verbosity_mode: str = "stage_stream"
-    gif_after_run: bool = False
-    gif_output_dir: str | None = None
-
     def __post_init__(self):
-        if isinstance(self.sensitivity_factors, dict):
-            normalized = {}
-            for key, defaults in DEFAULT_SENSITIVITY_FACTORS.items():
-                normalized[key] = [float(value) for value in self.sensitivity_factors.get(key, defaults)]
-        else:
-            normalized = {
-                "alpha_charge": [float(value) for value in self.sensitivity_factors],
-                "sigma_0_sq": DEFAULT_SENSITIVITY_FACTORS["sigma_0_sq"][:],
-                "beta_persistence": DEFAULT_SENSITIVITY_FACTORS["beta_persistence"][:],
-                "initial_beta": DEFAULT_SENSITIVITY_FACTORS["initial_beta"][:],
-            }
-        self.sensitivity_factors = normalized
-        self.verbose = bool(self.verbose)
-        self.verbosity_mode = str(self.verbosity_mode)
-        self.gif_after_run = bool(self.gif_after_run)
-        self.gif_output_dir = None if self.gif_output_dir is None else str(self.gif_output_dir)
-        normalized_horizon_overrides: dict[int | str, int] = {}
-        for raw_key, value in dict(self.horizon_overrides).items():
-            if isinstance(raw_key, str) and not raw_key.strip().isdigit():
-                normalized_horizon_overrides[raw_key.strip()] = int(value)
-            else:
-                normalized_horizon_overrides[int(raw_key)] = int(value)
-        self.horizon_overrides = normalized_horizon_overrides
+        self.num_partners = int(self.num_partners)
+        self.num_rounds = int(self.num_rounds)
+        self.num_replications = int(self.num_replications)
+        self.random_seed = int(self.random_seed)
 
     @classmethod
     def from_dict(cls, data: dict) -> ExperimentConfig:
@@ -117,17 +64,3 @@ class ExperimentConfig:
             if key in data:
                 data[key] = tuple(data[key])
         return cls(**data)
-
-    @classmethod
-    def from_json(cls, path: str) -> ExperimentConfig:
-        """Load a configuration from disk."""
-
-        data = json.loads(Path(path).read_text())
-        return cls.from_dict(data)
-
-    def to_json(self, path: str):
-        """Serialize this configuration to disk."""
-
-        target = Path(path)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(json.dumps(asdict(self), indent=2))

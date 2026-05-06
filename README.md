@@ -34,17 +34,17 @@ partner redesign:
 - the trust-game generative model exposes `o_action` and `o_payoff` observations over latent `type × stance`, with `own_action` tracked as a separate control/state factor
 - the default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`)
 - the current hypothesis surface is the H0-H5 behavior-card spine in [docs/theory/hypotheses.md](docs/theory/hypotheses.md)
-- lesion, no-epistemic, and clinical runs are named presets (`lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`)
+- runnable experiment specs are TOML files under `configs/`; trust specs live in `configs/trust/...`, benchmark specs in `configs/benchmark/...`, and each file declares a shared hypothesis/experiment/scenario/variant envelope with `experiment.family`
 
 Common entry points:
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --output-dir results --batch-name h0_openness_gate --workers 12
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 12
 python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv
-python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/analysis
-python scripts/analysis/visualize.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/gifs
-python scripts/analysis/model_comparison.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/model_comparison
-python scripts/benchmark/run_cvc.py --config configs/benchmark_default.json
+python scripts/analysis/analyze.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/analysis
+python scripts/analysis/visualize.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/gifs
+python scripts/analysis/model_comparison.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/model_comparison
+python scripts/benchmark/run_cvc.py --config configs/benchmark/e1_arena/default.toml
 python scripts/benchmark/analyze.py --results results/benchmark/benchmark_results.csv
 ```
 
@@ -52,12 +52,12 @@ python scripts/benchmark/analyze.py --results results/benchmark/benchmark_result
 
 - `inferactively-pymdp==1.0.0`: supported active-inference runtime dependency
 - `tasks/trust/`: native trust POMDP templates, procedural pymdp runtime helpers, affect tracking, environments, and evaluation arena
-- `experiments/trust/`: trust experiment configuration, conditions, and runner surface
+- `experiments/trust/`: trust experiment spec parser, runtime adapters, and runner surface
 - `experiments/multifocal/`: multi-focal trust experiment configuration and runtime
 - `analysis/`: result loading, metrics, and visualization helpers
 - `benchmarks/core/`: shared benchmark runner/config/comparison helpers
 - `benchmarks/cvc/`: experimental CvC backend, policies, packaging, and Observatory client
-- `configs/`: external benchmark and CvC JSON configurations
+- `configs/`: public runnable TOML specs grouped by family (`trust/`, `benchmark/`)
 - `docs/`: theory, experiment, implementation, results, and state notes
 - `scripts/README.md`: supported CLI wrappers
 - `tests/README.md`: supported verification surface

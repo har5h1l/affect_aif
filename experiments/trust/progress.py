@@ -46,29 +46,16 @@ class StageStreamProgressReporter(ProgressReporter):
             print(line, flush=True)
 
     def _format_event(self, event: str, payload: dict) -> str:
-        condition = payload.get("condition")
+        variant_id = payload.get("variant_id")
         replication = payload.get("replication")
         round_idx = payload.get("round_idx")
         round_count = payload.get("round_count")
-        prefix = f"[cond={_fmt_int(condition)} rep={_fmt_int(replication)}]"
+        prefix = f"[variant={variant_id or 'n/a'} rep={_fmt_int(replication)}]"
         if round_idx is not None:
             prefix += f" [round={int(round_idx) + 1}/{_fmt_int(round_count)}]"
-        if event == "calibration_episode_start":
-            return (
-                f"[calibration] [episode={int(payload['episode_idx']) + 1}/{_fmt_int(payload.get('episode_count'))}]"
-                f" seed={_fmt_int(payload.get('seed'))} start"
-            )
-        if event == "calibration_episode_end":
-            return (
-                f"[calibration] [episode={int(payload['episode_idx']) + 1}/{_fmt_int(payload.get('episode_count'))}]"
-                " seed="
-                f"{_fmt_int(payload.get('seed'))} end "
-                "mean_abs_step_efe="
-                f"{_fmt_float(payload.get('mean_abs_step_efe'))}"
-            )
-        if event == "condition_start":
-            return f"{prefix} start name={payload.get('condition_name', 'unknown')}"
-        if event == "condition_end":
+        if event == "variant_start":
+            return f"{prefix} start"
+        if event == "variant_end":
             return f"{prefix} end rows={_fmt_int(payload.get('rows'))}"
         if event == "replication_start":
             return f"{prefix} start seed={_fmt_int(payload.get('seed'))}"

@@ -436,7 +436,7 @@ git commit -m "feat(trust): map experiment specs to runtime config"
 def test_factory_uses_variant_affect_mode(example_run):
     runtime = create_native_runtime_from_run(example_run)
 
-    assert runtime.condition_name == "affect"
+    assert runtime.variant_id == "affect"
     assert runtime.agent_kind == "affective"
     assert runtime.affect_mode == "normal"
     assert runtime.planning_horizon == 4

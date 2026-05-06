@@ -1,0 +1,33 @@
+[hypothesis]
+id = "h5"
+name = "perturbation"
+
+[experiment]
+id = "affect_sensitivity"
+family = "trust"
+rounds = 120
+replications = 100
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[[sweeps]]
+parameter = "alpha_charge"
+values = [0.5, 1.0, 2.0, 3.0, 5.0, 8.0]
+applies_to = ["affect"]
+
+[analysis]
+auto = true
+primary = "h5_perturbation"
+compare = ["affect"]
+metrics = ["payoff", "precision"]

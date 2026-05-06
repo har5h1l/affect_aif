@@ -2,7 +2,7 @@
 
 All functions operate on pandas DataFrames with the standard result schema
 (columns: agent_action, partner_action, payoff, true_partner_type, partner_idx,
-inferred_type_correct, round, condition, seed).
+inferred_type_correct, round, variant_id, seed).
 """
 
 from __future__ import annotations

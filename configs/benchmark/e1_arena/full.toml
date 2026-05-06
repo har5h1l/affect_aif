@@ -1,0 +1,123 @@
+[hypothesis]
+id = "e1"
+name = "benchmark_arena"
+
+[experiment]
+id = "benchmark_full"
+family = "benchmark"
+rounds = 200
+replications = 100
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "random"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+
+[[variants]]
+id = "benchmark"
+affect = "none"
+planning_horizon = 1
+
+[analysis]
+auto = false
+primary = "e1_benchmark_arena"
+
+[benchmark]
+backends = ["trust"]
+agents = []
+
+[[benchmark.agent_specs]]
+name = "tau1_no_affect"
+backend = "trust"
+kind = "registry"
+implementation = "no_affect_horizon_1"
+
+[[benchmark.agent_specs]]
+name = "tau1_affect"
+backend = "trust"
+kind = "registry"
+implementation = "affect_horizon_1"
+
+[[benchmark.agent_specs]]
+name = "tau2_no_affect"
+backend = "trust"
+kind = "registry"
+implementation = "no_affect_horizon_2"
+
+[[benchmark.agent_specs]]
+name = "tau2_affect"
+backend = "trust"
+kind = "registry"
+implementation = "affect_horizon_2"
+
+[[benchmark.agent_specs]]
+name = "tau4_no_affect"
+backend = "trust"
+kind = "registry"
+implementation = "no_affect"
+
+[[benchmark.agent_specs]]
+name = "tau4_affect"
+backend = "trust"
+kind = "registry"
+implementation = "affect"
+
+[[benchmark.agent_specs]]
+name = "tau8_no_affect"
+backend = "trust"
+kind = "registry"
+implementation = "no_affect_horizon_8"
+
+[[benchmark.agent_specs]]
+name = "tau8_affect"
+backend = "trust"
+kind = "registry"
+implementation = "affect_horizon_8"
+
+[[benchmark.agent_specs]]
+name = "lesioned"
+backend = "trust"
+kind = "registry"
+implementation = "lesioned"
+
+[[benchmark.agent_specs]]
+name = "random"
+backend = "trust"
+kind = "registry"
+implementation = "random"
+
+[[benchmark.agent_specs]]
+name = "tit_for_tat"
+backend = "trust"
+kind = "registry"
+implementation = "tit_for_tat"
+
+[[benchmark.agent_specs]]
+name = "win_stay_lose_shift"
+backend = "trust"
+kind = "registry"
+implementation = "win_stay_lose_shift"
+
+[[benchmark.agent_specs]]
+name = "q_learning"
+backend = "trust"
+kind = "registry"
+implementation = "q_learning"
+
+[[benchmark.agent_specs]]
+name = "pavlov"
+backend = "trust"
+kind = "registry"
+implementation = "pavlov"
+
+[[benchmark.agent_specs]]
+name = "grim_trigger"
+backend = "trust"
+kind = "registry"
+implementation = "grim_trigger"
+
+[benchmark.trust]
+scenario = "resource_sharing"

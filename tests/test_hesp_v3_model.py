@@ -54,7 +54,10 @@ def test_social_posterior_multiplies_action_and_payoff_modalities():
     model = _build_model(ExperimentConfig(payoff_mode="binary"))
     prior = np.full((model.num_types, model.num_stances), 1.0 / (model.num_types * model.num_stances))
 
-    expected_likelihood = np.asarray(model.A[0][0, :, :, 0], dtype=float) * np.asarray(model.A[1][2, :, :, 0], dtype=float)
+    expected_likelihood = np.asarray(model.A[0][0, :, :, 0], dtype=float) * np.asarray(
+        model.A[1][2, :, :, 0],
+        dtype=float,
+    )
     expected_posterior = expected_likelihood * prior
     expected_posterior /= expected_posterior.sum()
 

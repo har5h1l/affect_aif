@@ -34,7 +34,7 @@ def main(argv: list[str] | None = None) -> int:
         sys.executable,
         str(root / "scripts" / "experiment" / "run.py"),
         "--config",
-        str(root / "experiments" / "trust" / "configs" / "smoke.json"),
+        str(root / "configs" / "trust" / "smoke" / "smoke.toml"),
         "--output-dir",
         args.output_dir,
         "--batch-name",

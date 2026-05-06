@@ -22,7 +22,7 @@ def test_experiment_run_dry_run_writes_manifest(tmp_path):
             sys.executable,
             "scripts/experiment/run.py",
             "--config",
-            "experiments/trust/configs/smoke.json",
+            "configs/trust/smoke/smoke.toml",
             "--output-dir",
             str(out),
             "--batch-name",

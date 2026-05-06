@@ -1,15 +1,13 @@
 import numpy as np
+from runtime_helpers import build_runtime
 
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.factory import create_native_runtime
 from tasks.trust.runtime import gamma_for_partner, update_beta_after_observation
 
 
 def test_no_affect_runtime_has_no_beta_precision_state():
-    runtime = create_native_runtime(
+    runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0),
-        condition=1,
-        seed=0,
     )
 
     assert runtime.partner_bank.beta is None
@@ -17,10 +15,10 @@ def test_no_affect_runtime_has_no_beta_precision_state():
 
 
 def test_hesp_beta_increases_on_surprise_and_decreases_on_accuracy():
-    runtime = create_native_runtime(
+    runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0, initial_beta=1.0),
-        condition=2,
-        seed=0,
+        variant_id="affect",
+        affect="precision",
     )
     beta = runtime.partner_bank.beta
     assert beta is not None
@@ -55,10 +53,10 @@ def test_hesp_beta_increases_on_surprise_and_decreases_on_accuracy():
 
 
 def test_lesioned_decouple_updates_beta_but_not_gamma():
-    runtime = create_native_runtime(
+    runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_rounds=2, num_replications=1, random_seed=0, initial_beta=1.0),
-        condition="lesioned",
-        seed=0,
+        variant_id="lesioned",
+        affect="tracked_only",
     )
     beta = runtime.partner_bank.beta
     assert beta is not None

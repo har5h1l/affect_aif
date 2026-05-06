@@ -1,0 +1,31 @@
+[hypothesis]
+id = "smoke"
+name = "smoke"
+
+[experiment]
+id = "smoke"
+family = "trust"
+rounds = 2
+replications = 1
+seed = 0
+
+[scenario]
+payoff = "binary"
+assignment = "random"
+partners = 2
+type_volatility = 0.0
+observation_noise = 0.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 1
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 1
+
+[analysis]
+auto = false
+primary = "h0_openness"

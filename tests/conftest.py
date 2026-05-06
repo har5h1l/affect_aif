@@ -18,8 +18,17 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip)
 
 
+from experiments.trust.factory import create_native_runtime_from_variant
 from experiments.trust.runner import ExperimentRunner
-from experiments.trust.factory import create_native_runtime
+from experiments.trust.spec import (
+    AnalysisSpec,
+    ExperimentMeta,
+    ExperimentSpec,
+    HypothesisSpec,
+    ScenarioSpec,
+    StanceSwitchSpec,
+    VariantSpec,
+)
 from tasks.trust.pomdp import build_trust_pomdp_template
 
 
@@ -40,7 +49,6 @@ def tiny_config():
 @pytest.fixture
 def betrayal_config():
     return ExperimentConfig(
-        experiment_name="betrayal_stress",
         payoff_mode="binary",
         num_partners=2,
         num_rounds=8,
@@ -52,8 +60,49 @@ def betrayal_config():
         initial_partner_types=["cooperator", "random"],
         initial_partner_stances=["trusting", "neutral"],
         scheduled_stance_switches=[{"round": 3, "partner_idx": 0, "to_stance": "hostile"}],
-        conditions=[5, 6],
-        run_sensitivity=False,
+    )
+
+
+def make_spec(
+    *,
+    payoff: str = "binary",
+    assignment: str = "random",
+    partners: int = 4,
+    rounds: int = 3,
+    replications: int = 1,
+    seed: int = 0,
+    variants: tuple[VariantSpec, ...] | None = None,
+    initial_types: tuple[str, ...] | None = None,
+    initial_stances: tuple[str, ...] | None = None,
+    stance_switches: tuple[StanceSwitchSpec, ...] = (),
+) -> ExperimentSpec:
+    return ExperimentSpec(
+        hypothesis=HypothesisSpec(id="test", name="test"),
+        experiment=ExperimentMeta(id="test", rounds=rounds, replications=replications, seed=seed),
+        scenario=ScenarioSpec(
+            payoff=payoff,
+            assignment=assignment,
+            partners=partners,
+            initial_types=initial_types,
+            initial_stances=initial_stances,
+            stance_switches=stance_switches,
+        ),
+        variants=variants
+        or (
+            VariantSpec(id="no_affect", affect="none", planning_horizon=1),
+            VariantSpec(id="affect", affect="precision", planning_horizon=1),
+        ),
+        analysis=AnalysisSpec(auto=False),
+    )
+
+
+@pytest.fixture
+def tiny_spec(tiny_config):
+    return make_spec(
+        payoff=tiny_config.payoff_mode,
+        rounds=tiny_config.num_rounds,
+        replications=tiny_config.num_replications,
+        seed=tiny_config.random_seed,
     )
 
 
@@ -64,12 +113,16 @@ def tiny_model(tiny_config):
 
 @pytest.fixture
 def agent_factory(tiny_config):
-    def _make(condition=1, **kwargs):
+    def _make(variant_id="no_affect", **kwargs):
         config = tiny_config
         for key, value in kwargs.items():
             if hasattr(config, key):
                 setattr(config, key, value)
-        return create_native_runtime(config, condition=condition, seed=0)
+        affect = "precision" if variant_id in {"affect", "alexithymia", "borderline", "depression"} else "none"
+        if variant_id in {"lesioned", "tracked_only"}:
+            affect = "tracked_only"
+        variant = VariantSpec(id=str(variant_id), affect=affect, planning_horizon=1)
+        return create_native_runtime_from_variant(config, variant=variant, seed=0)
 
     return _make
 
@@ -77,12 +130,12 @@ def agent_factory(tiny_config):
 @pytest.fixture
 def representative_agents(agent_factory):
     return {
-        "base": agent_factory(1),
-        "affective": agent_factory(2),
+        "base": agent_factory("no_affect"),
+        "affective": agent_factory("affect"),
         "lesioned": agent_factory("lesioned"),
     }
 
 
 @pytest.fixture
-def tiny_runner(tiny_config):
-    return ExperimentRunner(tiny_config)
+def tiny_runner(tiny_spec):
+    return ExperimentRunner.from_spec(tiny_spec)

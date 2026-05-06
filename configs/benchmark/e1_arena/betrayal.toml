@@ -1,0 +1,77 @@
+[hypothesis]
+id = "e1"
+name = "benchmark_arena"
+
+[experiment]
+id = "benchmark_betrayal"
+family = "benchmark"
+rounds = 200
+replications = 50
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "random"
+partners = 2
+type_volatility = 0.05
+observation_noise = 0.0
+
+[[variants]]
+id = "benchmark"
+affect = "none"
+planning_horizon = 1
+
+[analysis]
+auto = false
+primary = "e1_benchmark_arena"
+
+[benchmark]
+backends = ["trust"]
+agents = []
+
+[[benchmark.agent_specs]]
+name = "tau4_affect"
+backend = "trust"
+kind = "registry"
+implementation = "affect"
+
+[[benchmark.agent_specs]]
+name = "tau4_no_affect"
+backend = "trust"
+kind = "registry"
+implementation = "no_affect"
+
+[[benchmark.agent_specs]]
+name = "tit_for_tat"
+backend = "trust"
+kind = "registry"
+implementation = "tit_for_tat"
+
+[[benchmark.agent_specs]]
+name = "win_stay_lose_shift"
+backend = "trust"
+kind = "registry"
+implementation = "win_stay_lose_shift"
+
+[[benchmark.agent_specs]]
+name = "grim_trigger"
+backend = "trust"
+kind = "registry"
+implementation = "grim_trigger"
+
+[[benchmark.agent_specs]]
+name = "pavlov"
+backend = "trust"
+kind = "registry"
+implementation = "pavlov"
+
+[benchmark.trust]
+scenario = "betrayal_arena"
+num_partners = 2
+initial_partner_types = ["cooperative", "reciprocal"]
+initial_partner_stances = ["trusting", "neutral"]
+
+[[benchmark.trust.scheduled_stance_switches]]
+partner_idx = 0
+round = 100
+to_stance = "hostile"

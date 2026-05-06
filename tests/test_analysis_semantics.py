@@ -8,15 +8,13 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import final_round_summary
 from analysis.model_comparison import model_comparison_report
 from cli.common import load_results_table
-from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner
 from scripts.analysis.analyze import _hypothesis_summary_frame
 from scripts.analysis.model_comparison import main as run_model_comparison_main
 
 
-def test_behavior_cards_export_current_labels_and_summary_frame_uses_them(tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2]})
-    results = ExperimentRunner(cfg).run_all()
+def test_behavior_cards_export_current_labels_and_summary_frame_uses_them(tiny_spec):
+    results = ExperimentRunner.from_spec(tiny_spec).run_all()
 
     hypotheses = run_all_hypothesis_tests(results)
     assert hypotheses["h0"]["label"] == "openness_gate"
@@ -29,9 +27,8 @@ def test_behavior_cards_export_current_labels_and_summary_frame_uses_them(tiny_c
     assert h1_row["label"] == "model_fitness"
 
 
-def test_model_comparison_report_uses_predictive_log_score_language(tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 3, "num_rounds": 10})
-    results = ExperimentRunner(cfg).run_all()
+def test_model_comparison_report_uses_predictive_log_score_language(tiny_spec):
+    results = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=10, replications=3)).run_all()
 
     report = model_comparison_report(results)
 
@@ -40,9 +37,8 @@ def test_model_comparison_report_uses_predictive_log_score_language(tiny_config)
     assert set(report) == {"predictive_log_score_summary", "pairwise_predictive_log_scores", "random_effects_bms"}
 
 
-def test_run_model_comparison_cli_uses_predictive_language(tmp_path, capsys, tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "num_replications": 3, "num_rounds": 10})
-    results = ExperimentRunner(cfg).run_all()
+def test_run_model_comparison_cli_uses_predictive_language(tmp_path, capsys, tiny_spec):
+    results = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=10, replications=3)).run_all()
     results_path = tmp_path / "results.csv"
     output_dir = tmp_path / "model"
     results.to_csv(results_path, index=False)
@@ -55,11 +51,10 @@ def test_run_model_comparison_cli_uses_predictive_language(tmp_path, capsys, tin
     assert "predictive model comparison" in captured
 
 
-def test_load_results_table_normalizes_mixed_condition_identifiers(tmp_path):
-    def row(condition, condition_name, round_idx, payoff):
+def test_load_results_table_preserves_variant_identity(tmp_path):
+    def row(variant_id, round_idx, payoff):
         return {
-            "condition": condition,
-            "condition_name": condition_name,
+            "variant_id": variant_id,
             "seed": 0,
             "round": round_idx,
             "payoff": payoff,
@@ -73,22 +68,20 @@ def test_load_results_table_normalizes_mixed_condition_identifiers(tmp_path):
         }
 
     rows = [
-        row(1, "tau1_no_affect", 0, 10),
-        row("1", "tau1_no_affect", 1, 12),
-        row("lesioned", "lesioned", 0, 8),
-        row("lesioned", "lesioned", 1, 9),
+        row("no_affect__planning_horizon_1", 0, 10),
+        row("no_affect__planning_horizon_1", 1, 12),
+        row("lesioned", 0, 8),
+        row("lesioned", 1, 9),
     ]
-    path = tmp_path / "mixed_conditions.csv"
+    path = tmp_path / "mixed_variants.csv"
     pd.DataFrame(rows).to_csv(path, index=False)
 
     loaded = load_results_table(path)
     summary = final_round_summary(loaded)
 
-    assert sorted(loaded["condition"].drop_duplicates(), key=str) == [1, "lesioned"]
+    assert sorted(loaded["variant_id"].drop_duplicates(), key=str) == ["lesioned", "no_affect__planning_horizon_1"]
     assert len(summary) == 2
-    tau1 = summary.loc[summary["condition_name"] == "tau1_no_affect"].iloc[0]
-    lesion = summary.loc[summary["condition_name"] == "lesioned"].iloc[0]
-    assert tau1["condition"] == 1
-    assert tau1["total_payoff"] == 22
-    assert lesion["condition"] == "lesioned"
+    horizon_1 = summary.loc[summary["variant_id"] == "no_affect__planning_horizon_1"].iloc[0]
+    lesion = summary.loc[summary["variant_id"] == "lesioned"].iloc[0]
+    assert horizon_1["total_payoff"] == 22
     assert lesion["total_payoff"] == 17

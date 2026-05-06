@@ -8,8 +8,8 @@ from analysis.hypotheses import run_all_hypothesis_tests
 def test_run_all_hypothesis_tests_returns_current_behavior_card_labels():
     df = pd.DataFrame(
         [
-            {"condition_name": "tau1_no_affect", "seed": 1, "round": 0, "payoff": 1.0},
-            {"condition_name": "tau1_affect", "seed": 1, "round": 0, "payoff": 2.0},
+            {"variant_id": "no_affect__planning_horizon_1", "seed": 1, "round": 0, "payoff": 1.0},
+            {"variant_id": "affect__planning_horizon_1", "seed": 1, "round": 0, "payoff": 2.0},
         ]
     )
 
@@ -22,8 +22,7 @@ def test_hypothesis_payloads_are_json_safe_and_current_shape():
     df = pd.DataFrame(
         [
             {
-                "condition": 1,
-                "condition_name": "tau1_no_affect",
+                "variant_id": "no_affect__planning_horizon_1",
                 "seed": 1,
                 "round": 0,
                 "payoff": 1.0,
@@ -36,8 +35,7 @@ def test_hypothesis_payloads_are_json_safe_and_current_shape():
                 "planning_cost_ratio": 1.0,
             },
             {
-                "condition": 2,
-                "condition_name": "tau1_affect",
+                "variant_id": "affect__planning_horizon_1",
                 "seed": 1,
                 "round": 0,
                 "payoff": 2.0,

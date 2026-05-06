@@ -17,7 +17,6 @@ class MetricLogger:
     def log_round(
         self,
         round_idx: int,
-        condition: int | str,
         seed: int,
         agent_metrics: dict,
         env_result: dict,
@@ -66,7 +65,6 @@ class MetricLogger:
         )
 
         record = {
-            "condition": condition,
             "seed": int(seed),
             "round": int(round_idx),
             "partner_idx": int(env_result["partner_idx"]),
@@ -108,7 +106,6 @@ class MetricLogger:
             "planning_cost": _float_metric("planning_cost"),
             "planning_cost_ratio": _float_metric("planning_cost_ratio"),
             "betas": _to_float_list(betas),
-            "beta": _to_float_list(betas),
             "terminal_signal": _to_float_list(terminal_signal),
             "prediction_errors": _to_float_list(prediction_errors),
             "reward_avgs": _to_float_list(_metric("reward_avgs", default_partner_vector)),

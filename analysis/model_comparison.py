@@ -1,12 +1,12 @@
 """Predictive log-score comparison for agent variants.
 
-Each agent condition is treated as a predictive model. Per-round predictive
+Each agent variant is treated as a predictive model. Per-round predictive
 log probabilities of the observed partner action accumulate across an episode
 to give the total predictive log score for that model on that seed.
 
 Pairwise comparisons report differences in total predictive log scores.
 Random-effects Bayesian model selection (Stephan et al., 2009) is kept intact
-for the same seed-by-condition score matrix; the semantics of those inputs are
+for the same seed-by-variant score matrix; the semantics of those inputs are
 now described explicitly as predictive log scores rather than exact evidence.
 """
 
@@ -22,18 +22,18 @@ from scipy.special import digamma, gammaln
 from analysis.metrics import final_round_summary
 
 
-def _condition_sort_key(value) -> tuple[int, str]:
+def _variant_sort_key(value) -> tuple[int, str]:
     if isinstance(value, (int, np.integer)):
         return (0, f"{int(value):04d}")
     return (1, str(value))
 
 
-def _condition_value(value):
+def _variant_value(value):
     return value.item() if isinstance(value, np.generic) else value
 
 
 def log_score_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Per-condition summary of total predictive log score across seeds."""
+    """Per-variant summary of total predictive log score across seeds."""
     summary = final_round_summary(results)
     if "total_log_evidence" not in summary.columns:
         raise ValueError(
@@ -41,7 +41,7 @@ def log_score_summary(results: pd.DataFrame) -> pd.DataFrame:
         )
 
     records = []
-    for (cond, cond_name), grp in summary.groupby(["condition", "condition_name"]):
+    for variant_id, grp in summary.groupby("variant_id"):
         scores = grp["total_log_evidence"].to_numpy()
         scores = scores[np.isfinite(scores)]
         mean_score = float(scores.mean()) if len(scores) > 0 else float("nan")
@@ -49,8 +49,7 @@ def log_score_summary(results: pd.DataFrame) -> pd.DataFrame:
         median_score = float(np.median(scores)) if len(scores) > 0 else float("nan")
         records.append(
             {
-                "condition": _condition_value(cond),
-                "condition_name": str(cond_name),
+                "variant_id": str(_variant_value(variant_id)),
                 "n_seeds": len(scores),
                 "mean_predictive_log_score": mean_score,
                 "se_predictive_log_score": se_score,
@@ -61,7 +60,7 @@ def log_score_summary(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
-    """Compute pairwise predictive log-score differences between conditions.
+    """Compute pairwise predictive log-score differences between variants.
 
     For each pair (A, B), computes the mean difference in total predictive log
     score mean(score_A) - mean(score_B) across seeds. Also reports the
@@ -78,7 +77,7 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("Results do not contain predictive log-score data.")
 
     records = []
-    for (cond_a, frame_a), (cond_b, frame_b) in combinations(summary.groupby("condition"), 2):
+    for (variant_a, frame_a), (variant_b, frame_b) in combinations(summary.groupby("variant_id"), 2):
         le_a = frame_a["total_log_evidence"].to_numpy()
         le_b = frame_b["total_log_evidence"].to_numpy()
         le_a = le_a[np.isfinite(le_a)]
@@ -87,8 +86,8 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
         if len(le_a) < 2 or len(le_b) < 2:
             records.append(
                 {
-                    "condition_a": _condition_value(cond_a),
-                    "condition_b": _condition_value(cond_b),
+                    "variant_a": _variant_value(variant_a),
+                    "variant_b": _variant_value(variant_b),
                     "mean_predictive_log_score_difference": float("nan"),
                     "log10_predictive_log_score_difference": float("nan"),
                     "se_predictive_log_score_difference": float("nan"),
@@ -111,8 +110,8 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
 
         records.append(
             {
-                "condition_a": _condition_value(cond_a),
-                "condition_b": _condition_value(cond_b),
+                "variant_a": _variant_value(variant_a),
+                "variant_b": _variant_value(variant_b),
                 "mean_predictive_log_score_difference": mean_diff,
                 "log10_predictive_log_score_difference": float(mean_diff / np.log(10)),
                 "se_predictive_log_score_difference": se_diff,
@@ -243,19 +242,19 @@ def random_effects_bms(results: pd.DataFrame) -> dict:
     if "total_log_evidence" not in summary.columns:
         raise ValueError("Results do not contain predictive log-score data.")
 
-    conditions = sorted(summary["condition"].unique(), key=_condition_sort_key)
+    variants = sorted(summary["variant_id"].unique(), key=_variant_sort_key)
     seeds = sorted(summary["seed"].unique())
 
-    # Build the predictive log-score matrix (n_seeds x n_conditions)
-    le_matrix = np.full((len(seeds), len(conditions)), np.nan)
-    for j, cond in enumerate(conditions):
-        cond_data = summary[summary["condition"] == cond]
+    # Build the predictive log-score matrix (n_seeds x n_variants)
+    le_matrix = np.full((len(seeds), len(variants)), np.nan)
+    for j, variant in enumerate(variants):
+        variant_data = summary[summary["variant_id"] == variant]
         for i, seed in enumerate(seeds):
-            seed_data = cond_data[cond_data["seed"] == seed]
+            seed_data = variant_data[variant_data["seed"] == seed]
             if len(seed_data) == 1:
                 le_matrix[i, j] = float(seed_data["total_log_evidence"].iloc[0])
 
-    # Drop rows with any NaN (seeds not present in all conditions)
+    # Drop rows with any NaN (seeds not present in all variants)
     valid_mask = np.all(np.isfinite(le_matrix), axis=1)
     le_matrix = le_matrix[valid_mask]
 
@@ -266,7 +265,7 @@ def random_effects_bms(results: pd.DataFrame) -> dict:
         }
 
     bms_result = _spm_bms(le_matrix)
-    bms_result["conditions"] = [c.item() if isinstance(c, np.generic) else c for c in conditions]
+    bms_result["variants"] = [c.item() if isinstance(c, np.generic) else c for c in variants]
     bms_result["n_valid_seeds"] = int(le_matrix.shape[0])
     return bms_result
 
@@ -275,7 +274,7 @@ def model_comparison_report(results: pd.DataFrame) -> dict:
     """Full predictive log-score comparison report.
 
     Returns a dict with:
-        - predictive_log_score_summary: per-condition summary
+        - predictive_log_score_summary: per-variant summary
         - pairwise_predictive_log_scores: all pairwise score differences
         - random_effects_bms: RFX-BMS results (if enough data)
     """

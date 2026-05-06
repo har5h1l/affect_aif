@@ -3,22 +3,20 @@ import sys
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
+from experiment_spec_helpers import write_example_toml
 
 from analysis.metrics import post_switch_window_summary
 from analysis.visualization import build_run_gifs, load_results
 from experiments.trust.batch import BatchExperimentRunner
-from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner
-from tasks.trust.envs import TrustGameEnv
+from experiments.trust.spec import ExperimentSpec
 
 
-def test_full_experiment_runs_and_produces_records(tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2, 3, 4, 5]})
-    runner = ExperimentRunner(cfg)
+def test_full_experiment_runs_and_produces_records(tiny_spec):
+    runner = ExperimentRunner.from_spec(tiny_spec)
     results = runner.run_all()
-    assert len(results) == 15
+    assert len(results) == 6
     assert {
         "true_partner_type",
         "partner_idx",
@@ -27,54 +25,28 @@ def test_full_experiment_runs_and_produces_records(tiny_config):
     }.issubset(results.columns)
 
 
-def test_parameter_learning_updates_likelihoods_in_episode(tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1], "use_parameter_learning": True})
-    runner = ExperimentRunner(cfg)
-    env = TrustGameEnv(cfg, seed=cfg.random_seed)
+def test_runner_outputs_variant_identity(tmp_path):
+    spec = ExperimentSpec.from_toml(write_example_toml(tmp_path / "betrayal_choice.toml"))
+    tiny = spec.with_overrides(rounds=2, replications=1)
 
-    records = runner._run_episode(
-        runtime=runner._create_runtime(condition=1, seed=cfg.random_seed),
-        env=env,
-        seed=cfg.random_seed,
-        condition=1,
-    )
+    results = ExperimentRunner.from_spec(tiny).run_all()
+
+    assert {"hypothesis_id", "experiment_id", "variant_id", "replication", "seed", "round"} <= set(results.columns)
+    assert "condition" not in results.columns
+
+
+def test_runner_logs_joint_posteriors(tiny_spec):
+    runner = ExperimentRunner.from_spec(tiny_spec)
+    records = runner.run_replication(run=tiny_spec.expand_runs()[0])
 
     assert len(records) == 3
     assert "partner_joint_posteriors" in records[-1]
 
 
-def test_parameter_sensitivity_sweeps_charge_sigma_persistence_and_initial_beta(tiny_config):
-    cfg = ExperimentConfig(
-        **{
-            **tiny_config.__dict__,
-            "num_rounds": 1,
-            "conditions": [2],
-            "run_sensitivity": True,
-        }
-    )
-    runner = ExperimentRunner(cfg)
-    results = runner.run_all()
-    sensitivity_rows = results[results["run_mode"] == "sensitivity"]
-
-    assert len(sensitivity_rows) > 0
-    assert set(sensitivity_rows["sensitivity_parameter"]) == {
-        "alpha_charge",
-        "sigma_0_sq",
-        "beta_persistence",
-        "initial_beta",
-    }
-
-
-def test_sensitivity_config_normalization_uses_new_keys():
-    cfg = ExperimentConfig(sensitivity_factors=[0.5, 1.0])
-    assert cfg.sensitivity_factors["alpha_charge"] == [0.5, 1.0]
-    assert cfg.sensitivity_factors["sigma_0_sq"] == [0.1, 0.25, 0.4, 0.6]
-    assert cfg.sensitivity_factors["beta_persistence"] == [0.5, 0.7, 0.8, 0.9, 0.95]
-    assert cfg.sensitivity_factors["initial_beta"] == [0.5, 0.67, 1.0, 1.5, 2.0]
-
-
-def test_betrayal_metrics_and_analysis_outputs(tmp_path, betrayal_config):
-    runner = ExperimentRunner(betrayal_config)
+def test_betrayal_metrics_and_analysis_outputs(tmp_path):
+    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml")
+    spec = spec.with_overrides(rounds=35, replications=1)
+    runner = ExperimentRunner.from_spec(spec)
     results = runner.run_all()
     results_path = tmp_path / "betrayal.csv"
     output_dir = tmp_path / "analysis"
@@ -100,20 +72,10 @@ def test_betrayal_metrics_and_analysis_outputs(tmp_path, betrayal_config):
     assert (output_dir / "betrayal_detection_latency.csv").exists()
 
 
-def test_verbose_stage_stream_emits_progress_without_changing_results(tiny_config, capsys):
-    quiet_cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1], "verbose": False})
-    verbose_cfg = ExperimentConfig(
-        **{
-            **tiny_config.__dict__,
-            "conditions": [1],
-            "verbose": True,
-            "verbosity_mode": "stage_stream",
-        }
-    )
-
-    quiet_results = ExperimentRunner(quiet_cfg).run_all()
+def test_verbose_stage_stream_emits_progress_without_changing_results(tiny_spec, capsys):
+    quiet_results = ExperimentRunner.from_spec(tiny_spec).run_all()
     quiet_stdout = capsys.readouterr().out
-    verbose_results = ExperimentRunner(verbose_cfg).run_all()
+    verbose_results = ExperimentRunner.from_spec(tiny_spec, verbose=True).run_all()
     verbose_stdout = capsys.readouterr().out
 
     assert quiet_stdout == ""
@@ -123,9 +85,8 @@ def test_verbose_stage_stream_emits_progress_without_changing_results(tiny_confi
     assert "stage=logging_end" in verbose_stdout
 
 
-def test_build_run_gifs_writes_one_file_per_primary_run(tmp_path, tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2]})
-    results = ExperimentRunner(cfg).run_all()
+def test_build_run_gifs_writes_one_file_per_primary_run(tmp_path, tiny_spec):
+    results = ExperimentRunner.from_spec(tiny_spec).run_all()
 
     written = build_run_gifs(results, str(tmp_path / "gifs"))
 
@@ -133,20 +94,31 @@ def test_build_run_gifs_writes_one_file_per_primary_run(tmp_path, tiny_config):
     assert all(path.exists() for path in written)
 
 
-def test_visualization_handles_betrayal_switch_runs(tmp_path, betrayal_config):
-    results = ExperimentRunner(betrayal_config).run_all()
+def test_visualization_handles_betrayal_switch_runs(tmp_path):
+    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml")
+    spec = spec.with_overrides(rounds=35, replications=1)
+    results = ExperimentRunner.from_spec(spec).run_all()
     output_csv = tmp_path / "betrayal.csv"
     results.to_csv(output_csv, index=False)
     loaded = load_results(str(output_csv))
     written = build_run_gifs(loaded, str(tmp_path / "gifs"))
 
     assert any(bool(ids) for ids in loaded["scheduled_stance_switch_partner_ids"].tolist())
-    assert len(written) == len(loaded[loaded["run_mode"] == "primary"].groupby(["condition", "seed"]))
+    assert len(written) == len(loaded.groupby(["variant_id", "seed"]))
 
 
-def test_visualization_handles_non_affective_conditions(tmp_path, tiny_config):
-    cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1]})
-    results = ExperimentRunner(cfg).run_all()
+def test_visualization_handles_non_affective_variant(tmp_path, tiny_spec):
+    single_variant = tiny_spec.with_overrides(rounds=3, replications=1)
+    single_variant = single_variant.__class__(
+        hypothesis=single_variant.hypothesis,
+        experiment=single_variant.experiment,
+        scenario=single_variant.scenario,
+        variants=(single_variant.variants[0],),
+        runtime=single_variant.runtime,
+        analysis=single_variant.analysis,
+        path=single_variant.path,
+    )
+    results = ExperimentRunner.from_spec(single_variant).run_all()
 
     written = build_run_gifs(results, str(tmp_path / "base_gifs"))
 
@@ -165,9 +137,9 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
     args = parser.parse_args(
         [
             "--config",
-            "configs/default.json",
+            "configs/trust/smoke/smoke.toml",
             "--config",
-            "configs/betrayal_stress.json",
+            "configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml",
             "--output-dir",
             "results",
             "--workers",
@@ -175,20 +147,21 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
         ]
     )
 
-    assert args.config == ["configs/default.json", "configs/betrayal_stress.json"]
+    assert args.config == [
+        "configs/trust/smoke/smoke.toml",
+        "configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml",
+    ]
     assert args.output_dir == "results"
     assert args.workers == 3
 
 
-def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path, tiny_config):
-    cfg_a = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2], "run_sensitivity": False})
-    cfg_b = ExperimentConfig(
-        **{**tiny_config.__dict__, "conditions": [1], "experiment_name": "secondary", "run_sensitivity": False}
+def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path):
+    config_a_path = write_example_toml(tmp_path / "config_a.toml", rounds=2, replications=1)
+    config_b_path = write_example_toml(tmp_path / "config_b.toml", rounds=2, replications=1)
+    config_b_path.write_text(
+        config_b_path.read_text().replace('id = "betrayal_choice"', 'id = "secondary"', 1),
+        encoding="utf-8",
     )
-    config_a_path = tmp_path / "config_a.json"
-    config_b_path = tmp_path / "config_b.json"
-    cfg_a.to_json(str(config_a_path))
-    cfg_b.to_json(str(config_b_path))
 
     batch = BatchExperimentRunner(
         config_paths=[str(config_a_path), str(config_b_path)],
@@ -200,16 +173,31 @@ def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path, tiny_co
     result = batch.run_all()
 
     config_dirs = {state.config_name: state.output_dir for state in result.config_states}
-    assert set(config_dirs) == {"config_a", "config_b"}
+    assert set(config_dirs) == {"betrayal_choice", "secondary"}
 
-    results_a = pd.read_csv(config_dirs["config_a"] / "results.csv")
-    results_b = pd.read_csv(config_dirs["config_b"] / "results.csv")
+    results_a = pd.read_csv(config_dirs["betrayal_choice"] / "results.csv")
+    results_b = pd.read_csv(config_dirs["secondary"] / "results.csv")
 
-    assert {"config_path", "config_name", "batch_id", "run_mode"}.issubset(results_a.columns)
-    assert {"config_path", "config_name", "batch_id", "run_mode"}.issubset(results_b.columns)
-    assert set(results_a["config_name"]) == {"config_a"}
-    assert set(results_b["config_name"]) == {"config_b"}
+    assert {"config_path", "config_name", "batch_id", "variant_id"}.issubset(results_a.columns)
+    assert {"config_path", "config_name", "batch_id", "variant_id"}.issubset(results_b.columns)
+    assert set(results_a["config_name"]) == {"betrayal_choice"}
+    assert set(results_b["config_name"]) == {"secondary"}
     assert set(results_a["batch_id"]) == {"test_batch"}
     assert set(results_b["batch_id"]) == {"test_batch"}
-    assert (config_dirs["config_a"] / "batch_metadata.json").exists()
-    assert (config_dirs["config_b"] / "batch_metadata.json").exists()
+    assert (config_dirs["betrayal_choice"] / "batch_metadata.json").exists()
+    assert (config_dirs["secondary"] / "batch_metadata.json").exists()
+
+
+def test_batch_schedules_expanded_variant_runs(tmp_path):
+    path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=2)
+    runner = BatchExperimentRunner(
+        config_paths=[str(path)],
+        output_root=str(tmp_path / "results"),
+        batch_id="batch",
+        workers=1,
+    )
+
+    states = runner._load_states()
+
+    assert states[0].spec.experiment.id == "betrayal_choice"
+    assert len(states[0].expanded_runs) == 6

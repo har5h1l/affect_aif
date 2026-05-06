@@ -153,11 +153,12 @@ Phase 5 between-profile payoff differences are small (10.324-10.353). The paper 
 
 **2.1 Docs Consistency Check**
 Verify agreement across `docs/theory/hypotheses.md`, `docs/theory/theory.md`,
-`docs/experiment/design.md`, and `docs/experiments/manifest.md` on condition
-numbering, key numbers, hypothesis status, and phase descriptions.
+`docs/experiment/design.md`, and `docs/experiments/manifest.md` on explicit
+variant IDs, key numbers, hypothesis status, and phase descriptions.
 
 **2.2 Results Reproducibility Spot-Check**
-Spot-check key configs (5 seeds each): `default.json`, `betrayal_stress.json`, `horizon_sweep.json`.
+Spot-check key TOML specs (5 seeds each): the H0 openness, H3 betrayal-choice,
+and any horizon-sweep successor specs listed in `docs/experiments/manifest.md`.
 
 **2.3 Final LaTeX Polish**
 Bibliography completeness, figure/table numbering, equation references, add Yoshida/Sennesh/Ramstead/Bancee/Baram, check for TODO/FIXME.

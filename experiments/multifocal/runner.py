@@ -219,7 +219,7 @@ class MultiFocalRunner:
             "focal_idx": focal_g,
             "engaged_partner_global_idx": engaged_g,
             "agent_global_idx": agent_g,
-            "agent_kind": runtime.condition_name,
+            "agent_kind": runtime.variant_id,
             "is_focal_this_round": bool(is_focal),
             "q_pi": q_pi.tolist(),
             "G": np.asarray(decision.policy_scores, dtype=float).tolist(),
@@ -232,7 +232,9 @@ class MultiFocalRunner:
             "planning_cost_ratio": planning_cost_ratio,
             "round_log_evidence": float(runtime.partner_bank.round_log_evidence),
             "cumulative_log_evidence": float(runtime.partner_bank.cumulative_log_evidence),
-            "mean_abs_step_efe": float(np.mean(np.abs(decision.policy_scores))) if decision.policy_scores.size else np.nan,
+            "mean_abs_step_efe": (
+                float(np.mean(np.abs(decision.policy_scores))) if decision.policy_scores.size else np.nan
+            ),
             "betas": betas.tolist(),
             "prediction_errors": errors.tolist(),
             "partner_beliefs": snapshot.partner_type_beliefs.tolist(),

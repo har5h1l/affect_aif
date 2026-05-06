@@ -6,8 +6,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from experiments.trust.conditions import resolve_condition_spec
 from experiments.trust.config import ExperimentConfig
+from experiments.trust.spec import ExpandedRunSpec, VariantSpec
 from tasks.trust.affect import DiscreteBetaState
 from tasks.trust.envs import GradedTrustGameEnv, TrustGameEnv
 from tasks.trust.pomdp import TrustPomdpTemplate, build_trust_pomdp_template, create_partner_agents
@@ -23,7 +23,7 @@ class NativeTrustRuntime:
     action_selection: str
     rng: np.random.Generator
     planning_horizon: int
-    condition_name: str
+    variant_id: str
     agent_kind: str
 
     @property
@@ -32,7 +32,7 @@ class NativeTrustRuntime:
 
     @property
     def _kind_label(self) -> str:
-        return self.condition_name
+        return self.variant_id
 
 
 def create_model(config: ExperimentConfig) -> TrustPomdpTemplate:
@@ -52,68 +52,31 @@ def create_env(config: ExperimentConfig, seed: int) -> TrustGameEnv:
     return TrustGameEnv(config, seed=seed)
 
 
-def _planning_horizon_for_condition(config: ExperimentConfig, condition: int | str, default_horizon: int) -> int:
-    candidates: list[int | str] = [condition]
-    if isinstance(condition, str) and condition.strip().isdigit():
-        candidates.append(int(condition))
-    elif not isinstance(condition, str):
-        candidates.append(str(condition))
-        candidates.append(resolve_condition_spec(condition).name)
-    else:
-        candidates.append(resolve_condition_spec(condition).name)
+def create_native_runtime_from_run(run: ExpandedRunSpec) -> NativeTrustRuntime:
+    """Build a native trust runtime from an expanded TOML variant run."""
 
-    for key in candidates:
-        if key in config.horizon_overrides:
-            return int(config.horizon_overrides[key])
-    return int(default_horizon)
-
-
-def create_native_runtime(config: ExperimentConfig, condition: int | str, seed: int) -> NativeTrustRuntime:
-    spec = resolve_condition_spec(condition)
-    planning_horizon = _planning_horizon_for_condition(config, condition, spec.planning_horizon)
-    rng = np.random.default_rng(int(seed))
-    template = build_trust_pomdp_template(
-        config,
-        planning_horizon=planning_horizon,
-        max_policies=config.max_policies,
-        rng=rng,
+    return create_native_runtime_from_variant(
+        run.to_runtime_config(),
+        variant=run.variant,
+        variant_id=run.variant_id,
+        seed=run.seed,
     )
-    agents = create_partner_agents(template, num_partners=config.num_partners, gamma=config.gamma)
-    for agent in agents:
-        _set_information_gain(agent, spec.use_information_gain)
 
-    params = {
-        "alpha_charge": config.alpha_charge,
-        "sigma_0_sq": config.sigma_0_sq,
-        "initial_beta": config.initial_beta,
-    }
-    params.update(spec.parameter_overrides)
-    beta = None
-    affect_mode = "none"
-    if spec.agent_kind in {"affective", "lesioned"}:
-        affect_mode = "normal" if spec.agent_kind == "affective" else (spec.lesion_mode or config.lesion_mode)
-        beta_levels = None
-        if config.beta_num_levels != 5:
-            beta_levels = np.linspace(0.5, 2.0, int(config.beta_num_levels), dtype=np.float64)
-        beta = DiscreteBetaState(
-            num_entities=config.num_partners,
-            beta_levels=beta_levels,
-            persistence=config.beta_persistence,
-            alpha_charge=params["alpha_charge"],
-            sigma_0_sq=params["sigma_0_sq"],
-            initial_beta=params["initial_beta"],
-        )
 
-    return NativeTrustRuntime(
-        template=template,
-        partner_bank=PartnerBank(agents=agents, beta=beta),
-        affect_mode=affect_mode,
-        base_gamma=config.gamma,
-        action_selection=config.action_sampling,
-        rng=rng,
-        planning_horizon=planning_horizon,
-        condition_name=spec.name,
-        agent_kind=spec.agent_kind,
+def create_native_runtime_from_variant(
+    config: ExperimentConfig,
+    *,
+    variant: VariantSpec,
+    variant_id: str | None = None,
+    seed: int,
+) -> NativeTrustRuntime:
+    """Build a native trust runtime from explicit runtime config and variant metadata."""
+
+    return _create_runtime_from_config_and_variant(
+        config,
+        variant=variant,
+        variant_id=variant.id if variant_id is None else str(variant_id),
+        seed=seed,
     )
 
 
@@ -156,13 +119,15 @@ def create_agents_from_multi_focal_config(
         if unknown_agent_keys:
             raise ValueError(f"unsupported multi-focal agent keys: {sorted(unknown_agent_keys)}")
 
+        kind = str(spec["kind"])
+        affect = "precision" if kind == "affective" else "tracked_only" if kind == "lesioned" else "none"
+        planning_horizon = int(spec.get("planning_horizon", 8))
         runtime_config = ExperimentConfig(
             payoff_mode=config.payoff_mode,
             num_partners=participant_count - 1,
             assignment_mode=config.assignment_mode,
             num_rounds=config.num_rounds,
             random_seed=seed + i,
-            conditions=[],
             max_policies=int(spec.get("max_policies", 4096)),
             gamma=float(spec.get("gamma", 1.0)),
             action_sampling=str(spec.get("action_sampling", "marginal")),
@@ -171,20 +136,86 @@ def create_agents_from_multi_focal_config(
             initial_beta=float(spec.get("initial_beta", 1.0)),
             beta_num_levels=int(spec.get("num_levels", 5)),
             beta_persistence=float(spec.get("persistence", 0.8)),
-            horizon_overrides={"base": int(spec.get("planning_horizon", 8))},
         )
         for key, value in overrides.items():
             setattr(runtime_config, key, value)
         runtime_config.payoff_mode = config.payoff_mode
         runtime_config.num_partners = participant_count - 1
         runtime_config.assignment_mode = config.assignment_mode
-        kind = str(spec["kind"])
-        condition = "lesioned" if kind == "lesioned" else 2 if kind == "affective" else 1
-        runtime = create_native_runtime(runtime_config, condition=condition, seed=seed + i)
-        runtime.condition_name = str(spec.get("_label", kind))
+        variant = VariantSpec(
+            id=str(spec.get("_label", kind)),
+            affect=affect,
+            planning_horizon=planning_horizon,
+            gamma=runtime_config.gamma,
+            epistemic_value=bool(spec.get("use_information_gain", True)),
+            alpha_charge=runtime_config.alpha_charge,
+            sigma_0_sq=runtime_config.sigma_0_sq,
+            initial_beta=runtime_config.initial_beta,
+            beta_persistence=runtime_config.beta_persistence,
+            beta_levels=tuple(
+                runtime_config.beta_levels
+                if runtime_config.beta_levels is not None
+                else np.linspace(0.5, 2.0, int(runtime_config.beta_num_levels), dtype=np.float64).tolist()
+            ),
+            action_selection=runtime_config.action_sampling,
+        )
+        runtime = create_native_runtime_from_variant(
+            runtime_config,
+            variant=variant,
+            variant_id=variant.id,
+            seed=seed + i,
+        )
+        runtime.variant_id = str(spec.get("_label", kind))
         runtime.agent_kind = kind
         runtimes.append(runtime)
     return runtimes
+
+
+def _create_runtime_from_config_and_variant(
+    config: ExperimentConfig,
+    *,
+    variant: VariantSpec,
+    variant_id: str,
+    seed: int,
+) -> NativeTrustRuntime:
+    rng = np.random.default_rng(int(seed))
+    planning_horizon = int(variant.planning_horizon)
+    template = build_trust_pomdp_template(
+        config,
+        planning_horizon=planning_horizon,
+        max_policies=config.max_policies,
+        rng=rng,
+    )
+    agents = create_partner_agents(template, num_partners=config.num_partners, gamma=config.gamma)
+    for agent in agents:
+        _set_information_gain(agent, variant.epistemic_value)
+
+    beta = None
+    affect_mode = "none"
+    agent_kind = "base"
+    if variant.affect in {"precision", "tracked_only"}:
+        agent_kind = "affective" if variant.affect == "precision" else "lesioned"
+        affect_mode = "normal" if variant.affect == "precision" else "decouple"
+        beta = DiscreteBetaState(
+            num_entities=config.num_partners,
+            beta_levels=np.asarray(variant.beta_levels, dtype=np.float64),
+            persistence=config.beta_persistence,
+            alpha_charge=config.alpha_charge,
+            sigma_0_sq=config.sigma_0_sq,
+            initial_beta=config.initial_beta,
+        )
+
+    return NativeTrustRuntime(
+        template=template,
+        partner_bank=PartnerBank(agents=agents, beta=beta),
+        affect_mode=affect_mode,
+        base_gamma=config.gamma,
+        action_selection=config.action_sampling,
+        rng=rng,
+        planning_horizon=planning_horizon,
+        variant_id=variant_id,
+        agent_kind=agent_kind,
+    )
 
 
 def _set_information_gain(agent, enabled: bool) -> None:
@@ -199,5 +230,6 @@ __all__ = [
     "create_agents_from_multi_focal_config",
     "create_env",
     "create_model",
-    "create_native_runtime",
+    "create_native_runtime_from_run",
+    "create_native_runtime_from_variant",
 ]

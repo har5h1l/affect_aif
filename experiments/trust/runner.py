@@ -7,15 +7,15 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from experiments.trust.calibration import (
-    build_sensitivity_specs,
-)
-from experiments.trust.conditions import resolve_condition_spec
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.constants import SENSITIVITY_CONDITIONS
-from experiments.trust.factory import NativeTrustRuntime, create_env, create_native_runtime
+from experiments.trust.factory import (
+    NativeTrustRuntime,
+    create_env,
+    create_native_runtime_from_run,
+)
 from experiments.trust.logger import MetricLogger
 from experiments.trust.progress import ProgressReporter, create_progress_reporter
+from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec
 from tasks.trust.envs import TrustGameEnv
 from tasks.trust.runtime import (
     Decision,
@@ -29,84 +29,75 @@ from tasks.trust.runtime import (
 
 
 class ExperimentRunner:
-    """Run all conditions for an experiment configuration."""
+    """Run expanded TOML experiment variants."""
 
-    def __init__(self, config: ExperimentConfig):
-        self.config = config
+    def __init__(self, *, spec: ExperimentSpec, verbose: bool = False, verbosity_mode: str = "stage_stream"):
+        self.spec = spec
         self.progress: ProgressReporter = create_progress_reporter(
-            enabled=self.config.verbose,
-            mode=self.config.verbosity_mode,
+            enabled=bool(verbose),
+            mode=str(verbosity_mode),
         )
 
-    def _create_env(self, seed: int) -> TrustGameEnv:
-        return create_env(self.config, seed=seed)
-
-    def _create_runtime(self, condition: int | str, seed: int) -> NativeTrustRuntime:
-        return create_native_runtime(self.config, condition, seed)
-
-    def _annotate_primary_records(
-        self,
-        rows: list[dict],
+    @classmethod
+    def from_spec(
+        cls,
+        spec: ExperimentSpec,
         *,
-        condition: int | str,
-        config_path: str | None = None,
-        config_name: str | None = None,
-        batch_id: str | None = None,
-    ) -> list[dict]:
-        for row in rows:
-            row["condition_name"] = resolve_condition_spec(condition).name
-            row["run_mode"] = "primary"
-            row["config_path"] = config_path or np.nan
-            row["config_name"] = config_name or self.config.experiment_name
-            row["batch_id"] = batch_id or np.nan
-        return rows
+        verbose: bool = False,
+        verbosity_mode: str = "stage_stream",
+    ) -> ExperimentRunner:
+        return cls(spec=spec, verbose=verbose, verbosity_mode=verbosity_mode)
+
+    def _create_env(self, config: ExperimentConfig, seed: int) -> TrustGameEnv:
+        return create_env(config, seed=seed)
 
     def _run_episode(
         self,
         runtime: NativeTrustRuntime,
         env: TrustGameEnv,
+        config: ExperimentConfig,
         seed: int,
-        condition: int | str,
+        variant_id: str,
         replication: int = 0,
     ) -> list[dict]:
-        logger = MetricLogger(num_rounds=self.config.num_rounds, num_partners=self.config.num_partners)
+        logger = MetricLogger(num_rounds=config.num_rounds, num_partners=config.num_partners)
         context = env.reset()
 
-        for round_idx in range(self.config.num_rounds):
+        for round_idx in range(config.num_rounds):
             active_partner = context["active_partner"]
             self.progress.emit(
                 "round_start",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 active_partner=active_partner,
             )
             self.progress.emit(
                 "planning_start",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 active_partner=active_partner,
             )
             decision = select_decision(
                 bank=runtime.partner_bank,
                 template=runtime.template,
                 active_partner=active_partner,
-                assignment_mode=self.config.assignment_mode,
+                assignment_mode=config.assignment_mode,
                 base_gamma=runtime.base_gamma,
                 action_selection=runtime.action_selection,
                 rng=runtime.rng,
                 affect_mode=runtime.affect_mode,
             )
-            planning_metrics = self._decision_diagnostics(runtime, decision, None, None)
+            planning_metrics = self._decision_diagnostics(config, runtime, decision, None, None)
             self.progress.emit(
                 "planning_end",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 selected_partner=planning_metrics["selected_partner"],
                 selected_action=planning_metrics["selected_action"],
                 raw_action=planning_metrics["raw_action"],
@@ -114,20 +105,20 @@ class ExperimentRunner:
             )
             self.progress.emit(
                 "environment_step_start",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 raw_action=decision.raw_action,
             )
             result = env.step(decision.raw_action)
             result["active_partner_start"] = active_partner
             self.progress.emit(
                 "environment_step_end",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 partner_idx=result["partner_idx"],
                 agent_action=result["agent_action"],
                 partner_action=result["partner_action"],
@@ -136,10 +127,10 @@ class ExperimentRunner:
             )
             self.progress.emit(
                 "belief_update_start",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 partner_idx=result["partner_idx"],
             )
             predictive_log_lik = predictive_log_likelihood(
@@ -173,16 +164,16 @@ class ExperimentRunner:
             inferred_stance_correct = inferred_stance == result.get("true_partner_stance")
             self.progress.emit(
                 "belief_update_end",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 partner_idx=result["partner_idx"],
                 inferred_type=inferred_type,
                 inferred_type_correct=inferred_correct,
             )
 
-            agent_metrics = self._decision_diagnostics(runtime, decision, snapshot, result)
+            agent_metrics = self._decision_diagnostics(config, runtime, decision, snapshot, result)
             agent_metrics["inferred_type"] = inferred_type
             agent_metrics["inferred_type_correct"] = inferred_correct
             agent_metrics["inferred_stance"] = inferred_stance
@@ -191,17 +182,16 @@ class ExperimentRunner:
             agent_metrics["predictive_log_lik"] = predictive_log_lik
             logger.log_round(
                 round_idx=round_idx,
-                condition=condition,
                 seed=seed,
                 agent_metrics=agent_metrics,
                 env_result=result,
             )
             self.progress.emit(
                 "metric_logging_end",
-                condition=condition,
+                variant_id=variant_id,
                 replication=replication,
                 round_idx=round_idx,
-                round_count=self.config.num_rounds,
+                round_count=config.num_rounds,
                 payoff=result["agent_payoff"],
                 inferred_type=inferred_type,
                 q_pi_entropy=agent_metrics["q_pi_entropy"],
@@ -212,6 +202,7 @@ class ExperimentRunner:
 
     def _decision_diagnostics(
         self,
+        config: ExperimentConfig,
         runtime: NativeTrustRuntime,
         decision: Decision,
         snapshot: PartnerSnapshot | None,
@@ -224,10 +215,8 @@ class ExperimentRunner:
         entropy = float(-(q_pi * np.log(q_pi + 1e-16)).sum()) if q_pi.size else np.nan
         num_step_controls = int(np.prod(runtime.template.num_controls))
         planning_cost = float((num_step_controls**runtime.planning_horizon) * runtime.planning_horizon)
-        planning_cost_ratio = float(
-            (num_step_controls**self.config.deep_horizon) / max(num_step_controls**runtime.planning_horizon, 1)
-        )
-        default_vector = np.full((self.config.num_partners,), np.nan, dtype=float)
+        planning_cost_ratio = 1.0
+        default_vector = np.full((config.num_partners,), np.nan, dtype=float)
         betas = (
             np.asarray(runtime.partner_bank.beta.expected_beta(), dtype=float)
             if runtime.partner_bank.beta is not None
@@ -271,43 +260,53 @@ class ExperimentRunner:
     def run_replication(
         self,
         *,
-        condition: int | str,
-        replication: int,
-        seed: int,
+        run: ExpandedRunSpec,
         config_path: str | None = None,
         config_name: str | None = None,
         batch_id: str | None = None,
     ) -> list[dict]:
-        self.progress.emit(
-            "replication_start",
-            condition=condition,
-            replication=replication,
-            seed=seed,
-        )
-        env = self._create_env(seed=seed)
-        runtime = self._create_runtime(condition=condition, seed=seed)
-        episode_records = self._run_episode(
-            runtime=runtime,
-            env=env,
-            seed=seed,
-            condition=condition,
-            replication=replication,
-        )
-        self._annotate_primary_records(
-            episode_records,
-            condition=condition,
+        return self._run_variant_replication(
+            run=run,
             config_path=config_path,
             config_name=config_name,
             batch_id=batch_id,
         )
+
+    def _run_variant_replication(
+        self,
+        *,
+        run: ExpandedRunSpec,
+        config_path: str | None = None,
+        config_name: str | None = None,
+        batch_id: str | None = None,
+    ) -> list[dict]:
+        runtime_config = run.to_runtime_config()
         self.progress.emit(
-            "replication_end",
-            condition=condition,
-            replication=replication,
-            seed=seed,
-            cumulative_payoff=sum(float(row["payoff"]) for row in episode_records),
+            "replication_start",
+            variant_id=run.variant_id,
+            replication=run.replication,
+            seed=run.seed,
         )
-        return episode_records
+        env = self._create_env(runtime_config, seed=run.seed)
+        runtime = create_native_runtime_from_run(run)
+        rows = self._run_episode(
+            runtime=runtime,
+            env=env,
+            config=runtime_config,
+            seed=run.seed,
+            variant_id=run.variant_id,
+            replication=run.replication,
+        )
+        for row in rows:
+            row["hypothesis_id"] = run.hypothesis_id
+            row["experiment_id"] = run.experiment_id
+            row["variant_id"] = run.variant_id
+            row["replication"] = int(run.replication)
+            row["seed"] = int(run.seed)
+            row["config_path"] = config_path or np.nan
+            row["config_name"] = config_name or run.experiment_id
+            row["batch_id"] = batch_id or np.nan
+        return rows
 
     def run_all(
         self,
@@ -318,55 +317,30 @@ class ExperimentRunner:
         checkpoint_path: str | None = None,
         checkpoint_interval: int = 1,
     ) -> pd.DataFrame:
-        """Run all configured conditions across all seeds.
+        """Run all expanded variants across all seeds.
 
         Args:
             checkpoint_path: If set, save partial results to this path after every
-                ``checkpoint_interval`` replications per condition.
+                ``checkpoint_interval`` replications per variant.
             checkpoint_interval: How often (in replications) to write a checkpoint.
                 Defaults to 1 (save after every replication).
         """
 
         records: list[dict] = []
         reps_since_checkpoint = 0
-        configured_conditions: list[int | str] = list(self.config.conditions) + list(self.config.presets)
-        for condition in configured_conditions:
-            self.progress.emit(
-                "condition_start",
-                condition=condition,
-                replication=0,
-                condition_name=resolve_condition_spec(condition).name,
-            )
-            for replication in range(self.config.num_replications):
-                seed = self.config.random_seed + replication
-                records.extend(
-                    self.run_replication(
-                        condition=condition,
-                        replication=replication,
-                        seed=seed,
-                        config_path=config_path,
-                        config_name=config_name,
-                        batch_id=batch_id,
-                    )
-                )
-                reps_since_checkpoint += 1
-                if checkpoint_path and reps_since_checkpoint >= checkpoint_interval:
-                    self.save_results(pd.DataFrame(records), checkpoint_path)
-                    reps_since_checkpoint = 0
-            self.progress.emit(
-                "condition_end",
-                condition=condition,
-                replication=self.config.num_replications - 1,
-                rows=len([row for row in records if row["condition"] == condition and row["run_mode"] == "primary"]),
-            )
-        if self.config.run_sensitivity:
+        for run in self.spec.expand_runs():
             records.extend(
-                self.run_parameter_sensitivity(
-                    config_path=config_path,
-                    config_name=config_name,
+                self.run_replication(
+                    run=run,
+                    config_path=config_path or self.spec.path,
+                    config_name=config_name or self.spec.experiment.id,
                     batch_id=batch_id,
-                ).to_dict(orient="records")
+                )
             )
+            reps_since_checkpoint += 1
+            if checkpoint_path and reps_since_checkpoint >= checkpoint_interval:
+                self.save_results(pd.DataFrame(records), checkpoint_path)
+                reps_since_checkpoint = 0
         return pd.DataFrame(records)
 
     def save_results(self, results: pd.DataFrame, path: str):
@@ -378,87 +352,6 @@ class ExperimentRunner:
             results.to_parquet(target, index=False)
             return
         results.to_csv(target, index=False)
-
-    def _apply_sensitivity_override(self, parameter_name: str, parameter_value: float):
-        if parameter_name == "alpha_charge":
-            self.config.alpha_charge = float(parameter_value)
-        elif parameter_name == "sigma_0_sq":
-            self.config.sigma_0_sq = float(parameter_value)
-        elif parameter_name == "beta_persistence":
-            self.config.beta_persistence = float(parameter_value)
-        elif parameter_name == "initial_beta":
-            self.config.initial_beta = float(parameter_value)
-
-    def run_sensitivity_replication(
-        self,
-        *,
-        parameter_name: str,
-        parameter_value: float,
-        condition: int | str,
-        replication: int,
-        seed: int,
-        config_path: str | None = None,
-        config_name: str | None = None,
-        batch_id: str | None = None,
-    ) -> list[dict]:
-        original_alpha = self.config.alpha_charge
-        original_sigma = self.config.sigma_0_sq
-        original_persistence = self.config.beta_persistence
-        original_initial_beta = self.config.initial_beta
-        try:
-            self._apply_sensitivity_override(parameter_name, float(parameter_value))
-            env = self._create_env(seed=seed)
-            runtime = self._create_runtime(condition=condition, seed=seed)
-            rows = self._run_episode(runtime=runtime, env=env, seed=seed, condition=condition, replication=replication)
-            for row in rows:
-                row["condition_name"] = resolve_condition_spec(condition).name
-                row["sensitivity_parameter"] = parameter_name
-                row["sensitivity_value"] = float(parameter_value)
-                row["run_mode"] = "sensitivity"
-                row["config_path"] = config_path or np.nan
-                row["config_name"] = config_name or self.config.experiment_name
-                row["batch_id"] = batch_id or np.nan
-            return rows
-        finally:
-            self.config.alpha_charge = original_alpha
-            self.config.sigma_0_sq = original_sigma
-            self.config.beta_persistence = original_persistence
-            self.config.initial_beta = original_initial_beta
-
-    def run_parameter_sensitivity(
-        self,
-        *,
-        config_path: str | None = None,
-        config_name: str | None = None,
-        batch_id: str | None = None,
-    ) -> pd.DataFrame:
-        """Run one-at-a-time sensitivity sweeps for affective state hyperparameters."""
-
-        original_conditions = list(self.config.conditions)
-        sensitivity_conditions = [condition for condition in original_conditions if condition in SENSITIVITY_CONDITIONS]
-        if not sensitivity_conditions:
-            return pd.DataFrame()
-
-        records: list[dict] = []
-        for parameter_name, parameter_value in build_sensitivity_specs(self.config):
-            for condition in sensitivity_conditions:
-                for replication in range(self.config.num_replications):
-                    seed = self.config.random_seed + replication
-                    records.extend(
-                        self.run_sensitivity_replication(
-                            parameter_name=parameter_name,
-                            parameter_value=parameter_value,
-                            condition=condition,
-                            replication=replication,
-                            seed=seed,
-                            config_path=config_path,
-                            config_name=config_name,
-                            batch_id=batch_id,
-                        )
-                    )
-        self.config.conditions = original_conditions
-        return pd.DataFrame(records)
-
 
 __all__ = [
     "ExperimentRunner",

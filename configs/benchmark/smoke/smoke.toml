@@ -1,0 +1,33 @@
+[hypothesis]
+id = "e1"
+name = "benchmark_arena"
+
+[experiment]
+id = "benchmark_smoke"
+family = "benchmark"
+rounds = 1
+replications = 1
+seed = 7
+
+[scenario]
+payoff = "binary"
+assignment = "random"
+partners = 2
+type_volatility = 0.0
+observation_noise = 0.0
+
+[[variants]]
+id = "benchmark"
+affect = "none"
+planning_horizon = 1
+
+[analysis]
+auto = false
+primary = "e1_benchmark_arena"
+
+[benchmark]
+backends = ["trust"]
+agents = ["random"]
+
+[benchmark.trust]
+scenario = "resource_sharing"

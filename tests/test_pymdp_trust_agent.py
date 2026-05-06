@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import numpy as np
+from runtime_helpers import build_runtime
 
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.factory import create_native_runtime
 from tasks.trust.runtime import (
     select_decision,
     snapshot_partner_bank,
@@ -13,14 +13,14 @@ from tasks.trust.runtime import (
 
 
 def test_native_runtime_uses_official_pymdp_partner_agents() -> None:
-    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2), condition=1, seed=0)
+    runtime = build_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2))
 
     assert len(runtime.partner_bank.agents) == 2
     assert all(agent.__class__.__module__.startswith("pymdp.") for agent in runtime.partner_bank.agents)
 
 
 def test_runtime_can_plan_and_observe_single_outcome() -> None:
-    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2), condition=1, seed=0)
+    runtime = build_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2))
 
     decision = select_decision(
         bank=runtime.partner_bank,
@@ -47,10 +47,8 @@ def test_runtime_can_plan_and_observe_single_outcome() -> None:
 
 
 def test_agent_choice_stores_candidate_level_policy_distribution() -> None:
-    runtime = create_native_runtime(
+    runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice"),
-        condition=1,
-        seed=0,
     )
 
     decision = select_decision(
@@ -69,10 +67,8 @@ def test_agent_choice_stores_candidate_level_policy_distribution() -> None:
 
 
 def test_agent_choice_selected_fields_match_encoded_raw_action() -> None:
-    runtime = create_native_runtime(
+    runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice"),
-        condition=1,
-        seed=0,
     )
 
     decision = select_decision(
@@ -90,7 +86,11 @@ def test_agent_choice_selected_fields_match_encoded_raw_action() -> None:
 
 
 def test_use_information_gain_false_updates_pymdp_agent_flags() -> None:
-    runtime = create_native_runtime(ExperimentConfig(payoff_mode="binary", num_partners=2), condition="no_epistemic", seed=0)
+    runtime = build_runtime(
+        ExperimentConfig(payoff_mode="binary", num_partners=2),
+        variant_id="no_epistemic",
+        epistemic_value=False,
+    )
 
     for agent in runtime.partner_bank.agents:
         if hasattr(agent, "use_states_info_gain"):
@@ -100,10 +100,10 @@ def test_use_information_gain_false_updates_pymdp_agent_flags() -> None:
 
 
 def test_affective_runtime_updates_beta_after_observation() -> None:
-    runtime = create_native_runtime(
+    runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_partners=1, initial_beta=1.0),
-        condition=2,
-        seed=0,
+        variant_id="affect",
+        affect="precision",
     )
     beta = runtime.partner_bank.beta
     assert beta is not None
@@ -122,10 +122,10 @@ def test_affective_runtime_updates_beta_after_observation() -> None:
 
 
 def test_lesioned_decouple_updates_beta_but_uses_base_precision() -> None:
-    runtime = create_native_runtime(
+    runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_partners=1, initial_beta=1.0),
-        condition="lesioned",
-        seed=0,
+        variant_id="lesioned",
+        affect="tracked_only",
     )
     beta = runtime.partner_bank.beta
     assert beta is not None

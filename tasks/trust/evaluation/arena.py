@@ -12,9 +12,9 @@ import numpy as np
 from benchmarks.core.backend import BenchmarkBackend, BenchmarkBackendContext
 from benchmarks.core.benchmark_config import AGENT_REGISTRY, SCHEMA_VERSION, AgentSpec, BenchmarkConfig
 from benchmarks.core.scenarios import get_scenario
-from experiments.trust.conditions import resolve_condition_spec
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.factory import create_native_runtime
+from experiments.trust.factory import create_native_runtime_from_variant
+from experiments.trust.spec import VariantSpec
 from tasks.trust.envs import TrustGameEnv
 from tasks.trust.evaluation import baselines
 from tasks.trust.runtime import (
@@ -35,8 +35,23 @@ def _create_baseline_agent(agent_name: str, num_partners: int, seed: int):
     return cls(num_partners=num_partners, seed=seed)
 
 
-def _create_aif_agent(condition: int | str, config: ExperimentConfig, seed: int):
-    return create_native_runtime(config, condition, seed)
+def _create_aif_agent(agent_name: str, info: dict[str, Any], config: ExperimentConfig, seed: int):
+    payload = dict(info["variant"])
+    payload.update(info.get("variant_overrides", {}))
+    variant = VariantSpec(
+        id=agent_name,
+        affect=str(payload.get("affect", "none")),
+        planning_horizon=int(payload.get("planning_horizon", 4)),
+        gamma=float(payload.get("gamma", config.gamma)),
+        epistemic_value=bool(payload.get("epistemic_value", True)),
+        alpha_charge=float(payload.get("alpha_charge", config.alpha_charge)),
+        sigma_0_sq=float(payload.get("sigma_0_sq", config.sigma_0_sq)),
+        initial_beta=float(payload.get("initial_beta", config.initial_beta)),
+        beta_persistence=float(payload.get("beta_persistence", config.beta_persistence)),
+        beta_levels=tuple(payload.get("beta_levels", config.beta_levels or (0.5, 0.67, 1.0, 1.5, 2.0))),
+        action_selection=str(payload.get("action_selection", config.action_sampling)),
+    )
+    return create_native_runtime_from_variant(config, variant=variant, variant_id=agent_name, seed=seed)
 
 
 class TrustBackend(BenchmarkBackend):
@@ -124,16 +139,10 @@ class TrustBackend(BenchmarkBackend):
 
         env = TrustGameEnv(experiment_config, seed=seed)
         info = AGENT_REGISTRY[agent_name]
-        condition_key = (
-            info.get("condition", info.get("preset"))
-            if info["type"] == "aif"
-            else -(config.agents.index(agent_spec) + 1)
-        )
-
         if info["type"] == "baseline":
             agent = _create_baseline_agent(agent_name, env.num_partners, seed)
         else:
-            agent = _create_aif_agent(condition_key, experiment_config, seed)
+            agent = _create_aif_agent(agent_name, info, experiment_config, seed)
 
         context_payload = env.reset()
         if hasattr(agent, "reset"):
@@ -226,10 +235,7 @@ class TrustBackend(BenchmarkBackend):
                     "episode_id": episode_id,
                     "step": round_idx,
                     "reward": float(result["agent_payoff"]),
-                    "condition": condition_key,
-                    "condition_name": (
-                        resolve_condition_spec(condition_key).name if info["type"] == "aif" else agent_spec.name
-                    ),
+                    "variant_id": agent_name if info["type"] == "aif" else agent_spec.name,
                     "partner_idx": partner_idx,
                     "true_partner_type": result.get("true_partner_type", "unknown"),
                     "agent_action": result["agent_action"],

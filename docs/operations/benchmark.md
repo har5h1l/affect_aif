@@ -30,7 +30,13 @@ Because of that mismatch:
 
 ### Config model
 
-`benchmarks/core/benchmark_config.py` uses:
+Authored benchmark configs are unified TOML `ExperimentSpec` files under
+`configs/benchmark/` with `experiment.family = "benchmark"`. Benchmark-specific
+knobs live under `[benchmark]`, `[benchmark.trust]`, `[benchmark.cvc_local]`,
+and `[benchmark.observatory]`.
+
+`benchmarks/core/benchmark_config.py` is now an internal adapter constructed
+from the unified spec. It still uses:
 
 - `backends: list[str]`
 - `agents: list[AgentSpec]`
@@ -39,7 +45,7 @@ Because of that mismatch:
 
 `AgentSpec` is backend-specific:
 
-- trust uses registry-backed agents such as `tau4_affect`, `random`,
+- trust uses registry-backed agents such as `affect`, `random`,
   `pavlov`, `grim_trigger`
 - CvC uses explicit policy specs such as
   `class=benchmarks.cvc.policy.TeammateReliabilityPolicy`
@@ -78,16 +84,16 @@ active-inference theory. It now includes:
 
 - Pavlov baseline
 - Grim Trigger baseline
-- benchmark JSON configs under `configs/`
+- benchmark-family TOML specs under `configs/benchmark/`
 - scheduled-switch propagation through benchmark results
 - unfinished CoGames policy adapters are not shipped in `benchmarks/core/`
   (add one under `benchmarks/cvc/` when CvC integration is active)
 
 Recommended trust configs:
 
-- `configs/benchmark_default.json`
-- `configs/benchmark_betrayal.json`
-- `configs/benchmark_full.json`
+- `configs/benchmark/e1_arena/default.toml`
+- `configs/benchmark/e1_arena/betrayal.toml`
+- `configs/benchmark/e1_arena/full.toml`
 
 Scenario defaults now matter for the trust-task evaluation arena rather than
 serving as labels only. In particular, `betrayal_arena` now carries its own
@@ -142,8 +148,8 @@ It does not log in, upload, or submit policies.
 ### Run benchmarks
 
 ```bash
-python scripts/benchmark/run_cvc.py --backend trust --config configs/benchmark_default.json
-python scripts/benchmark/run_cvc.py --backend trust --agents tau4_affect random tit_for_tat --rounds 50 --replications 3
+python scripts/benchmark/run_cvc.py --config configs/benchmark/e1_arena/default.toml
+python scripts/benchmark/run_cvc.py --backend trust --agents affect random tit_for_tat --rounds 50 --replications 3
 # Experimental / WIP: requires Python 3.12 and uses the real CvC local worker.
 python scripts/benchmark/run_cvc.py --backend cvc_local --agents teammate_reliability starter --mission machina_1 --max-steps 250 --python-bin python3.12
 ```
@@ -181,7 +187,7 @@ The full CvC pipeline runs cleanly:
 4. **Results** flow back as JSON → DataFrame → CSV → comparison report
 5. **Analysis** pipeline (`scripts/benchmark/analyze.py`) computes CvC-specific summaries
 
-Verified with: `benchmark_cvc_full.json` (6 policies × 10 seeds × 10,000 steps = 60 episodes).
+Verified with: `configs/benchmark/cvc/full.toml` (6 policies × 10 seeds × 10,000 steps = 60 episodes).
 
 Available CvC policies tested:
 

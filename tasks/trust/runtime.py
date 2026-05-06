@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import inspect
+from dataclasses import dataclass, field
 from typing import Any
 
 import jax.numpy as jnp
@@ -114,7 +114,9 @@ def select_decision(
             affect_mode=affect_mode,
         )
         for policy_idx, score in enumerate(policy_scores):
-            candidates.append((partner_idx, policy_idx, np.asarray(template.policies[policy_idx, 0], dtype=int), float(score)))
+            candidates.append(
+                (partner_idx, policy_idx, np.asarray(template.policies[policy_idx, 0], dtype=int), float(score))
+            )
     scores = np.asarray([candidate[3] for candidate in candidates], dtype=float)
     candidate_probs = _softmax(scores)
     candidate_idx = _choose_index(candidate_probs, deterministic=deterministic, rng=rng)
@@ -226,7 +228,10 @@ def _infer_partner_policy(
 ) -> tuple[np.ndarray, np.ndarray]:
     idx = int(partner_idx)
     agent = bank.agents[idx]
-    _set_agent_gamma(agent, gamma_for_partner(base_gamma=base_gamma, beta=bank.beta, partner_idx=idx, affect_mode=affect_mode))
+    _set_agent_gamma(
+        agent,
+        gamma_for_partner(base_gamma=base_gamma, beta=bank.beta, partner_idx=idx, affect_mode=affect_mode),
+    )
     qs = bank.latest_qs[idx] if bank.latest_qs[idx] is not None else _policy_qs_from_agent_D(agent)
     result = agent.infer_policies(qs)
     q_pi, policy_scores = _unpack_policy_result(result)

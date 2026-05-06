@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 
-def _condition_sort_key(value) -> tuple[int, str]:
+def _variant_sort_key(value) -> tuple[int, str]:
     if isinstance(value, (int, np.integer)):
         return (0, f"{int(value):04d}")
     return (1, str(value))
@@ -58,20 +58,20 @@ def _build_scheduled_switch_map(
     column: str,
     switch_kind: str,
 ) -> dict[tuple[object, int, int], set[tuple[int, str]]]:
-    """Index scheduled switch rows by condition/seed/partner for fast lookup."""
+    """Index scheduled switch rows by variant/seed/partner for fast lookup."""
 
     schedule_map: dict[tuple[object, int, int], set[tuple[int, str]]] = defaultdict(set)
     if column not in frame.columns:
         return schedule_map
-    scheduled_rows = frame.loc[frame[column].apply(len).gt(0), ["condition", "seed", "round", column]]
+    scheduled_rows = frame.loc[frame[column].apply(len).gt(0), ["variant_id", "seed", "round", column]]
     for _, row in scheduled_rows.iterrows():
         for partner_idx in row[column]:
-            schedule_map[(row["condition"], int(row["seed"]), int(partner_idx))].add((int(row["round"]), switch_kind))
+            schedule_map[(row["variant_id"], int(row["seed"]), int(partner_idx))].add((int(row["round"]), switch_kind))
     return schedule_map
 
 
 def _build_observed_switch_map(frame: pd.DataFrame) -> dict[tuple[object, int, int], set[tuple[int, str]]]:
-    """Index observed switch rows by condition/seed/partner for fast lookup."""
+    """Index observed switch rows by variant/seed/partner for fast lookup."""
 
     observed_map: dict[tuple[object, int, int], set[tuple[int, str]]] = defaultdict(set)
     type_switched = (
@@ -85,10 +85,10 @@ def _build_observed_switch_map(frame: pd.DataFrame) -> dict[tuple[object, int, i
         else pd.Series(False, index=frame.index)
     )
     switch_rows = frame.loc[
-        type_switched | stance_switched, ["condition", "seed", "partner_idx", "round", "switch_kind"]
+        type_switched | stance_switched, ["variant_id", "seed", "partner_idx", "round", "switch_kind"]
     ]
     for _, row in switch_rows.iterrows():
-        observed_map[(row["condition"], int(row["seed"]), int(row["partner_idx"]))].add(
+        observed_map[(row["variant_id"], int(row["seed"]), int(row["partner_idx"]))].add(
             (int(row["round"]), str(row.get("switch_kind", "unknown")))
         )
     return observed_map
@@ -108,11 +108,11 @@ def _switch_rounds_for_partner(
 
 
 def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Aggregate final cumulative payoff and identification accuracy per seed and condition."""
+    """Aggregate final cumulative payoff and identification accuracy per seed and variant."""
 
     frame = results.copy()
-    frame["_condition_sort"] = frame["condition"].apply(_condition_sort_key)
-    frame = frame.sort_values(["_condition_sort", "seed", "round"]).drop(columns="_condition_sort")
+    frame["_variant_sort"] = frame["variant_id"].apply(_variant_sort_key)
+    frame = frame.sort_values(["_variant_sort", "seed", "round"]).drop(columns="_variant_sort")
     agg_dict = {
         "total_payoff": ("payoff", "sum"),
         "mean_accuracy": ("inferred_type_correct", "mean"),
@@ -127,14 +127,14 @@ def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
         agg_dict["total_log_evidence"] = ("cumulative_log_evidence", "last")
     if "round_log_evidence" in frame.columns:
         agg_dict["mean_round_log_evidence"] = ("round_log_evidence", "mean")
-    grouped = frame.groupby(["condition", "condition_name", "seed"], as_index=False).agg(**agg_dict)
+    grouped = frame.groupby(["variant_id", "seed"], as_index=False).agg(**agg_dict)
     return grouped
 
 
 def payoff_by_partner_type(results: pd.DataFrame) -> pd.DataFrame:
     """Mean payoff and accuracy sliced by ground-truth partner type."""
 
-    return results.groupby(["condition", "condition_name", "true_partner_type"], as_index=False).agg(
+    return results.groupby(["variant_id", "true_partner_type"], as_index=False).agg(
         mean_payoff=("payoff", "mean"),
         mean_accuracy=("inferred_type_correct", "mean"),
         n=("payoff", "size"),
@@ -144,7 +144,7 @@ def payoff_by_partner_type(results: pd.DataFrame) -> pd.DataFrame:
 def extract_partner_signal(results: pd.DataFrame, column: str, partner_idx: int) -> pd.DataFrame:
     """Extract one per-partner array-valued metric into a tidy long frame."""
 
-    frame = results[["condition", "condition_name", "seed", "round", column]].copy()
+    frame = results[["variant_id", "seed", "round", column]].copy()
     frame[column] = frame[column].apply(_ensure_array)
     frame["partner_idx"] = int(partner_idx)
     frame["value"] = frame[column].apply(lambda arr: float(arr[partner_idx]) if len(arr) > partner_idx else np.nan)
@@ -154,15 +154,18 @@ def extract_partner_signal(results: pd.DataFrame, column: str, partner_idx: int)
 def beta_reward_divergence(results: pd.DataFrame, partner_idx: int | None = None) -> pd.DataFrame:
     """Compare affective β and reward averages over time."""
 
-    betas = results[["condition", "condition_name", "seed", "round", "betas"]].copy()
-    rewards = results[["condition", "seed", "round", "reward_avgs"]].copy()
+    betas = results[["variant_id", "seed", "round", "betas"]].copy()
+    rewards = results[["variant_id", "seed", "round", "reward_avgs"]].copy()
     betas["betas"] = betas["betas"].apply(_ensure_array)
     rewards["reward_avgs"] = rewards["reward_avgs"].apply(_ensure_array)
 
     if partner_idx is None:
         betas["beta_mean"] = betas["betas"].apply(_safe_nanmean)
         rewards["reward_mean"] = rewards["reward_avgs"].apply(_safe_nanmean)
-        merged = betas.merge(rewards[["condition", "seed", "round", "reward_mean"]], on=["condition", "seed", "round"])
+        merged = betas.merge(
+            rewards[["variant_id", "seed", "round", "reward_mean"]],
+            on=["variant_id", "seed", "round"],
+        )
         merged["divergence"] = merged["beta_mean"] - merged["reward_mean"]
         return merged
 
@@ -175,8 +178,8 @@ def beta_reward_divergence(results: pd.DataFrame, partner_idx: int | None = None
         lambda arr: float(arr[partner_idx]) if len(arr) > partner_idx else np.nan
     )
     merged = betas.merge(
-        rewards[["condition", "seed", "round", "partner_idx", "reward_value"]],
-        on=["condition", "seed", "round", "partner_idx"],
+        rewards[["variant_id", "seed", "round", "partner_idx", "reward_value"]],
+        on=["variant_id", "seed", "round", "partner_idx"],
     )
     merged["divergence"] = merged["beta_value"] - merged["reward_value"]
     return merged
@@ -217,8 +220,8 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
     """Summarize payoff and inference quality in the rounds immediately after a switch."""
 
     frame = results.copy()
-    frame["_condition_sort"] = frame["condition"].apply(_condition_sort_key)
-    frame = frame.sort_values(["_condition_sort", "seed", "partner_idx", "round"]).drop(columns="_condition_sort")
+    frame["_variant_sort"] = frame["variant_id"].apply(_variant_sort_key)
+    frame = frame.sort_values(["_variant_sort", "seed", "partner_idx", "round"]).drop(columns="_variant_sort")
     if frame.empty:
         return pd.DataFrame()
     if "scheduled_switch_partner_ids" in frame.columns:
@@ -235,10 +238,10 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
     scheduled_stance_map = _build_scheduled_switch_map(frame, "scheduled_stance_switch_partner_ids", "scheduled_stance")
     observed_map = _build_observed_switch_map(frame)
     summaries: list[dict] = []
-    for (condition, condition_name, seed, partner_idx), group in frame.groupby(
-        ["condition", "condition_name", "seed", "partner_idx"],
+    for (variant_id, seed, partner_idx), group in frame.groupby(
+        ["variant_id", "seed", "partner_idx"],
     ):
-        key = (condition, int(seed), int(partner_idx))
+        key = (variant_id, int(seed), int(partner_idx))
         switch_rounds = _switch_rounds_for_partner(key, scheduled_type_map, scheduled_stance_map, observed_map)
         for switch_round, switch_kind in sorted(switch_rounds):
             window_frame = group[group["round"] >= switch_round].head(int(window)).copy()
@@ -247,8 +250,7 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
             window_frame["encounters_since_switch"] = np.arange(len(window_frame), dtype=int)
             summaries.append(
                 {
-                    "condition": condition,
-                    "condition_name": str(condition_name),
+                    "variant_id": str(variant_id),
                     "seed": int(seed),
                     "partner_idx": int(partner_idx),
                     "switch_round": switch_round,
@@ -277,8 +279,8 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
     """Return per-encounter trajectories following partner switches."""
 
     frame = results.copy()
-    frame["_condition_sort"] = frame["condition"].apply(_condition_sort_key)
-    frame = frame.sort_values(["_condition_sort", "seed", "partner_idx", "round"]).drop(columns="_condition_sort")
+    frame["_variant_sort"] = frame["variant_id"].apply(_variant_sort_key)
+    frame = frame.sort_values(["_variant_sort", "seed", "partner_idx", "round"]).drop(columns="_variant_sort")
     if frame.empty:
         return pd.DataFrame()
     if "scheduled_switch_partner_ids" in frame.columns:
@@ -296,11 +298,11 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
     observed_map = _build_observed_switch_map(frame)
 
     records: list[dict] = []
-    for (condition, condition_name, seed, partner_idx), group in frame.groupby(
-        ["condition", "condition_name", "seed", "partner_idx"],
+    for (variant_id, seed, partner_idx), group in frame.groupby(
+        ["variant_id", "seed", "partner_idx"],
     ):
         group = group.reset_index(drop=True)
-        key = (condition, int(seed), int(partner_idx))
+        key = (variant_id, int(seed), int(partner_idx))
         switch_rounds = _switch_rounds_for_partner(key, scheduled_type_map, scheduled_stance_map, observed_map)
         for event_idx, (switch_round, switch_kind) in enumerate(switch_rounds):
             window = group[group["round"] >= switch_round].head(int(max_encounters)).copy()
@@ -313,8 +315,7 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
                 reward_arr = row["reward_avgs"]
                 records.append(
                     {
-                        "condition": condition,
-                        "condition_name": str(condition_name),
+                        "variant_id": str(variant_id),
                         "seed": int(seed),
                         "partner_idx": int(partner_idx),
                         "switch_event_idx": int(event_idx),
@@ -341,12 +342,12 @@ def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.D
 def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
     """Summarize whether β values move enough to matter."""
 
-    frame = results[["condition", "condition_name", "seed", "betas"]].copy()
+    frame = results[["variant_id", "seed", "betas"]].copy()
     if frame.empty:
         return pd.DataFrame()
 
     frame["betas"] = frame["betas"].apply(_ensure_array)
-    per_seed = frame.groupby(["condition", "condition_name", "seed"], as_index=False).agg(
+    per_seed = frame.groupby(["variant_id", "seed"], as_index=False).agg(
         beta_range=(
             "betas",
             lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float)),
@@ -363,10 +364,10 @@ def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
     return thresholds
 
 
-def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, ...] = (5, 10)) -> pd.DataFrame:
-    """Compare paired conditions in post-switch windows.
+def post_switch_variant_comparison(results: pd.DataFrame, windows: tuple[int, ...] = (5, 10)) -> pd.DataFrame:
+    """Compare paired variants in post-switch windows.
 
-    Uses `tau4_affect` vs `tau4_no_affect` when both are present in the results.
+    Emits one row per switch window with pivoted metrics for each observed variant.
     """
 
     rows: list[pd.DataFrame] = []
@@ -376,28 +377,15 @@ def post_switch_condition_comparison(results: pd.DataFrame, windows: tuple[int, 
             continue
         pivot = summary.pivot_table(
             index=["seed", "partner_idx", "switch_round"],
-            columns="condition",
+            columns="variant_id",
             values=["mean_payoff", "mean_accuracy"],
         )
         if pivot.empty:
             continue
-        pivot.columns = [f"{metric}_c{condition}" for metric, condition in pivot.columns]
+        pivot.columns = [f"{metric}__variant_{variant}" for metric, variant in pivot.columns]
         pivot = pivot.reset_index()
         pivot["window"] = int(window)
         pivot["window_label"] = f"1-{int(window)}"
-        pivot["payoff_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
-            "mean_payoff_ctau4_affect", np.nan
-        ) - pivot.get("mean_payoff_ctau4_no_affect", np.nan)
-        pivot["accuracy_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
-            "mean_accuracy_ctau4_affect", np.nan
-        ) - pivot.get(
-            "mean_accuracy_ctau4_no_affect",
-            np.nan,
-        )
-        pivot["stance_accuracy_difference_tau4_affect_minus_tau4_no_affect"] = pivot.get(
-            "mean_stance_accuracy_ctau4_affect",
-            np.nan,
-        ) - pivot.get("mean_stance_accuracy_ctau4_no_affect", np.nan)
         rows.append(pivot)
     if not rows:
         return pd.DataFrame()
@@ -416,16 +404,15 @@ def betrayal_latency_summary(
         return pd.DataFrame()
 
     rows: list[dict] = []
-    for (condition, condition_name, seed, partner_idx, switch_event_idx), group in trajectory.groupby(
-        ["condition", "condition_name", "seed", "partner_idx", "switch_event_idx"],
+    for (variant_id, seed, partner_idx, switch_event_idx), group in trajectory.groupby(
+        ["variant_id", "seed", "partner_idx", "switch_event_idx"],
     ):
         group = group.sort_values("encounters_since_switch")
         detection = group.loc[group["inferred_type_correct"] >= 1.0, "encounters_since_switch"]
         recovery = group.loc[group["payoff"] >= float(safe_payoff_threshold), "encounters_since_switch"]
         rows.append(
             {
-                "condition": condition,
-                "condition_name": str(condition_name),
+                "variant_id": str(variant_id),
                 "seed": int(seed),
                 "partner_idx": int(partner_idx),
                 "switch_event_idx": int(switch_event_idx),

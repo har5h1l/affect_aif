@@ -48,12 +48,12 @@ As of 2026-04-16, the first post-restructure binary experiment families are comp
 
 ### Archived Phase 4: Variational Beta Validation
 
-This subsection records the pre-native Condition 12 / variational-beta prototype. The native supported surface now uses `DiscreteBetaState` inside the standard affective runtime rather than a separate Condition 12.
+This subsection records the pre-native variational-beta prototype. The native supported surface now uses `DiscreteBetaState` inside the standard affective runtime rather than a separate variational-beta variant.
 
-- `discrete_beta_confirm_default`: 50 replications × 200 rounds, random assignment, historical conditions 2, 4, 12
-- `discrete_beta_confirm_betrayal`: 50 replications × 120 rounds, agent-chosen partner, scheduled betrayal, historical conditions 2, 4, 12
+- `discrete_beta_confirm_default`: 50 replications × 200 rounds, random assignment, archived continuous, no-affect, and variational-beta prototypes
+- `discrete_beta_confirm_betrayal`: 50 replications × 120 rounds, agent-chosen partner, scheduled betrayal, archived continuous, no-affect, and variational-beta prototypes
 
-**Historical key finding:** The variational beta prototype used by Condition 12 was behaviorally equivalent to the continuous EMA (Condition 2) in stable environments (d = 0.001, p = 0.99) and both outperformed the baseline (d ≈ 0.6, p = 0.003). In the betrayal condition, the variational formulation underperformed the continuous one by a moderate effect (d = 0.41, p = 0.04) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperformed the no-affect baseline. This divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
+**Historical key finding:** The variational beta prototype was behaviorally equivalent to the continuous EMA prototype in stable environments (d = 0.001, p = 0.99) and both outperformed the baseline (d ≈ 0.6, p = 0.003). In the betrayal setting, the variational formulation underperformed the continuous one by a moderate effect (d = 0.41, p = 0.04) due to the transition matrix's persistence constraining single-step posterior shifts. Both still outperformed the no-affect baseline. This divergence reflects a difference in the prior on precision volatility, not a difference in mechanism.
 
 ### Prior experiment families (Phases 1-3)
 
@@ -539,7 +539,7 @@ The CvC benchmark pipeline runs end-to-end:
 - Worker imports cogames/mettagrid, resolves mission, runs episode, extracts metrics
 - Results flow back as JSON -> DataFrame -> CSV -> comparison report
 
-Config: `configs/benchmark_cvc_full.json`
+Config: `configs/benchmark/cvc/full.toml`
 Output: `results/benchmark_cvc_full/`
 
 ### Results (6 policies x 10 seeds x 10,000 steps, machina_1 mission)
