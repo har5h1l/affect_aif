@@ -47,7 +47,7 @@ def test_variant_key_raises():
 
 def test_model_class_key_raises():
     with pytest.raises(ValueError, match="'model_class' was removed"):
-        build_trust_pomdp_template({"payoff_mode": "binary", "model_class": "legacy"}, planning_horizon=1)
+        build_trust_pomdp_template({"payoff_mode": "binary", "model_class": "custom"}, planning_horizon=1)
 
 
 def test_binary_with_graded_keys_raises():

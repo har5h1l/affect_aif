@@ -80,7 +80,7 @@ class NavigationHelper:
         """Update global position and wall map from movement result."""
         state.step_count += 1
 
-        # Expire old movement-failure walls (handles agent-blocking)
+        # Expire stale movement-failure walls (handles agent-blocking)
         if state.walls:
             cutoff = state.step_count - WALL_EXPIRY_STEPS
             state.walls = {k: v for k, v in state.walls.items() if v > cutoff}

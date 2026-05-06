@@ -1,10 +1,13 @@
 {
-  "payoff_mode": "binary",
-  "experiment_name": "shallow_affect_confirm",
+  "experiment_name": "h0_graded_policy_regime",
+  "payoff_mode": "graded",
+  "num_investment_levels": 6,
+  "endowment": 10.0,
+  "multiplier": 3.0,
   "num_partners": 4,
   "num_rounds": 200,
   "p_switch": 0.05,
-  "assignment_mode": "random",
+  "assignment_mode": "agent_choice",
   "gamma": 1.0,
   "lr": 0.1,
   "action_sampling": "marginal",
@@ -19,22 +22,8 @@
   "lesion_mode": "decouple",
   "num_replications": 100,
   "random_seed": 42,
-  "conditions": [
-    1,
-    2,
-    3,
-    4,
-    9,
-    10
-  ],
-  "presets": [
-    "lesioned"
-  ],
-  "partner_types": [
-    "cooperator",
-    "reciprocator",
-    "exploiter",
-    "random"
-  ],
+  "conditions": [1, 2, 3, 4, 5, 6, 7, 8],
+  "presets": [],
+  "partner_types": ["cooperator", "reciprocator", "exploiter", "random"],
   "run_sensitivity": false
 }

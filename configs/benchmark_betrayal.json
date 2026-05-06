@@ -47,24 +47,22 @@
   "backend_configs": {
     "trust": {
       "scenario": "betrayal_arena",
-      "trust_game_overrides": {
-        "num_partners": 2,
-        "initial_partner_types": [
-          "cooperative",
-          "reciprocal"
-        ],
-        "initial_partner_stances": [
-          "trusting",
-          "neutral"
-        ],
-        "scheduled_stance_switches": [
-          {
-            "partner_idx": 0,
-            "round": 100,
-            "to_stance": "hostile"
-          }
-        ]
-      }
+      "num_partners": 2,
+      "initial_partner_types": [
+        "cooperative",
+        "reciprocal"
+      ],
+      "initial_partner_stances": [
+        "trusting",
+        "neutral"
+      ],
+      "scheduled_stance_switches": [
+        {
+          "partner_idx": 0,
+          "round": 100,
+          "to_stance": "hostile"
+        }
+      ]
     }
   }
 }

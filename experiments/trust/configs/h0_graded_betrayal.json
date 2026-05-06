@@ -1,5 +1,5 @@
 {
-  "experiment_name": "graded_betrayal",
+  "experiment_name": "h0_graded_betrayal",
   "payoff_mode": "graded",
   "num_investment_levels": 6,
   "endowment": 10.0,

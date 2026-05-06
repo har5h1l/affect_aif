@@ -92,9 +92,9 @@ Trust builds slowly and erodes quickly:
 
 This asymmetry emerges naturally from the Bayesian update structure — a single defection is strong evidence against a cooperative agent type, while a single cooperation is weaker evidence for it (exploitative agents also cooperate sometimes).
 
-### 2.7 Replacing the Exploiter Round-Switch
+### 2.7 Stance-Conditioned Exploitation
 
-The old exploiter type switched behavior at a fixed round number (e.g., round 4). This is replaced by stance-conditioned exploitation:
+The exploiter behavior is stance-conditioned:
 
 - A trusting stance gives the exploiter more to exploit (the partner cooperates more, creating higher-stakes betrayal)
 - The exploiter's behavioral shift happens when the agent's trust has been established, not at an arbitrary round number
@@ -114,7 +114,7 @@ Total hidden state space per partner: 4 types x 3 stances = 12 joint states.
 
 ### 3.2 A Matrix (Likelihood)
 
-Observation probabilities depend on type x stance (replacing the old type x last_action x phase conditioning).
+Observation probabilities depend on type x stance.
 
 A[0] (partner action observation): shape (2, num_types, num_stances)
 - For each type-stance combination, P(partner cooperates) and P(partner defects)
@@ -223,7 +223,7 @@ With 4+ partners whose stances are evolving independently (each based on their o
 
 **Design:** Compare planning horizons tau=1, 2, 4, 8 (no affect) across 50-100 seeds, 200 rounds.
 
-**Prediction:** Unlike the old flat curve, deeper planning should yield measurably better cumulative payoff. The agent at tau=4+ can discover trust-building sequences; tau=1 cannot.
+**Prediction:** Deeper planning should yield measurably better cumulative payoff when stance transitions make trust-building sequences available. The agent at tau=4+ can discover trust-building sequences; tau=1 cannot.
 
 **Key metric:** Cumulative payoff by depth. Effect size of tau=1 vs tau=8.
 
@@ -282,7 +282,7 @@ With 4+ partners whose stances are evolving independently (each based on their o
 | `environment/partner.py` | Add Bayesian inference over agent type, posterior-to-stance mapping, stance-conditioned action selection | Major |
 | `generative_model/model.py` | New hidden factor (stance), action-dependent B_stance, updated A matrix for type x stance | Major |
 | `core/rollout.py` | B matrix indexing uses action for stance factor; planning propagates stance beliefs forward | Major |
-| historical agent layer | Legacy agent wrapper carried joint inference over type + stance; native runtime now stores this in PartnerBank snapshots | Major |
+| partner bank | Stores joint inference over type + stance in PartnerBank snapshots | Major |
 | `environment/trust_game.py` | Pass stance information through step results for logging | Minor |
 | `configs/` | New experiment configs for all 6 experiments | Moderate |
 | `analysis/hypotheses.py` | Updated hypothesis definitions | Moderate |

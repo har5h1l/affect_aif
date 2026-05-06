@@ -16,15 +16,14 @@ These scripts are the supported CLI surface:
 | `scripts/analysis/summarize.py` | Write the final-round summary table for a saved results table. |
 | `scripts/analysis/visualize.py` | Regenerate GIFs from saved results. |
 | `scripts/analysis/model_comparison.py` | Compare conditions with predictive log-score summaries and RFX-BMS. |
-| `scripts/analysis/targeted_reanalysis.py` | Regenerate targeted H1/H2/H4 re-analysis summaries from result CSVs. |
+| `scripts/analysis/targeted_reanalysis.py` | Regenerate targeted H0/H2/H3 re-analysis summaries from result CSVs. |
 | `scripts/benchmark/analyze.py` | Derive shared, trust, and CvC benchmark summaries from benchmark CSVs. |
 | `scripts/benchmark/run_cvc.py` | Run backend-aware benchmark comparisons, including experimental CvC. |
 | `scripts/benchmark/package_cvc.py` | Write a submission-shaped local CvC policy bundle. |
 | `scripts/cvc/list_missions.py` | List local CvC mission metadata. |
 | `scripts/cvc/obs_diagnostic.py` | Inspect local CvC observation keys and shapes. |
 
-Historical one-off scripts and top-level compatibility wrappers are not part of
-the supported workflow contract.
+Only the grouped script paths above are part of the supported workflow contract.
 
 ## Experiment Runner
 
@@ -49,7 +48,6 @@ Important flags:
 | `--workers` | CPU count | Must be at least 1. |
 | `--verbose` | false | Enables progress output. |
 | `--verbosity-mode` | `stage_stream` | Only supported mode. |
-| `--no-verbose-calibration` | false | Legacy no-op retained for old invocations; the native runtime has no calibration stage. |
 | `--make-gifs` | false | Writes per-run GIFs after results are saved. |
 | `--dry-run` | false | Writes a provenance manifest without executing experiments. |
 
@@ -73,10 +71,10 @@ Examples:
 python scripts/experiment/run.py --config experiments/trust/configs/smoke.json
 
 # single config, named batch, 12 workers
-python scripts/experiment/run.py --config experiments/trust/configs/h6_shallow_policy_regime.json --output-dir results --batch-name h6_shallow_policy_regime --workers 12
+python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --output-dir results --batch-name h0_openness_gate --workers 12
 
 # shallow regime + betrayal volatility in one batch
-python scripts/experiment/run.py --config experiments/trust/configs/h6_shallow_policy_regime.json --config experiments/trust/configs/h4_betrayal_volatility.json --output-dir results --batch-name main_run --workers 12
+python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --config experiments/trust/configs/h3_betrayal_volatility.json --output-dir results --batch-name h0_h3_current_evidence --workers 12
 
 # provenance-only dry run
 python scripts/experiment/run.py --config experiments/trust/configs/smoke.json --output-dir results --batch-name dry_run --dry-run
@@ -84,13 +82,13 @@ python scripts/experiment/run.py --config experiments/trust/configs/smoke.json -
 
 ## Preliminary Run
 
-`scripts/experiment/preliminary.py` runs a small fixed-condition experiment and prints per-condition summaries.
+`scripts/experiment/preliminary.py` runs a small version of a maintained config and prints per-condition summaries plus H0-H5 behavior-card checks.
 
 ```bash
 python scripts/experiment/preliminary.py [--config <json>] [--replications N] [--rounds N] [--output <path>]
 ```
 
-It always evaluates conditions 1-5, disables sensitivity runs, and writes a CSV results table at `--output`.
+It preserves the config's conditions and presets, overrides only replications and rounds, disables sensitivity runs, and writes a CSV results table at `--output`.
 
 ## Post-hoc Analysis
 
@@ -112,5 +110,3 @@ Supported trust experiment configs live under `experiments/trust/configs/`.
 Supported multi-focal configs live under `experiments/multifocal/configs/`.
 External benchmark configs remain under `configs/`; CvC implementation code lives
 under `benchmarks/cvc/`, with shared runner code under `benchmarks/core/`.
-Historical material has been salvaged into `docs/results/historical_findings.md`
-and is not a runnable workflow surface.

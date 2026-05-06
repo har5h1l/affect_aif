@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Tests in this directory cover the supported package, CLI, benchmark, and compatibility surface.
+Tests in this directory cover the supported package, CLI, benchmark, and analysis surface.
 
 ## Verification Flow
 
@@ -13,7 +13,7 @@ python -m pytest
 python -m mypy
 ```
 
-## Internal / Compatibility Notes
+## Internal Notes
 
-- The suite includes explicit checks for the supported import surface and legacy compatibility shims.
-- Archived prototypes and exploratory scripts are intentionally excluded from the default test surface.
+- The suite includes explicit checks for the supported import surface.
+- Exploratory scripts are intentionally excluded from the default test surface.

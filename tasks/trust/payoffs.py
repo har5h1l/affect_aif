@@ -131,7 +131,7 @@ def decode_action(
 
 
 def factorized_num_controls(num_partners: int, assignment_mode: str, num_social_actions: int) -> list[int]:
-    """Control factor sizes: [1,2,2] (binary) or [num_partners,2,2] (agent_choice); else legacy single control."""
+    """Return control-factor sizes for the current trust-task action surface."""
 
     if int(num_social_actions) != 2:
         return [num_actions(num_partners, assignment_mode, num_social_actions)]

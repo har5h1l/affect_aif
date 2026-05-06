@@ -35,74 +35,44 @@ def _condition_summary_table(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def _directional_checks(hypotheses: dict) -> pd.DataFrame:
-    tests = hypotheses["tests"]
-    h1 = tests["h1"]
-    h2 = tests["h2"]
-    h3 = tests["h3"]
-    h4 = tests["h4"]
-    h5 = tests["h5"]
-
-    rows = [
-        {
-            "hypothesis": "H1",
-            "status": "PASS" if h1.get("mean_affect_payoff_gain", float("nan")) >= 0.0 else "FAIL",
-            "criterion": "Affect adds non-negative payoff over matched no-affect depths",
-            "value": h1.get("mean_affect_payoff_gain"),
-        },
-        {
-            "hypothesis": "H2",
-            "status": "PASS" if h2.get("payoff_difference_tau8_minus_tau1", float("nan")) > 0.0 else "FAIL",
-            "criterion": "Tau-8 no-affect payoff > tau-1 no-affect payoff",
-            "value": h2.get("payoff_difference_tau8_minus_tau1"),
-        },
-        {
-            "hypothesis": "H3",
-            "status": "PASS"
-            if h3.get("type_accuracy_preserved", False)
-            and h3.get("stance_recovery_worse_than_intact", False)
-            and h3.get("payoff_lower_than_intact", False)
-            else "FAIL",
-            "criterion": "Lesion preserves type accuracy but harms stance recovery and payoff",
-            "value": h3.get("payoff_difference_lesioned_minus_tau4_affect"),
-        },
-        {
-            "hypothesis": "H4",
-            "status": "N/A"
-            if not h4.get("available", False)
-            else (
-                "PASS"
-                if h4.get("payoff_difference_tau4_affect_minus_tau4_no_affect", float("nan")) > 0.0
-                and h4.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect", float("nan")) >= 0.0
-                else "FAIL"
-            ),
-            "criterion": "Tau-4 affect beats tau-4 no-affect after betrayal",
-            "value": h4.get("payoff_difference_tau4_affect_minus_tau4_no_affect"),
-        },
-        {
-            "hypothesis": "H5",
-            "status": "N/A"
-            if not h5.get("available", False)
-            else (
-                "PASS"
-                if h5.get("payoff_difference_tau4_affect_minus_tau4_no_affect", float("nan")) > 0.0
-                and h5.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect", float("nan")) >= 0.0
-                else "FAIL"
-            ),
-            "criterion": "Precision tracking beats reward averaging after stance shifts",
-            "value": h5.get("payoff_difference_tau4_affect_minus_tau4_no_affect"),
-        },
-    ]
+    tests = hypotheses.get("tests", hypotheses)
+    rows = []
+    for card_id, payload in tests.items():
+        evidence = payload.get("evidence", {})
+        rows.append(
+            {
+                "card": card_id.upper(),
+                "label": payload.get("label", ""),
+                "available": bool(payload.get("available", False)),
+                "claim": payload.get("summary", {}).get("claim", ""),
+                "primary_metric": _primary_metric(card_id, evidence),
+            }
+        )
     return pd.DataFrame(rows)
+
+
+def _primary_metric(card_id: str, evidence: dict) -> object:
+    if card_id == "h0":
+        return evidence.get("mean_affect_payoff_gain")
+    if card_id == "h1":
+        return len(evidence.get("beta_signal_columns", []))
+    if card_id == "h2":
+        return evidence.get("payoff_difference_lesioned_minus_tau4_affect")
+    if card_id == "h3":
+        return evidence.get("payoff_difference_tau4_affect_minus_tau4_no_affect")
+    if card_id == "h4":
+        return len(evidence.get("partner_selection_counts", {}))
+    if card_id == "h5":
+        return len(evidence.get("clinical_conditions", []))
+    return None
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a small preliminary affect_aif experiment.")
     parser.add_argument(
         "--config",
-        default="configs/betrayal_stress.json",
-        help=(
-            "Path to a JSON config file. Agent-choice configs such as betrayal_stress.json or variant_b.json enable H5."
-        ),
+        default="experiments/trust/configs/h0_shallow_policy_regime.json",
+        help="Path to a JSON config file.",
     )
     parser.add_argument("--replications", type=int, default=5, help="Number of replications per condition.")
     parser.add_argument("--rounds", type=int, default=200, help="Rounds per replication.")
@@ -121,8 +91,6 @@ def main(argv: list[str] | None = None):
     config = ExperimentConfig.from_json(args.config)
     config.num_replications = int(args.replications)
     config.num_rounds = int(args.rounds)
-    config.conditions = [1, 2, 3, 4, 5, 6, 7, 8]
-    config.presets = ["lesioned"]
     config.run_sensitivity = False
 
     runner = ExperimentRunner(config)
@@ -138,7 +106,7 @@ def main(argv: list[str] | None = None):
     print("\nPer-condition summary")
     print(summary_table.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))
 
-    print("\nDirectional hypothesis checks")
+    print("\nBehavior-card checks")
     print(directional.to_string(index=False, float_format=lambda value: f"{value:0.4f}"))
     return 0
 

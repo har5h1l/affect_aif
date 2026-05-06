@@ -11,7 +11,7 @@ pip install -e ".[dev]"
 pre-commit install
 ```
 
-`requirements.txt` remains available for compatibility, but the supported developer workflow uses the editable install above.
+The supported developer workflow uses the editable install above.
 
 ## Supported Workflow
 
@@ -33,17 +33,17 @@ partner redesign:
 - binary trust games use factorized controls for partner, stance, and own action
 - the trust-game generative model exposes `o_action` and `o_payoff` observations over latent `type × stance`, with `own_action` tracked as a separate control/state factor
 - the default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`)
-- the current hypothesis surface is H1-H7 in [docs/theory/hypotheses.md](docs/theory/hypotheses.md)
+- the current hypothesis surface is the H0-H5 behavior-card spine in [docs/theory/hypotheses.md](docs/theory/hypotheses.md)
 - lesion, no-epistemic, and clinical runs are named presets (`lesioned`, `no_epistemic`, `alexithymia`, `borderline`, `depression`)
 
 Common entry points:
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h6_shallow_policy_regime.json --output-dir results --batch-name h6_shallow_policy_regime --workers 12
+python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --output-dir results --batch-name h0_openness_gate --workers 12
 python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv
-python scripts/analysis/analyze.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/figures
-python scripts/analysis/visualize.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/gifs
-python scripts/analysis/model_comparison.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/model_comparison
+python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/analysis
+python scripts/analysis/visualize.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/gifs
+python scripts/analysis/model_comparison.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/model_comparison
 python scripts/benchmark/run_cvc.py --config configs/benchmark_default.json
 python scripts/benchmark/analyze.py --results results/benchmark/benchmark_results.csv
 ```
@@ -62,10 +62,9 @@ python scripts/benchmark/analyze.py --results results/benchmark/benchmark_result
 - `scripts/README.md`: supported CLI wrappers
 - `tests/README.md`: supported verification surface
 
-## Compatibility Notes
+## Supported Surface
 
 - The main package exposes the supported runner/config entry points at the top level.
 - The trust-task evaluation arena is the supported task-comparison surface; the local CvC path remains a separate experimental integration.
-- The legacy `aif/` runtime and discrete-beta prototype are archived; the supported affective path is task-local precision tracking around official `pymdp` agents.
-- Removed experiment surfaces (variational beta preset, unfinished AIFPolicy adapter) are not loaded by the runtime; see `docs/experiment/design.md` for future-work notes.
-- Historical findings are documented in [docs/results/historical_findings.md](docs/results/historical_findings.md) and are not current evidence unless rerun on the current architecture.
+- The supported affective path is task-local precision tracking around official `pymdp` agents.
+- Future-work experiment surfaces are documented in [docs/experiment/design.md](docs/experiment/design.md).

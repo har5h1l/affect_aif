@@ -1,18 +1,26 @@
 # Experiment Manifest
 
-This manifest maps the maintained experiment surface to the current Hesp-extension hypothesis spine. Benchmark and CvC configs still under `configs/` are preserved for the later benchmark phase and are not interpreted as primary trust-task hypothesis configs here.
+This manifest maps maintained experiment configs to the canonical behavior-card
+spine in `docs/theory/hypotheses.md`. Benchmark and CvC configs under
+`configs/` are preserved for the later benchmark phase and are not interpreted
+as primary trust-task hypothesis configs here.
 
-| Item | Question | Configs | Analysis |
-|---|---|---|---|
-| H1 | Model fitness, not reward | `experiments/trust/configs/h1_model_fitness_factorial.json` | `analysis.hypotheses.test_h1_model_fitness` |
-| H2 | Partner factorization | pending config | `analysis.hypotheses.test_h2_partner_factorization` |
-| H3 | Deployment, not knowledge | `experiments/trust/configs/h3_deployment_lesion.json` | `analysis.hypotheses.test_h3_deployment_not_knowledge` |
-| H4 | Social volatility | `experiments/trust/configs/h4_betrayal_volatility.json` | `analysis.hypotheses.test_h4_social_volatility` |
-| H5 | Partner selection | `experiments/trust/configs/h5_partner_selection.json` | `analysis.hypotheses.test_h5_partner_selection` |
-| H6 | Policy-space regime | `experiments/trust/configs/h6_shallow_policy_regime.json`, `experiments/trust/configs/h6_graded_policy_regime.json`, `experiments/trust/configs/h6_graded_betrayal.json` | `analysis.hypotheses.test_h6_policy_space_regime` |
-| H7 | Clinical perturbations | `experiments/trust/configs/h7_clinical_betrayal.json`, `experiments/trust/configs/h7_clinical_phenotypes.json`, `experiments/trust/configs/h7_sensitivity_sweep.json` | `analysis.hypotheses.test_h7_clinical_perturbations` |
-| E1 | External benchmark arena | pending Phase 5 benchmark config move; current benchmark configs remain under `configs/benchmark*.json` | pending benchmark analysis |
-| E2 | Multi-focal social dynamics | `experiments/multifocal/configs/e2_homogeneous.json`, `experiments/multifocal/configs/e2_clinical_mix.json`, `experiments/multifocal/configs/e2_assortative.json` | pending multi-focal analysis |
+All primary trust-task batches should write to `results/<card_root>/<config_slug>/`.
+For example, the shallow H0 run writes
+`results/h0_openness_gate/h0_shallow_policy_regime/results.csv`, and its
+analysis writes under
+`results/h0_openness_gate/h0_shallow_policy_regime/analysis/`.
+
+| Card | Result root | Question | Configs | Analysis |
+|---|---|---|---|---|
+| H0 Openness Gate | `results/h0_openness_gate/` | Is the policy space open enough for precision to change behavior? | `experiments/trust/configs/h0_shallow_policy_regime.json`, `experiments/trust/configs/h0_graded_policy_regime.json`, `experiments/trust/configs/h0_graded_betrayal.json` | `analysis.hypotheses.test_h0_openness_gate` |
+| H1 Model Fitness | `results/h1_model_fitness/` | Does precision track predictive reliability rather than reward? | `experiments/trust/configs/h1_model_fitness_factorial.json` | `analysis.hypotheses.test_h1_model_fitness` |
+| H2 Deployment | `results/h2_deployment/` | Are beliefs intact while behavior changes when beta is decoupled from policy precision? | `experiments/trust/configs/h2_deployment_lesion.json` | `analysis.hypotheses.test_h2_deployment` |
+| H3 Stress Response | `results/h3_stress_response/` | Does affect help most around betrayal, stance shifts, or other volatility windows? | `experiments/trust/configs/h3_betrayal_volatility.json` | `analysis.hypotheses.test_h3_stress_response` |
+| H4 Social Choice | `results/h4_social_choice/` | Does partner-specific precision guide approach, avoidance, probing, and return? | `experiments/trust/configs/h4_social_choice.json` | `analysis.hypotheses.test_h4_social_choice` |
+| H5 Perturbation Phenotypes | `results/h5_perturbation_phenotypes/` | Do clinical-like parameter variants separate first in precision dynamics, then behavior? | `experiments/trust/configs/h5_clinical_betrayal.json`, `experiments/trust/configs/h5_clinical_phenotypes.json`, `experiments/trust/configs/h5_sensitivity_sweep.json` | `analysis.hypotheses.test_h5_perturbation_phenotypes` |
+| E1 External benchmark arena | `results/e1_benchmarks/` | How do trust-task agents compare with benchmark surfaces? | pending Phase 5 benchmark config move; current benchmark configs remain under `configs/benchmark*.json` | pending benchmark analysis |
+| E2 Multi-focal social dynamics | `results/e2_multifocal_descriptive/` | What descriptive dynamics emerge when AIF agents interact with each other? | `experiments/multifocal/configs/e2_homogeneous.json`, `experiments/multifocal/configs/e2_clinical_mix.json`, `experiments/multifocal/configs/e2_assortative.json` | pending multi-focal analysis |
 
 Smoke configs:
 
@@ -20,3 +28,29 @@ Smoke configs:
 |---|---|
 | trust smoke | `experiments/trust/configs/smoke.json` |
 | multi-focal smoke | `experiments/multifocal/configs/smoke.json` |
+
+## Standard Analysis Outputs
+
+For every completed trust config, run:
+
+```bash
+python scripts/analysis/analyze.py --results results/<card_root>/<config_slug>/results.csv --output-dir results/<card_root>/<config_slug>/analysis
+```
+
+`analysis/` should contain:
+
+- `final_round_summary.csv`
+- `pairwise_payoff_tests.csv`
+- `hypothesis_tests.json`
+- `hypothesis_summary.csv`
+- `affective_movement_summary.csv`
+- `statistics_summary.txt`
+- betrayal-window CSVs when switch events are present
+- figures generated by `analysis.plots.save_all_figures`
+
+Optional follow-up artifacts:
+
+```bash
+python scripts/analysis/visualize.py --results results/<card_root>/<config_slug>/results.csv --output-dir results/<card_root>/<config_slug>/gifs
+python scripts/analysis/model_comparison.py --results results/<card_root>/<config_slug>/results.csv --output-dir results/<card_root>/<config_slug>/model_comparison
+```

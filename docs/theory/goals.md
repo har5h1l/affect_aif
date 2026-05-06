@@ -15,4 +15,4 @@ partners, and recover under social uncertainty.
 - The trust task is a testbed for social inference under volatility.
 - Clinical-like variants are perturbations of affective precision dynamics, not
   validated clinical diagnoses.
-- Historical claims remain motivation until rerun on the current architecture.
+- Current claims require completed H0-H5 runs on the supported architecture.

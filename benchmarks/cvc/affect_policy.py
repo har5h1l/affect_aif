@@ -12,7 +12,7 @@ rule. The team-average beta modulates coordination strategy:
 The beta update mirrors agent/affect/beta.py:
   surprise = manhattan_distance(predicted, actual) / max_distance
   charge   = alpha * (sigma_0_sq - surprise**2)
-  beta_k   = lambda_smooth * beta_k + (1 - lambda_smooth) * sigmoid(charge)
+  beta_k   = beta_smoothing * beta_k + (1 - beta_smoothing) * sigmoid(charge)
 """
 
 from __future__ import annotations

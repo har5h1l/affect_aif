@@ -1,6 +1,6 @@
 {
   "payoff_mode": "binary",
-  "experiment_name": "clinical_phenotypes",
+  "experiment_name": "h5_clinical_phenotypes",
   "num_partners": 4,
   "num_rounds": 200,
   "p_switch": 0.05,

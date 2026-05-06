@@ -23,8 +23,7 @@ These wrappers define the stable end-user workflow documented in `docs/operation
 - `cvc/list_missions.py`
 - `cvc/obs_diagnostic.py`
 
-## Internal / Compatibility Notes
+## Internal Notes
 
 - These scripts are intentionally thin and defer real work to the package modules.
 - There are no supported top-level `scripts/*.py` entry points; use the grouped paths above.
-- Historical one-off scripts were removed after salvage into `docs/results/historical_findings.md`.

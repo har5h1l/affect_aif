@@ -5,7 +5,7 @@ import numpy as np
 from analysis.model_comparison import (
     _spm_bms,
     model_comparison_report,
-    pairwise_bayes_factors,
+    pairwise_predictive_log_scores,
 )
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner
@@ -59,17 +59,17 @@ def test_final_round_summary_includes_log_evidence(tiny_config):
     assert summary["total_log_evidence"].notna().all()
 
 
-def test_pairwise_bayes_factors_runs(tiny_config):
-    """pairwise_bayes_factors should produce valid output."""
+def test_pairwise_predictive_log_scores_runs(tiny_config):
+    """pairwise_predictive_log_scores should produce valid output."""
     cfg = ExperimentConfig(**{**tiny_config.__dict__, "conditions": [1, 2, 4], "num_replications": 3, "num_rounds": 10})
     runner = ExperimentRunner(cfg)
     results = runner.run_all()
-    bf_table = pairwise_bayes_factors(results)
+    bf_table = pairwise_predictive_log_scores(results)
 
     assert len(bf_table) == 3  # C(3,2) = 3 pairs
-    assert "mean_log_bf" in bf_table.columns
-    assert "log10_bf" in bf_table.columns
-    assert bf_table["mean_log_bf"].notna().all()
+    assert "mean_predictive_log_score_difference" in bf_table.columns
+    assert "log10_predictive_log_score_difference" in bf_table.columns
+    assert bf_table["mean_predictive_log_score_difference"].notna().all()
 
 
 def test_spm_bms_recovers_strong_model():
@@ -109,8 +109,8 @@ def test_model_comparison_report_structure(tiny_config):
     results = runner.run_all()
     report = model_comparison_report(results)
 
-    assert "log_evidence_summary" in report
-    assert "pairwise_bayes_factors" in report
+    assert "predictive_log_score_summary" in report
+    assert "pairwise_predictive_log_scores" in report
     assert "random_effects_bms" in report
-    assert len(report["log_evidence_summary"]) == 2  # 2 conditions
-    assert len(report["pairwise_bayes_factors"]) == 1  # 1 pair
+    assert len(report["predictive_log_score_summary"]) == 2  # 2 conditions
+    assert len(report["pairwise_predictive_log_scores"]) == 1  # 1 pair

@@ -1,6 +1,6 @@
 {
   "payoff_mode": "binary",
-  "experiment_name": "clinical_betrayal",
+  "experiment_name": "h5_clinical_betrayal",
   "num_partners": 4,
   "num_rounds": 120,
   "p_switch": 0.0,

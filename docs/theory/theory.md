@@ -4,16 +4,25 @@
 
 ## Current Trust-Game Status
 
-The supported trust-family experiments now use the action-dependent stance redesign from [docs/action-dependent-partner-design.md](docs/action-dependent-partner-design.md).
+The supported trust-family experiments now use the action-dependent stance
+redesign described in `docs/theory/pomdp_spec.md` and
+`docs/design/implementation.md`.
+
+For the current canonical hypothesis surface, use
+`docs/theory/hypotheses.md`. That file organizes the project around H0-H5
+behavior cards.
 
 - The hidden social state is `partner type × partner stance`, not partner type plus exploiter phase.
 - Stance is endogenous: partners maintain a posterior over the agent's character and map that posterior to `trusting`, `neutral`, or `hostile`.
 - The agent's generative model includes an explicit stance factor and action-dependent `B_stance`, so deeper planning is now structurally informative.
-- The core claim is no longer "depth is irrelevant." The current claim is: depth matters in action-dependent social environments, and per-partner affective precision adds orthogonal value beyond that depth.
+- The current claim is: depth matters in action-dependent social environments,
+  and per-partner affective precision adds orthogonal value beyond that depth.
 
-Unless a section explicitly says "archived" or "prototype", read older references to exploiter phases, `switch_round`, or flat depth curves as superseded by the current redesign.
-
-Implementation note (2026-05-05): the shipped code now uses official `pymdp.Agent` instances, HESP-style discrete beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`, two observation modalities (`o_action`, `o_payoff`), and the trust-game hidden/control structure `type × stance` plus `own_action`. The supported affective path follows `gamma_k = gamma_base / E[beta_k]`; the earlier `mu`-weighted shallow-EFE and calibration path is archived prototype context only.
+Implementation note (2026-05-05): the shipped code uses official `pymdp.Agent`
+instances, HESP-style discrete beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`, two
+observation modalities (`o_action`, `o_payoff`), and the trust-game
+hidden/control structure `type × stance` plus `own_action`. The supported
+affective path follows `gamma_k = gamma_base / E[beta_k]`.
 
 ---
 
@@ -182,11 +191,12 @@ $$\gamma_k = f(\beta_k)$$
 
 Where $\beta_k$ is the affective state for partner $k$ — the expected precision of the agent's model of partner $k$. When the agent is selecting policies involving partner $k$, the effective policy precision is $\gamma_k$, not a global $\gamma$.
 
-In the supported native runtime, this precision-modulation path is the affective deployment mechanism. Old config fields such as `affect_modulates_precision` and `mu` are ignored on load and are retained only as historical compatibility shims.
+In the supported native runtime, this precision-modulation path is the
+affective deployment mechanism.
 
 ### 3.4 Affective State Dynamics
 
-> **Variational grounding (theory).** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. The **shipped** code path uses the discrete filter in task-local external precision tracker only; a separate variational auxiliary-state implementation is not in the runnable tree (see `docs/experiment/design.md` and `docs/results/historical_findings.md`).
+> **Variational grounding (theory).** The $\beta$ update rule below extends Hesp et al.'s (2021) variational treatment of precision dynamics to the multi-partner social setting. The signed charge mechanism converts per-partner prediction errors into precision estimates, tracking expected model fitness in the same spirit as Hesp et al.'s single-agent formulation. The **shipped** code path uses the discrete filter in task-local external precision tracker only; a separate variational auxiliary-state implementation is future work.
 
 The affective state $\beta_k$ for partner $k$ is updated from a signed affective charge derived from prediction error:
 
@@ -289,7 +299,11 @@ The model predicts that disruption at each level produces qualitatively differen
 
 The most important empirical update is that explicit planning depth is empirically flat in the shipped binary-action trust game once all conditions use the same observation-branching sophisticated inference. In the `horizon_sweep` run, the non-affective planners are flat: `C1 = 529.26`, `C7 = 529.40`, `C6 = 529.82`, `C4 = 530.04`, and every pairwise comparison among those four conditions has `p > 0.93`.
 
-This changes the theoretical reading of the earlier depth story. The old mean-field rollout was the practical bottleneck, not horizon length itself. Once hypothetical observations are integrated correctly and partner-type beliefs are updated pathwise, extending the explicit horizon from `τ = 2` to `τ = 8` yields no measurable payoff gain in this task. In the current shipped setup, with an action-independent B matrix for partner types, extra lookahead does not uncover additional state transitions.
+Once hypothetical observations are integrated correctly and partner-type beliefs
+are updated pathwise, extending the explicit horizon from `τ = 2` to `τ = 8`
+yields no measurable payoff gain in this task. In the current shipped setup,
+with an action-independent B matrix for partner types, extra lookahead does not
+uncover additional state transitions.
 
 That does not imply depth is universally irrelevant in active inference. It implies that in this particular task family, with binary actions and a small partner-type state space, sophisticated inference already captures the strategically relevant contingencies within a shallow horizon. If hidden-state transitions became action-dependent, or if the environment exposed richer transition structure, depth could matter again.
 
@@ -328,13 +342,13 @@ The key empirical pattern is:
 - the lesion preserves partner knowledge while impairing payoff, reproducing the Damasio-style dissociation
 - partner selection covaries with beta in the agent-choice setup
 - the precision-versus-reward comparison is null in `default` but positive in `betrayal_stress`
-- raw planning depth alone is flat once sophisticated inference replaces the old mean-field approximation
+- raw planning depth alone is flat once sophisticated inference is used
 
 So the present theory should be read as: affect adds a partner-specific precision signal orthogonal to explicit depth in this task, not as proof that affect universally substitutes for deep lookahead in every social POMDP.
 
 ### 4.9 Discrete Beta Formulation
 
-> **Status.** The experiment preset named `variational_beta` and any separate variational-state runtime have been **removed** from the active codebase to avoid ghost configuration. The discrete formulation below is implemented by the native affective runtime through `DiscreteBetaState`. Historical variational context is summarized in `docs/results/historical_findings.md`.
+> **Status.** A separate variational-state runtime is future work. The discrete formulation below is implemented by the native affective runtime through `DiscreteBetaState`.
 
 The narrative in §3.4 above described a continuous EMA-style story for intuition. The **implemented** $\beta$ dynamics are the discrete categorical update in the following bullets; partner type remains the primary hidden-state factor.
 
@@ -390,45 +404,19 @@ When the initial precision prior $\beta_0$ is set low, the agent starts with low
 
 **Important caveats.** These phenotype labels are heuristic mappings, not diagnostic claims. The current model lacks several features that would be required for serious clinical modeling: continuous (not discrete) action spaces, richer emotional state representations, developmental trajectories, and integration with physiological variables.
 
-### Preliminary Empirical Finding: Binary Augmentation Architecture
+### 4.10 Open Policy Regimes
 
-A systematic exploration of the clinical parameter space in the pre-native prototype (raw synthesis notes
-were under `results/`; that artifact is purged — see `docs/results/historical_findings.md`)
-found that the affective mechanism operated as a **binary augmentation** in that trust-game branch: having the prototype affective channel enabled provided ~10% payoff improvement, but the specific beta dynamics were behaviorally degenerate. Key findings:
+The H0 gate follows from the softmax geometry of policy selection. Affective
+precision can only become visible when multiple policies remain live enough for
+`gamma_k` to change the posterior. Binary trust games can saturate quickly; graded
+investment, noisy observations, betrayal windows, and agent-choice regimes are
+the maintained ways to open the policy space.
 
-- **Beta dynamics differentiate correctly.** Alexithymia freezes beta at 0.5 (σ=0.001), borderline creates swings from 0.08 to 0.99 (σ=0.113), depression starts at 0.01 and recovers. The parameter-to-phenotype mapping produces the intended dynamical signatures.
-
-- **Dynamics don't translate to behavior.** The maximum clinical effect is 0.5% of total payoff (3 points out of 576). The trust game's EFE landscape has a median best-vs-second-best policy gap of 10.83, making the softmax effectively a hard argmax. Whether beta is 0.14 or 0.94, the same policy wins.
-
-- **Softmax saturation nullified the prototype precision channel.** The historical precision-scaling branch had zero measurable effect on policy selection because the logit magnitudes were too large to change the argmax. 91.5% of rounds had q_π entropy < 0.01.
-
-- **The parameter space has clinically relevant structure; the task doesn't amplify it.** This is a task-specificity finding, not a model limitation. Richer environments with more ambiguous EFE landscapes (larger action spaces, partial observability, multiple equilibria) could unlock the clinical resolution the parameter space structurally supports.
-
-This result reframes the clinical sensitivity roadmap: Phase 5 should follow Phase 7 (richer tasks) rather than proceeding immediately, because the current environment cannot distinguish between clinical phenotypes regardless of parameter settings.
-
-### 4.11 Graded Trust Game: Activating the Precision Channel
-
-The historical binary augmentation finding (§4.10) identified the bottleneck: the binary game's EFE landscape was too steep for any partner-specific affective signal to change policy selection. The graded investment trust game tested whether a more ambiguous decision space unlocked the channel.
-
-The graded game replaces binary share/keep with six investment levels per partner (0%, 20%, 40%, 60%, 80%, 100% of endowment), creating 24 total actions (6 levels × 4 partners). This expands the EFE landscape from a near-deterministic argmax to a genuinely ambiguous softmax: policy entropy rises from $< 0.01$ to $\sim 5.8$, confirming that partner-specific affective signals have room to influence policy selection in ambiguity-rich tasks.
-
-**The orthogonality table across game types:**
-
-| Condition | Binary game payoff | Binary effect size vs C4 | Graded game payoff | Graded effect size vs C4 |
-|---|---|---|---|---|
-| C4 (no affect, $\tau=2$) | 530.04 | — | 10.184 | — |
-| C1 (no affect, $\tau=8$) | 529.26 | $d \approx 0$ | 10.184 | $d = 0$ |
-| C3 (lesioned) | 530.04 | $d = 0$ | 10.184 | $d = 0$ |
-| C2 (precision tracking) | 575.06 | $d = 0.64$ | 10.394 | $d = 1.14$ |
-| C5 (reward averaging) | 574.42 | $d = 0.009$ | 10.468 | $d = 1.72$ |
-
-Two historical results stand out. First, the augmentation effect was *stronger* in the graded game ($d = 1.14$) than in the binary game ($d = 0.64$), confirming that the ambiguous EFE landscape amplified partner-specific affective signals rather than merely exposing them. Second, reward averaging clearly outperformed precision tracking ($d = 0.43$ in favor of C5), reversing the pattern from the binary betrayal scenario where C2 dominated.
-
-**The affect × depth orthogonality in the binary game:**
-
-| | No Affect | Affect (C2) |
-|---|---|---|
-| Shallow ($\tau=2$) | C4: 530.04 | C2: 575.06 |
+The graded trust game replaces binary share/keep with six investment levels per
+partner (0%, 20%, 40%, 60%, 80%, 100% of endowment), creating 24 total actions
+(6 levels × 4 partners). This expands the EFE landscape from a near-deterministic
+argmax to a genuinely ambiguous softmax, giving partner-specific affective
+signals room to influence policy selection.
 | Deep ($\tau=8$) | C1: 529.26 | C8: $\approx 576$ |
 
 Depth is irrelevant (rows are statistically identical). Affect matters (columns differ by $d \approx 0.64$). The augmentation is additive and independent of planning depth.
@@ -512,86 +500,14 @@ We report these on the $\log_{10}$ scale as a predictive-score proxy. The usual 
 
 **Why this matters.** Frequentist tests answer "do conditions differ?" but cannot answer "which model best predicts the data?" or "how much predictive support favors one model over another?" Predictive score comparison provides both. It also naturally penalizes model complexity through the Occam factor implicit in predictive likelihood — a model with more parameters must predict more precisely to achieve the same score.
 
-*Results for this section are documented in §Hypothesis Scorecard of `docs/results_tracking.md` and in the model comparison output files.*
+### 4.11 Task Generalization and Perturbation Tests
 
-### 4.17 Cross-Game Generalization
-
-A fundamental question for any computational model is whether its predictions generalize beyond the specific task used to develop it. Sections 4.1–4.16 established the orthogonal augmentation claim within the Prisoner's Dilemma trust game. Phase 7 tests this claim across three fundamentally different 2×2 symmetric games:
-
-1. **Prisoner's Dilemma** (PD): defection-dominated; cooperation requires trust
-2. **Stag Hunt** (SH): coordination game; cooperation is risky but Pareto-optimal
-3. **Chicken**: anti-coordination; mutual defection is catastrophic
-
-These games create qualitatively different strategic landscapes while sharing the same agent architecture, partner types, and inference machinery. Only the payoff matrix differs.
-
-**Main result:** Affect augmentation generalizes robustly under volatility. All three games show strong augmentation (Cohen's d > 1.0) in betrayal conditions. This establishes that the orthogonal augmentation result is not specific to the Prisoner's Dilemma.
-
-**Game-dependent findings:** In stable (default) conditions, augmentation is game-dependent. PD and Stag Hunt show substantial effects (d = 0.5–0.6) because both games reward accurate partner prediction. Chicken shows negligible augmentation (d = 0.05) because its anti-coordination structure makes partner prediction less decision-relevant.
-
-**The Stag Hunt as the precision tracking game.** In the predictive model comparison, the Stag Hunt uniquely favors precision tracking (C2) over reward averaging (C5) in both default and betrayal conditions (RFX-BMS over per-seed predictive scores, exceedance > 0.95 in both). Theoretically, this follows from the Stag Hunt's severe miscoordination penalty: getting the sucker payoff (0) when cooperating with a defecting partner makes the *accuracy* of partner prediction more important than the *average reward* from that partner. This is exactly the informational niche that per-partner precision tracking fills.
-
-**Chicken as the reward averaging game.** Under betrayal stress in Chicken, C5 (reward averaging) wins the predictive comparison (RFX-BMS over per-seed predictive scores, exceedance 0.931), reversing the PD and Stag Hunt pattern. The reward gradient in Chicken is more directly informative of optimal play than precision accuracy, because the catastrophic mutual-defection payoff (0) means the agent's best response depends more on expected reward level than on prediction confidence.
-
-**Theoretical implication:** Per-partner metacognitive precision tracking is not a universal improvement but a *mechanism matched to specific informational niches*. It excels when: (a) partner behavior is volatile, (b) miscoordination is costly, and (c) prediction accuracy is more decision-relevant than reward history. These conditions are common in human social environments, which is why the mechanism has adaptive value despite not being universally superior.
-
-*Full results in `docs/results_tracking.md` §Phase 7.*
-
-### 4.18 Clinical Sensitivity: Environment-Dependent Phenotype Expression
-
-Sections 4.13 and 4.15 established that clinical parameter perturbations (alexithymia, borderline, depression) produce measurable behavioral effects in the graded game but not in binary games due to softmax saturation. However, between-clinical differentiation in the graded default condition was minimal (~0.03 point spread). Phase 5 resolves this by identifying the environmental conditions necessary for clinical phenotype expression.
-
-**The critical environment: graded betrayal.** Combining the graded game's ambiguous EFE landscape ($H_{q_\pi} \approx 5.8$) with betrayal stress (cooperator $\to$ exploiter switch at round 31) produces massive between-clinical differentiation. The between-clinical payoff spread is 80.5 points, a 2700$\times$ improvement over the graded default spread.
-
-**Alexithymia ($\alpha = 0.1$): paradoxical protection.** The blunted affective charging rate prevents the overreaction to betrayal that the normal agent exhibits. When partner 0 switches from cooperator to exploiter at round 31, the normal agent (C2) rapidly adjusts precision downward, which transiently overshoots — reducing investment in ALL partners, not just the betrayer. The alexithymic agent adjusts more slowly, maintaining stable investment levels and avoiding this costly overshoot. Effect: $d = +0.80$, $p < 0.0001$ vs C2. This finding is clinically consistent with observations that alexithymic individuals may show resilience to acute social stress precisely because they under-respond to affective signals (Taylor et al., 1997).
-
-**Borderline ($\alpha = 12$, low beta persistence): progressive deterioration.** The high charging rate combined with low smoothing creates noisy precision updates that compound over time. The beta signal oscillates between extremes, producing unstable policy precision that degrades action selection. The deficit is negligible during the acute impact window ($d = -0.02$) but grows progressively: recovery window $d = -0.54$ ($p = 0.0004$), late window $d = -0.83$ ($p < 0.0001$). This temporal signature — not acute failure but accumulating instability — matches the clinical characterization of borderline personality: functional under low stress but deteriorating under sustained emotional demand.
-
-**Depression ($\beta_0 = 0.2$): self-correcting perturbation.** The pessimistic initial precision prior creates a brief pre-betrayal advantage ($d = +0.47$, $p = 0.002$) — the agent starts cautious, investing less in uncertain partners — but the advantage dissipates completely by the impact window. Evidence accumulation corrects the pessimistic prior within $\sim$30 rounds. This reveals an important structural distinction: $\beta_0$ is an initial condition while $\alpha$ and beta persistence are dynamical parameters. Initial conditions are corrected by inference; dynamical parameters create persistent perturbations to the inference process itself.
-
-**Theoretical implication: the precision sweet spot.** The affect parameters define a two-dimensional space of $(\alpha, \lambda)$ regimes. The normal agent occupies a "sweet spot" — enough responsiveness ($\alpha = 3.0$) to track genuine partner changes but enough smoothing ($\lambda = 0.6$) to reject noise. Clinical phenotypes represent systematic deviations from this sweet spot, and the graded betrayal environment makes these deviations behaviorally visible. This suggests that the clinical utility of precision-tracking models lies not in the absolute performance of any single parameter regime but in the geometry of the $(\alpha, \lambda)$ landscape and how different clinical populations navigate it.
-
-### 4.19 Clinical Sensitivity in Coordination Games
-
-Section 4.13 showed that the graded trust game restores clinical sensitivity lost to binary softmax saturation, but between-clinical differentiation remained small (all phenotypes ≈ $d \approx 2.2$ vs no-affect, with payoffs in the range 10.32–10.35). The Stag Hunt's severe miscoordination penalty provides a stronger test: precision tracking is maximally decision-relevant here (§4.17), so perturbations to the affective mechanism should produce maximal behavioral differentiation.
-
-**Result: Stag Hunt betrayal produces qualitative clinical separation (50 seeds × 120 rounds).**
-
-| Phenotype | Mean payoff | $d$ vs healthy | $p$ vs healthy | log$_{10}$ BF vs healthy |
-|---|---|---|---|---|
-| Healthy (C2) | 489.7 | — | — | — |
-| Alexithymia (C9, $\alpha = 0.1$) | 497.1 | $-0.20$ | 0.318 | $+0.12$ anecdotal |
-| Depression (C11, $\beta_0 = 0.2$) | 484.6 | $+0.13$ | 0.510 | $-0.66$ substantial |
-| Borderline (C10, $\alpha = 12$, $\lambda = 0.5$) | 439.8 | $+0.72$ | $< 0.001$ | $-2.89$ **decisive** |
-| No-affect (C4) | 402.7 | — | — | — |
-
-**The borderline phenotype is significantly impaired** ($d = 0.72$, $p < 0.001$, decisive predictive-score proxy against), losing approximately 50 payoff points relative to healthy affect. Crucially, borderline still outperforms no-affect ($d = 0.57$, $p = 0.006$): volatile precision tracking is worse than stable tracking but better than none.
-
-**Alexithymia is not impaired.** Blunted affective charge ($\alpha = 0.1$) produces frozen beta (volatility = 0.003, range = 0.016) but does not degrade payoff. This makes theoretical sense: in the Stag Hunt, stable (even if flat) partner predictions are better than volatile ones. Alexithymia's insensitivity to prediction errors is protective — the agent maintains consistent partner models rather than overreacting to noisy evidence.
-
-**Depression shows mild impairment** detectable by predictive-score proxy ($-0.66$, substantial) but not by frequentist test ($p = 0.51$). The low initial beta requires several rounds to calibrate, creating a transient vulnerability that washes out over the full episode.
-
-**Stag Hunt default shows no clinical differentiation** ($d \approx 0$ for all phenotypes, 20 seeds). The stable environment's EFE landscape is as saturated as the binary PD — clinical parameter perturbations do not change the argmax of the softmax-transformed policy distribution.
-
-**Beta dynamics confirm clinical signatures.** All phenotypes produce the dynamical patterns predicted by §4.10:
-
-| Phenotype | $\beta$ mean | $\beta$ volatility | $\beta$ range |
-|---|---|---|---|
-| Alexithymia | 0.503 | 0.003 | 0.016 |
-| Depression | 0.561 | 0.103 | 0.440 |
-| Healthy | 0.579 | 0.085 | 0.441 |
-| Borderline | 0.688 | 0.185 | 0.928 |
-
-**Window analysis reveals temporal dynamics of impairment.** Borderline is impaired in pre-betrayal ($d = 0.82$, significant) and late game ($d = 0.67$, significant) windows — the volatility hurts coordination even outside the betrayal event. Alexithymia shows a different temporal pattern: mild advantage in pre-betrayal (stable predictions), mild disadvantage during impact (cannot adjust to betrayal), then recovery.
-
-**Theoretical interpretation.** The Stag Hunt betrayal condition creates the first environment where clinical phenotype *dynamics*, not just their presence/absence, determine qualitatively different behavioral outcomes. The key principle is that miscoordination cost amplifies the consequences of precision volatility:
-
-1. **High miscoordination cost + volatile precision = catastrophic.** The borderline agent's rapidly oscillating beta produces noisy partner predictions, leading to frequent miscoordination at the sucker payoff (0). This maps to the clinical observation that emotional volatility in BPD disrupts social coordination, not just social perception.
-
-2. **High miscoordination cost + frozen precision = protective.** The alexithymic agent's inability to revise precision estimates paradoxically stabilizes partner predictions. This is consistent with findings that reduced emotional reactivity can be locally adaptive in high-stakes coordination settings, even when it represents a global impairment in affective processing.
-
-3. **The task determines whether a clinical phenotype is harmful.** Alexithymia is harmless in Stag Hunt but would be expected to impair performance in environments requiring rapid affective adaptation (e.g., detecting deception in iterated games with changing partners). The model predicts task-dependent clinical presentations — the same parameter regime produces different behavioral signatures in different environmental niches.
-
-*Full results in `docs/results_tracking.md` §Phase 5.*
+Cross-game and clinical-like perturbation tests remain useful future extensions,
+but the active spine now evaluates them through the H0-H5 behavior cards:
+openness first, model fitness second, deployment third, then stress, social
+choice, and perturbation dynamics. Any clinical-like interpretation must first
+show the intended beta/precision dynamics and then show behavior only in regimes
+where H0 confirms policy-space openness.
 
 ---
 

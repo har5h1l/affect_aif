@@ -22,7 +22,5 @@ reference material for model construction and helper ideas.
 - Official `inferactively-pymdp==1.0.0` is the active runtime dependency.
 - Trust-task wrappers own model construction, task semantics, and any adapter
   logic needed around `pymdp.Agent`.
-- Pandas and NumPy are acceptable at analysis, logging, CLI, and compatibility
-  boundaries.
-- Historical paper and archive claims are not promoted as current evidence until
-  rerun on this architecture.
+- Pandas and NumPy are acceptable at analysis, logging, and CLI boundaries.
+- Current evidence must come from completed runs on this architecture.

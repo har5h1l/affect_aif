@@ -48,13 +48,13 @@ def main(argv: list[str] | None = None) -> int:
 
     # Predictive log-score summary
     le_summary = log_score_summary(results)
-    le_summary.to_csv(output_dir / "log_evidence_summary.csv", index=False)
+    le_summary.to_csv(output_dir / "predictive_log_score_summary.csv", index=False)
     print("Predictive log-score summary per condition:")
     print(le_summary.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
 
     # Pairwise predictive log-score differences
     bf_table = pairwise_predictive_log_scores(results)
-    bf_table.to_csv(output_dir / "pairwise_bayes_factors.csv", index=False)
+    bf_table.to_csv(output_dir / "pairwise_predictive_log_scores.csv", index=False)
     print("\nPairwise predictive log-score differences (log10 scale):")
     cols = ["condition_a", "condition_b", "log10_predictive_log_score_difference", "prop_a_preferred", "p_value"]
     print(bf_table[cols].to_string(index=False, float_format=lambda v: f"{v:.4f}"))

@@ -1,6 +1,6 @@
 {
   "payoff_mode": "binary",
-  "experiment_name": "h4_betrayal_recovery",
+  "experiment_name": "h3_betrayal_volatility",
   "num_partners": 4,
   "num_rounds": 120,
   "p_switch": 0.0,

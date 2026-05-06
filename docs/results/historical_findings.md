@@ -29,7 +29,7 @@ retain as hypotheses or motivation:
 - CvC transfer was described as an architectural proof of concept, not strong
   evidence of external validity.
 
-These claims should now be tested through the current H1-H7 surface in
+These claims should now be tested through the current H0-H5 behavior-card surface in
 `docs/theory/hypotheses.md`.
 
 ## Salvaged Conductor State

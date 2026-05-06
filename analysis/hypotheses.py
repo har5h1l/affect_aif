@@ -25,13 +25,12 @@ DEPTH_CONDITION_NAMES = {
 }
 
 HYPOTHESES = {
-    "H1": "Model fitness, not reward",
-    "H2": "Partner factorization",
-    "H3": "Deployment, not knowledge",
-    "H4": "Social volatility",
-    "H5": "Partner selection",
-    "H6": "Policy-space regime",
-    "H7": "Clinical perturbations",
+    "H0": "Openness Gate",
+    "H1": "Model Fitness",
+    "H2": "Deployment",
+    "H3": "Stress Response",
+    "H4": "Social Choice",
+    "H5": "Perturbation Phenotypes",
 }
 
 REQUIRED_SUMMARY_COLUMNS = {
@@ -235,6 +234,35 @@ def _conditions(results: pd.DataFrame) -> set[str]:
     return set(results["condition_name"].dropna().astype(str))
 
 
+def test_h0_openness_gate(results: pd.DataFrame) -> dict[str, Any]:
+    """Affect matters when the policy posterior has room to move."""
+
+    summary = _summary_by_condition(results)
+    payoff_gains_by_depth, payoff_deltas = _depth_gain_payload(summary, "total_payoff")
+    entropy_by_condition = {}
+    if "mean_q_pi_entropy" in summary.columns:
+        entropy_by_condition = {
+            str(condition): _mean(group["mean_q_pi_entropy"])
+            for condition, group in summary.groupby("condition_name", sort=True)
+        }
+    available = bool(payoff_gains_by_depth) or bool(entropy_by_condition) or "payoff_mode" in results.columns
+    return _payload(
+        HYPOTHESES["H0"],
+        available=available,
+        summary={"claim": "policy-space openness gates affective precision effects"},
+        evidence={
+            "depths_evaluated": sorted(payoff_gains_by_depth),
+            "mean_affect_payoff_gain": _mean(payoff_deltas),
+            "payoff_gain_by_depth": payoff_gains_by_depth,
+            "mean_q_pi_entropy_by_condition": entropy_by_condition,
+            "payoff_modes": sorted(results["payoff_mode"].dropna().astype(str).unique())
+            if "payoff_mode" in results.columns
+            else [],
+        },
+        reason=None if available else "Requires depth-pair, policy entropy, or payoff-mode evidence.",
+    )
+
+
 def test_h1_model_fitness(results: pd.DataFrame) -> dict[str, Any]:
     """Per-partner affect tracks model fitness rather than cached reward."""
 
@@ -256,40 +284,13 @@ def test_h1_model_fitness(results: pd.DataFrame) -> dict[str, Any]:
     return _payload(
         HYPOTHESES["H1"],
         available=available,
-        summary={"claim": "affect indexes model reliability rather than partner reward"},
+        summary={"claim": "precision tracks model reliability rather than partner reward"},
         evidence=evidence,
         reason=reason,
     )
 
 
-def test_h2_partner_factorization(results: pd.DataFrame) -> dict[str, Any]:
-    """Per-partner affect preserves partner-specific social structure."""
-
-    factorized_columns = [
-        column
-        for column in ("betas", "reward_avgs", "partner_idx", "selected_partner_idx")
-        if column in results.columns
-    ]
-    available = "betas" in results.columns and (
-        "partner_idx" in results.columns or "selected_partner_idx" in results.columns
-    )
-    evidence = {
-        "factorized_columns": factorized_columns,
-        "num_partners_observed": (
-            int(results["partner_idx"].nunique()) if "partner_idx" in results.columns and not results.empty else None
-        ),
-    }
-    reason = None if available else "Requires per-partner beta signals and partner identifiers."
-    return _payload(
-        HYPOTHESES["H2"],
-        available=available,
-        summary={"claim": "partner-specific affect should not collapse to global predictability"},
-        evidence=evidence,
-        reason=reason,
-    )
-
-
-def test_h3_deployment_not_knowledge(results: pd.DataFrame, accuracy_margin: float = 0.05) -> dict[str, Any]:
+def test_h2_deployment(results: pd.DataFrame, accuracy_margin: float = 0.05) -> dict[str, Any]:
     """Lesioned agents should preserve inference while impairing action deployment."""
 
     summary = _summary_by_condition(results)
@@ -299,7 +300,7 @@ def test_h3_deployment_not_knowledge(results: pd.DataFrame, accuracy_margin: flo
         summary.get("condition_name", [])
     ):
         return _payload(
-            HYPOTHESES["H3"],
+            HYPOTHESES["H2"],
             available=False,
             summary={"claim": "knowledge can remain intact while action deployment worsens"},
             reason="Requires lesioned and tau4_affect conditions.",
@@ -313,7 +314,7 @@ def test_h3_deployment_not_knowledge(results: pd.DataFrame, accuracy_margin: flo
     accuracy_diff = (_mean(lesion_accuracy) or 0.0) - (_mean(intact_accuracy) or 0.0)
     payoff_diff = (_mean(lesion_payoff) or 0.0) - (_mean(intact_payoff) or 0.0)
     return _payload(
-        HYPOTHESES["H3"],
+        HYPOTHESES["H2"],
         available=True,
         summary={
             "accuracy_preserved": abs(accuracy_diff) <= float(accuracy_margin),
@@ -330,12 +331,12 @@ def test_h3_deployment_not_knowledge(results: pd.DataFrame, accuracy_margin: flo
     )
 
 
-def test_h4_social_volatility(results: pd.DataFrame) -> dict[str, Any]:
+def test_h3_stress_response(results: pd.DataFrame) -> dict[str, Any]:
     """Affect should matter most under betrayal, stance shifts, or partner volatility."""
 
     if not has_switch_events(results):
         return _payload(
-            HYPOTHESES["H4"],
+            HYPOTHESES["H3"],
             available=False,
             summary={"claim": "affect should be most visible after social volatility"},
             reason="Requires scheduled or observed switch events.",
@@ -363,7 +364,7 @@ def test_h4_social_volatility(results: pd.DataFrame) -> dict[str, Any]:
     }
     reason = None if available else "Requires tau4_affect and tau4_no_affect post-switch windows."
     return _payload(
-        HYPOTHESES["H4"],
+        HYPOTHESES["H3"],
         available=available,
         summary={"claim": "post-switch behavior is the primary volatility readout"},
         evidence=evidence,
@@ -371,7 +372,7 @@ def test_h4_social_volatility(results: pd.DataFrame) -> dict[str, Any]:
     )
 
 
-def test_h5_partner_selection(results: pd.DataFrame) -> dict[str, Any]:
+def test_h4_social_choice(results: pd.DataFrame) -> dict[str, Any]:
     """Per-partner affect should shape who the agent selects, avoids, or revisits."""
 
     partner_column = "selected_partner_idx" if "selected_partner_idx" in results.columns else "partner_idx"
@@ -382,7 +383,7 @@ def test_h5_partner_selection(results: pd.DataFrame) -> dict[str, Any]:
         for (condition_name, partner_idx), count in grouped.items():
             counts.setdefault(str(condition_name), {})[str(partner_idx)] = int(count)
     return _payload(
-        HYPOTHESES["H5"],
+        HYPOTHESES["H4"],
         available=available,
         summary={"claim": "agent-choice settings expose partner approach and avoidance"},
         evidence={"partner_selection_counts": counts, "partner_column": partner_column if available else None},
@@ -390,36 +391,7 @@ def test_h5_partner_selection(results: pd.DataFrame) -> dict[str, Any]:
     )
 
 
-def test_h6_policy_space_regime(results: pd.DataFrame) -> dict[str, Any]:
-    """Affect matters when the policy posterior has room to move."""
-
-    summary = _summary_by_condition(results)
-    payoff_gains_by_depth, payoff_deltas = _depth_gain_payload(summary, "total_payoff")
-    entropy_by_condition = {}
-    if "mean_q_pi_entropy" in summary.columns:
-        entropy_by_condition = {
-            str(condition): _mean(group["mean_q_pi_entropy"])
-            for condition, group in summary.groupby("condition_name", sort=True)
-        }
-    available = bool(payoff_gains_by_depth) or bool(entropy_by_condition) or "payoff_mode" in results.columns
-    return _payload(
-        HYPOTHESES["H6"],
-        available=available,
-        summary={"claim": "saturated policy spaces can hide affective precision effects"},
-        evidence={
-            "depths_evaluated": sorted(payoff_gains_by_depth),
-            "mean_affect_payoff_gain": _mean(payoff_deltas),
-            "payoff_gain_by_depth": payoff_gains_by_depth,
-            "mean_q_pi_entropy_by_condition": entropy_by_condition,
-            "payoff_modes": sorted(results["payoff_mode"].dropna().astype(str).unique())
-            if "payoff_mode" in results.columns
-            else [],
-        },
-        reason=None if available else "Requires depth-pair, policy entropy, or payoff-mode evidence.",
-    )
-
-
-def test_h7_clinical_perturbations(results: pd.DataFrame) -> dict[str, Any]:
+def test_h5_perturbation_phenotypes(results: pd.DataFrame) -> dict[str, Any]:
     """Clinical-like regimes should separate by task regime."""
 
     clinical_names = {"alexithymia", "borderline", "depression"}
@@ -432,31 +404,22 @@ def test_h7_clinical_perturbations(results: pd.DataFrame) -> dict[str, Any]:
             condition: _mean(_condition_values(summary, condition, "total_payoff")) for condition in present
         }
     return _payload(
-        HYPOTHESES["H7"],
+        HYPOTHESES["H5"],
         available=bool(present),
-        summary={"claim": "clinical perturbations are task-regime dependent, not global traits"},
+        summary={"claim": "perturbation phenotypes are task-regime dependent, not global traits"},
         evidence=evidence,
         reason=None if present else "Requires alexithymia, borderline, or depression conditions.",
     )
 
 
 def run_all_hypothesis_tests(results: pd.DataFrame) -> dict[str, dict[str, Any]]:
-    """Run the current H1-H7 suite and return a JSON-safe dictionary."""
+    """Run the current H0-H5 behavior-card suite and return a JSON-safe dictionary."""
 
     return {
+        "h0": test_h0_openness_gate(results),
         "h1": test_h1_model_fitness(results),
-        "h2": test_h2_partner_factorization(results),
-        "h3": test_h3_deployment_not_knowledge(results),
-        "h4": test_h4_social_volatility(results),
-        "h5": test_h5_partner_selection(results),
-        "h6": test_h6_policy_space_regime(results),
-        "h7": test_h7_clinical_perturbations(results),
+        "h2": test_h2_deployment(results),
+        "h3": test_h3_stress_response(results),
+        "h4": test_h4_social_choice(results),
+        "h5": test_h5_perturbation_phenotypes(results),
     }
-
-
-test_h1_orthogonal_augmentation = test_h6_policy_space_regime
-test_h1_depth_compensation = test_h6_policy_space_regime
-test_h2_depth_matters = test_h6_policy_space_regime
-test_h3_lesion_dissociation = test_h3_deployment_not_knowledge
-test_h4_betrayal_recovery = test_h4_social_volatility
-test_h5_affect_vs_no_affect_post_switch = test_h4_social_volatility

@@ -1,10 +1,10 @@
 {
   "payoff_mode": "binary",
-  "experiment_name": "h5_partner_selection",
+  "experiment_name": "h2_deployment_lesion",
   "num_partners": 4,
   "num_rounds": 200,
   "p_switch": 0.05,
-  "assignment_mode": "agent_choice",
+  "assignment_mode": "random",
   "gamma": 1.0,
   "lr": 0.1,
   "action_sampling": "marginal",
@@ -24,7 +24,8 @@
     6
   ],
   "presets": [
-    "lesioned"
+    "lesioned",
+    "no_epistemic"
   ],
   "partner_types": [
     "cooperator",

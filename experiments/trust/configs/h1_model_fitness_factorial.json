@@ -1,6 +1,6 @@
 {
   "payoff_mode": "binary",
-  "experiment_name": "h1_depth_affect_factorial",
+  "experiment_name": "h1_model_fitness_factorial",
   "num_partners": 4,
   "num_rounds": 200,
   "p_switch": 0.05,

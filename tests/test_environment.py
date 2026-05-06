@@ -17,7 +17,7 @@ def test_cooperator_mostly_cooperates():
         type_lookup=lookup,
         rng=__import__("numpy").random.default_rng(0),
     )
-    actions = [partner.sample_action() for _ in range(200)]
+    actions = [partner.plan_and_act() for _ in range(200)]
     assert sum(actions) < 80
 
 

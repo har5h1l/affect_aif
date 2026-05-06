@@ -28,7 +28,6 @@ class ProgressReporter:
     """Base no-op reporter."""
 
     enabled: bool = False
-    include_calibration: bool = True
 
     def emit(self, event: str, **payload):
         del event, payload
@@ -41,8 +40,6 @@ class StageStreamProgressReporter(ProgressReporter):
 
     def emit(self, event: str, **payload):
         if not self.enabled:
-            return
-        if event.startswith("calibration_") and not self.include_calibration:
             return
         line = self._format_event(event, payload)
         if line:
@@ -123,11 +120,11 @@ class StageStreamProgressReporter(ProgressReporter):
         return ""
 
 
-def create_progress_reporter(enabled: bool, mode: str, include_calibration: bool) -> ProgressReporter:
+def create_progress_reporter(enabled: bool, mode: str) -> ProgressReporter:
     """Build a configured reporter."""
 
     if not enabled:
-        return ProgressReporter(enabled=False, include_calibration=include_calibration)
+        return ProgressReporter(enabled=False)
     if mode != "stage_stream":
         raise ValueError(f"Unsupported verbosity mode '{mode}'.")
-    return StageStreamProgressReporter(enabled=True, include_calibration=include_calibration)
+    return StageStreamProgressReporter(enabled=True)

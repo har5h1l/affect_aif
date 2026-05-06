@@ -30,9 +30,7 @@ and active-inference matrix conventions. The supported runtime is official
 `inferactively-pymdp==1.0.0`; Apashea's fork is reference material, not the
 runtime dependency.
 
-## Legacy Surfaces
+## Supported Surface
 
-Retired operating surfaces are removed from the runnable tree. Useful context is
-salvaged into `docs/state/` and `docs/results/`, then stale sources are removed.
 Do not reintroduce a custom active-inference engine; keep affect and trust logic
 in task-local modules around official `pymdp` agents.

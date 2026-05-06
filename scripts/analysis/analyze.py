@@ -37,25 +37,22 @@ def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
             "available": bool(payload.get("available", False)),
             "summary": payload.get("summary", {}).get("claim", ""),
         }
-        if hypothesis_id == "h1":
+        if hypothesis_id == "h0":
+            row["primary_metric"] = evidence.get("mean_affect_payoff_gain")
+            row["secondary_metric"] = len(evidence.get("mean_q_pi_entropy_by_condition", {}))
+        elif hypothesis_id == "h1":
             row["primary_metric"] = len(evidence.get("beta_signal_columns", []))
             row["secondary_metric"] = len(evidence.get("reward_control_conditions", []))
         elif hypothesis_id == "h2":
-            row["primary_metric"] = evidence.get("num_partners_observed")
-            row["secondary_metric"] = len(evidence.get("factorized_columns", []))
-        elif hypothesis_id == "h3":
             row["primary_metric"] = evidence.get("payoff_difference_lesioned_minus_tau4_affect")
             row["secondary_metric"] = evidence.get("accuracy_difference_lesioned_minus_tau4_affect")
-        elif hypothesis_id == "h4":
+        elif hypothesis_id == "h3":
             row["primary_metric"] = evidence.get("payoff_difference_tau4_affect_minus_tau4_no_affect")
             row["secondary_metric"] = evidence.get("detection_latency_difference_tau4_no_affect_minus_tau4_affect")
-        elif hypothesis_id == "h5":
+        elif hypothesis_id == "h4":
             row["primary_metric"] = len(evidence.get("partner_selection_counts", {}))
             row["secondary_metric"] = evidence.get("partner_column")
-        elif hypothesis_id == "h6":
-            row["primary_metric"] = evidence.get("mean_affect_payoff_gain")
-            row["secondary_metric"] = len(evidence.get("mean_q_pi_entropy_by_condition", {}))
-        elif hypothesis_id == "h7":
+        elif hypothesis_id == "h5":
             row["primary_metric"] = len(evidence.get("clinical_conditions", []))
             row["secondary_metric"] = None
         rows.append(row)

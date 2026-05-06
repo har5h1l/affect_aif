@@ -52,7 +52,7 @@ class TrustBackend(BenchmarkBackend):
 
     @staticmethod
     def _normalize_partner_type(type_name: str) -> str:
-        aliases = {
+        type_names = {
             "cooperative": "cooperator",
             "cooperator": "cooperator",
             "reciprocal": "reciprocator",
@@ -61,7 +61,7 @@ class TrustBackend(BenchmarkBackend):
             "exploiter": "exploiter",
             "random": "random",
         }
-        return aliases.get(type_name, type_name)
+        return type_names.get(type_name, type_name)
 
     def _normalize_overrides(self, overrides: dict[str, Any]) -> dict[str, Any]:
         normalized = dict(overrides)
@@ -87,8 +87,7 @@ class TrustBackend(BenchmarkBackend):
         }
         overrides.update(self.scenario.trust_game_defaults())
         direct_overrides = {key: value for key, value in self.backend_config.items() if key in EXPERIMENT_CONFIG_FIELDS}
-        legacy_overrides = dict(self.backend_config.get("trust_game_overrides", {}))
-        overrides.update(self._normalize_overrides({**direct_overrides, **legacy_overrides}))
+        overrides.update(self._normalize_overrides(direct_overrides))
         return ExperimentConfig(**overrides)
 
     def prepare(

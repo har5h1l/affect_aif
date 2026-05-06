@@ -30,7 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--config", action="append", required=True, help="Path to a JSON config file. Repeat to queue multiple configs."
     )
     parser.add_argument("--output-dir", default="results", help="Root directory for batch output folders.")
-    parser.add_argument("--batch-name", help="Stable name for the batch output subdirectory.")
+    parser.add_argument("--batch-name", help="Stable card-root or batch output subdirectory.")
     parser.add_argument(
         "--workers", type=int, default=os.cpu_count() or 1, help="Shared worker count across the whole batch."
     )
@@ -40,11 +40,6 @@ def build_parser() -> argparse.ArgumentParser:
         default="stage_stream",
         choices=["stage_stream"],
         help="Structured progress output mode for single-worker single-config runs.",
-    )
-    parser.add_argument(
-        "--no-verbose-calibration",
-        action="store_true",
-        help="Legacy no-op retained for old invocations; the native runtime has no calibration stage.",
     )
     parser.add_argument(
         "--make-gifs", action="store_true", help="Generate one GIF per primary condition-run after saving results."
@@ -129,7 +124,6 @@ def _serial_single_config_run(args) -> int:
     config = ExperimentConfig.from_json(config_path)
     config.verbose = bool(args.verbose)
     config.verbosity_mode = str(args.verbosity_mode)
-    config.verbosity_include_calibration = not bool(args.no_verbose_calibration)
     config.gif_after_run = False
     config.gif_output_dir = None
     runner = ExperimentRunner(config)

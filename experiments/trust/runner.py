@@ -36,7 +36,6 @@ class ExperimentRunner:
         self.progress: ProgressReporter = create_progress_reporter(
             enabled=self.config.verbose,
             mode=self.config.verbosity_mode,
-            include_calibration=self.config.verbosity_include_calibration,
         )
 
     def _create_env(self, seed: int) -> TrustGameEnv:
@@ -245,7 +244,9 @@ class ExperimentRunner:
             "q_pi": q_pi,
             "G": np.asarray(decision.policy_scores, dtype=float),
             "best_policy_step_costs": np.asarray([], dtype=float),
-            "mean_abs_step_efe": float(np.mean(np.abs(decision.policy_scores))) if decision.policy_scores.size else np.nan,
+            "mean_abs_step_efe": (
+                float(np.mean(np.abs(decision.policy_scores))) if decision.policy_scores.size else np.nan
+            ),
             "best_policy_idx": int(decision.best_policy_idx),
             "selected_partner": int(decision.selected_partner),
             "selected_action": int(decision.selected_action),

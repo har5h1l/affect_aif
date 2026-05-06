@@ -18,45 +18,65 @@ git diff --check
 
 ## Post-Verification Queue
 
-### 1. Shallow Affect / Tau 1-3
+### 1. H0 Openness Gate / Shallow Tau 1-3
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h6_shallow_policy_regime.json --output-dir results --batch-name h6_shallow_policy_regime --workers 12
-python scripts/analysis/analyze.py --results results/h6_shallow_policy_regime/h6_shallow_policy_regime/results.csv --output-dir results/h6_shallow_policy_regime/h6_shallow_policy_regime/analysis
+python scripts/experiment/run.py --config experiments/trust/configs/h0_shallow_policy_regime.json --output-dir results --batch-name h0_openness_gate --workers 12
+python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_shallow_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_shallow_policy_regime/analysis
 ```
 
-### 2. Partner Selection
+### 2. H1 Model Fitness / Reliability vs Reward
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h5_partner_selection.json --output-dir results --batch-name h5_partner_selection --workers 12
-python scripts/analysis/analyze.py --results results/h5_partner_selection/h5_partner_selection/results.csv --output-dir results/h5_partner_selection/h5_partner_selection/analysis
+python scripts/experiment/run.py --config experiments/trust/configs/h1_model_fitness_factorial.json --output-dir results --batch-name h1_model_fitness --workers 12
+python scripts/analysis/analyze.py --results results/h1_model_fitness/h1_model_fitness_factorial/results.csv --output-dir results/h1_model_fitness/h1_model_fitness_factorial/analysis
 ```
 
-### 3. Betrayal / Stance Switch
+### 3. H2 Deployment / Lesion
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h4_betrayal_volatility.json --output-dir results --batch-name h4_betrayal_volatility --workers 12
-python scripts/analysis/analyze.py --results results/h4_betrayal_volatility/h4_betrayal_volatility/results.csv --output-dir results/h4_betrayal_volatility/h4_betrayal_volatility/analysis
+python scripts/experiment/run.py --config experiments/trust/configs/h2_deployment_lesion.json --output-dir results --batch-name h2_deployment --workers 12
+python scripts/analysis/analyze.py --results results/h2_deployment/h2_deployment_lesion/results.csv --output-dir results/h2_deployment/h2_deployment_lesion/analysis
 ```
 
-### 4. Clinical Perturbations
+### 4. H3 Stress Response / Betrayal Stance Switch
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h7_clinical_betrayal.json --config experiments/trust/configs/h7_clinical_phenotypes.json --config experiments/trust/configs/h7_sensitivity_sweep.json --output-dir results --batch-name h7_clinical_perturbations --workers 12
-python scripts/analysis/analyze.py --results results/h7_clinical_perturbations/h7_clinical_betrayal/results.csv --output-dir results/h7_clinical_perturbations/h7_clinical_betrayal/analysis
-python scripts/analysis/analyze.py --results results/h7_clinical_perturbations/h7_clinical_phenotypes/results.csv --output-dir results/h7_clinical_perturbations/h7_clinical_phenotypes/analysis
-python scripts/analysis/analyze.py --results results/h7_clinical_perturbations/h7_sensitivity_sweep/results.csv --output-dir results/h7_clinical_perturbations/h7_sensitivity_sweep/analysis
+python scripts/experiment/run.py --config experiments/trust/configs/h3_betrayal_volatility.json --output-dir results --batch-name h3_stress_response --workers 12
+python scripts/analysis/analyze.py --results results/h3_stress_response/h3_betrayal_volatility/results.csv --output-dir results/h3_stress_response/h3_betrayal_volatility/analysis
 ```
 
-### 5. Graded Precision-Channel Tests
+### 5. H4 Social Choice / Partner Selection
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/configs/h6_graded_policy_regime.json --config experiments/trust/configs/h6_graded_betrayal.json --output-dir results --batch-name h6_graded_precision_channel --workers 12
-python scripts/analysis/analyze.py --results results/h6_graded_precision_channel/h6_graded_policy_regime/results.csv --output-dir results/h6_graded_precision_channel/h6_graded_policy_regime/analysis
-python scripts/analysis/analyze.py --results results/h6_graded_precision_channel/h6_graded_betrayal/results.csv --output-dir results/h6_graded_precision_channel/h6_graded_betrayal/analysis
+python scripts/experiment/run.py --config experiments/trust/configs/h4_social_choice.json --output-dir results --batch-name h4_social_choice --workers 12
+python scripts/analysis/analyze.py --results results/h4_social_choice/h4_social_choice/results.csv --output-dir results/h4_social_choice/h4_social_choice/analysis
 ```
 
-### 6. Multi-Focal Descriptive Runs
+### 6. H5 Perturbation Phenotypes / Clinical-Like Variants
+
+```bash
+python scripts/experiment/run.py --config experiments/trust/configs/h5_clinical_betrayal.json --config experiments/trust/configs/h5_clinical_phenotypes.json --config experiments/trust/configs/h5_sensitivity_sweep.json --output-dir results --batch-name h5_perturbation_phenotypes --workers 12
+python scripts/analysis/analyze.py --results results/h5_perturbation_phenotypes/h5_clinical_betrayal/results.csv --output-dir results/h5_perturbation_phenotypes/h5_clinical_betrayal/analysis
+python scripts/analysis/analyze.py --results results/h5_perturbation_phenotypes/h5_clinical_phenotypes/results.csv --output-dir results/h5_perturbation_phenotypes/h5_clinical_phenotypes/analysis
+python scripts/analysis/analyze.py --results results/h5_perturbation_phenotypes/h5_sensitivity_sweep/results.csv --output-dir results/h5_perturbation_phenotypes/h5_sensitivity_sweep/analysis
+```
+
+### 7. H0 Openness Gate / Graded Precision-Channel Tests
+
+```bash
+python scripts/experiment/run.py --config experiments/trust/configs/h0_graded_policy_regime.json --config experiments/trust/configs/h0_graded_betrayal.json --output-dir results --batch-name h0_openness_gate --workers 12
+python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_graded_policy_regime/results.csv --output-dir results/h0_openness_gate/h0_graded_policy_regime/analysis
+python scripts/analysis/analyze.py --results results/h0_openness_gate/h0_graded_betrayal/results.csv --output-dir results/h0_openness_gate/h0_graded_betrayal/analysis
+```
+
+### 8. Optional Factorization Ablation
+
+A future global-beta ablation can compare per-partner beta against a shared
+precision state. Keep it outside the core H0-H5 queue unless we decide the
+factorization claim needs direct model-comparison evidence.
+
+### 9. Multi-Focal Descriptive Runs
 
 Multi-focal configs currently use the package API directly; E2 analysis remains
 descriptive until a dedicated multi-focal analysis script exists.

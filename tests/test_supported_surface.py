@@ -17,7 +17,6 @@ from experiments.trust.conditions import (
 )
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.factory import create_native_runtime
-from experiments.trust.runner import ExperimentRunner
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -38,15 +37,14 @@ def _load_script_module(script_name: str):
     return module
 
 
-def test_config_legacy_beta_alias_loads_but_serializes_canonical(tmp_path):
-    config = ExperimentConfig.from_dict({"num_beta_levels": 7, "num_rounds": 2, "num_replications": 1})
+def test_config_uses_canonical_beta_level_name(tmp_path):
+    config = ExperimentConfig.from_dict({"beta_num_levels": 7, "num_rounds": 2, "num_replications": 1})
     assert config.beta_num_levels == 7
 
     output_path = tmp_path / "config.json"
     config.to_json(output_path)
     payload = json.loads(output_path.read_text())
     assert payload["beta_num_levels"] == 7
-    assert "num_beta_levels" not in payload
 
 
 def test_condition_metadata_and_presets_normalize_current_names():
@@ -133,9 +131,9 @@ def test_supported_cli_scripts_parse_and_run_smoke(tmp_path):
 def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
     run_targeted_reanalysis = _load_script_module("analysis/targeted_reanalysis.py")
 
-    h1_rows = []
+    h0_rows = []
     for seed in (0, 1):
-        h1_rows.extend(
+        h0_rows.extend(
             [
                 {
                     "condition": 1,
@@ -195,9 +193,9 @@ def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
                 },
             ]
         )
-    h2_rows = []
+    h3_rows = []
     for seed in (0, 1):
-        h2_rows.extend(
+        h3_rows.extend(
             [
                 {
                     "condition": 5,
@@ -243,33 +241,33 @@ def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
                 },
             ]
         )
-    h4_rows = []
+    stress_rows = []
     for seed in (0, 1):
         for round_idx in range(30, 61):
-            h4_rows.extend(
+            stress_rows.extend(
                 [
                     {"condition_name": "tau4_no_affect", "seed": seed, "round": round_idx, "payoff": 1.0 + seed},
                     {"condition_name": "tau4_affect", "seed": seed, "round": round_idx, "payoff": 2.0 + seed},
                 ]
             )
 
-    h1_path = tmp_path / "h1.csv"
+    h0_path = tmp_path / "h0.csv"
     h2_path = tmp_path / "h2.csv"
-    h4_path = tmp_path / "h4.csv"
-    pd.DataFrame(h1_rows).to_csv(h1_path, index=False)
-    pd.DataFrame(h2_rows).to_csv(h2_path, index=False)
-    pd.DataFrame(h4_rows).to_csv(h4_path, index=False)
+    h3_path = tmp_path / "h3.csv"
+    pd.DataFrame(h0_rows).to_csv(h0_path, index=False)
+    pd.DataFrame(h3_rows).to_csv(h2_path, index=False)
+    pd.DataFrame(stress_rows).to_csv(h3_path, index=False)
 
     out_dir = tmp_path / "reanalysis"
     assert (
         run_targeted_reanalysis.main(
             [
-                "--h1-results",
-                str(h1_path),
+                "--h0-results",
+                str(h0_path),
                 "--h2-results",
                 str(h2_path),
-                "--h4-results",
-                str(h4_path),
+                "--h3-results",
+                str(h3_path),
                 "--output-dir",
                 str(out_dir),
             ]
@@ -277,34 +275,34 @@ def test_targeted_reanalysis_cli_writes_requested_outputs(tmp_path):
         == 0
     )
 
-    assert (out_dir / "h1_shallow_reanalysis.txt").exists()
-    assert (out_dir / "h2_lesion_reanalysis.txt").exists()
-    assert (out_dir / "h4_betrayal_window_reanalysis.txt").exists()
-    h1_text = (out_dir / "h1_shallow_reanalysis.txt").read_text()
-    h2_text = (out_dir / "h2_lesion_reanalysis.txt").read_text()
-    h4_text = (out_dir / "h4_betrayal_window_reanalysis.txt").read_text()
-    assert "tau=1" in h1_text
-    assert "Source file:" in h1_text
-    assert "completed_seeds=" in h1_text
+    assert (out_dir / "h0_openness_gate_reanalysis.txt").exists()
+    assert (out_dir / "h2_deployment_reanalysis.txt").exists()
+    assert (out_dir / "h3_stress_response_reanalysis.txt").exists()
+    h0_text = (out_dir / "h0_openness_gate_reanalysis.txt").read_text()
+    h2_text = (out_dir / "h2_deployment_reanalysis.txt").read_text()
+    h3_text = (out_dir / "h3_stress_response_reanalysis.txt").read_text()
+    assert "tau=1" in h0_text
+    assert "Source file:" in h0_text
+    assert "completed_seeds=" in h0_text
     assert "lesioned vs tau4_affect" in h2_text
     assert "Source type: final results" in h2_text
-    assert "rounds 30-60" in h4_text
+    assert "rounds 30-60" in h3_text
 
 
 def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_live_tail(tmp_path):
     run_targeted_reanalysis = _load_script_module("analysis/targeted_reanalysis.py")
 
     results_root = tmp_path / "results"
-    h1_main = results_root / "h1_factorial" / "h1_depth_affect_factorial"
-    h1_setsid = results_root / "h1_factorial_setsid_20260416" / "h1_depth_affect_factorial"
+    h0_main = results_root / "h0_openness_gate" / "h0_shallow_policy_regime"
+    h0_setsid = results_root / "h0_openness_gate_setsid_20260416" / "h0_shallow_policy_regime"
     h2_dir = tmp_path / "inputs" / "h2"
-    h4_dir = tmp_path / "inputs" / "h4"
-    h1_main.mkdir(parents=True)
-    h1_setsid.mkdir(parents=True)
+    h3_dir = tmp_path / "inputs" / "h3"
+    h0_main.mkdir(parents=True)
+    h0_setsid.mkdir(parents=True)
     h2_dir.mkdir(parents=True)
-    h4_dir.mkdir(parents=True)
+    h3_dir.mkdir(parents=True)
 
-    (h1_main / "results_partial.csv").write_text(
+    (h0_main / "results_partial.csv").write_text(
         "\n".join(
             [
                 "condition_name,seed,round,payoff,inferred_joint_correct",
@@ -322,7 +320,7 @@ def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_liv
             {"condition_name": "tau1_affect", "seed": 1, "round": 199, "payoff": 16, "inferred_joint_correct": 1.0},
             {"condition_name": "tau2_affect", "seed": 0, "round": 199, "payoff": 17, "inferred_joint_correct": 1.0},
         ]
-    ).to_csv(h1_setsid / "results_partial.csv", index=False)
+    ).to_csv(h0_setsid / "results_partial.csv", index=False)
 
     h2_path = h2_dir / "h2.csv"
     pd.DataFrame(
@@ -336,29 +334,29 @@ def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_liv
         ]
     ).to_csv(h2_path, index=False)
 
-    h4_path = h4_dir / "h4.csv"
-    h4_rows = []
+    h3_path = h3_dir / "h3.csv"
+    h3_rows = []
     for seed in (0, 1):
         for round_idx in range(30, 61):
-            h4_rows.extend(
+            h3_rows.extend(
                 [
                     {"condition_name": "tau4_no_affect", "seed": seed, "round": round_idx, "payoff": 1.0 + seed},
                     {"condition_name": "tau4_affect", "seed": seed, "round": round_idx, "payoff": 2.0 + seed},
                 ]
             )
-    pd.DataFrame(h4_rows).to_csv(h4_path, index=False)
+    pd.DataFrame(h3_rows).to_csv(h3_path, index=False)
 
     out_dir = tmp_path / "reanalysis"
-    h1_missing_final = results_root / "h1_factorial" / "h1_depth_affect_factorial" / "results.csv"
+    h0_missing_final = results_root / "h0_openness_gate" / "h0_shallow_policy_regime" / "results.csv"
     assert (
         run_targeted_reanalysis.main(
             [
-                "--h1-results",
-                str(h1_missing_final),
+                "--h0-results",
+                str(h0_missing_final),
                 "--h2-results",
                 str(h2_path),
-                "--h4-results",
-                str(h4_path),
+                "--h3-results",
+                str(h3_path),
                 "--output-dir",
                 str(out_dir),
             ]
@@ -366,15 +364,15 @@ def test_targeted_reanalysis_falls_back_to_partial_checkpoints_and_tolerates_liv
         == 0
     )
 
-    h1_text = (out_dir / "h1_shallow_reanalysis.txt").read_text()
-    assert "Source files:" in h1_text
-    assert str(h1_main / "results_partial.csv") in h1_text
-    assert str(h1_setsid / "results_partial.csv") in h1_text
-    assert "tau1_affect" in h1_text
-    assert "tau2_no_affect" in h1_text
+    h0_text = (out_dir / "h0_openness_gate_reanalysis.txt").read_text()
+    assert "Source files:" in h0_text
+    assert str(h0_main / "results_partial.csv") in h0_text
+    assert str(h0_setsid / "results_partial.csv") in h0_text
+    assert "tau1_affect" in h0_text
+    assert "tau2_no_affect" in h0_text
 
 
-def test_historical_archive_surface_is_removed():
+def test_removed_script_surface_stays_out_of_supported_cli():
     supported_scripts = {
         "experiment/run.py",
         "experiment/preliminary.py",
@@ -394,7 +392,6 @@ def test_historical_archive_surface_is_removed():
     top_level_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
     all_scripts = {str(path.relative_to(REPO_ROOT / "scripts")) for path in (REPO_ROOT / "scripts").rglob("*.py")}
     cli_doc = (REPO_ROOT / "docs" / "operations" / "cli.md").read_text()
-    historical_doc = (REPO_ROOT / "docs" / "results" / "historical_findings.md").read_text()
 
     assert top_level_scripts == set()
     assert supported_scripts <= all_scripts
@@ -414,4 +411,3 @@ def test_historical_archive_surface_is_removed():
         assert deleted_name not in all_scripts
     assert not (REPO_ROOT / "archive").exists()
     assert "archive/configs/" not in cli_doc
-    assert "run_precision_modulation.py" in historical_doc

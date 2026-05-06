@@ -5,8 +5,12 @@
 Supported experiment runs write batch outputs under:
 
 ```text
-results/<batch_name>/<config_slug>/
+results/<card_root>/<config_slug>/
 ```
+
+Use card roots such as `h0_openness_gate`, `h1_model_fitness`,
+`h2_deployment`, `h3_stress_response`, `h4_social_choice`, and
+`h5_perturbation_phenotypes`.
 
 Typical experiment outputs include:
 

@@ -52,14 +52,6 @@ class Partner:
         self.last_partner_action = action
         return action
 
-    def sample_action(self, correlation_action: int | None = None, correlation_strength: float = 0.9) -> int:
-        """Backward-compatible alias for the scripted action sampler."""
-
-        return self.plan_and_act(
-            correlation_action=correlation_action,
-            correlation_strength=correlation_strength,
-        )
-
     def observe_outcome(
         self,
         agent_action: int,
@@ -76,11 +68,6 @@ class Partner:
             cooperation_evidence_strength=evidence,
         )
         self.stance_name = posterior_to_stance(self.agent_character_posterior)
-
-    def update_after_interaction(self, agent_action: int):
-        """Backward-compatible alias for the scripted outcome update."""
-
-        self.observe_outcome(agent_action=agent_action)
 
     def force_type_switch(self, new_type: str):
         """Apply a configured type change while preserving stance history."""

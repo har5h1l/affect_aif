@@ -8,6 +8,5 @@ This directory is the context steering wheel for humans and agents.
 - `decisions/`: settled architecture and experiment decisions
 - `handoffs/`: dated handoff snapshots replacing conductor logs
 
-Treat these files as current operating state. Historical findings live under
-`docs/results/` and are not current evidence unless explicitly rerun on the
-current architecture.
+Treat these files as current operating state. Current evidence is recorded
+under `docs/results/` only after completed supported-architecture runs.

@@ -1,51 +1,171 @@
 # Current Hypotheses
 
-The old H1-H5/H7 labels are replaced by hypotheses that follow directly from
-the Hesp-to-multi-agent extension.
+The canonical hypothesis surface is organized as chronological behavior cards:
+first ask whether affect can move policy, then ask what it tracks, whether it
+changes deployment, and where those changes become visible.
 
-## H1: Model Fitness, Not Reward
+## Mechanism Chain
 
-Per-partner affect tracks how reliable the agent's model of a partner is, not
-how rewarding that partner is. Reliable cooperators and reliable adversaries can
-both produce high model-fitness signals. Volatile partners should produce low or
-unstable signals.
+Hesp et al. model affect as inferred expected precision over action-model
+fitness. This project extends that idea from one global action model to multiple
+partner-specific social models:
 
-## H2: Partner Factorization
+```text
+partner prediction reliability
+  -> partner-specific precision_k
+  -> policy-posterior shift
+  -> action or partner-choice behavior
+  -> payoff, recovery, or reallocation
+```
 
-Per-partner affect should preserve social structure that a global affect signal
-collapses. Multi-agent environments require knowing which partner is predictable,
-not merely whether the world is globally predictable.
+The affective signal is not partner liking, direct reward history, or literal
+trust in the partner. It is trust in the agent's model of that partner. A
+predictable exploiter can therefore produce high precision because the agent
+knows how to act around them.
 
-## H3: Deployment, Not Knowledge
+Implementation note: beta is the HESP-aligned rate parameter. Low beta means
+high expected policy precision. Analyses should report
+`precision_k = 1 / E[beta_k]` whenever possible.
 
-Lesioning affect should preserve partner inference while impairing action
-deployment. The Damasio-style dissociation is: partner type or stance beliefs
-remain intact, but payoff, recovery, or partner choice worsens.
+Partner-specific beta is an architectural premise of the model, not a current
+behavior-card hypothesis. A future global-beta ablation can test whether
+per-partner affect is behaviorally superior to global affect. Predictive model
+comparison is future work, not part of the main H0-H5 spine.
 
-## H4: Social Volatility
+## H0: Openness Gate
 
-Affect should matter most under betrayal, stance shifts, partner volatility,
-noisy observations, or changing partner pools. Stable tasks may under-express
-the mechanism.
+**Mechanism claim:** Affective precision can only change behavior when the
+policy posterior has room to move. If the best policy is already effectively
+selected, changing precision may move beta without changing action.
 
-## H5: Partner Selection
+**Expected behavior:** Affect effects should be weakest in saturated binary
+settings and strongest in regimes with moderate policy uncertainty: shallow
+horizons, graded action spaces, betrayal windows, noisy observations, and
+agent-choice settings.
 
-Per-partner affect should guide whom the agent chooses, avoids, probes, or
-returns to in agent-choice settings.
+**Primary measures:** `q_pi_entropy`, `G_spread`, best-vs-second-best EFE gap,
+and policy-posterior shifts such as `KL(q_pi_affect || q_pi_no_affect)`.
 
-## H6: Policy-Space Regime
+**Pass pattern:** Affect payoff, action, or partner-choice effects increase when
+policy entropy is moderate or high.
 
-Affect only changes behavior when the policy posterior has room to move.
-Saturated binary settings can hide the mechanism. Shallow horizons, graded
-action spaces, volatile environments, and multi-partner choices should expose it
-more strongly.
+**Failure pattern:** Affect shows no behavioral effect even in open policy
+regimes, or effect size is unrelated to policy openness.
 
-## H7: Clinical Perturbations
+## H1: Model Fitness
 
-Clinical-like regimes are perturbations of affective precision dynamics: frozen
-precision, volatile precision, low-baseline precision, or slow-updating
-precision. They should separate by task regime, not as global traits that behave
-identically everywhere.
+**Mechanism claim:** Per-partner affect tracks prediction reliability, not how
+rewarding the partner is.
+
+**Expected behavior:**
+
+| Partner case | Reward | Predictability | Expected precision |
+|---|---:|---:|---:|
+| Reliable cooperator | high | high | high |
+| Reliable exploiter | low if cooperated with | high | high |
+| Volatile ally | medium/high | low | low or unstable |
+| Random partner | variable | low | low |
+
+The reliable exploiter is the critical dissociation: high precision should
+support confident avoidance, defection, or disengagement, not attraction.
+
+**Primary measures:** `precision_k = 1 / E[beta_k]`, predictive accuracy,
+predictive log score or surprise, and partner reward.
+
+**Pass pattern:** Precision is high for reliable cooperators and reliable
+exploiters, and low or unstable for volatile partners. Predictive accuracy
+dominates reward in partial-correlation or regression analyses.
+
+**Failure pattern:** Precision mostly tracks average payoff, collapsing the
+mechanism into cached value.
+
+## H2: Deployment
+
+**Mechanism claim:** Affective precision helps the agent deploy social knowledge
+in action. Lesioning the pathway should preserve partner inference while
+impairing policy selection, recovery, or partner choice.
+
+This is the computational vmPFC/somatic-marker dissociation: the model should
+not claim to implement vmPFC directly, only to reproduce the knowing-versus-
+using pattern associated with that literature.
+
+**Expected behavior:** Lesioned agents should infer partner type and stance about
+as well as affective agents, but should be worse at choosing actions, choosing
+partners, or recovering after a shift.
+
+**Primary measures:** type/stance belief accuracy, predictive log score,
+`KL(q_s_affect || q_s_lesion)`, `KL(q_pi_affect || q_pi_lesion)`, payoff,
+recovery latency, and partner-choice shift.
+
+**Pass pattern:** Beliefs are similar, while policy distributions and behavior
+diverge in an open policy regime.
+
+**Failure pattern:** The lesion damages inference itself, or lesion and affect
+behave identically when H0 says the policy space is open.
+
+## H3: Stress Response
+
+**Mechanism claim:** Social volatility makes model-fitness signals matter:
+betrayal, stance shifts, partner volatility, noisy observations, or changing
+partner pools create model mismatch and policy uncertainty.
+
+**Expected behavior:** After a betrayal or hostile stance switch, the affective
+agent should show a prediction-error spike, precision drop for the affected
+partner, faster policy change, and faster recovery or reallocation.
+
+**Primary measures:** post-switch windows, surprise spike, partner-specific
+precision reaction time, recovery latency, post-switch payoff, partner
+reallocation, and belief recalibration.
+
+**Pass pattern:** Affect advantage is larger around switch windows than in
+stable windows.
+
+**Failure pattern:** Affect effects are not amplified by volatility, or whole-run
+and post-switch effects are both flat.
+
+## H4: Social Choice
+
+**Mechanism claim:** Partner-specific precision should guide whom the agent
+approaches, avoids, probes, or returns to in agent-choice settings.
+
+**Expected behavior:** Partner choice should not be uniform. High precision does
+not always mean approach: a reliable exploiter should be confidently avoided or
+defected against, while an uncertain partner may be probed when epistemic value
+is useful.
+
+**Primary measures:** selection entropy, `P(select k)` as a function of
+`precision_k x expected_payoff_k`, avoidance of reliable exploiters, probing
+rate for uncertain partners, and return latency to recovered partners.
+
+**Pass pattern:** Partner choice is systematically related to partner-specific
+precision and expected value.
+
+**Failure pattern:** Partner choice is unrelated to partner-local precision in
+agent-choice settings.
+
+## H5: Perturbation Phenotypes
+
+**Mechanism claim:** Clinical-like variants are perturbations of precision
+dynamics, not validated clinical diagnoses.
+
+**Expected behavior:**
+
+| Variant | Parameter idea | Precision behavior | Visible behavior |
+|---|---|---|---|
+| Alexithymia-like | blunted update | barely moves | misses real shifts; may resist noise |
+| Borderline-like | high gain or low smoothing | swings too fast | unstable choice and high action churn |
+| Depression-like | pessimistic initial precision | starts low-confidence | early caution or avoidance |
+| Slow-updating | high persistence | lags reality | delayed recovery after changes |
+
+**Primary measures:** precision mean, variance, autocorrelation, reaction time to
+surprise, partner-selection entropy, action-flip rate, recovery latency, and
+payoff after precision dynamics are confirmed.
+
+**Pass pattern:** Perturbations separate first in beta/precision dynamics and
+become behaviorally visible mainly in open policy regimes.
+
+**Failure pattern:** Behavior differs without the intended precision dynamics,
+or precision dynamics do not differentiate.
 
 ## Engineering Objectives
 

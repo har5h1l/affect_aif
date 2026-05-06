@@ -15,7 +15,7 @@ The first major iteration established the core finding and produced a paper draf
 - **Cross-game generalization:** Augmentation holds across PD, Stag Hunt, and Chicken under volatility (d > 1.0 in all). Game-dependent in stable conditions.
 - **Clinical sensitivity:** Requires graded/betrayal environments (binary games saturate softmax). Graded betrayal produces 80.5-point between-clinical spread. Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects.
 - **Predictive score comparison:** C2 decisively preferred under betrayal stress (log10 proxy = 3.0 vs C1). Stag Hunt uniquely favors precision tracking; Chicken favors reward averaging.
-- **Discrete beta:** The native runtime now uses `DiscreteBetaState` inside the standard affective path. The older Condition 12 variational-beta prototype is archived historical evidence, not a supported condition.
+- **Discrete beta:** The native runtime uses `DiscreteBetaState` inside the standard affective path.
 - **CvC benchmark:** Early WIP / proof-of-concept. Navigation-only baseline works (BFS + wall detection, 84-91% move success). Reward results minimal. Not publication-ready.
 - **Paper:** Draft complete (theory gaps addressed, results integrated, figures included). Architecture needs justification of departures from standard AIF before submission.
 
@@ -28,7 +28,7 @@ The first major iteration established the core finding and produced a paper draf
 | Phase 6 | Bayesian Model Comparison | Complete |
 | Phase 7 | Cross-Game Generalization | Complete |
 
-**Phase 4 details:** Discrete Bayesian beta tracking is implemented through `DiscreteBetaState` and deployed through partner-local gamma. Older Condition 12 validation runs remain archived historical context.
+**Phase 4 details:** Discrete Bayesian beta tracking is implemented through `DiscreteBetaState` and deployed through partner-local gamma.
 
 **Phase 5 details:** Graded betrayal environment identified as the critical test bed. Between-clinical spread: 80.5 points (2700x improvement over graded default). Alexithymia paradoxically protective (d=+0.80); borderline shows progressive deterioration (d=-1.14); depression self-corrects within ~30 rounds.
 
@@ -54,7 +54,7 @@ These track what remains open after the action-dependent stance redesign.
 
 ### Decision 1: The B matrix question (resolved)
 
-This decision is now resolved. The supported trust-game path includes action-dependent stance transitions, and the post-restructure results show that depth redundancy persists as a structural property of the binary trust-game policy landscape rather than as an artifact of the old action-independent transition story.
+This decision is now resolved. The supported trust-game path includes action-dependent stance transitions, and the current results show that depth redundancy persists as a structural property of the binary trust-game policy landscape.
 
 Implication for the paper: document action-dependent stance as the supported architecture and present G compression / depth redundancy as a domain finding of the binary-action task, not as a bug that still needs fixing.
 
@@ -65,9 +65,7 @@ The pymdp hard cutover is the supported path. Future runtime work should extend 
 ### Decision 3: Partner-local precision deployment (resolved)
 
 The native runtime deploys affect by setting partner-local pymdp policy precision:
-`gamma_k = gamma_base / E[beta_k]`. The removed policy-score weighting path is
-historical prototype context only and should not be revived as the supported
-trust-game runtime surface.
+`gamma_k = gamma_base / E[beta_k]`.
 
 ### Decision 4: AIF partners vs rule-based partners
 
@@ -154,7 +152,9 @@ Phase 5 between-profile payoff differences are small (10.324-10.353). The paper 
 ### Track 2: Paper Preparation (active, MEDIUM priority)
 
 **2.1 Docs Consistency Check**
-Verify agreement across `docs/theory/theory.md`, `docs/experiment/results.md`, and `docs/experiment/design.md` on condition numbering, key numbers, hypothesis status, and phase descriptions.
+Verify agreement across `docs/theory/hypotheses.md`, `docs/theory/theory.md`,
+`docs/experiment/design.md`, and `docs/experiments/manifest.md` on condition
+numbering, key numbers, hypothesis status, and phase descriptions.
 
 **2.2 Results Reproducibility Spot-Check**
 Spot-check key configs (5 seeds each): `default.json`, `betrayal_stress.json`, `horizon_sweep.json`.

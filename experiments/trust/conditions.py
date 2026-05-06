@@ -16,7 +16,6 @@ class ConditionSpec:
     use_information_gain: bool = True
     lesion_mode: str | None = None
     parameter_overrides: dict[str, float] = field(default_factory=dict)
-    aliases: tuple[str, ...] = ()
 
 
 CONDITIONS: dict[int, ConditionSpec] = {
@@ -83,16 +82,13 @@ def get_preset_condition(name: str) -> ConditionSpec:
     normalized = str(name).strip().lower()
     if normalized in PRESET_CONDITIONS:
         return PRESET_CONDITIONS[normalized]
-    for preset_name, metadata in PRESET_CONDITIONS.items():
-        if normalized == metadata.name or normalized in metadata.aliases:
-            return PRESET_CONDITIONS[preset_name]
     raise KeyError(f"Unknown preset condition '{name}'.")
 
 
 def normalize_condition_name(name: str) -> str:
     normalized = str(name).strip().lower()
     for metadata in list(CONDITIONS.values()) + list(PRESET_CONDITIONS.values()):
-        if normalized == metadata.name or normalized in metadata.aliases:
+        if normalized == metadata.name:
             return metadata.name
     raise KeyError(f"Unknown condition name '{name}'.")
 
@@ -105,7 +101,7 @@ def resolve_condition_spec(condition: int | str) -> ConditionSpec:
         if normalized in PRESET_CONDITIONS:
             return get_preset_condition(normalized)
         for condition_id, metadata in CONDITIONS.items():
-            if normalized == metadata.name or normalized in metadata.aliases:
+            if normalized == metadata.name:
                 return get_condition_metadata(condition_id)
         return get_preset_condition(normalized)
     return get_condition_metadata(condition)

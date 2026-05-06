@@ -1,4 +1,4 @@
-"""Generate the Phase 3 targeted re-analysis summaries from result CSVs."""
+"""Generate targeted behavior-card re-analysis summaries from result CSVs."""
 
 from __future__ import annotations
 
@@ -17,9 +17,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from analysis.metrics import final_round_summary
 from experiments.trust.conditions import CONDITIONS, resolve_condition_spec
 
-H1_TARGET_CONDITIONS = ("tau1_no_affect", "tau1_affect", "tau2_no_affect", "tau2_affect")
+H0_TARGET_CONDITIONS = ("tau1_no_affect", "tau1_affect", "tau2_no_affect", "tau2_affect")
 H2_TARGET_CONDITIONS = ("lesioned", "tau4_no_affect", "tau4_affect")
-H4_TARGET_CONDITIONS = ("tau4_no_affect", "tau4_affect")
+H3_TARGET_CONDITIONS = ("tau4_no_affect", "tau4_affect")
 CONDITION_IDS_BY_NAME = {metadata.name: condition_id for condition_id, metadata in CONDITIONS.items()}
 SUMMARY_REQUIRED_COLUMNS = {
     "inferred_type_correct": np.nan,
@@ -33,21 +33,21 @@ SUMMARY_REQUIRED_COLUMNS = {
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the targeted post-restructure re-analyses.")
+    parser = argparse.ArgumentParser(description="Run targeted behavior-card re-analyses.")
     parser.add_argument(
-        "--h1-results",
-        default="results/h1_factorial/h1_depth_affect_factorial/results.csv",
-        help="Path to the H1 factorial results CSV.",
+        "--h0-results",
+        default="results/h0_openness_gate/h0_shallow_policy_regime/results.csv",
+        help="Path to the H0 shallow policy-regime results CSV.",
     )
     parser.add_argument(
         "--h2-results",
-        default="results/h2_lesion/h2_lesion_dissociation/results.csv",
-        help="Path to the H2 lesion results CSV.",
+        default="results/h2_deployment/h2_deployment_lesion/results.csv",
+        help="Path to the H2 deployment lesion results CSV.",
     )
     parser.add_argument(
-        "--h4-results",
-        default="results/h4_betrayal/h4_betrayal_recovery/results.csv",
-        help="Path to the H4 betrayal results CSV.",
+        "--h3-results",
+        default="results/h3_stress_response/h3_betrayal_volatility/results.csv",
+        help="Path to the H3 betrayal results CSV.",
     )
     parser.add_argument(
         "--output-dir",
@@ -258,9 +258,9 @@ def _header(title: str, source_paths: OrderedDict[Path, list[str]], frame: pd.Da
     return lines
 
 
-def _run_h1(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> str:
+def _run_h0(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> str:
     summary = final_round_summary(frame)
-    lines = _header("H1 shallow-depth reanalysis", source_paths, frame)
+    lines = _header("H0 openness-gate shallow reanalysis", source_paths, frame)
     lines.extend(["", "Compare affect vs. no-affect at tau=1 and tau=2 using per-seed total payoff."])
     for depth, no_affect, affect in (
         (1, "tau1_no_affect", "tau1_affect"),
@@ -298,7 +298,7 @@ def _run_h2(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> 
     no_affect_accuracy = _summary_values(summary, "tau4_no_affect", "mean_joint_accuracy")
     lesion_payoff = _summary_values(summary, "lesioned", "total_payoff")
     affect_payoff = _summary_values(summary, "tau4_affect", "total_payoff")
-    lines = _header("H2 lesion reanalysis", source_paths, frame)
+    lines = _header("H2 deployment lesion reanalysis", source_paths, frame)
     lines.extend(
         [
             "",
@@ -325,16 +325,16 @@ def _run_h2(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> 
     return "\n".join(lines)
 
 
-def _run_h4(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> str:
+def _run_h3(frame: pd.DataFrame, source_paths: OrderedDict[Path, list[str]]) -> str:
     required = {"condition_name", "seed", "round", "payoff"}
     missing = sorted(required - set(frame.columns))
     if missing:
-        raise ValueError(f"H4 results are missing required columns: {', '.join(missing)}")
+        raise ValueError(f"H3 results are missing required columns: {', '.join(missing)}")
     window = frame.loc[(frame["round"] >= 30) & (frame["round"] <= 60)].copy()
     grouped = window.groupby(["condition_name", "seed"], as_index=False).agg(mean_window_payoff=("payoff", "mean"))
     affect = grouped.loc[grouped["condition_name"] == "tau4_affect", "mean_window_payoff"].to_numpy(dtype=float)
     no_affect = grouped.loc[grouped["condition_name"] == "tau4_no_affect", "mean_window_payoff"].to_numpy(dtype=float)
-    lines = _header("H4 betrayal-window reanalysis", source_paths, frame)
+    lines = _header("H3 betrayal-window reanalysis", source_paths, frame)
     lines.extend(
         [
             "",
@@ -353,17 +353,17 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     output_dir = Path(args.output_dir)
 
-    h1_frame, h1_sources = _load_results(args.h1_results, H1_TARGET_CONDITIONS)
+    h0_frame, h0_sources = _load_results(args.h0_results, H0_TARGET_CONDITIONS)
     h2_frame, h2_sources = _load_results(args.h2_results, H2_TARGET_CONDITIONS)
-    h4_frame, h4_sources = _load_results(args.h4_results, H4_TARGET_CONDITIONS)
+    h3_frame, h3_sources = _load_results(args.h3_results, H3_TARGET_CONDITIONS)
 
-    h1 = _run_h1(h1_frame, h1_sources)
+    h0 = _run_h0(h0_frame, h0_sources)
     h2 = _run_h2(h2_frame, h2_sources)
-    h4 = _run_h4(h4_frame, h4_sources)
+    h3 = _run_h3(h3_frame, h3_sources)
 
-    _write(output_dir / "h1_shallow_reanalysis.txt", h1)
-    _write(output_dir / "h2_lesion_reanalysis.txt", h2)
-    _write(output_dir / "h4_betrayal_window_reanalysis.txt", h4)
+    _write(output_dir / "h0_openness_gate_reanalysis.txt", h0)
+    _write(output_dir / "h2_deployment_reanalysis.txt", h2)
+    _write(output_dir / "h3_stress_response_reanalysis.txt", h3)
     return 0
 
 

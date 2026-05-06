@@ -79,7 +79,6 @@ class ExperimentConfig:
     experiment_name: str = "primary"
     verbose: bool = False
     verbosity_mode: str = "stage_stream"
-    verbosity_include_calibration: bool = True
     gif_after_run: bool = False
     gif_output_dir: str | None = None
 
@@ -98,7 +97,6 @@ class ExperimentConfig:
         self.sensitivity_factors = normalized
         self.verbose = bool(self.verbose)
         self.verbosity_mode = str(self.verbosity_mode)
-        self.verbosity_include_calibration = bool(self.verbosity_include_calibration)
         self.gif_after_run = bool(self.gif_after_run)
         self.gif_output_dir = None if self.gif_output_dir is None else str(self.gif_output_dir)
         normalized_horizon_overrides: dict[int | str, int] = {}
@@ -114,15 +112,6 @@ class ExperimentConfig:
         """Build a configuration from a raw dictionary."""
 
         data = dict(data)
-        if "num_beta_levels" in data and "beta_num_levels" not in data:
-            data["beta_num_levels"] = data.pop("num_beta_levels")
-        else:
-            data.pop("num_beta_levels", None)
-        data.pop("affect_modulates_precision", None)
-        data.pop("beta_mode", None)
-        data.pop("mu", None)
-        data.pop("lambda_smooth", None)
-        data.pop("calibration_episodes", None)
         tuple_fields = ("mutual_coop", "sucker", "temptation", "mutual_defect")
         for key in tuple_fields:
             if key in data:

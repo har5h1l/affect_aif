@@ -33,11 +33,7 @@ def _condition_value(value):
 
 
 def log_score_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Per-condition summary of total predictive log score across seeds.
-
-    Returns a DataFrame with canonical predictive-log-score columns and legacy
-    log-evidence aliases for compatibility.
-    """
+    """Per-condition summary of total predictive log score across seeds."""
     summary = final_round_summary(results)
     if "total_log_evidence" not in summary.columns:
         raise ValueError(
@@ -59,18 +55,9 @@ def log_score_summary(results: pd.DataFrame) -> pd.DataFrame:
                 "mean_predictive_log_score": mean_score,
                 "se_predictive_log_score": se_score,
                 "median_predictive_log_score": median_score,
-                "mean_log_evidence": mean_score,
-                "se_log_evidence": se_score,
-                "median_log_evidence": median_score,
             }
         )
     return pd.DataFrame(records)
-
-
-def log_evidence_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Compatibility alias for :func:`log_score_summary`."""
-
-    return log_score_summary(results)
 
 
 def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
@@ -105,9 +92,6 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
                     "mean_predictive_log_score_difference": float("nan"),
                     "log10_predictive_log_score_difference": float("nan"),
                     "se_predictive_log_score_difference": float("nan"),
-                    "mean_log_bf": float("nan"),
-                    "log10_bf": float("nan"),
-                    "se_log_bf": float("nan"),
                     "prop_a_preferred": float("nan"),
                     "t_stat": float("nan"),
                     "p_value": float("nan"),
@@ -132,9 +116,6 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
                 "mean_predictive_log_score_difference": mean_diff,
                 "log10_predictive_log_score_difference": float(mean_diff / np.log(10)),
                 "se_predictive_log_score_difference": se_diff,
-                "mean_log_bf": mean_diff,
-                "log10_bf": float(mean_diff / np.log(10)),
-                "se_log_bf": se_diff,
                 "prop_a_preferred": prop_a,
                 "t_stat": float(t_stat),
                 "p_value": float(p_value),
@@ -142,12 +123,6 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
         )
 
     return pd.DataFrame(records)
-
-
-def pairwise_bayes_factors(results: pd.DataFrame) -> pd.DataFrame:
-    """Compatibility alias for :func:`pairwise_predictive_log_scores`."""
-
-    return pairwise_predictive_log_scores(results)
 
 
 def _spm_bms(log_evidence_matrix: np.ndarray, max_iter: int = 100, tol: float = 1e-6) -> dict:
@@ -303,7 +278,6 @@ def model_comparison_report(results: pd.DataFrame) -> dict:
         - predictive_log_score_summary: per-condition summary
         - pairwise_predictive_log_scores: all pairwise score differences
         - random_effects_bms: RFX-BMS results (if enough data)
-        - legacy log_evidence_summary / pairwise_bayes_factors aliases
     """
     le_summary = log_score_summary(results)
     bf_table = pairwise_predictive_log_scores(results)
@@ -311,8 +285,6 @@ def model_comparison_report(results: pd.DataFrame) -> dict:
 
     return {
         "predictive_log_score_summary": le_summary.to_dict(orient="records"),
-        "log_evidence_summary": le_summary.to_dict(orient="records"),
         "pairwise_predictive_log_scores": bf_table.to_dict(orient="records"),
-        "pairwise_bayes_factors": bf_table.to_dict(orient="records"),
         "random_effects_bms": bms,
     }

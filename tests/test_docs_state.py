@@ -17,14 +17,14 @@ def test_docs_state_steering_wheel_exists():
     assert missing == []
 
 
-def test_current_docs_do_not_use_old_hypothesis_story():
+def test_current_docs_do_not_use_stale_hypothesis_story():
     paths = [
         ROOT / "README.md",
         ROOT / "AGENTS.md",
         ROOT / "docs/theory/goals.md",
         ROOT / "docs/theory/hypotheses.md",
     ]
-    forbidden = ["affect compensates for shallow planning", "deep planner as gold standard"]
+    forbidden = ["affect compensates for shallow planning", "deep planner as reference"]
     offenders = []
     for path in paths:
         if not path.exists():

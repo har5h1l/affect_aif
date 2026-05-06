@@ -2,15 +2,27 @@
 
 ## Hypothesis Spine
 
-The current experiment surface follows the Hesp-extension H1-H7 hypotheses in
+The current experiment surface follows the Hesp-extension behavior cards in
 `docs/theory/hypotheses.md`.
+
+Canonical labels are:
+
+- H0 Openness Gate
+- H1 Model Fitness
+- H2 Deployment
+- H3 Stress Response
+- H4 Social Choice
+- H5 Perturbation Phenotypes
+
+Partner-specific beta remains an architectural premise. A global-beta ablation
+can be added later as optional model comparison, but it is not part of the
+current core hypothesis spine.
 
 ## Evidence Status
 
 Current evidence requires a completed run on the current apashea-aligned,
 factorized-control architecture, with provenance recorded under `docs/results/`.
-Historical or partial outputs are not comparable unless rerun or explicitly
-marked as historical.
+Partial outputs are not comparable to completed current-evidence runs.
 
 ## Full Runs
 
