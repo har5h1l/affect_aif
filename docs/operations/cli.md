@@ -108,8 +108,12 @@ python scripts/analysis/analyze.py --results <path-to-csv-or-parquet> --output-d
 The input can be CSV or parquet. Variant-shaped results produce
 `final_round_summary.csv`, `pairwise_payoff_tests.csv`,
 `hypothesis_tests.json`, `hypothesis_summary.csv`,
-`affective_movement_summary.csv`, `statistics_summary.txt`, and betrayal CSVs
-when switch events are present.
+`affective_movement_summary.csv`, `deployment_dissociation_summary.csv`,
+`partner_choice_summary.csv`, `phenotype_validation_summary.csv`,
+`statistics_summary.txt`, and betrayal CSVs when switch events are present.
+Betrayal outputs include post-switch windows, phase splits
+(`pre_switch`, `acute_post_switch`, `post_acute_tail`), detection/recovery
+latencies, and per-encounter trajectories.
 
 ## Configs
 

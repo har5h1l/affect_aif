@@ -66,6 +66,44 @@ def test_agent_choice_stores_candidate_level_policy_distribution() -> None:
     np.testing.assert_allclose(decision.q_pi.sum(), 1.0)
 
 
+def test_agent_choice_precision_affect_changes_candidate_distribution() -> None:
+    config = ExperimentConfig(
+        payoff_mode="graded",
+        num_partners=2,
+        num_investment_levels=6,
+        assignment_mode="agent_choice",
+    )
+    affective = build_runtime(config, variant_id="affect", affect="precision", seed=0)
+    lesioned = build_runtime(config, variant_id="lesioned", affect="precision", seed=0)
+    assert affective.partner_bank.beta is not None
+    assert lesioned.partner_bank.beta is not None
+    affective.partner_bank.beta.betas[:] = [0.5, 2.0]
+    lesioned.partner_bank.beta.betas[:] = [0.5, 2.0]
+
+    affective_decision = select_decision(
+        bank=affective.partner_bank,
+        template=affective.template,
+        active_partner=None,
+        assignment_mode="agent_choice",
+        base_gamma=affective.base_gamma,
+        action_selection="sample",
+        rng=np.random.default_rng(0),
+        affect_mode="normal",
+    )
+    lesioned_decision = select_decision(
+        bank=lesioned.partner_bank,
+        template=lesioned.template,
+        active_partner=None,
+        assignment_mode="agent_choice",
+        base_gamma=lesioned.base_gamma,
+        action_selection="sample",
+        rng=np.random.default_rng(0),
+        affect_mode="decouple",
+    )
+
+    assert not np.allclose(affective_decision.q_pi, lesioned_decision.q_pi)
+
+
 def test_agent_choice_selected_fields_match_encoded_raw_action() -> None:
     runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice"),

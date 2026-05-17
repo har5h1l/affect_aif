@@ -44,6 +44,16 @@ For TOML specs with `analysis.auto = true`, the run command writes first-pass
 configured outputs under `analysis/raw`, `analysis/figures`, and
 `analysis/report`.
 
+Stable raw tables include:
+
+- `final_round_summary.csv`
+- `hypothesis_tests.json`
+- `affective_movement_summary.csv`
+- `deployment_dissociation_summary.csv`
+- `partner_choice_summary.csv`
+- `phenotype_validation_summary.csv`
+- `betrayal_phase_summary.csv` when switch events are present
+
 The standalone post-hoc analysis remains available:
 
 ```bash

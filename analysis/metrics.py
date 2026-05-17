@@ -46,6 +46,61 @@ def _safe_range(values: np.ndarray) -> float:
     return float(finite.max() - finite.min())
 
 
+def _safe_entropy(values: pd.Series | np.ndarray) -> float:
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return np.nan
+    total = float(values.sum())
+    if total <= 0:
+        return np.nan
+    probs = values / total
+    probs = probs[probs > 0]
+    return float(-(probs * np.log(probs)).sum())
+
+
+def _safe_lag1_autocorr(values: pd.Series | np.ndarray) -> float:
+    values = np.asarray(values, dtype=float)
+    values = values[np.isfinite(values)]
+    if values.size < 3:
+        return np.nan
+    previous = values[:-1]
+    current = values[1:]
+    if np.isclose(previous.std(), 0.0) or np.isclose(current.std(), 0.0):
+        return np.nan
+    return float(np.corrcoef(previous, current)[0, 1])
+
+
+def _selected_partner_beta(row: pd.Series) -> float:
+    if "betas" not in row or "selected_partner" not in row:
+        return np.nan
+    partner_idx = int(row["selected_partner"])
+    if partner_idx < 0:
+        return np.nan
+    betas = _ensure_array(row["betas"])
+    if len(betas) <= partner_idx:
+        return np.nan
+    return float(betas[partner_idx])
+
+
+def _mean_beta(row: pd.Series) -> float:
+    if "betas" not in row:
+        return np.nan
+    return _safe_nanmean(_ensure_array(row["betas"]))
+
+
+def _stack_beta_rows(series: pd.Series) -> np.ndarray:
+    arrays = [_ensure_array(value) for value in series]
+    arrays = [array for array in arrays if array.size > 0]
+    if not arrays:
+        return np.asarray([], dtype=float)
+    width = max(len(array) for array in arrays)
+    stacked = np.full((len(arrays), width), np.nan, dtype=float)
+    for row_idx, array in enumerate(arrays):
+        stacked[row_idx, : len(array)] = array
+    return stacked
+
+
 def _scheduled_switch_targets(value) -> list[int]:
     array = _ensure_array(value)
     if array.size == 0:
@@ -246,6 +301,22 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
         for switch_round, switch_kind in sorted(switch_rounds):
             window_frame = group[group["round"] >= switch_round].head(int(window)).copy()
             if window_frame.empty:
+                summaries.append(
+                    {
+                        "variant_id": str(variant_id),
+                        "seed": int(seed),
+                        "partner_idx": int(partner_idx),
+                        "switch_round": switch_round,
+                        "switch_kind": str(switch_kind),
+                        "window": int(window),
+                        "window_label": f"1-{int(window)}",
+                        "mean_payoff": np.nan,
+                        "mean_accuracy": np.nan,
+                        "mean_stance_accuracy": np.nan,
+                        "mean_joint_accuracy": np.nan,
+                        "encounters": 0,
+                    }
+                )
                 continue
             window_frame["encounters_since_switch"] = np.arange(len(window_frame), dtype=int)
             summaries.append(
@@ -273,6 +344,75 @@ def post_switch_window_summary(results: pd.DataFrame, window: int = 10) -> pd.Da
                 }
             )
     return pd.DataFrame(summaries)
+
+
+def betrayal_phase_summary(
+    results: pd.DataFrame,
+    pre_window: int = 20,
+    acute_window: int = 10,
+) -> pd.DataFrame:
+    """Split betrayal events into pre-switch, acute post-switch, and post-acute tail windows."""
+
+    frame = results.copy()
+    frame["_variant_sort"] = frame["variant_id"].apply(_variant_sort_key)
+    frame = frame.sort_values(["_variant_sort", "seed", "partner_idx", "round"]).drop(columns="_variant_sort")
+    if frame.empty:
+        return pd.DataFrame()
+    if "scheduled_switch_partner_ids" in frame.columns:
+        frame["scheduled_switch_partner_ids"] = frame["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    else:
+        frame["scheduled_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    if "scheduled_stance_switch_partner_ids" in frame.columns:
+        frame["scheduled_stance_switch_partner_ids"] = frame["scheduled_stance_switch_partner_ids"].apply(
+            _scheduled_switch_targets
+        )
+    else:
+        frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    scheduled_type_map = _build_scheduled_switch_map(frame, "scheduled_switch_partner_ids", "scheduled_type")
+    scheduled_stance_map = _build_scheduled_switch_map(frame, "scheduled_stance_switch_partner_ids", "scheduled_stance")
+    observed_map = _build_observed_switch_map(frame)
+
+    rows: list[dict] = []
+    for (variant_id, seed, partner_idx), group in frame.groupby(["variant_id", "seed", "partner_idx"]):
+        key = (variant_id, int(seed), int(partner_idx))
+        switch_rounds = _switch_rounds_for_partner(key, scheduled_type_map, scheduled_stance_map, observed_map)
+        for switch_round, switch_kind in switch_rounds:
+            phases = {
+                "pre_switch": group[group["round"] < switch_round].tail(int(pre_window)),
+                "acute_post_switch": group[group["round"] >= switch_round].head(int(acute_window)),
+                "post_acute_tail": group[group["round"] >= switch_round].iloc[int(acute_window) :],
+            }
+            for phase, phase_frame in phases.items():
+                selected_partner_rate = (
+                    float((phase_frame["selected_partner"] == int(partner_idx)).mean())
+                    if "selected_partner" in phase_frame.columns and not phase_frame.empty
+                    else np.nan
+                )
+                selected_action_mean = (
+                    float(phase_frame["selected_action"].mean())
+                    if "selected_action" in phase_frame.columns and not phase_frame.empty
+                    else np.nan
+                )
+                rows.append(
+                    {
+                        "variant_id": str(variant_id),
+                        "seed": int(seed),
+                        "partner_idx": int(partner_idx),
+                        "switch_round": int(switch_round),
+                        "switch_kind": str(switch_kind),
+                        "phase": phase,
+                        "encounters": int(len(phase_frame)),
+                        "mean_payoff": float(phase_frame["payoff"].mean()) if not phase_frame.empty else np.nan,
+                        "mean_q_pi_entropy": (
+                            float(phase_frame["q_pi_entropy"].mean())
+                            if "q_pi_entropy" in phase_frame.columns and not phase_frame.empty
+                            else np.nan
+                        ),
+                        "selected_partner_rate": selected_partner_rate,
+                        "mean_selected_action": selected_action_mean,
+                    }
+                )
+    return pd.DataFrame(rows)
 
 
 def betrayal_trajectory(results: pd.DataFrame, max_encounters: int = 10) -> pd.DataFrame:
@@ -362,6 +502,117 @@ def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
     thresholds = per_seed.copy()
     thresholds["beta_moved_materially"] = thresholds["beta_range"] >= 0.05
     return thresholds
+
+
+def deployment_dissociation_summary(results: pd.DataFrame, reference_variant: str = "affect") -> pd.DataFrame:
+    """Summarize H2 belief-vs-policy deployment deltas against an affective reference."""
+
+    summary = final_round_summary(results)
+    if summary.empty:
+        return pd.DataFrame()
+    if "round_log_evidence" in results.columns:
+        log_score = (
+            results.groupby(["variant_id", "seed"], as_index=False)
+            .agg(mean_round_log_evidence=("round_log_evidence", "mean"))
+            .rename(columns={"mean_round_log_evidence": "predictive_log_score"})
+        )
+        summary = summary.merge(log_score, on=["variant_id", "seed"], how="left")
+
+    value_columns = [
+        "total_payoff",
+        "mean_accuracy",
+        "mean_stance_accuracy",
+        "mean_joint_accuracy",
+        "mean_q_pi_entropy",
+        "predictive_log_score",
+    ]
+    available = [column for column in value_columns if column in summary.columns]
+    per_variant = summary.groupby("variant_id", as_index=False).agg({column: "mean" for column in available})
+    reference = per_variant.loc[per_variant["variant_id"] == reference_variant]
+    if reference.empty:
+        return per_variant
+    reference_row = reference.iloc[0]
+    for column in available:
+        per_variant[f"delta_{column}_vs_{reference_variant}"] = per_variant[column] - float(reference_row[column])
+    return per_variant
+
+
+def partner_choice_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Summarize partner-selection allocation for agent-choice runs."""
+
+    if "selected_partner" not in results.columns:
+        return pd.DataFrame()
+    frame = results.copy()
+    frame = frame[frame["selected_partner"].notna()]
+    if frame.empty:
+        return pd.DataFrame()
+    frame["selected_partner"] = frame["selected_partner"].astype(int)
+    if "betas" in frame.columns:
+        frame["selected_partner_beta"] = frame.apply(_selected_partner_beta, axis=1)
+    else:
+        frame["selected_partner_beta"] = np.nan
+    totals = frame.groupby(["variant_id", "seed"], as_index=False).size().rename(columns={"size": "total_choices"})
+    grouped = (
+        frame.groupby(["variant_id", "seed", "selected_partner"], as_index=False)
+        .agg(
+            selection_count=("selected_partner", "size"),
+            mean_payoff=("payoff", "mean"),
+            mean_q_pi_entropy=("q_pi_entropy", "mean"),
+            mean_selected_partner_beta=("selected_partner_beta", "mean"),
+        )
+        .merge(totals, on=["variant_id", "seed"], how="left")
+    )
+    grouped["selection_rate"] = grouped["selection_count"] / grouped["total_choices"]
+    return grouped
+
+
+def phenotype_validation_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Summarize beta dynamics and visible behavior for H5 perturbation variants."""
+
+    if results.empty:
+        return pd.DataFrame()
+    frame = results.copy()
+    if "betas" in frame.columns:
+        frame["mean_beta"] = frame.apply(_mean_beta, axis=1)
+    else:
+        frame["mean_beta"] = np.nan
+
+    rows: list[dict] = []
+    for (variant_id, seed), group in frame.groupby(["variant_id", "seed"]):
+        group = group.sort_values("round")
+        beta_stack = _stack_beta_rows(group["betas"]) if "betas" in group.columns else np.asarray([], dtype=float)
+        partner_ranges = (
+            np.asarray([_safe_range(beta_stack[:, idx]) for idx in range(beta_stack.shape[1])], dtype=float)
+            if beta_stack.size
+            else np.asarray([], dtype=float)
+        )
+        selected_counts = (
+            group["selected_partner"].value_counts().to_numpy(dtype=float)
+            if "selected_partner" in group.columns
+            else np.asarray([], dtype=float)
+        )
+        actions = group["selected_action"].dropna().to_numpy(dtype=float) if "selected_action" in group.columns else []
+        action_flip_rate = (
+            float(np.mean(np.diff(actions) != 0)) if len(actions) > 1 else np.nan
+        )
+        finite_partner_ranges = partner_ranges[np.isfinite(partner_ranges)]
+        rows.append(
+            {
+                "variant_id": str(variant_id),
+                "seed": int(seed),
+                "beta_mean": float(group["mean_beta"].mean()),
+                "beta_std": float(group["mean_beta"].std(ddof=0)),
+                "beta_range": float(finite_partner_ranges.max()) if finite_partner_ranges.size else np.nan,
+                "beta_lag1_autocorr": _safe_lag1_autocorr(group["mean_beta"]),
+                "mean_q_pi_entropy": (
+                    float(group["q_pi_entropy"].mean()) if "q_pi_entropy" in group.columns else np.nan
+                ),
+                "partner_selection_entropy": _safe_entropy(selected_counts),
+                "action_flip_rate": action_flip_rate,
+                "total_payoff": float(group["payoff"].sum()) if "payoff" in group.columns else np.nan,
+            }
+        )
+    return pd.DataFrame(rows)
 
 
 def post_switch_variant_comparison(results: pd.DataFrame, windows: tuple[int, ...] = (5, 10)) -> pd.DataFrame:

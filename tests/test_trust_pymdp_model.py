@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import jax.numpy as jnp
 import numpy as np
 
 from experiments.trust.config import ExperimentConfig
-from tasks.trust.pomdp import build_trust_pomdp_template
+from tasks.trust.pomdp import build_trust_pomdp_template, create_pymdp_agent
 
 
 def test_binary_model_exports_pymdp_bundle_shapes() -> None:
@@ -34,6 +35,19 @@ def test_policies_have_pymdp_shape() -> None:
     assert bundle.policies.ndim == 3
     assert bundle.policies.shape[1] == 2
     assert bundle.policies.shape[2] == 3
+
+
+def test_graded_policies_match_transition_factor_count_for_pymdp() -> None:
+    bundle = build_trust_pomdp_template(
+        ExperimentConfig(payoff_mode="graded", assignment_mode="agent_choice"),
+        planning_horizon=2,
+    )
+    agent = create_pymdp_agent(bundle, gamma=1.0)
+
+    assert len(bundle.B) == 3
+    assert bundle.policies.shape[2] == len(bundle.B)
+    qs = [jnp.asarray(np.asarray(factor).squeeze()[None, None, :]) for factor in agent.D]
+    agent.infer_policies(qs)
 
 
 def test_truncated_pymdp_policies_without_rng_are_deterministic() -> None:

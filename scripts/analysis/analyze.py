@@ -16,9 +16,13 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
     affective_movement_summary,
     betrayal_latency_summary,
+    betrayal_phase_summary,
     betrayal_trajectory,
+    deployment_dissociation_summary,
     final_round_summary,
     has_switch_events,
+    partner_choice_summary,
+    phenotype_validation_summary,
     post_switch_variant_comparison,
     post_switch_window_summary,
 )
@@ -88,6 +92,9 @@ def main(argv: list[str] | None = None) -> int:
     pairwise = pairwise_payoff_tests(results)
     hypotheses = run_all_hypothesis_tests(results)
     movement = affective_movement_summary(results)
+    deployment = deployment_dissociation_summary(results)
+    partner_choice = partner_choice_summary(results)
+    phenotypes = phenotype_validation_summary(results)
 
     summary.to_csv(output_dir / "final_round_summary.csv", index=False)
     pairwise.to_csv(output_dir / "pairwise_payoff_tests.csv", index=False)
@@ -95,16 +102,21 @@ def main(argv: list[str] | None = None) -> int:
     hypothesis_summary = _hypothesis_summary_frame(hypotheses)
     hypothesis_summary.to_csv(output_dir / "hypothesis_summary.csv", index=False)
     movement.to_csv(output_dir / "affective_movement_summary.csv", index=False)
+    deployment.to_csv(output_dir / "deployment_dissociation_summary.csv", index=False)
+    partner_choice.to_csv(output_dir / "partner_choice_summary.csv", index=False)
+    phenotypes.to_csv(output_dir / "phenotype_validation_summary.csv", index=False)
 
     if switch_events_present:
         post_switch_5 = post_switch_window_summary(results, window=5)
         post_switch_10 = post_switch_window_summary(results, window=10)
+        betrayal_phases = betrayal_phase_summary(results, pre_window=20, acute_window=10)
         betrayal_comp = post_switch_variant_comparison(results, windows=(5, 10))
         betrayal_latencies = betrayal_latency_summary(results, max_encounters=10)
         betrayal_traj = betrayal_trajectory(results, max_encounters=10)
 
         post_switch_5.to_csv(output_dir / "betrayal_post_switch_window_1_5.csv", index=False)
         post_switch_10.to_csv(output_dir / "betrayal_post_switch_window_1_10.csv", index=False)
+        betrayal_phases.to_csv(output_dir / "betrayal_phase_summary.csv", index=False)
         betrayal_comp.to_csv(output_dir / "betrayal_variant_comparison.csv", index=False)
         betrayal_latencies.to_csv(output_dir / "betrayal_detection_latency.csv", index=False)
         betrayal_traj.to_csv(output_dir / "betrayal_trajectories.csv", index=False)
@@ -131,6 +143,14 @@ def main(argv: list[str] | None = None) -> int:
                 .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
             )
             betrayal_lines = ["\nBetrayal post-switch comparison\n", grouped, "\n"]
+        betrayal_phases = betrayal_phase_summary(results, pre_window=20, acute_window=10)
+        if not betrayal_phases.empty:
+            phase_grouped = (
+                betrayal_phases.groupby(["phase"], as_index=False)
+                .mean(numeric_only=True)
+                .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
+            )
+            betrayal_lines.extend(["\nBetrayal phase summary\n", phase_grouped, "\n"])
     summary_path.write_text(
         "Cumulative payoff ANOVA\n"
         f"F = {anova['f_stat']:.6f}\n"
@@ -164,6 +184,14 @@ def main(argv: list[str] | None = None) -> int:
             print("\nBetrayal post-switch comparison")
             print(
                 betrayal_comp.groupby(["window"], as_index=False)
+                .mean(numeric_only=True)
+                .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
+            )
+        betrayal_phases = betrayal_phase_summary(results, pre_window=20, acute_window=10)
+        if not betrayal_phases.empty:
+            print("\nBetrayal phase summary")
+            print(
+                betrayal_phases.groupby(["phase"], as_index=False)
                 .mean(numeric_only=True)
                 .to_string(index=False, float_format=lambda value: f"{value:0.4f}")
             )

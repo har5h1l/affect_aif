@@ -153,8 +153,8 @@ def build_trust_pomdp_template(
             endowment=float(cfg.get("endowment", 10.0)),
             multiplier=float(cfg.get("multiplier", 3.0)),
         )
-        num_controls = (num_social_actions,)
-        control_fac_idx = (0,)
+        num_controls = tuple(factorized_num_controls(1, "random", num_social_actions))
+        control_fac_idx = (1, 2)
     else:
         raise ValueError(f"unknown payoff_mode={payoff_mode!r}, expected 'binary' or 'graded'")
 

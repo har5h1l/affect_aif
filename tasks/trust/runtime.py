@@ -104,7 +104,7 @@ def select_decision(
             predictive_log_lik=float("nan"),
         )
 
-    candidates: list[tuple[int, int, np.ndarray, float]] = []
+    candidates: list[tuple[int, int, np.ndarray, float, float]] = []
     for partner_idx in range(len(bank.agents)):
         _q_pi, policy_scores = _infer_partner_policy(
             bank=bank,
@@ -113,14 +113,27 @@ def select_decision(
             base_gamma=base_gamma,
             affect_mode=affect_mode,
         )
+        partner_gamma = gamma_for_partner(
+            base_gamma=base_gamma,
+            beta=bank.beta,
+            partner_idx=partner_idx,
+            affect_mode=affect_mode,
+        )
         for policy_idx, score in enumerate(policy_scores):
             candidates.append(
-                (partner_idx, policy_idx, np.asarray(template.policies[policy_idx, 0], dtype=int), float(score))
+                (
+                    partner_idx,
+                    policy_idx,
+                    np.asarray(template.policies[policy_idx, 0], dtype=int),
+                    float(score),
+                    float(partner_gamma) * float(score),
+                )
             )
     scores = np.asarray([candidate[3] for candidate in candidates], dtype=float)
-    candidate_probs = _softmax(scores)
+    candidate_logits = np.asarray([candidate[4] for candidate in candidates], dtype=float)
+    candidate_probs = _softmax(candidate_logits)
     candidate_idx = _choose_index(candidate_probs, deterministic=deterministic, rng=rng)
-    selected_partner, policy_idx, first_step, _score = candidates[candidate_idx]
+    selected_partner, policy_idx, first_step, _score, _logit = candidates[candidate_idx]
     raw_action, stance_action, own_action = _encode_policy_action(
         template=template,
         partner_idx=selected_partner,

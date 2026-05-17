@@ -6,17 +6,20 @@ name = "stress_response"
 id = "betrayal_choice"
 family = "trust"
 rounds = 120
-replications = 100
+replications = 5
 seed = 42
 
 [scenario]
-payoff = "binary"
+payoff = "graded"
 assignment = "agent_choice"
 partners = 4
 type_volatility = 0.0
 observation_noise = 0.0
 initial_types = ["cooperator", "reciprocator", "cooperator", "random"]
 initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
 
 [[scenario.stance_switches]]
 round = 31

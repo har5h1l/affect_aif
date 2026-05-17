@@ -404,10 +404,15 @@ alone.
   behavior shifts in lesioned runs
 
 **Behavior analyses**:
-- H3: use post-switch windows and recovery latencies, not whole-run payoff alone
-- H4: model partner selection as a function of precision and expected value
-- H5: verify beta/precision dynamics before interpreting payoff or action
-  differences
+- H3: use pre-switch, acute post-switch, and post-acute tail phase summaries,
+  post-switch windows, and recovery latencies; whole-run payoff is a downstream
+  diagnostic, not the stress-response claim by itself
+- H4: model partner selection as a function of precision and expected value;
+  flat payoff can still accompany meaningful approach, avoidance, or probing
+  changes
+- H5: verify beta/precision range, volatility, autocorrelation, action churn,
+  partner-selection entropy, and recovery timing before interpreting payoff or
+  clinical-like labels
 
 **Supplementary analyses**:
 - cumulative payoff ANOVA and pairwise tests remain useful summaries, but they
@@ -422,6 +427,10 @@ alone.
 - Outputs are written per experiment under
   `<output-dir>/<batch-name>/<hypothesis-id>/<experiment-id>/results.csv`; use
   the layout in `docs/experiments/manifest.md`.
+- Analysis outputs include generic final-round, movement, deployment,
+  partner-choice, and phenotype-validation summaries. Betrayal-style runs also
+  write post-switch windows, phase summaries, detection/recovery latency, and
+  per-encounter trajectories.
 - Current maintained specs are listed in `docs/experiments/manifest.md`.
 
 ### 6.4 Visualizations

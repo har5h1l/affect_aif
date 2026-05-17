@@ -34,6 +34,9 @@ def test_auto_analysis_writes_raw_outputs(tmp_path):
     assert (output_dir / "analysis" / "figures").exists()
     assert (output_dir / "analysis" / "report").exists()
     assert (output_dir / "analysis" / "report" / "summary.md").exists()
+    assert (output_dir / "analysis" / "raw" / "deployment_dissociation_summary.csv").exists()
+    assert (output_dir / "analysis" / "raw" / "partner_choice_summary.csv").exists()
+    assert (output_dir / "analysis" / "raw" / "phenotype_validation_summary.csv").exists()
 
 
 def test_hypothesis_analysis_modules_are_importable():

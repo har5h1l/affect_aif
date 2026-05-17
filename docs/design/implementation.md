@@ -34,6 +34,10 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - Affective native runtimes use the HESP inverse-beta mapping `gamma_k = gamma_base / E[beta_k]`.
 - That means low beta (high expected precision) sharpens the policy posterior, while high beta (low expected precision) softens it below the base `gamma`.
 - Lesioned runtimes use `affect_mode="decouple"` to leave beta updates intact while forcing `gamma_k = gamma_base`.
+- In `agent_choice` mode, the final candidate selector applies the selected
+  partner's `gamma_k` to each candidate policy score before the global softmax,
+  so partner-choice policies use the same precision channel as assigned-partner
+  action policies.
 
 ## Belief updating (state inference)
 
@@ -139,13 +143,25 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - `scripts/analysis/analyze.py` now detects switch events automatically and writes betrayal-specific artifacts without extra CLI flags:
   - `betrayal_post_switch_window_1_5.csv`
   - `betrayal_post_switch_window_1_10.csv`
+  - `betrayal_phase_summary.csv`
   - `betrayal_variant_comparison.csv`
   - `betrayal_detection_latency.csv`
   - `betrayal_trajectories.csv`
   - `affective_movement_summary.csv`
+- Generic analysis also writes `deployment_dissociation_summary.csv`,
+  `partner_choice_summary.csv`, and `phenotype_validation_summary.csv` so H2,
+  H4, and H5 can be read without relying on whole-run payoff alone.
+- `betrayal_phase_summary.csv` separates each scheduled or observed switch into
+  `pre_switch`, `acute_post_switch`, and `post_acute_tail` encounters for the
+  switched partner. This is the primary diagnostic for cases where whole-run
+  payoff and immediate recovery move in different directions.
 - The round-level schema now logs the raw per-partner `terminal_signal` used for planning, plus `switch_kind`, `current_partner_switched`, `current_partner_scheduled_switch`, `scheduled_switch_partner_ids`, `active_partner`, `selected_partner`, `selected_action`, `best_policy_idx`, `partner_beliefs`, and `partner_posteriors`.
 - Detection latency is defined as encounters after the switch until inferred type becomes correct.
 - Payoff recovery latency is defined as encounters after the switch until payoff reaches at least `1.0`, meaning the agent is no longer taking sucker-level losses under the default matrix.
+- In agent-choice runs, post-switch window summaries retain scheduled switch
+  events even when the agent does not re-encounter the switched partner in the
+  requested window. Those rows use `encounters = 0` and NaN outcome metrics so
+  avoidance/no-return remains visible instead of being silently dropped.
 - If the betrayal outputs remain flat, treat that as a mechanism null result: beta and terminal-signal dynamics did not move enough to separate precision tracking from reward averaging under the current task and hyperparameters.
 
 ## Future Directions

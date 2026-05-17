@@ -79,12 +79,14 @@ def test_graded_model_construction():
     model = _build_model(cfg)
     assert model.num_social_actions == 6
     assert model.payoff_matrix.shape == (6, 2, 2)
-    assert model.num_controls == (6,)
+    assert model.num_controls == (1, 6, 6)
     assert model.payoff_index_table.shape == (6, 2)
     # A, B, C, D should all be constructable
     A, B, C, D = model.get_matrices()
     assert A[0].shape[0] == 2  # partner action obs is binary
-    assert B[0].shape[2] == 6
+    assert B[0].shape[2] == 1
+    assert B[1].shape[2] == 6
+    assert B[2].shape[2] == 6
     assert D[0].shape[0] == model.num_types
     assert D[1].shape[0] == model.num_stances
     assert D[2].shape[0] == model.num_social_actions

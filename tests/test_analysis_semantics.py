@@ -5,7 +5,13 @@ from __future__ import annotations
 import pandas as pd
 
 from analysis.hypotheses import run_all_hypothesis_tests
-from analysis.metrics import final_round_summary
+from analysis.metrics import (
+    betrayal_phase_summary,
+    deployment_dissociation_summary,
+    final_round_summary,
+    partner_choice_summary,
+    phenotype_validation_summary,
+)
 from analysis.model_comparison import model_comparison_report
 from cli.common import load_results_table
 from experiments.trust.runner import ExperimentRunner
@@ -85,3 +91,136 @@ def test_load_results_table_preserves_variant_identity(tmp_path):
     lesion = summary.loc[summary["variant_id"] == "lesioned"].iloc[0]
     assert horizon_1["total_payoff"] == 22
     assert lesion["total_payoff"] == 17
+
+
+def test_betrayal_phase_summary_splits_pre_acute_and_tail_windows():
+    rows = []
+    for variant_id in ["no_affect", "affect"]:
+        for round_idx in range(1, 8):
+            rows.append(
+                {
+                    "variant_id": variant_id,
+                    "seed": 0,
+                    "round": round_idx,
+                    "partner_idx": 0,
+                    "payoff": 10 + round_idx if variant_id == "affect" else round_idx,
+                    "q_pi_entropy": 0.1 * round_idx,
+                    "selected_partner": 0,
+                    "selected_action": round_idx % 2,
+                    "scheduled_stance_switch_partner_ids": [0] if round_idx == 4 else [],
+                    "scheduled_switch_partner_ids": [],
+                    "type_switched": False,
+                    "stance_switched": False,
+                    "switch_kind": "scheduled_stance" if round_idx == 4 else "",
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 1.0,
+                    "inferred_joint_correct": 1.0,
+                }
+            )
+    summary = betrayal_phase_summary(pd.DataFrame(rows), pre_window=2, acute_window=2)
+
+    phases = set(summary["phase"])
+    assert phases == {"pre_switch", "acute_post_switch", "post_acute_tail"}
+    affect_pre = summary[(summary["variant_id"] == "affect") & (summary["phase"] == "pre_switch")].iloc[0]
+    affect_acute = summary[(summary["variant_id"] == "affect") & (summary["phase"] == "acute_post_switch")].iloc[0]
+    affect_tail = summary[(summary["variant_id"] == "affect") & (summary["phase"] == "post_acute_tail")].iloc[0]
+    assert affect_pre["encounters"] == 2
+    assert affect_pre["mean_payoff"] == 12.5
+    assert affect_acute["mean_payoff"] == 14.5
+    assert affect_tail["mean_payoff"] == 16.5
+
+
+def test_deployment_dissociation_summary_pairs_affect_and_lesion():
+    rows = []
+    for variant_id, payoff, accuracy, entropy in [
+        ("affect", 10.0, 0.8, 0.2),
+        ("tracked_only", 7.0, 0.75, 0.5),
+    ]:
+        for round_idx in [1, 2]:
+            rows.append(
+                {
+                    "variant_id": variant_id,
+                    "seed": 0,
+                    "round": round_idx,
+                    "payoff": payoff,
+                    "inferred_type_correct": accuracy,
+                    "inferred_stance_correct": accuracy,
+                    "inferred_joint_correct": accuracy,
+                    "q_pi_entropy": entropy,
+                    "mean_abs_step_efe": 1.0,
+                    "planning_cost": 1.0,
+                    "planning_cost_ratio": 1.0,
+                    "round_log_evidence": -0.2 if variant_id == "affect" else -0.22,
+                }
+            )
+
+    summary = deployment_dissociation_summary(pd.DataFrame(rows), reference_variant="affect")
+    lesion = summary.loc[summary["variant_id"] == "tracked_only"].iloc[0]
+    assert lesion["delta_total_payoff_vs_affect"] == -6.0
+    assert abs(lesion["delta_mean_accuracy_vs_affect"]) < 0.1
+    assert lesion["delta_mean_q_pi_entropy_vs_affect"] > 0
+
+
+def test_partner_choice_summary_reports_selection_rates_and_beta():
+    rows = [
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 1,
+            "selected_partner": 0,
+            "partner_idx": 0,
+            "payoff": 3.0,
+            "q_pi_entropy": 0.4,
+            "betas": [0.5, 2.0],
+        },
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 2,
+            "selected_partner": 1,
+            "partner_idx": 1,
+            "payoff": 1.0,
+            "q_pi_entropy": 0.6,
+            "betas": [0.5, 2.0],
+        },
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 3,
+            "selected_partner": 0,
+            "partner_idx": 0,
+            "payoff": 5.0,
+            "q_pi_entropy": 0.2,
+            "betas": [0.5, 2.0],
+        },
+    ]
+
+    summary = partner_choice_summary(pd.DataFrame(rows))
+    partner_0 = summary.loc[summary["selected_partner"] == 0].iloc[0]
+    assert partner_0["selection_count"] == 2
+    assert partner_0["selection_rate"] == 2 / 3
+    assert partner_0["mean_selected_partner_beta"] == 0.5
+
+
+def test_phenotype_validation_summary_includes_dynamics_and_behavior():
+    rows = []
+    for round_idx, beta in enumerate([1.0, 0.5, 1.5, 0.5], start=1):
+        rows.append(
+            {
+                "variant_id": "borderline",
+                "seed": 0,
+                "round": round_idx,
+                "payoff": 1.0,
+                "q_pi_entropy": 0.3,
+                "selected_partner": round_idx % 2,
+                "selected_action": round_idx % 2,
+                "betas": [beta, 1.0],
+            }
+        )
+
+    summary = phenotype_validation_summary(pd.DataFrame(rows))
+    row = summary.iloc[0]
+    assert row["variant_id"] == "borderline"
+    assert row["beta_range"] == 1.0
+    assert row["action_flip_rate"] == 1.0
+    assert row["partner_selection_entropy"] > 0

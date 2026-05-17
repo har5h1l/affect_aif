@@ -6,15 +6,17 @@ name = "model_fitness"
 id = "reliability_vs_reward"
 family = "trust"
 rounds = 200
-replications = 100
+replications = 5
 seed = 42
 
 [scenario]
 payoff = "binary"
 assignment = "agent_choice"
 partners = 4
-type_volatility = 0.05
+type_volatility = 0.0
 observation_noise = 0.0
+initial_types = ["cooperator", "exploiter", "random", "reciprocator"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
 
 [[variants]]
 id = "no_affect"

@@ -76,10 +76,12 @@ def decode_raw_action_to_partner_and_social(
     del num_partners
     if factorized_policies:
         if int(assignment_mode_code) == 1:
-            partner_idx = int(raw_action) // 4
-            rem = int(raw_action) % 4
-            social_action = rem % 2
-            return partner_idx, social_action
+            if int(num_social_actions) == 2:
+                partner_idx = int(raw_action) // 4
+                rem = int(raw_action) % 4
+                social_action = rem % 2
+                return partner_idx, social_action
+            return int(raw_action) // int(num_social_actions), int(raw_action) % int(num_social_actions)
         return int(active_partner), int(raw_action)
     return _decode_action(
         int(raw_action),

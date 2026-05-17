@@ -6,7 +6,7 @@ name = "perturbation"
 id = "clinical_dynamics"
 family = "trust"
 rounds = 200
-replications = 100
+replications = 5
 seed = 42
 
 [scenario]
@@ -15,6 +15,11 @@ assignment = "agent_choice"
 partners = 4
 type_volatility = 0.05
 observation_noise = 0.0
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
 
 [[variants]]
 id = "alexithymia"
@@ -37,5 +42,5 @@ initial_beta = 2.0
 [analysis]
 auto = true
 primary = "h5_perturbation"
-compare = ["alexithymia", "borderline", "depression"]
+compare = ["affect", "alexithymia", "borderline", "depression"]
 metrics = ["payoff", "precision", "partner_choice"]
