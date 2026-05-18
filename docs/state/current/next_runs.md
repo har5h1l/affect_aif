@@ -16,6 +16,34 @@ git diff --check
 
 ## Post-Verification Queue
 
+The May 18, 2026 H0-H5 queue completed and is interpreted in
+`docs/results/current.md`. The commands below remain the canonical full queue,
+but the immediate next research action is narrower: confirm the strongest
+H0/H2/H4 evidence at higher replication, then repair or split the H3 stress
+readout.
+
+## Recommended Confirmation Queue
+
+### 1. Confirm Open-Regime Affect and Deployment
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name confirm_open_deployment --workers 12
+```
+
+### 2. Confirm Social Choice
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name confirm_social_choice --workers 12
+```
+
+### 3. H3 Follow-Up Before Claim Promotion
+
+Before relaunching H3 as confirmation, split the readout into post-switch
+action deployment, partner reallocation/avoidance, return latency, and
+overconfident misdeployment. The May 18 results show that affect can lower
+entropy while hurting whole-run payoff in betrayal, so the current H3 design
+should be treated as mixed evidence rather than a clean pass.
+
 ### 1. H0 Openness Gate
 
 ```bash

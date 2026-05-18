@@ -4,7 +4,6 @@ This directory records interpreted result status and provenance.
 
 - `current.md`: current evidence status for the active architecture
 - `runs/`: per-run provenance notes for completed current-architecture runs
-  (directory may be absent until the first post-purge run is documented)
 
 ## Artifact hygiene
 
@@ -28,9 +27,11 @@ Primary trust-task outputs should use the card-root layout documented in
 
 Partial runs are not current evidence.
 
-## Post-Restructure Queue
+## Current Evidence
 
-No new full statistical run has been interpreted after the reusable-core/task
-package restructure. The next current-evidence queue and exact commands live in
-`docs/state/current/next_runs.md` and should be copied into per-run provenance
-notes under `docs/results/runs/` after each completed run.
+The May 18, 2026 H0-H5 queue is now the current interpreted evidence for the
+supported architecture. See `docs/results/current.md` for the scorecard and
+`docs/results/runs/2026-05-18-h0-h5-rerun.md` for run-level details. The full
+raw row-level result CSVs remain on the Mango server because the completed
+outputs are large; compact analysis artifacts are mirrored locally under
+`results/`.

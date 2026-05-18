@@ -29,6 +29,14 @@ Current top-line read:
 
 Older entries below remain as historical records. Treat pre-reframe scorecards and narratives as archived unless they are explicitly updated to this hypothesis framing.
 
+## Current Evidence Note (2026-05-18)
+
+The May 18, 2026 H0-H5 queue is now the current interpreted evidence for the
+supported architecture. Use `docs/results/current.md` and
+`docs/results/runs/2026-05-18-h0-h5-rerun.md` as the active scorecard. Older
+sections in this file remain historical context and should not override the
+current H0-H5 read.
+
 ## Architectural Review Note (2026-04-16)
 
 A three-agent codebase/results/architecture review identified issues that may affect interpretation of existing results:
