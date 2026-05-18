@@ -33,9 +33,18 @@ class ConfigBatchState:
     primary_rows: list[dict] = field(default_factory=list)
     submitted_primary: int = 0
     completed_primary: int = 0
+    resumed_primary: int = 0
 
     def all_rows(self) -> pd.DataFrame:
         return pd.DataFrame(self.primary_rows)
+
+
+def _run_key_from_values(variant_id: Any, seed: Any, replication: Any) -> tuple[str, int, int]:
+    return (str(variant_id), int(seed), int(replication))
+
+
+def _run_key(run: ExpandedRunSpec) -> tuple[str, int, int]:
+    return _run_key_from_values(run.variant_id, run.seed, run.replication)
 
 
 @dataclass
@@ -91,13 +100,54 @@ class BatchExperimentRunner:
             )
         return states
 
+    def _load_checkpoint(self, state: ConfigBatchState) -> set[tuple[str, int, int]]:
+        partial_path = state.output_dir / "results_partial.csv"
+        if not partial_path.exists():
+            return set()
+        partial = pd.read_csv(partial_path, low_memory=False)
+        required = {"variant_id", "seed", "replication", "round"}
+        if partial.empty or not required <= set(partial.columns):
+            return set()
+
+        expected_rounds = { _run_key(run): int(run.rounds) for run in state.expanded_runs }
+        completed_keys: set[tuple[str, int, int]] = set()
+        for values, group in partial.groupby(["variant_id", "seed", "replication"], dropna=False):
+            key = _run_key_from_values(*values)
+            expected = expected_rounds.get(key)
+            if expected is None:
+                continue
+            if len(group) >= expected:
+                completed_keys.add(key)
+
+        if not completed_keys:
+            return set()
+        resumed = partial[
+            partial.apply(
+                lambda row: _run_key_from_values(row["variant_id"], row["seed"], row["replication"])
+                in completed_keys,
+                axis=1,
+            )
+        ]
+        state.primary_rows.extend(resumed.to_dict(orient="records"))
+        state.completed_primary += len(completed_keys)
+        state.resumed_primary += len(completed_keys)
+        self._write_checkpoint_manifest(state, completed_keys)
+        self._emit(
+            f"[batch={self.batch_id}] resumed config={state.config_name} "
+            f"{len(completed_keys)}/{len(state.expanded_runs)} primary"
+        )
+        return completed_keys
+
     def _schedule_config_work(
         self,
         executor: ProcessPoolExecutor,
         state: ConfigBatchState,
         future_map: dict[Any, tuple[str, ConfigBatchState, dict[str, Any]]],
     ):
+        completed_keys = self._load_checkpoint(state)
         for run in state.expanded_runs:
+            if _run_key(run) in completed_keys:
+                continue
             future = executor.submit(
                 run_variant_replication_task,
                 state.spec_payload,
@@ -113,12 +163,38 @@ class BatchExperimentRunner:
                 {"variant_id": run.variant_id, "replication": run.replication, "seed": run.seed},
             )
 
+    def _write_checkpoint_manifest(
+        self,
+        state: ConfigBatchState,
+        completed_keys: set[tuple[str, int, int]] | None = None,
+    ):
+        completed = sorted(
+            completed_keys
+            or {
+                _run_key_from_values(row["variant_id"], row["seed"], row["replication"])
+                for row in state.primary_rows
+            }
+        )
+        manifest = {
+            "batch_id": self.batch_id,
+            "config_name": state.config_name,
+            "hypothesis_id": state.spec.hypothesis.id,
+            "experiment_id": state.spec.experiment.id,
+            "completed_tasks": [
+                {"variant_id": variant_id, "seed": seed, "replication": replication}
+                for variant_id, seed, replication in completed
+            ],
+        }
+        state.output_dir.mkdir(parents=True, exist_ok=True)
+        (state.output_dir / "checkpoint_manifest.json").write_text(json.dumps(manifest, indent=2))
+
     def _write_checkpoint(self, state: ConfigBatchState):
         """Save partial results for a config so progress survives crashes."""
         state.output_dir.mkdir(parents=True, exist_ok=True)
         partial = state.all_rows()
         if not partial.empty:
             partial.to_csv(state.output_dir / "results_partial.csv", index=False)
+            self._write_checkpoint_manifest(state)
             self._emit(
                 f"[batch={self.batch_id}] checkpoint config={state.config_name} "
                 f"{state.completed_primary}/{state.submitted_primary} primary"
@@ -143,6 +219,7 @@ class BatchExperimentRunner:
             "hypothesis_id": state.spec.hypothesis.id,
             "experiment_id": state.spec.experiment.id,
             "expanded_runs": len(state.expanded_runs),
+            "resumed_tasks": state.resumed_primary,
         }
         metadata_path.write_text(json.dumps(metadata, indent=2))
         if self.make_gifs and not results.empty:

@@ -19,6 +19,11 @@ analysis/figures/
 analysis/report/
 ```
 
+Experiment directories also contain resumability artifacts. `results_partial.csv`
+and `checkpoint_manifest.json` are updated after each completed expanded run, so
+rerunning the same command with the same `--batch-name` skips completed
+`variant_id` × `seed` × `replication` tasks and fills in only missing work.
+
 | Card | Result root | Question | Specs | Configured analysis |
 |---|---|---|---|---|
 | H0 Openness Gate | `results/h0_openness/` | Is the policy space open enough for precision to change behavior? | `configs/trust/hypotheses/h0_openness/shallow_binary.toml`, `configs/trust/hypotheses/h0_openness/graded_choice.toml`, `configs/trust/hypotheses/h0_openness/graded_betrayal.toml` | `analysis.configured` |

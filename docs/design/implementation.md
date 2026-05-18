@@ -127,6 +127,11 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 - `scripts/experiment/run.py` accepts multiple TOML `--config` paths and a `--workers` count. With more than one config or `workers > 1`, it uses `BatchExperimentRunner` and a `ProcessPoolExecutor` from the standard library.
 - Work is parallelized at expanded-run granularity. Each worker receives a serialized experiment spec plus a serialized `ExpandedRunSpec`; results are collected in the main process and written under `<output-dir>/<batch_name>/<hypothesis_id>/<experiment_id>/results.csv`.
+- Batch and serial trust runs checkpoint after each completed expanded run.
+  `results_partial.csv` stores row-level progress, while
+  `checkpoint_manifest.json` records completed `variant_id`, `seed`, and
+  `replication` keys. Reusing the same `--batch-name` resumes from these files
+  and schedules only missing expanded runs.
 - Sweeps are expanded into concrete variant runs, so the old sensitivity worker path is no longer part of maintained TOML execution.
 - Serial mode (exactly one config and `--workers 1`) runs in the main process and supports `--verbose` stage streaming and `--make-gifs`; batch mode disables per-round verbosity but can still use `--verbose` for completion messages and `--make-gifs` to build GIFs per config after all replications finish.
 

@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 from importlib.util import module_from_spec, spec_from_file_location
@@ -201,3 +202,160 @@ def test_batch_schedules_expanded_variant_runs(tmp_path):
 
     assert states[0].spec.experiment.id == "betrayal_choice"
     assert len(states[0].expanded_runs) == 6
+
+
+def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
+    path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=2, replications=2)
+    runner = BatchExperimentRunner(
+        config_paths=[str(path)],
+        output_root=str(tmp_path / "results"),
+        batch_id="resume_batch",
+        workers=1,
+    )
+    first = runner._load_states()[0]
+    completed_run = first.expanded_runs[0]
+    first.output_dir.mkdir(parents=True)
+    pd.DataFrame(
+        [
+            {
+                "variant_id": completed_run.variant_id,
+                "seed": completed_run.seed,
+                "replication": completed_run.replication,
+                "round": 0,
+                "payoff": 1.0,
+                "config_name": first.config_name,
+                "batch_id": "resume_batch",
+            },
+            {
+                "variant_id": completed_run.variant_id,
+                "seed": completed_run.seed,
+                "replication": completed_run.replication,
+                "round": 1,
+                "payoff": 1.0,
+                "config_name": first.config_name,
+                "batch_id": "resume_batch",
+            },
+        ]
+    ).to_csv(first.output_dir / "results_partial.csv", index=False)
+
+    submitted: list[tuple[str, int, int]] = []
+
+    class ImmediateFuture:
+        def __init__(self, run):
+            self.run = run
+
+        def result(self):
+            submitted.append((self.run.variant_id, self.run.seed, self.run.replication))
+            return {
+                "task_kind": "variant",
+                "variant_id": self.run.variant_id,
+                "replication": self.run.replication,
+                "seed": self.run.seed,
+                "records": [
+                    {
+                        "variant_id": self.run.variant_id,
+                        "seed": self.run.seed,
+                        "replication": self.run.replication,
+                        "round": 0,
+                        "payoff": 2.0,
+                        "config_name": first.config_name,
+                        "batch_id": "resume_batch",
+                    },
+                    {
+                        "variant_id": self.run.variant_id,
+                        "seed": self.run.seed,
+                        "replication": self.run.replication,
+                        "round": 1,
+                        "payoff": 2.0,
+                        "config_name": first.config_name,
+                        "batch_id": "resume_batch",
+                    },
+                ],
+            }
+
+    class ImmediateExecutor:
+        def __init__(self, max_workers):
+            self.max_workers = max_workers
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def submit(self, _fn, _spec_payload, run_payload, **_kwargs):
+            from experiments.trust.spec import ExpandedRunSpec
+
+            return ImmediateFuture(ExpandedRunSpec.from_payload(run_payload))
+
+    def immediate_wait(futures, return_when):
+        del return_when
+        return {next(iter(futures))}, set(futures[1:])
+
+    monkeypatch.setattr("experiments.trust.batch.ProcessPoolExecutor", ImmediateExecutor)
+    monkeypatch.setattr("experiments.trust.batch.wait", immediate_wait)
+
+    result = runner.run_all()
+    state = result.config_states[0]
+    final = pd.read_csv(state.output_dir / "results.csv")
+
+    assert (completed_run.variant_id, completed_run.seed, completed_run.replication) not in submitted
+    assert len(submitted) == len(first.expanded_runs) - 1
+    assert len(final) == len(first.expanded_runs) * 2
+    metadata = json.loads((state.output_dir / "batch_metadata.json").read_text())
+    assert metadata["resumed_tasks"] == 1
+
+
+def test_serial_runner_resumes_completed_checkpoint_runs(tmp_path, tiny_spec, monkeypatch):
+    spec = tiny_spec.with_overrides(rounds=2, replications=2)
+    runs = spec.expand_runs()
+    completed_run = runs[0]
+    checkpoint = tmp_path / "results_partial.csv"
+    pd.DataFrame(
+        [
+            {
+                "variant_id": completed_run.variant_id,
+                "seed": completed_run.seed,
+                "replication": completed_run.replication,
+                "round": 0,
+                "payoff": 1.0,
+            },
+            {
+                "variant_id": completed_run.variant_id,
+                "seed": completed_run.seed,
+                "replication": completed_run.replication,
+                "round": 1,
+                "payoff": 1.0,
+            },
+        ]
+    ).to_csv(checkpoint, index=False)
+
+    executed: list[tuple[str, int, int]] = []
+
+    def fake_run_replication(*, run, config_path=None, config_name=None, batch_id=None):
+        del config_path, config_name, batch_id
+        executed.append((run.variant_id, run.seed, run.replication))
+        return [
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "round": 0,
+                "payoff": 2.0,
+            },
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "round": 1,
+                "payoff": 2.0,
+            },
+        ]
+
+    runner = ExperimentRunner.from_spec(spec)
+    monkeypatch.setattr(runner, "run_replication", fake_run_replication)
+
+    results = runner.run_all(checkpoint_path=str(checkpoint), checkpoint_interval=1)
+
+    assert (completed_run.variant_id, completed_run.seed, completed_run.replication) not in executed
+    assert len(results) == len(runs) * 2

@@ -63,6 +63,7 @@ Default TOML output layout:
 <output-dir>/<batch_name>/<hypothesis_id>/<experiment_id>/
   results.csv
   results_partial.csv
+  checkpoint_manifest.json
   config.toml
   batch_metadata.json
   analysis/
@@ -74,6 +75,13 @@ Default TOML output layout:
 `analysis/` is written automatically when the spec sets `analysis.auto = true`.
 The standalone `scripts/analysis/analyze.py` remains available for direct
 post-hoc analysis of a saved CSV or parquet file.
+
+Experiment execution is resumable. `results_partial.csv` is updated after each
+completed expanded run, and `checkpoint_manifest.json` records completed
+`variant_id` × `seed` × `replication` tasks. If a run is interrupted, rerun the
+same command with the same `--batch-name`; completed tasks are loaded from the
+checkpoint and skipped, while missing tasks continue into the same output
+directory.
 
 Examples:
 

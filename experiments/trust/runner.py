@@ -326,9 +326,42 @@ class ExperimentRunner:
                 Defaults to 1 (save after every replication).
         """
 
+        expanded_runs = self.spec.expand_runs()
         records: list[dict] = []
+        completed_keys: set[tuple[str, int, int]] = set()
+        if checkpoint_path:
+            checkpoint = Path(checkpoint_path)
+            if checkpoint.exists():
+                partial = pd.read_csv(checkpoint, low_memory=False)
+                required = {"variant_id", "seed", "replication", "round"}
+                if not partial.empty and required <= set(partial.columns):
+                    expected_rounds = {
+                        (str(run.variant_id), int(run.seed), int(run.replication)): int(run.rounds)
+                        for run in expanded_runs
+                    }
+                    for values, group in partial.groupby(["variant_id", "seed", "replication"], dropna=False):
+                        key = (str(values[0]), int(values[1]), int(values[2]))
+                        expected = expected_rounds.get(key)
+                        if expected is not None and len(group) >= expected:
+                            completed_keys.add(key)
+                    if completed_keys:
+                        resumed = partial[
+                            partial.apply(
+                                lambda row: (
+                                    str(row["variant_id"]),
+                                    int(row["seed"]),
+                                    int(row["replication"]),
+                                )
+                                in completed_keys,
+                                axis=1,
+                            )
+                        ]
+                        records.extend(resumed.to_dict(orient="records"))
         reps_since_checkpoint = 0
-        for run in self.spec.expand_runs():
+        for run in expanded_runs:
+            key = (str(run.variant_id), int(run.seed), int(run.replication))
+            if key in completed_keys:
+                continue
             records.extend(
                 self.run_replication(
                     run=run,
