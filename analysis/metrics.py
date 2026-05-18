@@ -698,12 +698,18 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     rows: list[dict] = []
     for variant_id, group in partner_summary.groupby("variant_id"):
+        reward_proxy = group["reward_signal_mean"]
+        reward_source = "reward_signal"
+        if reward_proxy.notna().sum() < 3:
+            reward_proxy = group["active_mean_payoff"]
+            reward_source = "active_mean_payoff"
         corr_surprise = _safe_corr(group["precision_mean"], group["surprise_mean"])
-        corr_reward = _safe_corr(group["precision_mean"], group["reward_signal_mean"])
+        corr_reward = _safe_corr(group["precision_mean"], reward_proxy)
         rows.append(
             {
                 "variant_id": str(variant_id),
                 "n_partner_seed_units": int(len(group)),
+                "reward_proxy": reward_source,
                 "corr_precision_surprise": corr_surprise,
                 "corr_precision_reward": corr_reward,
                 "abs_corr_precision_surprise": abs(corr_surprise) if np.isfinite(corr_surprise) else np.nan,
