@@ -2,11 +2,11 @@
 
 ## Requires Human Decision
 
-- Whether to treat the May 18 H0-H5 rerun as pilot evidence and launch a
-  higher-replication confirmation, or first revise the H3 betrayal design.
+- Whether to launch higher-replication confirmation for H0/H1/H2/H4 now, or
+  first revise the H3 betrayal design.
 - Whether H3 should be framed as a boundary condition for affective precision
-  under miscalibrated confidence, or rerun after adding cleaner reallocation and
-  return-latency readouts.
+  under overconfident wrong-belief deployment, or rerun after adding cleaner
+  reallocation and return-latency readouts.
 
 ## Current Interpretation Guardrails
 

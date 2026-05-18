@@ -29,9 +29,9 @@ deployment signal; it can also confidently amplify a bad post-switch model.
 | Card | Current status | Evidence read |
 |---|---|---|
 | H0 Openness Gate | Supported with caveat | Affect has little room in shallow binary but lowers entropy and can improve payoff in graded choice. Openness is necessary but not sufficient: the graded betrayal run shows lower entropy with worse total payoff. |
-| H1 Model Fitness | Incomplete | The H1 run shows beta movement, but payoff and accuracy favor no-affect. The current analysis does not yet cleanly test reliability-vs-reward at the partner level. |
+| H1 Model Fitness | Supported as pilot | Targeted partner-level analysis shows precision tracks surprise more strongly than realized partner payoff in H1 (`|r| = 0.665` vs `0.414`). This is the right dissociation, but still needs higher-rep confirmation. |
 | H2 Deployment | Supported | In the open graded-choice regime, affect and lesioned/no-affect have similar belief accuracy while affect improves payoff by +25.2 and lowers policy entropy. |
-| H3 Stress Response | Mixed / needs follow-up | Post-switch payoff windows are slightly better for affect in some seeds, but whole-run payoff and inferred-type accuracy are worse under affect in graded betrayal. |
+| H3 Stress Response | Boundary condition / needs redesign | Post-switch affect shows stronger precision-surprise coupling, but also higher wrong-type and overconfident-wrong-belief rates after betrayal. Current H3 is evidence that affect can misdeploy under volatility, not a clean recovery win. |
 | H4 Social Choice | Supported behaviorally | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. This is the expected signature for partner-choice behavior changing before total reward moves. |
 | H5 Perturbation Phenotypes | Supported for dynamics; payoff underpowered | Clinical-like variants separate in beta range, entropy, partner selection, and payoff ordering, but payoff pairwise tests are mostly not significant with five seeds. |
 
@@ -40,9 +40,9 @@ deployment signal; it can also confidently amplify a bad post-switch model.
 The project is no longer in the "no current evidence" state. The H0-H5 queue
 establishes that the precision channel is behaviorally active on the current
 runtime. The next scientific decision is whether to treat the current evidence
-as a pilot result and run higher-replication confirmation, or to first adjust the
-stress-response design so H3 isolates reallocation/recovery rather than whole-run
-avoidance and miscalibrated confidence.
+as a pilot result and run higher-replication confirmation, while revising the
+stress-response design so H3 isolates reallocation/recovery from overconfident
+wrong-belief deployment.
 
 ## Current Architecture Requirement
 
