@@ -6,16 +6,20 @@ import pandas as pd
 
 from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
+    betrayal_misdeployment_summary,
     betrayal_phase_summary,
     deployment_dissociation_summary,
     final_round_summary,
+    model_fitness_correlation_summary,
     partner_choice_summary,
+    partner_model_fitness_summary,
     phenotype_validation_summary,
 )
 from analysis.model_comparison import model_comparison_report
 from cli.common import load_results_table
 from experiments.trust.runner import ExperimentRunner
 from scripts.analysis.analyze import _hypothesis_summary_frame
+from scripts.analysis.analyze import main as run_analysis_main
 from scripts.analysis.model_comparison import main as run_model_comparison_main
 
 
@@ -200,6 +204,111 @@ def test_partner_choice_summary_reports_selection_rates_and_beta():
     assert partner_0["selection_count"] == 2
     assert partner_0["selection_rate"] == 2 / 3
     assert partner_0["mean_selected_partner_beta"] == 0.5
+
+
+def test_partner_model_fitness_summary_separates_surprise_from_reward():
+    rows = []
+    for round_idx in [1, 2, 3]:
+        for partner_idx, payoff, correct in [(0, 1.0, 1.0), (1, 5.0, 0.0), (2, 5.0, 1.0)]:
+            rows.append(
+                {
+                    "variant_id": "affect",
+                    "seed": 0,
+                    "round": round_idx,
+                    "partner_idx": partner_idx,
+                    "payoff": payoff,
+                    "betas": [0.5, 2.0, 0.67],
+                    "prediction_errors": [0.1, 0.8, 0.2],
+                    "reward_avgs": [1.0, 5.0, 5.0],
+                    "inferred_type_correct": correct,
+                }
+            )
+
+    partner_summary = partner_model_fitness_summary(pd.DataFrame(rows))
+    reliable_low_reward = partner_summary.loc[partner_summary["partner_idx"] == 0].iloc[0]
+    volatile_high_reward = partner_summary.loc[partner_summary["partner_idx"] == 1].iloc[0]
+    assert reliable_low_reward["precision_mean"] > volatile_high_reward["precision_mean"]
+    assert reliable_low_reward["reward_signal_mean"] < volatile_high_reward["reward_signal_mean"]
+
+    corr = model_fitness_correlation_summary(pd.DataFrame(rows)).iloc[0]
+    assert corr["corr_precision_surprise"] < 0
+    assert corr["abs_corr_precision_surprise"] > corr["abs_corr_precision_reward"]
+
+
+def test_betrayal_misdeployment_summary_flags_low_entropy_bad_payoff_after_switch():
+    rows = []
+    for round_idx in range(1, 7):
+        rows.append(
+            {
+                "variant_id": "affect",
+                "seed": 0,
+                "round": round_idx,
+                "partner_idx": 0,
+                "payoff": -1.0 if round_idx in {4, 5} else 3.0,
+                "q_pi_entropy": 0.05 if round_idx in {4, 5} else 1.0,
+                "selected_partner": 0 if round_idx != 6 else 1,
+                "selected_action": 1,
+                "scheduled_stance_switch_partner_ids": [0] if round_idx == 4 else [],
+                "scheduled_switch_partner_ids": [],
+                "type_switched": False,
+                "stance_switched": False,
+                "switch_kind": "scheduled_stance" if round_idx == 4 else "",
+                "inferred_type_correct": 0.0 if round_idx in {4, 5} else 1.0,
+                "inferred_stance_correct": 1.0,
+                "inferred_joint_correct": 0.0 if round_idx in {4, 5} else 1.0,
+            }
+        )
+
+    summary = betrayal_misdeployment_summary(pd.DataFrame(rows), window=3, entropy_quantile=0.5)
+    row = summary.iloc[0]
+    assert row["encounters"] == 3
+    assert row["bad_payoff_rate"] == 2 / 3
+    assert row["wrong_type_rate"] == 2 / 3
+    assert row["overconfident_bad_payoff_rate"] == 2 / 3
+    assert row["selected_partner_rate"] == 2 / 3
+
+
+def test_analysis_cli_writes_model_fitness_and_misdeployment_reports(tmp_path):
+    rows = []
+    for round_idx in range(1, 7):
+        rows.append(
+            {
+                "variant_id": "affect",
+                "seed": 0,
+                "round": round_idx,
+                "partner_idx": 0,
+                "true_partner_type": "cooperator",
+                "payoff": -1.0 if round_idx in {4, 5} else 3.0,
+                "partner_payoff": 1.0,
+                "q_pi_entropy": 0.05 if round_idx in {4, 5} else 1.0,
+                "mean_abs_step_efe": 1.0,
+                "planning_cost": 1.0,
+                "planning_cost_ratio": 1.0,
+                "selected_partner": 0,
+                "selected_action": 1,
+                "betas": [0.5, 2.0, 0.67],
+                "prediction_errors": [0.1, 0.8, 0.2],
+                "reward_avgs": [1.0, 5.0, 5.0],
+                "scheduled_stance_switch_partner_ids": [0] if round_idx == 4 else [],
+                "scheduled_switch_partner_ids": [],
+                "type_switched": False,
+                "stance_switched": False,
+                "switch_kind": "scheduled_stance" if round_idx == 4 else "",
+                "inferred_type_correct": 0.0 if round_idx in {4, 5} else 1.0,
+                "inferred_stance_correct": 1.0,
+                "inferred_joint_correct": 0.0 if round_idx in {4, 5} else 1.0,
+            }
+        )
+    results_path = tmp_path / "results.csv"
+    output_dir = tmp_path / "analysis"
+    pd.DataFrame(rows).to_csv(results_path, index=False)
+
+    exit_code = run_analysis_main(["--results", str(results_path), "--output-dir", str(output_dir)])
+
+    assert exit_code == 0
+    assert (output_dir / "partner_model_fitness_summary.csv").exists()
+    assert (output_dir / "model_fitness_correlation_summary.csv").exists()
+    assert (output_dir / "betrayal_misdeployment_summary.csv").exists()
 
 
 def test_phenotype_validation_summary_includes_dynamics_and_behavior():

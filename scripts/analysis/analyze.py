@@ -16,12 +16,15 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
     affective_movement_summary,
     betrayal_latency_summary,
+    betrayal_misdeployment_summary,
     betrayal_phase_summary,
     betrayal_trajectory,
     deployment_dissociation_summary,
     final_round_summary,
     has_switch_events,
+    model_fitness_correlation_summary,
     partner_choice_summary,
+    partner_model_fitness_summary,
     phenotype_validation_summary,
     post_switch_variant_comparison,
     post_switch_window_summary,
@@ -93,6 +96,8 @@ def main(argv: list[str] | None = None) -> int:
     hypotheses = run_all_hypothesis_tests(results)
     movement = affective_movement_summary(results)
     deployment = deployment_dissociation_summary(results)
+    partner_model_fitness = partner_model_fitness_summary(results)
+    model_fitness_corr = model_fitness_correlation_summary(results)
     partner_choice = partner_choice_summary(results)
     phenotypes = phenotype_validation_summary(results)
 
@@ -103,6 +108,8 @@ def main(argv: list[str] | None = None) -> int:
     hypothesis_summary.to_csv(output_dir / "hypothesis_summary.csv", index=False)
     movement.to_csv(output_dir / "affective_movement_summary.csv", index=False)
     deployment.to_csv(output_dir / "deployment_dissociation_summary.csv", index=False)
+    partner_model_fitness.to_csv(output_dir / "partner_model_fitness_summary.csv", index=False)
+    model_fitness_corr.to_csv(output_dir / "model_fitness_correlation_summary.csv", index=False)
     partner_choice.to_csv(output_dir / "partner_choice_summary.csv", index=False)
     phenotypes.to_csv(output_dir / "phenotype_validation_summary.csv", index=False)
 
@@ -113,6 +120,7 @@ def main(argv: list[str] | None = None) -> int:
         betrayal_comp = post_switch_variant_comparison(results, windows=(5, 10))
         betrayal_latencies = betrayal_latency_summary(results, max_encounters=10)
         betrayal_traj = betrayal_trajectory(results, max_encounters=10)
+        betrayal_misdeployment = betrayal_misdeployment_summary(results, window=10)
 
         post_switch_5.to_csv(output_dir / "betrayal_post_switch_window_1_5.csv", index=False)
         post_switch_10.to_csv(output_dir / "betrayal_post_switch_window_1_10.csv", index=False)
@@ -120,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
         betrayal_comp.to_csv(output_dir / "betrayal_variant_comparison.csv", index=False)
         betrayal_latencies.to_csv(output_dir / "betrayal_detection_latency.csv", index=False)
         betrayal_traj.to_csv(output_dir / "betrayal_trajectories.csv", index=False)
+        betrayal_misdeployment.to_csv(output_dir / "betrayal_misdeployment_summary.csv", index=False)
 
     summary_path = output_dir / "statistics_summary.txt"
     movement_lines = []

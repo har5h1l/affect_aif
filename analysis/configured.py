@@ -14,11 +14,14 @@ from analysis.core.loading import load_configured_results
 from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
     affective_movement_summary,
+    betrayal_misdeployment_summary,
     betrayal_phase_summary,
     deployment_dissociation_summary,
     final_round_summary,
     has_switch_events,
+    model_fitness_correlation_summary,
     partner_choice_summary,
+    partner_model_fitness_summary,
     phenotype_validation_summary,
 )
 from experiments.trust.spec import AnalysisSpec, ExperimentSpec
@@ -76,6 +79,8 @@ def write_configured_analysis_outputs(results_path: Path, output_dir: Path, anal
 
     raw_builders: list[tuple[str, Callable[[pd.DataFrame], pd.DataFrame]]] = [
         ("deployment_dissociation_summary.csv", deployment_dissociation_summary),
+        ("partner_model_fitness_summary.csv", partner_model_fitness_summary),
+        ("model_fitness_correlation_summary.csv", model_fitness_correlation_summary),
         ("partner_choice_summary.csv", partner_choice_summary),
         ("phenotype_validation_summary.csv", phenotype_validation_summary),
     ]
@@ -96,6 +101,11 @@ def write_configured_analysis_outputs(results_path: Path, output_dir: Path, anal
         except (KeyError, ValueError):
             betrayal_phases = pd.DataFrame()
         betrayal_phases.to_csv(raw_dir / "betrayal_phase_summary.csv", index=False)
+        try:
+            betrayal_misdeployment = betrayal_misdeployment_summary(results, window=10)
+        except (KeyError, ValueError):
+            betrayal_misdeployment = pd.DataFrame()
+        betrayal_misdeployment.to_csv(raw_dir / "betrayal_misdeployment_summary.csv", index=False)
     (report_dir / "summary.md").write_text(
         "# Analysis Summary\n\nConfigured analysis outputs generated.\n",
         encoding="utf-8",

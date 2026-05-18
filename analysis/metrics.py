@@ -615,6 +615,210 @@ def phenotype_validation_summary(results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def partner_model_fitness_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Summarize partner-local precision, surprise, reward, and accuracy.
+
+    Beta is the HESP rate parameter, so lower beta means higher policy precision.
+    This table makes the H1 distinction explicit: precision should follow
+    predictive reliability/surprise more closely than payoff or reward signal.
+    """
+
+    required = {"variant_id", "seed", "round", "betas"}
+    if results.empty or not required <= set(results.columns):
+        return pd.DataFrame()
+
+    rows: list[dict] = []
+    for _, row in results.iterrows():
+        betas = _ensure_array(row["betas"])
+        prediction_errors = (
+            _ensure_array(row["prediction_errors"]) if "prediction_errors" in row.index else np.asarray([])
+        )
+        reward_avgs = _ensure_array(row["reward_avgs"]) if "reward_avgs" in row.index else np.asarray([])
+        active_partner = (
+            int(row["partner_idx"]) if "partner_idx" in row.index and pd.notna(row["partner_idx"]) else None
+        )
+        for partner_idx, beta in enumerate(betas):
+            if not np.isfinite(beta):
+                continue
+            is_active = active_partner == partner_idx
+            rows.append(
+                {
+                    "variant_id": str(row["variant_id"]),
+                    "seed": int(row["seed"]),
+                    "round": int(row["round"]),
+                    "partner_idx": int(partner_idx),
+                    "beta": float(beta),
+                    "precision": float(1.0 / beta) if beta > 0 else np.nan,
+                    "surprise": (
+                        float(prediction_errors[partner_idx])
+                        if len(prediction_errors) > partner_idx
+                        else np.nan
+                    ),
+                    "reward_signal": (
+                        float(reward_avgs[partner_idx]) if len(reward_avgs) > partner_idx else np.nan
+                    ),
+                    "active_payoff": float(row["payoff"]) if is_active and "payoff" in row.index else np.nan,
+                    "active_accuracy": (
+                        float(row["inferred_type_correct"])
+                        if is_active and "inferred_type_correct" in row.index
+                        else np.nan
+                    ),
+                    "active_encounter": bool(is_active),
+                }
+            )
+    tidy = pd.DataFrame(rows)
+    if tidy.empty:
+        return tidy
+    summary = tidy.groupby(["variant_id", "seed", "partner_idx"], as_index=False).agg(
+        beta_mean=("beta", "mean"),
+        precision_mean=("precision", "mean"),
+        surprise_mean=("surprise", "mean"),
+        reward_signal_mean=("reward_signal", "mean"),
+        active_mean_payoff=("active_payoff", "mean"),
+        active_accuracy=("active_accuracy", "mean"),
+        active_encounters=("active_encounter", "sum"),
+    )
+    return summary
+
+
+def _safe_corr(left: pd.Series, right: pd.Series) -> float:
+    pair = pd.DataFrame({"left": left, "right": right}).replace([np.inf, -np.inf], np.nan).dropna()
+    if len(pair) < 3:
+        return np.nan
+    if np.isclose(pair["left"].std(ddof=0), 0.0) or np.isclose(pair["right"].std(ddof=0), 0.0):
+        return np.nan
+    return float(pair["left"].corr(pair["right"]))
+
+
+def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Correlate partner precision with surprise and reward for H1."""
+
+    partner_summary = partner_model_fitness_summary(results)
+    if partner_summary.empty:
+        return pd.DataFrame()
+    rows: list[dict] = []
+    for variant_id, group in partner_summary.groupby("variant_id"):
+        corr_surprise = _safe_corr(group["precision_mean"], group["surprise_mean"])
+        corr_reward = _safe_corr(group["precision_mean"], group["reward_signal_mean"])
+        rows.append(
+            {
+                "variant_id": str(variant_id),
+                "n_partner_seed_units": int(len(group)),
+                "corr_precision_surprise": corr_surprise,
+                "corr_precision_reward": corr_reward,
+                "abs_corr_precision_surprise": abs(corr_surprise) if np.isfinite(corr_surprise) else np.nan,
+                "abs_corr_precision_reward": abs(corr_reward) if np.isfinite(corr_reward) else np.nan,
+                "surprise_dominates_reward": (
+                    bool(abs(corr_surprise) > abs(corr_reward))
+                    if np.isfinite(corr_surprise) and np.isfinite(corr_reward)
+                    else False
+                ),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def betrayal_misdeployment_summary(
+    results: pd.DataFrame,
+    window: int = 10,
+    entropy_quantile: float = 0.25,
+    bad_payoff_threshold: float = 1.0,
+) -> pd.DataFrame:
+    """Summarize low-entropy bad outcomes after betrayal-style switches."""
+
+    frame = results.copy()
+    if frame.empty or not has_switch_events(frame):
+        return pd.DataFrame()
+    if "scheduled_switch_partner_ids" in frame.columns:
+        frame["scheduled_switch_partner_ids"] = frame["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    else:
+        frame["scheduled_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    if "scheduled_stance_switch_partner_ids" in frame.columns:
+        frame["scheduled_stance_switch_partner_ids"] = frame["scheduled_stance_switch_partner_ids"].apply(
+            _scheduled_switch_targets
+        )
+    else:
+        frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    scheduled_type_map = _build_scheduled_switch_map(frame, "scheduled_switch_partner_ids", "scheduled_type")
+    scheduled_stance_map = _build_scheduled_switch_map(frame, "scheduled_stance_switch_partner_ids", "scheduled_stance")
+    observed_map = _build_observed_switch_map(frame)
+
+    entropy_cutoffs = (
+        frame.groupby("variant_id")["q_pi_entropy"].quantile(float(entropy_quantile)).to_dict()
+        if "q_pi_entropy" in frame.columns
+        else {}
+    )
+    rows: list[dict] = []
+    for (variant_id, seed, partner_idx), group in frame.groupby(["variant_id", "seed", "partner_idx"]):
+        group = group.sort_values("round")
+        key = (variant_id, int(seed), int(partner_idx))
+        switch_rounds = _switch_rounds_for_partner(key, scheduled_type_map, scheduled_stance_map, observed_map)
+        for event_idx, (switch_round, switch_kind) in enumerate(switch_rounds):
+            window_frame = group[group["round"] >= switch_round].head(int(window)).copy()
+            cutoff = float(entropy_cutoffs.get(variant_id, np.nan))
+            if window_frame.empty:
+                rows.append(
+                    {
+                        "variant_id": str(variant_id),
+                        "seed": int(seed),
+                        "partner_idx": int(partner_idx),
+                        "switch_event_idx": int(event_idx),
+                        "switch_round": int(switch_round),
+                        "switch_kind": str(switch_kind),
+                        "window": int(window),
+                        "encounters": 0,
+                        "mean_payoff": np.nan,
+                        "mean_q_pi_entropy": np.nan,
+                        "wrong_type_rate": np.nan,
+                        "bad_payoff_rate": np.nan,
+                        "overconfident_bad_payoff_rate": np.nan,
+                        "selected_partner_rate": np.nan,
+                        "entropy_cutoff": cutoff,
+                    }
+                )
+                continue
+            bad_payoff = window_frame["payoff"] <= float(bad_payoff_threshold)
+            wrong_type = (
+                window_frame["inferred_type_correct"] < 1.0
+                if "inferred_type_correct" in window_frame.columns
+                else pd.Series(False, index=window_frame.index)
+            )
+            low_entropy = (
+                window_frame["q_pi_entropy"] <= cutoff
+                if np.isfinite(cutoff) and "q_pi_entropy" in window_frame.columns
+                else pd.Series(False, index=window_frame.index)
+            )
+            selected_partner_rate = (
+                float((window_frame["selected_partner"] == int(partner_idx)).mean())
+                if "selected_partner" in window_frame.columns
+                else np.nan
+            )
+            rows.append(
+                {
+                    "variant_id": str(variant_id),
+                    "seed": int(seed),
+                    "partner_idx": int(partner_idx),
+                    "switch_event_idx": int(event_idx),
+                    "switch_round": int(switch_round),
+                    "switch_kind": str(switch_kind),
+                    "window": int(window),
+                    "encounters": int(len(window_frame)),
+                    "mean_payoff": float(window_frame["payoff"].mean()),
+                    "mean_q_pi_entropy": (
+                        float(window_frame["q_pi_entropy"].mean())
+                        if "q_pi_entropy" in window_frame.columns
+                        else np.nan
+                    ),
+                    "wrong_type_rate": float(wrong_type.mean()),
+                    "bad_payoff_rate": float(bad_payoff.mean()),
+                    "overconfident_bad_payoff_rate": float((low_entropy & bad_payoff & wrong_type).mean()),
+                    "selected_partner_rate": selected_partner_rate,
+                    "entropy_cutoff": cutoff,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 def post_switch_variant_comparison(results: pd.DataFrame, windows: tuple[int, ...] = (5, 10)) -> pd.DataFrame:
     """Compare paired variants in post-switch windows.
 
