@@ -264,6 +264,7 @@ def test_betrayal_misdeployment_summary_flags_low_entropy_bad_payoff_after_switc
     assert row["encounters"] == 3
     assert row["bad_payoff_rate"] == 2 / 3
     assert row["wrong_type_rate"] == 2 / 3
+    assert row["overconfident_wrong_type_rate"] == 2 / 3
     assert row["overconfident_bad_payoff_rate"] == 2 / 3
     assert row["selected_partner_rate"] == 2 / 3
 
