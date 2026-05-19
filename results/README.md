@@ -2,9 +2,10 @@
 
 `results/` is reserved for local experiment outputs and analysis artifacts from the supported CLI workflows.
 
-Active local evidence copies are kept at top level. Older pilots and partial
-attempts are moved under `results/archive/` so the visible surface contains only
-the latest promoted or follow-up batches per hypothesis family.
+Active local evidence copies are kept at top level. Older pilots, partial
+attempts, and duplicate local batches should be removed from `results/` before
+Mango sync so the server surface contains only the latest promoted or follow-up
+batches per hypothesis family.
 
 Current top-level batches:
 
@@ -12,6 +13,8 @@ Current top-level batches:
   H0-H4 and most H5 experiments
 - `updated_h0_h5_20260518_remainder/`: May 18 promoted H5 affect-sensitivity
   remainder
+- `confirm_h0_h1_h2_h4_20260518/`: latest H0/H1/H2/H4 confirmation artifacts
+  when present on the Mango server
 - `h3_reallocation_followup_20260519/`: small May 19 H3 split-readout pilot
 
 Supported experiment runs write batch outputs under:
