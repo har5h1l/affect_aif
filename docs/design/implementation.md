@@ -152,6 +152,8 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - `betrayal_variant_comparison.csv`
   - `betrayal_detection_latency.csv`
   - `betrayal_trajectories.csv`
+  - `betrayal_misdeployment_summary.csv`
+  - `betrayal_reallocation_summary.csv`
   - `affective_movement_summary.csv`
 - Generic analysis also writes `deployment_dissociation_summary.csv`,
   `partner_choice_summary.csv`, and `phenotype_validation_summary.csv` so H2,
@@ -163,6 +165,13 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The round-level schema now logs the raw per-partner `terminal_signal` used for planning, plus `switch_kind`, `current_partner_switched`, `current_partner_scheduled_switch`, `scheduled_switch_partner_ids`, `active_partner`, `selected_partner`, `selected_action`, `best_policy_idx`, `partner_beliefs`, and `partner_posteriors`.
 - Detection latency is defined as encounters after the switch until inferred type becomes correct.
 - Payoff recovery latency is defined as encounters after the switch until payoff reaches at least `1.0`, meaning the agent is no longer taking sucker-level losses under the default matrix.
+- Reallocation summaries are one row per switch event and report post-switch
+  decisions, whether the agent returned to the switched partner,
+  decisions/rounds to first re-encounter, selection rate after the switch, and
+  payoff/entropy conditional on re-encounter.
+- Misdeployment summaries report post-switch wrong-type, bad-payoff,
+  low-entropy, and overconfident-wrong rates so H3 can distinguish recovery
+  wins from precision-sharpened wrong deployment.
 - In agent-choice runs, post-switch window summaries retain scheduled switch
   events even when the agent does not re-encounter the switched partner in the
   requested window. Those rows use `encounters = 0` and NaN outcome metrics so

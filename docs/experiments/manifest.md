@@ -29,7 +29,7 @@ rerunning the same command with the same `--batch-name` skips completed
 | H0 Openness Gate | `results/h0_openness/` | Is the policy space open enough for precision to change behavior? | `configs/trust/hypotheses/h0_openness/shallow_binary.toml`, `configs/trust/hypotheses/h0_openness/graded_choice.toml`, `configs/trust/hypotheses/h0_openness/graded_betrayal.toml` | `analysis.configured` |
 | H1 Model Fitness | `results/h1_model_fitness/` | Does precision track predictive reliability rather than reward? | `configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml` | `analysis.configured` |
 | H2 Deployment | `results/h2_deployment/` | Are beliefs intact while behavior changes when beta is decoupled from policy precision? | `configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml` | `analysis.configured` |
-| H3 Stress Response | `results/h3_stress_response/` | Does affect help most around betrayal, stance shifts, or other volatility windows? | `configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml` | `analysis.configured` |
+| H3 Stress Response | `results/h3_stress_response/` | Does affect help most around betrayal, stance shifts, or other volatility windows? | `configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml`, `configs/trust/hypotheses/h3_stress_response/betrayal_reallocation.toml` | `analysis.configured` |
 | H4 Social Choice | `results/h4_social_choice/` | Does partner-specific precision guide approach, avoidance, probing, and return? | `configs/trust/hypotheses/h4_social_choice/partner_choice.toml` | `analysis.configured` |
 | H5 Perturbation Phenotypes | `results/h5_perturbation/` | Do clinical-like parameter variants separate first in precision dynamics, then behavior? | `configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml`, `configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml`, `configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml` | `analysis.configured` |
 | E1 External benchmark arena | `results/e1_benchmarks/` | How do trust-task agents compare with benchmark surfaces? | `configs/benchmark/e1_arena/default.toml`, `configs/benchmark/e1_arena/betrayal.toml`, `configs/benchmark/e1_arena/full.toml`, `configs/benchmark/cvc/local_smoke.toml` | pending benchmark analysis |
@@ -57,7 +57,9 @@ Stable raw tables include:
 - `deployment_dissociation_summary.csv`
 - `partner_choice_summary.csv`
 - `phenotype_validation_summary.csv`
-- `betrayal_phase_summary.csv` when switch events are present
+- `betrayal_phase_summary.csv`,
+  `betrayal_misdeployment_summary.csv`, and
+  `betrayal_reallocation_summary.csv` when switch events are present
 
 The standalone post-hoc analysis remains available:
 

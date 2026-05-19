@@ -18,6 +18,7 @@ from analysis.metrics import (
     betrayal_latency_summary,
     betrayal_misdeployment_summary,
     betrayal_phase_summary,
+    betrayal_reallocation_summary,
     betrayal_trajectory,
     deployment_dissociation_summary,
     final_round_summary,
@@ -121,6 +122,7 @@ def main(argv: list[str] | None = None) -> int:
         betrayal_latencies = betrayal_latency_summary(results, max_encounters=10)
         betrayal_traj = betrayal_trajectory(results, max_encounters=10)
         betrayal_misdeployment = betrayal_misdeployment_summary(results, window=10)
+        betrayal_reallocation = betrayal_reallocation_summary(results)
 
         post_switch_5.to_csv(output_dir / "betrayal_post_switch_window_1_5.csv", index=False)
         post_switch_10.to_csv(output_dir / "betrayal_post_switch_window_1_10.csv", index=False)
@@ -129,6 +131,7 @@ def main(argv: list[str] | None = None) -> int:
         betrayal_latencies.to_csv(output_dir / "betrayal_detection_latency.csv", index=False)
         betrayal_traj.to_csv(output_dir / "betrayal_trajectories.csv", index=False)
         betrayal_misdeployment.to_csv(output_dir / "betrayal_misdeployment_summary.csv", index=False)
+        betrayal_reallocation.to_csv(output_dir / "betrayal_reallocation_summary.csv", index=False)
 
     summary_path = output_dir / "statistics_summary.txt"
     movement_lines = []

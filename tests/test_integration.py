@@ -71,6 +71,7 @@ def test_betrayal_metrics_and_analysis_outputs(tmp_path):
     assert (output_dir / "betrayal_post_switch_window_1_5.csv").exists()
     assert (output_dir / "betrayal_post_switch_window_1_10.csv").exists()
     assert (output_dir / "betrayal_detection_latency.csv").exists()
+    assert (output_dir / "betrayal_reallocation_summary.csv").exists()
 
 
 def test_verbose_stage_stream_emits_progress_without_changing_results(tiny_spec, capsys):

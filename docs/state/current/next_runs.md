@@ -18,33 +18,43 @@ git diff --check
 
 The May 18, 2026 H0-H5 queue completed and is interpreted in
 `docs/results/current.md`. Follow-up analysis added partner-level H1 and
-overconfident-wrong-belief H3 reports. The commands below remain the canonical
-full queue, but the immediate next research action is narrower: confirm the
-strongest H0/H1/H2/H4 evidence at higher replication, then repair or split the
-H3 stress readout.
+overconfident-wrong-belief H3 reports. The May 19, 2026
+`betrayal_reallocation` follow-up also completed and is recorded as a small H3
+pilot, not promoted to the same evidential level as the May H0-H5 queue.
 
-## Recommended Confirmation Queue
+There is no immediate experiment queue. The recommended next action is write-up
+stabilization: consolidate the results narrative and keep H3 framed as adaptive
+reallocation plus misdeployment risk. Optional higher-replication H1 and H3
+split confirmation can wait until the story is stable.
 
-### 1. Confirm Open-Regime Affect, H1 Model Fitness, and Deployment
+## Optional Confirmation Queue
+
+### 1. Higher-Rep Open-Regime Affect, H1 Model Fitness, and Deployment
 
 ```bash
 python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name confirm_open_model_deployment --workers 12
 ```
 
-### 2. Confirm Social Choice
+### 2. Higher-Rep Social Choice
 
 ```bash
 python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name confirm_social_choice --workers 12
 ```
 
-### 3. H3 Follow-Up Before Claim Promotion
+### 3. Optional H3 Split Confirmation
 
-Before relaunching H3 as confirmation, split the readout into post-switch
-action deployment, partner reallocation/avoidance, return latency, and
-overconfident wrong-belief deployment. The May 18 results show that affect can
-lower entropy while increasing post-switch wrong-type and overconfident-wrong
-rates, so the current H3 design should be treated as a boundary-condition result
-rather than a clean pass.
+The small follow-up below already ran as
+`results/h3_reallocation_followup_20260519/`. Re-run at higher replication only
+if H3 split-readout confirmation is needed after write-up stabilization.
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation.toml --output-dir results --batch-name h3_reallocation_followup --workers 3
+```
+
+## Canonical Full Queue
+
+The commands below remain the canonical H0-H5 queue for a fresh full rerun.
+They are not the immediate next action.
 
 ### 1. H0 Openness Gate
 

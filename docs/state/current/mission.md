@@ -1,8 +1,9 @@
 # Current Mission
 
-Re-ground affect_aif around official `inferactively-pymdp==1.0.0`, trust-task
-wrappers, external affective precision tracking, canonical script-driven
-experiments, and docs/state steering.
+Stabilize the current H0-H5 evidence narrative on the official
+`inferactively-pymdp==1.0.0` runtime, with docs/state steering kept aligned to
+the supported trust-task wrappers, external affective precision tracking, and
+canonical script-driven experiments.
 
 ## Scope
 
@@ -14,6 +15,8 @@ experiments, and docs/state steering.
 - Preserve the Hesp-extension behavior-card spine in
   `docs/theory/hypotheses.md`.
 - Keep current docs aligned with the supported H0-H5 experiment surface.
+- Treat the May 19 H3 reallocation run as a small follow-up pilot rather than
+  promoted confirmation evidence.
 
 ## Constraints
 
@@ -23,14 +26,17 @@ experiments, and docs/state steering.
 - Do not add orchestration or deployment scripts to this repo; use Mango for
   remote VM, sync, and merge flows.
 - Re-run the verification gate in `docs/state/current/next_runs.md` immediately
-  before scheduling full experiment reruns.
+  before scheduling any further full experiment reruns.
 
 ## Completion State
 
-- The active runtime cutover targets official `inferactively-pymdp==1.0.0` plus
-  project-owned trust-task wrappers and external affective precision tracking.
-- The next research action is the H0-H5 experiment queue in
-  `docs/state/current/next_runs.md` after the focused verification gate passes.
+- The active runtime cutover is complete for official
+  `inferactively-pymdp==1.0.0` plus project-owned trust-task wrappers and
+  external affective precision tracking.
+- The May 18 H0-H5 queue is complete and interpreted in
+  `docs/results/current.md`.
+- The next research action is write-up stabilization. Further H1/H3
+  split-readout confirmation is optional, not the immediate queue.
 
 ## Stop Conditions
 

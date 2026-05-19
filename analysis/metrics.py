@@ -829,6 +829,90 @@ def betrayal_misdeployment_summary(
     return pd.DataFrame(rows)
 
 
+def betrayal_reallocation_summary(
+    results: pd.DataFrame,
+    max_decisions: int | None = None,
+) -> pd.DataFrame:
+    """Summarize avoidance, return latency, and payoff conditional on re-encounter."""
+
+    frame = results.copy()
+    if frame.empty or not has_switch_events(frame):
+        return pd.DataFrame()
+    frame["_variant_sort"] = frame["variant_id"].apply(_variant_sort_key)
+    frame = frame.sort_values(["_variant_sort", "seed", "round"]).drop(columns="_variant_sort")
+    if "scheduled_switch_partner_ids" in frame.columns:
+        frame["scheduled_switch_partner_ids"] = frame["scheduled_switch_partner_ids"].apply(_scheduled_switch_targets)
+    else:
+        frame["scheduled_switch_partner_ids"] = [[] for _ in range(len(frame))]
+    if "scheduled_stance_switch_partner_ids" in frame.columns:
+        frame["scheduled_stance_switch_partner_ids"] = frame["scheduled_stance_switch_partner_ids"].apply(
+            _scheduled_switch_targets
+        )
+    else:
+        frame["scheduled_stance_switch_partner_ids"] = [[] for _ in range(len(frame))]
+
+    scheduled_type_map = _build_scheduled_switch_map(frame, "scheduled_switch_partner_ids", "scheduled_type")
+    scheduled_stance_map = _build_scheduled_switch_map(frame, "scheduled_stance_switch_partner_ids", "scheduled_stance")
+    observed_map = _build_observed_switch_map(frame)
+    event_keys = sorted(
+        set(scheduled_type_map) | set(scheduled_stance_map) | set(observed_map),
+        key=lambda key: (_variant_sort_key(key[0]), key[1], key[2]),
+    )
+    if not event_keys:
+        return pd.DataFrame()
+
+    selector_column = "selected_partner" if "selected_partner" in frame.columns else "partner_idx"
+    rows: list[dict] = []
+    for key in event_keys:
+        variant_id, seed, partner_idx = key
+        run_frame = frame[(frame["variant_id"] == variant_id) & (frame["seed"].astype(int) == int(seed))]
+        run_frame = run_frame.sort_values("round")
+        switch_rounds = _switch_rounds_for_partner(key, scheduled_type_map, scheduled_stance_map, observed_map)
+        for event_idx, (switch_round, switch_kind) in enumerate(switch_rounds):
+            post_switch = run_frame[run_frame["round"] >= int(switch_round)].copy()
+            if max_decisions is not None:
+                post_switch = post_switch.head(int(max_decisions))
+            selected = (
+                post_switch[selector_column].astype(float) == float(partner_idx)
+                if selector_column in post_switch.columns and not post_switch.empty
+                else pd.Series(False, index=post_switch.index)
+            )
+            reencounters = post_switch[selected].copy()
+            first_positions = np.flatnonzero(selected.to_numpy(dtype=bool))
+            first_position = int(first_positions[0]) if first_positions.size else None
+            first_round = int(reencounters["round"].iloc[0]) if not reencounters.empty else None
+            post_switch_decisions = int(len(post_switch))
+            rows.append(
+                {
+                    "variant_id": str(variant_id),
+                    "seed": int(seed),
+                    "partner_idx": int(partner_idx),
+                    "switch_event_idx": int(event_idx),
+                    "switch_round": int(switch_round),
+                    "switch_kind": str(switch_kind),
+                    "post_switch_decisions": post_switch_decisions,
+                    "reencounters": int(len(reencounters)),
+                    "returned_to_partner": bool(not reencounters.empty),
+                    "decisions_to_first_reencounter": float(first_position) if first_position is not None else np.nan,
+                    "rounds_to_first_reencounter": (
+                        float(first_round - int(switch_round)) if first_round is not None else np.nan
+                    ),
+                    "reencounter_selection_rate": (
+                        float(len(reencounters) / post_switch_decisions) if post_switch_decisions else np.nan
+                    ),
+                    "mean_payoff_on_reencounter": (
+                        float(reencounters["payoff"].mean()) if not reencounters.empty else np.nan
+                    ),
+                    "mean_q_pi_entropy_on_reencounter": (
+                        float(reencounters["q_pi_entropy"].mean())
+                        if "q_pi_entropy" in reencounters.columns and not reencounters.empty
+                        else np.nan
+                    ),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 def post_switch_variant_comparison(results: pd.DataFrame, windows: tuple[int, ...] = (5, 10)) -> pd.DataFrame:
     """Compare paired variants in post-switch windows.
 

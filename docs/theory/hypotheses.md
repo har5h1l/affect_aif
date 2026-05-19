@@ -111,17 +111,26 @@ partner pools create model mismatch and policy uncertainty.
 
 **Expected behavior:** After a betrayal or hostile stance switch, the affective
 agent should show a prediction-error spike, precision drop for the affected
-partner, faster policy change, and faster recovery or reallocation.
+partner, faster policy change, and either faster recovery/reallocation or a
+measurable boundary-condition failure when precision sharpens the wrong
+post-switch model.
 
 **Primary measures:** post-switch windows, surprise spike, partner-specific
 precision reaction time, recovery latency, post-switch payoff, partner
-reallocation, and belief recalibration.
+reallocation, return latency to the switched partner, payoff conditional on
+re-encounter, low-entropy wrong action/belief rates, and belief recalibration.
 
 **Pass pattern:** Affect advantage is larger around switch windows than in
-stable windows.
+stable windows, either as better post-switch action deployment or as better
+avoidance/reallocation with safer conditional payoff when the agent returns to
+the switched partner.
 
-**Failure pattern:** Affect effects are not amplified by volatility, or whole-run
-and post-switch effects are both flat.
+**Boundary-condition pattern:** Affect lowers entropy but increases wrong-type,
+wrong-action, or low-entropy bad-outcome rates after a switch. This means the
+precision channel is active but misdeploying under volatility.
+
+**Failure pattern:** Affect effects are not amplified by volatility, and the
+recovery/reallocation plus misdeployment readouts are all flat.
 
 ## H4: Social Choice
 

@@ -8,6 +8,7 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
     betrayal_misdeployment_summary,
     betrayal_phase_summary,
+    betrayal_reallocation_summary,
     deployment_dissociation_summary,
     final_round_summary,
     model_fitness_correlation_summary,
@@ -269,6 +270,53 @@ def test_betrayal_misdeployment_summary_flags_low_entropy_bad_payoff_after_switc
     assert row["selected_partner_rate"] == 2 / 3
 
 
+def test_betrayal_reallocation_summary_reports_return_and_no_return_events():
+    rows = []
+    for variant_id, selected_partners in [
+        ("affect", [0, 1, 1, 1, 0, 2]),
+        ("no_affect", [0, 1, 1, 2, 2, 2]),
+    ]:
+        for round_idx, selected_partner in enumerate(selected_partners, start=1):
+            rows.append(
+                {
+                    "variant_id": variant_id,
+                    "seed": 0,
+                    "round": round_idx,
+                    "partner_idx": selected_partner,
+                    "payoff": 10.0 + round_idx if selected_partner == 0 else 1.0,
+                    "q_pi_entropy": 0.5 * round_idx,
+                    "selected_partner": selected_partner,
+                    "selected_action": 1,
+                    "scheduled_stance_switch_partner_ids": [0] if round_idx == 3 else [],
+                    "scheduled_switch_partner_ids": [],
+                    "type_switched": False,
+                    "stance_switched": False,
+                    "switch_kind": "scheduled_stance" if round_idx == 3 else "",
+                    "inferred_type_correct": 1.0,
+                    "inferred_stance_correct": 1.0,
+                    "inferred_joint_correct": 1.0,
+                }
+            )
+
+    summary = betrayal_reallocation_summary(pd.DataFrame(rows))
+
+    affect = summary.loc[summary["variant_id"] == "affect"].iloc[0]
+    assert bool(affect["returned_to_partner"]) is True
+    assert affect["post_switch_decisions"] == 4
+    assert affect["reencounters"] == 1
+    assert affect["decisions_to_first_reencounter"] == 2
+    assert affect["rounds_to_first_reencounter"] == 2
+    assert affect["mean_payoff_on_reencounter"] == 15.0
+    assert affect["reencounter_selection_rate"] == 0.25
+
+    no_affect = summary.loc[summary["variant_id"] == "no_affect"].iloc[0]
+    assert bool(no_affect["returned_to_partner"]) is False
+    assert no_affect["post_switch_decisions"] == 4
+    assert no_affect["reencounters"] == 0
+    assert pd.isna(no_affect["decisions_to_first_reencounter"])
+    assert no_affect["reencounter_selection_rate"] == 0.0
+
+
 def test_analysis_cli_writes_model_fitness_and_misdeployment_reports(tmp_path):
     rows = []
     for round_idx in range(1, 7):
@@ -310,6 +358,7 @@ def test_analysis_cli_writes_model_fitness_and_misdeployment_reports(tmp_path):
     assert (output_dir / "partner_model_fitness_summary.csv").exists()
     assert (output_dir / "model_fitness_correlation_summary.csv").exists()
     assert (output_dir / "betrayal_misdeployment_summary.csv").exists()
+    assert (output_dir / "betrayal_reallocation_summary.csv").exists()
 
 
 def test_phenotype_validation_summary_includes_dynamics_and_behavior():

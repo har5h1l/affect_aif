@@ -195,8 +195,16 @@ Partner actions are observed with 10% noise (cooperation misread as defection an
 Two of the four partners are secretly correlated — partner C copies partner B's action with 90% probability. This tests whether affective signals can detect structural relationships: the agent should notice that its model of C is suspiciously well-predicted by its model of B, signaling coalition structure. This variant connects to the BMR/structure learning direction.
 
 **Variant E: Betrayal stress test**
-Use agent-chosen partners, disable stochastic type switches (`p_switch = 0`), seed a clearly cooperative partner at the start of the episode, then force a scheduled switch from `cooperator` to `exploiter` mid-episode. The key readout is payoff, action choice, and inferred-type accuracy in the first 5-10 encounters after the betrayal event. This is the cleanest way to separate precision tracking from reward averaging, because the partner's past reward history remains attractive while the predictive model becomes sharply wrong.
-The repository now treats this as the primary diagnostic benchmark for variant comparison because it is the most direct test of whether per-partner beta dynamics do computational work beyond cached value.
+Use agent-chosen partners, disable stochastic type switches (`p_switch = 0`),
+seed a clearly cooperative/trusting partner at the start of the episode, then
+force a scheduled hostile stance switch mid-episode. The key readouts are
+post-switch action deployment, partner avoidance/reallocation, return latency,
+payoff conditional on re-encounter, and low-entropy wrong-belief or wrong-action
+deployment. Whole-run payoff remains a downstream diagnostic rather than the
+stress-response claim by itself.
+The repository now treats this as the primary diagnostic benchmark for whether
+per-partner beta dynamics do computational work beyond cached value and where
+that work can become maladaptive under volatility.
 
 ---
 
@@ -296,7 +304,8 @@ should amplify affect's behavioral role.
 
 **Expected behavior:** Around a hostile switch, the affective agent should show a
 surprise spike, precision drop for the affected partner, faster policy change,
-and faster recovery or reallocation.
+and either faster recovery/reallocation or a diagnosable misdeployment boundary
+condition when precision sharpens a wrong post-switch model.
 
 **Primary metrics:**
 - post-switch payoff windows
@@ -304,10 +313,13 @@ and faster recovery or reallocation.
 - partner-specific precision reaction time
 - recovery latency
 - partner reallocation
+- return latency to the switched partner
+- payoff conditional on re-encounter
+- low-entropy wrong action or wrong-belief deployment
 - belief recalibration
 
-**Failure mode:** Affect effects are not amplified by volatility, or whole-run
-and post-switch effects are both flat.
+**Failure mode:** Affect effects are not amplified by volatility across both
+recovery/reallocation readouts and misdeployment readouts.
 
 ### H4: Social Choice
 
@@ -405,7 +417,8 @@ alone.
 
 **Behavior analyses**:
 - H3: use pre-switch, acute post-switch, and post-acute tail phase summaries,
-  post-switch windows, and recovery latencies; whole-run payoff is a downstream
+  post-switch windows, return/reallocation summaries, recovery latencies, and
+  low-entropy wrong-deployment summaries; whole-run payoff is a downstream
   diagnostic, not the stress-response claim by itself
 - H4: model partner selection as a function of precision and expected value;
   flat payoff can still accompany meaningful approach, avoidance, or probing
