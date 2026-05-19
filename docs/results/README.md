@@ -35,3 +35,8 @@ supported architecture. See `docs/results/current.md` for the scorecard and
 raw row-level result CSVs remain on the Mango server because the completed
 outputs are large; compact analysis artifacts are mirrored locally under
 `results/`.
+
+The May 19, 2026 H3 reallocation follow-up is recorded as a small pilot. It
+updates the H3 interpretation by adding cautious reallocation and conditional
+return evidence, but it should not be promoted to the same evidential level as
+the May 18 H0-H5 queue without higher-replication confirmation.
