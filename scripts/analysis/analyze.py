@@ -21,6 +21,7 @@ from analysis.metrics import (
     betrayal_reallocation_summary,
     betrayal_trajectory,
     deployment_dissociation_summary,
+    evidence_effect_summary,
     final_round_summary,
     has_switch_events,
     model_fitness_correlation_summary,
@@ -101,6 +102,7 @@ def main(argv: list[str] | None = None) -> int:
     model_fitness_corr = model_fitness_correlation_summary(results)
     partner_choice = partner_choice_summary(results)
     phenotypes = phenotype_validation_summary(results)
+    evidence_effects = evidence_effect_summary(results)
 
     summary.to_csv(output_dir / "final_round_summary.csv", index=False)
     pairwise.to_csv(output_dir / "pairwise_payoff_tests.csv", index=False)
@@ -113,6 +115,7 @@ def main(argv: list[str] | None = None) -> int:
     model_fitness_corr.to_csv(output_dir / "model_fitness_correlation_summary.csv", index=False)
     partner_choice.to_csv(output_dir / "partner_choice_summary.csv", index=False)
     phenotypes.to_csv(output_dir / "phenotype_validation_summary.csv", index=False)
+    evidence_effects.to_csv(output_dir / "evidence_effect_summary.csv", index=False)
 
     if switch_events_present:
         post_switch_5 = post_switch_window_summary(results, window=5)

@@ -10,6 +10,7 @@ from analysis.metrics import (
     betrayal_phase_summary,
     betrayal_reallocation_summary,
     deployment_dissociation_summary,
+    evidence_effect_summary,
     final_round_summary,
     model_fitness_correlation_summary,
     partner_choice_summary,
@@ -317,6 +318,67 @@ def test_betrayal_reallocation_summary_reports_return_and_no_return_events():
     assert no_affect["reencounter_selection_rate"] == 0.0
 
 
+def test_evidence_effect_summary_reports_h1_and_h3_split_readouts():
+    rows = []
+    for seed in [0, 1, 2]:
+        for variant_id, beta_values, selected_after, payoff_after in [
+            ("affect", [0.5, 2.0, 0.67], [1, 1, 0], [1.0, 1.0, 10.0]),
+            ("no_affect", [float("nan"), float("nan"), float("nan")], [0, 0, 1], [7.0, 7.0, 1.0]),
+        ]:
+            for round_idx in range(1, 7):
+                after_switch_idx = max(round_idx - 4, 0)
+                selected_partner = selected_after[after_switch_idx] if round_idx >= 4 else 0
+                payoff = payoff_after[after_switch_idx] if round_idx >= 4 else 3.0
+                rows.append(
+                    {
+                        "variant_id": variant_id,
+                        "seed": seed,
+                        "round": round_idx,
+                        "partner_idx": selected_partner,
+                        "true_partner_type": "cooperator",
+                        "payoff": payoff,
+                        "q_pi_entropy": (0.2 if variant_id == "affect" else 0.8) + 0.01 * seed,
+                        "mean_abs_step_efe": 1.0,
+                        "planning_cost": 1.0,
+                        "planning_cost_ratio": 1.0,
+                        "selected_partner": selected_partner,
+                        "selected_action": 1,
+                        "betas": beta_values,
+                        "prediction_errors": [0.1, 0.8, 0.2],
+                        "reward_avgs": [1.0, 5.0, 5.0],
+                        "scheduled_stance_switch_partner_ids": [0] if round_idx == 4 else [],
+                        "scheduled_switch_partner_ids": [],
+                        "type_switched": False,
+                        "stance_switched": False,
+                        "switch_kind": "scheduled_stance" if round_idx == 4 else "",
+                        "inferred_type_correct": 1.0,
+                        "inferred_stance_correct": 1.0,
+                        "inferred_joint_correct": 1.0,
+                    }
+                )
+
+    summary = evidence_effect_summary(pd.DataFrame(rows), bootstrap_iterations=50, random_seed=0)
+
+    final_entropy = summary.loc[
+        (summary["readout"] == "final") & (summary["metric"] == "mean_q_pi_entropy")
+    ].iloc[0]
+    assert final_entropy["treatment_variant"] == "affect"
+    assert final_entropy["reference_variant"] == "no_affect"
+    assert final_entropy["difference"] < 0
+    assert pd.notna(final_entropy["bootstrap_ci_low"])
+    assert pd.notna(final_entropy["cohen_d"])
+
+    h1 = summary.loc[summary["readout"] == "model_fitness"].iloc[0]
+    assert h1["metric"] == "abs_corr_precision_surprise_minus_reward"
+    assert h1["treatment_mean"] > 0
+
+    reallocation = summary.loc[
+        (summary["readout"] == "betrayal_reallocation")
+        & (summary["metric"] == "mean_payoff_on_reencounter")
+    ].iloc[0]
+    assert reallocation["difference"] > 0
+
+
 def test_analysis_cli_writes_model_fitness_and_misdeployment_reports(tmp_path):
     rows = []
     for round_idx in range(1, 7):
@@ -359,6 +421,7 @@ def test_analysis_cli_writes_model_fitness_and_misdeployment_reports(tmp_path):
     assert (output_dir / "model_fitness_correlation_summary.csv").exists()
     assert (output_dir / "betrayal_misdeployment_summary.csv").exists()
     assert (output_dir / "betrayal_reallocation_summary.csv").exists()
+    assert (output_dir / "evidence_effect_summary.csv").exists()
 
 
 def test_phenotype_validation_summary_includes_dynamics_and_behavior():

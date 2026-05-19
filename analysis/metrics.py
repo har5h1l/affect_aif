@@ -690,6 +690,234 @@ def _safe_corr(left: pd.Series, right: pd.Series) -> float:
     return float(pair["left"].corr(pair["right"]))
 
 
+def _cohen_d(left: pd.Series, right: pd.Series) -> float:
+    left_values = pd.Series(left, dtype=float).replace([np.inf, -np.inf], np.nan).dropna()
+    right_values = pd.Series(right, dtype=float).replace([np.inf, -np.inf], np.nan).dropna()
+    if len(left_values) < 2 or len(right_values) < 2:
+        return np.nan
+    pooled_var = (
+        ((len(left_values) - 1) * left_values.var(ddof=1))
+        + ((len(right_values) - 1) * right_values.var(ddof=1))
+    ) / (len(left_values) + len(right_values) - 2)
+    if not np.isfinite(pooled_var) or np.isclose(pooled_var, 0.0):
+        return np.nan
+    return float((left_values.mean() - right_values.mean()) / np.sqrt(pooled_var))
+
+
+def _bootstrap_mean_ci(
+    values: pd.Series,
+    iterations: int = 1000,
+    random_seed: int = 0,
+) -> tuple[float, float]:
+    clean = pd.Series(values, dtype=float).replace([np.inf, -np.inf], np.nan).dropna().to_numpy(dtype=float)
+    if clean.size == 0 or iterations <= 0:
+        return (np.nan, np.nan)
+    rng = np.random.default_rng(int(random_seed))
+    samples = rng.choice(clean, size=(int(iterations), clean.size), replace=True)
+    means = samples.mean(axis=1)
+    return (float(np.quantile(means, 0.025)), float(np.quantile(means, 0.975)))
+
+
+def _bootstrap_difference_ci(
+    left: pd.Series,
+    right: pd.Series,
+    iterations: int = 1000,
+    random_seed: int = 0,
+) -> tuple[float, float]:
+    left_values = pd.Series(left, dtype=float).replace([np.inf, -np.inf], np.nan).dropna().to_numpy(dtype=float)
+    right_values = pd.Series(right, dtype=float).replace([np.inf, -np.inf], np.nan).dropna().to_numpy(dtype=float)
+    if left_values.size == 0 or right_values.size == 0 or iterations <= 0:
+        return (np.nan, np.nan)
+    rng = np.random.default_rng(int(random_seed))
+    left_samples = rng.choice(left_values, size=(int(iterations), left_values.size), replace=True)
+    right_samples = rng.choice(right_values, size=(int(iterations), right_values.size), replace=True)
+    diffs = left_samples.mean(axis=1) - right_samples.mean(axis=1)
+    return (float(np.quantile(diffs, 0.025)), float(np.quantile(diffs, 0.975)))
+
+
+def _effect_row(
+    *,
+    readout: str,
+    metric: str,
+    treatment_variant: str,
+    treatment_values: pd.Series,
+    reference_variant: str | None = None,
+    reference_values: pd.Series | None = None,
+    bootstrap_iterations: int = 1000,
+    random_seed: int = 0,
+) -> dict:
+    treatment_clean = pd.Series(treatment_values, dtype=float).replace([np.inf, -np.inf], np.nan).dropna()
+    reference_clean = (
+        pd.Series(reference_values, dtype=float).replace([np.inf, -np.inf], np.nan).dropna()
+        if reference_values is not None
+        else pd.Series(dtype=float)
+    )
+    treatment_mean = float(treatment_clean.mean()) if not treatment_clean.empty else np.nan
+    reference_mean = float(reference_clean.mean()) if not reference_clean.empty else np.nan
+    if reference_values is None:
+        difference = treatment_mean
+        ci_low, ci_high = _bootstrap_mean_ci(treatment_clean, bootstrap_iterations, random_seed)
+        cohen_d = np.nan
+        n_reference = 0
+    else:
+        difference = treatment_mean - reference_mean
+        ci_low, ci_high = _bootstrap_difference_ci(
+            treatment_clean,
+            reference_clean,
+            bootstrap_iterations,
+            random_seed,
+        )
+        cohen_d = _cohen_d(treatment_clean, reference_clean)
+        n_reference = int(len(reference_clean))
+    return {
+        "readout": readout,
+        "metric": metric,
+        "treatment_variant": treatment_variant,
+        "reference_variant": reference_variant or "",
+        "treatment_mean": treatment_mean,
+        "reference_mean": reference_mean,
+        "difference": difference,
+        "cohen_d": cohen_d,
+        "bootstrap_ci_low": ci_low,
+        "bootstrap_ci_high": ci_high,
+        "n_treatment": int(len(treatment_clean)),
+        "n_reference": n_reference,
+    }
+
+
+def evidence_effect_summary(
+    results: pd.DataFrame,
+    treatment_variant: str = "affect",
+    reference_variant: str = "no_affect",
+    bootstrap_iterations: int = 1000,
+    random_seed: int = 0,
+) -> pd.DataFrame:
+    """Summarize key write-up effect sizes and bootstrap intervals."""
+
+    if results.empty:
+        return pd.DataFrame()
+    rows: list[dict] = []
+    final = final_round_summary(results)
+    final_metrics = [
+        "total_payoff",
+        "mean_q_pi_entropy",
+        "mean_joint_accuracy",
+        "mean_stance_accuracy",
+    ]
+    for metric in final_metrics:
+        if metric not in final.columns:
+            continue
+        treatment = final.loc[final["variant_id"] == treatment_variant, metric]
+        reference = final.loc[final["variant_id"] == reference_variant, metric]
+        if treatment.empty or reference.empty:
+            continue
+        rows.append(
+            _effect_row(
+                readout="final",
+                metric=metric,
+                treatment_variant=treatment_variant,
+                reference_variant=reference_variant,
+                treatment_values=treatment,
+                reference_values=reference,
+                bootstrap_iterations=bootstrap_iterations,
+                random_seed=random_seed,
+            )
+        )
+
+    partner_fitness = partner_model_fitness_summary(results)
+    if not partner_fitness.empty:
+        for variant_id, group in partner_fitness.groupby("variant_id"):
+            reward_proxy = group["reward_signal_mean"]
+            if reward_proxy.notna().sum() < 3:
+                reward_proxy = group["active_mean_payoff"]
+            seed_rows = []
+            for seed, seed_group in group.groupby("seed"):
+                corr_surprise = _safe_corr(seed_group["precision_mean"], seed_group["surprise_mean"])
+                corr_reward = _safe_corr(seed_group["precision_mean"], reward_proxy.loc[seed_group.index])
+                if np.isfinite(corr_surprise) and np.isfinite(corr_reward):
+                    seed_rows.append(
+                        {
+                            "seed": int(seed),
+                            "dominance": abs(corr_surprise) - abs(corr_reward),
+                        }
+                    )
+            seed_frame = pd.DataFrame(seed_rows)
+            if seed_frame.empty:
+                corr_surprise = _safe_corr(group["precision_mean"], group["surprise_mean"])
+                corr_reward = _safe_corr(group["precision_mean"], reward_proxy)
+                if np.isfinite(corr_surprise) and np.isfinite(corr_reward):
+                    seed_frame = pd.DataFrame(
+                        [{"seed": -1, "dominance": abs(corr_surprise) - abs(corr_reward)}]
+                    )
+            if not seed_frame.empty:
+                rows.append(
+                    _effect_row(
+                        readout="model_fitness",
+                        metric="abs_corr_precision_surprise_minus_reward",
+                        treatment_variant=str(variant_id),
+                        treatment_values=seed_frame["dominance"],
+                        bootstrap_iterations=bootstrap_iterations,
+                        random_seed=random_seed,
+                    )
+                )
+
+    if has_switch_events(results):
+        reallocation = betrayal_reallocation_summary(results)
+        for metric in [
+            "reencounters",
+            "decisions_to_first_reencounter",
+            "reencounter_selection_rate",
+            "mean_payoff_on_reencounter",
+            "mean_q_pi_entropy_on_reencounter",
+        ]:
+            if reallocation.empty or metric not in reallocation.columns:
+                continue
+            treatment = reallocation.loc[reallocation["variant_id"] == treatment_variant, metric]
+            reference = reallocation.loc[reallocation["variant_id"] == reference_variant, metric]
+            if treatment.empty or reference.empty:
+                continue
+            rows.append(
+                _effect_row(
+                    readout="betrayal_reallocation",
+                    metric=metric,
+                    treatment_variant=treatment_variant,
+                    reference_variant=reference_variant,
+                    treatment_values=treatment,
+                    reference_values=reference,
+                    bootstrap_iterations=bootstrap_iterations,
+                    random_seed=random_seed,
+                )
+            )
+
+        misdeployment = betrayal_misdeployment_summary(results)
+        for metric in [
+            "wrong_type_rate",
+            "bad_payoff_rate",
+            "low_entropy_rate",
+            "overconfident_wrong_type_rate",
+            "overconfident_bad_payoff_rate",
+        ]:
+            if misdeployment.empty or metric not in misdeployment.columns:
+                continue
+            treatment = misdeployment.loc[misdeployment["variant_id"] == treatment_variant, metric]
+            reference = misdeployment.loc[misdeployment["variant_id"] == reference_variant, metric]
+            if treatment.empty or reference.empty:
+                continue
+            rows.append(
+                _effect_row(
+                    readout="betrayal_misdeployment",
+                    metric=metric,
+                    treatment_variant=treatment_variant,
+                    reference_variant=reference_variant,
+                    treatment_values=treatment,
+                    reference_values=reference,
+                    bootstrap_iterations=bootstrap_iterations,
+                    random_seed=random_seed,
+                )
+            )
+    return pd.DataFrame(rows)
+
+
 def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
     """Correlate partner precision with surprise and reward for H1."""
 

@@ -27,6 +27,12 @@ stabilization: consolidate the results narrative and keep H3 framed as adaptive
 reallocation plus misdeployment risk. Optional higher-replication H1 and H3
 split confirmation can wait until the story is stable.
 
+Concrete H1/H3 confirmation command:
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 12
+```
+
 ## Optional Confirmation Queue
 
 ### 1. Higher-Rep Open-Regime Affect, H1 Model Fitness, and Deployment
@@ -48,7 +54,7 @@ The small follow-up below already ran as
 if H3 split-readout confirmation is needed after write-up stabilization.
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation.toml --output-dir results --batch-name h3_reallocation_followup --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 12
 ```
 
 ## Canonical Full Queue
