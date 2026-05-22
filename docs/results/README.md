@@ -5,14 +5,13 @@ This directory records interpreted result status and provenance.
 - `current.md`: current evidence status for the active architecture
 - `runs/`: per-run provenance notes for completed current-architecture runs
 
-## Artifact hygiene
+## Artifact Hygiene
 
-May 2026: bulk `results/` outputs were cleared locally. `mango cloud sync push
-affect_aif` rsyncs to `server:~/repos/affect_aif` but does not delete
-**remote-only** paths under `results/`; after a local purge, remove orphan batch
-dirs on the server over SSH (or they linger). If rsync updated files while git
-was behind, run `git fetch` and `git reset --hard origin/master` on the server so
-HEAD matches GitHub. Re-run experiments before refreshing interpreted numbers.
+Large row-level result files are not assumed to be present in every checkout.
+Current interpreted claims should point to compact provenance notes under this
+directory and to reproducible config paths. If a local or remote results mirror
+is pruned, keep the documentation trail intact and rerun experiments before
+refreshing interpreted numbers.
 
 ## Evidence Contract
 
@@ -31,10 +30,10 @@ Partial runs are not current evidence.
 
 The May 18, 2026 H0-H5 queue is now the current interpreted evidence for the
 supported architecture. See `docs/results/current.md` for the scorecard and
-`docs/results/runs/2026-05-18-h0-h5-rerun.md` for run-level details. The full
-raw row-level result CSVs remain on the Mango server because the completed
-outputs are large; compact analysis artifacts are mirrored locally under
-`results/`.
+`docs/results/runs/2026-05-18-h0-h5-rerun.md` for run-level details. Full
+row-level CSVs may live outside lightweight checkouts because completed outputs
+are large; compact analysis artifacts and provenance notes should be kept with
+the repository when practical.
 
 The May 19, 2026 H3 reallocation follow-up is recorded as a small pilot. The
 May 2026 H1/H3 split confirmation is now the targeted follow-up evidence: it

@@ -130,7 +130,7 @@ After each trial with partner $k$, the external beta tracker is updated from the
 
 ```
 # After observing partner k's action at time t:
-prediction = E[o_t | current posterior over s^(2)_k]
+prediction = E[o_t | current posterior over partner-local type x stance]
 actual = o_t
 surprise_k = 1 - prediction[actual]               # unsigned surprise of what happened
 sq_surprise = surprise_k^2
@@ -465,53 +465,57 @@ Key figures should mirror the behavior cards:
 7. **Perturbation phenotypes**: beta/precision mean, variance, autocorrelation,
    and reaction time before payoff interpretation.
 
-### 6.5 Implementation Timeline (Completed)
+### 6.5 Implementation Timeline
 
-These phases describe the original build sequence. For future research phases (theory tightening, variational beta, clinical sensitivity, model comparison, richer tasks, human data), see the Phase Roadmap in Section 8.5.
+These phases describe the original build sequence and current documentation
+phase. Older phase labels are historical; current empirical claims use the H0-H5
+behavior cards and the provenance recorded in `docs/results/`.
 
 | Phase | Tasks | Duration | Status |
 |---|---|---|---|
-| Build 1 | Implement basic multi-partner POMDP in the repository's JAX-first stack | 2 weeks | Done |
+| Build 1 | Implement basic multi-partner trust-task POMDP | 2 weeks | Done |
 | Build 2 | Implement affective state and partner-local precision modulation | 1-2 weeks | Done |
-| Build 3 | Implement lesion and reward-comparison variants | 1 week | Done |
-| Build 4 | Run primary simulations (Variant A, explicit variants, 100 replications) | 1 week | Done |
-| Build 5 | Analysis and visualization of primary results | 1 week | Done |
-| Build 6 | Run Variants B, C, D | 2 weeks | Partial (B, E done) |
-| Build 7 | Sensitivity analyses and parameter sweeps | 1 week | Partial (horizon sweep done) |
-| Build 8 | Write-up | 2-3 weeks | In progress |
+| Build 3 | Implement lesion, no-affect, and clinical-like perturbation variants | 1 week | Done |
+| Build 4 | Cut over to official `inferactively-pymdp==1.0.0` and apashea-aligned controls | 1 week | Done |
+| Build 5 | Run current H0-H5 queue and targeted H1/H3 confirmation | 1 week | Done |
+| Build 6 | Analysis and result documentation | 1 week | Done |
+| Build 7 | Write-up stabilization | 2-3 weeks | Current phase |
 
 ### 6.6 Current Empirical Status
 
-Current evidence requires completed runs on the native pymdp,
-apashea-aligned, factorized-control architecture, with provenance recorded under
-`docs/results/`. Partial outputs can motivate experiment design, but completed
-current-architecture runs are required for current evidence.
+Current evidence comes from completed runs on the native pymdp,
+apashea-aligned, factorized-control architecture, with provenance recorded in
+`docs/results/current.md` and `docs/results/runs/`.
 
-Current pre-run scorecard:
+Current scorecard:
 
 | Card | Current reading | Status |
 |---|---|---|
-| H0 Openness Gate | Must be checked before interpreting any payoff or choice null; saturated binary regimes can hide precision effects. | Verification rerun pending |
-| H1 Model Fitness | Needs a stable-good/stable-bad/volatile/random test that dissociates predictability from reward. | Config exists; rerun pending |
-| H2 Deployment | Lesion tests should focus on open policy regimes and compare beliefs against policy/behavior shifts. | Config exists; rerun pending |
-| H3 Stress Response | Betrayal should be read in post-switch windows, not whole-run payoff alone. | Config exists; rerun pending |
-| H4 Social Choice | Agent-choice mode is likely the clearest behavioral readout; choice/reweighting is primary and payoff is secondary. | Config exists; rerun pending |
-| H5 Perturbation Phenotypes | Clinical-like variants are exploratory; beta/precision dynamics must separate before behavior is interpreted. | Configs exist; rerun pending |
+| H0 Openness Gate | Affect has little room in shallow binary settings, but lowers entropy and can improve payoff in graded choice. Open policy space is necessary but not sufficient; graded betrayal shows lower entropy with worse payoff. | Supported with caveat |
+| H1 Model Fitness | The 30-seed confirmation shows precision tracks surprise more strongly than payoff, while total payoff remains flat-to-worse for affect. | Supported |
+| H2 Deployment | In the open graded-choice regime, affect and lesion/no-affect have similar belief accuracy while affect changes entropy and payoff. | Supported |
+| H3 Stress Response | The confirmation shows lower entropy and fewer returns to the switched partner, but worse whole-run payoff and no confirmed conditional-return advantage. | Boundary condition confirmed |
+| H4 Social Choice | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. | Supported behaviorally |
+| H5 Perturbation Phenotypes | Clinical-like variants separate in beta range, entropy, partner selection, and payoff ordering, but five-seed payoff tests are underpowered. | Supported for dynamics |
 
 Interpretation guardrails:
 
 - Do not update result-interpretation docs from new outputs without user
   approval.
 - Interpret behavioral nulls through H0 before weakening a mechanism claim.
+- Treat H3 as a stress boundary-condition result, not as a clean affective
+  recovery win.
 
-For the current run queue, see `docs/state/current/next_runs.md`.
+There is no immediate run queue. The recommended next action is write-up
+stabilization; optional confirmation commands remain in
+`docs/state/current/next_runs.md`.
 
 ---
 
 ## 7. Outcome Interpretation Rules
 
-Until current-architecture reruns are complete, this section records how to
-interpret future outcomes rather than claiming resolved results.
+This section records how to interpret current and future outcomes without
+collapsing the mechanism into a simple payoff story.
 
 ### 7.1 Positive Mechanism Pattern
 
@@ -574,7 +578,7 @@ Initialize agents with no prior knowledge and simulate the full developmental tr
 Vary model parameters to probe clinically relevant behavioral signatures:
 - **Alexithymia** ($\alpha \to 0$): attenuated affective charge, near-flat beta trajectories
 - **Borderline patterns** (high $\alpha$ + low beta persistence): intense, volatile affective states
-- **Depression** (low $\beta_0$): chronically low precision estimates, reduced engagement
+- **Depression** (high initial beta): chronically low policy precision, reduced engagement
 - **Anxiety**: increased epistemic drive weighting when $\beta_k$ is low (uncertainty triggers excessive information-seeking)
 
 **Critical analysis warning**: These are sensitivity analyses, not a unified clinical framework. The parameter-to-phenotype mappings are illustrative and should not be interpreted as validated clinical models. The configs exist for H5 Perturbation Phenotypes, but moving from sensitivity analysis to clinical modeling requires: (a) fitting to human behavioral data, (b) formal model comparison showing the affective model outperforms simpler alternatives on clinical populations, and (c) demonstrating that the parameter variations are identifiable from behavioral data alone rather than being degenerate with other model parameters.
@@ -590,9 +594,9 @@ H0 precision-channel tests.
 
 | Phase | Description | Dependencies | Status |
 |---|---|---|---|
-| Phase 3 | Theory tightening: formalize the H0-H5 behavior cards and expected behavior | Current docs | In progress |
-| Phase 4 | Discrete beta: supported task-local `DiscreteBetaState` | Phase 3 | Supported native helper |
-| Phase 5 | Clinical sensitivity: rerun perturbation phenotypes after H0-H5 are checked | H0-H5 reruns | Planned |
-| Phase 6 | Model comparison: predictive log score comparison outside the main H0-H5 spine | Phase 4 | Future work |
-| Phase 7 | Richer tasks: graded action spaces, noisy observations, structure learning | Phase 3 | Maintained configs; rerun pending |
-| Phase 8 | Human data: fit to behavioral data, estimate individual-difference parameters | Phases 5-7 | Planned |
+| Phase 3 | Theory tightening: formalize the H0-H5 behavior cards and expected behavior | Current docs | Done |
+| Phase 4 | Discrete beta: supported task-local `DiscreteBetaState` | Phase 3 | Done |
+| Phase 5 | Current H0-H5 run queue and H1/H3 confirmation | Phase 4 | Done |
+| Phase 6 | Write-up stabilization and public documentation cleanup | Phase 5 | Current |
+| Phase 7 | Reviewer-driven robustness checks, richer tasks, or global-beta ablation | Phase 6 | Optional future |
+| Phase 8 | Human data: fit behavioral data and estimate individual-difference parameters | Stable manuscript | Future |

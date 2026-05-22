@@ -2,8 +2,8 @@
 
 ## Code/Doc Alignment
 
-- `docs/theory.md` is the mechanism-level description.
-- `docs/experiment.md` is the task and hypothesis-level description.
+- `docs/theory/theory.md` is the mechanism-level description.
+- `docs/experiment/design.md` is the task and hypothesis-level description.
 - This file records implementation-specific choices that are easy to misread from the theory alone.
 - When code changes any of these behaviors, update the docs in the same patch.
 
@@ -55,7 +55,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 ## Trust vs Affect
 
 - `use_parameter_learning=True` enables standard Dirichlet updates to the likelihood model after each observed interaction.
-- This is an implementation of ordinary parameter learning over the observation model, not a separate trust variable matching the $\tau_k$ notation in [docs/theory.md](/Users/harshilshah/Desktop/Active%20Inference/affect_aif/docs/theory.md).
+- This is an implementation of ordinary parameter learning over the observation model, not a separate trust variable matching older archived $\tau_k$ notation.
 - In other words:
   - learned likelihood parameters capture how the agent updates beliefs from evidence
   - affective `beta_k` captures the slow per-partner summary used for partner-local policy precision
@@ -120,7 +120,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 - `affect_aif.analysis.visualization.build_run_gifs(...)` generates one GIF per `(variant_id, seed)` run from an in-memory or reloaded results table.
 - `scripts/experiment/run.py --make-gifs` calls that helper after writing the results file. `scripts/analysis/visualize.py` provides the same capability for an existing CSV/parquet file.
-- The animation dashboard is intentionally task-facing rather than publication-facing. Each frame shows the current round, partner roster, selected/observed actions, payoff, inferred vs true type, cumulative payoff trajectory, and the per-partner beta or reward-average signal when that signal exists.
+- The animation dashboard is intentionally task-facing rather than publication-facing. Each frame shows the current round, partner roster, selected/observed actions, payoff, inferred vs true type, cumulative payoff trajectory, and the per-partner beta signal when that signal exists.
 - Non-affective variants render a disabled signal panel instead of fabricating beta values.
 
 ## Parallelism
@@ -176,7 +176,10 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   events even when the agent does not re-encounter the switched partner in the
   requested window. Those rows use `encounters = 0` and NaN outcome metrics so
   avoidance/no-return remains visible instead of being silently dropped.
-- If the betrayal outputs remain flat, treat that as a mechanism null result: beta and terminal-signal dynamics did not move enough to separate precision tracking from reward averaging under the current task and hyperparameters.
+- If betrayal outputs remain flat in future variants, treat that as a mechanism
+  null for that stress regime: beta and policy dynamics did not move enough to
+  separate affective deployment from the no-affect or lesioned baseline under
+  the current task and hyperparameters.
 
 ## Future Directions
 
