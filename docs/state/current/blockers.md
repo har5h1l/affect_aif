@@ -4,8 +4,8 @@
 
 - No immediate blocker. Current steering is to pause experiments and consolidate
   the results narrative.
-- Optional later decision: whether to run higher-replication H1 and H3
-  split-readout confirmation after the write-up narrative stabilizes.
+- Optional later decision: whether any paper/reviewer-specific stress-regime
+  robustness check is needed after write-up stabilization.
 
 ## Current Interpretation Guardrails
 

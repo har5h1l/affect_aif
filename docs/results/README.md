@@ -36,7 +36,7 @@ raw row-level result CSVs remain on the Mango server because the completed
 outputs are large; compact analysis artifacts are mirrored locally under
 `results/`.
 
-The May 19, 2026 H3 reallocation follow-up is recorded as a small pilot. It
-updates the H3 interpretation by adding cautious reallocation and conditional
-return evidence, but it should not be promoted to the same evidential level as
-the May 18 H0-H5 queue without higher-replication confirmation.
+The May 19, 2026 H3 reallocation follow-up is recorded as a small pilot. The
+May 2026 H1/H3 split confirmation is now the targeted follow-up evidence: it
+promotes H1 as a confirmed model-fitness readout and keeps H3 as a stress
+boundary condition rather than an affective recovery win.

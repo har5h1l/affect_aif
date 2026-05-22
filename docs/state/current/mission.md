@@ -15,8 +15,8 @@ canonical script-driven experiments.
 - Preserve the Hesp-extension behavior-card spine in
   `docs/theory/hypotheses.md`.
 - Keep current docs aligned with the supported H0-H5 experiment surface.
-- Treat the May 19 H3 reallocation run as a small follow-up pilot rather than
-  promoted confirmation evidence.
+- Treat the May 19 H3 reallocation run as a small follow-up pilot. Use the
+  completed H1/H3 confirmation batch as the current targeted follow-up evidence.
 
 ## Constraints
 
@@ -35,8 +35,9 @@ canonical script-driven experiments.
   external affective precision tracking.
 - The May 18 H0-H5 queue is complete and interpreted in
   `docs/results/current.md`.
-- The next research action is write-up stabilization. Further H1/H3
-  split-readout confirmation is optional, not the immediate queue.
+- The next research action is write-up stabilization. The H1/H3 split-readout
+  confirmation has completed and should be used to stabilize the paper
+  narrative rather than to motivate another immediate experiment.
 
 ## Stop Conditions
 
