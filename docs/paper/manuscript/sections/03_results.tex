@@ -1,45 +1,39 @@
 \section{Results}
 
-\subsection{Partner-local precision tracks model fitness}
+\subsection{Model fitness is separable from reward}
 
-The H1 reliability-versus-reward confirmation is the central mechanism result. Across 30 seeds per variant and 200 rounds per seed, affective precision did not improve payoff: total payoff was $534.6$ for the precision-modulated agent and $542.1$ for the no-affect baseline, with a mean difference of $-7.53$ and bootstrap CI $[-27.88,13.82]$. This rules out a simple reward-booster interpretation.
+The H1 reliability-versus-reward confirmation is the central mechanism result. The reward-cache interpretation predicts that precision should track payoff at least as strongly as predictive reliability. The model-fitness interpretation predicts the opposite: a predictable partner can support high precision even when interacting with that partner is not rewarding.
 
-Despite the absence of a payoff advantage, the beta-derived precision signal tracked predictive reliability more strongly than reward. Across partner-seed units, $|\mathrm{corr}(\precision,\mathrm{surprise})|=0.701$, while $|\mathrm{corr}(\precision,\mathrm{payoff})|=0.419$. The corresponding seed-level reliability-over-reward summary was $+0.096$ with bootstrap CI $[0.027,0.164]$. This dissociation supports the model-fitness interpretation: the affective signal estimates confidence in the partner model, not partner value.
+Across 30 seeds per variant and 200 rounds per seed, affective precision did not improve payoff: total payoff was $534.6$ for the precision-modulated agent and $542.1$ for the no-affect baseline, with a mean difference of $-7.53$ and bootstrap CI $[-27.88,13.82]$. The absence of a payoff advantage is useful because it makes the reliability analysis a cleaner test of what the signal tracks.
+
+The beta-derived precision signal tracked predictive reliability more strongly than reward. Across partner-seed units, $|\mathrm{corr}(\precision,\mathrm{surprise})|=0.701$, while $|\mathrm{corr}(\precision,\mathrm{payoff})|=0.419$. The corresponding seed-level reliability-over-reward summary was $+0.096$ with bootstrap CI $[0.027,0.164]$. This dissociation supports the model-fitness interpretation: the affective signal estimates confidence in the partner model, not partner value.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.72\linewidth]{fig_model_fitness_beta_reward_divergence.png}
+\includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.png}
 \caption{Model-fitness readout. In the 30-seed H1 confirmation, partner-local precision tracks predictive surprise more strongly than realized payoff, while precision modulation has no total-payoff advantage.}
 \label{fig:model-fitness}
 \end{figure}
 
 \subsection{Precision gates deployment in open policy regimes}
 
-In the open graded regime, using five seeds per variant, partner-local precision changed behavior in the predicted direction. The precision-modulated agent reached total payoff $1884.6$ with mean policy entropy $7.94$, while the no-affect or tracked-only baseline reached $1859.4$ with entropy $8.80$. The difference was therefore $+25.2$ payoff and $-0.86$ entropy for precision modulation.
+Partner-local precision can only change behavior when several policies remain live enough for precision to matter. In a saturated regime, the best policy may already dominate the posterior; changing softmax precision then changes little. In the open graded regime, using five seeds per variant and 200 rounds per seed, partner-local precision changed behavior in the predicted direction. The precision-modulated agent reached total payoff $1884.6$ with mean policy entropy $7.94$, while the no-affect or tracked-only baseline reached $1859.4$ with entropy $8.80$. The difference was therefore $+25.2$ payoff and $-0.86$ entropy for precision modulation.
 
 The tracked-only lesion clarifies the deployment claim. In the same open regime, the precision-modulated agent had joint belief accuracy $0.336$ and stance accuracy $0.816$, while the tracked-only lesion had joint accuracy $0.339$ and stance accuracy $0.855$. Belief readouts were therefore similar or slightly favored the lesion, but policy entropy and payoff favored the precision pathway. This is the intended deployment dissociation: the signal changes how beliefs are acted upon rather than simply improving belief accuracy.
 
 \subsection{Partner choice changes before payoff}
 
-In the H4 partner-choice run, payoff was nearly flat across five seeds: $393.6$ for precision modulation versus $393.2$ for no affect. The behavioral distribution nevertheless changed. Mean policy entropy was $3.99$ with precision modulation and $4.83$ without it. Selection shifted toward the first partner ($0.348$ to $0.366$) and away from the third partner ($0.162$ to $0.138$). This supports the social-choice prediction in a bounded way: partner-local precision can shape approach and avoidance before total payoff becomes an informative readout.
+The H4 partner-choice regime asks whether partner-local precision shapes approach, avoidance, and probing. Payoff is a blunt readout here because partner selection can change before total payoff separates. Across five seeds and 200 rounds per seed, payoff was nearly flat: $393.6$ for precision modulation versus $393.2$ for no affect. The policy distribution nevertheless changed. Mean policy entropy was $3.99$ with precision modulation and $4.83$ without it. Selection shifted toward the first partner ($0.348$ to $0.366$) and away from the third partner ($0.162$ to $0.138$). This supports the social-choice prediction in a bounded way: partner-local precision can shape approach and avoidance before total payoff becomes an informative readout.
 
 \subsection{Abrupt betrayal exposes a boundary condition}
 
-The H3 confirmation shows that the same precision channel can be harmful under abrupt social volatility. Across 30 seeds per variant and 120 rounds per seed, the precision-modulated agent obtained lower whole-run payoff than no-affect or tracked-only baselines: $1136.1$ versus $1172.1$, with mean difference $-36.08$, bootstrap CI $[-63.65,-10.93]$, and pairwise $p=0.0169$. Policy entropy was lower under precision modulation ($8.38$ versus $8.74$), showing that the channel was behaviorally active.
+The H3 confirmation shows that the same precision channel can be harmful under abrupt social volatility. A partner's stance changes suddenly, creating a mismatch between the agent's accumulated model and the partner's new behavior. Across 30 seeds per variant and 120 rounds per seed, the precision-modulated agent obtained lower whole-run payoff than no-affect or tracked-only baselines: $1136.1$ versus $1172.1$, with mean difference $-36.08$, bootstrap CI $[-63.65,-10.93]$, and pairwise $p=0.0169$. Policy entropy was lower under precision modulation ($8.38$ versus $8.74$), showing that the channel was behaviorally active.
 
-Post-switch readouts explain the failure mode. Precision modulation reduced mean reencounters with the switched partner ($4.4$ versus $6.1$) and lowered reencounter selection rate ($0.049$ versus $0.067$), but it did not improve the safety of returning: payoff on reencounter was $8.76$ versus $8.91$, and wrong-type rate on reencounter was $0.237$ versus $0.165$. Abrupt betrayal therefore does not show affective recovery. It shows precision-driven misdeployment: decisions become sharper before the partner model has recalibrated enough.
+Post-switch readouts explain why this is not affective recovery. Precision modulation reduced mean reencounters with the switched partner ($4.4$ versus $6.1$) and lowered reencounter selection rate ($0.049$ versus $0.067$), but it did not improve the safety of returning: payoff on reencounter was $8.76$ versus $8.91$, and wrong-type rate on reencounter was $0.237$ versus $0.165$. The agent returned less often, but when it returned, it was not safer or better calibrated. Abrupt betrayal therefore shows precision-driven misdeployment: decisions become sharper before the partner model has recalibrated enough.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.48\linewidth}
-\includegraphics[width=\linewidth]{fig_betrayal_confirm_cumulative_payoff.png}
-\caption{Cumulative payoff}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.48\linewidth}
-\includegraphics[width=\linewidth]{fig_betrayal_signal_trajectories.png}
-\caption{Beta trajectory}
-\end{subfigure}
+\includegraphics[width=\linewidth]{fig_betrayal_boundary_summary.png}
 \caption{Betrayal boundary condition. Abrupt betrayal makes partner-local precision behaviorally visible, but not safer: precision modulation lowers entropy and changes reallocation while reducing whole-run payoff.}
 \label{fig:betrayal-boundary}
 \end{figure}

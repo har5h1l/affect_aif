@@ -2,17 +2,25 @@
 
 We evaluate partner-specific affective precision in a repeated trust game derived from the economic trust-game tradition \cite{Berg1995Trust,KingCasas2005Trust}. A focal active-inference agent interacts with four partners. Each partner has a latent type (cooperator, reciprocator, exploiter, or random) and a latent stance toward the agent (trusting, neutral, or hostile). The agent observes the partner's action and its own payoff, and it selects either a binary action or a graded investment depending on the regime.
 
-For each partner $k$, the focal agent maintains a separate discrete active-inference model over partner type, partner stance, and own-action bookkeeping. State and policy inference use the standard discrete active-inference machinery implemented in \texttt{pymdp} \cite{Friston2017ProcessTheory,DaCosta2020DiscreteSynthesis,Heins2022Pymdp}. Partner choice is handled by evaluating partner-local policies and selecting among the resulting candidate interactions.
+For each partner $k$, the focal agent maintains a separate discrete active-inference model over partner type, partner stance, and own-action bookkeeping:
+\begin{equation}
+s_{t,k} = \left(s^{\mathrm{type}}_{t,k}, s^{\mathrm{stance}}_{t,k}, s^{\mathrm{own}}_{t}\right).
+\end{equation}
+The model has two observation modalities, partner action and own payoff. Partner action depends on latent type and stance. Payoff depends on the focal action and the partner response, and is represented as an observation likelihood rather than an external reward cache. State and policy inference use the standard discrete active-inference machinery implemented in \texttt{pymdp} \cite{Friston2017ProcessTheory,DaCosta2020DiscreteSynthesis,Heins2022Pymdp}. The trust-task code constructs the matrices, manages the partner bank, applies the external beta tracker, and logs readouts; it is not a custom replacement for the active-inference engine.
+
+Partner choice is handled by evaluating partner-local policies and selecting among the resulting candidate interactions. In assigned-partner regimes, the agent chooses only the trust-game action. In partner-choice regimes, it first chooses whom to engage and then chooses an action toward that partner. This separates local social inference from the higher-level question of approach, avoidance, or probing.
 
 The affective component is external to the POMDP state space. After interacting with partner $k$, the agent computes partner-action surprise
 \begin{equation}
 \epsilon_k = 1 - P(o^{\mathrm{action}}_k = o^{\mathrm{obs}}_k \mid q(s_{\mathrm{type}},s_{\mathrm{stance}})).
 \end{equation}
+This is a bounded prediction-error proxy in $[0,1]$, not logarithmic surprisal. It is computed from partner action rather than payoff because partner action is the most direct readout of type-by-stance predictive fit.
+
 The tracker converts this into affective charge
 \begin{equation}
 \phi_k = \alpha(\sigma_0^2 - \epsilon_k^2),
 \end{equation}
-following the interpretation of affect as expected action precision and model fitness \cite{Hesp2021DeeplyFeltAffect}. A categorical beta posterior $q(\beta_k)$ is updated over discrete beta levels. The expected beta then modulates policy precision for future choices involving that partner:
+following the interpretation of affect as expected action precision and model fitness \cite{Hesp2021DeeplyFeltAffect}. Positive charge means the partner model predicted better than the baseline variance $\sigma_0^2$; negative charge means it predicted worse. A categorical beta posterior $q(\beta_k)$ is updated over discrete beta levels $\{0.5,0.67,1.0,1.5,2.0\}$. The expected beta then modulates policy precision for future choices involving that partner:
 \begin{equation}
 \gamma_k = \gamma_{\mathrm{base}} / \mathbb{E}_{q(\beta_k)}[\beta_k].
 \end{equation}
