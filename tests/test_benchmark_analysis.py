@@ -28,22 +28,12 @@ def test_shared_summary_aggregates_episode_reward_per_backend():
                 "reward": 2.0,
                 "schema_version": 2,
             },
-            {
-                "backend": "cvc_local",
-                "scenario": "machina_1",
-                "agent_name": "b",
-                "seed": 1,
-                "episode_id": "c-1",
-                "step": 100,
-                "reward": 7.0,
-                "schema_version": 2,
-            },
         ]
     )
 
     summary = compute_shared_summary(results)
 
-    assert set(summary["backend"]) == {"trust", "cvc_local"}
+    assert set(summary["backend"]) == {"trust"}
     assert "mean_episode_reward" in summary.columns
 
 
@@ -65,17 +55,6 @@ def test_report_mentions_backend_specific_sections():
                 "partner_action": 0,
                 "inferred_type_correct": True,
             },
-            {
-                "backend": "cvc_local",
-                "scenario": "machina_1",
-                "agent_name": "b",
-                "seed": 1,
-                "episode_id": "c-1",
-                "step": 100,
-                "reward": 7.0,
-                "schema_version": 2,
-                "team_reward_mean": 7.0,
-            },
         ]
     )
 
@@ -83,4 +62,3 @@ def test_report_mentions_backend_specific_sections():
 
     assert "Shared Summary" in report
     assert "Trust Backend" in report
-    assert "CvC Backend" in report

@@ -10,7 +10,7 @@ N agents interact in a repeated trust game with turn-taking. Each round, one foc
 
 Precision tracking reads social prediction errors and modulates policy precision, without being part of the POMDP state space. This matches Hesp et al.'s hierarchical approach where precision is inferred from inference dynamics rather than from a dedicated sensory channel.
 
-**Version history**: v1 had F=4, M=3 with non-standard payoff. v2 dropped payoff (M=2). v3 restores payoff as a proper modality via s_own factor and re-parameterizes beta to match Hesp's convention. v4 removes beta from POMDP state space and intero from observations; precision tracking becomes an external module operating on inference dynamics. The current implementation also follows the apashea-aligned factorized-control convention described in `docs/theory/apashea_alignment.md`.
+**Version history**: v1 had F=4, M=3 with non-standard payoff. v2 dropped payoff (M=2). v3 restores payoff as a proper modality via s_own factor and re-parameterizes beta to match Hesp's convention. v4 removes beta from POMDP state space and intero from observations; precision tracking becomes an external module operating on inference dynamics. The current implementation also follows the factorized-control convention from the reference trust notebook.
 
 ---
 
@@ -45,27 +45,32 @@ Joint state space per partner: 4 types x 3 stances x 2 own_action = 24 states.
 
 ## 4. Control Factors
 
-The current binary trust-game implementation uses apashea-aligned factorized
-controls instead of one flat social-action control during planning.
+The current trust-game implementation uses factorized controls
+inside each partner-local `pymdp.Agent`. Partner choice is handled outside the
+partner-local POMDP by evaluating candidate policies for each partner in
+`tasks.trust.runtime.select_decision(...)`.
 
 | Factor | Symbol | Actions | Controls |
 |--------|--------|---------|----------|
-| Partner choice | `pi_partner` | current partner only in random mode; N partners in agent-choice mode | which partner receives the executed interaction |
-| Stance control | `pi_stance` | cooperate, defect (2) | `s_stance` transitions via action-dependent B |
-| Own action | `pi_own` | cooperate, defect (2) | `s_own` deterministic update and realized payoff |
+| Partner choice | external selector | current partner in random mode; N partners in agent-choice mode | which partner receives the executed interaction |
+| Stance control | `pi_stance` | action/investment levels | `s_stance` transitions via action-dependent B |
+| Own action | `pi_own` | action/investment levels | `s_own` deterministic update and realized payoff |
 
-For random-partner binary games, the instantaneous control shape is `[1, 2, 2]`.
-For agent-choice binary games, the instantaneous control shape is
-`[num_partners, 2, 2]`. Environment action encoding follows
-`partner * 4 + stance * 2 + own`.
+For both random and agent-choice runs, the partner-local instantaneous control
+shape is `[1, num_social_actions, num_social_actions]`. Binary games have
+`num_social_actions = 2`; graded games use the configured number of investment
+levels. In agent-choice mode, the runtime loops over partners, applies the
+candidate partner's `gamma_k`, and then encodes the executed environment action
+as `(partner, stance_action, own_action)`.
 
 Payoff and outcome updates use the executed `own` action. Rollout uses the
 stance-control column for generative stance transitions during planning, while
 partner-observed stance dynamics use the executed own action. This keeps the
-POMDP matrices apashea-aligned while using official `pymdp` as the runtime dependency.
+POMDP matrices compatible with the reference notebook while using official
+`pymdp` as the runtime dependency.
 
-Graded trust games keep a single flat social-action control over investment
-levels where that representation is the active task semantics.
+The older single-flat-action graded control path is no longer the supported
+trust-game semantics.
 
 ---
 
@@ -114,7 +119,7 @@ Example: P(o_payoff=5 | own=defect, type=cooperator, stance=trusting) = P(partne
 
 ### B[0]: P(s_type' | s_type)
 
-Shape: `(4, 4, 2)` — replicated identically across actions (uncontrollable).
+Shape: `(4, 4, 1)` in the current factorized template. Type is uncontrollable.
 
 Near-identity with small stochastic drift:
 ```
@@ -126,7 +131,7 @@ P(switch to each other type) = p_switch / 3 ~ 0.017
 
 ### B[1]: P(s_stance' | s_stance, pi_social)
 
-Shape: `(3, 3, 2)` — **action-dependent.** This is the core mechanism that makes planning depth structurally informative.
+Shape: `(3, 3, num_social_actions)` — **action-dependent.** This is the core mechanism that makes planning depth structurally informative.
 
 **For pi_social = cooperate** (action index 0):
 ```
@@ -152,7 +157,7 @@ Key dynamics:
 
 ### B[2]: P(s_own' | s_own, pi_social)
 
-Shape: `(2, 2, 2)` — **deterministic on the control.**
+Shape: `(num_social_actions, num_social_actions, num_social_actions)` — **deterministic on the control.**
 
 **For pi_social = cooperate** (action index 0):
 ```
@@ -345,7 +350,7 @@ Each round:
 
 ## 14. Summary: What to Build
 
-1. **Standard pymdp model**: A[0] (2x4x3), A[1] (4x2x4x3), B[0] (4x4x2), B[1] (3x3x2), B[2] (2x2x2), C[0-1], D[0-2], E.
+1. **Standard pymdp model**: A[0] (2x4x3xN), A[1] (payoff_levels x 4 x 3 x N), B[0] (4x4x1), B[1] (3x3xN), B[2] (NxNxN), C[0-1], D[0-2], E, where `N = num_social_actions`.
 2. **External precision tracker**: Per-partner categorical over 5 beta levels, updated via affective charge pseudo-likelihood (Section 10). Runs after each trial observation, before policy selection.
 3. **Separated inference channels**: Type × stance inference via A[0]+A[1] in the POMDP. Beta inference via external tracker. Beta is not a POMDP factor and does not enter A/B; computationally the tracker is downstream of belief updates (reads prediction errors) and upstream of policy selection (modulates gamma).
 4. **Per-partner gamma**: `gamma_k = gamma_base / E[beta_k]` in the policy softmax.

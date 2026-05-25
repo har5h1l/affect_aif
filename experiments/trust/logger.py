@@ -9,9 +9,10 @@ import pandas as pd
 class MetricLogger:
     """Track round-by-round metrics for a single episode."""
 
-    def __init__(self, num_rounds: int, num_partners: int):
+    def __init__(self, num_rounds: int, num_partners: int, *, log_policy_traces: bool = False):
         self.num_rounds = int(num_rounds)
         self.num_partners = int(num_partners)
+        self.log_policy_traces = bool(log_policy_traces)
         self.records: list[dict] = []
 
     def log_round(
@@ -109,8 +110,8 @@ class MetricLogger:
             "terminal_signal": _to_float_list(terminal_signal),
             "prediction_errors": _to_float_list(prediction_errors),
             "reward_avgs": _to_float_list(_metric("reward_avgs", default_partner_vector)),
-            "G": _to_float_list(_metric("G", [])),
-            "q_pi": _to_float_list(_metric("q_pi", [])),
+            "G": _to_float_list(_metric("G", [])) if self.log_policy_traces else [],
+            "q_pi": _to_float_list(_metric("q_pi", [])) if self.log_policy_traces else [],
             "best_policy_step_costs": _to_float_list(_metric("best_policy_step_costs", [])),
             "predictive_log_lik": float(agent_metrics.get("predictive_log_lik", float("nan"))),
             "partner_beliefs": partner_beliefs.tolist(),

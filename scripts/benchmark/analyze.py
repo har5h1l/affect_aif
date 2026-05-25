@@ -12,7 +12,6 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from benchmarks.core.comparison import (
-    compute_cvc_summary,
     compute_shared_summary,
     compute_trust_summary,
     format_comparison_report,
@@ -31,14 +30,11 @@ def main():
 
     shared = compute_shared_summary(results)
     trust = compute_trust_summary(results)
-    cvc = compute_cvc_summary(results)
     report = format_comparison_report(results)
 
     shared.to_csv(output_dir / "benchmark_shared_summary.csv", index=False)
     if not trust.empty:
         trust.to_csv(output_dir / "benchmark_trust_summary.csv", index=False)
-    if not cvc.empty:
-        cvc.to_csv(output_dir / "benchmark_cvc_summary.csv", index=False)
     (output_dir / "benchmark_report.txt").write_text(report)
 
     print(report)

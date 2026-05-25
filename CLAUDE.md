@@ -4,7 +4,7 @@ This file provides guidance to Claude Code when working with this repository.
 
 ## Overview
 
-JAX-first multi-agent active inference simulations testing whether per-partner metacognitive precision tracking provides orthogonal value beyond explicit planning depth in a volatile trust game. Uses a phased research workflow where theory, code, experiments, and documentation co-evolve.
+pymdp-backed active-inference trust-game simulations testing whether per-partner metacognitive precision tracking provides orthogonal value beyond explicit planning depth in volatile social settings. Uses a phased research workflow where theory, code, experiments, and documentation co-evolve.
 
 ## Quick Reference
 
@@ -12,7 +12,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 |------|---------|
 | Run all tests | `python -m pytest tests/ -v` |
 | Run single test | `python -m pytest tests/test_core.py::test_name -v` |
-| Run experiment | `python scripts/experiment/run.py --config experiments/trust/hypotheses/<hypothesis>/<experiment>.toml --output-dir results --batch-name <name>` |
+| Run experiment | `python scripts/experiment/run.py --config configs/trust/hypotheses/<hypothesis>/<experiment>.toml --output-dir results --batch-name <name>` |
 | Analyze results | `python scripts/analysis/analyze.py --results <path>/results.csv --output-dir <path>/figures` |
 | Preliminary check | `python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv` |
 | Generate GIFs | `python scripts/analysis/visualize.py --results <path>/results.csv --output-dir <path>/gifs` |
@@ -28,8 +28,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 | `experiments/multifocal/` | Multi-focal trust experiment config and runtime |
 | `analysis/` | Metrics, statistics, plotting, hypothesis tests |
 | `benchmarks/core/` | Shared benchmark runner, config, metrics, and comparison helpers |
-| `benchmarks/cvc/` | Experimental CvC backend, policies, packaging, and Observatory client |
-| `configs/` | External benchmark and CvC TOML configurations |
+| `configs/` | Trust and trust-benchmark TOML configurations |
 | `scripts/` | CLI entry points (thin orchestrators) |
 | `tests/` | Unit and integration tests |
 | `docs/` | Theory, experiment design, implementation, results tracking, roadmap |
@@ -43,7 +42,7 @@ JAX-first multi-agent active inference simulations testing whether per-partner m
 | POMDP model specification | `docs/theory/pomdp_spec.md` |
 | Environment, implementation | `docs/design/implementation.md` |
 | Setup or usage | `README.md` |
-| Current results and hypothesis status | `docs/experiment/results.md` |
+| Current results and hypothesis status | `docs/results/current.md`, `docs/results/README.md` |
 | Phase roadmap and what's next | `docs/future/roadmap.md` |
 | Experimental design and variants | `docs/experiment/design.md` |
 | Partner stance redesign | `docs/design/partner_stance.md` |
@@ -76,7 +75,7 @@ When operating autonomously (all permissions granted), follow this protocol. The
 Every session begins with orientation:
 
 1. Read `docs/future/roadmap.md` to identify the current phase and its tasks
-2. Read `docs/experiment/results.md` to understand where the last session left off
+2. Read `docs/results/current.md` to understand where the last session left off
 3. Read `docs/experiment/design.md` for experimental design context
 4. Check git status for uncommitted work from a prior session
 5. Run `python -m pytest tests/ -v` to confirm the codebase is clean
@@ -101,7 +100,7 @@ orient -> plan -> code -> test -> experiment -> analyze -> interpret -> document
 
 **Analyze**: Run `scripts/analysis/analyze.py` on the results. Read the output summary, hypothesis tests, and movement tables.
 
-**Interpret**: Compare results against the hypothesis scorecard in `docs/experiment/results.md`. Does this change the story? If yes, flag it clearly.
+**Interpret**: Compare results against the hypothesis scorecard in `docs/results/current.md`. Does this change the story? If yes, flag it clearly.
 
 **Document**: Update docs to reflect new findings. Follow the documentation map above.
 
@@ -130,7 +129,7 @@ These are absolute rules that never bend:
 4. **Never force-push**: All git operations are local-only unless the user explicitly asks to push
 5. **Never silently rewrite narrative**: If experiment results change the interpretation, flag it to the user before updating docs
 6. **Commit at checkpoints**: After any working code change + passing tests, commit. After any completed experiment + analysis, commit
-7. **Preserve the hypothesis scorecard**: The scorecard in `docs/experiment/results.md` is the ground truth. Update it with evidence, not speculation
+7. **Preserve the hypothesis scorecard**: The scorecard in `docs/results/current.md` is the ground truth. Update it with evidence, not speculation
 8. **Save results incrementally**: When running experiments, use partial saves (e.g., `_partial.csv`) during long runs so that a crash or OOM doesn't lose all progress. Scripts like `run_clinical_incremental.py` and `run_comparison.py` already do this — follow the same pattern for any new experiment scripts
 9. **No orchestration infrastructure in this repo.** Syncing, deployment, conductor scripts, and cloud operations belong in the mango repo only. This repo contains only project code, configs, tests, and results.
 
@@ -151,15 +150,15 @@ STOP and ask the user when:
 |---------|-------------|--------|----------|
 | Smoke test | 3-5 | 50 | Checking code works at all |
 | Exploration | 10 | 100 | Testing a hypothesis direction |
-| Confirmation | 50-100 | 200 | Producing publication-quality results |
-| Clinical sensitivity | 100 | 200 | Parameter sweep across conditions |
+| Confirmation | 30-100 | spec-defined | Producing publication-quality or reviewer-facing results |
+| Clinical sensitivity | 30-100 | spec-defined | Parameter sweep across conditions |
 
 ### Configuration Templates
 
 Trust experiments are configured via TOML specs in
-`experiments/trust/hypotheses/`; multi-focal experiments live in
-`experiments/multifocal/configs/`; external benchmark and CvC configs live as
-TOML under `configs/`. Key trust-spec fields:
+`configs/trust/hypotheses/`; multi-focal experiments live in
+`experiments/multifocal/configs/`; trust-benchmark configs live as TOML under
+`configs/benchmark/`. Key trust-spec fields:
 
 - `[[variants]]`: explicit agent/runtime variants to run
 - `[experiment] replications`: seeds per variant
@@ -172,15 +171,15 @@ TOML under `configs/`. Key trust-spec fields:
 
 ## Project State
 
-`docs/state/` is the steering surface for humans and agents:
+`docs/active/` is the steering surface for humans and agents:
 
-- `docs/state/current/mission.md` — active mission, scope, constraints, and stop conditions
-- `docs/state/current/next_runs.md` — exact experiment queue and run commands
-- `docs/state/current/blockers.md` — unresolved blockers and human decisions
-- `docs/state/decisions/` — settled architecture and experiment decisions
-- `docs/state/handoffs/` — dated handoff snapshots
+- `docs/active/state.md` — active mission, scope, constraints, and stop conditions
+- `docs/active/progress.md` — exact experiment queue and run commands
+- `docs/active/blockers.md` — unresolved blockers and human decisions
+- `docs/decisions/` — settled architecture and experiment decisions
+- `docs/active/handoff.md` — current handoff snapshot
 
-Historical conductor state has been salvaged into `docs/state/` and
+Historical conductor state has been salvaged into `docs/active/` and
 `docs/results/historical_findings.md`; it is not a live repo surface.
 
 ## Mango (Session & Cloud Management)

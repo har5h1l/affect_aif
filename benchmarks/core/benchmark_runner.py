@@ -16,15 +16,8 @@ def _load_trust_backend():
     return TrustBackend
 
 
-def _load_cvc_backend():
-    from benchmarks.cvc.local_backend import CvCLocalBackend
-
-    return CvCLocalBackend
-
-
 BACKEND_REGISTRY = {
     "trust": _load_trust_backend,
-    "cvc_local": _load_cvc_backend,
 }
 
 

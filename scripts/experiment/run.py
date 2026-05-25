@@ -121,7 +121,7 @@ def _serial_single_config_run(args) -> int:
     if spec.experiment.family != "trust":
         raise ValueError(
             "Only trust-family specs are executable through scripts/experiment/run.py; "
-            "use scripts/benchmark/run_cvc.py for benchmark-family specs."
+            "use scripts/benchmark/run.py for benchmark-family specs."
         )
     config_name = spec.experiment.id
     config_dir = batch_dir / spec.hypothesis.id / spec.experiment.id
@@ -165,7 +165,7 @@ def _batch_run(args) -> int:
         if spec.experiment.family != "trust":
             raise ValueError(
                 "Only trust-family specs are executable through scripts/experiment/run.py; "
-                "use scripts/benchmark/run_cvc.py for benchmark-family specs."
+                "use scripts/benchmark/run.py for benchmark-family specs."
             )
     batch_id = args.batch_name or default_batch_id()
     runner = BatchExperimentRunner(

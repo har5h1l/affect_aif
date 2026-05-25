@@ -98,8 +98,8 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - `scripts/analysis/summarize.py`
   - `scripts/analysis/visualize.py`
   - `scripts/analysis/model_comparison.py`
-  - `scripts/benchmark/run_cvc.py`
-  - `scripts/benchmark/package_cvc.py`
+  - `scripts/benchmark/run.py`
+  - ``
   Use the grouped paths above for all supported CLI work.
 
 ## Verbose Execution Tracing
@@ -162,7 +162,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   `pre_switch`, `acute_post_switch`, and `post_acute_tail` encounters for the
   switched partner. This is the primary diagnostic for cases where whole-run
   payoff and immediate recovery move in different directions.
-- The round-level schema now logs the raw per-partner `terminal_signal` used for planning, plus `switch_kind`, `current_partner_switched`, `current_partner_scheduled_switch`, `scheduled_switch_partner_ids`, `active_partner`, `selected_partner`, `selected_action`, `best_policy_idx`, `partner_beliefs`, and `partner_posteriors`.
+- The round-level schema now logs the raw per-partner `terminal_signal` used for planning, plus `switch_kind`, `current_partner_switched`, `current_partner_scheduled_switch`, `current_partner_scheduled_stance_switch`, `scheduled_switch_partner_ids`, `scheduled_stance_switch_partner_ids`, `active_partner`, `selected_partner`, `selected_action`, `best_policy_idx`, `partner_beliefs`, and `partner_posteriors`.
 - Detection latency is defined as encounters after the switch until inferred type becomes correct.
 - Payoff recovery latency is defined as encounters after the switch until payoff reaches at least `1.0`, meaning the agent is no longer taking sucker-level losses under the default matrix.
 - Reallocation summaries are one row per switch event and report post-switch

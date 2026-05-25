@@ -2,20 +2,9 @@
 
 `results/` is reserved for local experiment outputs and analysis artifacts from the supported CLI workflows.
 
-Active local evidence copies are kept at top level. Older pilots, partial
-attempts, and duplicate local batches should be removed from `results/` before
-Mango sync so the server surface contains only the latest promoted or follow-up
-batches per hypothesis family.
-
-Current top-level batches:
-
-- `updated_h0_h5_20260517_w2/`: May 18 promoted H0-H5 analysis artifacts for
-  H0-H4 and most H5 experiments
-- `updated_h0_h5_20260518_remainder/`: May 18 promoted H5 affect-sensitivity
-  remainder
-- `confirm_h0_h1_h2_h4_20260518/`: latest H0/H1/H2/H4 confirmation artifacts
-  when present on the Mango server
-- `h3_reallocation_followup_20260519/`: small May 19 H3 split-readout pilot
+Generated outputs follow the experiment config envelope. Do not create
+`results/paper/`; paper-facing interpretation belongs in `docs/paper/` and
+`docs/results/`.
 
 Supported experiment runs write batch outputs under:
 
@@ -25,7 +14,20 @@ results/<batch_name>/<hypothesis_id>/<experiment_id>/
 
 Use descriptive batch names such as `updated_h0_h5_20260517_w2`,
 `confirm_h0_h1_h2_h4_20260518`, or
-`h3_reallocation_followup_20260519`.
+`h3_precision_sensitivity_20260522`.
+
+Current promoted or follow-up batches:
+
+- `updated_h0_h5_20260517_w2/`: May 18 promoted H0-H5 artifacts for H0-H4 and
+  most H5 experiments.
+- `updated_h0_h5_20260518_remainder/`: May 18 H5 affect-sensitivity
+  remainder.
+- `confirm_h0_h1_h2_h4_20260518/`: latest H0/H1/H2/H4 confirmation artifacts.
+- `confirm_h1_h3_split_20260519/`: targeted 30-seed H1/H3 confirmation.
+- `h3_precision_sensitivity_20260522/`: H3 abrupt/gradual precision-sensitivity
+  follow-up.
+- `h3_reallocation_followup_20260519/`: small H3 split-readout pilot retained
+  as exploratory context.
 
 Typical experiment outputs include:
 

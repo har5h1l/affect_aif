@@ -22,8 +22,6 @@ The following require new implementation and tests before they become runnable
 surface:
 
 - **Variational beta** — a variational auxiliary state would be new code.
-- **CoGames policy bridge** — CvC integration should add a policy class under
-  `benchmarks/cvc/` when that track unfreezes.
 
 ---
 
@@ -54,26 +52,24 @@ The current card order is:
 
 ### 2.1 State Space Factorization
 
-The generative model is best understood as a single hidden-state inference problem plus an auxiliary affective summary:
+The supported trust-game generative model is the `type x stance x own_action`
+POMDP specified in `docs/theory/pomdp_spec.md`.
 
-**Level 1 — Trial State** $s^{(1)}_t$
-The current-round game context is task-given:
-- which partner is currently interacting
-- the partner's action on this trial: {Cooperate, Defect}
+**Partner type** is the partner's latent behavioral category: cooperator,
+reciprocator, exploiter, or random. Type can drift stochastically when
+`p_switch > 0`, and explicit scheduled type switches remain supported only for
+experiments about exogenous type volatility.
 
-This is directly observed in the main experiments (or noisily observed in later variants — see Section 3.3). It is not treated as a latent factor in the shipped binary-action setup.
+**Partner stance** is the partner's disposition toward the focal agent:
+trusting, neutral, or hostile. Stance is hidden, action-dependent, and is the
+supported surface for betrayal-style experiments via `scheduled_stance_switches`.
 
-**Level 2 — Partner Type** $s^{(2)}_k$
-Each partner's latent strategy type, drawn from:
-- **Cooperator**: cooperates with probability 0.9
-- **Reciprocator**: mirrors the agent's previous action with probability 0.85
-- **Exploiter**: cooperates initially (first 3-5 rounds) then defects with probability 0.85
-- **Random**: cooperates with probability 0.5
+**Own action** is a deterministic bookkeeping factor over the action or
+investment level chosen by the focal agent. It lets the payoff modality remain
+a standard pymdp likelihood conditioned on `own_action x type x stance`.
 
-Types are stable within blocks but switch at geometrically-distributed intervals (expected block length ~20 rounds). The agent does not observe type switches directly.
-
-**Level 3 — Affective State** $\beta_k$ (for affective agents only)
-A discrete HESP-style auxiliary state per partner representing the **rate parameter** of expected policy precision. Default levels are `[0.5, 0.67, 1.0, 1.5, 2.0]`, with `\beta_k = 1.0` as the baseline prior. Lower beta means higher expected precision and more decisive policy selection when precision modulation is enabled.
+The affective beta state is not a hidden factor in this POMDP. It is a
+per-partner auxiliary precision tracker outside the generative model.
 
 ### 2.2 Observation Model (A matrix)
 
@@ -83,21 +79,26 @@ Observations consist of:
 
 For the basic version, observations are noise-free — the agent sees exactly what the partner did. A later variant can add observational noise (misreading partner actions) to test whether affective precision also aids robustness to sensory uncertainty.
 
-The A matrix maps hidden states (partner type × context) to observations (partner action × payoff):
-
-$$P(o_t | s^{(1)}_t, s^{(2)}_k) = \text{determined by type-specific cooperation probabilities}$$
+The A matrices map hidden `type x stance x own_action` states to observations:
+partner action is generated from the `type x stance` cooperation table, and
+payoff is generated from `own_action x type x stance` with the partner action
+marginalized through that table.
 
 ### 2.3 Transition Model (B matrix)
 
-**Level 1 transitions**: depend on the agent's action and partner's type.
-
-**Level 2 transitions**: partner types are mostly stable (identity transition with probability 0.95) but switch with probability 0.05 per trial to a uniformly random new type. This creates the volatility that makes the task nontrivial.
+**Type transitions** are mostly stable, with optional stochastic drift:
 
 $$P(s^{(2)}_{k,t+1} | s^{(2)}_{k,t}) = (1 - p_{\text{switch}}) \cdot \mathbb{I}[s' = s] + p_{\text{switch}} \cdot \text{Uniform}(S^{(2)})$$
 
-Important implementation note: this stochastic type switching is separate from the exploiter's internal `switch_round`. `p_switch` governs when a partner changes latent type altogether; `switch_round` only governs when an **exploiter-type** partner changes from its early cooperative phase to its later exploitative phase after repeated interactions.
+**Stance transitions** are action-dependent. Cooperating tends to build or
+repair trust; defecting tends to push stance toward hostile. Scheduled stance
+switches are applied at the start of configured rounds for betrayal tests.
 
-**Level 3 transitions (affective state)**: in the default path, beta updates via a discrete predict-then-correct filter over the HESP beta levels using interoceptive observations derived from surprise.
+**Own-action transitions** are deterministic on the executed own-action control.
+
+**Affective beta transitions** are handled outside the POMDP by a discrete
+predict-then-correct filter over HESP beta levels. The tracker reads partner
+action prediction error and then modulates the next policy precision.
 
 ### 2.4 Preference Model (C matrix)
 
@@ -116,15 +117,18 @@ This creates the standard tension: mutual cooperation is collectively optimal bu
 
 ### 2.5 Policy Space and Planning Horizon
 
-**Actions**: {Cooperate, Defect} per round, for each partner interaction.
+**Actions**: binary games use cooperate/defect; graded games use configured
+investment levels. In both modes, partner-local pymdp policies use factorized
+stance and own-action controls. Agent-choice runs evaluate each partner-local
+agent and perform partner selection in `tasks.trust.runtime.select_decision`.
 
 **Planning horizon**: varies by explicit variant (`planning_horizon`).
 - Deeper planners can evaluate up to 8 steps ahead in benchmark comparisons.
 - Shallow planners use shorter horizons such as 1 or 2 steps.
 
-**Policy evaluation**: official `pymdp.Agent.infer_policies(...)` computes the policy posterior over the task-local policy set built by `tasks.trust.pomdp`. The repository-owned code constructs the matrices and partner-local priors, but policy inference itself is native pymdp rather than a custom rollout engine. For affective runtimes, the external beta tracker sets the active partner's precision before inference as `gamma_k = gamma_base / E[beta_k]`; no separate shallow-EFE multiplier is applied.
+**Policy evaluation**: official `pymdp.Agent.infer_policies(...)` computes the policy posterior over the task-local policy set built by `tasks.trust.pomdp`. The repository-owned code constructs the matrices and partner-local priors, but policy inference itself is native pymdp rather than a custom rollout engine. For affective runtimes, the external beta tracker sets each partner's precision before inference as `gamma_k = gamma_base / E[beta_k]`; no separate shallow-EFE multiplier is applied.
 
-### 2.6 Affective State Update (Level 3 Implementation)
+### 2.6 Affective State Update
 
 After each trial with partner $k$, the external beta tracker is updated from the partner-action prediction error:
 
@@ -397,7 +401,7 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 | Beta persistence | 0.8 | Tridiagonal persistence for the discrete beta posterior; higher values make beta less reactive |
 | Beta levels | `[0.5, 0.67, 1.0, 1.5, 2.0]` | HESP-style inverse-beta support for partner-local precision |
 | Policy precision | `gamma_base / E[beta_k]` | Native pymdp policy precision set before each partner-local policy inference |
-| Replications per variant | 100 | Sufficient for reliable statistics |
+| Replications per variant | Declared per TOML spec | Current evidence uses 5-seed pilots and 30-seed confirmations; 100 remains a future high-power target if needed |
 
 ### 6.3 Analysis Plan
 
@@ -476,7 +480,7 @@ behavior cards and the provenance recorded in `docs/results/`.
 | Build 1 | Implement basic multi-partner trust-task POMDP | 2 weeks | Done |
 | Build 2 | Implement affective state and partner-local precision modulation | 1-2 weeks | Done |
 | Build 3 | Implement lesion, no-affect, and clinical-like perturbation variants | 1 week | Done |
-| Build 4 | Cut over to official `inferactively-pymdp==1.0.0` and apashea-aligned controls | 1 week | Done |
+| Build 4 | Cut over to official `inferactively-pymdp==1.0.0` and factorized controls | 1 week | Done |
 | Build 5 | Run current H0-H5 queue and targeted H1/H3 confirmation | 1 week | Done |
 | Build 6 | Analysis and result documentation | 1 week | Done |
 | Build 7 | Write-up stabilization | 2-3 weeks | Current phase |
@@ -484,7 +488,7 @@ behavior cards and the provenance recorded in `docs/results/`.
 ### 6.6 Current Empirical Status
 
 Current evidence comes from completed runs on the native pymdp,
-apashea-aligned, factorized-control architecture, with provenance recorded in
+factorized-control architecture, with provenance recorded in
 `docs/results/current.md` and `docs/results/runs/`.
 
 Current scorecard:
@@ -508,7 +512,7 @@ Interpretation guardrails:
 
 There is no immediate run queue. The recommended next action is write-up
 stabilization; optional confirmation commands remain in
-`docs/state/current/next_runs.md`.
+`docs/active/progress.md`.
 
 ---
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, cast
@@ -110,6 +111,8 @@ class SweepSpec:
 @dataclass(frozen=True)
 class RuntimeSpec:
     max_policies: int = 4096
+    debug_mode: bool = False
+    log_policy_traces: bool = False
 
 
 @dataclass(frozen=True)
@@ -128,8 +131,6 @@ class BenchmarkSettings:
     agents: tuple[str | dict[str, Any], ...]
     agent_specs: tuple[dict[str, Any], ...]
     trust: dict[str, Any]
-    cvc_local: dict[str, Any]
-    observatory: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)
@@ -172,6 +173,8 @@ class ExpandedRunSpec:
             beta_persistence=self.variant.beta_persistence,
             beta_levels=list(self.variant.beta_levels),
             max_policies=self.runtime.max_policies,
+            debug_mode=self.runtime.debug_mode,
+            log_policy_traces=self.runtime.log_policy_traces,
             num_replications=1,
             random_seed=self.seed,
         )
@@ -372,8 +375,6 @@ def _parse_benchmark(data: dict[str, Any] | None) -> BenchmarkSettings | None:
         agents=tuple(raw.get("agents", ())),
         agent_specs=tuple(dict(item) for item in raw.get("agent_specs", ())),
         trust=dict(raw.get("trust", {})),
-        cvc_local=dict(raw.get("cvc_local", {})),
-        observatory=None if raw.get("observatory") is None else dict(raw["observatory"]),
     )
 
 
@@ -404,11 +405,16 @@ def _parse_sweep(data: dict[str, Any]) -> SweepSpec:
 
 def _parse_analysis(data: dict[str, Any], hypothesis: HypothesisSpec) -> AnalysisSpec:
     normalized = dict(data)
-    normalized.setdefault("primary", f"{hypothesis.id}_{hypothesis.name}")
+    normalized.setdefault("primary", f"{_slugify(hypothesis.id)}_{_slugify(hypothesis.name)}")
     normalized["compare"] = tuple(normalized.get("compare", ()))
     normalized["switch_window"] = tuple(int(item) for item in normalized.get("switch_window", ()))
     normalized["metrics"] = tuple(normalized.get("metrics", ()))
     return AnalysisSpec(**normalized)
+
+
+def _slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", str(value).strip().lower())
+    return slug.strip("_")
 
 
 def _value_slug(value: float | int | str | bool) -> str:

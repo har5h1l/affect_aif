@@ -1,7 +1,7 @@
 # Historical Findings
 
 These findings are preserved as historical context only. They may predate the
-apashea-aligned factorized-control model and should not be compared as current
+factorized-control model and should not be compared as current
 evidence unless explicitly rerun on the current architecture.
 
 May 2026: raw `results/` batches on local disk were deleted; on the Mango
@@ -26,8 +26,6 @@ retain as hypotheses or motivation:
 - Clinical-like perturbations were treated as changes to affective precision
   dynamics: blunted response, volatile response, and pessimistic initial
   precision.
-- CvC transfer was described as an architectural proof of concept, not strong
-  evidence of external validity.
 
 These claims should now be tested through the current H0-H5 behavior-card surface in
 `docs/theory/hypotheses.md`.
@@ -44,8 +42,8 @@ The old conductor state recorded that:
 - partial outputs were present but incomplete and should not be analyzed as
   completed batches.
 
-Those notes now inform `docs/state/current/blockers.md` and
-`docs/state/current/next_runs.md`.
+Those notes now inform `docs/active/blockers.md` and
+`docs/active/progress.md`.
 
 ## Salvaged Archive Themes
 

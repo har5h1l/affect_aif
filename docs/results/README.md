@@ -4,6 +4,8 @@ This directory records interpreted result status and provenance.
 
 - `current.md`: current evidence status for the active architecture
 - `runs/`: per-run provenance notes for completed current-architecture runs
+- `../paper/`: submission-readiness, claims, outline, literature positioning,
+  and figure/table plan
 
 ## Artifact Hygiene
 
@@ -16,7 +18,7 @@ refreshing interpreted numbers.
 ## Evidence Contract
 
 A result is current only when it comes from a completed run on the current
-apashea-aligned, factorized-control architecture and records enough provenance
+factorized-control architecture and records enough provenance
 to reproduce or audit it: config, command, seed count, date, branch or commit,
 and analysis entry point.
 
@@ -38,4 +40,7 @@ the repository when practical.
 The May 19, 2026 H3 reallocation follow-up is recorded as a small pilot. The
 May 2026 H1/H3 split confirmation is now the targeted follow-up evidence: it
 promotes H1 as a confirmed model-fitness readout and keeps H3 as a stress
-boundary condition rather than an affective recovery win.
+boundary condition rather than an affective recovery win. The May 2026 H3
+precision-sensitivity follow-up narrows that boundary condition: generic
+caution knobs do not rescue abrupt betrayal, while gradual betrayal makes
+default affect nearly payoff-neutral relative to no-affect/lesioned baselines.

@@ -15,18 +15,19 @@ The supported developer workflow uses the editable install above.
 
 ## Supported Workflow
 
-See [docs/state/README.md](docs/state/README.md) for current project state,
+See [docs/active/README.md](docs/active/README.md) for current project state,
 [docs/theory/goals.md](docs/theory/goals.md) and
 [docs/theory/hypotheses.md](docs/theory/hypotheses.md) for the active
 Hesp-extension framing, [docs/operations/cli.md](docs/operations/cli.md) for
 the command-line reference, and [docs/results/README.md](docs/results/README.md)
-for result status and provenance rules.
+for result status and provenance rules. See [docs/paper/README.md](docs/paper/README.md)
+for the paper-facing claim, outline, literature, figure, and limitation packet.
 
 The supported trust-game runtime is built on official `inferactively-pymdp==1.0.0`.
 Project code owns trust-game model construction, affective precision tracking,
 experiments, logging, and analysis.
 
-The supported trust-game workflow uses the action-dependent, apashea-aligned
+The supported trust-game workflow uses the action-dependent, factorized-control
 partner redesign:
 - partner behavior depends on latent `type × stance`
 - stance changes are action-dependent and can also be scheduled explicitly with `scheduled_stance_switches`
@@ -44,7 +45,7 @@ python scripts/experiment/preliminary.py --replications 5 --output results/preli
 python scripts/analysis/analyze.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/analysis
 python scripts/analysis/visualize.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/gifs
 python scripts/analysis/model_comparison.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/model_comparison
-python scripts/benchmark/run_cvc.py --config configs/benchmark/e1_arena/default.toml
+python scripts/benchmark/run.py --config configs/benchmark/e1_arena/default.toml
 python scripts/benchmark/analyze.py --results results/benchmark/benchmark_results.csv
 ```
 
@@ -56,7 +57,6 @@ python scripts/benchmark/analyze.py --results results/benchmark/benchmark_result
 - `experiments/multifocal/`: multi-focal trust experiment configuration and runtime
 - `analysis/`: result loading, metrics, and visualization helpers
 - `benchmarks/core/`: shared benchmark runner/config/comparison helpers
-- `benchmarks/cvc/`: experimental CvC backend, policies, packaging, and Observatory client
 - `configs/`: public runnable TOML specs grouped by family (`trust/`, `benchmark/`)
 - `docs/`: theory, experiment, implementation, results, and state notes
 - `scripts/README.md`: supported CLI wrappers
@@ -65,6 +65,6 @@ python scripts/benchmark/analyze.py --results results/benchmark/benchmark_result
 ## Supported Surface
 
 - The main package exposes the supported runner/config entry points at the top level.
-- The trust-task evaluation arena is the supported task-comparison surface; the local CvC path remains a separate experimental integration.
+- The trust-task evaluation arena is the supported task-comparison surface.
 - The supported affective path is task-local precision tracking around official `pymdp` agents.
 - Future-work experiment surfaces are documented in [docs/experiment/design.md](docs/experiment/design.md).

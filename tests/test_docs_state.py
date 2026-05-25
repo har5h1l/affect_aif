@@ -6,12 +6,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_docs_state_steering_wheel_exists():
     required = [
-        "docs/state/README.md",
-        "docs/state/current/mission.md",
-        "docs/state/current/next_runs.md",
-        "docs/state/current/blockers.md",
-        "docs/state/decisions/architecture.md",
-        "docs/state/decisions/experiments.md",
+        "docs/active/README.md",
+        "docs/active/state.md",
+        "docs/active/progress.md",
+        "docs/active/blockers.md",
+        "docs/active/handoff.md",
+        "docs/decisions/architecture.md",
+        "docs/decisions/experiments.md",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]
     assert missing == []

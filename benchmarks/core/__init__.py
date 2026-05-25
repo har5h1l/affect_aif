@@ -13,11 +13,7 @@ if TYPE_CHECKING:
         partner_discrimination,
         type_identification_accuracy,
     )
-    from benchmarks.core.compat import cogames_available, mettagrid_available
-
 __all__ = [
-    "cogames_available",
-    "mettagrid_available",
     "cooperation_rate",
     "cumulative_payoff",
     "mean_payoff",
@@ -28,10 +24,6 @@ __all__ = [
 
 
 def __getattr__(name: str) -> Any:
-    if name in {"cogames_available", "mettagrid_available"}:
-        from benchmarks.core import compat
-
-        return getattr(compat, name)
     if name in {
         "cooperation_rate",
         "cumulative_payoff",

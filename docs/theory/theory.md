@@ -116,8 +116,12 @@ The current shipped experiments are best read as a single hidden-state inference
 **Level 1 — Directly observed task context (fastest timescale: per-trial)**
 Partner identity / interaction context and trial outcome are task-given. The agent observes which partner is being played and what happened on that round; context is not a latent factor in the main experiments.
 
-**Level 2 — Cognitive social model (medium timescale: parameter learning)**
-The main hidden state is each partner's type/strategy (e.g., cooperator, reciprocator, exploiter, random). This is the standard theory-of-mind layer. Dirichlet parameters accumulate evidence about partner tendencies over many rounds. This is where the existing trust-as-learning-rate mechanism operates.
+**Level 2 — Cognitive social model (medium timescale: partner inference)**
+The main hidden state is each partner's `type x stance`: a strategy-like
+partner type (cooperator, reciprocator, exploiter, random) and the partner's
+hidden disposition toward the focal agent (trusting, neutral, hostile).
+Optional Dirichlet learning hooks can accumulate evidence about likelihoods,
+but the shipped trust runtime does not maintain a separate trust scalar.
 
 **Level 3 — Per-partner affective summary (slowest timescale: metacognitive affective integration)**
 A slow auxiliary state for each partner summarizes the running quality of the agent's social model of that partner — operationalized as an expected precision-like signal tied to level-2 prediction error. It modulates policy evaluation, but it is not treated as a fully symmetric hidden-state factor in the main generative model.
@@ -264,13 +268,17 @@ H0 says precision can move policy.
 
 ### 3.7 Relationship to Trust-as-Learning-Rate
 
-In the existing social learning framework, trust modulates how much agent A updates its world model based on agent B's demonstrations:
+Trust-as-learning-rate is useful theoretical contrast, but it is not a current
+implemented scalar in the supported trust-game runtime. In that broader social
+learning formulation, trust would modulate how much agent A updates its world
+model based on agent B's demonstrations:
 
 $$\Delta \theta_A = \eta \cdot \tau_k \cdot \delta_k$$
 
 Where $\tau_k$ is the trust parameter for partner $k$ and $\delta_k$ is the learning signal from $k$'s behavior.
 
-The affective state $\beta_k$ is distinct from $\tau_k$:
+The affective state $\beta_k$ should be kept distinct from such a future
+$\tau_k$:
 
 - **Trust ($\tau_k$)** modulates *learning rate* — how much B's information changes A's world model
 - **Affect ($\beta_k$)** modulates *policy precision* — how confidently A acts on its model of B

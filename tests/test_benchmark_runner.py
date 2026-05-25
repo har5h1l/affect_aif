@@ -1,9 +1,5 @@
 """Tests for benchmark runner output schema and calibration behavior."""
 
-import builtins
-import importlib
-import sys
-
 from benchmarks.core.benchmark_config import BenchmarkConfig
 from benchmarks.core.benchmark_runner import BenchmarkRunner
 
@@ -47,20 +43,7 @@ def test_runner_sets_nan_type_accuracy_for_baselines():
     assert results["inferred_type_correct"].isna().all()
 
 
-def test_runner_module_imports_when_optional_backend_module_is_missing(monkeypatch):
-    module_name = "benchmarks.core.benchmark_runner"
-    sys.modules.pop(module_name, None)
+def test_runner_registry_is_trust_only():
+    from benchmarks.core import benchmark_runner
 
-    real_import = builtins.__import__
-
-    def guarded_import(name, globals=None, locals=None, fromlist=(), level=0):
-        if name == "benchmarks.cvc.local_backend":
-            raise ModuleNotFoundError("No module named 'benchmarks.cvc.local_backend'")
-        return real_import(name, globals, locals, fromlist, level)
-
-    monkeypatch.setattr(builtins, "__import__", guarded_import)
-
-    module = importlib.import_module(module_name)
-
-    assert module.BenchmarkRunner is not None
-    assert set(module.BACKEND_REGISTRY) == {"trust", "cvc_local"}
+    assert set(benchmark_runner.BACKEND_REGISTRY) == {"trust"}

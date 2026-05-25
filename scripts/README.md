@@ -17,10 +17,7 @@ These wrappers define the stable end-user workflow documented in `docs/operation
 - `analysis/visualize.py`
 - `analysis/model_comparison.py`
 - `benchmark/analyze.py`
-- `benchmark/run_cvc.py`
-- `benchmark/package_cvc.py`
-- `cvc/list_missions.py`
-- `cvc/obs_diagnostic.py`
+- `benchmark/run.py`
 
 ## Internal Notes
 

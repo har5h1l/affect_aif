@@ -19,7 +19,6 @@ configs/
     smoke/
   benchmark/
     e1_arena/
-    cvc/
     smoke/
 ```
 
@@ -77,6 +76,11 @@ Sweep expansion produces concrete `variant_id` values such as
 `[runtime]`
 
 - `max_policies`
+- `debug_mode`: enables heavy diagnostic runtime logging. Currently this turns
+  on full policy-trace persistence (`q_pi` and `G`) for small debug runs.
+- `log_policy_traces`: when true, persist full per-round `q_pi` and `G`
+  arrays. Leave false for statistical batches; these arrays can make CSV
+  checkpoints extremely large.
 
 `[analysis]`
 
@@ -92,16 +96,14 @@ Sweep expansion produces concrete `variant_id` values such as
 Required when `experiment.family = "benchmark"` and rejected for
 `experiment.family = "trust"`.
 
-- `backends`: backend ids such as `trust` or `cvc_local`
-- `agents`: simple registry/policy names when strings are sufficient
+- `backends`: backend ids; the maintained backend is `trust`
+- `agents`: simple registry names when strings are sufficient
 - `[[benchmark.agent_specs]]`: structured agent declarations with `name`,
-  `backend`, `kind`, `implementation`, and/or `policy_spec`
+  `backend`, `kind`, and `implementation`
 
 Family-specific benchmark knobs stay namespaced:
 
 - `[benchmark.trust]`: trust benchmark scenario and trust backend overrides
-- `[benchmark.cvc_local]`: CvC mission, worker, and step settings
-- `[benchmark.observatory]`: optional Observatory season/pool metadata
 
 ## Removed Public Keys
 

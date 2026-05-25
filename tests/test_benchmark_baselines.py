@@ -1,11 +1,7 @@
-"""Tests for benchmark baseline agents and compat module.
-
-These tests do NOT require cogames or mettagrid.
-"""
+"""Tests for benchmark baseline agents."""
 
 import numpy as np
 
-from benchmarks.core.compat import cogames_available, mettagrid_available
 from tasks.trust.evaluation.baselines import (
     GrimTriggerAgent,
     PavlovAgent,
@@ -14,11 +10,6 @@ from tasks.trust.evaluation.baselines import (
     TitForTatAgent,
     WinStayLoseShiftAgent,
 )
-
-
-def test_compat_returns_bool():
-    assert isinstance(cogames_available(), bool)
-    assert isinstance(mettagrid_available(), bool)
 
 
 class TestRandomAgent:

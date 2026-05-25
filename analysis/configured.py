@@ -24,6 +24,7 @@ from analysis.metrics import (
     partner_model_fitness_summary,
     phenotype_validation_summary,
 )
+from analysis.plots import save_all_figures
 from experiments.trust.spec import AnalysisSpec, ExperimentSpec
 
 
@@ -49,6 +50,10 @@ def write_configured_analysis_outputs(results_path: Path, output_dir: Path, anal
     figures_dir.mkdir(parents=True, exist_ok=True)
     report_dir.mkdir(parents=True, exist_ok=True)
     results = load_configured_results(results_path)
+    try:
+        save_all_figures(results, str(figures_dir))
+    except (KeyError, ValueError) as exc:
+        (figures_dir / "skipped_figures.txt").write_text(f"Skipped figures: {exc}\n", encoding="utf-8")
 
     try:
         summary = final_round_summary(results)

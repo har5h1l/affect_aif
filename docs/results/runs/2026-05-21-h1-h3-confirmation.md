@@ -3,6 +3,8 @@
 ## Provenance
 
 - Batch: `results/confirm_h1_h3_split_20260519/`
+- Branch/commit: current server checkout on `master`; exact commit not
+  recorded in this note.
 - H1 config:
   `configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml`
 - H3 config:
@@ -11,6 +13,19 @@
   for affect, no-affect, and lesioned.
 - Worker cap used for the completed resume: `--workers 3`
 - Analysis: `scripts/analysis/analyze.py`
+
+Run command:
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 3
+```
+
+Analysis commands:
+
+```bash
+python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_20260519/h1/reliability_vs_reward_confirm/results.csv --output-dir results/confirm_h1_h3_split_20260519/h1/reliability_vs_reward_confirm/analysis
+python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/results.csv --output-dir results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/analysis
+```
 
 ## H1 Model Fitness
 

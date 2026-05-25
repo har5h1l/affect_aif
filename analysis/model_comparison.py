@@ -78,12 +78,20 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
 
     records = []
     for (variant_a, frame_a), (variant_b, frame_b) in combinations(summary.groupby("variant_id"), 2):
-        le_a = frame_a["total_log_evidence"].to_numpy()
-        le_b = frame_b["total_log_evidence"].to_numpy()
-        le_a = le_a[np.isfinite(le_a)]
-        le_b = le_b[np.isfinite(le_b)]
+        paired = (
+            frame_a[["seed", "total_log_evidence"]]
+            .rename(columns={"total_log_evidence": "score_a"})
+            .merge(
+                frame_b[["seed", "total_log_evidence"]].rename(columns={"total_log_evidence": "score_b"}),
+                on="seed",
+                how="inner",
+            )
+            .replace([np.inf, -np.inf], np.nan)
+            .dropna(subset=["score_a", "score_b"])
+            .sort_values("seed")
+        )
 
-        if len(le_a) < 2 or len(le_b) < 2:
+        if len(paired) < 2:
             records.append(
                 {
                     "variant_a": _variant_value(variant_a),
@@ -94,19 +102,16 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
                     "prop_a_preferred": float("nan"),
                     "t_stat": float("nan"),
                     "p_value": float("nan"),
+                    "n_matched_seeds": int(len(paired)),
                 }
             )
             continue
 
-        mean_diff = float(le_a.mean() - le_b.mean())
-        se_diff = float(np.sqrt(le_a.var(ddof=1) / len(le_a) + le_b.var(ddof=1) / len(le_b)))
-
-        # Welch t-test on log-evidence difference
-        t_stat, p_value = stats.ttest_ind(le_a, le_b, equal_var=False)
-
-        # Per-seed comparison (matched by index for equal-length, otherwise just proportions)
-        n_min = min(len(le_a), len(le_b))
-        prop_a = float((le_a[:n_min] > le_b[:n_min]).mean()) if n_min > 0 else float("nan")
+        paired_diff = paired["score_a"] - paired["score_b"]
+        mean_diff = float(paired_diff.mean())
+        se_diff = float(paired_diff.std(ddof=1) / np.sqrt(len(paired_diff)))
+        t_stat, p_value = stats.ttest_rel(paired["score_a"], paired["score_b"])
+        prop_a = float((paired["score_a"] > paired["score_b"]).mean())
 
         records.append(
             {
@@ -118,6 +123,7 @@ def pairwise_predictive_log_scores(results: pd.DataFrame) -> pd.DataFrame:
                 "prop_a_preferred": prop_a,
                 "t_stat": float(t_stat),
                 "p_value": float(p_value),
+                "n_matched_seeds": int(len(paired)),
             }
         )
 

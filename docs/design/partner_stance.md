@@ -31,7 +31,7 @@ Observation modalities:
 - `o_action`: observed partner action
 - `o_payoff`: observed payoff
 
-Binary trust games use apashea-aligned factorized controls:
+Binary trust games use factorized controls:
 
 - partner choice, when `assignment_mode = "agent_choice"`
 - stance-directed social control

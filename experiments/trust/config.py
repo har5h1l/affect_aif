@@ -36,6 +36,8 @@ class ExperimentConfig:
     gamma: float = 1.0
     action_sampling: str = "marginal"
     max_policies: int = 4096
+    debug_mode: bool = False
+    log_policy_traces: bool = False
 
     alpha_charge: float = 3.0
     sigma_0_sq: float = 0.25
@@ -53,6 +55,8 @@ class ExperimentConfig:
         self.num_rounds = int(self.num_rounds)
         self.num_replications = int(self.num_replications)
         self.random_seed = int(self.random_seed)
+        self.debug_mode = bool(self.debug_mode)
+        self.log_policy_traces = bool(self.log_policy_traces or self.debug_mode)
 
     @classmethod
     def from_dict(cls, data: dict) -> ExperimentConfig:

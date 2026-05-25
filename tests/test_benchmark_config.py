@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from benchmarks.core.benchmark_config import AgentSpec, BenchmarkConfig
+from benchmarks.core.benchmark_config import BenchmarkConfig
 from experiments.trust.spec import ExperimentSpec
 
 
@@ -55,27 +55,3 @@ def test_benchmark_config_keeps_json_compatibility_surface(tmp_path):
 
     assert loaded.backends == ["trust"]
     assert loaded.agents[0].name == "random"
-
-
-def test_agent_specs_accept_explicit_policy_specs_for_cvc_backend():
-    config = BenchmarkConfig.from_dict(
-        {
-            "backends": ["cvc_local"],
-            "agents": [
-                {
-                    "name": "teammate_reliability",
-                    "backend": "cvc_local",
-                    "kind": "policy_spec",
-                    "policy_spec": "class=benchmarks.cvc.policy.TeammateReliabilityPolicy",
-                }
-            ],
-            "backend_configs": {"cvc_local": {"mission": "machina_1"}},
-        }
-    )
-
-    assert len(config.agents) == 1
-    agent = config.agents[0]
-    assert isinstance(agent, AgentSpec)
-    assert agent.backend == "cvc_local"
-    assert agent.kind == "policy_spec"
-    assert agent.policy_spec == "class=benchmarks.cvc.policy.TeammateReliabilityPolicy"

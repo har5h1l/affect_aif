@@ -117,6 +117,38 @@ def test_expanded_run_builds_runtime_config(example_spec):
     assert cfg.p_switch == 0.0
     assert cfg.gamma == 1.0
     assert cfg.alpha_charge == 3.0
+    assert not cfg.log_policy_traces
+
+
+def test_runtime_debug_mode_enables_policy_trace_logging(tmp_path):
+    path = write_example_toml(tmp_path / "debug.toml")
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        + """
+
+[runtime]
+debug_mode = true
+""",
+        encoding="utf-8",
+    )
+    spec = ExperimentSpec.from_toml(path)
+
+    cfg = spec.expand_runs()[0].to_runtime_config()
+
+    assert cfg.debug_mode
+    assert cfg.log_policy_traces
+
+
+def test_analysis_primary_default_is_slugified(tmp_path):
+    path = write_example_toml(tmp_path / "default_primary.toml")
+    text = path.read_text(encoding="utf-8")
+    text = text.replace('name = "stress_response"', 'name = "Stress Response"')
+    text = text.replace('primary = "h3_stress_response"\n', "")
+    path.write_text(text, encoding="utf-8")
+
+    spec = ExperimentSpec.from_toml(path)
+
+    assert spec.analysis.primary == "h3_stress_response"
 
 
 def test_factory_uses_variant_affect_mode(example_spec):

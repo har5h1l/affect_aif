@@ -1,6 +1,7 @@
 """Tests for predictive model comparison (Phase 6)."""
 
 import numpy as np
+import pandas as pd
 
 from analysis.model_comparison import (
     _spm_bms,
@@ -63,6 +64,38 @@ def test_pairwise_predictive_log_scores_runs(tiny_spec):
     assert "mean_predictive_log_score_difference" in bf_table.columns
     assert "log10_predictive_log_score_difference" in bf_table.columns
     assert bf_table["mean_predictive_log_score_difference"].notna().all()
+
+
+def test_pairwise_predictive_log_scores_matches_by_seed():
+    rows = []
+    for variant_id, seed, total in [
+        ("a", 1, 1_000.0),
+        ("a", 2, 0.0),
+        ("b", 2, 100.0),
+        ("b", 3, -100.0),
+    ]:
+        rows.append(
+            {
+                "variant_id": variant_id,
+                "seed": seed,
+                "round": 0,
+                "payoff": 1.0,
+                "inferred_type_correct": 1.0,
+                "inferred_stance_correct": 1.0,
+                "inferred_joint_correct": 1.0,
+                "q_pi_entropy": 0.0,
+                "mean_abs_step_efe": 0.0,
+                "planning_cost": 1.0,
+                "planning_cost_ratio": 1.0,
+                "cumulative_log_evidence": total,
+            }
+        )
+
+    table = pairwise_predictive_log_scores(pd.DataFrame(rows))
+    row = table.iloc[0]
+
+    assert row["n_matched_seeds"] == 1
+    assert np.isnan(row["prop_a_preferred"])
 
 
 def test_spm_bms_recovers_strong_model():

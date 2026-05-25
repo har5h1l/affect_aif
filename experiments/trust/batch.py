@@ -13,6 +13,7 @@ from typing import Any
 import pandas as pd
 
 from analysis.visualization import build_run_gifs
+from experiments.trust.runner import checkpoint_group_complete
 from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec
 from experiments.trust.tasks import run_variant_replication_task
 
@@ -116,7 +117,7 @@ class BatchExperimentRunner:
             expected = expected_rounds.get(key)
             if expected is None:
                 continue
-            if len(group) >= expected:
+            if checkpoint_group_complete(group, expected):
                 completed_keys.add(key)
 
         if not completed_keys:

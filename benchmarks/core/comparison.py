@@ -64,36 +64,10 @@ def compute_trust_summary(results: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def compute_cvc_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Summarize CvC-local metrics from episode-level records."""
-    cvc = results[results["backend"] == "cvc_local"]
-    if cvc.empty:
-        return pd.DataFrame()
-
-    aggregate_fields = {
-        "reward": "mean",
-        "team_reward_sum": "mean",
-        "team_reward_var": "mean",
-        "aligned_junctions": "mean",
-        "scrambled_junctions": "mean",
-        "hearts_gained": "mean",
-        "miner_role_gains": "mean",
-        "aligner_role_gains": "mean",
-        "scrambler_role_gains": "mean",
-        "scout_role_gains": "mean",
-    }
-    available = {key: value for key, value in aggregate_fields.items() if key in cvc.columns}
-    if not available:
-        return cvc.groupby("agent_name", as_index=False).agg(mean_episode_reward=("reward", "mean"))
-
-    return cvc.groupby("agent_name", as_index=False).agg(**{f"mean_{k}": (k, v) for k, v in available.items()})
-
-
 def format_comparison_report(results: pd.DataFrame) -> str:
     """Generate a backend-aware benchmark report."""
     shared = compute_shared_summary(results)
     trust = compute_trust_summary(results)
-    cvc = compute_cvc_summary(results)
 
     lines = ["# Benchmark Comparison Report", ""]
     lines.append("## Shared Summary")
@@ -106,16 +80,11 @@ def format_comparison_report(results: pd.DataFrame) -> str:
     lines.append(trust.to_string(index=False) if not trust.empty else "No trust backend data.")
 
     lines.append("")
-    lines.append("## CvC Backend")
-    lines.append("")
-    lines.append(cvc.to_string(index=False) if not cvc.empty else "No CvC backend data.")
-
-    lines.append("")
     lines.append("## Notes")
     lines.append("")
     lines.append(
-        "Cross-backend comparison uses shared reward summaries only. Trust-specific and CvC-specific metrics are "
-        "reported separately rather than forcing action semantics into a fake shared environment model."
+        "The maintained benchmark surface is the trust-task evaluation arena. "
+        "Trust-specific metrics are reported separately from shared reward summaries."
     )
 
     return "\n".join(lines)

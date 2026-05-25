@@ -102,10 +102,18 @@ def _stack_beta_rows(series: pd.Series) -> np.ndarray:
 
 
 def _scheduled_switch_targets(value) -> list[int]:
+    if value is None:
+        return []
+    if isinstance(value, float) and np.isnan(value):
+        return []
+    if isinstance(value, str) and value.strip() in {"", "[]", "nan", "None"}:
+        return []
     array = _ensure_array(value)
     if array.size == 0:
         return []
-    return [int(item) for item in array.tolist()]
+    if array.ndim == 0:
+        return [int(array.item())] if np.isfinite(array.item()) else []
+    return [int(item) for item in array.tolist() if np.isfinite(item)]
 
 
 def _build_scheduled_switch_map(

@@ -91,7 +91,6 @@ def main(argv: list[str] | None = None) -> int:
     results = filter_primary_runs(load_results_table(args.results))
     switch_events_present = has_switch_events(results)
 
-    save_all_figures(results, str(output_dir))
     summary = final_round_summary(results)
     anova = cumulative_payoff_anova(results)
     pairwise = pairwise_payoff_tests(results)
@@ -135,6 +134,13 @@ def main(argv: list[str] | None = None) -> int:
         betrayal_traj.to_csv(output_dir / "betrayal_trajectories.csv", index=False)
         betrayal_misdeployment.to_csv(output_dir / "betrayal_misdeployment_summary.csv", index=False)
         betrayal_reallocation.to_csv(output_dir / "betrayal_reallocation_summary.csv", index=False)
+
+    try:
+        save_all_figures(results, str(output_dir))
+    except (KeyError, ValueError) as exc:
+        message = f"Skipped figures: {exc}"
+        (output_dir / "skipped_figures.txt").write_text(message + "\n", encoding="utf-8")
+        print(message, file=sys.stderr)
 
     summary_path = output_dir / "statistics_summary.txt"
     movement_lines = []

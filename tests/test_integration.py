@@ -307,6 +307,29 @@ def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
     assert metadata["resumed_tasks"] == 1
 
 
+def test_batch_runner_does_not_resume_duplicate_incomplete_checkpoint(tmp_path):
+    path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=2, replications=1)
+    runner = BatchExperimentRunner(
+        config_paths=[str(path)],
+        output_root=str(tmp_path / "results"),
+        batch_id="resume_batch",
+        workers=1,
+    )
+    state = runner._load_states()[0]
+    run = state.expanded_runs[0]
+    state.output_dir.mkdir(parents=True)
+    pd.DataFrame(
+        [
+            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
+            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
+        ]
+    ).to_csv(state.output_dir / "results_partial.csv", index=False)
+
+    completed = runner._load_checkpoint(state)
+
+    assert (run.variant_id, run.seed, run.replication) not in completed
+
+
 def test_serial_runner_resumes_completed_checkpoint_runs(tmp_path, tiny_spec, monkeypatch):
     spec = tiny_spec.with_overrides(rounds=2, replications=2)
     runs = spec.expand_runs()
@@ -360,3 +383,32 @@ def test_serial_runner_resumes_completed_checkpoint_runs(tmp_path, tiny_spec, mo
 
     assert (completed_run.variant_id, completed_run.seed, completed_run.replication) not in executed
     assert len(results) == len(runs) * 2
+
+
+def test_serial_runner_does_not_resume_duplicate_incomplete_checkpoint(tmp_path, tiny_spec, monkeypatch):
+    spec = tiny_spec.with_overrides(rounds=2, replications=1)
+    run = spec.expand_runs()[0]
+    checkpoint = tmp_path / "results_partial.csv"
+    pd.DataFrame(
+        [
+            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
+            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
+        ]
+    ).to_csv(checkpoint, index=False)
+
+    executed: list[tuple[str, int, int]] = []
+
+    def fake_run_replication(*, run, config_path=None, config_name=None, batch_id=None):
+        del config_path, config_name, batch_id
+        executed.append((run.variant_id, run.seed, run.replication))
+        return [
+            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
+            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 1},
+        ]
+
+    runner = ExperimentRunner.from_spec(spec)
+    monkeypatch.setattr(runner, "run_replication", fake_run_replication)
+
+    runner.run_all(checkpoint_path=str(checkpoint), checkpoint_interval=1)
+
+    assert (run.variant_id, run.seed, run.replication) in executed

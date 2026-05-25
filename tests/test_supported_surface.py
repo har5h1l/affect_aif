@@ -183,7 +183,7 @@ scenario = "resource_sharing"
 
 
 def test_benchmark_cli_uses_unified_toml_configs(tmp_path, capsys):
-    run_benchmark = _load_script_module("benchmark/run_cvc.py")
+    run_benchmark = _load_script_module("benchmark/run.py")
     config_path = REPO_ROOT / "configs" / "benchmark" / "smoke" / "smoke.toml"
 
     with pytest.raises(SystemExit):
@@ -228,10 +228,7 @@ def test_removed_script_surface_stays_out_of_supported_cli():
         "analysis/visualize.py",
         "analysis/model_comparison.py",
         "benchmark/analyze.py",
-        "benchmark/run_cvc.py",
-        "benchmark/package_cvc.py",
-        "cvc/list_missions.py",
-        "cvc/obs_diagnostic.py",
+        "benchmark/run.py",
     }
     top_level_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
     all_scripts = {str(path.relative_to(REPO_ROOT / "scripts")) for path in (REPO_ROOT / "scripts").rglob("*.py")}

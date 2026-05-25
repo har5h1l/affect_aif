@@ -28,6 +28,15 @@ from tasks.trust.runtime import (
 )
 
 
+def checkpoint_group_complete(group: pd.DataFrame, expected_rounds: int) -> bool:
+    """Return True when a partial checkpoint has one row for every expected round."""
+
+    if "round" not in group.columns:
+        return False
+    observed_rounds = set(pd.to_numeric(group["round"], errors="coerce").dropna().astype(int))
+    return observed_rounds >= set(range(int(expected_rounds)))
+
+
 class ExperimentRunner:
     """Run expanded TOML experiment variants."""
 
@@ -60,7 +69,11 @@ class ExperimentRunner:
         variant_id: str,
         replication: int = 0,
     ) -> list[dict]:
-        logger = MetricLogger(num_rounds=config.num_rounds, num_partners=config.num_partners)
+        logger = MetricLogger(
+            num_rounds=config.num_rounds,
+            num_partners=config.num_partners,
+            log_policy_traces=config.log_policy_traces,
+        )
         context = env.reset()
 
         for round_idx in range(config.num_rounds):
@@ -342,7 +355,7 @@ class ExperimentRunner:
                     for values, group in partial.groupby(["variant_id", "seed", "replication"], dropna=False):
                         key = (str(values[0]), int(values[1]), int(values[2]))
                         expected = expected_rounds.get(key)
-                        if expected is not None and len(group) >= expected:
+                        if expected is not None and checkpoint_group_complete(group, expected):
                             completed_keys.add(key)
                     if completed_keys:
                         resumed = partial[

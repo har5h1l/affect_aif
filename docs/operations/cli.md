@@ -16,11 +16,8 @@ as the working directory and an activated virtualenv with dependencies installed
 | `scripts/analysis/summarize.py` | Write the final-round summary table for a saved results table. |
 | `scripts/analysis/visualize.py` | Regenerate GIFs from saved results. |
 | `scripts/analysis/model_comparison.py` | Compare variants with predictive log-score summaries and RFX-BMS. |
-| `scripts/benchmark/analyze.py` | Derive shared, trust, and CvC benchmark summaries from benchmark CSVs. |
-| `scripts/benchmark/run_cvc.py` | Run backend-aware benchmark comparisons, including experimental CvC. |
-| `scripts/benchmark/package_cvc.py` | Write a submission-shaped local CvC policy bundle. |
-| `scripts/cvc/list_missions.py` | List local CvC mission metadata. |
-| `scripts/cvc/obs_diagnostic.py` | Inspect local CvC observation keys and shapes. |
+| `scripts/benchmark/analyze.py` | Derive shared and trust benchmark summaries from benchmark CSVs. |
+| `scripts/benchmark/run.py` | Run trust-task benchmark comparisons. |
 
 ## Experiment Runner
 
@@ -127,7 +124,7 @@ latencies, and per-encounter trajectories.
 
 Maintained trust experiment specs live under `configs/trust/hypotheses/`, with
 smoke specs under `configs/trust/smoke/`. Benchmark-family TOML specs live
-under `configs/benchmark/` and run through `scripts/benchmark/run_cvc.py`.
+under `configs/benchmark/` and run through `scripts/benchmark/run.py`.
 Supported multi-focal configs still live under `experiments/multifocal/configs/`
-until the multifocal family is migrated. CvC implementation code lives under
-`benchmarks/cvc/`, with shared runner code under `benchmarks/core/`.
+until the multifocal family is migrated. Shared benchmark runner code lives
+under `benchmarks/core/`.

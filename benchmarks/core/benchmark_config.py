@@ -25,7 +25,6 @@ class AgentSpec:
     backend: str = "trust"
     kind: str = "registry"
     implementation: str | None = None
-    policy_spec: str | None = None
     config: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
@@ -41,9 +40,8 @@ class AgentSpec:
         data = dict(raw)
         backend = str(data.get("backend", default_backend))
         kind = str(data.get("kind", "registry"))
-        name = str(data.get("name") or data.get("implementation") or data.get("policy_spec"))
+        name = str(data.get("name") or data.get("implementation"))
         implementation = data.get("implementation")
-        policy_spec = data.get("policy_spec")
 
         if implementation is None and kind == "registry":
             implementation = name
@@ -53,7 +51,6 @@ class AgentSpec:
             backend=backend,
             kind=kind,
             implementation=None if implementation is None else str(implementation),
-            policy_spec=None if policy_spec is None else str(policy_spec),
             config=dict(data.get("config", {})),
         )
 
@@ -126,7 +123,6 @@ class BenchmarkConfig:
     output_dir: str = DEFAULT_OUTPUT_DIR
     random_seed: int = 42
     backend_configs: dict[str, dict[str, Any]] = field(default_factory=dict)
-    observatory: dict[str, Any] | None = None
 
     def __post_init__(self):
         self.backends = [str(name) for name in self.backends] or DEFAULT_BACKENDS[:]
@@ -135,7 +131,6 @@ class BenchmarkConfig:
             for agent in self.agents
         ]
         self.backend_configs = {str(name): dict(config) for name, config in dict(self.backend_configs).items()}
-        self.observatory = None if self.observatory is None else dict(self.observatory)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> BenchmarkConfig:
@@ -164,8 +159,6 @@ class BenchmarkConfig:
         backend_configs: dict[str, dict[str, Any]] = {}
         if spec.benchmark.trust:
             backend_configs["trust"] = dict(spec.benchmark.trust)
-        if spec.benchmark.cvc_local:
-            backend_configs["cvc_local"] = dict(spec.benchmark.cvc_local)
 
         agents = list(spec.benchmark.agent_specs) if spec.benchmark.agent_specs else list(spec.benchmark.agents)
         payload: dict[str, Any] = {
@@ -177,8 +170,6 @@ class BenchmarkConfig:
             "random_seed": spec.experiment.seed,
             "backend_configs": backend_configs,
         }
-        if spec.benchmark.observatory:
-            payload["observatory"] = dict(spec.benchmark.observatory)
         return cls.from_dict(payload)
 
     @classmethod
@@ -210,9 +201,6 @@ class BenchmarkConfig:
         for backend_name, backend_config in payload["backend_configs"].items():
             _write_table(lines, f"backend_configs.{backend_name}", backend_config)
 
-        if payload["observatory"]:
-            _write_table(lines, "observatory", payload["observatory"])
-
         target.write_text("\n".join(lines).rstrip() + "\n")
 
     def to_json(self, path: str | Path):
@@ -223,8 +211,7 @@ class BenchmarkConfig:
         target.write_text(json.dumps(payload, indent=2))
 
 
-# Trust-task evaluation agents use the registry. Real CvC runs use explicit
-# policy specs because those policies live in the external CoGames runtime.
+# Trust-task evaluation agents use the registry.
 AGENT_REGISTRY = {
     "no_affect": {
         "type": "aif",

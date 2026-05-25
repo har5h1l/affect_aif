@@ -12,14 +12,16 @@ The supported trust-task architecture is in place:
 - official `inferactively-pymdp==1.0.0` is the active inference runtime
 - project code owns trust-task matrices, environments, beta tracking, logging,
   experiment runners, and analysis
-- binary trust games use apashea-aligned factorized controls
+- binary trust games use factorized controls
 - affective precision is partner-local and deployed as
   `gamma_k = gamma_base / E[beta_k]`
-- current evidence comes from the May 2026 H0-H5 queue plus the 30-seed H1/H3
-  confirmation batch
+- current evidence comes from the May 2026 H0-H5 queue, the 30-seed H1/H3
+  confirmation batch, and the H3 precision-sensitivity follow-up
 
 The immediate research phase is **write-up stabilization**. There is no
 required experiment queue before a public narrative draft.
+
+The paper-facing packet is maintained under `docs/paper/`.
 
 ## Current Scientific Read
 
@@ -67,15 +69,13 @@ Keep public docs aligned with the current architecture:
 
 - `docs/results/current.md` is the active evidence scorecard
 - `docs/results/historical_findings.md` is the archive for pre-current claims
-- `docs/experiment/results.md` should remain an index/pointer, not a competing
-  result narrative
 - old C1-C5, reward-average, Stag Hunt, Chicken, and pre-cutover claims should
   be marked historical unless rerun on the supported architecture
 
 ### 3. Optional Reviewer-Driven Experiments
 
 Do not run more experiments by default. If a manuscript or reviewer needs a
-specific check, use the verification gate in `docs/state/current/next_runs.md`
+specific check, use the verification gate in `docs/active/progress.md`
 before launching a new full run.
 
 Likely optional checks:
@@ -98,8 +98,8 @@ These are future research tracks, not current blockers.
    model inadequacy and trigger model-structure search.
 4. **Richer task regimes**: noisy observations, larger action spaces, delayed
    reward, coalition structure, and richer partner dynamics.
-5. **External benchmarks**: continue CvC/CoGames only as a separate benchmark
-   track; it should not block trust-task claims.
+5. **Benchmarks**: keep the supported benchmark surface limited to trust-task
+   baseline comparisons unless a new benchmark integration is explicitly scoped.
 
 ## Archive Note
 

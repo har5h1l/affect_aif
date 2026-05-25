@@ -4,9 +4,9 @@ This document provides comprehensive system documentation for AI agents operatin
 
 ## Documentation First
 
-- Read `docs/state/README.md` and `docs/state/current/mission.md` before taking over a research or restructure task.
+- Read `docs/active/README.md` and `docs/active/state.md` before taking over a research or restructure task.
 - Read `docs/theory/goals.md`, `docs/theory/hypotheses.md`, and `docs/theory/pomdp_spec.md` before changing computational claims, affect dynamics, terminal values, or the interpretation of results.
-- Read `docs/theory/apashea_alignment.md` before changing factorized controls, policy priors, learning hooks, or pymdp/JAX alignment claims.
+- Read `docs/decisions/architecture.md` before changing factorized controls, policy priors, learning hooks, or pymdp/JAX alignment claims.
 - Read `docs/experiment/design.md` before changing task design, configs, variants, metrics, or sensitivity sweeps.
 - Read `docs/design/implementation.md` before changing environment semantics, switching logic, or analysis helpers.
 - Read `README.md` before changing setup, entry points, or repo layout.
@@ -22,7 +22,7 @@ This document provides comprehensive system documentation for AI agents operatin
 
 - Before updating result-interpretation docs from new experiment outputs, ask the user first.
 - When the user asks about branch state, merge readiness, or pruning stale remote branches, run git (fetch or prune as needed) and summarise concrete outputs instead of only listing commands.
-- For docs/state-driven research, treat `docs/state/current/mission.md` as the source of truth for phase autonomy; do not default to “blocked” framing when the mission tells the agent to proceed or to choose the next phase.
+- For active-doc-driven research, treat `docs/active/state.md` as the source of truth for phase autonomy; do not default to “blocked” framing when the mission tells the agent to proceed or to choose the next phase.
 
 ## Learned Workspace Facts
 
@@ -33,8 +33,8 @@ This document provides comprehensive system documentation for AI agents operatin
 - State inference (partner-type belief updating) is handled by official
   `pymdp.Agent` instances created from `tasks.trust.pomdp` templates and logged
   as matrix-based belief updates.
-- Benchmark runs use `scripts/benchmark/run_cvc.py` plus `docs/operations/benchmark.md` for backends, TOML configs (for example `configs/benchmark/e1_arena/default.toml` and `configs/benchmark/e1_arena/betrayal.toml`), and Python 3.12 CvC worker notes.
-- Primary trust-hypothesis configs are under `configs/trust/hypotheses/` (and smoke under `configs/trust/smoke/`); benchmark/CvC configs are benchmark-family TOML specs under `configs/benchmark/`—see `docs/experiments/manifest.md`.
+- Benchmark runs use `scripts/benchmark/run.py` plus `docs/operations/benchmark.md` for trust-task evaluation arena TOML configs such as `configs/benchmark/e1_arena/default.toml` and `configs/benchmark/e1_arena/betrayal.toml`.
+- Primary trust-hypothesis configs are under `configs/trust/hypotheses/` (and smoke under `configs/trust/smoke/`); benchmark configs are benchmark-family TOML specs under `configs/benchmark/`—see `docs/experiments/manifest.md`.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is rsync and does not delete remote-only files under `results/`). Do not add orchestration or deployment scripts to this repo.
 
 ---
@@ -75,7 +75,7 @@ affect_aif/
 │   ├── hypotheses.py      # Current Hesp-extension hypothesis helpers
 │   ├── plots.py           # Matplotlib figure generation
 │   └── visualization.py   # GIF generation
-└── configs/               # External benchmark and CvC TOML configurations
+└── configs/               # Trust and trust-benchmark TOML configurations
 ```
 
 ### Experiment Variants
@@ -142,7 +142,7 @@ update_partner_after_observation(...)
 ## Configuration System
 
 Trust specs live in `configs/trust/hypotheses/`, smoke specs live in
-`configs/trust/smoke/`, benchmark/CvC specs live under `configs/benchmark/`,
+`configs/trust/smoke/`, benchmark specs live under `configs/benchmark/`,
 and multi-focal configs currently live in `experiments/multifocal/configs/`. `ExperimentConfig` is now an internal runtime adapter derived from
 expanded TOML runs. Key runtime fields:
 
@@ -202,7 +202,7 @@ python -m pytest tests/ -v --tb=short
 ### Experiment produces unexpected results
 1. Run with `--verbose --verbosity-mode stage_stream` for per-round tracing
 2. Check beta/gamma traces and `q_pi_entropy` in the per-round results
-3. Check current state in `docs/state/current/blockers.md`
+3. Check current state in `docs/active/blockers.md`
 4. Compare against current and historical status in `docs/results/`
 
 ### Analysis script errors

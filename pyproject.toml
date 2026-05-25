@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "affect_aif"
 version = "0.1.0"
-description = "JAX-first multi-agent active inference trust-game simulations"
+description = "pymdp-backed active-inference trust-game simulations"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

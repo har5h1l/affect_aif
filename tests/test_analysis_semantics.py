@@ -136,6 +136,31 @@ def test_betrayal_phase_summary_splits_pre_acute_and_tail_windows():
     assert affect_tail["mean_payoff"] == 16.5
 
 
+def test_betrayal_phase_summary_treats_nan_switch_cells_as_empty():
+    rows = []
+    for round_idx in range(1, 4):
+        rows.append(
+            {
+                "variant_id": "affect",
+                "seed": 0,
+                "round": round_idx,
+                "partner_idx": 0,
+                "payoff": 1.0,
+                "q_pi_entropy": 0.5,
+                "selected_partner": 0,
+                "scheduled_stance_switch_partner_ids": float("nan"),
+                "scheduled_switch_partner_ids": float("nan"),
+                "type_switched": False,
+                "stance_switched": False,
+                "switch_kind": "",
+            }
+        )
+
+    summary = betrayal_phase_summary(pd.DataFrame(rows))
+
+    assert summary.empty
+
+
 def test_deployment_dissociation_summary_pairs_affect_and_lesion():
     rows = []
     for variant_id, payoff, accuracy, entropy in [

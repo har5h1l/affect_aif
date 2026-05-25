@@ -10,7 +10,6 @@ __pycache__/
 
 # Virtual environments
 .venv/
-.venv-cogames/
 venv/
 env/
 ENV/
