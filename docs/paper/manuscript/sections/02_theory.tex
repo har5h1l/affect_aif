@@ -1,0 +1,51 @@
+\section{Theory: Affective Precision as Partner-Local Model Fitness}
+
+\subsection{From global affect to partner-specific affect}
+
+The proposed mechanism is:
+
+\begin{center}
+\begin{tabular}{c}
+partner prediction reliability \\
+$\downarrow$ \\
+partner-specific $\beta_k$ / precision$_k$ \\
+$\downarrow$ \\
+partner-local policy posterior shift \\
+$\downarrow$ \\
+action or partner-choice deployment \\
+$\downarrow$ \\
+payoff, reallocation, probing, or misdeployment.
+\end{tabular}
+\end{center}
+
+The affective state is not a hidden state inside the trust POMDP. It is an external precision tracker coupled to the dynamics of inference. For partner $k$, the tracker reads how surprising the partner's observed action was under the focal agent's current partner-local beliefs. Accurate predictions push the tracker toward lower beta and therefore higher expected policy precision; surprising observations push it toward higher beta and therefore lower expected policy precision.
+
+This gives the model a different interpretation from reward averaging. A reliable cooperator and a reliable exploiter can both be predictable, so both can support high model fitness. The action implied by high precision differs: for the cooperator, high precision may support confident approach or cooperation; for the exploiter, it may support confident avoidance or defection. Conversely, a partner who sometimes rewards the agent but changes unpredictably should not necessarily produce high precision because the agent's model is not stable enough to deploy confidently.
+
+\subsection{Deployment rather than knowledge}
+
+The model's deployment claim is inspired by the knowing-versus-using dissociation associated with somatic-marker accounts of decision-making \todocite{Damasio; Bechara Iowa Gambling Task}. The paper does not implement vmPFC, skin conductance, or a neural circuit. It implements a computational analogue: a lesioned agent can maintain or update the partner-specific beta state, and can retain broadly similar partner beliefs, but the beta-to-policy-precision pathway is decoupled. When the policy posterior is open enough for precision to matter, this lesion should impair action deployment without necessarily destroying social inference itself.
+
+This distinction matters for interpreting negative results. If beliefs are intact but action is worse, affect is not being used as a knowledge source; it is being used as a policy-precision gate. If beliefs and behavior are both unchanged, either the mechanism is not active or the policy space is saturated. If affect lowers entropy and makes behavior worse after a shock, the mechanism is active but miscalibrated for that transition regime.
+
+\subsection{Hypothesis surface}
+
+The current manuscript uses six behavior cards. H0 asks whether the policy posterior has room to move. H1 tests model fitness against reward. H2 tests deployment by decoupling beta from policy precision. H3 tests stress and betrayal as volatility boundary conditions. H4 tests partner selection. H5 tests clinical-like parameter perturbations as precision-dynamics variants, not as diagnoses.
+
+\begin{table}[t]
+\centering
+\caption{Evidence hierarchy used in this draft. H1 and H3 are the primary statistical anchors because they use 30 seeds per variant. H0, H2, H4, and H5 are supporting or supplemental because they use five seeds per variant.}
+\label{tab:evidence-hierarchy}
+\begin{tabularx}{\linewidth}{lXll}
+\toprule
+Card & Mechanism role & Seeds & Draft status \\
+\midrule
+H0 & Policy openness gates visible affect effects & 5/variant & Supporting \\
+H1 & Precision tracks model fitness rather than reward & 30/variant & Primary \\
+H2 & Affect changes deployment despite similar beliefs & 5/variant & Supporting \\
+H3 & Stress exposes both deployment and misdeployment & 30/variant & Primary \\
+H4 & Partner-specific precision guides social choice & 5/variant & Supporting \\
+H5 & Clinical-like perturbations separate precision dynamics & 5/variant & Supplemental \\
+\bottomrule
+\end{tabularx}
+\end{table}

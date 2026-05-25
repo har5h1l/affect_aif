@@ -1,0 +1,100 @@
+\section{Results}
+
+\subsection{Open policy spaces permit affective deployment}
+
+In the H0/H2 open graded regime, using five seeds per variant, affective precision changed behavior in the predicted direction. The affective agent reached total payoff $1884.6$ with mean policy entropy $7.94$, while the no-affect or lesioned baseline reached total payoff $1859.4$ with mean policy entropy $8.80$. The resulting difference was $+25.2$ payoff and $-0.86$ entropy for affect. Because this run uses five seeds per variant, it is supporting evidence rather than the manuscript's strongest statistical anchor.
+
+The interpretation is that open graded policy spaces allow partner-local precision to move the policy posterior. The result should not be generalized to all regimes. The same mechanism can be behaviorally invisible in saturated binary settings and harmful in abrupt betrayal settings. Thus, H0 supports a gate claim: policy openness is necessary for visible affective deployment, but it does not guarantee a payoff benefit.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\linewidth]{fig_open_regime_cumulative_payoff.png}
+\caption{Open-regime deployment. In the open graded regime, affective precision lowers policy entropy and increases payoff relative to the baseline, while belief readouts remain similar or slightly favor the lesion. This diagnostic figure should be redrawn from source tables before submission.}
+\label{fig:open-regime}
+\end{figure}
+
+\subsection{Partner-specific precision tracks model fitness rather than reward}
+
+The H1 reliability-versus-reward confirmation is the cleanest mechanism result. With 30 seeds per variant and 200 rounds per seed, the affective agent did not outperform the no-affect baseline on payoff: total payoff was $534.6$ for affect and $542.1$ for no affect, a difference of $-7.53$ with bootstrap CI $[-27.88, 13.82]$. This absence of a payoff advantage is important because it prevents the result from being explained as a generic reward booster.
+
+Despite no payoff advantage, the beta-derived precision signal tracked predictive reliability more strongly than reward. Across partner-seed units, $|\mathrm{corr}(\mathrm{precision},\mathrm{surprise})| = 0.701$, while $|\mathrm{corr}(\mathrm{precision},\mathrm{payoff})| = 0.419$. The reliability-over-reward effect was $+0.096$ with bootstrap CI $[0.027, 0.164]$. Mean policy entropy was $4.48$ for affect and $4.32$ for no affect, a difference of $+0.16$ with bootstrap CI $[0.06, 0.27]$. The main result is therefore a dissociation: partner-local precision follows predictive reliability more strongly than realized payoff.
+
+This supports the model-fitness interpretation. If beta were merely caching reward, precision should collapse toward payoff history. Instead, it is more tightly associated with surprise and predictability. In social terms, the agent can be precise about a partner it should avoid. Precision is confidence in the social model, not affection for the partner.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\linewidth]{fig_model_fitness_beta_reward_divergence.png}
+\caption{Model-fitness readout. In the 30-seed H1 confirmation, partner-local precision tracks predictive surprise more strongly than realized payoff, while affect has no total-payoff advantage.}
+\label{fig:model-fitness}
+\end{figure}
+
+\subsection{Affect changes deployment despite similar belief readouts}
+
+The H2 open-regime lesion tests whether beta affects action deployment rather than partner inference. With five seeds per variant, affect produced payoff $1884.6$, joint accuracy $0.336$, stance accuracy $0.816$, and mean policy entropy $7.94$. The tracked-only lesion produced payoff $1859.4$, joint accuracy $0.339$, stance accuracy $0.855$, and mean policy entropy $8.80$.
+
+The belief readouts were therefore similar and in some cases slightly favored the lesion, while policy entropy and payoff favored the affective deployment pathway. This is the strongest current knowing-versus-using pattern: the lesion resembles an agent that can maintain partner-belief readouts but cannot use the partner-specific model-fitness signal to sharpen or soften policy selection. Because the run uses five seeds per variant, the manuscript treats it as supporting evidence that complements the primary 30-seed H1 and H3 results.
+
+\subsection{Partner choice moves before payoff}
+
+H4 tests whether partner-specific precision affects social selection. With five seeds per variant in the partner-choice run, payoff was nearly flat: affect reached $393.6$ and no affect reached $393.2$. The behavioral distribution nevertheless moved. Mean policy entropy was $3.99$ for affect and $4.83$ for no affect. Mean selection rates by partner were $[0.366, 0.316, 0.138, 0.180]$ for affect and $[0.348, 0.318, 0.162, 0.172]$ for no affect.
+
+This result is useful because payoff is a downstream and sometimes insensitive readout in partner-choice settings. H4 predicts approach, avoidance, and probing shifts, not necessarily immediate payoff gain. The observed entropy and selection-rate changes show behavioral movement before total payoff becomes informative. As with H0 and H2, the five-seed sample means H4 should be presented as supporting behavioral evidence rather than a standalone statistical anchor.
+
+\subsection{Abrupt betrayal exposes a precision-driven boundary condition}
+
+The H3 betrayal reallocation confirmation is the primary stress result. With 30 seeds per variant and 120 rounds per seed, affect reduced whole-run payoff relative to the no-affect or lesioned baseline. Total payoff was $1136.1$ for affect and $1172.1$ for no affect/lesion, a difference of $-36.08$ with bootstrap CI $[-63.65, -10.93]$ and pairwise $p=0.0169$. Mean policy entropy was lower for affect: $8.38$ versus $8.74$, a difference of $-0.36$ with bootstrap CI $[-0.45, -0.26]$.
+
+The post-switch reencounter readouts show an active but risky precision channel. Affect reencountered the switched partner $4.4$ times on average, compared with $6.1$ for no affect. Reencounter selection rate was $0.049$ for affect and $0.067$ for no affect. However, payoff conditional on reencounter did not improve: affect averaged $8.76$ on reencounters, while no affect averaged $8.91$. The wrong-type rate on reencounter was $0.237$ for affect and $0.165$ for no affect.
+
+The correct interpretation is not that affect recovers after betrayal. The correct interpretation is that abrupt betrayal reveals the precision channel and its failure mode. Affect lowers entropy and changes return/reallocation behavior, but it does not improve return safety or whole-run payoff in the 30-seed confirmation. Under abrupt social shocks, precision can sharpen action around a model that has not recalibrated fast enough.
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}{0.48\linewidth}
+\includegraphics[width=\linewidth]{fig_betrayal_confirm_cumulative_payoff.png}
+\caption{Cumulative payoff}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\linewidth}
+\includegraphics[width=\linewidth]{fig_betrayal_signal_trajectories.png}
+\caption{Betrayal signal trajectories}
+\end{subfigure}
+\caption{Betrayal boundary condition. Abrupt betrayal makes partner-local precision behaviorally visible, but not safer: affect lowers entropy and changes reallocation while reducing whole-run payoff.}
+\label{fig:betrayal-boundary}
+\end{figure}
+
+\subsection{Shock shape matters more than generic caution}
+
+The H3 precision-sensitivity follow-up tests whether the betrayal failure is simply excessive gain that can be fixed by generic caution. In the abrupt sensitivity run, with 30 seeds per variant and 120 rounds per seed, the no-affect/lesion baseline had payoff $1153.6$ and entropy $8.80$. Default affect had payoff $1140.4$ and entropy $8.35$, with pairwise $p=0.370$ against no affect. Combined caution had payoff $1115.0$ and entropy $9.27$, with $p=0.003$ against no affect.
+
+The gradual sensitivity run changed the shock shape. With 30 seeds per variant, the no-affect/lesion baseline had payoff $1148.9$ and entropy $8.76$. Default affect was nearly payoff-neutral, with payoff $1147.6$, entropy $8.38$, and $p=0.906$ against no affect. Combined caution again reduced payoff, reaching $1118.3$ with entropy $9.25$ and $p=0.005$ against no affect.
+
+These results argue against a simple ``make the agent more cautious'' repair. Generic caution can raise entropy but still harm payoff. The more informative axis is shock shape: default affect is costly mainly under abrupt betrayal, while gradual betrayal largely removes the default affect payoff penalty. The boundary condition appears to be temporal credit-assignment mismatch under sudden model change, not merely too much policy precision.
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}{0.48\linewidth}
+\includegraphics[width=\linewidth]{fig_abrupt_sensitivity_cumulative_payoff.png}
+\caption{Abrupt betrayal}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\linewidth}
+\includegraphics[width=\linewidth]{fig_gradual_sensitivity_cumulative_payoff.png}
+\caption{Gradual betrayal}
+\end{subfigure}
+\caption{Shock-shape sensitivity. Default affect is costly under abrupt betrayal but nearly payoff-neutral under gradual betrayal. Cautious variants raise entropy but do not rescue payoff.}
+\label{fig:shock-shape}
+\end{figure}
+
+\subsection{Clinical-like perturbations separate precision dynamics, not clinical validity}
+
+H5 is supplemental. In the five-seed dynamics run, total payoff was $1884.6$ for affect, $1871.1$ for borderline-like, $1840.7$ for alexithymia-like, and $1834.1$ for depression-like variants. The more important readout is beta dynamics. Beta range was $1.318$ for borderline-like, $1.435$ for depression-like, $0.950$ for default affect, and $0.149$ for alexithymia-like. In the five-seed betrayal run, payoff was $1216.3$ for alexithymia-like, $1196.9$ for borderline-like, $1168.3$ for affect, and $1150.1$ for depression-like.
+
+These numbers show that parameter perturbations can separate in precision range, entropy, and selection dynamics. They do not validate clinical diagnoses. The current runs are underpowered for payoff claims and task-specific. H5 belongs in the supplement unless the paper is reframed around perturbation dynamics.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\linewidth]{fig_h5_dynamics_beta_reward_divergence.png}
+\caption{Clinical-like perturbation dynamics. Perturbations separate in beta dynamics and policy/choice readouts, but these are computational parameter variants rather than validated clinical phenotypes.}
+\label{fig:h5-dynamics}
+\end{figure}

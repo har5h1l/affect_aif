@@ -5,17 +5,19 @@ best entry point when deciding what the manuscript can claim.
 
 ## Files
 
-- `manuscript_outline.md`: section-by-section paper skeleton.
-- `claims_and_evidence.md`: what the current results support, fail to support,
-  and leave incomplete.
-- `literature_positioning.md`: novelty and related-work positioning.
-- `figures_tables.md`: recommended figures, tables, and source artifacts.
-- `limitations_followups.md`: limitations, reviewer risks, and narrow
+- `notes/manuscript_outline.md`: section-by-section paper skeleton.
+- `notes/claims_and_evidence.md`: what the current results support, fail to
+  support, and leave incomplete.
+- `notes/literature_positioning.md`: novelty and related-work positioning.
+- `notes/figures_tables.md`: recommended figures, tables, and source artifacts.
+- `notes/limitations_followups.md`: limitations, reviewer risks, and narrow
   follow-up experiments.
-- `model_spec.md`: concise computational model description.
-- `experiment_manifest.md`: manuscript-facing experiment/config map.
-- `reproducibility.md`: commands, environment, and provenance rules.
-- `result_provenance.md`: promoted result roots and interpretation notes.
+- `notes/model_spec.md`: concise computational model description.
+- `notes/experiment_manifest.md`: manuscript-facing experiment/config map.
+- `notes/reproducibility.md`: commands, environment, and provenance rules.
+- `notes/result_provenance.md`: promoted result roots and interpretation notes.
+- `manuscript/`: first-draft LaTeX outline, audited result digest, copied
+  figure assets, source CSVs, future-work menu, and writing-model handoff.
 
 ## One-Sentence Thesis
 

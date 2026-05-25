@@ -1,0 +1,42 @@
+[hypothesis]
+id = "h2"
+name = "deployment"
+
+[experiment]
+id = "lesion_open_regime_confirm"
+family = "trust"
+rounds = 200
+replications = 30
+seed = 620
+
+[scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[[variants]]
+id = "lesioned"
+affect = "tracked_only"
+planning_horizon = 4
+
+[[variants]]
+id = "no_epistemic"
+affect = "precision"
+planning_horizon = 4
+epistemic_value = false
+
+[analysis]
+auto = true
+primary = "h2_deployment"
+compare = ["affect", "lesioned", "no_epistemic"]
+metrics = ["payoff", "precision", "stance_accuracy", "deployment", "evidence_effects"]
