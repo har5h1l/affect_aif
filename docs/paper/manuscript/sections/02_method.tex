@@ -1,0 +1,68 @@
+\section{Model and Experiments}
+
+We evaluate partner-specific affective precision in a repeated trust game derived from the economic trust-game tradition \cite{Berg1995Trust,KingCasas2005Trust}. A focal active-inference agent interacts with four partners. Each partner has a latent type (cooperator, reciprocator, exploiter, or random) and a latent stance toward the agent (trusting, neutral, or hostile). The agent observes the partner's action and its own payoff, and it selects either a binary action or a graded investment depending on the regime.
+
+For each partner $k$, the focal agent maintains a separate discrete active-inference model over partner type, partner stance, and own-action bookkeeping. State and policy inference use the standard discrete active-inference machinery implemented in \texttt{pymdp} \cite{Friston2017ProcessTheory,DaCosta2020DiscreteSynthesis,Heins2022Pymdp}. Partner choice is handled by evaluating partner-local policies and selecting among the resulting candidate interactions.
+
+The affective component is external to the POMDP state space. After interacting with partner $k$, the agent computes partner-action surprise
+\begin{equation}
+\epsilon_k = 1 - P(o^{\mathrm{action}}_k = o^{\mathrm{obs}}_k \mid q(s_{\mathrm{type}},s_{\mathrm{stance}})).
+\end{equation}
+The tracker converts this into affective charge
+\begin{equation}
+\phi_k = \alpha(\sigma_0^2 - \epsilon_k^2),
+\end{equation}
+following the interpretation of affect as expected action precision and model fitness \cite{Hesp2021DeeplyFeltAffect}. A categorical beta posterior $q(\beta_k)$ is updated over discrete beta levels. The expected beta then modulates policy precision for future choices involving that partner:
+\begin{equation}
+\gamma_k = \gamma_{\mathrm{base}} / \mathbb{E}_{q(\beta_k)}[\beta_k].
+\end{equation}
+Lower beta therefore sharpens the policy posterior; higher beta softens it. A tracked-only lesion keeps the beta update but fixes $\gamma_k=\gamma_{\mathrm{base}}$, isolating deployment from belief updating.
+
+\begin{figure}[t]
+\centering
+\small
+\setlength{\fboxsep}{5pt}
+\begin{tabular}{c@{\hspace{0.7em}}c@{\hspace{0.7em}}c}
+\fbox{\begin{minipage}{0.27\linewidth}\centering
+Partner-local model\\
+$q_k(s_{\mathrm{type}},s_{\mathrm{stance}})$
+\end{minipage}}
+&
+$\rightarrow$
+&
+\fbox{\begin{minipage}{0.27\linewidth}\centering
+Surprise update\\
+$\epsilon_k \rightarrow q(\beta_k)$
+\end{minipage}}
+\\[0.8em]
+& $\searrow$ & $\downarrow$ \\
+&
+\fbox{\begin{minipage}{0.27\linewidth}\centering
+Policy deployment\\
+$\gamma_k=\gamma_{\mathrm{base}}/\mathbb{E}[\beta_k]$
+\end{minipage}}
+& $\rightarrow$ \quad action toward partner $k$
+\end{tabular}
+\caption{Partner-specific affective precision. Each partner has a local generative model; prediction error updates a partner-local beta estimate, which modulates the precision of future policies involving that partner.}
+\label{fig:model}
+\end{figure}
+
+The experiments test five readouts. H0 asks whether policy openness gates visible affect effects. H1 tests whether precision tracks predictive reliability rather than realized reward. H2 compares affective agents with tracked-only lesions to test deployment with similar belief readouts. H3 introduces an abrupt hostile stance switch to test stress and misdeployment. H4 tests whether partner-local precision changes partner selection. H5 perturbation variants are treated as supplemental checks on beta dynamics rather than clinical validation.
+
+\begin{table}[t]
+\centering
+\caption{Evidence hierarchy used in the paper. H1 and H3 are the primary statistical anchors because they use 30 seeds per variant.}
+\label{tab:evidence-hierarchy}
+\begin{tabularx}{\linewidth}{lXll}
+\toprule
+Card & Mechanism role & Seeds & Status \\
+\midrule
+H0 & Policy openness gates visible precision effects & 5/variant & Supporting \\
+H1 & Precision tracks model fitness rather than reward & 30/variant & Primary \\
+H2 & Precision changes deployment despite similar beliefs & 5/variant & Supporting \\
+H3 & Abrupt betrayal exposes misdeployment risk & 30/variant & Primary \\
+H4 & Precision changes partner choice & 5/variant & Supporting \\
+H5 & Perturbations separate beta dynamics & 5/variant & Supplemental \\
+\bottomrule
+\end{tabularx}
+\end{table}

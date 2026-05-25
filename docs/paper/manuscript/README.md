@@ -1,24 +1,20 @@
-# Manuscript Packet
+# IWAI Manuscript Packet
 
-This folder is a writer-facing packet for a first LaTeX draft. It borrows the
-useful parts of `docxology/template`: keep manuscript structure, figure assets,
-source tables, provenance, and claim boundaries together, without migrating this
-repo into a new project scaffold.
+This folder contains the LNCS manuscript and the supporting evidence packet for
+the IWAI 2026 submission. It keeps manuscript source, figure assets, source
+tables, provenance, and claim boundaries together without migrating this repo
+into a new project scaffold.
 
 ## Files
 
-- `main.tex`: split manuscript draft that incorporates the external full-draft
-  content into this packet and includes current figure assets.
+- `main.tex`: anonymized LNCS manuscript source using the approved title.
 - `sections/`: manuscript section files included by `main.tex`.
 - `manuscript_draft.pdf`: rendered PDF produced from `main.tex`.
-- `technical_outline.tex`: earlier technical outline retained as planning
-  context for future rewrites.
+- `references.bib`: verified bibliography entries used by the manuscript.
 - `results_digest.md`: audited seed counts, promoted result roots, key numbers,
   and include/exclude decisions.
 - `figures.md`: figure plan, copied figure assets, captions, and source paths.
 - `future_work.md`: two-week follow-up menu and longer-term work.
-- `references_todo.md`: citation targets to verify. Do not invent BibTeX keys
-  or citation details from this file.
 - `figures/`: copied PNGs from current analysis outputs.
 - `source_tables/`: compact CSVs copied from analysis outputs for the writing
   model and later manual checking.
@@ -49,5 +45,4 @@ Primary manuscript evidence should come from:
 - State that H5 variants are clinical-like perturbations, not clinical models.
 - State that beta is an external HESP-style precision tracker, not a POMDP
   hidden state.
-- Treat citations as TODOs until verified; no fabricated DOIs, venues, quotes,
-  or BibTeX entries.
+- Do not add unverified citations, DOIs, venues, quotes, or BibTeX entries.

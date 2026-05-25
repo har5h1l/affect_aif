@@ -53,8 +53,8 @@ seeds to 30 seeds without changing runtime behavior. It should write under
 python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice_confirm.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml --output-dir results --batch-name manuscript_open_social_confirm_20260525_single_worker --workers 1
 ```
 
-`results/manuscript_open_social_confirm_20260525/` is an aborted partial run
-started with 12 workers before the one-worker constraint was clarified; do not
+`results/manuscript_open_social_confirm_20260525/` is an aborted partial
+parallel run started before the one-worker constraint was clarified; do not
 interpret it as evidence.
 
 ### 3. Optional H3 Stress Robustness

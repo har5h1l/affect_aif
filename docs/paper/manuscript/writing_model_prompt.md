@@ -6,10 +6,10 @@ evidence packet. Do not invent citations, results, methods, or claims.
 Read these files first:
 
 1. `docs/paper/manuscript/README.md`
-2. `docs/paper/manuscript/outline.tex`
+2. `docs/paper/manuscript/main.tex`
 3. `docs/paper/manuscript/results_digest.md`
 4. `docs/paper/manuscript/figures.md`
-5. `docs/paper/manuscript/references_todo.md`
+5. `docs/paper/manuscript/references.bib`
 
 Use these project docs for context if needed:
 
@@ -31,8 +31,8 @@ Drafting rules:
 - Do not write "affect improves payoff" without the boundary conditions.
 - Do not write "affect recovers after betrayal"; write that abrupt betrayal
   exposes precision-driven misdeployment risk.
-- Keep citations as TODO placeholders unless exact bibliographic details are
-  verified.
+- Use `references.bib` for existing citation keys. Add new citations only after
+  checking bibliographic details.
 - Every results paragraph must include the relevant seed count and at least one
   concrete number from `results_digest.md`.
 

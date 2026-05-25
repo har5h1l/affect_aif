@@ -50,8 +50,8 @@ Post-run analysis:
 ## Aborted Run Note
 
 `results/manuscript_open_social_confirm_20260525/` contains a partial aborted
-run started with 12 workers before the one-worker constraint was clarified. It
-is marked with `ABORTED_DO_NOT_USE.md` and should not be interpreted.
+parallel run started before the one-worker constraint was clarified. It is
+marked with `ABORTED_DO_NOT_USE.md` and should not be interpreted.
 
 ## Why This Is The Next Best Run
 
