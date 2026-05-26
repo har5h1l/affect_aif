@@ -57,8 +57,9 @@ Read this folder in order: `state.md`, `progress.md`, then `blockers.md`.
 Paper-facing evidence remains in `docs/paper/manuscript/` and interpreted
 results remain in `docs/results/`.
 
-The next research thread should first check the queued H6 discovery batch in
-`results/h6_global_beta_discovery_20260525/`. The run is intentionally
+The next research thread should first check the running H6 discovery batch in
+`results/h6_global_beta_discovery_20260525/`. It is running in tmux session
+`h6_global_beta_discovery` with `--workers 1`. The run is intentionally
 smoke-scale and one-worker: it tests global beta across model-fitness,
 deployment, partner-choice, betrayal, and lesion-family probes without
 promoting new claims into the manuscript. After it finishes, run standalone

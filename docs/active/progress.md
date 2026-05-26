@@ -53,9 +53,24 @@ This is a diagnostic smoke run only. It verifies the new condition, logging,
 and cross-partner interference analysis; it is not yet promoted into the
 manuscript evidence hierarchy.
 
-## Queued H6 Discovery Batch
+## Running H6 Discovery Batch
 
-The next queued batch should stay at `--workers 1` and use the H6 probe configs:
+The H6 discovery batch is running in tmux session
+`h6_global_beta_discovery`. It writes logs to:
+
+```text
+results/h6_global_beta_discovery_20260525/run.log
+```
+
+Inspect or stop it with:
+
+```bash
+tmux capture-pane -pt h6_global_beta_discovery -S -120
+tmux attach -t h6_global_beta_discovery
+tmux kill-session -t h6_global_beta_discovery
+```
+
+The launched command is:
 
 ```bash
 python scripts/experiment/run.py \
@@ -73,7 +88,9 @@ This is not a full-seed confirmation. It is a complete discovery queue across
 the main mechanism regimes plus a lesion-family probe, with five seeds for the
 global-beta regime probes and three seeds for the larger lesion-family probe.
 All variants use planning horizon 2 to keep the one-worker queue tractable.
-Analyze each completed experiment with:
+Checkpoint output has started under
+`results/h6_global_beta_discovery_20260525/h6/`. Analyze each completed
+experiment with:
 
 ```bash
 python scripts/analysis/analyze.py --results results/h6_global_beta_discovery_20260525/h6/<experiment_id>/results.csv --output-dir results/h6_global_beta_discovery_20260525/h6/<experiment_id>/analysis
