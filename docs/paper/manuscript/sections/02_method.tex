@@ -51,7 +51,7 @@ where $\sigma_0^2$ is a prior fitness baseline and $\alpha$ is a gain parameter.
 \gamma_k = \gamma_{\text{base}} \,/\, \mathbb{E}_{q(\beta_k)}[\beta_k].
 \label{eq:gamma}
 \end{equation}
-A well-validated partner model drives $\mathbb{E}[\beta_k]$ toward low values, raising $\gamma_k$ and sharpening policy selection for that partner. An unreliable partner model keeps $\mathbb{E}[\beta_k]$ high, lowering $\gamma_k$ and leaving policy selection diffuse. The affective precision channel thus translates accumulated evidence about predictive reliability into action confidence---independently for each social relationship.
+Note the direction: $\beta_k$ represents precision \emph{volatility}, not precision itself. Higher $\beta_k$ means the model has been less reliable, producing a broader, less committed policy distribution. This runs opposite to the intuition that higher $\beta$ equals more confidence --- it is the inverse that drives action sharpening. A well-validated partner model drives $\mathbb{E}[\beta_k]$ toward low values, raising $\gamma_k$ and sharpening policy selection for that partner. An unreliable partner model keeps $\mathbb{E}[\beta_k]$ high, lowering $\gamma_k$ and leaving policy selection diffuse. The affective precision channel thus translates accumulated evidence about predictive reliability into action confidence---independently for each social relationship.
 
 The $\beta_k$ posterior is maintained as an external auxiliary tracker rather than a proper hidden state in the generative model, which simplifies implementation at the cost of losing the agent's ability to form prior expectations over its own future affective states (discussed in Section~\ref{sec:discussion}).
 
