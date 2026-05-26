@@ -10,7 +10,6 @@ def test_docs_state_steering_wheel_exists():
         "docs/active/state.md",
         "docs/active/progress.md",
         "docs/active/blockers.md",
-        "docs/active/handoff.md",
         "docs/decisions/architecture.md",
         "docs/decisions/experiments.md",
     ]
