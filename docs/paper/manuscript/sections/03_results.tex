@@ -1,16 +1,16 @@
 \section{Results}
 \label{sec:results}
 
-We report five sets of analyses. Section~\ref{sec:h1} establishes what the affective precision channel actually tracks. Section~\ref{sec:h2} shows that its behavioral effect depends on how open the policy space is, and that the effect runs through action sharpening rather than better partner beliefs. Section~\ref{sec:choice} examines partner selection. Sections~\ref{sec:betrayal} and~\ref{sec:shock} characterize the mechanism's volatility limit. Section~\ref{sec:pheno} reports precision-dynamics phenotypes as a parameter-sensitivity check.
+We report five sets of analyses. Section~\ref{sec:h1} establishes what partner-local affective precision actually tracks. Section~\ref{sec:h2} shows that its behavioral effect depends on how open the policy space is, and that the effect runs through action sharpening rather than better partner beliefs. Section~\ref{sec:choice} examines partner selection. Sections~\ref{sec:betrayal} and~\ref{sec:shock} characterize the mechanism's volatility limit. Section~\ref{sec:pheno} reports precision-dynamics phenotypes as a parameter-sensitivity check.
 
 \subsection{The affective precision channel tracks partner predictability, not partner value}
 \label{sec:h1}
 
-The central question for the affective precision channel is whether its running estimate of model fitness actually reflects predictive reliability or whether it is a proxy for experienced reward. A predictable exploiter is low value but easy to model; a valuable but erratic partner is worth engaging but hard to predict. If the channel tracks value, these two situations should produce similar precision levels. If it tracks model fitness, they should diverge.
+The central question is whether the $\beta_k$ signal actually reflects predictive reliability or whether it is a proxy for experienced reward. A predictable exploiter is low value but easy to model; a valuable but erratic partner is worth engaging but hard to predict. If affective precision tracks value, these two situations should produce similar $\beta_k$ levels. If it tracks model fitness, they should diverge.
 
-We evaluate this in the binary game across 30 seeds and 200 rounds per seed. The affective precision channel ($\gamma_k$-derived signal) correlates more strongly with partner predictability than with payoff: $|\text{corr}(\text{precision}, \text{surprise})| = 0.701$ versus $|\text{corr}(\text{precision}, \text{payoff})| = 0.419$ across partner-seed units. The seed-level gap between these two correlations is $+0.096$, bootstrap CI $[0.027,\; 0.164]$. The channel is carrying partner-model reliability information, not reward history.
+We evaluate this in the binary game across 30 seeds and 200 rounds per seed. The $\gamma_k$-derived signal correlates more strongly with partner predictability than with payoff: $|\text{corr}(\text{precision}, \text{surprise})| = 0.701$ versus $|\text{corr}(\text{precision}, \text{payoff})| = 0.419$ across partner-seed units. The seed-level gap between these two correlations is $+0.096$, bootstrap CI $[0.027,\; 0.164]$. Partner-local affective precision carries model-reliability information, not reward history.
 
-The absence of a payoff benefit is itself informative: it prevents the precision signal from being explained away as a proxy for reward. In the binary regime the expected free energy gap between cooperating and defecting is large enough that the policy posterior is already near-deterministic; sharpening or softening a near-argmax changes almost nothing. The channel is informative about reliability but has nowhere to act. Section~\ref{sec:h2} shows what happens when it does.
+The absence of a payoff benefit is itself informative: it prevents the precision signal from being explained away as a proxy for reward. In the binary regime the expected free energy gap between cooperating and defecting is large enough that the policy posterior is already near-deterministic; sharpening or softening a near-argmax changes almost nothing. Affective precision is informative about reliability but has nowhere to act. Section~\ref{sec:h2} shows what happens when it does.
 
 \begin{figure}[H]
 \centering
@@ -19,12 +19,12 @@ The absence of a payoff benefit is itself informative: it prevents the precision
 \label{fig:model-fitness}
 \end{figure}
 
-\subsection{Behavioral effects depend on policy entropy; action sharpening accounts for the benefit}
+\subsection{Behavioral gains are regime-dependent and trace to action sharpening, not belief quality}
 \label{sec:h2}
 
 Whether the affective precision channel can improve behavior depends on how much room the policy space gives it to act. We compare five seeds per variant, 200 rounds, across both regimes. In the binary game: no payoff advantage, no entropy difference (Section~\ref{sec:h1}). In the graded investment game: precision modulation reaches total payoff $1884.6$ versus $1859.4$ for the no-affect baseline ($+25.2$), with mean policy entropy $7.94$ versus $8.80$ ($-0.86$). The improvement emerges precisely in the regime where policy entropy is high enough for action confidence to matter.
 
-The tracked-only lesion isolates where the effect lives. It matches the no-affect baseline in payoff and entropy --- not the full-precision agent --- despite having slightly \emph{better} partner-belief accuracy (joint: $0.339$ vs.\ $0.336$; stance: $0.855$ vs.\ $0.816$). Better beliefs alone do not produce the behavioral gain. The effect is located at the action-selection stage: $\beta_k$ changes how sharply existing beliefs are expressed, not whether those beliefs are correct.
+The tracked-only lesion isolates where the effect lives. It matches the no-affect baseline in payoff and entropy --- not the full-precision agent --- despite having slightly \emph{better} partner-belief accuracy (joint: $0.339$ vs.\ $0.336$; stance: $0.855$ vs.\ $0.816$). The benefit is not epistemic: the agent is not forming better partner models. It is metacognitive: the agent deploys the same models with better-calibrated confidence. The gain traces specifically to the $\beta_k \to \gamma_k$ pathway.
 
 \begin{figure}[H]
 \centering
@@ -45,7 +45,7 @@ The mechanism is reorganizing social engagement around partner-model reliability
 
 All conditions above involve stationary partners. Betrayal scenarios test what happens when a partner's disposition changes mid-episode: the agent enters the post-switch period with a model that has been accumulating positive affective charge under the old behavioral regime.
 
-The problem is precisely that the affective precision channel has been doing its job. The agent has built up action confidence toward the betraying partner based on a model that no longer applies. When the partner changes, the $\beta_k$ posterior still reflects the pre-switch reliability record while the lower-level partner-state beliefs---which need repeated evidence to reorganize---are only beginning to update. The channel sharpens action based on accumulated confidence in a stale model.
+The problem is precisely that affective precision has been doing its job. The agent has built up action confidence toward the betraying partner based on a model that no longer applies. When the partner changes, $\beta_k$ still reflects the pre-switch reliability record while the lower-level partner-state beliefs---which need repeated evidence to reorganize---are only beginning to update. Metacognitive confidence sharpens action around a stale first-order model.
 
 Across 30 seeds and 120 rounds this is what we observe. Precision modulation yields lower whole-run payoff than the no-affect and tracked-only baselines: $1136.1$ versus $1172.1$, mean difference $-36.1$, bootstrap CI $[-63.7,\; -10.9]$, $p = 0.017$. Policy entropy is lower under precision modulation ($8.38$ vs.\ $8.74$), confirming the channel is active and influencing action. Post-switch, the agent returns to the switched partner less often ($4.4$ vs.\ $6.1$ reencounters; selection rate $0.049$ vs.\ $0.067$) but with no calibration improvement: payoff per reencounter $8.76$ vs.\ $8.91$, wrong-type rate $0.237$ vs.\ $0.165$. The agent acted decisively; its inference did not justify that decisiveness.
 
@@ -61,7 +61,7 @@ Across 30 seeds and 120 rounds this is what we observe. Precision modulation yie
 
 The betrayal failure might suggest the problem is too much precision gain---a $\beta_k$ update that is too fast. The sensitivity analysis rules this out. A combined-caution variant that raises $\beta$ globally to reduce precision gain produces worse payoff, not better: $1115.0$ versus $1172.1$ for no-affect ($p = 0.003$, entropy $9.27$). Reducing precision uniformly removes the useful action confidence in the stable portions of the episode without addressing the timing problem in the betrayal portion.
 
-Gradual betrayal confirms that the limit is the speed of change. When the partner's disposition shifts slowly, the $\beta_k$ posterior tracks the changing prediction record before a large confidence surplus can accumulate. Default precision modulation is neutral under gradual change: payoff $1147.6$ versus $1148.9$ for no-affect, $p = 0.906$. The fact that blanket caution hurts in \emph{both} regimes while local precision is only bad in the abrupt case is a strong interaction: it reveals that the mechanism's limitation is not the magnitude of its response but the temporal alignment between social change and belief recalibration. Combined caution again hurts ($1118.3$, $p = 0.005$). The affective precision channel is adaptive when partner behavior is stable and neutral when it changes slowly; it becomes maladaptive specifically when behavioral change is faster than partner beliefs can track.
+Gradual betrayal confirms that the limit is the speed of change. When the partner's disposition shifts slowly, the $\beta_k$ posterior tracks the changing prediction record before a large confidence surplus can accumulate. Default precision modulation is neutral under gradual change: payoff $1147.6$ versus $1148.9$ for no-affect, $p = 0.906$. The fact that blanket caution hurts in \emph{both} regimes while local precision is only bad in the abrupt case is a strong interaction: it reveals that the mechanism's limitation is not the magnitude of its response but the temporal alignment between social change and belief recalibration. Combined caution again hurts ($1118.3$, $p = 0.005$). Partner-local affective precision is adaptive when partner behavior is stable and neutral when it changes slowly; it becomes maladaptive specifically when behavioral change is faster than partner beliefs can track.
 
 \begin{figure}[H]
 \centering
@@ -73,7 +73,7 @@ Gradual betrayal confirms that the limit is the speed of change. When the partne
 \subsection{Precision-dynamics phenotypes}
 \label{sec:pheno}
 
-As a compact parameter check we verify that the affective precision channel responds to parameterization in an interpretable way. In the open graded regime a low-gain variant (small $\alpha$) produces narrow $\beta_k$ movement (mean range $0.149$ vs.\ $0.950$ for default); high-gain and cautious-prior variants produce wider movement ($1.318$ and $1.435$). The same ordering holds in betrayal ($0.132$, $1.114$, $1.091$). Payoff does not rank variants monotonically by precision-dynamics range, consistent with the regime-dependence result: the affective channel's behavioral consequence depends on the task context, not just on how much it moves.
+As a compact parameter check we verify that $\beta_k$ dynamics respond to parameterization in an interpretable way. In the open graded regime a low-gain variant (small $\alpha$) produces narrow $\beta_k$ movement (mean range $0.149$ vs.\ $0.950$ for default); high-gain and cautious-prior variants produce wider movement ($1.318$ and $1.435$). The same ordering holds in betrayal ($0.132$, $1.114$, $1.091$). Payoff does not rank variants monotonically by precision-dynamics range, consistent with the regime-dependence result: the behavioral consequence of affective precision depends on the task context, not just on how much the signal moves.
 
 \begin{figure}[H]
 \centering
