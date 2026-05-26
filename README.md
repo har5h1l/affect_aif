@@ -40,7 +40,7 @@ partner redesign:
 Common entry points:
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 12
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
 python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv
 python scripts/analysis/analyze.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/analysis
 python scripts/analysis/visualize.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/gifs

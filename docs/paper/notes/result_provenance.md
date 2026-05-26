@@ -34,7 +34,7 @@ See `docs/results/runs/2026-05-18-h0-h5-rerun.md` for the full run digest.
 ### H1/H3 Split Confirmation
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 1
 python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_20260519/h1/reliability_vs_reward_confirm/results.csv --output-dir results/confirm_h1_h3_split_20260519/h1/reliability_vs_reward_confirm/analysis
 python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/results.csv --output-dir results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/analysis
 ```

@@ -27,7 +27,7 @@ This document provides comprehensive system documentation for AI agents operatin
 ## Learned Workspace Facts
 
 - Use `.venv` in project root; venv should auto-activate when in this folder (direnv with `.envrc`).
-- Recommended experiment run: queue the relevant TOML specs under `configs/trust/hypotheses/` in one batch with `--workers 12`; results go under `results/<batch_name>/<hypothesis_id>/<experiment_id>/results.csv`; run `scripts/analysis/analyze.py` on those paths after.
+- Recommended experiment run: queue the relevant TOML specs under `configs/trust/hypotheses/` in one batch with `--workers 1` unless the user explicitly authorizes more workers; results go under `results/<batch_name>/<hypothesis_id>/<experiment_id>/results.csv`; run `scripts/analysis/analyze.py` on those paths after.
 - Random-assignment specs are weak discriminators for the current hypothesis spine; use agent-choice scheduled-stance-switch specs for stress-response results.
 - Official `inferactively-pymdp==1.0.0` is the supported runtime. Do not reintroduce a custom active-inference engine; keep affect and trust logic in task modules.
 - State inference (partner-type belief updating) is handled by official

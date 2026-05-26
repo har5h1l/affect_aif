@@ -24,23 +24,26 @@ pilot. The higher-replication H1/H3 split confirmation also completed under
 `results/confirm_h1_h3_split_20260519/` and is documented in
 `docs/results/runs/2026-05-21-h1-h3-confirmation.md`.
 
-There is no immediate experiment queue. The recommended next action is write-up
-stabilization: consolidate the results narrative, promote H1 as a confirmed
-model-fitness readout, and keep H3 framed as a stress boundary condition where
-affective precision changes deployment but can hurt payoff.
+The manuscript write-up has been stabilized. The recommended next action is
+not a broad seed sweep; it is the global-beta/locality implementation described
+in `docs/paper/manuscript/next_research_plan.md` and
+`docs/superpowers/plans/2026-05-25-global-beta-locality.md`.
+
+Run only 3-5 seed smoke tests at first, keep `--workers 1`, and do not update
+manuscript interpretation from new outputs until the user reviews the results.
 
 ## Optional Confirmation Queue
 
 ### 1. Higher-Rep Open-Regime Affect, H1 Model Fitness, and Deployment
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name confirm_open_model_deployment --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name confirm_open_model_deployment --workers 1
 ```
 
 ### 2. Higher-Rep Social Choice
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name confirm_social_choice --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name confirm_social_choice --workers 1
 ```
 
 ### 2b. Manuscript Open/Social Confirmation
@@ -64,7 +67,7 @@ The H3 split confirmation already ran as
 write-up or review process requires a specific stress-regime robustness check.
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h3_stress_robustness --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h3_stress_robustness --workers 1
 ```
 
 ## Canonical Full Queue
@@ -75,37 +78,37 @@ They are not the immediate next action.
 ### 1. H0 Openness Gate
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 1
 ```
 
 ### 2. H1 Model Fitness / Reliability vs Reward
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --output-dir results --batch-name h1_model_fitness --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --output-dir results --batch-name h1_model_fitness --workers 1
 ```
 
 ### 3. H2 Deployment / Lesion
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name h2_deployment --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name h2_deployment --workers 1
 ```
 
 ### 4. H3 Stress Response / Betrayal Stance Switch
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
 ```
 
 ### 5. H4 Social Choice / Partner Selection
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name h4_social_choice --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name h4_social_choice --workers 1
 ```
 
 ### 6. H5 Perturbation Phenotypes / Clinical-Like Variants
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml --config configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml --config configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml --output-dir results --batch-name h5_perturbation --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml --config configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml --config configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml --output-dir results --batch-name h5_perturbation --workers 1
 ```
 
 ### 7. Optional Factorization Ablation
