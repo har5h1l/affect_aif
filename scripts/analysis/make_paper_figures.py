@@ -26,14 +26,29 @@ VARIANT_LABELS = {
 
 
 def _read(source_dir: Path, filename: str) -> pd.DataFrame:
-    return pd.read_csv(source_dir / filename)
+    path = source_dir / filename
+    if not path.exists():
+        raise FileNotFoundError(f"Required source table not found: {path}")
+    return pd.read_csv(path)
 
 
-def _save(fig: plt.Figure, output_dir: Path, stem: str) -> None:
+def _read_required(source_dir: Path, filename: str, columns: set[str]) -> pd.DataFrame:
+    frame = _read(source_dir, filename)
+    missing = sorted(columns.difference(frame.columns))
+    if missing:
+        raise ValueError(f"{filename} missing required columns: {', '.join(missing)}")
+    return frame
+
+
+def _save(fig: plt.Figure, output_dir: Path, stem: str) -> list[Path]:
     output_dir.mkdir(parents=True, exist_ok=True)
+    paths = []
     for suffix in (".png", ".pdf"):
-        fig.savefig(output_dir / f"{stem}{suffix}", bbox_inches="tight", dpi=300)
+        path = output_dir / f"{stem}{suffix}"
+        fig.savefig(path, bbox_inches="tight", dpi=300)
+        paths.append(path)
     plt.close(fig)
+    return paths
 
 
 def _label(values: list[str]) -> list[str]:
@@ -58,7 +73,168 @@ def _bar(ax: plt.Axes, labels: list[str], values: list[float], *, title: str, yl
         )
 
 
-def deployment_social_figure(source_dir: Path, output_dir: Path) -> None:
+def _effect_row(frame: pd.DataFrame, readout: str, metric: str) -> pd.Series:
+    rows = frame[(frame["readout"] == readout) & (frame["metric"] == metric)]
+    if rows.empty:
+        raise ValueError(f"Missing source row for readout={readout!r}, metric={metric!r}")
+    return rows.iloc[0]
+
+
+def _plot_difference_with_ci(
+    ax: plt.Axes,
+    labels: list[str],
+    values: list[float],
+    lows: list[float],
+    highs: list[float],
+    *,
+    title: str,
+    ylabel: str,
+) -> None:
+    x = np.arange(len(values))
+    lower_errors = np.array(values) - np.array(lows)
+    upper_errors = np.array(highs) - np.array(values)
+    ax.axhline(0, color="#555555", linewidth=0.8)
+    ax.bar(x, values, color=["#2f6f9f", "#c47f2c", "#7a6aa8", "#5f8f5f", "#8c8c8c"][: len(values)])
+    ax.errorbar(x, values, yerr=[lower_errors, upper_errors], fmt="none", color="#222222", capsize=3, linewidth=0.9)
+    ax.set_xticks(x, labels, rotation=20, ha="right")
+    ax.set_title(title, pad=8)
+    ax.set_ylabel(ylabel)
+    ax.spines[["top", "right"]].set_visible(False)
+
+
+def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
+    evidence = _read_required(
+        source_dir,
+        "h1_evidence_effect_summary.csv",
+        {
+            "readout",
+            "metric",
+            "treatment_variant",
+            "reference_variant",
+            "treatment_mean",
+            "reference_mean",
+            "difference",
+            "bootstrap_ci_low",
+            "bootstrap_ci_high",
+        },
+    )
+    correlation = _read_required(
+        source_dir,
+        "h1_model_fitness_correlation_summary.csv",
+        {
+            "variant_id",
+            "corr_precision_surprise",
+            "corr_precision_reward",
+            "abs_corr_precision_surprise",
+            "abs_corr_precision_reward",
+        },
+    )
+    if correlation.empty:
+        raise ValueError("h1_model_fitness_correlation_summary.csv has no rows")
+
+    corr_row = correlation.iloc[0]
+    fitness = _effect_row(evidence, "model_fitness", "abs_corr_precision_surprise_minus_reward")
+    payoff = _effect_row(evidence, "final", "total_payoff")
+
+    fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
+    _bar(
+        axes[0],
+        ["predictive surprise", "reward proxy"],
+        [
+            float(corr_row["abs_corr_precision_surprise"]),
+            float(corr_row["abs_corr_precision_reward"]),
+        ],
+        title="Precision correlations",
+        ylabel="absolute correlation",
+    )
+    axes[0].set_ylim(0, max(0.05, float(corr_row["abs_corr_precision_surprise"])) + 0.12)
+
+    _plot_difference_with_ci(
+        axes[1],
+        ["surprise - reward"],
+        [float(fitness["difference"])],
+        [float(fitness["bootstrap_ci_low"])],
+        [float(fitness["bootstrap_ci_high"])],
+        title="Model fitness gap",
+        ylabel="absolute correlation delta",
+    )
+
+    _bar(
+        axes[2],
+        [str(payoff["treatment_variant"]), str(payoff["reference_variant"])],
+        [float(payoff["treatment_mean"]), float(payoff["reference_mean"])],
+        title="Reward is not improved",
+        ylabel="total payoff",
+    )
+
+    fig.suptitle("Model fitness versus realized reward", y=1.04, fontsize=12)
+    return _save(fig, output_dir, "fig_model_fitness_beta_reward_divergence")
+
+
+def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
+    evidence = _read_required(
+        source_dir,
+        "h3_evidence_effect_summary.csv",
+        {
+            "readout",
+            "metric",
+            "treatment_variant",
+            "reference_variant",
+            "treatment_mean",
+            "reference_mean",
+            "difference",
+            "bootstrap_ci_low",
+            "bootstrap_ci_high",
+        },
+    )
+    payoff = _effect_row(evidence, "final", "total_payoff")
+    entropy = _effect_row(evidence, "final", "mean_q_pi_entropy")
+    reencounters = _effect_row(evidence, "betrayal_reallocation", "reencounters")
+    reencounter_payoff = _effect_row(evidence, "betrayal_reallocation", "mean_payoff_on_reencounter")
+    wrong_type = _effect_row(evidence, "betrayal_misdeployment", "wrong_type_rate")
+
+    fig, axes = plt.subplots(1, 3, figsize=(11.2, 3.0))
+    _bar(
+        axes[0],
+        [str(payoff["treatment_variant"]), str(payoff["reference_variant"])],
+        [float(payoff["treatment_mean"]), float(payoff["reference_mean"])],
+        title="Betrayal payoff",
+        ylabel="total payoff",
+    )
+    _bar(
+        axes[1],
+        [str(entropy["treatment_variant"]), str(entropy["reference_variant"])],
+        [float(entropy["treatment_mean"]), float(entropy["reference_mean"])],
+        title="Policy entropy",
+        ylabel="mean entropy",
+    )
+    _plot_difference_with_ci(
+        axes[2],
+        ["reencounters", "return payoff", "wrong type"],
+        [
+            float(reencounters["difference"]),
+            float(reencounter_payoff["difference"]),
+            float(wrong_type["difference"]),
+        ],
+        [
+            float(reencounters["bootstrap_ci_low"]),
+            float(reencounter_payoff["bootstrap_ci_low"]),
+            float(wrong_type["bootstrap_ci_low"]),
+        ],
+        [
+            float(reencounters["bootstrap_ci_high"]),
+            float(reencounter_payoff["bootstrap_ci_high"]),
+            float(wrong_type["bootstrap_ci_high"]),
+        ],
+        title="Boundary diagnostics",
+        ylabel="affect - no affect",
+    )
+
+    fig.suptitle("Betrayal boundary condition", y=1.04, fontsize=12)
+    return _save(fig, output_dir, "fig_betrayal_boundary_summary")
+
+
+def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     h2 = _read(source_dir, "h2_deployment_dissociation_summary.csv")
     h4 = _read(source_dir, "h4_partner_choice_summary.csv")
 
@@ -110,10 +286,10 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> None:
 
     fig.suptitle("Deployment and social choice", y=1.01, fontsize=12)
     fig.tight_layout()
-    _save(fig, output_dir, "fig_deployment_social_summary")
+    return _save(fig, output_dir, "fig_deployment_social_summary")
 
 
-def shock_shape_figure(source_dir: Path, output_dir: Path) -> None:
+def shock_shape_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     abrupt = _read(source_dir, "h3_abrupt_sensitivity_final_round_summary.csv")
     gradual = _read(source_dir, "h3_gradual_sensitivity_final_round_summary.csv")
     order = ["no_affect", "affect_default", "affect_combined_caution"]
@@ -169,10 +345,10 @@ def shock_shape_figure(source_dir: Path, output_dir: Path) -> None:
     axes[2].spines[["top", "right"]].set_visible(False)
 
     fig.suptitle("Shock shape and precision sensitivity", y=1.04, fontsize=12)
-    _save(fig, output_dir, "fig_shock_shape_summary")
+    return _save(fig, output_dir, "fig_shock_shape_summary")
 
 
-def phenotype_figure(source_dir: Path, output_dir: Path) -> None:
+def phenotype_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     dynamics = _read(source_dir, "h5_clinical_dynamics_phenotype_validation_summary.csv")
     betrayal = _read(source_dir, "h5_clinical_betrayal_phenotype_validation_summary.csv")
     order = ["affect", "alexithymia", "borderline", "depression"]
@@ -208,7 +384,13 @@ def phenotype_figure(source_dir: Path, output_dir: Path) -> None:
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].legend(frameon=False, fontsize=8)
     fig.suptitle("Precision-dynamics perturbation phenotypes", y=1.04, fontsize=12)
-    _save(fig, output_dir, "fig_phenotype_dynamics_summary")
+    return _save(fig, output_dir, "fig_phenotype_dynamics_summary")
+
+
+def print_manifest(paths: list[Path]) -> None:
+    print("Generated paper figure files:")
+    for path in paths:
+        print(f"  - {path}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -240,10 +422,14 @@ def main() -> int:
             "legend.fontsize": 8,
         }
     )
-    deployment_social_figure(source_dir, output_dir)
-    shock_shape_figure(source_dir, output_dir)
-    phenotype_figure(source_dir, output_dir)
-    print(f"Wrote paper figures to {output_dir}")
+    generated = [
+        *model_fitness_figure(source_dir, output_dir),
+        *betrayal_boundary_figure(source_dir, output_dir),
+        *deployment_social_figure(source_dir, output_dir),
+        *shock_shape_figure(source_dir, output_dir),
+        *phenotype_figure(source_dir, output_dir),
+    ]
+    print_manifest(generated)
     return 0
 
 
