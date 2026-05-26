@@ -118,7 +118,8 @@ The input can be CSV or parquet. Variant-shaped results produce
 `statistics_summary.txt`, and betrayal CSVs when switch events are present.
 Betrayal outputs include post-switch windows, phase splits
 (`pre_switch`, `acute_post_switch`, `post_acute_tail`), detection/recovery
-latencies, and per-encounter trajectories.
+latencies, per-encounter trajectories, cross-partner interference summaries,
+and per-partner pre/post delta summaries.
 
 ## Configs
 

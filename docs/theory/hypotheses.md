@@ -36,6 +36,12 @@ The global-beta ablation is now promoted to an H6 discovery surface. It should
 not be treated as settled evidence until smoke outputs are reviewed and, if
 promising, rerun at higher replication.
 
+Current H6 discovery read: local beta preserves a cleaner model-fitness signal
+than global beta in the focused locality probes, but global beta has higher
+aggregate payoff in those same smoke runs. H6 should therefore be treated as an
+open decomposition of signal quality versus behavioral allocation, not as
+evidence that partner-local beta is necessary.
+
 ## H0: Openness Gate
 
 **Mechanism claim:** Affective precision can only change behavior when the
@@ -202,6 +208,10 @@ change.
 **Failure pattern:** Global beta matches partner-local beta across the same
 readouts, suggesting that the current partner-local implementation is
 interpretable but not necessary under this task design.
+
+**Current discovery pattern:** Local beta has the stronger
+surprise-over-reward signature, but this cleaner signal has not yet produced
+better allocation or payoff than global beta in five-seed locality smokes.
 
 ## Engineering Objectives
 

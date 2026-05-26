@@ -159,6 +159,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   - `betrayal_trajectories.csv`
   - `betrayal_misdeployment_summary.csv`
   - `betrayal_reallocation_summary.csv`
+  - `partner_phase_delta_summary.csv`
   - `affective_movement_summary.csv`
 - Generic analysis also writes `deployment_dissociation_summary.csv`,
   `partner_choice_summary.csv`, and `phenotype_validation_summary.csv` so H2,
@@ -174,6 +175,11 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   decisions, whether the agent returned to the switched partner,
   decisions/rounds to first re-encounter, selection rate after the switch, and
   payoff/entropy conditional on re-encounter.
+- Partner phase deltas report per-partner selection, payoff, and entropy
+  changes in equal pre/post windows around the first scheduled stance switch.
+  This is the primary H6 locality readout when the question is whether a shock
+  to one partner changes deployment toward partners whose behavior did not
+  change.
 - Misdeployment summaries report post-switch wrong-type, bad-payoff,
   low-entropy, and overconfident-wrong rates so H3 can distinguish recovery
   wins from precision-sharpened wrong deployment.

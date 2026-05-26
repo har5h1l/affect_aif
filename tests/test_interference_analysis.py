@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import pandas as pd
 
-from analysis.interference import cross_partner_interference_summary, global_vs_local_beta_summary
+from analysis.interference import (
+    cross_partner_interference_summary,
+    global_vs_local_beta_summary,
+    partner_phase_delta_summary,
+)
 from analysis.metrics import affective_movement_summary
 
 
@@ -69,3 +73,54 @@ def test_affective_movement_summary_uses_temporal_beta_range() -> None:
 
     assert summary.loc[0, "beta_range"] == 0.30000000000000004
     assert bool(summary.loc[0, "beta_moved_materially"])
+
+
+def test_partner_phase_delta_summary_reports_per_partner_changes() -> None:
+    frame = pd.DataFrame(
+        [
+            {
+                "variant_id": "local_beta",
+                "seed": 1,
+                "round": 0,
+                "selected_partner": 0,
+                "payoff": 10.0,
+                "q_pi_entropy": 2.0,
+                "scheduled_stance_switch_partner_ids": "[]",
+            },
+            {
+                "variant_id": "local_beta",
+                "seed": 1,
+                "round": 1,
+                "selected_partner": 1,
+                "payoff": 4.0,
+                "q_pi_entropy": 3.0,
+                "scheduled_stance_switch_partner_ids": "[]",
+            },
+            {
+                "variant_id": "local_beta",
+                "seed": 1,
+                "round": 2,
+                "selected_partner": 0,
+                "payoff": 1.0,
+                "q_pi_entropy": 1.0,
+                "scheduled_stance_switch_partner_ids": "[0]",
+            },
+            {
+                "variant_id": "local_beta",
+                "seed": 1,
+                "round": 3,
+                "selected_partner": 1,
+                "payoff": 5.0,
+                "q_pi_entropy": 2.0,
+                "scheduled_stance_switch_partner_ids": "[]",
+            },
+        ]
+    )
+
+    summary = partner_phase_delta_summary(frame, window=2).sort_values("partner_idx").reset_index(drop=True)
+
+    assert bool(summary.loc[0, "is_switched_partner"]) is True
+    assert summary.loc[0, "selection_rate_delta"] == 0.0
+    assert summary.loc[0, "mean_payoff_delta"] == -9.0
+    assert bool(summary.loc[1, "is_switched_partner"]) is False
+    assert summary.loc[1, "mean_entropy_delta"] == -1.0

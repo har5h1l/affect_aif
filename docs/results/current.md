@@ -26,6 +26,8 @@ Primary provenance:
   `results/h6_global_beta_discovery_20260525/`
 - H6 locality/interference probe:
   `results/h6_global_beta_locality_probe_20260526/`
+- H6 focal-switch locality probe:
+  `results/h6_global_beta_focal_switch_probe_20260526/`
 - Analysis entry point: `scripts/analysis/analyze.py`
 - Server evidence copy: current/provenance-bearing batches are retained under
   `results/`; superseded incomplete and duplicate local result directories
@@ -61,7 +63,7 @@ bad post-switch model.
 | H3 Stress Response | Boundary condition sharpened | The 30-seed reallocation confirmation shows lower entropy and fewer returns to the switched partner, but worse whole-run payoff and no conditional-return payoff advantage. The precision-sensitivity follow-up shows that simple caution knobs do not rescue the abrupt betrayal regime; gradual betrayal makes default affect nearly payoff-neutral relative to baseline. H3 should read as stress exposing precision-driven misdeployment risk, especially under abrupt shocks. |
 | H4 Social Choice | Supported behaviorally | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. This is the expected signature for partner-choice behavior changing before total reward moves. |
 | H5 Perturbation Phenotypes | Supported for dynamics; payoff underpowered | Clinical-like variants separate in beta range, entropy, partner selection, and payoff ordering, but payoff pairwise tests are mostly not significant with five seeds. |
-| H6 Locality / Interference | Discovery only | Global beta does not simply duplicate local beta. It often weakens or inverts the surprise-over-reward signature, but the focused five-seed locality probe is mixed: local beta preserved the cleaner model-fitness signal, while global beta had higher aggregate payoff. Current evidence is not sufficient to claim partner-local beta is necessary. |
+| H6 Locality / Interference | Discovery only | Global beta does not simply duplicate local beta. Across two focused five-seed locality probes, local beta preserved the cleaner model-fitness signal, while global beta had higher aggregate payoff. Current evidence supports partner-local beta as an interpretable model-fitness readout, not as a necessary architecture. |
 
 ## What This Means
 
@@ -112,24 +114,24 @@ This suggests that a shared tracker can mix partner-specific model fitness with
 overall episode quality, but the current run is too small to promote a
 necessity claim.
 
-H6 locality probe read: the focused five-seed mixed-partner probe does not
-support a simple locality-win story. Global beta had higher aggregate payoff
-than local beta (`822.9` vs `768.2`; no-affect/tracked-only `796.6`), while
-local beta kept the stronger model-fitness signature (`|corr(precision,
-surprise)| = 0.872` vs `0.601` for reward; global beta `0.070` vs `0.236`).
-The cross-partner interference readout is also mixed: selection entropy fell
-more under local beta than global beta after the switch (`-0.620` vs `-0.190`),
-and local beta produced the strongest shift away from the switched partner
-(`-0.170`) and toward the random partner (`+0.400`). Treat this as evidence to
-refine the locality design, not to promote H6.
+H6 locality probe read: the focused five-seed mixed-partner probes do not
+support a simple locality-win story. In the first probe, global beta had higher
+aggregate payoff than local beta (`822.9` vs `768.2`; no-affect/tracked-only
+`796.6`), while local beta kept the stronger model-fitness signature
+(`|corr(precision, surprise)| = 0.872` vs `0.601` for reward; global beta
+`0.070` vs `0.236`). In the focal-switch follow-up, the same pattern held:
+global beta had higher payoff (`991.7` vs `953.7`; no-affect/tracked-only
+`964.3`), while local beta again had the cleaner surprise-over-reward signature
+(`0.832` vs `0.287`; global beta `0.133` vs `0.164`). Global beta moved more
+broadly as a shared state, but that broader movement did not reduce payoff in
+these smoke probes. Treat this as evidence to soften H6, not to promote it.
 
-The project should now be treated as in write-up stabilization plus focused H6
-mechanism follow-up: consolidate the evidence hierarchy, keep H3 split into
-reallocation and misdeployment readouts, and avoid broad new experiment sweeps.
-The next useful experiment is a revised locality/interference design that
-separates two questions: whether local beta preserves a cleaner reliability
-signal, and whether that cleaner signal improves partner allocation after a
-shock.
+The project should now be treated as in write-up stabilization plus focused
+confirmation of the main result spine. H6 should be written as an open
+decomposition: local beta is cleaner as a model-fitness signal, but current
+smokes do not show that locality is behaviorally necessary. The next useful
+experiments are confirmation runs for the manuscript-facing H0/H2/H4 support,
+not more H6 smoke variants.
 
 ## Current Architecture Requirement
 

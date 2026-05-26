@@ -2,27 +2,57 @@
 
 ## Purpose
 
-The next experiment phase should test whether affective precision must remain
-partner-local, or whether one shared volatility/fitness tracker can explain the
-same behavioral effects. The current H0-H5 manuscript evidence supports
-partner-local precision as an active deployment signal. The H6 discovery runs
-show that local beta preserves a cleaner model-fitness signal than global beta,
-but the first focused locality smoke is mixed: global beta had higher aggregate
-payoff, and local beta produced stronger post-switch selection concentration.
-The follow-up work should therefore refine the locality claim before adding
-more broad sweeps.
+The next experiment phase should strengthen the manuscript-facing result spine
+while keeping H6 in the right evidential position. The current H0-H5 manuscript
+evidence supports partner-local precision as an active deployment signal. The
+H6 discovery runs show that local beta preserves a cleaner model-fitness signal
+than global beta, but two focused locality smokes are mixed: global beta had
+higher aggregate payoff, while local beta retained the stronger
+surprise-over-reward signature. H6 should therefore remain a mechanism
+decomposition, not a necessity claim.
 
 The plan has four lanes, ordered by manuscript value:
 
-1. Locality/interference diagnostic.
-2. Global-beta interpretation.
-3. Focused lesion-family follow-up.
-4. Figure-quality outputs for reviewable evidence.
+1. Confirm H0/H2/H4 manuscript support at higher replication.
+2. Keep H6 as a locality/global-beta decomposition.
+3. Run focused lesion-family follow-up only if needed.
+4. Maintain figure-quality outputs for reviewable evidence.
 
 All runs should use `--workers 1` unless the user explicitly authorizes a
 different worker count.
 
-## Lane 1: Locality / Interference Diagnostic
+## Lane 1: Manuscript Confirmation
+
+### Question
+
+Do the currently five-seed H0/H2/H4 support results hold at higher replication?
+
+### Run
+
+This is now the highest manuscript-value experiment lane because H1 and H3
+already have 30-seed confirmations, while H0/H2/H4 still support major
+manuscript claims with smaller seed counts.
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h0_openness/graded_choice_confirm.toml \
+  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
+  --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml \
+  --output-dir results \
+  --batch-name manuscript_open_social_confirm_YYYYMMDD \
+  --workers 1
+```
+
+### Primary Readouts
+
+- H0: graded-regime payoff and policy entropy.
+- H2: affect-vs-tracked-only payoff, entropy, and belief accuracy.
+- H4: partner-selection entropy and selection distribution, not payoff alone.
+
+Promote only the readouts that replicate. Do not rewrite H6 into a necessity
+claim from these runs.
+
+## Lane 2: Locality / Interference Diagnostic
 
 ### Question
 
@@ -121,7 +151,7 @@ Do not promote based on aggregate payoff alone. Also do not promote the exact
 2026-05-26 design unless the stance-switch timing and post-switch comparison
 window are revised so the same shock is cleanly represented across seeds.
 
-## Lane 2: Global-Beta Interpretation
+## Lane 3: Global-Beta Interpretation
 
 ### Question
 
@@ -157,14 +187,14 @@ containing volatility to the partner whose model failed. If no, soften the claim
 to: partner-local precision is an interpretable implementation of a more general
 volatility/fitness signal.
 
-## Lane 3: Focused Lesion-Family Follow-Up
+## Lane 4: Focused Lesion-Family Follow-Up
 
 ### Question
 
 Which failure mode best explains maladaptive deployment: fixed precision, stale
 precision, noisy precision, asymmetric updating, or global sharing?
 
-### Run After Lane 1
+### Run After Lane 2
 
 Do not start with a broad lesion sweep. Add lesions only after the locality logs
 are verified, because the lesion results are most useful when they can be read
@@ -198,7 +228,7 @@ For each lesion, report dynamics before payoff:
 The useful product is a phenotyping table: lesion type -> expected beta
 dynamics -> deployment signature -> behavioral consequence.
 
-## Lane 4: Figure-Quality Outputs
+## Lane 5: Figure-Quality Outputs
 
 Create one figure-generation path that reads canonical analysis CSVs and emits
 reviewable PDF/PNG panels. This should happen before more exploratory sweeps,

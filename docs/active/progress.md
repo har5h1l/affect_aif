@@ -121,6 +121,19 @@ locality claim: local beta preserves a cleaner precision-surprise signature, but
 global beta has higher aggregate payoff in this probe. See
 `docs/results/runs/2026-05-26-h6-locality-probe.md`.
 
+The focal-switch follow-up completed under:
+
+```text
+results/h6_global_beta_focal_switch_probe_20260526/
+```
+
+It switched partner `0`, a high-engagement cooperator, to hostile mid-run. This
+made the shock easier to observe than the earlier partner-`3` switch. The result
+is still mixed in the same direction: local beta preserves the cleaner
+model-fitness signal, while global beta has higher aggregate payoff. H6 should
+therefore remain an open mechanism decomposition rather than a manuscript-level
+necessity claim.
+
 ## Optional Confirmation Queue
 
 ### 1. Higher-Rep Open-Regime Affect, H1 Model Fitness, and Deployment
@@ -138,8 +151,8 @@ python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_cho
 ### 2b. Manuscript Open/Social Confirmation
 
 This config-only batch promotes the H0/H2/H4 supporting evidence from five
-seeds to 30 seeds without changing runtime behavior. It should write under
-`results/manuscript_open_social_confirm_20260525_single_worker/`.
+seeds to 30 seeds without changing runtime behavior. This is now the preferred
+next run after the H6 smokes.
 
 ```bash
 python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice_confirm.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml --output-dir results --batch-name manuscript_open_social_confirm_20260525_single_worker --workers 1

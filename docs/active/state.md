@@ -56,6 +56,12 @@ precision is doing work beyond a shared model-fitness tracker.
   `--workers 1`. It is mixed discovery evidence: local beta preserves a cleaner
   model-fitness signal, but global beta has higher aggregate payoff in this
   small probe. Do not promote H6 to a necessity claim without a revised design.
+- The H6 focal-switch follow-up completed at
+  `results/h6_global_beta_focal_switch_probe_20260526/` with five seeds and
+  `--workers 1`. It replicated the mixed H6 pattern: local beta preserved the
+  cleaner model-fitness signal, while global beta had higher aggregate payoff.
+  The next run should return to H0/H2/H4 manuscript confirmation rather than
+  adding more H6 smoke variants.
 - The manuscript now includes script-generated figure panels for model fitness,
   deployment/social choice, betrayal boundary, shock shape, and
   precision-dynamics phenotypes. It compiles to 11 LNCS pages.
@@ -73,6 +79,9 @@ Both were intentionally smoke-scale and one-worker. The current read is that
 global beta does not duplicate local beta, but the locality/interference result
 is mixed enough that H6 should remain a follow-up mechanism question rather than
 a manuscript-level necessity claim.
+
+The next active experiment lane is the H0/H2/H4 manuscript confirmation queue in
+`docs/active/progress.md`.
 
 Do not create a separate handoff document; keep the live handoff in this
 `docs/active/` state/progress surface.

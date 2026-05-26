@@ -62,9 +62,10 @@ Stable raw tables include:
 - `betrayal_phase_summary.csv`,
   `betrayal_misdeployment_summary.csv`, and
   `betrayal_reallocation_summary.csv` when switch events are present
-- `cross_partner_interference_summary.csv` and
-  `global_vs_local_beta_summary.csv` from the standalone analysis path when
-  switch-event runs include the H6 global-beta condition
+- `cross_partner_interference_summary.csv`,
+  `partner_phase_delta_summary.csv`, and `global_vs_local_beta_summary.csv`
+  from the standalone analysis path when switch-event runs include the H6
+  global-beta condition
 
 The standalone post-hoc analysis remains available:
 

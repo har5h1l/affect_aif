@@ -2,8 +2,8 @@
 
 ## Status
 
-This is a five-seed smoke result for the focused locality/interference design.
-It is useful for deciding what to run next, but it should not be promoted into
+This note records two five-seed H6 locality/interference smoke results. They
+are useful for deciding what to run next, but they should not be promoted into
 the main manuscript evidence hierarchy or used to claim that partner-local beta
 is necessary.
 
@@ -18,6 +18,17 @@ is necessary.
 - Status: completed and analyzed
 - Analysis:
   `results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/analysis/`
+
+Second focal-switch probe:
+
+- Batch: `results/h6_global_beta_focal_switch_probe_20260526/`
+- Config:
+  `configs/trust/hypotheses/h6_locality_interference/global_beta_focal_switch_probe.toml`
+- Size: 4 variants x 5 seeds x 100 rounds = `2,000` rows
+- Worker count: `--workers 1`
+- Status: completed and analyzed
+- Analysis:
+  `results/h6_global_beta_focal_switch_probe_20260526/h6/global_beta_focal_switch_probe/analysis/`
 
 Run command:
 
@@ -35,6 +46,24 @@ Analysis command:
 .venv/bin/python scripts/analysis/analyze.py \
   --results results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/results.csv \
   --output-dir results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/analysis
+```
+
+Focal-switch run command:
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h6_locality_interference/global_beta_focal_switch_probe.toml \
+  --output-dir results \
+  --batch-name h6_global_beta_focal_switch_probe_20260526 \
+  --workers 1
+```
+
+Focal-switch analysis command:
+
+```bash
+.venv/bin/python scripts/analysis/analyze.py \
+  --results results/h6_global_beta_focal_switch_probe_20260526/h6/global_beta_focal_switch_probe/results.csv \
+  --output-dir results/h6_global_beta_focal_switch_probe_20260526/h6/global_beta_focal_switch_probe/analysis
 ```
 
 ## Design
@@ -117,7 +146,7 @@ diffuse selection change.
 This run is useful precisely because it complicates the simple story. The local
 tracker keeps a cleaner model-fitness signal, but the global tracker performs
 better by aggregate payoff in this small mixed-partner setting. The locality
-claim should therefore be softened until a better-controlled follow-up is run.
+claim should therefore be softened.
 
 The next design should separate two questions that are confounded here:
 
@@ -126,10 +155,43 @@ The next design should separate two questions that are confounded here:
 
 The current answer is: probably yes to the first, not yet to the second.
 
+## Focal-Switch Follow-Up
+
+The first probe switched partner `3`, which was not reliably selected after the
+switch. A second five-seed smoke switched partner `0`, the stable cooperator
+that tends to draw engagement. This made the post-switch comparison cleaner.
+
+Aggregate payoff still does not support a local-beta advantage:
+
+| Variant | Mean total payoff | Mean policy entropy | Mean joint accuracy |
+|---|---:|---:|---:|
+| `global_beta` | `991.7` | `7.92` | `0.292` |
+| `no_affect` | `964.3` | `8.11` | `0.300` |
+| `tracked_only` | `964.3` | `8.11` | `0.300` |
+| `local_beta` | `953.7` | `7.80` | `0.214` |
+
+The model-fitness diagnostic again separates local and global beta:
+
+| Variant | `|corr(precision, surprise)|` | `|corr(precision, reward)|` | Surprise dominates reward |
+|---|---:|---:|---|
+| `local_beta` | `0.832` | `0.287` | yes |
+| `tracked_only` | `0.874` | `0.030` | yes |
+| `global_beta` | `0.133` | `0.164` | no |
+
+The focal-switch partner-delta readout is also mixed. In the 10-round pre/post
+window, local beta slightly increased selection of the switched partner
+(`+0.060`) and reduced untouched-partner selection (`-0.020` on average).
+Global beta increased selection of the switched partner more strongly
+(`+0.220`) and reduced untouched-partner selection more broadly (`-0.073` on
+average), but this did not hurt aggregate payoff. Global beta also moved more
+widely as a shared state (`mean beta range = 0.777`) than the mean local beta
+range (`0.361`).
+
 ## Next Step
 
-Do not scale this exact probe directly to 30 seeds yet. First revise the
-locality design so the scheduled switch reliably creates a comparable
-post-switch period across seeds and so the primary readout is explicitly
-partner-indexed interference rather than aggregate payoff. Then rerun a 5-seed
-smoke before promotion.
+Do not scale H6 directly to a 30-seed necessity test. The current H6 conclusion
+is already useful: partner-local beta is a cleaner model-fitness readout, but a
+global tracker can still perform as well or better behaviorally in these small
+mixed-partner probes. The next manuscript-useful work is to treat H6 as an open
+decomposition and shift effort back to confirmation of the main H0-H5 result
+spine unless a reviewer specifically asks for locality necessity.
