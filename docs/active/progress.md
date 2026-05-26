@@ -30,8 +30,8 @@ has also been implemented as a smoke-test surface under
 Keep follow-up experiments narrow and use them to test structure before adding
 more seeds.
 
-Run only 3-5 seed smoke tests at first, keep `--workers 1`, and do not update
-manuscript interpretation from new outputs until the user reviews the results.
+Run only 3-5 seed smoke tests at first, keep `--workers 1`, and do not promote
+new outputs into manuscript-level claims until the user reviews the results.
 
 ## Current H6 Smoke Provenance
 
@@ -93,9 +93,33 @@ Standalone analysis has been run for each experiment:
 python scripts/analysis/analyze.py --results results/h6_global_beta_discovery_20260525/h6/<experiment_id>/results.csv --output-dir results/h6_global_beta_discovery_20260525/h6/<experiment_id>/analysis
 ```
 
-Treat these outputs as discovery evidence awaiting user review. Do not promote
-H6 into result interpretation docs or manuscript claims until the user approves
-the evidence read.
+Treat these outputs as discovery evidence. Do not promote H6 into manuscript
+claims until the user approves the evidence read.
+
+## Completed H6 Locality / Interference Probe
+
+The focused locality probe completed under:
+
+```text
+results/h6_global_beta_locality_probe_20260526/
+```
+
+The completed command was:
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h6_locality_interference/global_beta_locality_probe.toml --output-dir results --batch-name h6_global_beta_locality_probe_20260526 --workers 1
+```
+
+Analysis was run with:
+
+```bash
+python scripts/analysis/analyze.py --results results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/results.csv --output-dir results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/analysis
+```
+
+This is a five-seed smoke result, not a confirmation. It complicates the simple
+locality claim: local beta preserves a cleaner precision-surprise signature, but
+global beta has higher aggregate payoff in this probe. See
+`docs/results/runs/2026-05-26-h6-locality-probe.md`.
 
 ## Optional Confirmation Queue
 

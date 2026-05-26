@@ -1,81 +1,244 @@
-# Follow-Up Experiment Plan
+# Follow-Up Experiment Design Plan
 
-## Goal
+## Purpose
 
-Strengthen the first-draft manuscript by promoting the weakest supporting
-open-regime and social-choice results from five-seed evidence to 30-seed
-confirmation evidence, while keeping the current H1/H3 30-seed mechanism and
-stress results unchanged.
+The next experiment phase should test whether affective precision must remain
+partner-local, or whether one shared volatility/fitness tracker can explain the
+same behavioral effects. The current H0-H5 manuscript evidence supports
+partner-local precision as an active deployment signal. The H6 discovery runs
+show that local beta preserves a cleaner model-fitness signal than global beta,
+but the first focused locality smoke is mixed: global beta had higher aggregate
+payoff, and local beta produced stronger post-switch selection concentration.
+The follow-up work should therefore refine the locality claim before adding
+more broad sweeps.
 
-## Run 1: Manuscript Open/Social Confirmation
+The plan has four lanes, ordered by manuscript value:
 
-Batch name:
+1. Locality/interference diagnostic.
+2. Global-beta interpretation.
+3. Focused lesion-family follow-up.
+4. Figure-quality outputs for reviewable evidence.
 
-```text
-manuscript_open_social_confirm_20260525_single_worker
-```
+All runs should use `--workers 1` unless the user explicitly authorizes a
+different worker count.
 
-Configs:
+## Lane 1: Locality / Interference Diagnostic
 
-- `configs/trust/hypotheses/h0_openness/graded_choice_confirm.toml`
-- `configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml`
-- `configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml`
+### Question
 
-Expected result roots:
+When one partner changes, does affective precision stay attached to the partner
+whose model failed, or does it contaminate policy deployment for untouched
+partners?
 
-- `results/manuscript_open_social_confirm_20260525_single_worker/h0/graded_choice_confirm/`
-- `results/manuscript_open_social_confirm_20260525_single_worker/h2/lesion_open_regime_confirm/`
-- `results/manuscript_open_social_confirm_20260525_single_worker/h4/partner_choice_confirm/`
+### Task Design
 
-Command:
+Use four partners in a single mixed regime:
+
+- one stable cooperator;
+- one reliable exploiter;
+- one random or volatile partner;
+- one partner with a scheduled stance switch mid-run.
+
+The key comparison is not overall payoff first. The first readout is whether the
+shock to the switching partner changes selection, entropy, or payoff for the
+three partners whose behavior did not change.
+
+### Conditions
+
+Run the same task under:
+
+- `local_beta`: partner-local beta updates and beta-to-policy deployment;
+- `global_beta`: one shared beta posterior updated by all interactions;
+- `tracked_only`: beta updates but does not set policy precision;
+- `no_affect`: no beta tracker.
+
+Keep partner-local POMDP beliefs unchanged in every condition. Only the source
+of policy precision should differ.
+
+### Primary Readouts
+
+For each partner separately, compute pre-switch and post-switch summaries:
+
+- selection rate;
+- policy entropy conditional on selecting that partner;
+- payoff conditional on selecting that partner;
+- beta or gamma trajectory;
+- KL shift in policy posterior for untouched partners after the switch;
+- return latency to the switched partner;
+- wrong-type-on-return after reencounter.
+
+The strongest locality result would be a selective change for the switched
+partner under `local_beta`, but broader entropy/payoff disruption for untouched
+partners under `global_beta`.
+
+### Smoke Run
+
+Run 3-5 seeds first and inspect logs before any confirmation sweep:
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h0_openness/graded_choice_confirm.toml \
-  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
-  --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml \
+  --config configs/trust/hypotheses/h6_locality_interference/global_beta_locality_probe.toml \
   --output-dir results \
-  --batch-name manuscript_open_social_confirm_20260525_single_worker \
+  --batch-name h6_global_beta_locality_probe_YYYYMMDD \
   --workers 1
 ```
 
-Post-run analysis:
+Analyze the smoke output before increasing replication:
 
 ```bash
-.venv/bin/python scripts/analysis/analyze.py --results results/manuscript_open_social_confirm_20260525_single_worker/h0/graded_choice_confirm/results.csv --output-dir results/manuscript_open_social_confirm_20260525_single_worker/h0/graded_choice_confirm/analysis
-.venv/bin/python scripts/analysis/analyze.py --results results/manuscript_open_social_confirm_20260525_single_worker/h2/lesion_open_regime_confirm/results.csv --output-dir results/manuscript_open_social_confirm_20260525_single_worker/h2/lesion_open_regime_confirm/analysis
-.venv/bin/python scripts/analysis/analyze.py --results results/manuscript_open_social_confirm_20260525_single_worker/h4/partner_choice_confirm/results.csv --output-dir results/manuscript_open_social_confirm_20260525_single_worker/h4/partner_choice_confirm/analysis
+.venv/bin/python scripts/analysis/analyze.py \
+  --results results/h6_global_beta_locality_probe_YYYYMMDD/h6/global_beta_locality_probe/results.csv \
+  --output-dir results/h6_global_beta_locality_probe_YYYYMMDD/h6/global_beta_locality_probe/analysis
 ```
 
-## Aborted Run Note
+### Current Smoke Read
 
-`results/manuscript_open_social_confirm_20260525/` contains a partial aborted
-parallel run started before the one-worker constraint was clarified. It is
-marked with `ABORTED_DO_NOT_USE.md` and should not be interpreted.
+The completed 2026-05-26 smoke is documented in
+`docs/results/runs/2026-05-26-h6-locality-probe.md`. It should not be scaled
+directly to 30 seeds yet.
 
-## Why This Is The Next Best Run
+The smoke verified that partner-indexed logs and analysis outputs exist, but it
+did not confirm the simple prediction that global beta contaminates untouched
+partners more than local beta. Local beta preserved the stronger
+precision-surprise association, while global beta had better aggregate payoff.
+The next design should separate those two questions explicitly.
 
-- H1 and H3 already have 30-seed confirmations.
-- H0/H2/H4 currently support the manuscript but still rest on five seeds.
-- This run tests the most manuscript-relevant support claims without adding new
-  runtime behavior or changing interpretation assumptions.
-- It keeps output paths clean and resumable under one manuscript-specific batch.
+### Promotion Rule
 
-## Include/Exclude Rules
+Promote this to a larger confirmation run only if the smoke pass shows usable
+partner-indexed logs for:
 
-Include in the manuscript only after review:
+- selected partner;
+- payoff;
+- surprise or prediction error;
+- `q_pi_entropy`;
+- `gamma_used` or enough beta/precision state to reconstruct the deployed
+  precision;
+- global beta, when present;
+- local beta, when present.
 
-- H0 graded-choice payoff, entropy, and movement readouts.
-- H2 affect-vs-lesion deployment dissociation.
-- H4 partner-choice entropy and selection distribution.
+Do not promote based on aggregate payoff alone. Also do not promote the exact
+2026-05-26 design unless the stance-switch timing and post-switch comparison
+window are revised so the same shock is cleanly represented across seeds.
 
-Do not automatically rewrite interpretation docs from these outputs. First
-compare them against `docs/paper/manuscript/results_digest.md` and decide
-whether they strengthen, weaken, or leave unchanged the current manuscript
-claims.
+## Lane 2: Global-Beta Interpretation
 
-## Next Ablation After This Batch
+### Question
 
-Global-beta ablation remains the highest-value implementation follow-up because
-it directly tests whether partner-specific affect is necessary. It should be a
-separate code-and-test task, not mixed into this config-only confirmation run.
+Does one shared beta tracker preserve the same model-fitness signal as
+partner-local beta, or does it mix partner-specific reliability with overall
+episode quality?
+
+### Current Discovery Read
+
+The H6 discovery batch suggests that global beta is not an equivalent
+replacement for partner-local beta. In the discovery probes, local beta showed a
+stronger precision-surprise association, while global beta weakened or changed
+that association in deployment and lesion-family settings.
+
+This remains discovery evidence only. It should shape the next experiment and
+the manuscript limitations, not support a manuscript-level necessity claim.
+
+### Decision Criteria
+
+After the locality smoke and any confirmation run, interpret global beta with
+four questions:
+
+- Does global beta spread precision changes to untouched partners after a shock?
+- Does global beta reduce partner-selection entropy in a way that local beta
+  does not?
+- Does global beta track reward/payoff more than predictive surprise in
+  multi-partner settings?
+- If local beta preserves a cleaner reliability signal, does that signal improve
+  allocation or merely concentrate choices?
+
+If yes, the manuscript can say partner-local precision appears important for
+containing volatility to the partner whose model failed. If no, soften the claim
+to: partner-local precision is an interpretable implementation of a more general
+volatility/fitness signal.
+
+## Lane 3: Focused Lesion-Family Follow-Up
+
+### Question
+
+Which failure mode best explains maladaptive deployment: fixed precision, stale
+precision, noisy precision, asymmetric updating, or global sharing?
+
+### Run After Lane 1
+
+Do not start with a broad lesion sweep. Add lesions only after the locality logs
+are verified, because the lesion results are most useful when they can be read
+against partner-specific interference metrics.
+
+Priority lesions:
+
+- `frozen_beta`: beta posterior never updates and precision stays fixed;
+- `tracked_only_decouple`: beta updates but policy precision uses the base
+  gamma;
+- `delayed_deployment`: beta updates immediately but precision uses beta from
+  `d` rounds earlier;
+- `noisy_beta`: beta update receives controlled noise;
+- `asymmetric_charge`: negative surprises receive higher gain than positive
+  surprises;
+- `joint_surprise_beta`: epsilon comes from joint action-plus-payoff likelihood
+  rather than partner action alone.
+
+### Readout Map
+
+For each lesion, report dynamics before payoff:
+
+- beta range;
+- entropy change;
+- choice churn;
+- return latency;
+- wrong-type-on-return;
+- payoff conditional on selected partner;
+- untouched-partner entropy and payoff after a betrayal elsewhere.
+
+The useful product is a phenotyping table: lesion type -> expected beta
+dynamics -> deployment signature -> behavioral consequence.
+
+## Lane 4: Figure-Quality Outputs
+
+Create one figure-generation path that reads canonical analysis CSVs and emits
+reviewable PDF/PNG panels. This should happen before more exploratory sweeps,
+because it turns existing evidence into inspectable manuscript material.
+
+Required panels:
+
+- model-fitness dissociation: precision-surprise versus precision-payoff;
+- deployment dissociation: payoff, entropy, and belief readouts;
+- partner choice: selection rates and partner-selection entropy;
+- betrayal: payoff, entropy, reencounters, and wrong-type-on-return;
+- shock shape: abrupt versus gradual payoff and entropy;
+- H6 supplement: local versus global beta ranges and perturbation dynamics;
+- lesion supplement: beta range, entropy, choice churn, and return latency by
+  lesion type.
+
+Recommended output location:
+
+```text
+docs/paper/manuscript/figures/generated/
+```
+
+Recommended script name:
+
+```text
+scripts/analysis/make_paper_figures.py
+```
+
+The script should not rewrite manuscript claims. It should produce figures and
+summary CSVs that make the evidence easier to review.
+
+## Stop Conditions
+
+Pause before changing manuscript claims if:
+
+- global beta matches local beta on the locality/interference readouts;
+- the locality smoke lacks partner-indexed logs needed for interpretation;
+- lesion variants change belief updating instead of only beta/precision
+  deployment;
+- aggregate payoff improves while untouched-partner interference worsens.
+
+In those cases, update the research plan first and decide whether the manuscript
+should make a weaker interpretive claim.

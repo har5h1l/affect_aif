@@ -790,7 +790,7 @@ git commit -m "refactor(cli): report experiment families"
 Replace trust paths with:
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 12
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
 ```
 
 Replace benchmark paths with:

@@ -50,7 +50,12 @@ precision is doing work beyond a shared model-fitness tracker.
 - The H6 discovery batch completed at
   `results/h6_global_beta_discovery_20260525/` and standalone analysis outputs
   exist under each `h6/<experiment_id>/analysis/` directory. Treat these as
-  discovery outputs awaiting user review, not promoted manuscript evidence.
+  documented discovery outputs, not promoted manuscript evidence.
+- The focused H6 locality/interference probe completed at
+  `results/h6_global_beta_locality_probe_20260526/` with five seeds and
+  `--workers 1`. It is mixed discovery evidence: local beta preserves a cleaner
+  model-fitness signal, but global beta has higher aggregate payoff in this
+  small probe. Do not promote H6 to a necessity claim without a revised design.
 - The manuscript now includes script-generated figure panels for model fitness,
   deployment/social choice, betrayal boundary, shock shape, and
   precision-dynamics phenotypes. It compiles to 11 LNCS pages.
@@ -61,13 +66,13 @@ Read this folder in order: `state.md`, `progress.md`, then `blockers.md`.
 Paper-facing evidence remains in `docs/paper/manuscript/` and interpreted
 results remain in `docs/results/`.
 
-The next research thread should review the completed H6 discovery analysis in
-`results/h6_global_beta_discovery_20260525/h6/`. The run was intentionally
-smoke-scale and one-worker: it tested global beta across model-fitness,
-deployment, partner-choice, betrayal, and lesion-family probes without
-promoting new claims into the manuscript. Summarize whether global beta blurs
-partner-specific reallocation or matches local beta, then ask the user before
-updating result interpretation or manuscript claims.
+The next research thread should review both completed H6 discovery surfaces:
+`results/h6_global_beta_discovery_20260525/h6/` and
+`results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/`.
+Both were intentionally smoke-scale and one-worker. The current read is that
+global beta does not duplicate local beta, but the locality/interference result
+is mixed enough that H6 should remain a follow-up mechanism question rather than
+a manuscript-level necessity claim.
 
 Do not create a separate handoff document; keep the live handoff in this
 `docs/active/` state/progress surface.

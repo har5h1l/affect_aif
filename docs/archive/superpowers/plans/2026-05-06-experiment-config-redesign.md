@@ -939,7 +939,7 @@ git commit -m "feat(analysis): dispatch configured analyses"
 Replace old JSON examples with TOML examples:
 
 ```bash
-python scripts/experiment/run.py --config experiments/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --workers 12
+python scripts/experiment/run.py --config experiments/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --workers 1
 ```
 
 - [ ] **Step 2: Update CLI contract**

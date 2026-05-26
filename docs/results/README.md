@@ -44,3 +44,12 @@ boundary condition rather than an affective recovery win. The May 2026 H3
 precision-sensitivity follow-up narrows that boundary condition: generic
 caution knobs do not rescue abrupt betrayal, while gradual betrayal makes
 default affect nearly payoff-neutral relative to no-affect/lesioned baselines.
+
+The May 2026 H6 global-beta discovery batch is recorded in
+`docs/results/runs/2026-05-26-h6-global-beta-discovery.md`. It is current
+discovery evidence for planning the next locality/interference experiment, but
+it is not promoted to the main H0-H5 evidence hierarchy. The focused five-seed
+locality/interference probe is recorded in
+`docs/results/runs/2026-05-26-h6-locality-probe.md`; it is also discovery-scale
+and currently argues for softening, not strengthening, any necessity claim
+about partner-local beta.

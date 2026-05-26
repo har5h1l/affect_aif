@@ -11,13 +11,15 @@
   `configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml`
 - Size: H1 has 30 seeds each for affect and no-affect; H3 has 30 seeds each
   for affect, no-affect, and lesioned.
-- Worker cap used for the completed resume: `--workers 3`
+- Active reruns should use `--workers 1` unless explicitly authorized
+  otherwise. This historical batch was completed before the current one-worker
+  operating rule.
 - Analysis: `scripts/analysis/analyze.py`
 
 Run command:
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 3
+python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 1
 ```
 
 Analysis commands:

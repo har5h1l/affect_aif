@@ -12,6 +12,8 @@
 - Runtime: official `inferactively-pymdp==1.0.0`
 - Size: 30 seeds per variant; 12 variants in the abrupt run and 8 variants in
   the gradual run.
+- Historical batch execution used a higher worker count. New active reruns
+  should use `--workers 1` unless explicitly authorized otherwise.
 - Outputs:
   - Abrupt: `h3/betrayal_precision_sensitivity/results.csv` (`43,200` rows)
   - Gradual: `h3/betrayal_precision_sensitivity_gradual/results.csv`
@@ -21,7 +23,7 @@
 Run command:
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_precision_sensitivity.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_precision_sensitivity_gradual.toml --output-dir results --batch-name h3_precision_sensitivity_20260522 --workers 12
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_precision_sensitivity.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_precision_sensitivity_gradual.toml --output-dir results --batch-name h3_precision_sensitivity_20260522 --workers 1
 ```
 
 Analysis commands:

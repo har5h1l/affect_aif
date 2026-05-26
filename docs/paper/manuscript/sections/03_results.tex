@@ -1,72 +1,85 @@
 \section{Results}
+\label{sec:results}
 
-\subsection{Model fitness is separable from reward}
+We report five sets of analyses. The first asks what the precision signal tracks. The second asks when that signal actually changes behavior, and whether the change comes from action sharpening rather than better beliefs. The third asks how the mechanism affects partner selection. The fourth and fifth use abrupt and gradual betrayal to identify the temporal boundary of the mechanism. We close with a compact parameter check on the precision pathway.
 
-The first analysis separates model fitness from realized reward. If the beta-derived precision signal were functioning as cached value, it would be expected to covary with payoff at least as strongly as with predictive reliability. A model-fitness account instead expects precision to remain high for partners whose behavior is predictable, even when interaction with those partners is not especially rewarding.
+\subsection{The precision signal tracks model fitness, not reward}
+\label{sec:h1}
 
-Across 30 seeds per variant and 200 rounds per seed, affective precision did not improve payoff: total payoff was $534.6$ for the precision-modulated agent and $542.1$ for the no-affect baseline, with a mean difference of $-7.53$ and bootstrap CI $[-27.88,13.82]$. The absence of a payoff advantage is useful because it makes the reliability analysis a cleaner test of what the signal tracks.
+The first question is whether $\beta_k$ is mainly a reward-like estimate of partner value or a model-fitness estimate of predictive reliability. The trust game separates these quantities. A well-modeled cooperator and a well-modeled exploiter can be equally predictable, even though only one is consistently rewarding. This makes the reliability-versus-reward comparison a direct test of what the precision signal is measuring.
 
-The beta-derived precision signal tracked predictive reliability more strongly than reward. Across partner-seed units, $|\mathrm{corr}(\precision,\mathrm{surprise})|=0.701$, while $|\mathrm{corr}(\precision,\mathrm{payoff})|=0.419$. The corresponding seed-level reliability-over-reward summary was $+0.096$ with bootstrap CI $[0.027,0.164]$. This pattern is consistent with the model-fitness interpretation: the affective signal estimates confidence in the partner model, not partner value.
+Across 30 seeds and 200 rounds per seed in the binary game, precision modulation yields no payoff advantage over the no-affect baseline: $534.6$ vs.\ $542.1$, mean difference $-7.5$, bootstrap CI $[-27.9,\; 13.8]$. The absence of a payoff benefit matters because it keeps the interpretation of $\beta_k$ from collapsing into ``the condition that earned more reward.'' Across partner-seed units, $|\text{corr}(\beta_k, \text{surprise})| = 0.701$ versus $|\text{corr}(\beta_k, \text{payoff})| = 0.419$. The seed-level reliability-over-reward margin is $+0.096$, CI $[0.027,\; 0.164]$. The precision signal is therefore more closely tied to whether the partner model predicts behavior well than to whether the partner is profitable.
+
+The binary regime also explains why a reliable signal need not produce an immediate behavioral gain. The expected free energy difference between cooperating and defecting is large enough that the softmax policy posterior is already near-deterministic: $\beta_k$ can move substantially without changing the selected action. The next section therefore asks whether the same signal becomes behaviorally consequential when the policy posterior is less saturated.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.png}
-\caption{Model-fitness measurement. In the 30-seed reliability-versus-reward analysis, partner-local precision tracks predictive surprise more strongly than realized payoff, while precision modulation has no total-payoff advantage.}
+\caption{Model-fitness analysis. Partner-local precision correlates more strongly with predictive surprise than with payoff across partner-seed units. Precision modulation yields no payoff advantage over the no-affect baseline in the binary regime, where policy entropy is already low.}
 \label{fig:model-fitness}
 \end{figure}
 
-\subsection{Precision gates deployment in open policy regimes}
+\subsection{Behavioral effect depends on policy entropy; lesion isolates the pathway}
+\label{sec:h2}
 
-Partner-local precision can only change behavior when several policies remain live enough for precision to matter. In a saturated regime, the best policy may already dominate the posterior; changing softmax precision then changes little. In the open graded regime, using five seeds per variant and 200 rounds per seed, partner-local precision was associated with higher payoff and lower policy entropy. The precision-modulated agent reached total payoff $1884.6$ with mean policy entropy $7.94$, while the no-affect or tracked-only baseline reached $1859.4$ with entropy $8.80$. The difference was therefore $+25.2$ payoff and $-0.86$ entropy for precision modulation.
+The second question is whether partner-local precision changes behavior only when there is room for precision to matter. In the binary game, sharpening or softening an already-peaked posterior changes little. In the graded investment game, the agent distributes probability mass across several investment levels; changing $\gamma_k$ can move the selected investment level even when the underlying partner belief is unchanged.
 
-The tracked-only lesion separates belief estimation from action selection. In the same open regime, the precision-modulated agent had joint belief accuracy $0.336$ and stance accuracy $0.816$, while the tracked-only lesion had joint accuracy $0.339$ and stance accuracy $0.855$. Belief measurements were therefore similar or slightly favored the lesion, but policy entropy and payoff favored the precision pathway. The difference appears at deployment: the signal changes how beliefs are acted upon rather than simply improving belief accuracy.
+We compare five seeds per variant, 200 rounds, across both regimes. In the binary game (Section~\ref{sec:h1}) there is no payoff advantage and no meaningful entropy separation. In the graded game, the precision-modulated agent reaches total payoff $1884.6$ versus $1859.4$ for the no-affect baseline ($+25.2$), with mean policy entropy $7.94$ versus $8.80$ ($-0.86$). The same precision pathway that was behaviorally silent in the saturated binary game becomes visible once the task offers several plausible actions.
+
+The tracked-only lesion addresses the pathway. In the graded regime the lesion---which tracks $\beta_k$ fully but fixes $\gamma_k = \gamma_{\text{base}}$---has joint type-disposition belief accuracy $0.339$ and stance accuracy $0.855$, slightly better than the precision-modulated agent's $0.336$ and $0.816$. If the benefit came from better partner inference, the lesion should improve with the full model. It does not: its payoff and entropy match the no-affect baseline rather than the precision-modulated agent. The behavioral effect is therefore located at the action-selection stage, where $\beta_k$ changes how sharply existing beliefs are expressed.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_deployment_social_summary.png}
-\caption{Deployment and social choice measurements. In the open graded regime, local beta coupling changes payoff and policy entropy even when belief measurements remain similar. In the partner-choice regime, selection rates move before total payoff separates.}
+\caption{Regime dependence and lesion comparison. Precision modulation improves payoff and reduces entropy in the decision-open graded regime but not in the near-saturated binary regime. The tracked-only lesion, which preserves belief accuracy while removing action-precision modulation, matches the no-affect baseline rather than the full-precision agent.}
 \label{fig:deployment-social}
 \end{figure}
 
-\subsection{Partner choice changes before payoff}
+\subsection{Partner selection reorganizes around model fitness}
+\label{sec:choice}
 
-The partner-choice regime shows how partner-local precision shapes approach, avoidance, and probing. Payoff is a blunt measurement here because partner selection can change before total payoff separates. Across five seeds and 200 rounds per seed, payoff was nearly flat: $393.6$ for precision modulation versus $393.2$ for no affect. The policy distribution nevertheless changed. Mean policy entropy was $3.99$ with precision modulation and $4.83$ without it. Selection shifted toward the first partner ($0.348$ to $0.366$) and away from the third partner ($0.162$ to $0.138$). Within this bounded evidence, partner-local precision changed approach and avoidance before total payoff became informative.
+The third question is whether partner-local precision changes social allocation. In partner-choice regimes the agent expresses precision partly through whom it chooses to engage, not only how it acts once a partner is chosen. Aggregate payoff is a blunt measure here because selection shifts can occur before cumulative return separates.
 
-\subsection{Abrupt betrayal exposes a boundary condition}
+Across five seeds and 200 rounds, aggregate payoff is nearly flat: $393.6$ versus $393.2$. The behavioral signature appears elsewhere. Policy entropy under precision modulation is $3.99$ versus $4.83$ without it, and selection rates shift directionally: the most predictable partner draws more engagement ($0.348 \to 0.366$) while a less predictable partner draws less ($0.162 \to 0.138$). The mechanism is not simply increasing reward; it is reorganizing interaction toward partners whose behavior the model can anticipate.
 
-Abrupt betrayal reveals a boundary condition in which the same precision channel can be harmful. A partner's stance changes suddenly, creating a mismatch between the agent's accumulated model and the partner's new behavior. Across 30 seeds per variant and 120 rounds per seed, the precision-modulated agent obtained lower whole-run payoff than no-affect or tracked-only baselines: $1136.1$ versus $1172.1$, with mean difference $-36.08$, bootstrap CI $[-63.65,-10.93]$, and pairwise $p=0.0169$. Policy entropy was lower under precision modulation ($8.38$ versus $8.74$), showing that the channel was behaviorally active.
+\subsection{Abrupt betrayal reveals a boundary condition}
+\label{sec:betrayal}
 
-Post-switch measurements explain why this is not affective recovery. Precision modulation reduced mean reencounters with the switched partner ($4.4$ versus $6.1$) and lowered reencounter selection rate ($0.049$ versus $0.067$), but it did not improve the safety of returning: payoff on reencounter was $8.76$ versus $8.91$, and wrong-type rate on reencounter was $0.237$ versus $0.165$. The agent returned less often, but when it returned, it was not safer or better calibrated. Abrupt betrayal therefore produced precision-driven misdeployment: decisions became sharper before the partner model had recalibrated enough.
+The fourth question is what happens when a validated partner model suddenly becomes stale. Betrayal regimes introduce a stance switch mid-episode: one partner's behavior changes abruptly, creating a mismatch between the agent's accumulated model and the partner's new behavior. The question is not whether the agent can eventually adapt---it can---but what partner-local precision does during the transition.
+
+After a stable pre-switch period, $\beta_k$ for the switched partner reflects a model that has been repeatedly validated. When the partner changes, the agent enters the post-switch period with confidence inherited from the old regime. The possible failure mode is therefore temporal: precision can sharpen action before the partner-state posterior has reorganized.
+
+Across 30 seeds and 120 rounds this is what we observe. Precision modulation yields lower whole-run payoff than the no-affect or tracked-only baselines: $1136.1$ versus $1172.1$, mean difference $-36.1$, bootstrap CI $[-63.7,\; -10.9]$, $p = 0.017$. Policy entropy is lower under precision modulation ($8.38$ vs.\ $8.74$), so the loss is not caused by an inactive precision pathway. Post-switch, the agent returns to the switched partner less often ($4.4$ vs.\ $6.1$ reencounters; selection rate $0.049$ vs.\ $0.067$) but is not better calibrated when it does: payoff per reencounter is $8.76$ vs.\ $8.91$ and wrong-type rate is $0.237$ vs.\ $0.165$. The mechanism made action more decisive without making the stale model correct.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_betrayal_boundary_summary.png}
-\caption{Betrayal boundary condition. Abrupt betrayal makes partner-local precision behaviorally visible, but not safer: precision modulation lowers entropy and changes reallocation while reducing whole-run payoff.}
+\caption{Abrupt-betrayal boundary condition. Precision modulation reduces whole-run payoff, lowers policy entropy, and changes reallocation patterns without improving post-switch calibration. The agent acts more decisively on a model that is no longer valid.}
 \label{fig:betrayal-boundary}
 \end{figure}
 
-\subsection{Shock shape matters more than generic caution}
+\subsection{Shock shape is the key moderator}
+\label{sec:shock}
 
-The precision-sensitivity analysis tests whether betrayal failure is simply excessive precision gain. In the abrupt sensitivity run, the no-affect/tracked-only baseline had payoff $1153.6$ and entropy $8.80$. Default precision modulation reached payoff $1140.4$ and entropy $8.35$ ($p=0.370$ against no affect). A combined-caution variant raised entropy to $9.27$ but lowered payoff to $1115.0$ ($p=0.003$ against no affect).
+The fifth question is whether the betrayal cost is caused by too much precision gain or by when that gain is deployed. A combined-caution variant raises $\beta$ globally to reduce precision gain. If the problem were simply excessive confidence, this should help. It does not: combined caution lowers abrupt-betrayal payoff further ($1115.0$, $p = 0.003$, entropy $9.27$). Blanket caution removes useful decisiveness in the non-betrayal portions of the episode without fixing the post-switch timing mismatch.
 
-The gradual betrayal run changed the outcome. The no-affect/tracked-only baseline had payoff $1148.9$ and entropy $8.76$, while default precision modulation nearly matched it with payoff $1147.6$, entropy $8.38$, and $p=0.906$. Combined caution again reduced payoff ($1118.3$, $p=0.005$). Generic caution therefore does not rescue abrupt betrayal. The more informative boundary is shock shape: default partner-local precision is most harmful when a partner changes abruptly.
+Gradual betrayal isolates the timing claim directly. When the partner's stance shifts slowly, the $\beta_k$ posterior has time to track the changing prediction record before a large confidence surplus is applied to a mismatched model. Default precision modulation is neutral under gradual betrayal: payoff $1147.6$ versus $1148.9$ for no-affect, $p = 0.906$. Combined caution again reduces payoff ($1118.3$, $p = 0.005$). The cost of partner-local precision is therefore not an all-purpose penalty for being confident; it appears when behavioral change is faster than belief recalibration.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_shock_shape_summary.png}
-\caption{Shock-shape sensitivity. Default local beta has a larger payoff penalty under abrupt betrayal than gradual betrayal, while a generic caution variant raises entropy but remains costly in both regimes.}
+\caption{Shock-shape sensitivity. Default local precision is neutral under gradual betrayal but harmful under abrupt betrayal. A generic caution variant reduces payoff in both regimes. The relevant boundary is the speed of behavioral change, not the magnitude of the precision response.}
 \label{fig:shock-shape}
 \end{figure}
 
-\subsection{Perturbations separate precision dynamics before interpretation}
+\subsection{Precision-dynamics phenotypes}
+\label{sec:pheno}
 
-The perturbation runs are not clinical validation; they are a computational phenotyping check on the beta pathway. In open graded interaction, the low-gain variant compressed beta movement (mean beta range $0.149$ versus $0.950$ for default local beta), while high-gain and cautious-prior variants expanded it ($1.318$ and $1.435$). In betrayal, the same qualitative ordering remained visible: low gain stayed blunted ($0.132$), while high gain and cautious prior remained more volatile ($1.114$ and $1.091$). These differences are useful because they appear directly in the precision dynamics rather than only in payoff.
-
-Behavioral measurements were less one-dimensional. Action churn stayed high across variants, and payoff did not rank variants by a simple ``more beta movement is worse'' rule. That pattern is the point of treating these as phenotypes rather than diagnoses: the perturbations define different beta dynamics, but the behavioral consequence depends on the regime in which those dynamics are deployed.
+As a compact parameter check we verify that the $\beta_k$ pathway responds to parameterization in an interpretable way before assigning behavioral meaning. In the open graded regime a low-gain variant produces narrow $\beta_k$ movement (mean range $0.149$ vs.\ $0.950$ for default); high-gain and cautious-prior variants produce wider movement ($1.318$ and $1.435$). The same ordering holds in betrayal. Payoff and action churn do not sort monotonically by beta-movement range, reinforcing the main result: beta dynamics are only meaningful in relation to the task regime in which they are deployed. These perturbations define computational phenotypes of the affective channel, not clinical models.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_phenotype_dynamics_summary.png}
-\caption{Precision-dynamics perturbation phenotypes. Low-gain, high-gain, and cautious-prior variants separate clearly in beta movement, while action churn and payoff depend on the task regime. These variants are computational perturbations, not clinical models.}
+\caption{Precision-dynamics phenotypes. Low-gain, high-gain, and cautious-prior variants separate clearly in $\beta_k$ movement range. Behavioral consequences depend on task regime rather than beta magnitude alone.}
 \label{fig:phenotype-dynamics}
 \end{figure}

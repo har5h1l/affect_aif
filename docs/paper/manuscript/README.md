@@ -9,7 +9,7 @@ into a new project scaffold.
 
 - `main.tex`: anonymized LNCS manuscript source using the approved title.
 - `sections/`: manuscript section files included by `main.tex`.
-- `manuscript_draft.pdf`: rendered PDF produced from `main.tex`.
+- `manuscript.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
 - `results_digest.md`: audited seed counts, promoted result roots, key numbers,
   and include/exclude decisions.

@@ -48,7 +48,7 @@ Important flags:
 | `--config` | required | Repeatable TOML experiment spec. |
 | `--output-dir` | `results` | Root directory for batch outputs. |
 | `--batch-name` | timestamped batch id | Subdirectory under `--output-dir`. |
-| `--workers` | CPU count | Must be at least 1. |
+| `--workers` | CPU count | Must be at least 1; use `--workers 1` for active research runs unless the user explicitly authorizes more. |
 | `--verbose` | false | Enables progress output for supported serial paths. |
 | `--verbosity-mode` | `stage_stream` | Only supported mode. |
 | `--make-gifs` | false | Writes per-run GIFs for variant outputs after results are saved. |
@@ -87,10 +87,10 @@ Examples:
 python scripts/experiment/run.py --config configs/trust/smoke/smoke.toml --output-dir results --batch-name dry_run --dry-run
 
 # H3 betrayal stress response
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 12
+python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
 
 # multiple H0 openness experiments in one batch
-python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 12
+python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 1
 ```
 
 ## Preliminary Run

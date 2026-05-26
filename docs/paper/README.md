@@ -16,8 +16,9 @@ best entry point when deciding what the manuscript can claim.
 - `notes/experiment_manifest.md`: manuscript-facing experiment/config map.
 - `notes/reproducibility.md`: commands, environment, and provenance rules.
 - `notes/result_provenance.md`: promoted result roots and interpretation notes.
-- `manuscript/`: first-draft LaTeX outline, audited result digest, copied
-  figure assets, source CSVs, future-work menu, and writing-model handoff.
+- `manuscript/`: LNCS manuscript source, rendered `manuscript.pdf`, audited
+  result digest, copied figure assets, source CSVs, future-work menu, and
+  writing-model handoff.
 
 ## One-Sentence Thesis
 
@@ -27,7 +28,7 @@ into action when the policy space is open.
 
 ## Current Read
 
-The project is ready for manuscript drafting, but not for overclaiming.
+The project has a compiled manuscript packet, but is not ready for overclaiming.
 
 - Complete enough: H0, H1, H2, H3, and H4 have a coherent current-architecture
   evidence chain.
