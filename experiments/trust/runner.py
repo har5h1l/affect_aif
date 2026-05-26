@@ -235,6 +235,16 @@ class ExperimentRunner:
             if runtime.partner_bank.beta is not None
             else default_vector
         )
+        global_beta = (
+            float(betas[0])
+            if runtime.affect_mode == "global" and np.asarray(betas, dtype=float).size
+            else np.nan
+        )
+        local_betas = (
+            np.full((config.num_partners,), global_beta, dtype=float)
+            if runtime.affect_mode == "global"
+            else np.asarray(betas, dtype=float)
+        )
         prediction_errors = (
             np.asarray(runtime.partner_bank.latest_surprise, dtype=float)
             if runtime.partner_bank.latest_surprise is not None
@@ -254,10 +264,12 @@ class ExperimentRunner:
             "selected_action": int(decision.selected_action),
             "raw_action": int(decision.raw_action),
             "q_pi_entropy": entropy,
-            "betas": betas,
+            "betas": local_betas,
+            "global_beta": global_beta,
+            "local_betas": local_betas,
             "prediction_errors": prediction_errors,
             "latest_surprise_by_partner": prediction_errors,
-            "terminal_signal": betas,
+            "terminal_signal": local_betas,
             "reward_avgs": default_vector,
             "partner_beliefs": snapshot.partner_type_beliefs,
             "partner_posteriors": snapshot.partner_joint_posteriors.sum(axis=2),

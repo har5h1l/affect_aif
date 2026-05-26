@@ -203,7 +203,8 @@ def snapshot_partner_bank(*, bank: PartnerBank, template: TrustPomdpTemplate) ->
 def gamma_for_partner(*, base_gamma: float, beta, partner_idx: int, affect_mode: str) -> float:
     if beta is None or affect_mode in {"none", "decouple", "fixed"}:
         return float(base_gamma)
-    expected_beta = float(np.asarray(beta.expected_beta(), dtype=float)[int(partner_idx)])
+    beta_idx = 0 if affect_mode == "global" else int(partner_idx)
+    expected_beta = float(np.asarray(beta.expected_beta(), dtype=float)[beta_idx])
     return float(base_gamma) / max(expected_beta, 1e-16)
 
 
@@ -219,7 +220,8 @@ def update_beta_after_observation(
         return float("nan")
     probability = float(np.asarray(predicted_partner_action_probs, dtype=float)[int(observed_partner_action)])
     surprise = 1.0 - probability
-    bank.beta.update(entity=int(partner_idx), surprise=surprise)
+    beta_idx = 0 if affect_mode == "global" else int(partner_idx)
+    bank.beta.update(entity=beta_idx, surprise=surprise)
     if bank.latest_surprise is None:
         bank.latest_surprise = np.full((len(bank.agents),), np.nan, dtype=float)
     bank.latest_surprise[int(partner_idx)] = surprise

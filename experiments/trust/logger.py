@@ -59,6 +59,7 @@ class MetricLogger:
         partner_joint_posteriors = _array_metric("partner_joint_posteriors", default_posteriors)
         partner_stance_beliefs = _array_metric("partner_stance_beliefs", default_partner_beliefs)
         betas = _array_metric("betas", default_partner_vector)
+        local_betas = _array_metric("local_betas", betas)
         terminal_signal = _array_metric("terminal_signal", betas)
         prediction_errors = _array_metric(
             "latest_surprise_by_partner",
@@ -107,6 +108,8 @@ class MetricLogger:
             "planning_cost": _float_metric("planning_cost"),
             "planning_cost_ratio": _float_metric("planning_cost_ratio"),
             "betas": _to_float_list(betas),
+            "local_betas": _to_float_list(local_betas),
+            "global_beta": _float_metric("global_beta"),
             "terminal_signal": _to_float_list(terminal_signal),
             "prediction_errors": _to_float_list(prediction_errors),
             "reward_avgs": _to_float_list(_metric("reward_avgs", default_partner_vector)),

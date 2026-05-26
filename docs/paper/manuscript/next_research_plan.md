@@ -22,11 +22,16 @@ tracker would explain the same effects.
 
 ## Priority 1: Global-Beta Ablation
 
+**Status.** Implemented as `affect = "global_beta"` and smoke-tested in the
+H6 locality/interference config. The completed quick smoke lives under
+`results/global_beta_locality_smoke_quick_20260525/h6/global_beta_smoke/`.
+Use it to check logging and analysis, not to revise manuscript claims yet.
+
 **Purpose.** Test whether partner-local precision is necessary, or whether a
 single global volatility/model-fitness tracker explains the same behavior.
 
-**Condition.** Add `global_beta` as a fourth affect condition alongside
-`none`, `precision`, and `tracked_only`.
+**Condition.** `global_beta` is a fourth affect condition alongside `none`,
+`precision`, and `tracked_only`.
 
 - Maintain one categorical beta posterior shared across all partners.
 - Update that posterior after every interaction using the existing
@@ -37,12 +42,15 @@ single global volatility/model-fitness tracker explains the same behavior.
 - Log global beta, per-partner local beta when available, selected partner,
   partner-indexed surprise, payoff, entropy, and gamma used.
 
-**Smoke pass.** Run 3-5 seeds first, not 30:
+**Next smoke pass.** After reviewing the H6 quick smoke, run 3-5 seeds first,
+not 30, on the older manuscript regimes:
 
 - H1 reliability-versus-reward;
 - H2 open-regime deployment;
 - H4 partner choice;
 - H3 abrupt betrayal if the first three smoke tests pass.
+- H6 locality/interference only after changing the design or diagnostics; the
+  first quick smoke has already run.
 
 **Decision rule.**
 
@@ -66,6 +74,11 @@ partners whose behavior did not change.
 - random or volatile partner;
 - scheduled stance-switch partner.
 
+The first implemented version uses
+`configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`:
+two seeds, 40 rounds, one scheduled stance switch, and variants `none`,
+`precision`, `tracked_only`, and `global_beta`.
+
 **Variants.** Compare:
 
 - `none`;
@@ -82,6 +95,9 @@ partners whose behavior did not change.
 - KL shift in policy posterior for untouched partners after the switched
   partner changes;
 - entropy and payoff for unaffected partners after betrayal elsewhere.
+
+Current analysis outputs include `cross_partner_interference_summary.csv` and
+`global_vs_local_beta_summary.csv` from `scripts/analysis/analyze.py`.
 
 **Manuscript value.** This is the cleanest test of the title claim. The
 important result is not simply payoff. It is whether local beta confines
@@ -149,4 +165,3 @@ recalibration. This directly tests the proposed misdeployment mechanism.
 - Do not start a run expected to take more than 30 minutes in an interactive
   session without explicit approval.
 - Keep all experiment commands at `--workers 1`.
-

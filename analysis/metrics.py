@@ -495,16 +495,28 @@ def affective_movement_summary(results: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
 
     frame["betas"] = frame["betas"].apply(_ensure_array)
-    per_seed = frame.groupby(["variant_id", "seed"], as_index=False).agg(
-        beta_range=(
-            "betas",
-            lambda series: _safe_nanmean(np.asarray([_safe_range(arr) for arr in series], dtype=float)),
-        ),
-        beta_mean=(
-            "betas",
-            lambda series: _safe_nanmean(np.asarray([_safe_nanmean(arr) for arr in series], dtype=float)),
-        ),
-    )
+    rows: list[dict] = []
+    for (variant_id, seed), group in frame.groupby(["variant_id", "seed"], sort=False):
+        beta_stack = _stack_beta_rows(group["betas"])
+        if beta_stack.size:
+            temporal_ranges = np.asarray(
+                [_safe_range(beta_stack[:, idx]) for idx in range(beta_stack.shape[1])],
+                dtype=float,
+            )
+            beta_range = _safe_nanmean(temporal_ranges)
+            beta_mean = _safe_nanmean(beta_stack.ravel())
+        else:
+            beta_range = np.nan
+            beta_mean = np.nan
+        rows.append(
+            {
+                "variant_id": variant_id,
+                "seed": int(seed),
+                "beta_range": beta_range,
+                "beta_mean": beta_mean,
+            }
+        )
+    per_seed = pd.DataFrame(rows)
     if per_seed.empty:
         return per_seed
     thresholds = per_seed.copy()

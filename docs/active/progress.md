@@ -24,13 +24,34 @@ pilot. The higher-replication H1/H3 split confirmation also completed under
 `results/confirm_h1_h3_split_20260519/` and is documented in
 `docs/results/runs/2026-05-21-h1-h3-confirmation.md`.
 
-The manuscript write-up has been stabilized. The recommended next action is
-not a broad seed sweep; it is the global-beta/locality implementation described
-in `docs/paper/manuscript/next_research_plan.md` and
-`docs/superpowers/plans/2026-05-25-global-beta-locality.md`.
+The manuscript write-up has been stabilized. The global-beta/locality ablation
+has also been implemented as a smoke-test surface under
+`configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`.
+Keep follow-up experiments narrow and use them to test structure before adding
+more seeds.
 
 Run only 3-5 seed smoke tests at first, keep `--workers 1`, and do not update
 manuscript interpretation from new outputs until the user reviews the results.
+
+## Current H6 Smoke Provenance
+
+The completed one-worker smoke run is:
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml --output-dir results --batch-name global_beta_locality_smoke_quick_20260525 --workers 1
+```
+
+Rows are complete for `none`, `precision`, `tracked_only`, and `global_beta`
+with two seeds, 40 rounds, and planning horizon 2:
+
+```text
+results/global_beta_locality_smoke_quick_20260525/h6/global_beta_smoke/results.csv
+results/global_beta_locality_smoke_quick_20260525/h6/global_beta_smoke/analysis/
+```
+
+This is a diagnostic smoke run only. It verifies the new condition, logging,
+and cross-partner interference analysis; it is not yet promoted into the
+manuscript evidence hierarchy.
 
 ## Optional Confirmation Queue
 
@@ -111,11 +132,16 @@ python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_cho
 python scripts/experiment/run.py --config configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml --config configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml --config configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml --output-dir results --batch-name h5_perturbation --workers 1
 ```
 
-### 7. Optional Factorization Ablation
+### 7. H6 Locality / Global-Beta Ablation
 
-A future global-beta ablation can compare per-partner beta against a shared
-precision state. Keep it outside the core H0-H5 queue unless we decide the
-factorization claim needs direct model-comparison evidence.
+Use this only for smoke-scale discovery until the run design is reviewed:
+
+```bash
+python scripts/experiment/run.py --config configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml --output-dir results --batch-name global_beta_locality_smoke_next --workers 1
+```
+
+Run `scripts/analysis/analyze.py` on the output directory afterward to produce
+`cross_partner_interference_summary.csv` and `global_vs_local_beta_summary.csv`.
 
 ### 8. Multi-Focal Descriptive Runs
 

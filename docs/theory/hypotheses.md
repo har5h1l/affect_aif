@@ -32,6 +32,10 @@ behavior-card hypothesis. A future global-beta ablation can test whether
 per-partner affect is behaviorally superior to global affect. Predictive model
 comparison is future work, not part of the main H0-H5 spine.
 
+The global-beta ablation is now promoted to an H6 discovery surface. It should
+not be treated as settled evidence until smoke outputs are reviewed and, if
+promising, rerun at higher replication.
+
 ## H0: Openness Gate
 
 **Mechanism claim:** Affective precision can only change behavior when the
@@ -175,6 +179,29 @@ become behaviorally visible mainly in open policy regimes.
 
 **Failure pattern:** Behavior differs without the intended precision dynamics,
 or precision dynamics do not differentiate.
+
+## H6: Locality / Interference
+
+**Mechanism claim:** Partner-local affect should contain volatility to the
+partner whose model failed. A shared global beta tracker should spread precision
+changes to partners whose behavior did not change.
+
+**Expected behavior:** After one partner switches stance, local beta should move
+mainly for that partner, while global beta should change policy precision for
+all candidate partners.
+
+**Primary measures:** global beta, partner-local beta or terminal signal,
+selected-partner distribution, policy entropy conditional on selected partner,
+payoff conditional on selected partner, and policy-posterior shifts for
+untouched partners.
+
+**Pass pattern:** Global beta produces measurable cross-partner interference
+after a localized social shock, while partner-local beta confines the precision
+change.
+
+**Failure pattern:** Global beta matches partner-local beta across the same
+readouts, suggesting that the current partner-local implementation is
+interpretable but not necessary under this task design.
 
 ## Engineering Objectives
 

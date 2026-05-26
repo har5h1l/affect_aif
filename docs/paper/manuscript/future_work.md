@@ -11,16 +11,20 @@ Why it matters: the manuscript's architectural novelty is partner-local affect.
 Right now, partner specificity is a premise of the model and indirectly useful
 in H4, but it has not been directly compared to a global-affect control.
 
-Suggested design:
+Implemented starting point:
 
-- Add a global-beta variant that shares one beta tracker across partners but
-  keeps the same `gamma = gamma_base / E[beta]` mapping.
-- Run H1 reliability-vs-reward, H2 open-regime lesion, and H4 partner choice.
+- `affect = "global_beta"` now shares one beta tracker across partners while
+  preserving partner-local POMDP beliefs.
+- `configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`
+  provides a first locality/interference smoke run.
+- Next, review the H6 smoke output and then run 3-5 seed checks on H1
+  reliability-vs-reward, H2 open-regime lesion, and H4 partner choice.
 - Optional H3 abrupt/gradual stress check if time allows.
 - Primary readout: partner choice, entropy, payoff, and precision-reward versus
   precision-surprise association.
 
-Risk: requires implementation and tests, not just config changes.
+Risk: the first H6 run is smoke-scale only; do not promote it to manuscript
+evidence until the design and diagnostics are reviewed.
 
 ### 2. Focused Shock-Shape Gradient
 
@@ -75,6 +79,6 @@ Risk: low scientific risk, high manuscript value.
 
 ## Current Recommendation
 
-For a two-week deadline, prioritize the figure-quality composite script and, if
-there is enough implementation time, the global-beta ablation. Avoid another
-broad hyperparameter sweep.
+For a two-week deadline, prioritize reviewing the H6 smoke, producing cleaner
+paper figures, and running only small targeted global-beta follow-ups before
+any full-seed confirmation. Avoid another broad hyperparameter sweep.

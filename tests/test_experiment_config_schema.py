@@ -169,3 +169,21 @@ def test_factory_uses_tracked_only_lesion(example_spec):
     runtime = create_native_runtime_from_run(lesioned)
 
     assert runtime.affect_mode == "decouple"
+
+
+def test_factory_uses_global_beta_shared_tracker(example_spec):
+    run = example_spec.expand_runs()[0]
+    global_beta = replace(
+        run,
+        variant=replace(run.variant, id="global_beta", affect="global_beta"),
+        variant_id="global_beta",
+    )
+
+    runtime = create_native_runtime_from_run(global_beta)
+
+    assert runtime.variant_id == "global_beta"
+    assert runtime.agent_kind == "global_beta"
+    assert runtime.affect_mode == "global"
+    assert runtime.partner_bank.beta is not None
+    assert runtime.partner_bank.beta.num_entities == 1
+    assert len(runtime.partner_bank.agents) == global_beta.scenario.partners

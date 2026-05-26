@@ -76,8 +76,10 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - Planning horizon is a normal variant knob (`planning_horizon`) rather than a
   numeric condition category.
 - `affect = "none"` builds a base runtime, `affect = "precision"` builds the
-  normal beta-to-gamma runtime, and `affect = "tracked_only"` builds the beta
-  tracker while decoupling it from policy precision.
+  normal partner-local beta-to-gamma runtime, `affect = "tracked_only"` builds
+  the beta tracker while decoupling it from policy precision, and
+  `affect = "global_beta"` builds one shared beta tracker that modulates every
+  partner's policy precision.
 
 ## Affective Update Signal
 
@@ -86,6 +88,9 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The `prediction_errors` logging field records surprise magnitude.
 - Affective variants use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
+- The `global_beta` ablation uses the same update law but routes every
+  interaction through beta entity `0`. Partner-local POMDP beliefs remain
+  separate; only the beta precision signal is shared across partners.
 
 ## Supported Surface
 
@@ -180,6 +185,15 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   null for that stress regime: beta and policy dynamics did not move enough to
   separate affective deployment from the no-affect or lesioned baseline under
   the current task and hyperparameters.
+
+## Global-Beta Locality Ablation
+
+- `configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`
+  is a discovery smoke config, not a final statistical run.
+- It compares `none`, `precision`, `tracked_only`, and `global_beta` in an
+  agent-choice task with one scheduled stance switch.
+- The key diagnostic is cross-partner interference: whether a beta update caused
+  by the switched partner spreads precision changes to untouched partners.
 
 ## Future Directions
 

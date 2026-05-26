@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from analysis.configured import run_configured_analysis
 from analysis.hypotheses import run_all_hypothesis_tests
+from analysis.interference import cross_partner_interference_summary, global_vs_local_beta_summary
 from analysis.metrics import (
     affective_movement_summary,
     betrayal_latency_summary,
@@ -125,6 +126,8 @@ def main(argv: list[str] | None = None) -> int:
         betrayal_traj = betrayal_trajectory(results, max_encounters=10)
         betrayal_misdeployment = betrayal_misdeployment_summary(results, window=10)
         betrayal_reallocation = betrayal_reallocation_summary(results)
+        interference = cross_partner_interference_summary(results, post_window=10)
+        beta_scope = global_vs_local_beta_summary(results)
 
         post_switch_5.to_csv(output_dir / "betrayal_post_switch_window_1_5.csv", index=False)
         post_switch_10.to_csv(output_dir / "betrayal_post_switch_window_1_10.csv", index=False)
@@ -134,6 +137,8 @@ def main(argv: list[str] | None = None) -> int:
         betrayal_traj.to_csv(output_dir / "betrayal_trajectories.csv", index=False)
         betrayal_misdeployment.to_csv(output_dir / "betrayal_misdeployment_summary.csv", index=False)
         betrayal_reallocation.to_csv(output_dir / "betrayal_reallocation_summary.csv", index=False)
+        interference.to_csv(output_dir / "cross_partner_interference_summary.csv", index=False)
+        beta_scope.to_csv(output_dir / "global_vs_local_beta_summary.csv", index=False)
 
     try:
         save_all_figures(results, str(output_dir))

@@ -193,11 +193,24 @@ def _create_runtime_from_config_and_variant(
     beta = None
     affect_mode = "none"
     agent_kind = "base"
-    if variant.affect in {"precision", "tracked_only"}:
-        agent_kind = "affective" if variant.affect == "precision" else "lesioned"
-        affect_mode = "normal" if variant.affect == "precision" else "decouple"
+    if variant.affect in {"precision", "tracked_only", "global_beta"}:
+        agent_kind = (
+            "affective"
+            if variant.affect == "precision"
+            else "lesioned"
+            if variant.affect == "tracked_only"
+            else "global_beta"
+        )
+        affect_mode = (
+            "normal"
+            if variant.affect == "precision"
+            else "decouple"
+            if variant.affect == "tracked_only"
+            else "global"
+        )
+        beta_entities = 1 if variant.affect == "global_beta" else config.num_partners
         beta = DiscreteBetaState(
-            num_entities=config.num_partners,
+            num_entities=beta_entities,
             beta_levels=np.asarray(variant.beta_levels, dtype=np.float64),
             persistence=config.beta_persistence,
             alpha_charge=config.alpha_charge,

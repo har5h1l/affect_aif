@@ -22,6 +22,9 @@ The following require new implementation and tests before they become runnable
 surface:
 
 - **Variational beta** — a variational auxiliary state would be new code.
+- **Global beta** — now exists as a smoke-test ablation surface under H6; full
+  interpretation requires review of the one-worker discovery outputs before
+  broader reruns.
 
 ---
 
@@ -45,6 +48,9 @@ The current card order is:
    return?
 6. **H5 Perturbation Phenotypes**: do clinical-like parameter changes first
    separate in precision dynamics, then behavior?
+7. **H6 Locality/Interference**: does partner-local beta contain volatility to
+   the partner whose model failed, or does a shared global beta contaminate
+   decisions about untouched partners?
 
 ---
 

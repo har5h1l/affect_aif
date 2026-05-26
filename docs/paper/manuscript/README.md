@@ -36,6 +36,8 @@ Primary manuscript evidence should come from:
 - Five-seed H0/H2/H4 current-architecture queue: open-regime deployment and
   social-choice readouts.
 - Five-seed H5 runs: supplemental precision-dynamics phenotypes only.
+- H6 global-beta/locality smoke runs: follow-up discovery only unless promoted
+  after user review.
 
 ## Writing Guardrails
 

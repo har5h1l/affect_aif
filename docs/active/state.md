@@ -3,7 +3,9 @@
 Stabilize the current H0-H5 evidence narrative on the official
 `inferactively-pymdp==1.0.0` runtime, with active handoff docs kept aligned to
 the supported trust-task wrappers, external affective precision tracking, and
-canonical script-driven experiments.
+canonical script-driven experiments. The active follow-up surface is H6
+locality/interference: a global-beta ablation that asks whether partner-local
+precision is doing work beyond a shared model-fitness tracker.
 
 ## Scope
 
@@ -14,9 +16,11 @@ canonical script-driven experiments.
 - Keep scripts as the canonical experiment and analysis entry points.
 - Preserve the Hesp-extension behavior-card spine in
   `docs/theory/hypotheses.md`.
-- Keep current docs aligned with the supported H0-H5 experiment surface.
+- Keep current docs aligned with the supported H0-H6 experiment surface.
 - Treat the May 19 H3 reallocation run as a small follow-up pilot. Use the
   completed H1/H3 confirmation batch as the current targeted follow-up evidence.
+- Treat H6 global-beta outputs as smoke/discovery evidence until the user
+  explicitly approves changing manuscript interpretation.
 
 ## Constraints
 
@@ -36,10 +40,13 @@ canonical script-driven experiments.
   external affective precision tracking.
 - The May 18 H0-H5 queue is complete and interpreted in
   `docs/results/current.md`.
-- The next research action is write-up stabilization. The H1/H3 split-readout
-  confirmation and H3 precision-sensitivity follow-up have completed and
-  should be used to stabilize the paper narrative rather than to motivate
-  another immediate experiment.
+- The manuscript draft has been revised toward a traditional results/discussion
+  structure, with clearer game and generative-model descriptions.
+- H6 `global_beta` support, a locality/interference smoke config, and generic
+  analysis outputs for cross-partner interference have been added.
+- A two-seed H6 smoke run completed at `--workers 1`; it verifies the new
+  condition and analysis path but should not yet be treated as manuscript
+  evidence.
 
 ## Stop Conditions
 

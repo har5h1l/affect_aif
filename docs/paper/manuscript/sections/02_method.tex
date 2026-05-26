@@ -2,6 +2,22 @@
 
 We evaluate partner-specific affective precision in a repeated trust game derived from the economic trust-game tradition \cite{Berg1995Trust,KingCasas2005Trust}. A focal active-inference agent interacts with four partners. Each partner has a latent type (cooperator, reciprocator, exploiter, or random) and a latent stance toward the agent (trusting, neutral, or hostile). The agent observes the partner's action and its own payoff, and it selects either a binary action or a graded investment depending on the regime.
 
+In the binary game, both players choose cooperate or defect. Mutual cooperation gives the focal agent payoff $3$, unilateral cooperation against a defecting partner gives $-1$, unilateral defection against a cooperating partner gives $5$, and mutual defection gives $1$. Graded regimes replace the binary cooperate/defect choice with a discretized investment level, but preserve the same social problem: the agent must decide how much to rely on a partner whose type and stance are hidden. Partner choice regimes add one more decision: before acting, the focal agent chooses which partner to engage.
+
+\begin{table}[t]
+\centering
+\caption{Binary trust-game payoff to the focal agent. The graded task uses the same reliance structure with discretized investment levels.}
+\label{tab:payoff}
+\begin{tabular}{lcc}
+\toprule
+ & Partner cooperates & Partner defects \\
+\midrule
+Agent cooperates & $3$ & $-1$ \\
+Agent defects & $5$ & $1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 For each partner $k$, the focal agent maintains a separate discrete active-inference model over partner type, partner stance, and own-action bookkeeping:
 \begin{equation}
 s_{t,k} = \left(s^{\mathrm{type}}_{t,k}, s^{\mathrm{stance}}_{t,k}, s^{\mathrm{own}}_{t}\right).
@@ -55,22 +71,4 @@ $\gamma_k=\gamma_{\mathrm{base}}/\mathbb{E}[\beta_k]$
 \label{fig:model}
 \end{figure}
 
-The experiments test five readouts. H0 asks whether policy openness gates visible affect effects. H1 tests whether precision tracks predictive reliability rather than realized reward. H2 compares affective agents with tracked-only lesions to test deployment with similar belief readouts. H3 introduces an abrupt hostile stance switch to test stress and misdeployment. H4 tests whether partner-local precision changes partner selection. H5 perturbation variants are treated as supplemental checks on beta dynamics rather than clinical validation.
-
-\begin{table}[t]
-\centering
-\caption{Evidence hierarchy used in the paper. H1 and H3 are the primary statistical anchors because they use 30 seeds per variant.}
-\label{tab:evidence-hierarchy}
-\begin{tabularx}{\linewidth}{lXll}
-\toprule
-Card & Mechanism role & Seeds & Status \\
-\midrule
-H0 & Policy openness gates visible precision effects & 5/variant & Supporting \\
-H1 & Precision tracks model fitness rather than reward & 30/variant & Primary \\
-H2 & Precision changes deployment despite similar beliefs & 5/variant & Supporting \\
-H3 & Abrupt betrayal exposes misdeployment risk & 30/variant & Primary \\
-H4 & Precision changes partner choice & 5/variant & Supporting \\
-H5 & Perturbations separate beta dynamics & 5/variant & Supplemental \\
-\bottomrule
-\end{tabularx}
-\end{table}
+The experiments are organized around five readouts rather than one payoff score. We first ask when the policy posterior is open enough for precision to matter. We then test whether precision follows predictive reliability more than reward, whether beta-to-gamma coupling changes deployment without improving beliefs, whether partner-local precision changes partner selection, and whether abrupt betrayal turns the same mechanism into misdeployment. Perturbation variants are treated as supplemental checks on beta dynamics rather than clinical validation.

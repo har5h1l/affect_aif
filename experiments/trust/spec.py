@@ -41,7 +41,7 @@ LEGACY_PUBLIC_KEYS = {
 
 PAYOFF_VALUES = {"binary", "graded"}
 ASSIGNMENT_VALUES = {"random", "agent_choice"}
-AFFECT_VALUES = {"none", "precision", "tracked_only"}
+AFFECT_VALUES = {"none", "precision", "tracked_only", "global_beta"}
 FAMILY_VALUES = {"trust", "benchmark", "multifocal"}
 
 
