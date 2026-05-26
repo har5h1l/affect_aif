@@ -26,7 +26,7 @@ The partner model is a discrete generative model
 \begin{equation}
 \mathcal{M}_k = \{A^{\mathrm{action}}_k,A^{\mathrm{payoff}}_k,B_k,C_k,D_k,E_k\},
 \end{equation}
-where $A^{\mathrm{action}}_k$ maps hidden type and stance to the partner's response, $A^{\mathrm{payoff}}_k$ maps own action and partner response to the payoff observation, $B_k$ encodes state transitions, $D_k$ stores prior beliefs, $C_k$ encodes preferred observations, and $E_k$ stores policy priors. Payoff is therefore represented as an observation modality inside the generative model rather than as an external reward cache. State and policy inference use the standard discrete active-inference machinery implemented in \texttt{pymdp} \cite{Friston2017ProcessTheory,DaCosta2020DiscreteSynthesis,Heins2022Pymdp}. The trust-task code constructs the matrices, manages the partner bank, applies the external beta tracker, and logs readouts; it is not a custom replacement for the active-inference engine.
+where $A^{\mathrm{action}}_k$ maps hidden type and stance to the partner's response, $A^{\mathrm{payoff}}_k$ maps own action and partner response to the payoff observation, $B_k$ encodes state transitions, $D_k$ stores prior beliefs, $C_k$ encodes preferred observations, and $E_k$ stores policy priors. Payoff is therefore represented as an observation modality inside the generative model rather than as an external reward cache. State and policy inference use the standard discrete active-inference machinery implemented in \texttt{pymdp} \cite{Friston2017ProcessTheory,DaCosta2020DiscreteSynthesis,Heins2022Pymdp}. The trust-task code constructs the matrices, manages the partner bank, applies the external beta tracker, and records the behavioral and inferential measurements; it is not a custom replacement for the active-inference engine.
 
 Partner choice is handled by evaluating partner-local policies and selecting among the resulting candidate interactions. In assigned-partner regimes, the agent chooses only the trust-game action. In partner-choice regimes, it first chooses whom to engage and then chooses an action toward that partner. This separates local social inference from the higher-level question of approach, avoidance, or probing: a partner can be predictable enough to avoid confidently, uncertain enough to probe, or reliable enough to return to.
 
@@ -34,7 +34,7 @@ The affective component is external to the POMDP state space. After interacting 
 \begin{equation}
 \epsilon_k = 1 - P(o^{\mathrm{action}}_k = o^{\mathrm{obs}}_k \mid q(s_{\mathrm{type}},s_{\mathrm{stance}})).
 \end{equation}
-This is a bounded prediction-error proxy in $[0,1]$, not logarithmic surprisal. It is computed from partner action rather than payoff because partner action is the most direct readout of type-by-stance predictive fit.
+This is a bounded prediction-error proxy in $[0,1]$, not logarithmic surprisal. It is computed from partner action rather than payoff because partner action is the most direct measurement of type-by-stance predictive fit.
 
 The tracker converts this into affective charge
 \begin{equation}
@@ -75,4 +75,4 @@ $\gamma_k=\gamma_{\mathrm{base}}/\mathbb{E}[\beta_k]$
 \label{fig:model}
 \end{figure}
 
-The experiments are organized around five readouts rather than one payoff score. We first ask when the policy posterior is open enough for precision to matter. We then test whether precision follows predictive reliability more than reward, whether beta-to-gamma coupling changes deployment without improving beliefs, whether partner-local precision changes partner selection, and whether abrupt betrayal turns the same mechanism into misdeployment. Perturbation variants are treated as supplemental checks on beta dynamics rather than clinical validation.
+The experiments use several behavioral and inferential measurements rather than a single payoff score. Policy entropy measures whether the action posterior is open enough for precision to matter. Correlations with surprise and payoff test what the beta-derived precision signal tracks. Lesion comparisons separate belief accuracy from policy deployment, partner-choice regimes measure approach and avoidance, and betrayal regimes test whether the same mechanism remains useful when a partner changes abruptly. Perturbation variants are treated as supplemental checks on beta dynamics rather than clinical validation.
