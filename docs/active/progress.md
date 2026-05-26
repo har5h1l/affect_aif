@@ -155,6 +155,23 @@ It is marked with `ABORTED_DO_NOT_USE.md` and is not evidence. If this
 confirmation is still needed, resume it intentionally with the same batch name
 and expect a multi-hour one-worker run.
 
+A bounded five-seed H4 pair check completed under:
+
+```text
+results/h4_social_choice_paircheck_20260526/
+```
+
+It reran `configs/trust/hypotheses/h4_social_choice/partner_choice.toml` with
+`--workers 1` and completed both `affect` and `no_affect`. The readout
+replicates the H4 pattern: payoff is flat (`393.6` vs `393.2`), while affect
+lowers policy entropy (`3.989` vs `4.833`). See
+`docs/results/runs/2026-05-26-h4-social-choice-paircheck.md`.
+
+An attempted one-worker H0 graded-choice pair check was started at
+`results/h0_graded_choice_paircheck_20260526/` and stopped after one no-affect
+seed because each horizon-4 graded seed was too slow for the interactive loop.
+It is marked with `ABORTED_DO_NOT_USE.md` and is not evidence.
+
 ### 2b. Manuscript Open/Social Confirmation
 
 This config-only batch promotes the H0/H2/H4 supporting evidence from five

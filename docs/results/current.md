@@ -22,6 +22,8 @@ Primary provenance:
 - H1/H3 confirmation: `results/confirm_h1_h3_split_20260519/`
 - H3 precision sensitivity:
   `results/h3_precision_sensitivity_20260522/`
+- H4 social-choice pair check:
+  `results/h4_social_choice_paircheck_20260526/`
 - H6 global-beta discovery:
   `results/h6_global_beta_discovery_20260525/`
 - H6 locality/interference probe:
@@ -39,7 +41,9 @@ See `docs/results/runs/2026-05-18-h0-h5-rerun.md` for the run-level
 interpretation and `docs/results/runs/2026-05-21-h1-h3-confirmation.md` for the
 targeted confirmation. See
 `docs/results/runs/2026-05-24-h3-precision-sensitivity.md` for the H3
-precision-sensitivity follow-up. See `docs/paper/` for the current
+precision-sensitivity follow-up. See
+`docs/results/runs/2026-05-26-h4-social-choice-paircheck.md` for the H4
+five-seed pair check. See `docs/paper/` for the current
 submission-readiness and literature-positioning read. See
 `docs/results/runs/2026-05-26-h6-global-beta-discovery.md` for the H6
 discovery read and `docs/results/runs/2026-05-26-h6-locality-probe.md` for the
@@ -61,7 +65,7 @@ bad post-switch model.
 | H1 Model Fitness | Supported | The 30-seed confirmation strengthens the reliability-over-reward readout: precision tracks surprise more strongly than realized payoff (`|r| = 0.701` vs `0.419`), while total payoff remains flat-to-worse for affect. |
 | H2 Deployment | Supported | In the open graded-choice regime, affect and lesioned/no-affect have similar belief accuracy while affect improves payoff by +25.2 and lowers policy entropy. |
 | H3 Stress Response | Boundary condition sharpened | The 30-seed reallocation confirmation shows lower entropy and fewer returns to the switched partner, but worse whole-run payoff and no conditional-return payoff advantage. The precision-sensitivity follow-up shows that simple caution knobs do not rescue the abrupt betrayal regime; gradual betrayal makes default affect nearly payoff-neutral relative to baseline. H3 should read as stress exposing precision-driven misdeployment risk, especially under abrupt shocks. |
-| H4 Social Choice | Supported behaviorally | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. This is the expected signature for partner-choice behavior changing before total reward moves. |
+| H4 Social Choice | Supported behaviorally | The five-seed pair check reproduces the H4 pattern: payoff is flat (`393.6` vs `393.2`), while affect lowers policy entropy (`3.989` vs `4.833`) and preserves a positive model-fitness readout. This is the expected signature for partner-choice behavior changing before total reward moves. |
 | H5 Perturbation Phenotypes | Supported for dynamics; payoff underpowered | Clinical-like variants separate in beta range, entropy, partner selection, and payoff ordering, but payoff pairwise tests are mostly not significant with five seeds. |
 | H6 Locality / Interference | Discovery only | Global beta does not simply duplicate local beta. Across two focused five-seed locality probes, local beta preserved the cleaner model-fitness signal, while global beta had higher aggregate payoff. Current evidence supports partner-local beta as an interpretable model-fitness readout, not as a necessary architecture. |
 

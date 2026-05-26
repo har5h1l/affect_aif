@@ -44,6 +44,9 @@ boundary condition rather than an affective recovery win. The May 2026 H3
 precision-sensitivity follow-up narrows that boundary condition: generic
 caution knobs do not rescue abrupt betrayal, while gradual betrayal makes
 default affect nearly payoff-neutral relative to no-affect/lesioned baselines.
+The May 26, 2026 H4 social-choice pair check is recorded as a five-seed
+replication of the partner-choice deployment pattern, not as a 30-seed
+confirmation.
 
 The May 2026 H6 global-beta discovery batch is recorded in
 `docs/results/runs/2026-05-26-h6-global-beta-discovery.md`. It is current
