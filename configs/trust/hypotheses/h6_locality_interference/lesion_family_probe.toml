@@ -1,0 +1,105 @@
+[hypothesis]
+id = "h6"
+name = "locality_interference"
+
+[experiment]
+id = "lesion_family_probe"
+family = "trust"
+rounds = 120
+replications = 3
+seed = 880
+
+[scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+initial_types = ["cooperator", "reciprocator", "cooperator", "random"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[[scenario.stance_switches]]
+round = 31
+partner = 0
+to = "hostile"
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 2
+
+[[variants]]
+id = "local_beta"
+affect = "precision"
+planning_horizon = 2
+
+[[variants]]
+id = "tracked_only"
+affect = "tracked_only"
+planning_horizon = 2
+
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 2
+
+[[variants]]
+id = "low_alpha"
+affect = "precision"
+planning_horizon = 2
+alpha_charge = 0.5
+
+[[variants]]
+id = "high_alpha"
+affect = "precision"
+planning_horizon = 2
+alpha_charge = 8.0
+
+[[variants]]
+id = "fast_beta"
+affect = "precision"
+planning_horizon = 2
+beta_persistence = 0.6
+
+[[variants]]
+id = "slow_beta"
+affect = "precision"
+planning_horizon = 2
+beta_persistence = 0.95
+
+[[variants]]
+id = "cautious_prior"
+affect = "precision"
+planning_horizon = 2
+initial_beta = 2.0
+
+[[variants]]
+id = "no_epistemic"
+affect = "precision"
+planning_horizon = 2
+epistemic_value = false
+
+[runtime]
+max_policies = 4096
+log_policy_traces = false
+
+[analysis]
+auto = false
+primary = "h6_lesion_family_probe"
+compare = [
+  "local_beta",
+  "tracked_only",
+  "global_beta",
+  "low_alpha",
+  "high_alpha",
+  "fast_beta",
+  "slow_beta",
+  "cautious_prior",
+  "no_epistemic",
+  "no_affect",
+]
+switch_window = [1, 10]
+metrics = ["payoff", "precision", "partner_choice", "return_latency", "misdeployment"]

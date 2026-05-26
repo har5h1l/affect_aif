@@ -17,8 +17,8 @@ Implemented starting point:
   preserving partner-local POMDP beliefs.
 - `configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`
   provides a first locality/interference smoke run.
-- Next, review the H6 smoke output and then run 3-5 seed checks on H1
-  reliability-vs-reward, H2 open-regime lesion, and H4 partner choice.
+- The next queued H6 discovery batch extends this to model-fitness,
+  deployment, partner-choice, betrayal, and lesion-family probes.
 - Optional H3 abrupt/gradual stress check if time allows.
 - Primary readout: partner choice, entropy, payoff, and precision-reward versus
   precision-surprise association.
@@ -79,6 +79,6 @@ Risk: low scientific risk, high manuscript value.
 
 ## Current Recommendation
 
-For a two-week deadline, prioritize reviewing the H6 smoke, producing cleaner
-paper figures, and running only small targeted global-beta follow-ups before
-any full-seed confirmation. Avoid another broad hyperparameter sweep.
+For a two-week deadline, prioritize reviewing the H6 discovery batch and
+deciding whether global beta needs a manuscript paragraph. Avoid another broad
+hyperparameter sweep until these structural probes are interpreted.

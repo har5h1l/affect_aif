@@ -192,6 +192,12 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   is a discovery smoke config, not a final statistical run.
 - It compares `none`, `precision`, `tracked_only`, and `global_beta` in an
   agent-choice task with one scheduled stance switch.
+- The H6 probe configs extend the same ablation across model-fitness,
+  deployment, partner-choice, betrayal, and lesion-family regimes:
+  `global_beta_model_fitness_probe.toml`,
+  `global_beta_deployment_probe.toml`,
+  `global_beta_partner_choice_probe.toml`,
+  `global_beta_betrayal_probe.toml`, and `lesion_family_probe.toml`.
 - The key diagnostic is cross-partner interference: whether a beta update caused
   by the switched partner spreads precision changes to untouched partners.
 

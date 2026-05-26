@@ -1,9 +1,14 @@
 # Figure Plan
 
-Use compact figures from current analysis outputs. The copied PNGs in
-`figures/` are draft aids, not final publication-quality panels. Final figures
-should likely be redrawn as multi-panel composites from the copied source CSVs
-or the canonical analysis outputs.
+Use generated composite figures from current source tables where possible.
+Regenerate the current paper panels with:
+
+```bash
+python scripts/analysis/make_paper_figures.py
+```
+
+The script reads `docs/paper/manuscript/source_tables/` and writes PNG/PDF
+figures to `docs/paper/manuscript/figures/`.
 
 ## Main Figure 1: Model Schematic
 
@@ -28,9 +33,9 @@ Must show:
 - external beta tracker outside the POMDP;
 - tracked-only lesion where beta updates but gamma is decoupled.
 
-## Main Figure 2: Open-Regime Deployment
+## Main Figure 2: Open-Regime Deployment And Social Choice
 
-Draft asset: `figures/fig_open_regime_cumulative_payoff.png`
+Current asset: `figures/fig_deployment_social_summary.png`
 
 Primary numbers:
 
@@ -39,7 +44,8 @@ Primary numbers:
 - Belief readouts remain similar or slightly favor lesion.
 
 Caption claim: In the open graded regime, affective precision changes policy
-deployment and payoff without improving belief accuracy.
+deployment and payoff without improving belief accuracy; partner-selection
+rates also move before whole-run payoff separates.
 
 ## Main Figure 3: Model Fitness Versus Reward
 
@@ -85,10 +91,7 @@ policy sharpening is not equivalent to safer recovery.
 
 ## Main Figure 5: Shock Shape And Sensitivity
 
-Draft assets:
-
-- `figures/fig_abrupt_sensitivity_cumulative_payoff.png`
-- `figures/fig_gradual_sensitivity_cumulative_payoff.png`
+Current asset: `figures/fig_shock_shape_summary.png`
 
 Source tables:
 
@@ -107,24 +110,14 @@ Primary numbers:
 Caption claim: Generic caution does not rescue abrupt betrayal; gradual shock
 mostly removes the default affect payoff penalty.
 
-## Supplemental Figures
+## Main Figure 6: Perturbation Dynamics
 
-### Social Choice
-
-Source table: `source_tables/h4_partner_choice_summary.csv`
-
-Use as supplemental or fold into Figure 2. Show entropy and partner-selection
-rates. The claim is behavioral movement before payoff movement.
-
-### Perturbation Dynamics
-
-Draft asset: `figures/fig_h5_dynamics_beta_reward_divergence.png`
+Current asset: `figures/fig_phenotype_dynamics_summary.png`
 
 Source tables:
 
 - `source_tables/h5_clinical_dynamics_phenotype_validation_summary.csv`
 - `source_tables/h5_clinical_betrayal_phenotype_validation_summary.csv`
 
-Use only as supplement unless the paper foregrounds perturbation phenotypes.
-The caption must say "clinical-like parameter perturbations", not "clinical
-validation".
+Use as a bounded computational phenotyping result. The caption must say
+"computational perturbations", not "clinical validation".

@@ -53,6 +53,32 @@ This is a diagnostic smoke run only. It verifies the new condition, logging,
 and cross-partner interference analysis; it is not yet promoted into the
 manuscript evidence hierarchy.
 
+## Queued H6 Discovery Batch
+
+The next queued batch should stay at `--workers 1` and use the H6 probe configs:
+
+```bash
+python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h6_locality_interference/global_beta_model_fitness_probe.toml \
+  --config configs/trust/hypotheses/h6_locality_interference/global_beta_deployment_probe.toml \
+  --config configs/trust/hypotheses/h6_locality_interference/global_beta_partner_choice_probe.toml \
+  --config configs/trust/hypotheses/h6_locality_interference/global_beta_betrayal_probe.toml \
+  --config configs/trust/hypotheses/h6_locality_interference/lesion_family_probe.toml \
+  --output-dir results \
+  --batch-name h6_global_beta_discovery_20260525 \
+  --workers 1
+```
+
+This is not a full-seed confirmation. It is a complete discovery queue across
+the main mechanism regimes plus a lesion-family probe, with five seeds for the
+global-beta regime probes and three seeds for the larger lesion-family probe.
+All variants use planning horizon 2 to keep the one-worker queue tractable.
+Analyze each completed experiment with:
+
+```bash
+python scripts/analysis/analyze.py --results results/h6_global_beta_discovery_20260525/h6/<experiment_id>/results.csv --output-dir results/h6_global_beta_discovery_20260525/h6/<experiment_id>/analysis
+```
+
 ## Optional Confirmation Queue
 
 ### 1. Higher-Rep Open-Regime Affect, H1 Model Fitness, and Deployment

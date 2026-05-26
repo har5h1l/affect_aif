@@ -47,6 +47,26 @@ precision is doing work beyond a shared model-fitness tracker.
 - A two-seed H6 smoke run completed at `--workers 1`; it verifies the new
   condition and analysis path but should not yet be treated as manuscript
   evidence.
+- The manuscript now includes larger generated figure panels for deployment,
+  social choice, shock shape, and precision-dynamics phenotypes. It compiles to
+  11 LNCS pages.
+
+## Current Handoff
+
+Read this folder in order: `state.md`, `progress.md`, then `blockers.md`.
+Paper-facing evidence remains in `docs/paper/manuscript/` and interpreted
+results remain in `docs/results/`.
+
+The next research thread should first check the queued H6 discovery batch in
+`results/h6_global_beta_discovery_20260525/`. The run is intentionally
+smoke-scale and one-worker: it tests global beta across model-fitness,
+deployment, partner-choice, betrayal, and lesion-family probes without
+promoting new claims into the manuscript. After it finishes, run standalone
+analysis for each experiment directory and review whether global beta blurs
+partner-specific reallocation or matches local beta.
+
+Do not create a separate handoff document; keep the live handoff in this
+`docs/active/` state/progress surface.
 
 ## Stop Conditions
 

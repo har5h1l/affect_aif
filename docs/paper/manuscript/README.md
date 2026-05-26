@@ -18,6 +18,8 @@ into a new project scaffold.
 - `figures/`: copied PNGs from current analysis outputs.
 - `source_tables/`: compact CSVs copied from analysis outputs for the writing
   model and later manual checking.
+- `scripts/analysis/make_paper_figures.py`: regenerates larger manuscript
+  composite figures from `source_tables/`.
 
 ## Evidence Contract
 

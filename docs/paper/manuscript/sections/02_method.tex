@@ -22,9 +22,13 @@ For each partner $k$, the focal agent maintains a separate discrete active-infer
 \begin{equation}
 s_{t,k} = \left(s^{\mathrm{type}}_{t,k}, s^{\mathrm{stance}}_{t,k}, s^{\mathrm{own}}_{t}\right).
 \end{equation}
-The model has two observation modalities, partner action and own payoff. Partner action depends on latent type and stance. Payoff depends on the focal action and the partner response, and is represented as an observation likelihood rather than an external reward cache. State and policy inference use the standard discrete active-inference machinery implemented in \texttt{pymdp} \cite{Friston2017ProcessTheory,DaCosta2020DiscreteSynthesis,Heins2022Pymdp}. The trust-task code constructs the matrices, manages the partner bank, applies the external beta tracker, and logs readouts; it is not a custom replacement for the active-inference engine.
+The partner model is a discrete generative model
+\begin{equation}
+\mathcal{M}_k = \{A^{\mathrm{action}}_k,A^{\mathrm{payoff}}_k,B_k,C_k,D_k,E_k\},
+\end{equation}
+where $A^{\mathrm{action}}_k$ maps hidden type and stance to the partner's response, $A^{\mathrm{payoff}}_k$ maps own action and partner response to the payoff observation, $B_k$ encodes state transitions, $D_k$ stores prior beliefs, $C_k$ encodes preferred observations, and $E_k$ stores policy priors. Payoff is therefore represented as an observation modality inside the generative model rather than as an external reward cache. State and policy inference use the standard discrete active-inference machinery implemented in \texttt{pymdp} \cite{Friston2017ProcessTheory,DaCosta2020DiscreteSynthesis,Heins2022Pymdp}. The trust-task code constructs the matrices, manages the partner bank, applies the external beta tracker, and logs readouts; it is not a custom replacement for the active-inference engine.
 
-Partner choice is handled by evaluating partner-local policies and selecting among the resulting candidate interactions. In assigned-partner regimes, the agent chooses only the trust-game action. In partner-choice regimes, it first chooses whom to engage and then chooses an action toward that partner. This separates local social inference from the higher-level question of approach, avoidance, or probing.
+Partner choice is handled by evaluating partner-local policies and selecting among the resulting candidate interactions. In assigned-partner regimes, the agent chooses only the trust-game action. In partner-choice regimes, it first chooses whom to engage and then chooses an action toward that partner. This separates local social inference from the higher-level question of approach, avoidance, or probing: a partner can be predictable enough to avoid confidently, uncertain enough to probe, or reliable enough to return to.
 
 The affective component is external to the POMDP state space. After interacting with partner $k$, the agent computes partner-action surprise
 \begin{equation}
