@@ -148,6 +148,13 @@ python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/g
 python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name confirm_social_choice --workers 1
 ```
 
+An attempted one-worker run of the 30-seed `partner_choice_confirm` config was
+started at `results/h4_social_choice_confirm_20260526/` and stopped after 5
+no-affect seeds because the full queue was too slow for the interactive loop.
+It is marked with `ABORTED_DO_NOT_USE.md` and is not evidence. If this
+confirmation is still needed, resume it intentionally with the same batch name
+and expect a multi-hour one-worker run.
+
 ### 2b. Manuscript Open/Social Confirmation
 
 This config-only batch promotes the H0/H2/H4 supporting evidence from five
