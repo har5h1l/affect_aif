@@ -53,24 +53,15 @@ This is a diagnostic smoke run only. It verifies the new condition, logging,
 and cross-partner interference analysis; it is not yet promoted into the
 manuscript evidence hierarchy.
 
-## Running H6 Discovery Batch
+## Completed H6 Discovery Batch
 
-The H6 discovery batch is running in tmux session
-`h6_global_beta_discovery`. It writes logs to:
+The H6 discovery batch completed under:
 
 ```text
-results/h6_global_beta_discovery_20260525/run.log
+results/h6_global_beta_discovery_20260525/
 ```
 
-Inspect or stop it with:
-
-```bash
-tmux capture-pane -pt h6_global_beta_discovery -S -120
-tmux attach -t h6_global_beta_discovery
-tmux kill-session -t h6_global_beta_discovery
-```
-
-The launched command is:
+The completed command was:
 
 ```bash
 python scripts/experiment/run.py \
@@ -87,14 +78,24 @@ python scripts/experiment/run.py \
 This is not a full-seed confirmation. It is a complete discovery queue across
 the main mechanism regimes plus a lesion-family probe, with five seeds for the
 global-beta regime probes and three seeds for the larger lesion-family probe.
-All variants use planning horizon 2 to keep the one-worker queue tractable.
-Checkpoint output has started under
-`results/h6_global_beta_discovery_20260525/h6/`. Analyze each completed
-experiment with:
+All variants use planning horizon 2 to keep the one-worker queue tractable. It
+wrote final `results.csv` files for:
+
+- `global_beta_model_fitness_probe`
+- `global_beta_deployment_probe`
+- `global_beta_partner_choice_probe`
+- `global_beta_betrayal_probe`
+- `lesion_family_probe`
+
+Standalone analysis has been run for each experiment:
 
 ```bash
 python scripts/analysis/analyze.py --results results/h6_global_beta_discovery_20260525/h6/<experiment_id>/results.csv --output-dir results/h6_global_beta_discovery_20260525/h6/<experiment_id>/analysis
 ```
+
+Treat these outputs as discovery evidence awaiting user review. Do not promote
+H6 into result interpretation docs or manuscript claims until the user approves
+the evidence read.
 
 ## Optional Confirmation Queue
 
