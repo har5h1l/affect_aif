@@ -33,8 +33,8 @@ partner redesign:
 - stance changes are action-dependent and can also be scheduled explicitly with `scheduled_stance_switches`
 - binary trust games use factorized controls for partner, stance, and own action
 - the trust-game generative model exposes `o_action` and `o_payoff` observations over latent `type × stance`, with `own_action` tracked as a separate control/state factor
-- the default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`)
-- the current hypothesis surface is the H0-H5 behavior-card spine in [docs/theory/hypotheses.md](docs/theory/hypotheses.md)
+- the default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`) driven by partner-action surprisal, `-log P(observed action)`
+- the current hypothesis surface is the H0-H6 behavior-card spine in [docs/theory/hypotheses.md](docs/theory/hypotheses.md)
 - runnable experiment specs are TOML files under `configs/`; trust specs live in `configs/trust/...`, benchmark specs in `configs/benchmark/...`, and each file declares a shared hypothesis/experiment/scenario/variant envelope with `experiment.family`
 
 Common entry points:

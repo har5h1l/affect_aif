@@ -53,7 +53,7 @@ Beta is external to the POMDP. After observing partner action for partner `k`,
 the tracker computes:
 
 ```text
-surprise_k = 1 - P_predicted(observed_partner_action)
+surprise_k = -log(P_predicted(observed_partner_action))
 charge_k = alpha_charge * (sigma_0_sq - surprise_k^2)
 q(beta_k) <- normalize(likelihood(charge_k | beta_level) * T_beta q(beta_k))
 gamma_k = gamma_base / E[beta_k]

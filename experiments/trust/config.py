@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from tasks.trust.affect import LOG_SURPRISE_BASELINE_SQ
 from tasks.trust.types import PARTNER_TYPE_ORDER
 
 
@@ -40,7 +41,7 @@ class ExperimentConfig:
     log_policy_traces: bool = False
 
     alpha_charge: float = 3.0
-    sigma_0_sq: float = 0.25
+    sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ
     initial_beta: float = 1.0
     beta_num_levels: int = 5
     beta_levels: list[float] | None = None

@@ -1,9 +1,7 @@
 \section{Results}
 \label{sec:results}
 
-We report five sets of analyses. Section~\ref{sec:h1} establishes what partner-local affective precision actually tracks. Section~\ref{sec:h2} shows that its behavioral effect depends on how open the policy space is, and that the effect runs through action sharpening rather than better partner beliefs. Section~\ref{sec:choice} examines partner selection. Sections~\ref{sec:betrayal} and~\ref{sec:shock} characterize the mechanism's volatility limit. Section~\ref{sec:pheno} reports precision-dynamics phenotypes as a parameter-sensitivity check.
-
-\subsection{The affective precision channel tracks partner predictability, not partner value}
+\subsection{Partner-local affective precision tracks partner predictability, not partner value}
 \label{sec:h1}
 
 The central question is whether the $\beta_k$ signal actually reflects predictive reliability or whether it is a proxy for experienced reward. A predictable exploiter is low value but easy to model; a valuable but erratic partner is worth engaging but hard to predict. If affective precision tracks value, these two situations should produce similar $\beta_k$ levels. If it tracks model fitness, they should diverge.
@@ -15,14 +13,14 @@ The absence of a payoff benefit is itself informative: it prevents the precision
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.png}
-\caption{The affective precision channel tracks partner predictability more strongly than realized reward. In the binary game the channel has no payoff advantage, consistent with a near-saturated policy space where precision cannot influence action.}
+\caption{Partner-local $\beta_k$ tracks partner predictability more strongly than realized reward. In the binary game the mechanism has no payoff advantage, consistent with a near-saturated policy space where precision cannot influence action.}
 \label{fig:model-fitness}
 \end{figure}
 
 \subsection{Behavioral gains are regime-dependent and trace to action sharpening, not belief quality}
 \label{sec:h2}
 
-Whether the affective precision channel can improve behavior depends on how much room the policy space gives it to act. We compare five seeds per variant, 200 rounds, across both regimes. In the binary game: no payoff advantage, no entropy difference (Section~\ref{sec:h1}). In the graded investment game: precision modulation reaches total payoff $1884.6$ versus $1859.4$ for the no-affect baseline ($+25.2$), with mean policy entropy $7.94$ versus $8.80$ ($-0.86$). The improvement emerges precisely in the regime where policy entropy is high enough for action confidence to matter.
+Whether affective precision can improve behavior depends on how much room the policy space gives it to act. We compare five seeds per variant, 200 rounds, across both regimes. In the binary game: no payoff advantage, no entropy difference (Section~\ref{sec:h1}). In the graded investment game: precision modulation reaches total payoff $1884.6$ versus $1859.4$ for the no-affect baseline ($+25.2$), with mean policy entropy $7.94$ versus $8.80$ ($-0.86$). The improvement emerges precisely in the regime where policy entropy is high enough for action confidence to matter.
 
 The tracked-only lesion isolates where the effect lives. It matches the no-affect baseline in payoff and entropy --- not the full-precision agent --- despite having slightly \emph{better} partner-belief accuracy (joint: $0.339$ vs.\ $0.336$; stance: $0.855$ vs.\ $0.816$). The benefit is not epistemic: the agent is not forming better partner models. It is metacognitive: the agent deploys the same models with better-calibrated confidence. The gain traces specifically to the $\beta_k \to \gamma_k$ pathway.
 

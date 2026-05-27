@@ -26,13 +26,18 @@ id = "affect"
 affect = "precision"
 planning_horizon = 1
 
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 1
+
 [[sweeps]]
 parameter = "planning_horizon"
 values = [1, 2, 3, 4, 8]
-applies_to = ["no_affect", "affect"]
+applies_to = ["no_affect", "affect", "global_beta"]
 
 [analysis]
 auto = true
 primary = "h0_openness"
-compare = ["affect", "no_affect"]
+compare = ["affect", "global_beta", "no_affect"]
 metrics = ["payoff", "precision", "q_pi_entropy"]

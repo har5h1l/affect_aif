@@ -40,8 +40,8 @@ def test_config_uses_canonical_beta_level_name():
 
 def test_toml_spec_surface_uses_explicit_variants():
     spec = ExperimentSpec.from_toml(REPO_ROOT / "configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml")
-    assert [variant.id for variant in spec.variants] == ["no_affect", "affect", "lesioned"]
-    assert {run.variant_id for run in spec.expand_runs()} == {"no_affect", "affect", "lesioned"}
+    assert [variant.id for variant in spec.variants] == ["no_affect", "affect", "lesioned", "global_beta"]
+    assert {run.variant_id for run in spec.expand_runs()} == {"no_affect", "affect", "lesioned", "global_beta"}
 
 
 def test_no_epistemic_variant_disables_information_gain():

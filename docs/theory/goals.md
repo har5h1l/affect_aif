@@ -11,8 +11,9 @@ partners, and recover under social uncertainty.
 
 ## Current Scientific Spine
 
-- Affect is modeled as partner-specific model fitness.
+- Affect is modeled as partner-specific model fitness, updated from
+  partner-action surprisal and deployed as inverse-beta policy precision.
 - The trust task is a testbed for social inference under volatility.
 - Clinical-like variants are perturbations of affective precision dynamics, not
   validated clinical diagnoses.
-- Current claims require completed H0-H5 runs on the supported architecture.
+- Current claims require completed H0-H6 runs on the supported architecture.

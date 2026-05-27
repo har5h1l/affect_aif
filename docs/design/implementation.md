@@ -83,11 +83,14 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 ## Affective Update Signal
 
-- The current code tracks unsigned surprise, not signed residual error.
-- Concretely, it uses `1 - P(observed action)` under the current predictive distribution for that partner.
+- The current code tracks Hesp-style surprisal, not signed residual error.
+- Concretely, it uses `-log P(observed action)` under the current predictive
+  distribution for that partner.
 - The `prediction_errors` logging field records surprise magnitude.
 - Affective variants use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
+- The default `sigma_0_sq` is `(-log 0.5)^2`, preserving a fifty-fifty binary
+  prediction as the neutral baseline.
 - The `global_beta` ablation uses the same update law but routes every
   interaction through beta entity `0`. Partner-local POMDP beliefs remain
   separate; only the beta precision signal is shared across partners.

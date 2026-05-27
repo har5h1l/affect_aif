@@ -16,8 +16,28 @@ git diff --check
 
 ## Post-Verification Queue
 
-The May 18, 2026 H0-H5 queue completed and is interpreted in
-`docs/results/current.md`. Follow-up analysis added partner-level H1 and
+As of May 27, 2026, the canonical affect update uses Hesp-style surprisal,
+`-log P(observed partner action)`, with neutral baseline
+`sigma_0_sq = (-log 0.5)^2`. Earlier bounded-error results are historical until
+the log-surprisal rebaseline completes. The detailed rerun plan is
+`docs/active/final_rebaseline_plan.md`.
+
+Run the smoke queue first:
+
+```bash
+.venv/bin/python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --config configs/trust/hypotheses/h6_locality_interference/global_beta_focal_switch_probe.toml --output-dir results --batch-name log_surprisal_core_smoke_20260527 --workers 1
+```
+
+Only after those logs and analysis outputs are verified, run the confirmation
+queue:
+
+```bash
+.venv/bin/python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml --output-dir results --batch-name log_surprisal_core_confirm_20260527 --workers 1
+```
+
+The May 18, 2026 H0-H5 queue completed and is documented in
+`docs/results/current.md`, but it is now historical/provisional because the
+affect update changed to log-surprisal. Follow-up analysis added partner-level H1 and
 overconfident-wrong-belief H3 reports. The May 19, 2026
 `betrayal_reallocation` follow-up completed and is retained as a small H3
 pilot. The higher-replication H1/H3 split confirmation also completed under
@@ -196,10 +216,10 @@ write-up or review process requires a specific stress-regime robustness check.
 python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h3_stress_robustness --workers 1
 ```
 
-## Canonical Full Queue
+## Historical Full Queue
 
-The commands below remain the canonical H0-H5 queue for a fresh full rerun.
-They are not the immediate next action.
+The commands below are retained for historical H0-H5 reference. The immediate
+next action is the log-surprisal rebaseline queue above.
 
 ### 1. H0 Openness Gate
 

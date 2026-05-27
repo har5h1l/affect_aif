@@ -13,6 +13,17 @@ from collections.abc import Sequence
 import numpy as np
 
 DEFAULT_BETA_LEVELS = np.asarray([0.5, 0.67, 1.0, 1.5, 2.0], dtype=np.float64)
+LOG_SURPRISE_BASELINE_SQ = float(np.log(2.0) ** 2)
+
+
+def surprise_from_probability(probability: float) -> float:
+    """Convert an observed-outcome probability into Hesp-style surprisal."""
+
+    probability_value = float(probability)
+    if not np.isfinite(probability_value):
+        raise ValueError("probability must be finite")
+    clipped = float(np.clip(probability_value, 1e-16, 1.0))
+    return float(-np.log(clipped))
 
 
 def _affective_charge(surprise: float, *, alpha: float, sigma_0_sq: float) -> float:
@@ -50,7 +61,7 @@ class DiscreteBetaState:
         initial_beta: float = 1.0,
         beta_levels: Sequence[float] | None = None,
         alpha_charge: float = 3.0,
-        sigma_0_sq: float = 0.25,
+        sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ,
         persistence: float = 0.8,
     ) -> None:
         self.num_entities = int(num_entities)

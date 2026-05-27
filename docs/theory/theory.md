@@ -9,7 +9,7 @@ redesign described in `docs/theory/pomdp_spec.md` and
 `docs/design/implementation.md`.
 
 For the current canonical hypothesis surface, use
-`docs/theory/hypotheses.md`. That file organizes the project around H0-H5
+`docs/theory/hypotheses.md`. That file organizes the project around H0-H6
 behavior cards.
 
 - The hidden social state is `partner type × partner stance`, not partner type plus exploiter phase.
@@ -222,8 +222,8 @@ equations are archived prototype intuition only.
 
 The current update uses:
 
-- $\epsilon_k^{(t)} = 1 - P(o_t = o_t^{\mathrm{obs}} \mid s_k)$ — unsigned
-  surprise from the partner-local social model
+- $\epsilon_k^{(t)} = -\log P(o_t = o_t^{\mathrm{obs}} \mid s_k)$ —
+  surprisal from the partner-local social model
 - $\phi(\epsilon)$ — a signed transformation that converts surprise magnitudes
   into affective charge:
   - small $\epsilon$ -> positive charge, favoring lower beta and higher policy
@@ -235,8 +235,8 @@ The specific form of $\phi$ is:
 
 $$\phi(\epsilon) = \alpha \cdot (\sigma_0^2 - \epsilon^2)$$
 
-Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. In the current implementation, the default `0.25` corresponds to the squared surprise of a maximally uninformative binary partner: $(1 - 0.5)^2$. Defaults of `beta_persistence = 0.8` and `alpha_charge = 3.0` keep affect slower than belief updates while still letting partner-specific precision estimates separate over repeated interactions. When actual squared surprise is below baseline, expected policy precision increases through lower beta; when above, expected policy precision decreases through higher beta. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
-Within-theory sensitivity analysis therefore varies `alpha_charge`, `sigma_0_sq`, `beta_persistence`, and `initial_beta`. That sweep asks whether the mechanism is under-expressed because the baseline surprise scale or beta dynamics are badly matched to the task, while keeping the update law itself fixed.
+Where $\sigma_0^2$ is a baseline expected surprise variance and $\alpha$ is a learning rate. The default `sigma_0_sq = (-\log 0.5)^2` corresponds to the squared surprisal of a maximally uninformative binary prediction. Defaults of `beta_persistence = 0.8` and `alpha_charge = 3.0` keep affect slower than belief updates while still letting partner-specific precision estimates separate over repeated interactions. When actual squared surprise is below baseline, expected policy precision increases through lower beta; when above, expected policy precision decreases through higher beta. This is still a precision-tracking signal — the affective state estimates how reliable the social model has been for that partner.
+Within-theory sensitivity analysis therefore varies `alpha_charge`, `sigma_0_sq`, `beta_persistence`, and `initial_beta`. That sweep asks whether the mechanism is under-expressed because the surprise scale or beta dynamics are badly matched to the task.
 
 This update law extends Hesp et al.'s variational precision dynamics to the
 per-partner social setting. The surprise term is computed from the agent's own
@@ -459,19 +459,20 @@ are reliably cooperative. Current H5 configs instantiate this with
 
 ### 4.11 Predictive and Comparative Extensions
 
-Predictive model comparison remains useful future work, but it is no longer part
-of the active H0-H5 evidence spine. A clean comparison should score matched
+Predictive model comparison remains useful future work, but it is separate from
+the active H0-H6 evidence spine. A clean comparison should score matched
 observation sequences and avoid mixing reward optimization with predictive
-fitness. Global beta, reward-history baselines, and richer model-selection
-variants should be treated as future model-comparison work unless rerun and
-documented under the current architecture.
+fitness. Global beta is now the maintained H6 ablation; reward-history
+baselines and richer model-selection variants remain future work unless rerun
+and documented under the current architecture.
 
 ### 4.12 Task Generalization and Perturbation Tests
 
 Cross-game and clinical-like perturbation tests remain useful future extensions,
-but the active spine now evaluates them through the H0-H5 behavior cards:
+but the active spine now evaluates them through the H0-H6 behavior cards:
 openness first, model fitness second, deployment third, then stress, social
-choice, and perturbation dynamics. Any clinical-like interpretation must first
+choice, perturbation dynamics, and locality/global-beta controls. Any
+clinical-like interpretation must first
 show the intended beta/precision dynamics and then show behavior only in regimes
 where H0 confirms policy-space openness.
 

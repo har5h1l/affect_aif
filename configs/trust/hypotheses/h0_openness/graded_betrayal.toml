@@ -36,9 +36,14 @@ id = "affect"
 affect = "precision"
 planning_horizon = 4
 
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
 [analysis]
 auto = true
 primary = "h0_openness"
-compare = ["affect", "no_affect"]
+compare = ["affect", "global_beta", "no_affect"]
 switch_window = [1, 10]
 metrics = ["payoff", "precision", "q_pi_entropy"]

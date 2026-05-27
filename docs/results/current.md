@@ -1,13 +1,20 @@
 # Current Results
 
-Current interpreted evidence has three tiers. The primary evidence is promoted
-from the completed May 2026 H0-H5 run queue on the supported factorized-control
-architecture. The May 2026 H1/H3 confirmation batch is a
-targeted follow-up confirmation for the two formerly weakest split readouts,
-and the H3 precision-sensitivity batch is a stress-regime robustness check for
-that boundary condition. The earlier May 19 H3 reallocation run remains a small
-pilot because its conditional-return advantage did not survive the
-higher-replication check. The May 2026 H6 global-beta batch is discovery
+> Rebaseline note, May 27, 2026: the affect update has been changed from the
+> earlier bounded action-error proxy to Hesp-style action surprisal,
+> `-log P(observed partner action)`, with neutral baseline
+> `sigma_0_sq = (-log 0.5)^2`. The evidence below remains the historical
+> bounded-proxy read and should be treated as provisional until the H0-H6
+> rebaseline queue is rerun on the current mechanism.
+
+Historical interpreted evidence has three tiers. The primary evidence was
+promoted from the completed May 2026 H0-H5 run queue on the supported
+factorized-control architecture before the log-surprisal rebaseline. The May
+2026 H1/H3 confirmation batch targeted the two formerly weakest split readouts,
+and the H3 precision-sensitivity batch served as a stress-regime robustness
+check for that boundary condition. The earlier May 19 H3 reallocation run
+remains a small pilot because its conditional-return advantage did not survive
+the higher-replication check. The May 2026 H6 global-beta batch is discovery
 evidence for planning the next locality/interference experiment; it is not yet
 part of the main evidence hierarchy.
 
@@ -49,7 +56,7 @@ submission-readiness and literature-positioning read. See
 discovery read and `docs/results/runs/2026-05-26-h6-locality-probe.md` for the
 focused five-seed locality probe.
 
-## Current Read
+## Historical Read
 
 The central result is conditional, not global: affective precision clearly moves
 policy entropy, partner choice, and deployment when the policy space is open,

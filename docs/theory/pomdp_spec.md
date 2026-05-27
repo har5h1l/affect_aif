@@ -231,14 +231,16 @@ This module runs after each trial observation, before the next policy selection.
 ### Step 1: Prediction Error
 
 ```
-eps_k = 1 - P_predicted(observed_action_k)
+eps_k = -log(P_predicted(observed_action_k))
 ```
 
 Where `P_predicted` comes from the agent's belief over type × stance before the observation.
 
 **Design choice**: Prediction error is computed from partner action only, not from the joint (action, payoff) observation. Partner action is the most direct social signal of partner model mismatch — it reflects type and stance directly. Payoff adds information about the game outcome but is downstream of partner action (marginalized through the cooperation table). A richer alternative would define eps_k from the joint negative log-likelihood of both observations; this is a straightforward extension if needed.
 
-**Terminology**: This is a bounded prediction error proxy (range [0, 1]), not standard surprisal (-log P). It linearizes surprise for computational simplicity and ensures the affective charge has a natural zero-crossing at eps = sigma_0.
+**Terminology**: `eps_k` is standard surprisal from the partner-action
+likelihood. The default `sigma_0_sq = (-log 0.5)^2` makes an uninformative
+binary prediction the neutral point.
 
 ### Step 2: Affective Charge
 
@@ -246,10 +248,10 @@ Where `P_predicted` comes from the agent's belief over type × stance before the
 phi_k = alpha * (sigma_0^2 - eps_k^2)
 ```
 
-With `alpha = 3.0`, `sigma_0^2 = 0.25`:
-- `eps = 0` (perfect prediction): `phi = 0.75` (positive — model accurate)
-- `eps = 0.5` (baseline): `phi = 0.0` (neutral)
-- `eps = 1.0` (total surprise): `phi = -2.25` (negative — model failing)
+With `alpha = 3.0`, `sigma_0^2 = (-log 0.5)^2`:
+- `eps = 0` (perfect prediction): positive charge
+- `eps = -log 0.5` (fifty-fifty prediction): neutral charge
+- `eps > -log 0.5` (worse than chance prediction): negative charge
 
 ### Step 3: Persistence Prediction
 

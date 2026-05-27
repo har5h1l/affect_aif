@@ -8,9 +8,9 @@
   "random_seed": 42,
   "payoff_mode": "binary",
   "agents": [
-    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.25, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8},
-    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.25, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8},
-    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.25, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8},
-    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.25, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8}
+    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.4804530139182014, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8},
+    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.4804530139182014, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8},
+    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.4804530139182014, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8},
+    {"kind": "affective", "planning_horizon": 8, "alpha_charge": 3.0, "sigma_0_sq": 0.4804530139182014, "initial_beta": 1.0, "num_levels": 5, "persistence": 0.8}
   ]
 }

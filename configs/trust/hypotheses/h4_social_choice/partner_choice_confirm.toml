@@ -26,8 +26,13 @@ id = "affect"
 affect = "precision"
 planning_horizon = 4
 
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
 [analysis]
 auto = true
 primary = "h4_social_choice"
-compare = ["affect", "no_affect"]
+compare = ["affect", "global_beta", "no_affect"]
 metrics = ["payoff", "precision", "partner_choice", "evidence_effects"]

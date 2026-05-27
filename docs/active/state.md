@@ -1,11 +1,10 @@
 # Current Mission
 
-Stabilize the current H0-H5 evidence narrative on the official
-`inferactively-pymdp==1.0.0` runtime, with active handoff docs kept aligned to
-the supported trust-task wrappers, external affective precision tracking, and
-canonical script-driven experiments. The active follow-up surface is H6
-locality/interference: a global-beta ablation that asks whether partner-local
-precision is doing work beyond a shared model-fitness tracker.
+Rebaseline the H0-H6 evidence narrative on the official
+`inferactively-pymdp==1.0.0` runtime after shifting the affect update to
+Hesp-style partner-action surprisal. The active follow-up surface now combines
+the main H0-H5 mechanism tests with global-beta controls, so partner-local and
+shared affective precision can be compared in the same rerun pass.
 
 ## Scope
 
@@ -17,10 +16,8 @@ precision is doing work beyond a shared model-fitness tracker.
 - Preserve the Hesp-extension behavior-card spine in
   `docs/theory/hypotheses.md`.
 - Keep current docs aligned with the supported H0-H6 experiment surface.
-- Treat the May 19 H3 reallocation run as a small follow-up pilot. Use the
-  completed H1/H3 confirmation batch as the current targeted follow-up evidence.
-- Treat H6 global-beta outputs as smoke/discovery evidence until the user
-  explicitly approves changing manuscript interpretation.
+- Treat pre-May-27 bounded-error results as historical/provisional until
+  rebaseline runs complete under `-log P(observed partner action)`.
 
 ## Constraints
 
@@ -38,8 +35,8 @@ precision is doing work beyond a shared model-fitness tracker.
 - The active runtime cutover is complete for official
   `inferactively-pymdp==1.0.0` plus project-owned trust-task wrappers and
   external affective precision tracking.
-- The May 18 H0-H5 queue is complete and interpreted in
-  `docs/results/current.md`.
+- The May 18 H0-H5 queue is complete but now historical/provisional because the
+  affect update has changed to log-surprisal.
 - The manuscript draft has been revised toward a traditional results/discussion
   structure, with clearer game and generative-model descriptions.
 - H6 `global_beta` support, a locality/interference smoke config, and generic
@@ -60,8 +57,9 @@ precision is doing work beyond a shared model-fitness tracker.
   `results/h6_global_beta_focal_switch_probe_20260526/` with five seeds and
   `--workers 1`. It replicated the mixed H6 pattern: local beta preserved the
   cleaner model-fitness signal, while global beta had higher aggregate payoff.
-  The next run should return to H0/H2/H4 manuscript confirmation rather than
-  adding more H6 smoke variants.
+- The core H0/H1/H2/H3/H4 configs now include `global_beta` variants where
+  relevant, so the next rerun can evaluate locality alongside the main
+  mechanism spine.
 - The manuscript now includes script-generated figure panels for model fitness,
   deployment/social choice, betrayal boundary, shock shape, and
   precision-dynamics phenotypes. It compiles to 11 LNCS pages.
@@ -72,16 +70,9 @@ Read this folder in order: `state.md`, `progress.md`, then `blockers.md`.
 Paper-facing evidence remains in `docs/paper/manuscript/` and interpreted
 results remain in `docs/results/`.
 
-The next research thread should review both completed H6 discovery surfaces:
-`results/h6_global_beta_discovery_20260525/h6/` and
-`results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/`.
-Both were intentionally smoke-scale and one-worker. The current read is that
-global beta does not duplicate local beta, but the locality/interference result
-is mixed enough that H6 should remain a follow-up mechanism question rather than
-a manuscript-level necessity claim.
-
-The next active experiment lane is the H0/H2/H4 manuscript confirmation queue in
-`docs/active/progress.md`.
+The next active experiment lane is the log-surprisal rebaseline queue in
+`docs/active/progress.md`. Run smoke-scale H0-H4/H6 checks first, then promote
+only stable readouts to confirmation-scale reruns.
 
 Do not create a separate handoff document; keep the live handoff in this
 `docs/active/` state/progress surface.

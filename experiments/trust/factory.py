@@ -8,7 +8,7 @@ import numpy as np
 
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.spec import ExpandedRunSpec, VariantSpec
-from tasks.trust.affect import DiscreteBetaState
+from tasks.trust.affect import LOG_SURPRISE_BASELINE_SQ, DiscreteBetaState
 from tasks.trust.envs import GradedTrustGameEnv, TrustGameEnv
 from tasks.trust.pomdp import TrustPomdpTemplate, build_trust_pomdp_template, create_partner_agents
 from tasks.trust.runtime import PartnerBank
@@ -132,7 +132,7 @@ def create_agents_from_multi_focal_config(
             gamma=float(spec.get("gamma", 1.0)),
             action_sampling=str(spec.get("action_sampling", "marginal")),
             alpha_charge=float(spec.get("alpha_charge", 3.0)),
-            sigma_0_sq=float(spec.get("sigma_0_sq", 0.25)),
+            sigma_0_sq=float(spec.get("sigma_0_sq", LOG_SURPRISE_BASELINE_SQ)),
             initial_beta=float(spec.get("initial_beta", 1.0)),
             beta_num_levels=int(spec.get("num_levels", 5)),
             beta_persistence=float(spec.get("persistence", 0.8)),

@@ -53,7 +53,7 @@ configs/
 `[[variants]]`
 
 - `id`
-- `affect`: `none`, `precision`, or `tracked_only`
+- `affect`: `none`, `precision`, `tracked_only`, or `global_beta`
 - `planning_horizon`
 - `gamma`
 - `epistemic_value`

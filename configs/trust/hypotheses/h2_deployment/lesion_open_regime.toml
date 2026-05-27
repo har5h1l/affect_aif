@@ -27,6 +27,11 @@ affect = "tracked_only"
 planning_horizon = 4
 
 [[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
+[[variants]]
 id = "no_epistemic"
 affect = "precision"
 planning_horizon = 4
@@ -35,5 +40,5 @@ epistemic_value = false
 [analysis]
 auto = true
 primary = "h2_deployment"
-compare = ["affect", "lesioned", "no_epistemic"]
+compare = ["affect", "global_beta", "lesioned", "no_epistemic"]
 metrics = ["payoff", "precision", "stance_accuracy"]

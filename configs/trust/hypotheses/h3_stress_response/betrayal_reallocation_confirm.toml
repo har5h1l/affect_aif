@@ -41,13 +41,18 @@ id = "lesioned"
 affect = "tracked_only"
 planning_horizon = 4
 
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
 [runtime]
 max_policies = 4096
 
 [analysis]
 auto = true
 primary = "h3_stress_response"
-compare = ["affect", "no_affect", "lesioned"]
+compare = ["affect", "global_beta", "no_affect", "lesioned"]
 switch_window = [1, 10]
 metrics = [
   "payoff",

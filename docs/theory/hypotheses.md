@@ -27,14 +27,9 @@ Implementation note: beta is the HESP-aligned rate parameter. Low beta means
 high expected policy precision. Analyses should report
 `precision_k = 1 / E[beta_k]` whenever possible.
 
-Partner-specific beta is an architectural premise of the model, not a current
-behavior-card hypothesis. A future global-beta ablation can test whether
-per-partner affect is behaviorally superior to global affect. Predictive model
-comparison is future work, not part of the main H0-H5 spine.
-
-The global-beta ablation is now promoted to an H6 discovery surface. It should
-not be treated as settled evidence until smoke outputs are reviewed and, if
-promising, rerun at higher replication.
+Partner-specific beta is an architectural premise of the model. The H6
+global-beta condition tests whether per-partner affect is behaviorally superior
+to a shared affective precision state.
 
 Current H6 discovery read: local beta preserves a cleaner model-fitness signal
 than global beta in the focused locality probes, but global beta has higher

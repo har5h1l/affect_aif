@@ -70,4 +70,26 @@ def test_global_beta_update_routes_to_shared_entity() -> None:
     after = bank.beta.expected_beta()[0]
 
     assert after > before
-    assert np.isclose(bank.latest_surprise[2], 0.9)
+    assert np.isclose(bank.latest_surprise[2], -np.log(0.1))
+
+
+def test_beta_update_logs_surprisal_signal() -> None:
+    template = build_trust_pomdp_template(ExperimentConfig(payoff_mode="binary", num_partners=1), planning_horizon=1)
+    bank = PartnerBank(
+        agents=create_partner_agents(template, num_partners=1, gamma=1.0),
+        beta=DiscreteBetaState(
+            num_entities=1,
+            initial_beta=1.0,
+            sigma_0_sq=float(np.log(2.0) ** 2),
+        ),
+    )
+
+    update_beta_after_observation(
+        bank=bank,
+        partner_idx=0,
+        predicted_partner_action_probs=np.array([0.1, 0.9]),
+        observed_partner_action=0,
+        affect_mode="normal",
+    )
+
+    assert np.isclose(bank.latest_surprise[0], -np.log(0.1))

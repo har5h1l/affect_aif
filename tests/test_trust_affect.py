@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tasks.trust.affect import DiscreteBetaState
+from tasks.trust.affect import LOG_SURPRISE_BASELINE_SQ, DiscreteBetaState, surprise_from_probability
 from tasks.trust.rollout import gamma_per_policy
 
 
@@ -27,10 +27,22 @@ def test_high_surprise_increases_beta_rate() -> None:
     state = DiscreteBetaState(num_entities=1, initial_beta=1.0)
 
     before = state.expected_beta()[0]
-    state.update(entity=0, surprise=1.0)
+    state.update(entity=0, surprise=-np.log(0.1))
     after = state.expected_beta()[0]
 
     assert after > before
+
+
+def test_surprise_uses_negative_log_likelihood() -> None:
+    surprise = surprise_from_probability(0.1)
+
+    assert np.isclose(surprise, -np.log(0.1))
+
+
+def test_log_surprise_baseline_matches_fifty_fifty_prediction() -> None:
+    surprise = surprise_from_probability(0.5)
+
+    assert np.isclose(surprise**2, LOG_SURPRISE_BASELINE_SQ)
 
 
 def test_discrete_beta_state_rejects_invalid_initialization() -> None:

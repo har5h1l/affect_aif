@@ -9,6 +9,7 @@ from typing import Any
 import jax.numpy as jnp
 import numpy as np
 
+from tasks.trust.affect import surprise_from_probability
 from tasks.trust.payoffs import encode_action, encode_env_action_factorized
 from tasks.trust.pomdp import (
     TrustPomdpTemplate,
@@ -219,7 +220,7 @@ def update_beta_after_observation(
     if bank.beta is None or affect_mode in {"none", "fixed"}:
         return float("nan")
     probability = float(np.asarray(predicted_partner_action_probs, dtype=float)[int(observed_partner_action)])
-    surprise = 1.0 - probability
+    surprise = surprise_from_probability(probability)
     beta_idx = 0 if affect_mode == "global" else int(partner_idx)
     bank.beta.update(entity=beta_idx, surprise=surprise)
     if bank.latest_surprise is None:

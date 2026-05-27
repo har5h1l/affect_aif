@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, cast
 
+from tasks.trust.affect import LOG_SURPRISE_BASELINE_SQ
 from tasks.trust.types import PARTNER_TYPE_ORDER
 
 try:  # pragma: no cover - exercised only on Python < 3.11
@@ -94,7 +95,7 @@ class VariantSpec:
     gamma: float = 1.0
     epistemic_value: bool = True
     alpha_charge: float = 3.0
-    sigma_0_sq: float = 0.25
+    sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ
     initial_beta: float = 1.0
     beta_persistence: float = 0.8
     beta_levels: tuple[float, ...] = (0.5, 0.67, 1.0, 1.5, 2.0)

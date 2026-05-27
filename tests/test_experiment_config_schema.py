@@ -117,6 +117,7 @@ def test_expanded_run_builds_runtime_config(example_spec):
     assert cfg.p_switch == 0.0
     assert cfg.gamma == 1.0
     assert cfg.alpha_charge == 3.0
+    assert cfg.sigma_0_sq == pytest.approx(0.4804530139182014)
     assert not cfg.log_policy_traces
 
 
@@ -160,6 +161,8 @@ def test_factory_uses_variant_affect_mode(example_spec):
     assert runtime.agent_kind == "affective"
     assert runtime.affect_mode == "normal"
     assert runtime.planning_horizon == 4
+    assert runtime.partner_bank.beta is not None
+    assert runtime.partner_bank.beta.sigma_0_sq == pytest.approx(0.4804530139182014)
 
 
 def test_factory_uses_tracked_only_lesion(example_spec):

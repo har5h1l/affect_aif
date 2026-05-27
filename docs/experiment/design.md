@@ -22,9 +22,6 @@ The following require new implementation and tests before they become runnable
 surface:
 
 - **Variational beta** — a variational auxiliary state would be new code.
-- **Global beta** — now exists as a smoke-test ablation surface under H6; full
-  interpretation requires review of the one-worker discovery outputs before
-  broader reruns.
 
 ---
 
@@ -142,7 +139,7 @@ After each trial with partner $k$, the external beta tracker is updated from the
 # After observing partner k's action at time t:
 prediction = E[o_t | current posterior over partner-local type x stance]
 actual = o_t
-surprise_k = 1 - prediction[actual]               # unsigned surprise of what happened
+surprise_k = -log(prediction[actual])             # Hesp-style surprisal
 sq_surprise = surprise_k^2
 
 # Affective charge: positive if model is accurate, negative if not
@@ -160,7 +157,7 @@ gamma_k = gamma_base / E_beta_k
 Parameters:
 - `beta_persistence = 0.8` — persistence in the tridiagonal beta transition matrix; higher values make precision estimates more inertial
 - $\alpha = 3.0$ — charge sensitivity; expands the sigmoid operating range so correct vs. incorrect predictions separate betas materially
-- $\sigma_0^2$ — baseline expected squared surprise; default `0.25` matches a random binary partner because $(1 - 0.5)^2 = 0.25$
+- $\sigma_0^2$ — baseline expected squared surprise; default `(-log 0.5)^2` matches a maximally uninformative binary prediction.
 - `initial_beta = 1.0` and beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]` define the default discrete support
 
 The beta state remains outside the POMDP hidden-state factors. It is a task-local HESP precision tracker used to set native pymdp policy precision before the next partner-local `infer_policies(...)` call.
@@ -377,11 +374,13 @@ separate from the main H0-H5 behavior-card spine. A separate variational beta
 model would require new implementation and tests; the supported runtime uses a
 task-local discrete beta tracker outside the POMDP state space.
 
-### Future Work: Global-Beta Ablation
+### H6: Global-Beta Ablation
 
-Partner-specific beta is part of the current architecture. A future optional
-ablation can compare it with a single shared beta state, but that comparison is
-not part of the current core hypothesis spine.
+Partner-specific beta is part of the current architecture. The supported
+`global_beta` condition compares it with a single shared beta state while
+keeping partner-local POMDP beliefs intact. The current core H0-H4 configs now
+include this condition where relevant, and focused H6 configs retain the
+cross-partner interference diagnostics.
 
 ---
 
@@ -560,8 +559,8 @@ value. H1 is the protection against that failure.
 
 If a global beta ablation performs as well as per-partner beta, the strong
 multi-agent factorization claim should be weakened until a task demonstrates
-partner-local advantage. This is future model comparison, not a current H0-H5
-failure condition.
+partner-local advantage. This is a current H6 model-comparison readout, not an
+H0-H5 failure condition.
 
 ---
 
@@ -607,6 +606,6 @@ H0 precision-channel tests.
 | Phase 3 | Theory tightening: formalize the H0-H5 behavior cards and expected behavior | Current docs | Done |
 | Phase 4 | Discrete beta: supported task-local `DiscreteBetaState` | Phase 3 | Done |
 | Phase 5 | Current H0-H5 run queue and H1/H3 confirmation | Phase 4 | Done |
-| Phase 6 | Write-up stabilization and public documentation cleanup | Phase 5 | Current |
-| Phase 7 | Reviewer-driven robustness checks, richer tasks, or global-beta ablation | Phase 6 | Optional future |
+| Phase 6 | Write-up stabilization and public documentation cleanup | Phase 5 | Done |
+| Phase 7 | Log-surprisal H0-H6 rebaseline with global-beta controls | Phase 6 | Current |
 | Phase 8 | Human data: fit behavioral data and estimate individual-difference parameters | Stable manuscript | Future |

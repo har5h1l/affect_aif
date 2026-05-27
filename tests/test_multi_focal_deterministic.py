@@ -25,7 +25,7 @@ def _build(M=4, num_rounds=50, seed=42):
                     "kind": "affective",
                     "planning_horizon": 4,
                     "alpha_charge": 3.0,
-                    "sigma_0_sq": 0.25,
+                    "sigma_0_sq": 0.4804530139182014,
                     "initial_beta": 1.0,
                     "num_levels": 5,
                     "persistence": 0.8,
