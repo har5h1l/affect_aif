@@ -39,7 +39,7 @@ def test_config_uses_canonical_beta_level_name():
 
 
 def test_toml_spec_surface_uses_explicit_variants():
-    spec = ExperimentSpec.from_toml(REPO_ROOT / "configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml")
+    spec = ExperimentSpec.from_toml(REPO_ROOT / "configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
     assert [variant.id for variant in spec.variants] == ["no_affect", "affect", "lesioned", "global_beta"]
     assert {run.variant_id for run in spec.expand_runs()} == {"no_affect", "affect", "lesioned", "global_beta"}
 
@@ -119,7 +119,7 @@ def test_run_cli_dry_run_reports_toml_manifest(tmp_path):
 
     assert run_experiment.main() == 0
     manifest = json.loads((tmp_path / "results" / "dry" / "manifest.json").read_text())
-    assert manifest["configs"][0]["hypothesis_id"] == "h3"
+    assert manifest["configs"][0]["hypothesis_id"] == "h5"
     assert manifest["configs"][0]["experiment_id"] == "betrayal_choice"
     assert manifest["configs"][0]["family"] == "trust"
     assert manifest["configs"][0]["variants"] == ["affect", "no_affect"]
@@ -198,16 +198,17 @@ def test_benchmark_cli_uses_unified_toml_configs(tmp_path, capsys):
 
 def test_core_hypothesis_experiments_exist():
     expected = [
-        "configs/trust/hypotheses/h0_openness/shallow_binary.toml",
-        "configs/trust/hypotheses/h0_openness/graded_choice.toml",
-        "configs/trust/hypotheses/h0_openness/graded_betrayal.toml",
+        "configs/trust/hypotheses/h0_policy_openness/shallow_binary.toml",
+        "configs/trust/hypotheses/h0_policy_openness/graded_choice.toml",
+        "configs/trust/hypotheses/h0_policy_openness/graded_betrayal.toml",
         "configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml",
         "configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml",
-        "configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml",
-        "configs/trust/hypotheses/h4_social_choice/partner_choice.toml",
-        "configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml",
-        "configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml",
-        "configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml",
+        "configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml",
+        "configs/trust/hypotheses/h4_social_allocation/partner_choice.toml",
+        "configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml",
+        "configs/trust/hypotheses/h6_perturbation/clinical_betrayal.toml",
+        "configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml",
+        "configs/trust/hypotheses/h6_perturbation/affect_sensitivity.toml",
         "configs/trust/smoke/smoke.toml",
     ]
     assert not (REPO_ROOT / "experiments" / "trust" / "hypotheses").exists()

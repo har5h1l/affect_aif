@@ -40,14 +40,18 @@ The current card order is:
 1. **H0 Openness Gate**: can precision move policy here?
 2. **H1 Model Fitness**: does precision track predictability rather than reward?
 3. **H2 Deployment**: can the agent use what it knows?
-4. **H3 Stress Response**: do volatility windows amplify the mechanism?
-5. **H4 Social Choice**: does precision guide approach, avoidance, probing, and
-   return?
-6. **H5 Perturbation Phenotypes**: do clinical-like parameter changes first
+4. **H3 Locality / Global Precision**: does partner-local beta preserve cleaner
+   model-fitness signals than a shared global tracker?
+5. **H4 Social Allocation**: does precision guide approach, avoidance, probing,
+   and return?
+6. **H5 Timescale / Volatility**: when does social change outrun confidence
+   calibration?
+7. **H6 Perturbation Phenotypes**: do clinical-like parameter changes first
    separate in precision dynamics, then behavior?
-7. **H6 Locality/Interference**: does partner-local beta contain volatility to
-   the partner whose model failed, or does a shared global beta contaminate
-   decisions about untouched partners?
+8. **H7 Signal Source**: does partner-action surprisal remain cleaner than
+   exploratory joint action-plus-payoff surprisal?
+9. **H8 Observation Noise / Robustness**: does beta inertia stabilize or slow
+   behavior under noisy social observations?
 
 ---
 
@@ -304,10 +308,51 @@ betrayal, or selecting cooperate/defect actions in open policy regimes.
 **Failure mode:** Lesion damages inference itself, or lesion and affect behave
 identically when H0 indicates that precision could have changed policy.
 
-### H3: Stress Response
+### H3: Locality / Global Precision
+
+**Prediction:** Partner-local beta preserves relationship-specific
+model-fitness evidence better than a shared global beta tracker.
+
+**Expected behavior:** Local beta should preserve the strongest partner-level
+precision-surprise signature. Global beta may produce useful aggregate behavior,
+but should mix evidence across partners and can perturb decisions about
+untouched partners after a localized shock.
+
+**Primary metrics:**
+- global beta versus partner-local beta or terminal signal
+- partner-level precision-surprise and precision-payoff associations
+- selected-partner distribution
+- policy entropy and payoff conditional on selected partner
+- cross-partner interference after a localized switch
+
+**Failure mode:** Global beta matches partner-local beta on signal quality,
+allocation, and post-shock interference, suggesting the current partner-local
+implementation is interpretable but not necessary under this task design.
+
+### H4: Social Allocation
+
+**Prediction:** Partner-specific precision should guide approach, avoidance,
+probing, and return in agent-choice settings.
+
+**Expected behavior:** Partner choice should be systematically related to both
+precision and expected value. High precision does not always imply approach: a
+reliable exploiter should be avoided or defected against, while uncertain
+partners may be probed when epistemic value is useful.
+
+**Primary metrics:**
+- selection entropy
+- `P(select k)` as a function of `precision_k x expected_payoff_k`
+- avoidance of reliable exploiters
+- probing rate for uncertain partners
+- return latency to recovered partners
+
+**Failure mode:** Partner choice is unrelated to partner-local precision.
+
+### H5: Timescale / Volatility
 
 **Prediction:** Betrayal, stance shifts, noisy observation, or partner volatility
-should amplify affect's behavioral role.
+should amplify affect's behavioral role. The sign of that role depends on
+whether partner beliefs and beta stay temporally aligned.
 
 **Expected behavior:** Around a hostile switch, the affective agent should show a
 surprise spike, precision drop for the affected partner, faster policy change,
@@ -328,26 +373,7 @@ condition when precision sharpens a wrong post-switch model.
 **Failure mode:** Affect effects are not amplified by volatility across both
 recovery/reallocation readouts and misdeployment readouts.
 
-### H4: Social Choice
-
-**Prediction:** Partner-specific precision should guide approach, avoidance,
-probing, and return in agent-choice settings.
-
-**Expected behavior:** Partner choice should be systematically related to both
-precision and expected value. High precision does not always imply approach: a
-reliable exploiter should be avoided or defected against, while uncertain
-partners may be probed when epistemic value is useful.
-
-**Primary metrics:**
-- selection entropy
-- `P(select k)` as a function of `precision_k x expected_payoff_k`
-- avoidance of reliable exploiters
-- probing rate for uncertain partners
-- return latency to recovered partners
-
-**Failure mode:** Partner choice is unrelated to partner-local precision.
-
-### H5: Perturbation Phenotypes
+### H6: Perturbation Phenotypes
 
 **Prediction:** Clinical-like variants should separate first in beta/precision
 dynamics and only then in behavior, and mainly in open policy regimes.
@@ -366,20 +392,44 @@ start low-confidence; slow-updating settings lag after real changes.
 **Failure mode:** Behavior differs without the intended precision dynamics, or
 precision dynamics do not differentiate.
 
+### H7: Signal Source
+
+**Prediction:** Partner-action surprisal should preserve the model-fitness
+dissociation better than joint action-plus-payoff surprisal.
+
+**Expected behavior:** A joint signal may become more reward-like because payoff
+is downstream of both partner action and the focal agent's action. Partner-action
+surprisal should keep a predictable exploiter high precision despite low payoff.
+
+**Current status:** Exploratory. The supported runtime uses partner-action
+surprisal; joint surprisal would require explicit implementation and tests.
+
+### H8: Observation Noise / Robustness
+
+**Prediction:** Beta inertia can stabilize behavior under noisy observations,
+but may slow adaptation if noise resembles real partner change.
+
+**Expected behavior:** Moderate observation noise should reduce the reliability
+of trial-level beliefs. A useful affective channel should dampen action churn
+without erasing real stance-switch responses.
+
+**Current status:** Exploratory. Observation noise is supported in scenario
+configs, but this lane is not required for the manuscript argument.
+
 ### Future Work: Predictive Model Comparison
 
 Predictive scoring of affective versus non-affective generative models remains
 future work. It should be evaluated on matched observation sequences and kept
-separate from the main H0-H5 behavior-card spine. A separate variational beta
+separate from the main H0-H8 behavior-card spine. A separate variational beta
 model would require new implementation and tests; the supported runtime uses a
 task-local discrete beta tracker outside the POMDP state space.
 
-### H6: Global-Beta Ablation
+### Global-Beta Ablation
 
 Partner-specific beta is part of the current architecture. The supported
 `global_beta` condition compares it with a single shared beta state while
-keeping partner-local POMDP beliefs intact. The current core H0-H4 configs now
-include this condition where relevant, and focused H6 configs retain the
+keeping partner-local POMDP beliefs intact. The current core H0-H6 configs now
+include this condition where relevant, and focused H3 configs retain the
 cross-partner interference diagnostics.
 
 ---
@@ -410,7 +460,7 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 
 ### 6.3 Analysis Plan
 
-Primary analysis follows the H0-H5 behavior cards rather than whole-run payoff
+Primary analysis follows the H0-H8 behavior cards rather than whole-run payoff
 alone.
 
 **Gate analysis first**:
@@ -425,14 +475,16 @@ alone.
   behavior shifts in lesioned runs
 
 **Behavior analyses**:
-- H3: use pre-switch, acute post-switch, and post-acute tail phase summaries,
-  post-switch windows, return/reallocation summaries, recovery latencies, and
-  low-entropy wrong-deployment summaries; whole-run payoff is a downstream
-  diagnostic, not the stress-response claim by itself
+- H3: compare local beta and global beta on partner-level signal quality and
+  cross-partner interference after localized shocks
 - H4: model partner selection as a function of precision and expected value;
   flat payoff can still accompany meaningful approach, avoidance, or probing
   changes
-- H5: verify beta/precision range, volatility, autocorrelation, action churn,
+- H5: use pre-switch, acute post-switch, and post-acute tail phase summaries,
+  post-switch windows, return/reallocation summaries, recovery latencies, and
+  low-entropy wrong-deployment summaries; whole-run payoff is a downstream
+  diagnostic, not the timescale claim by itself
+- H6: verify beta/precision range, volatility, autocorrelation, action churn,
   partner-selection entropy, and recovery timing before interpreting payoff or
   clinical-like labels
 
@@ -477,7 +529,7 @@ Key figures should mirror the behavior cards:
 ### 6.5 Implementation Timeline
 
 These phases describe the original build sequence and current documentation
-phase. Older phase labels are historical; current empirical claims use the H0-H5
+phase. Older phase labels are historical; current empirical claims use the H0-H8
 behavior cards and the provenance recorded in `docs/results/`.
 
 | Phase | Tasks | Duration | Status |
@@ -486,7 +538,7 @@ behavior cards and the provenance recorded in `docs/results/`.
 | Build 2 | Implement affective state and partner-local precision modulation | 1-2 weeks | Done |
 | Build 3 | Implement lesion, no-affect, and clinical-like perturbation variants | 1 week | Done |
 | Build 4 | Cut over to official `inferactively-pymdp==1.0.0` and factorized controls | 1 week | Done |
-| Build 5 | Run current H0-H5 queue and targeted H1/H3 confirmation | 1 week | Done |
+| Build 5 | Run current H0-H8 queue and targeted confirmation runs | 1 week | Done |
 | Build 6 | Analysis and result documentation | 1 week | Done |
 | Build 7 | Write-up stabilization | 2-3 weeks | Current phase |
 
@@ -503,9 +555,12 @@ Current scorecard:
 | H0 Openness Gate | Affect has little room in shallow binary settings, but lowers entropy and can improve payoff in graded choice. Open policy space is necessary but not sufficient; graded betrayal shows lower entropy with worse payoff. | Supported with caveat |
 | H1 Model Fitness | The 30-seed confirmation shows precision tracks surprise more strongly than payoff, while total payoff remains flat-to-worse for affect. | Supported |
 | H2 Deployment | In the open graded-choice regime, affect and lesion/no-affect have similar belief accuracy while affect changes entropy and payoff. | Supported |
-| H3 Stress Response | The confirmation shows lower entropy and fewer returns to the switched partner, but worse whole-run payoff and no confirmed conditional-return advantage. | Boundary condition confirmed |
-| H4 Social Choice | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. | Supported behaviorally |
-| H5 Perturbation Phenotypes | Clinical-like variants separate in beta range, entropy, partner selection, and payoff ordering, but five-seed payoff tests are underpowered. | Supported for dynamics |
+| H3 Locality / Global Precision | Discovery runs show local beta preserves a cleaner model-fitness signal than global beta, but global beta can have higher aggregate payoff in small probes. | Open decomposition |
+| H4 Social Allocation | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. | Supported behaviorally |
+| H5 Timescale / Volatility | Confirmation and sensitivity runs show abrupt shocks can produce precision-driven misdeployment, while gradual shocks are less harmful. | Boundary condition confirmed |
+| H6 Perturbation Phenotypes | Clinical-like variants separate in beta range, entropy, partner selection, and payoff ordering, but five-seed payoff tests are underpowered. | Supported for dynamics |
+| H7 Signal Source | Partner-action surprisal is canonical; joint action-plus-payoff surprise is future work. | Exploratory |
+| H8 Observation Noise / Robustness | Observation-noise configs are possible but not part of current manuscript evidence. | Exploratory |
 
 Interpretation guardrails:
 
@@ -535,7 +590,7 @@ predictive reliability -> precision_k -> policy shift -> behavior
 ```
 
 This requires more than payoff. H1 should show precision tracking predictive
-accuracy rather than reward. H0 should show the policy space is open. H2-H4
+accuracy rather than reward. H0 should show the policy space is open. H2-H5
 should then show policy, action, recovery, or partner-choice shifts.
 
 ### 7.2 Gate-Limited Null
@@ -559,8 +614,8 @@ value. H1 is the protection against that failure.
 
 If a global beta ablation performs as well as per-partner beta, the strong
 multi-agent factorization claim should be weakened until a task demonstrates
-partner-local advantage. This is a current H6 model-comparison readout, not an
-H0-H5 failure condition.
+partner-local advantage. This is a current H3 model-comparison readout, not an
+H0-H8 failure condition.
 
 ---
 
@@ -590,7 +645,7 @@ Vary model parameters to probe clinically relevant behavioral signatures:
 - **Depression** (high initial beta): chronically low policy precision, reduced engagement
 - **Anxiety**: increased epistemic drive weighting when $\beta_k$ is low (uncertainty triggers excessive information-seeking)
 
-**Critical analysis warning**: These are sensitivity analyses, not a unified clinical framework. The parameter-to-phenotype mappings are illustrative and should not be interpreted as validated clinical models. The configs exist for H5 Perturbation Phenotypes, but moving from sensitivity analysis to clinical modeling requires: (a) fitting to human behavioral data, (b) formal model comparison showing the affective model outperforms simpler alternatives on clinical populations, and (c) demonstrating that the parameter variations are identifiable from behavioral data alone rather than being degenerate with other model parameters.
+**Critical analysis warning**: These are sensitivity analyses, not a unified clinical framework. The parameter-to-phenotype mappings are illustrative and should not be interpreted as validated clinical models. The configs exist for H6 Perturbation Phenotypes, but moving from sensitivity analysis to clinical modeling requires: (a) fitting to human behavioral data, (b) formal model comparison showing the affective model outperforms simpler alternatives on clinical populations, and (c) demonstrating that the parameter variations are identifiable from behavioral data alone rather than being degenerate with other model parameters.
 
 ### 8.5 Graded Investment Trust Game
 
@@ -603,9 +658,9 @@ H0 precision-channel tests.
 
 | Phase | Description | Dependencies | Status |
 |---|---|---|---|
-| Phase 3 | Theory tightening: formalize the H0-H5 behavior cards and expected behavior | Current docs | Done |
+| Phase 3 | Theory tightening: formalize the H0-H8 behavior cards and expected behavior | Current docs | Done |
 | Phase 4 | Discrete beta: supported task-local `DiscreteBetaState` | Phase 3 | Done |
-| Phase 5 | Current H0-H5 run queue and H1/H3 confirmation | Phase 4 | Done |
+| Phase 5 | Current H0-H8 run queue and targeted confirmation | Phase 4 | Done |
 | Phase 6 | Write-up stabilization and public documentation cleanup | Phase 5 | Done |
-| Phase 7 | Log-surprisal H0-H6 rebaseline with global-beta controls | Phase 6 | Current |
+| Phase 7 | Log-surprisal H0-H8 rebaseline with global-beta controls | Phase 6 | Current |
 | Phase 8 | Human data: fit behavioral data and estimate individual-difference parameters | Stable manuscript | Future |

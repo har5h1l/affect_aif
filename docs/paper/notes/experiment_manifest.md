@@ -3,16 +3,19 @@
 This is the paper-facing subset of the maintained experiment manifest. The
 operational manifest remains `docs/experiments/manifest.md`.
 
-## Primary H0-H5 Specs
+## Primary / Exploratory H0-H8 Specs
 
 | Card | Purpose | Primary configs |
 |---|---|---|
-| H0 Openness Gate | Test whether policy-space openness gates affect effects. | `configs/trust/hypotheses/h0_openness/shallow_binary.toml`, `configs/trust/hypotheses/h0_openness/graded_choice.toml`, `configs/trust/hypotheses/h0_openness/graded_betrayal.toml` |
+| H0 Policy Openness | Test whether policy-space openness gates affect effects. | `configs/trust/hypotheses/h0_policy_openness/shallow_binary.toml`, `configs/trust/hypotheses/h0_policy_openness/graded_choice.toml`, `configs/trust/hypotheses/h0_policy_openness/graded_betrayal.toml` |
 | H1 Model Fitness | Test whether precision tracks predictability rather than reward. | `configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml`, `configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml` |
 | H2 Deployment | Test beta-to-policy lesion in an open regime. | `configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml` |
-| H3 Stress Response | Test betrayal/stress windows and misdeployment. | `configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml`, `configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml`, `configs/trust/hypotheses/h3_stress_response/betrayal_precision_sensitivity.toml`, `configs/trust/hypotheses/h3_stress_response/betrayal_precision_sensitivity_gradual.toml` |
-| H4 Social Choice | Test partner selection, avoidance, and probing. | `configs/trust/hypotheses/h4_social_choice/partner_choice.toml` |
-| H5 Perturbation Phenotypes | Test clinical-like precision-dynamics perturbations. | `configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml`, `configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml`, `configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml` |
+| H3 Locality / Global Precision | Test local beta against shared global beta. | `configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml`, `configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml` |
+| H4 Social Allocation | Test partner selection, avoidance, and probing. | `configs/trust/hypotheses/h4_social_allocation/partner_choice.toml` |
+| H5 Timescale / Volatility | Test betrayal/stress windows and misdeployment. | `configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity_gradual.toml` |
+| H6 Perturbation Phenotypes | Test clinical-like precision-dynamics perturbations. | `configs/trust/hypotheses/h6_perturbation/clinical_betrayal.toml`, `configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml`, `configs/trust/hypotheses/h6_perturbation/affect_sensitivity.toml` |
+| H7 Signal Source | Compare partner-action surprisal with joint surprise. | Future-work; no active config. |
+| H8 Observation Noise / Robustness | Test beta inertia under noisy observations. | Future exploratory config. |
 
 ## Evidence Batches
 

@@ -120,6 +120,7 @@ def select_decision(
             partner_idx=partner_idx,
             affect_mode=affect_mode,
         )
+        centered_logits = _precision_centered_logits(policy_scores, float(partner_gamma))
         for policy_idx, score in enumerate(policy_scores):
             candidates.append(
                 (
@@ -127,7 +128,7 @@ def select_decision(
                     policy_idx,
                     np.asarray(template.policies[policy_idx, 0], dtype=int),
                     float(score),
-                    float(partner_gamma) * float(score),
+                    float(centered_logits[policy_idx]),
                 )
             )
     scores = np.asarray([candidate[3] for candidate in candidates], dtype=float)
@@ -402,6 +403,12 @@ def _softmax(values: np.ndarray) -> np.ndarray:
     shifted = vector - float(np.max(vector))
     exp = np.exp(shifted)
     return _normalize(exp)
+
+
+def _precision_centered_logits(policy_scores: np.ndarray, gamma: float) -> np.ndarray:
+    scores = _as_policy_vector(policy_scores, "policy_scores")
+    center = float(np.mean(scores))
+    return center + float(gamma) * (scores - center)
 
 
 def _normalize(values: np.ndarray) -> np.ndarray:

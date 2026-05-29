@@ -15,7 +15,7 @@ def test_run_all_hypothesis_tests_returns_current_behavior_card_labels():
 
     result = run_all_hypothesis_tests(df)
 
-    assert set(result) == {"h0", "h1", "h2", "h3", "h4", "h5"}
+    assert set(result) == {"h0", "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8"}
 
 
 def test_hypothesis_payloads_are_json_safe_and_current_shape():

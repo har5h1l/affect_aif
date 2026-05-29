@@ -14,8 +14,8 @@ applies_to = ["affect", "no_affect"]
     path.write_text(
         f"""
 [hypothesis]
-id = "h3"
-name = "stress_response"
+id = "h5"
+name = "timescale_volatility"
 
 [experiment]
 id = "betrayal_choice"
@@ -42,7 +42,7 @@ planning_horizon = 4
 
 [analysis]
 auto = true
-primary = "h3_stress_response"
+primary = "h5_timescale_volatility"
 compare = ["affect", "no_affect"]
 {sweep_block}
 """,

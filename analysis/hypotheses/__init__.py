@@ -18,12 +18,15 @@ from analysis.metrics import (
 )
 
 HYPOTHESES = {
-    "H0": "Openness Gate",
+    "H0": "Policy Openness",
     "H1": "Model Fitness",
     "H2": "Deployment",
-    "H3": "Stress Response",
-    "H4": "Social Choice",
-    "H5": "Perturbation Phenotypes",
+    "H3": "Locality Global Precision",
+    "H4": "Social Allocation",
+    "H5": "Timescale Volatility",
+    "H6": "Perturbation Phenotypes",
+    "H7": "Signal Source",
+    "H8": "Observation Noise Robustness",
 }
 
 REQUIRED_SUMMARY_COLUMNS = {
@@ -328,12 +331,37 @@ def test_h2_deployment(results: pd.DataFrame, accuracy_margin: float = 0.05) -> 
     )
 
 
-def test_h3_stress_response(results: pd.DataFrame) -> dict[str, Any]:
+def test_h3_locality(results: pd.DataFrame) -> dict[str, Any]:
+    """Local beta should preserve partner-specific signal quality versus global beta."""
+
+    variant_ids = _variants(results)
+    local_present = bool(variant_ids & {"affect", "local_beta"})
+    global_present = "global_beta" in variant_ids
+    summary = _summary_by_variant(results)
+    evidence: dict[str, Any] = {
+        "local_variants": sorted(variant_ids & {"affect", "local_beta"}),
+        "global_beta_present": global_present,
+    }
+    if "total_payoff" in summary.columns:
+        evidence["mean_total_payoff_by_variant"] = {
+            str(variant): _mean(group["total_payoff"])
+            for variant, group in summary.groupby("variant_id", sort=True)
+        }
+    return _payload(
+        HYPOTHESES["H3"],
+        available=local_present and global_present,
+        summary={"claim": "local beta and global beta separate signal quality from shared precision"},
+        evidence=evidence,
+        reason=None if local_present and global_present else "Requires local/affect and global_beta variants.",
+    )
+
+
+def test_h5_timescale_volatility(results: pd.DataFrame) -> dict[str, Any]:
     """Affect should matter most under betrayal, stance shifts, or partner volatility."""
 
     if not has_switch_events(results):
         return _payload(
-            HYPOTHESES["H3"],
+            HYPOTHESES["H5"],
             available=False,
             summary={"claim": "affect should be most visible after social volatility"},
             reason="Requires scheduled or observed switch events.",
@@ -361,7 +389,7 @@ def test_h3_stress_response(results: pd.DataFrame) -> dict[str, Any]:
     }
     reason = None if available else "Requires affect and no_affect post-switch windows."
     return _payload(
-        HYPOTHESES["H3"],
+        HYPOTHESES["H5"],
         available=available,
         summary={"claim": "post-switch behavior is the primary volatility readout"},
         evidence=evidence,
@@ -369,7 +397,7 @@ def test_h3_stress_response(results: pd.DataFrame) -> dict[str, Any]:
     )
 
 
-def test_h4_social_choice(results: pd.DataFrame) -> dict[str, Any]:
+def test_h4_social_allocation(results: pd.DataFrame) -> dict[str, Any]:
     """Per-partner affect should shape who the agent selects, avoids, or revisits."""
 
     partner_column = "selected_partner_idx" if "selected_partner_idx" in results.columns else "partner_idx"
@@ -388,7 +416,7 @@ def test_h4_social_choice(results: pd.DataFrame) -> dict[str, Any]:
     )
 
 
-def test_h5_perturbation_phenotypes(results: pd.DataFrame) -> dict[str, Any]:
+def test_h6_perturbation_phenotypes(results: pd.DataFrame) -> dict[str, Any]:
     """Clinical-like regimes should separate by task regime."""
 
     clinical_names = {"alexithymia", "borderline", "depression"}
@@ -401,7 +429,7 @@ def test_h5_perturbation_phenotypes(results: pd.DataFrame) -> dict[str, Any]:
             variant: _mean(_variant_values(summary, variant, "total_payoff")) for variant in present
         }
     return _payload(
-        HYPOTHESES["H5"],
+        HYPOTHESES["H6"],
         available=bool(present),
         summary={"claim": "perturbation phenotypes are task-regime dependent, not global traits"},
         evidence=evidence,
@@ -409,14 +437,46 @@ def test_h5_perturbation_phenotypes(results: pd.DataFrame) -> dict[str, Any]:
     )
 
 
+def test_h7_signal_source(results: pd.DataFrame) -> dict[str, Any]:
+    """Signal-source alternatives are future work unless explicit columns exist."""
+
+    columns = [column for column in ("affect_signal_source", "prediction_error_source") if column in results.columns]
+    return _payload(
+        HYPOTHESES["H7"],
+        available=bool(columns),
+        summary={"claim": "partner-action surprisal should stay cleaner than joint surprise"},
+        evidence={"signal_source_columns": columns},
+        reason=None if columns else "Requires explicit signal-source variants or columns.",
+    )
+
+
+def test_h8_observation_noise(results: pd.DataFrame) -> dict[str, Any]:
+    """Observation-noise robustness is exploratory unless noise conditions are present."""
+
+    has_noise = "observation_noise" in results.columns
+    noise_levels = (
+        sorted(results["observation_noise"].dropna().astype(float).unique().tolist()) if has_noise else []
+    )
+    return _payload(
+        HYPOTHESES["H8"],
+        available=bool(noise_levels),
+        summary={"claim": "beta inertia may stabilize or slow behavior under noisy observations"},
+        evidence={"observation_noise_levels": noise_levels},
+        reason=None if noise_levels else "Requires observation-noise conditions.",
+    )
+
+
 def run_all_hypothesis_tests(results: pd.DataFrame) -> dict[str, dict[str, Any]]:
-    """Run the current H0-H5 behavior-card suite and return a JSON-safe dictionary."""
+    """Run the current H0-H8 behavior-card suite and return a JSON-safe dictionary."""
 
     return {
         "h0": test_h0_openness_gate(results),
         "h1": test_h1_model_fitness(results),
         "h2": test_h2_deployment(results),
-        "h3": test_h3_stress_response(results),
-        "h4": test_h4_social_choice(results),
-        "h5": test_h5_perturbation_phenotypes(results),
+        "h3": test_h3_locality(results),
+        "h4": test_h4_social_allocation(results),
+        "h5": test_h5_timescale_volatility(results),
+        "h6": test_h6_perturbation_phenotypes(results),
+        "h7": test_h7_signal_source(results),
+        "h8": test_h8_observation_noise(results),
     }

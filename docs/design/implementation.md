@@ -34,10 +34,12 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - Affective native runtimes use the HESP inverse-beta mapping `gamma_k = gamma_base / E[beta_k]`.
 - That means low beta (high expected precision) sharpens the policy posterior, while high beta (low expected precision) softens it below the base `gamma`.
 - Lesioned runtimes use `affect_mode="decouple"` to leave beta updates intact while forcing `gamma_k = gamma_base`.
-- In `agent_choice` mode, the final candidate selector applies the selected
-  partner's `gamma_k` to each candidate policy score before the global softmax,
-  so partner-choice policies use the same precision channel as assigned-partner
-  action policies.
+- In `agent_choice` mode, the final candidate selector compares partner-local
+  policy branches with centered precision logits:
+  `center(G_k) + gamma_k * (G_k - center(G_k))` before the global softmax. This
+  preserves within-partner precision sharpening without letting low precision
+  make uniformly bad negative-valued policy-score branches more selectable
+  merely by shrinking their magnitude toward zero.
 
 ## Belief updating (state inference)
 
@@ -148,7 +150,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - The environment supports `initial_partner_types` to seed a specific partner roster.
 - It also supports `initial_partner_stances` and `scheduled_stance_switches`, a list of `{round, partner_idx, to_stance}` events.
 - Scheduled stance switches are applied at the start of the specified 1-based round, before the selected partner acts, so the agent experiences the disruption as an unexpected trust violation.
-- See `configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml`
+- See `configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml`
   for the reference setup.
 - Sensitivity-style studies should use explicit `[[sweeps]]` blocks in TOML.
   Expanded sweep runs are ordinary variant runs with concrete `variant_id`
@@ -197,7 +199,7 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 ## Global-Beta Locality Ablation
 
-- `configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`
+- `configs/trust/hypotheses/h3_locality/global_beta_smoke.toml`
   is a discovery smoke config, not a final statistical run.
 - It compares `none`, `precision`, `tracked_only`, and `global_beta` in an
   agent-choice task with one scheduled stance switch.

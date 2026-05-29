@@ -59,9 +59,10 @@ partner-local POMDP by evaluating candidate policies for each partner in
 For both random and agent-choice runs, the partner-local instantaneous control
 shape is `[1, num_social_actions, num_social_actions]`. Binary games have
 `num_social_actions = 2`; graded games use the configured number of investment
-levels. In agent-choice mode, the runtime loops over partners, applies the
-candidate partner's `gamma_k`, and then encodes the executed environment action
-as `(partner, stance_action, own_action)`.
+levels. In agent-choice mode, the runtime loops over partners and compares
+partner-local policy branches with centered `gamma_k`-scaled logits before
+encoding the executed environment action as `(partner, stance_action,
+own_action)`.
 
 Payoff and outcome updates use the executed `own` action. Rollout uses the
 stance-control column for generative stance transitions during planning, while
@@ -286,9 +287,17 @@ E[beta_k] = dot(posterior_k, beta_levels)
 gamma_k = gamma_base / E[beta_k]
 ```
 
-Policy selection: `q(pi) = softmax(-gamma_k * G(pi))`.
+Assigned-partner policy selection: `q(pi) = softmax(-gamma_k * G(pi))`.
 
-**Per-partner routing in agent-choice mode**: When the action space includes partner selection (N × 2 actions), each policy's first action determines which partner it engages. The policy inherits gamma from that partner: `gamma(pi) = gamma_base / E[beta_{first_partner(pi)}]`. This means policies targeting a well-modeled partner (low beta) are evaluated more decisively than policies targeting an uncertain partner (high beta). The effect is branchwise: different branches of the policy tree may have different effective precision, creating an implicit exploration-exploitation dynamic across partners.
+**Per-partner routing in agent-choice mode**: When the action space includes
+partner selection, each candidate branch inherits gamma from the partner it
+engages: `gamma(pi) = gamma_base / E[beta_{first_partner(pi)}]`. The runtime
+uses centered branch logits, `center(G_k) + gamma_k * (G_k - center(G_k))`,
+before the global softmax over partner-policy candidates. This means policies
+targeting a well-modeled partner (low beta) are evaluated more decisively within
+that partner's branch, while avoiding the artifact where low precision over
+negative-valued policy scores can make an uncertain partner more selectable by
+shrinking all of its scores toward zero.
 
 **Framing**: The POMDP handles social inference (type, stance). The precision tracker is a separate Bayesian module that reads prediction errors from social inference and modulates policy precision. This is a hierarchical architecture: the precision tracker operates on the *dynamics* of belief updating, not on a dedicated observation channel.
 

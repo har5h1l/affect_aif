@@ -29,12 +29,12 @@ def test_behavior_cards_export_current_labels_and_summary_frame_uses_them(tiny_s
     results = ExperimentRunner.from_spec(tiny_spec).run_all()
 
     hypotheses = run_all_hypothesis_tests(results)
-    assert hypotheses["h0"]["label"] == "openness_gate"
+    assert hypotheses["h0"]["label"] == "policy_openness"
     assert hypotheses["h1"]["label"] == "model_fitness"
 
     summary = _hypothesis_summary_frame(hypotheses)
     h0_row = summary.loc[summary["hypothesis"] == "H0"].iloc[0]
-    assert h0_row["label"] == "openness_gate"
+    assert h0_row["label"] == "policy_openness"
     h1_row = summary.loc[summary["hypothesis"] == "H1"].iloc[0]
     assert h1_row["label"] == "model_fitness"
 

@@ -2,7 +2,7 @@
 
 This roadmap tracks the public research direction for `affect_aif`. The current
 project is no longer organized around the older C1-C5 phase scorecard. Current
-claims use the H0-H5 behavior-card spine in `docs/theory/hypotheses.md` and the
+claims use the H0-H8 behavior-card spine in `docs/theory/hypotheses.md` and the
 completed current-architecture evidence in `docs/results/current.md`.
 
 ## Current Status
@@ -15,8 +15,8 @@ The supported trust-task architecture is in place:
 - binary trust games use factorized controls
 - affective precision is partner-local and deployed as
   `gamma_k = gamma_base / E[beta_k]`
-- current evidence comes from the May 2026 H0-H5 queue, the 30-seed H1/H3
-  confirmation batch, and the H3 precision-sensitivity follow-up
+- current historical evidence comes from the May 2026 H0-H5 queue, the 30-seed
+  H1/timescale confirmation batch, and the precision-sensitivity follow-up
 
 The immediate research phase is **write-up stabilization**. There is no
 required experiment queue before a public narrative draft.
@@ -44,12 +44,13 @@ Current evidence summary:
 
 | Card | Status | Public-facing read |
 |---|---|---|
-| H0 Openness Gate | Supported with caveat | Affect has little room in saturated regimes, but moves policy entropy and behavior in open regimes. Openness is necessary, not sufficient. |
+| H0 Policy Openness | Supported with caveat | Affect has little room in saturated regimes, but moves policy entropy and behavior in open regimes. Openness is necessary, not sufficient. |
 | H1 Model Fitness | Supported | Precision tracks predictive reliability more than realized reward; this is the cleanest current mechanism result. |
 | H2 Deployment | Supported | Lesion/no-affect can preserve partner inference while changing policy deployment. |
-| H3 Stress Response | Boundary condition confirmed | Stress exposes precision-driven misdeployment risk more than a clean affective recovery advantage. |
-| H4 Social Choice | Supported behaviorally | Partner selection and policy entropy move even when total payoff is flat. |
-| H5 Perturbation Phenotypes | Supported for dynamics | Clinical-like variants separate in beta dynamics and behavior; payoff tests remain underpowered. |
+| H3 Locality / Global Precision | Discovery only | Local beta preserves a cleaner model-fitness signal than global beta in small probes, but has not shown better aggregate payoff. |
+| H4 Social Allocation | Supported behaviorally | Partner selection and policy entropy move even when total payoff is flat. |
+| H5 Timescale / Volatility | Boundary condition confirmed | Abrupt stress exposes precision-driven misdeployment risk more than a clean affective recovery advantage. |
+| H6 Perturbation Phenotypes | Supported for dynamics | Clinical-like variants separate in beta dynamics and behavior; payoff tests remain underpowered. |
 
 ## Near-Term Work
 
@@ -60,7 +61,7 @@ Consolidate the public narrative around:
 - affect as partner-specific model-fitness precision, not cached reward
 - openness as the gate for observable policy effects
 - deployment dissociation as the strongest behavioral evidence
-- H3 as a stress boundary condition, not an affect-wins-after-betrayal claim
+- H5 as a timescale boundary condition, not an affect-wins-after-betrayal claim
 - clinical-like variants as perturbation dynamics, not diagnoses
 
 ### 2. Documentation Hygiene

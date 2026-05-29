@@ -42,16 +42,22 @@ Source artifacts:
 
 ### Figure 3: H1 Model Fitness
 
-Show precision-surprise versus precision-reward association.
+Show precision-surprise versus precision-reward association as a post-fix
+target diagnostic, not as final evidence.
 
 Primary source:
 
-- `results/confirm_h1_h3_split_20260519/h1/reliability_vs_reward_confirm/analysis/model_fitness_correlation_summary.csv`
-- `results/confirm_h1_h3_split_20260519/h1/reliability_vs_reward_confirm/analysis/evidence_effect_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h1_model_fitness_correlation_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h1_evidence_effect_summary.csv`
 
-### Figure 4: H3 Betrayal Boundary Condition
+Current post-fix smoke: local affect has
+`|corr(precision, surprise)| = 0.226` and
+`|corr(precision, payoff)| = 0.615`, so the old model-fitness panel should be
+treated as unresolved.
 
-Show abrupt betrayal effects:
+### Figure 4: H5 Betrayal Anchor
+
+Show post-fix abrupt betrayal effects:
 
 - total payoff;
 - policy entropy;
@@ -60,9 +66,9 @@ Show abrupt betrayal effects:
 
 Primary source:
 
-- `results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/analysis/evidence_effect_summary.csv`
-- `results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/analysis/betrayal_reallocation_summary.csv`
-- `results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/analysis/betrayal_misdeployment_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h5_final_round_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h5_betrayal_reallocation_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h5_betrayal_misdeployment_summary.csv`
 
 ### Figure 5: H3 Shock-Shape / Sensitivity
 

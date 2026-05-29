@@ -45,7 +45,7 @@ def test_runner_logs_joint_posteriors(tiny_spec):
 
 
 def test_betrayal_metrics_and_analysis_outputs(tmp_path):
-    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml")
+    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
     spec = spec.with_overrides(rounds=35, replications=1)
     runner = ExperimentRunner.from_spec(spec)
     results = runner.run_all()
@@ -97,7 +97,7 @@ def test_build_run_gifs_writes_one_file_per_primary_run(tmp_path, tiny_spec):
 
 
 def test_visualization_handles_betrayal_switch_runs(tmp_path):
-    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml")
+    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
     spec = spec.with_overrides(rounds=35, replications=1)
     results = ExperimentRunner.from_spec(spec).run_all()
     output_csv = tmp_path / "betrayal.csv"
@@ -141,7 +141,7 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
             "--config",
             "configs/trust/smoke/smoke.toml",
             "--config",
-            "configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml",
+            "configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml",
             "--output-dir",
             "results",
             "--workers",
@@ -151,7 +151,7 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
 
     assert args.config == [
         "configs/trust/smoke/smoke.toml",
-        "configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml",
+        "configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml",
     ]
     assert args.output_dir == "results"
     assert args.workers == 3

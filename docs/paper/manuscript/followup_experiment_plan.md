@@ -3,56 +3,95 @@
 ## Purpose
 
 The next experiment phase should strengthen the manuscript-facing result spine
-while keeping H6 in the right evidential position. The current H0-H5 manuscript
-evidence supports partner-local precision as an active deployment signal. The
-H6 discovery runs show that local beta preserves a cleaner model-fitness signal
-than global beta, but two focused locality smokes are mixed: global beta had
-higher aggregate payoff, while local beta retained the stronger
-surprise-over-reward signature. H6 should therefore remain a mechanism
-decomposition, not a necessity claim.
+while keeping H3 locality in the right evidential position. The current post-fix
+H0-H6 smoke supports partner-local precision as an active deployment signal and
+repairs H5 betrayal-choice behavior at smoke scale. It does not yet support the
+old H1 surprise-over-reward model-fitness readout, so H1 must be confirmed or
+redesigned before carrying a central manuscript claim. H3 should remain a
+mechanism decomposition, not a necessity claim.
 
 The plan has four lanes, ordered by manuscript value:
 
-1. Confirm H0/H2/H4 manuscript support at higher replication.
-2. Keep H6 as a locality/global-beta decomposition.
-3. Run focused lesion-family follow-up only if needed.
-4. Maintain figure-quality outputs for reviewable evidence.
+1. Confirm H5 as the repaired behavioral anchor.
+2. Rework or confirm H1 before using the model-fitness claim.
+3. Confirm H0/H2/H4 manuscript support only if payoff/deployment language
+   remains in the draft.
+4. Keep H3 as a locality/global-beta decomposition.
 
 All runs should use `--workers 1` unless the user explicitly authorizes a
 different worker count.
 
-## Lane 1: Manuscript Confirmation
+## Lane 1: H5 Betrayal Confirmation
 
 ### Question
 
-Do the currently five-seed H0/H2/H4 support results hold at higher replication?
+Does the post-fix H5 betrayal-choice advantage survive a confirmation-scale run?
 
 ### Run
 
-This is now the highest manuscript-value experiment lane because H1 and H3
-already have 30-seed confirmations, while H0/H2/H4 still support major
-manuscript claims with smaller seed counts.
+This is a more-seeds confirmation, so do not launch it without explicit user
+approval.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h0_openness/graded_choice_confirm.toml \
-  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
-  --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml \
+  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml \
   --output-dir results \
-  --batch-name manuscript_open_social_confirm_YYYYMMDD \
+  --batch-name log_surprisal_h5_confirm_postfix_YYYYMMDD \
   --workers 1
 ```
 
 ### Primary Readouts
 
-- H0: graded-regime payoff and policy entropy.
-- H2: affect-vs-tracked-only payoff, entropy, and belief accuracy.
-- H4: partner-selection entropy and selection distribution, not payoff alone.
+- total payoff by variant;
+- post-switch reallocation and reencounter rate;
+- policy entropy and joint accuracy;
+- payoff conditional on returned/switched partner.
 
-Promote only the readouts that replicate. Do not rewrite H6 into a necessity
-claim from these runs.
+## Lane 2: H1 Reliability-Versus-Reward Rework
 
-## Lane 2: Locality / Interference Diagnostic
+### Question
+
+Why does the post-fix smoke show local precision more payoff-correlated than
+surprise-correlated?
+
+### Next Step
+
+Do not add seeds first. Inspect whether the current H1 task creates exposure
+confounds where reward and partner-action predictability are not cleanly
+separated. A useful follow-up would be a design-level diagnostic with the same
+seed count, not a broad confirmation sweep.
+
+### Primary Readouts
+
+- partner-level action surprisal versus payoff exposure;
+- whether active partner sampling changes the correlation denominator;
+- whether a reliability manipulation with matched reward removes the reversal.
+
+## Lane 3: Manuscript Support Confirmation
+
+### Question
+
+Do H0/H2/H4 support results hold at higher replication if the draft keeps those
+claims?
+
+### Run
+
+This is also a more-seeds confirmation and should wait for approval.
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h0_policy_openness/graded_choice_confirm.toml \
+  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
+  --config configs/trust/hypotheses/h4_social_allocation/partner_choice_confirm.toml \
+  --output-dir results \
+  --batch-name manuscript_open_social_confirm_YYYYMMDD \
+  --workers 1
+```
+
+Promote only the readouts that replicate. Do not rewrite H3 locality into a
+necessity claim from these runs.
+
+## Lane 4: Locality / Interference Diagnostic
 
 ### Question
 
@@ -107,9 +146,9 @@ Run 3-5 seeds first and inspect logs before any confirmation sweep:
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h6_locality_interference/global_beta_locality_probe.toml \
+  --config configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml \
   --output-dir results \
-  --batch-name h6_global_beta_locality_probe_YYYYMMDD \
+  --batch-name h3_global_beta_locality_probe_YYYYMMDD \
   --workers 1
 ```
 
@@ -117,8 +156,8 @@ Analyze the smoke output before increasing replication:
 
 ```bash
 .venv/bin/python scripts/analysis/analyze.py \
-  --results results/h6_global_beta_locality_probe_YYYYMMDD/h6/global_beta_locality_probe/results.csv \
-  --output-dir results/h6_global_beta_locality_probe_YYYYMMDD/h6/global_beta_locality_probe/analysis
+  --results results/h3_global_beta_locality_probe_YYYYMMDD/h3/global_beta_locality_probe/results.csv \
+  --output-dir results/h3_global_beta_locality_probe_YYYYMMDD/h3/global_beta_locality_probe/analysis
 ```
 
 ### Current Smoke Read
@@ -161,7 +200,7 @@ episode quality?
 
 ### Current Discovery Read
 
-The H6 discovery batch suggests that global beta is not an equivalent
+The global-beta discovery batch suggests that global beta is not an equivalent
 replacement for partner-local beta. In the discovery probes, local beta showed a
 stronger precision-surprise association, while global beta weakened or changed
 that association in deployment and lesion-family settings.

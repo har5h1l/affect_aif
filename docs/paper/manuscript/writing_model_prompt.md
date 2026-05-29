@@ -21,13 +21,14 @@ Use these project docs for context if needed:
 
 Drafting rules:
 
-- Preserve the central claim: partner-specific affective precision tracks model
-  fitness and gates social policy deployment; it is not a generic reward
-  booster.
-- Make H1 and H3 the strongest empirical anchors because they use 30 seeds per
-  variant.
+- Preserve the central claim as a target claim: partner-specific affective
+  precision is designed to track model fitness and gate social policy
+  deployment; the current post-fix smoke only supports the deployment/H5 side.
+- Make H5 the strongest current empirical anchor. Treat H1 as a
+  confirmation/rework item because the post-fix smoke does not preserve the old
+  surprise-over-reward diagnostic.
 - Present H0/H2/H4 as supporting five-seed evidence.
-- Present H5 as supplemental precision-dynamics evidence only.
+- Present H6 as supplemental precision-dynamics evidence only.
 - Do not write "affect improves payoff" without the boundary conditions.
 - Do not write "affect recovers after betrayal"; write that abrupt betrayal
   exposes precision-driven misdeployment risk.
@@ -42,8 +43,10 @@ Recommended manuscript spine:
 2. Social interaction requires partner-specific model-fitness estimates.
 3. The implementation keeps state/policy inference in official `pymdp.Agent`
    instances and keeps beta as an external HESP-style tracker.
-4. H1 shows the tracker follows prediction reliability more than reward.
+4. H1 is currently unresolved under post-fix smoke and needs confirmation or
+   redesign before carrying the model-fitness claim.
 5. H2/H4 show the tracker changes deployment and partner choice in open regimes.
-6. H3 shows abrupt volatility can make the same precision channel harmful.
-7. H5 suggests clinical-like perturbations separate precision dynamics, but this
+6. H5 shows the corrected selector can improve abrupt-betrayal behavior at
+   smoke scale.
+7. H6 suggests clinical-like perturbations separate precision dynamics, but this
    is not clinical validation.

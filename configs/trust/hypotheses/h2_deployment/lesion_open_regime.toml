@@ -6,7 +6,7 @@ name = "deployment"
 id = "lesion_open_regime"
 family = "trust"
 rounds = 200
-replications = 5
+replications = 3
 seed = 42
 
 [scenario]

@@ -17,7 +17,7 @@ def example_spec(tmp_path):
 def test_loads_hierarchical_toml_spec(tmp_path):
     spec = ExperimentSpec.from_toml(write_example_toml(tmp_path / "betrayal_choice.toml"))
 
-    assert spec.hypothesis.id == "h3"
+    assert spec.hypothesis.id == "h5"
     assert spec.experiment.id == "betrayal_choice"
     assert spec.experiment.family == "trust"
     assert spec.scenario.assignment == "agent_choice"
@@ -143,13 +143,13 @@ debug_mode = true
 def test_analysis_primary_default_is_slugified(tmp_path):
     path = write_example_toml(tmp_path / "default_primary.toml")
     text = path.read_text(encoding="utf-8")
-    text = text.replace('name = "stress_response"', 'name = "Stress Response"')
-    text = text.replace('primary = "h3_stress_response"\n', "")
+    text = text.replace('name = "timescale_volatility"', 'name = "Timescale Volatility"')
+    text = text.replace('primary = "h5_timescale_volatility"\n', "")
     path.write_text(text, encoding="utf-8")
 
     spec = ExperimentSpec.from_toml(path)
 
-    assert spec.analysis.primary == "h3_stress_response"
+    assert spec.analysis.primary == "h5_timescale_volatility"
 
 
 def test_factory_uses_variant_affect_mode(example_spec):

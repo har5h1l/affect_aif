@@ -11,13 +11,13 @@ from experiments.trust.spec import ExperimentSpec
 
 def test_auto_analysis_writes_raw_outputs(tmp_path):
     spec = ExperimentSpec.from_toml(write_example_toml(tmp_path / "betrayal_choice.toml"))
-    output_dir = tmp_path / "results" / "h3" / "betrayal_choice"
+    output_dir = tmp_path / "results" / "h5" / "betrayal_choice"
     output_dir.mkdir(parents=True)
     results_path = output_dir / "results.csv"
     pd.DataFrame(
         [
             {
-                "hypothesis_id": "h3",
+                "hypothesis_id": "h5",
                 "experiment_id": "betrayal_choice",
                 "variant_id": "affect",
                 "seed": 42,
@@ -43,12 +43,13 @@ def test_auto_analysis_writes_raw_outputs(tmp_path):
 
 def test_hypothesis_analysis_modules_are_importable():
     module_names = [
-        "analysis.hypotheses.h0_openness.analyze",
+        "analysis.hypotheses.h0_policy_openness.analyze",
         "analysis.hypotheses.h1_model_fitness.analyze",
         "analysis.hypotheses.h2_deployment.analyze",
-        "analysis.hypotheses.h3_stress_response.analyze",
-        "analysis.hypotheses.h4_social_choice.analyze",
-        "analysis.hypotheses.h5_perturbation.analyze",
+        "analysis.hypotheses.h3_locality.analyze",
+        "analysis.hypotheses.h4_social_allocation.analyze",
+        "analysis.hypotheses.h5_timescale_volatility.analyze",
+        "analysis.hypotheses.h6_perturbation.analyze",
     ]
 
     for module_name in module_names:

@@ -1,0 +1,51 @@
+[hypothesis]
+id = "h3"
+name = "locality"
+
+[experiment]
+id = "global_beta_deployment_probe"
+family = "trust"
+rounds = 200
+replications = 5
+seed = 850
+
+[scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[[variants]]
+id = "local_beta"
+affect = "precision"
+planning_horizon = 2
+
+[[variants]]
+id = "tracked_only"
+affect = "tracked_only"
+planning_horizon = 2
+
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 2
+
+[[variants]]
+id = "no_epistemic"
+affect = "precision"
+planning_horizon = 2
+epistemic_value = false
+
+[runtime]
+max_policies = 4096
+log_policy_traces = false
+
+[analysis]
+auto = false
+primary = "h3_locality"
+compare = ["local_beta", "global_beta", "tracked_only", "no_epistemic"]
+metrics = ["payoff", "precision", "stance_accuracy", "deployment"]

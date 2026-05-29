@@ -7,6 +7,15 @@
 > bounded-proxy read and should be treated as provisional until the H0-H6
 > rebaseline queue is rerun on the current mechanism.
 
+> Post-fix smoke note, May 29, 2026: the corrected centered-logit selector has
+> completed a three-seed H0-H6 smoke at
+> `results/log_surprisal_spine_smoke_postfix_20260528/`. Treat it as current
+> smoke evidence only. It repairs the H5 betrayal-choice warning at smoke scale
+> (affect `1322.3` mean payoff versus `1225.0` for no-affect/lesioned), while
+> H0/H1/H2/H4 remain flat-to-negative on payoff, H1 no longer preserves the old
+> surprise-over-reward model-fitness readout at smoke scale, and H3 still favors
+> global beta on aggregate reward.
+
 Historical interpreted evidence has three tiers. The primary evidence was
 promoted from the completed May 2026 H0-H5 run queue on the supported
 factorized-control architecture before the log-surprisal rebaseline. The May
@@ -37,6 +46,8 @@ Primary provenance:
   `results/h6_global_beta_locality_probe_20260526/`
 - H6 focal-switch locality probe:
   `results/h6_global_beta_focal_switch_probe_20260526/`
+- Post-fix log-surprisal smoke:
+  `results/log_surprisal_spine_smoke_postfix_20260528/`
 - Analysis entry point: `scripts/analysis/analyze.py`
 - Server evidence copy: current/provenance-bearing batches are retained under
   `results/`; superseded incomplete and duplicate local result directories
@@ -69,7 +80,7 @@ bad post-switch model.
 | Card | Current status | Evidence read |
 |---|---|---|
 | H0 Openness Gate | Supported with caveat | Affect has little room in shallow binary but lowers entropy and can improve payoff in graded choice. Openness is necessary but not sufficient: the graded betrayal run shows lower entropy with worse total payoff. |
-| H1 Model Fitness | Supported | The 30-seed confirmation strengthens the reliability-over-reward readout: precision tracks surprise more strongly than realized payoff (`|r| = 0.701` vs `0.419`), while total payoff remains flat-to-worse for affect. |
+| H1 Model Fitness | Historical support; post-fix unresolved | The older 30-seed bounded-proxy confirmation supported reliability-over-reward (`|r| = 0.701` vs `0.419`), but the post-fix log-surprisal smoke does not preserve that readout (`0.226` surprise vs `0.615` payoff). Treat H1 as a confirmation/rework item. |
 | H2 Deployment | Supported | In the open graded-choice regime, affect and lesioned/no-affect have similar belief accuracy while affect improves payoff by +25.2 and lowers policy entropy. |
 | H3 Stress Response | Boundary condition sharpened | The 30-seed reallocation confirmation shows lower entropy and fewer returns to the switched partner, but worse whole-run payoff and no conditional-return payoff advantage. The precision-sensitivity follow-up shows that simple caution knobs do not rescue the abrupt betrayal regime; gradual betrayal makes default affect nearly payoff-neutral relative to baseline. H3 should read as stress exposing precision-driven misdeployment risk, especially under abrupt shocks. |
 | H4 Social Choice | Supported behaviorally | The five-seed pair check reproduces the H4 pattern: payoff is flat (`393.6` vs `393.2`), while affect lowers policy entropy (`3.989` vs `4.833`) and preserves a positive model-fitness readout. This is the expected signature for partner-choice behavior changing before total reward moves. |
@@ -138,11 +149,12 @@ broadly as a shared state, but that broader movement did not reduce payoff in
 these smoke probes. Treat this as evidence to soften H6, not to promote it.
 
 The project should now be treated as in write-up stabilization plus focused
-confirmation of the main result spine. H6 should be written as an open
+post-fix confirmation of the main result spine. H6 should be written as an open
 decomposition: local beta is cleaner as a model-fitness signal, but current
 smokes do not show that locality is behaviorally necessary. The next useful
-experiments are confirmation runs for the manuscript-facing H0/H2/H4 support,
-not more H6 smoke variants.
+experiments are confirmation runs for H5 as the repaired behavioral anchor and
+H1 as a model-fitness confirmation/rework item; H0/H2/H4 should either be
+confirmed at higher seed count or softened to deployment/entropy support.
 
 ## Current Architecture Requirement
 

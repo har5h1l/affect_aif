@@ -45,7 +45,7 @@ results/<batch_name>/<hypothesis_id>/<experiment_id>/
 Example:
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
+python scripts/experiment/run.py --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml --output-dir results --batch-name h5_timescale_volatility --workers 1
 ```
 
 ## Analyzing Results

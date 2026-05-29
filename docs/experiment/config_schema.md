@@ -86,7 +86,7 @@ Sweep expansion produces concrete `variant_id` values such as
 
 - `auto`: whether the experiment runner writes configured analysis outputs
 - `target`: usually `experiment`
-- `primary`: configured analysis module id such as `h3_stress_response`
+- `primary`: configured analysis module id such as `h5_timescale_volatility`
 - `compare`: variants to compare
 - `switch_window`
 - `metrics`

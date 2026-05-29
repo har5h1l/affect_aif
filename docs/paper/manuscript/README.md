@@ -23,30 +23,40 @@ into a new project scaffold.
 
 ## Evidence Contract
 
-Use `docs/results/current.md` and this packet as the current evidence hierarchy.
+Use `docs/results/current.md`, `docs/paper/manuscript/results_digest.md`, and
+this packet as the current diagnostic evidence surface. The completed post-fix
+log-surprisal smoke is current smoke evidence, but not publication-grade
+confirmation. Do not promote old bounded-error numbers or pre-fix smoke numbers
+as current manuscript evidence.
 Do not write a broad "affect improves reward" claim. The supported thesis is:
 
-> Partner-specific affective precision tracks social model fitness and changes
-> policy deployment when the policy space is open, but abrupt social shocks can
-> turn the same precision channel into misdeployment.
+> Partner-specific affective precision changes social policy deployment when
+> the policy space is open, and under the corrected selector it can improve
+> abrupt-betrayal behavior at smoke scale. The model-fitness interpretation
+> remains a target claim that requires post-fix confirmation.
 
-Primary manuscript evidence should come from:
+Current manuscript evidence should be written as diagnostic/provisional until
+confirmation-scale post-fix reruns exist:
 
-- 30-seed H1 confirmation: model fitness rather than reward.
-- 30-seed H3 confirmation: stress boundary condition.
-- 30-seed H3 precision-sensitivity follow-up: abrupt versus gradual shock shape.
-- Five-seed H0/H2/H4 current-architecture queue: open-regime deployment and
-  social-choice readouts.
-- Five-seed H5 runs: supplemental precision-dynamics phenotypes only.
-- H6 global-beta/locality smoke runs: follow-up discovery only unless promoted
-  after user review.
+- Three-seed H1 smoke: post-fix evidence does not yet preserve the old
+  surprise-over-reward model-fitness tracking claim.
+- Three-seed H0/H2 smoke: beta-to-gamma coupling changes deployment, but local
+  affect does not yet have a payoff advantage.
+- Three-seed H3 smoke: locality improves signal quality, not demonstrated
+  aggregate behavior.
+- Three-seed H5 smoke: abrupt betrayal is repaired under the centered selector
+  and is now the strongest candidate positive behavioral anchor.
+- Three-seed H4/H6 smoke: supplemental only.
+
+Publication-ready evidence requires confirmation-scale reruns of the post-fix
+claim spine.
 
 ## Writing Guardrails
 
 - Every paragraph should have one claim tied to a result, method detail, source,
   or explicit assumption.
 - Report seed counts with every headline result.
-- State that H5 variants are clinical-like perturbations, not clinical models.
+- State that H6 variants are clinical-like perturbations, not clinical models.
 - State that beta is an external HESP-style precision tracker, not a POMDP
   hidden state.
 - Do not add unverified citations, DOIs, venues, quotes, or BibTeX entries.

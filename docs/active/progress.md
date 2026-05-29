@@ -8,298 +8,137 @@ statistical experiments so queued runs carry fresh local provenance.
 Run these before scheduling current-evidence experiments:
 
 ```bash
-python -m pytest tests/ -q
-python -m ruff check .
-python -m mypy
+.venv/bin/python -m pytest tests/ -q
+.venv/bin/python -m ruff check .
+.venv/bin/python -m mypy
 git diff --check
 ```
 
-## Post-Verification Queue
+## Current Queue Status
 
 As of May 27, 2026, the canonical affect update uses Hesp-style surprisal,
 `-log P(observed partner action)`, with neutral baseline
-`sigma_0_sq = (-log 0.5)^2`. Earlier bounded-error results are historical until
-the log-surprisal rebaseline completes. The detailed rerun plan is
-`docs/active/final_rebaseline_plan.md`.
-
-Run the smoke queue first:
-
-```bash
-.venv/bin/python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --config configs/trust/hypotheses/h6_locality_interference/global_beta_focal_switch_probe.toml --output-dir results --batch-name log_surprisal_core_smoke_20260527 --workers 1
-```
-
-Only after those logs and analysis outputs are verified, run the confirmation
-queue:
-
-```bash
-.venv/bin/python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml --output-dir results --batch-name log_surprisal_core_confirm_20260527 --workers 1
-```
-
-The May 18, 2026 H0-H5 queue completed and is documented in
-`docs/results/current.md`, but it is now historical/provisional because the
-affect update changed to log-surprisal. Follow-up analysis added partner-level H1 and
-overconfident-wrong-belief H3 reports. The May 19, 2026
-`betrayal_reallocation` follow-up completed and is retained as a small H3
-pilot. The higher-replication H1/H3 split confirmation also completed under
-`results/confirm_h1_h3_split_20260519/` and is documented in
-`docs/results/runs/2026-05-21-h1-h3-confirmation.md`.
-
-The manuscript write-up has been stabilized. The global-beta/locality ablation
-has also been implemented as a smoke-test surface under
-`configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`.
-Keep follow-up experiments narrow and use them to test structure before adding
-more seeds.
-
-Run only 3-5 seed smoke tests at first, keep `--workers 1`, and do not promote
-new outputs into manuscript-level claims until the user reviews the results.
-
-## Current H6 Smoke Provenance
-
-The completed one-worker smoke run is:
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml --output-dir results --batch-name global_beta_locality_smoke_quick_20260525 --workers 1
-```
-
-Rows are complete for `none`, `precision`, `tracked_only`, and `global_beta`
-with two seeds, 40 rounds, and planning horizon 2:
+`sigma_0_sq = (-log 0.5)^2`. Earlier bounded-error results are historical. The
+first reduced log-surprisal smoke queue has completed at:
 
 ```text
-results/global_beta_locality_smoke_quick_20260525/h6/global_beta_smoke/results.csv
-results/global_beta_locality_smoke_quick_20260525/h6/global_beta_smoke/analysis/
+results/log_surprisal_spine_smoke_20260527/
 ```
 
-This is a diagnostic smoke run only. It verifies the new condition, logging,
-and cross-partner interference analysis; it is not yet promoted into the
-manuscript evidence hierarchy.
+The completed smoke is now treated as pre-fix diagnostic evidence because H5
+follow-up found an agent-choice candidate aggregation bug in the beta-to-gamma
+path. The bug let low-precision branches with negative policy scores become
+more selectable by shrinking scores toward zero. The runtime now uses centered
+precision logits for agent-choice candidate comparison.
 
-## Completed H6 Discovery Batch
-
-The H6 discovery batch completed under:
-
-```text
-results/h6_global_beta_discovery_20260525/
-```
-
-The completed command was:
+The pre-fix run command was:
 
 ```bash
-python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h6_locality_interference/global_beta_model_fitness_probe.toml \
-  --config configs/trust/hypotheses/h6_locality_interference/global_beta_deployment_probe.toml \
-  --config configs/trust/hypotheses/h6_locality_interference/global_beta_partner_choice_probe.toml \
-  --config configs/trust/hypotheses/h6_locality_interference/global_beta_betrayal_probe.toml \
-  --config configs/trust/hypotheses/h6_locality_interference/lesion_family_probe.toml \
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h0_policy_openness/graded_choice.toml \
+  --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml \
+  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml \
+  --config configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml \
+  --config configs/trust/hypotheses/h4_social_allocation/partner_choice.toml \
+  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml \
+  --config configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml \
   --output-dir results \
-  --batch-name h6_global_beta_discovery_20260525 \
+  --batch-name log_surprisal_spine_smoke_20260527 \
   --workers 1
 ```
 
-This is not a full-seed confirmation. It is a complete discovery queue across
-the main mechanism regimes plus a lesion-family probe, with five seeds for the
-global-beta regime probes and three seeds for the larger lesion-family probe.
-All variants use planning horizon 2 to keep the one-worker queue tractable. It
-wrote final `results.csv` files for:
+Analysis outputs have been generated for all seven queued configs:
 
-- `global_beta_model_fitness_probe`
-- `global_beta_deployment_probe`
-- `global_beta_partner_choice_probe`
-- `global_beta_betrayal_probe`
-- `lesion_family_probe`
+- `h0/graded_choice/analysis`
+- `h1/reliability_vs_reward/analysis`
+- `h2/lesion_open_regime/analysis`
+- `h3/global_beta_focal_switch_probe/analysis`
+- `h4/partner_choice/analysis`
+- `h5/betrayal_choice/analysis`
+- `h6/clinical_dynamics/analysis`
 
-Standalone analysis has been run for each experiment:
+Do not run the confirmation queue from the pre-fix smoke.
 
-```bash
-python scripts/analysis/analyze.py --results results/h6_global_beta_discovery_20260525/h6/<experiment_id>/results.csv --output-dir results/h6_global_beta_discovery_20260525/h6/<experiment_id>/analysis
-```
-
-Treat these outputs as discovery evidence. Do not promote H6 into manuscript
-claims until the user approves the evidence read.
-
-## Completed H6 Locality / Interference Probe
-
-The focused locality probe completed under:
+The post-fix smoke rerun has completed under the corrected selector:
 
 ```text
-results/h6_global_beta_locality_probe_20260526/
+results/log_surprisal_spine_smoke_postfix_20260528/
 ```
 
-The completed command was:
+Analysis outputs exist for all seven queued configs:
 
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h6_locality_interference/global_beta_locality_probe.toml --output-dir results --batch-name h6_global_beta_locality_probe_20260526 --workers 1
-```
+- `h0/graded_choice/analysis`
+- `h1/reliability_vs_reward/analysis`
+- `h2/lesion_open_regime/analysis`
+- `h3/global_beta_focal_switch_probe/analysis`
+- `h4/partner_choice/analysis`
+- `h5/betrayal_choice/analysis`
+- `h6/clinical_dynamics/analysis`
 
-Analysis was run with:
+The stale Mango monitor `affect_aif_postfix_spine_smoke_20260528` has been
+removed after tmux exited and no matching experiment or analysis process was
+running.
 
-```bash
-python scripts/analysis/analyze.py --results results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/results.csv --output-dir results/h6_global_beta_locality_probe_20260526/h6/global_beta_locality_probe/analysis
-```
-
-This is a five-seed smoke result, not a confirmation. It complicates the simple
-locality claim: local beta preserves a cleaner precision-surprise signature, but
-global beta has higher aggregate payoff in this probe. See
-`docs/results/runs/2026-05-26-h6-locality-probe.md`.
-
-The focal-switch follow-up completed under:
+## Pre-Fix Smoke Read
 
 ```text
-results/h6_global_beta_focal_switch_probe_20260526/
+H0: affect lowers entropy but does not improve payoff over no-affect.
+H1: local beta tracks surprise more cleanly than reward.
+H2: deployment path is active, but no payoff win for local affect.
+H3: local beta has cleaner signal quality; no locality payoff advantage.
+H4: underpowered partner-choice readout.
+H5: main follow-up risk; local affect underperforms no-affect/lesioned.
+H6: beta dynamics separate; clinical claims remain supplemental only.
 ```
 
-It switched partner `0`, a high-engagement cooperator, to hostile mid-run. This
-made the shock easier to observe than the earlier partner-`3` switch. The result
-is still mixed in the same direction: local beta preserves the cleaner
-model-fitness signal, while global beta has higher aggregate payoff. H6 should
-therefore remain an open mechanism decomposition rather than a manuscript-level
-necessity claim.
-
-## Optional Confirmation Queue
-
-### 1. Higher-Rep Open-Regime Affect, H1 Model Fitness, and Deployment
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name confirm_open_model_deployment --workers 1
-```
-
-### 2. Higher-Rep Social Choice
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name confirm_social_choice --workers 1
-```
-
-An attempted one-worker run of the 30-seed `partner_choice_confirm` config was
-started at `results/h4_social_choice_confirm_20260526/` and stopped after 5
-no-affect seeds because the full queue was too slow for the interactive loop.
-It is marked with `ABORTED_DO_NOT_USE.md` and is not evidence. If this
-confirmation is still needed, resume it intentionally with the same batch name
-and expect a multi-hour one-worker run.
-
-A bounded five-seed H4 pair check completed under:
+## Post-Fix Smoke Read
 
 ```text
-results/h4_social_choice_paircheck_20260526/
+H0: no stable payoff advantage; affect/global beta/no-affect are close.
+H1: post-fix smoke does not preserve the old surprise-over-reward readout.
+H2: deployment path is active; payoff remains flat-to-negative for affect.
+H3: global beta has the best smoke payoff; local beta remains a cleaner signal.
+H4: partner-choice payoff is noisy and flat at three seeds.
+H5: repaired under the centered selector; affect beats no-affect/lesioned.
+H6: perturbation dynamics separate; clinical claims remain supplemental only.
 ```
 
-It reran `configs/trust/hypotheses/h4_social_choice/partner_choice.toml` with
-`--workers 1` and completed both `affect` and `no_affect`. The readout
-replicates the H4 pattern: payoff is flat (`393.6` vs `393.2`), while affect
-lowers policy entropy (`3.989` vs `4.833`). See
-`docs/results/runs/2026-05-26-h4-social-choice-paircheck.md`.
+## Follow-Up Before Confirmation
 
-An attempted one-worker H0 graded-choice pair check was started at
-`results/h0_graded_choice_paircheck_20260526/` and stopped after one no-affect
-seed because each horizon-4 graded seed was too slow for the interactive loop.
-It is marked with `ABORTED_DO_NOT_USE.md` and is not evidence.
+1. Refresh the verification gate immediately before any confirmation-scale run.
+2. Queue a confirmation-scale H5 betrayal-choice run first, because it is the
+   repaired positive behavioral anchor after the selector fix.
+3. Queue H1 only if the next step is a confirmation/rework of the
+   reliability-versus-reward design; current smoke should not carry the
+   model-fitness claim.
+4. Treat H0/H2/H4 as manuscript-support checks: either confirm at higher seeds
+   or soften them to deployment/entropy diagnostics rather than payoff claims.
+5. Keep H3 local/global as a decomposition result unless a revised task makes
+   locality behaviorally necessary.
 
-### 2b. Manuscript Open/Social Confirmation
+## Superseded Partial Smoke Provenance
 
-This config-only batch promotes the H0/H2/H4 supporting evidence from five
-seeds to 30 seeds without changing runtime behavior. This is now the preferred
-next run after the H6 smokes.
+The first reduced smoke queue was initially stopped after a clean H0 checkpoint:
 
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/graded_choice_confirm.toml --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml --output-dir results --batch-name manuscript_open_social_confirm_20260525_single_worker --workers 1
+```text
+results/log_surprisal_spine_smoke_20260527/h0/graded_choice/checkpoint_manifest.json
+results/log_surprisal_spine_smoke_20260527/h0/graded_choice/results_partial.csv
 ```
 
-`results/manuscript_open_social_confirm_20260525/` is an aborted partial
-parallel run started before the one-worker constraint was clarified; do not
-interpret it as evidence.
+That partial state is superseded by the completed batch at the same root.
 
-### 3. Optional H3 Stress Robustness
+## Result Interpretation Rules
 
-The H3 split confirmation already ran as
-`results/confirm_h1_h3_split_20260519/`. Re-run or modify this only if a
-write-up or review process requires a specific stress-regime robustness check.
+- Do not treat partial detached rerun outputs as current evidence.
+- Do not promote new outputs into manuscript-level claims until the user reviews
+  the result read.
+- Treat pre-log-surprisal batches as historical/provisional, even if they remain
+  useful for design provenance.
+- Keep H7 signal-source and H8 observation-noise lanes exploratory unless the
+  user explicitly promotes them.
 
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h3_stress_robustness --workers 1
-```
+## Historical Provenance
 
-## Historical Full Queue
-
-The commands below are retained for historical H0-H5 reference. The immediate
-next action is the log-surprisal rebaseline queue above.
-
-### 1. H0 Openness Gate
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 1
-```
-
-### 2. H1 Model Fitness / Reliability vs Reward
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml --output-dir results --batch-name h1_model_fitness --workers 1
-```
-
-### 3. H2 Deployment / Lesion
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml --output-dir results --batch-name h2_deployment --workers 1
-```
-
-### 4. H3 Stress Response / Betrayal Stance Switch
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
-```
-
-### 5. H4 Social Choice / Partner Selection
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml --output-dir results --batch-name h4_social_choice --workers 1
-```
-
-### 6. H5 Perturbation Phenotypes / Clinical-Like Variants
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h5_perturbation/clinical_betrayal.toml --config configs/trust/hypotheses/h5_perturbation/clinical_dynamics.toml --config configs/trust/hypotheses/h5_perturbation/affect_sensitivity.toml --output-dir results --batch-name h5_perturbation --workers 1
-```
-
-### 7. H6 Locality / Global-Beta Ablation
-
-Use this only for smoke-scale discovery until the run design is reviewed:
-
-```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml --output-dir results --batch-name global_beta_locality_smoke_next --workers 1
-```
-
-Run `scripts/analysis/analyze.py` on the output directory afterward to produce
-`cross_partner_interference_summary.csv` and `global_vs_local_beta_summary.csv`.
-
-### 8. Multi-Focal Descriptive Runs
-
-Multi-focal configs currently use the package API directly; E2 analysis remains
-descriptive until a dedicated multi-focal analysis script exists.
-
-```bash
-python - <<'PY'
-import json
-from pathlib import Path
-
-import numpy as np
-import pandas as pd
-
-from experiments.multifocal.config import MultiFocalConfig
-from experiments.multifocal.runner import MultiFocalRunner
-from experiments.trust.factory import create_agents_from_multi_focal_config
-
-configs = [
-    Path("experiments/multifocal/configs/e2_homogeneous.json"),
-    Path("experiments/multifocal/configs/e2_clinical_mix.json"),
-    Path("experiments/multifocal/configs/e2_assortative.json"),
-]
-root = Path("results/multifocal_descriptive")
-for path in configs:
-    raw = json.loads(path.read_text())
-    cfg = MultiFocalConfig.from_dict(raw)
-    agents = create_agents_from_multi_focal_config(cfg, seed=cfg.random_seed)
-    rows = MultiFocalRunner(cfg, agents, rng=np.random.default_rng(cfg.random_seed)).run()
-    out = root / path.stem
-    out.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(rows).to_csv(out / "results.csv", index=False)
-    (out / "config.json").write_text(json.dumps(raw, indent=2))
-    print(f"{path} -> {out / 'results.csv'}")
-PY
-```
+Historical bounded-error and earlier log-surprisal discovery outputs remain
+documented in `docs/results/`. They should not be used as current manuscript
+evidence after the H0-H8 rebaseline begins.

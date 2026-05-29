@@ -1,0 +1,38 @@
+[hypothesis]
+id = "h4"
+name = "social_allocation"
+
+[experiment]
+id = "partner_choice"
+family = "trust"
+rounds = 200
+replications = 3
+seed = 42
+
+[scenario]
+payoff = "binary"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
+[analysis]
+auto = true
+primary = "h4_social_allocation"
+compare = ["affect", "global_beta", "no_affect"]
+metrics = ["payoff", "precision", "partner_choice"]

@@ -104,6 +104,35 @@ def test_agent_choice_precision_affect_changes_candidate_distribution() -> None:
     assert not np.allclose(affective_decision.q_pi, lesioned_decision.q_pi)
 
 
+def test_agent_choice_high_precision_partner_is_not_penalized_when_scores_match() -> None:
+    config = ExperimentConfig(
+        payoff_mode="graded",
+        num_partners=2,
+        num_investment_levels=6,
+        assignment_mode="agent_choice",
+    )
+    runtime = build_runtime(config, variant_id="affect", affect="precision", seed=0)
+    assert runtime.partner_bank.beta is not None
+    runtime.partner_bank.beta.betas[:] = [0.5, 2.0]
+
+    decision = select_decision(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        active_partner=None,
+        assignment_mode="agent_choice",
+        base_gamma=runtime.base_gamma,
+        action_selection="sample",
+        rng=np.random.default_rng(0),
+        affect_mode="normal",
+    )
+
+    policies_per_partner = len(runtime.template.policies)
+    high_precision_mass = decision.q_pi[:policies_per_partner].sum()
+    low_precision_mass = decision.q_pi[policies_per_partner:].sum()
+
+    assert high_precision_mass >= low_precision_mass
+
+
 def test_agent_choice_selected_fields_match_encoded_raw_action() -> None:
     runtime = build_runtime(
         ExperimentConfig(payoff_mode="binary", num_partners=3, assignment_mode="agent_choice"),

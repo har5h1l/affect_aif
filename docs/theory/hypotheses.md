@@ -27,13 +27,13 @@ Implementation note: beta is the HESP-aligned rate parameter. Low beta means
 high expected policy precision. Analyses should report
 `precision_k = 1 / E[beta_k]` whenever possible.
 
-Partner-specific beta is an architectural premise of the model. The H6
+Partner-specific beta is an architectural premise of the model. The H3
 global-beta condition tests whether per-partner affect is behaviorally superior
-to a shared affective precision state.
+to, or mechanistically cleaner than, a shared affective precision state.
 
-Current H6 discovery read: local beta preserves a cleaner model-fitness signal
+Current global-beta discovery read: local beta preserves a cleaner model-fitness signal
 than global beta in the focused locality probes, but global beta has higher
-aggregate payoff in those same smoke runs. H6 should therefore be treated as an
+aggregate payoff in those same smoke runs. H3 should therefore be treated as an
 open decomposition of signal quality versus behavioral allocation, not as
 evidence that partner-local beta is necessary.
 
@@ -108,36 +108,37 @@ diverge in an open policy regime.
 **Failure pattern:** The lesion damages inference itself, or lesion and affect
 behave identically when H0 says the policy space is open.
 
-## H3: Stress Response
+## H3: Locality / Global Precision
 
-**Mechanism claim:** Social volatility makes model-fitness signals matter:
-betrayal, stance shifts, partner volatility, noisy observations, or changing
-partner pools create model mismatch and policy uncertainty.
+**Mechanism claim:** Partner-local affect should contain model-fitness evidence
+to the partner whose model generated it. A shared global beta tracker should
+mix reliability evidence across partners and may spread precision changes to
+partners whose behavior did not change.
 
-**Expected behavior:** After a betrayal or hostile stance switch, the affective
-agent should show a prediction-error spike, precision drop for the affected
-partner, faster policy change, and either faster recovery/reallocation or a
-measurable boundary-condition failure when precision sharpens the wrong
-post-switch model.
+**Expected behavior:** Local beta should preserve the strongest
+surprise-over-reward signature at the partner level. After one partner switches
+stance, local beta should move mainly for that partner, while global beta should
+change policy precision for all candidate partners.
 
-**Primary measures:** post-switch windows, surprise spike, partner-specific
-precision reaction time, recovery latency, post-switch payoff, partner
-reallocation, return latency to the switched partner, payoff conditional on
-re-encounter, low-entropy wrong action/belief rates, and belief recalibration.
+**Primary measures:** global beta, partner-local beta or terminal signal,
+selected-partner distribution, policy entropy conditional on selected partner,
+payoff conditional on selected partner, partner-level precision-surprise versus
+precision-payoff associations, and policy-posterior shifts for untouched
+partners.
 
-**Pass pattern:** Affect advantage is larger around switch windows than in
-stable windows, either as better post-switch action deployment or as better
-avoidance/reallocation with safer conditional payoff when the agent returns to
-the switched partner.
+**Pass pattern:** Global beta produces measurable cross-partner interference
+after a localized social shock, or weakens the partner-level model-fitness
+signature relative to local beta.
 
-**Boundary-condition pattern:** Affect lowers entropy but increases wrong-type,
-wrong-action, or low-entropy bad-outcome rates after a switch. This means the
-precision channel is active but misdeploying under volatility.
+**Failure pattern:** Global beta matches partner-local beta across the same
+readouts, suggesting that the current partner-local implementation is
+interpretable but not necessary under this task design.
 
-**Failure pattern:** Affect effects are not amplified by volatility, and the
-recovery/reallocation plus misdeployment readouts are all flat.
+**Current discovery pattern:** Local beta has the stronger
+surprise-over-reward signature, but this cleaner signal has not yet produced
+better allocation or payoff than global beta in five-seed locality smokes.
 
-## H4: Social Choice
+## H4: Social Allocation
 
 **Mechanism claim:** Partner-specific precision should guide whom the agent
 approaches, avoids, probes, or returns to in agent-choice settings.
@@ -157,7 +158,34 @@ precision and expected value.
 **Failure pattern:** Partner choice is unrelated to partner-local precision in
 agent-choice settings.
 
-## H5: Perturbation Phenotypes
+## H5: Timescale / Volatility
+
+**Mechanism claim:** Affective precision helps when partner regularities persist
+long enough for partner beliefs and beta to stay aligned. It becomes risky when
+social change is faster than belief recalibration.
+
+**Expected behavior:** After a betrayal or hostile stance switch, the affective
+agent should show a prediction-error spike, precision drop for the affected
+partner, faster policy change, and either faster recovery/reallocation or a
+measurable boundary-condition failure when precision sharpens the wrong
+post-switch model. Gradual shifts should be less harmful than abrupt shifts
+because belief and beta can stay better synchronized.
+
+**Primary measures:** post-switch windows, surprise spike, partner-specific
+precision reaction time, recovery latency, post-switch payoff, partner
+reallocation, return latency to the switched partner, payoff conditional on
+re-encounter, low-entropy wrong action/belief rates, belief recalibration, and
+beta-lag relative to belief change.
+
+**Pass pattern:** Affect effects are amplified around volatility windows, either
+as better post-switch action deployment or as a boundary-condition pattern:
+lower entropy but higher wrong-type, wrong-action, or low-entropy bad-outcome
+rates after an abrupt switch.
+
+**Failure pattern:** Affect effects are not amplified by volatility, and the
+recovery/reallocation plus misdeployment readouts are all flat.
+
+## H6: Perturbation Phenotypes
 
 **Mechanism claim:** Clinical-like variants are perturbations of precision
 dynamics, not validated clinical diagnoses.
@@ -181,32 +209,43 @@ become behaviorally visible mainly in open policy regimes.
 **Failure pattern:** Behavior differs without the intended precision dynamics,
 or precision dynamics do not differentiate.
 
-## H6: Locality / Interference
+## H7: Signal Source
 
-**Mechanism claim:** Partner-local affect should contain volatility to the
-partner whose model failed. A shared global beta tracker should spread precision
-changes to partners whose behavior did not change.
+**Mechanism claim:** Partner-action surprisal is the canonical affect update
+because partner action is the direct social model-fitness signal. Joint
+action-plus-payoff surprisal is an exploratory alternative that may mix social
+predictability with reward structure.
 
-**Expected behavior:** After one partner switches stance, local beta should move
-mainly for that partner, while global beta should change policy precision for
-all candidate partners.
+**Expected behavior:** Partner-action surprisal should preserve the reliable
+exploiter dissociation: predictable but low-payoff partners can still produce
+high precision. A joint surprise signal may pull precision toward payoff or
+action-outcome value and weaken the H1 model-fitness dissociation.
 
-**Primary measures:** global beta, partner-local beta or terminal signal,
-selected-partner distribution, policy entropy conditional on selected partner,
-payoff conditional on selected partner, and policy-posterior shifts for
-untouched partners.
+**Primary measures:** precision-surprise association, precision-payoff
+association, reliable-exploiter precision, deployment effects, and payoff in
+matched H1/H2 settings.
 
-**Pass pattern:** Global beta produces measurable cross-partner interference
-after a localized social shock, while partner-local beta confines the precision
-change.
+**Current status:** Future-work or exploratory. The supported runtime currently
+uses partner-action surprisal.
 
-**Failure pattern:** Global beta matches partner-local beta across the same
-readouts, suggesting that the current partner-local implementation is
-interpretable but not necessary under this task design.
+## H8: Observation Noise / Robustness
 
-**Current discovery pattern:** Local beta has the stronger
-surprise-over-reward signature, but this cleaner signal has not yet produced
-better allocation or payoff than global beta in five-seed locality smokes.
+**Mechanism claim:** Affective precision may stabilize behavior under noisy
+observations by integrating reliability evidence more slowly than trial-level
+belief updates, but the same inertia may slow adaptation when noise is confused
+with real partner change.
+
+**Expected behavior:** Under moderate observation noise, local beta should reduce
+action churn and preserve partner-selection structure when the underlying
+partner is stable. Under high noise or real shifts, excess inertia may delay
+recalibration.
+
+**Primary measures:** observation-noise level, beta volatility, policy entropy,
+action-flip rate, predictive log score, partner-selection entropy, and payoff
+conditional on stable versus switched partners.
+
+**Current status:** Exploratory. Observation noise is supported by configs, but
+the manuscript does not depend on this lane.
 
 ## Engineering Objectives
 

@@ -28,4 +28,4 @@ planning_horizon = 1
 
 [analysis]
 auto = false
-primary = "h0_openness"
+primary = "h0_policy_openness"

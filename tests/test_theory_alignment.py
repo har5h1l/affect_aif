@@ -63,7 +63,7 @@ def test_lesion_freeze_constant_beta():
 
 
 def test_betrayal_run_affect_mechanism_is_active():
-    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml")
+    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
     results = ExperimentRunner.from_spec(spec.with_overrides(rounds=35, replications=1)).run_all()
 
     no_affect = results[results["variant_id"] == "no_affect"].sort_values("round")

@@ -15,23 +15,23 @@ Implemented starting point:
 
 - `affect = "global_beta"` now shares one beta tracker across partners while
   preserving partner-local POMDP beliefs.
-- `configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`
+- `configs/trust/hypotheses/h3_locality/global_beta_smoke.toml`
   provides a first locality/interference smoke run.
-- The next queued H6 discovery batch extends this to model-fitness,
+- The next queued global-beta discovery batch extends this to model-fitness,
   deployment, partner-choice, betrayal, and lesion-family probes.
-- Optional H3 abrupt/gradual stress check if time allows.
+- Optional H5 abrupt/gradual stress check if time allows.
 - Primary readout: partner choice, entropy, payoff, and precision-reward versus
   precision-surprise association.
 
-Risk: the first H6 run is smoke-scale only; do not promote it to manuscript
+Risk: the first global-beta run is smoke-scale only; do not promote it to manuscript
 evidence until the design and diagnostics are reviewed.
 
 ### 2. Focused Shock-Shape Gradient
 
-Question: is H3 failure driven by temporal abruptness rather than generic
+Question: is H5 failure driven by temporal abruptness rather than generic
 overconfidence?
 
-Why it matters: the H3 precision-sensitivity follow-up suggests shock shape is
+Why it matters: the H5 precision-sensitivity follow-up suggests shock shape is
 the right axis. This would strengthen the boundary-condition story without
 another broad sweep.
 
@@ -59,7 +59,7 @@ Suggested design:
 - One script under `scripts/analysis/` or `docs/paper/manuscript/` that reads
   copied source tables and emits 4-5 clean composite PNG/PDF figures.
 - Use existing analysis outputs only; do not recompute experiment results.
-- Panels: H2 deployment, H1 model fitness, H3 boundary, H3 shock shape, H5
+- Panels: H2 deployment, H1 model fitness, H5 boundary, H5 shock shape, H6
   supplement.
 
 Risk: low scientific risk, high manuscript value.
@@ -79,6 +79,6 @@ Risk: low scientific risk, high manuscript value.
 
 ## Current Recommendation
 
-For a two-week deadline, prioritize reviewing the H6 discovery batch and
+For a two-week deadline, prioritize reviewing the global-beta discovery batch and
 deciding whether global beta needs a manuscript paragraph. Avoid another broad
 hyperparameter sweep until these structural probes are interpreted.

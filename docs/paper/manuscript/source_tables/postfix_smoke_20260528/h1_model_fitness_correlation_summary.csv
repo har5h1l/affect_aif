@@ -1,0 +1,3 @@
+variant_id,n_partner_seed_units,reward_proxy,corr_precision_surprise,corr_precision_reward,abs_corr_precision_surprise,abs_corr_precision_reward,surprise_dominates_reward
+affect,12,active_mean_payoff,-0.22624154411056846,-0.6151031890674439,0.22624154411056846,0.6151031890674439,False
+global_beta,12,active_mean_payoff,0.11450534957283526,0.10317858019965026,0.11450534957283526,0.10317858019965026,True

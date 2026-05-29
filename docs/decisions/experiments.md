@@ -10,13 +10,15 @@ Canonical labels are:
 - H0 Openness Gate
 - H1 Model Fitness
 - H2 Deployment
-- H3 Stress Response
-- H4 Social Choice
-- H5 Perturbation Phenotypes
+- H3 Locality / Global Precision
+- H4 Social Allocation
+- H5 Timescale / Volatility
+- H6 Perturbation Phenotypes
+- H7 Signal Source
+- H8 Observation Noise / Robustness
 
-Partner-specific beta remains an architectural premise. A global-beta ablation
-can be added later as optional model comparison, but it is not part of the
-current core hypothesis spine.
+Partner-specific beta remains an architectural premise. The global-beta
+ablation is now the maintained H3 locality/global-precision comparison.
 
 ## Evidence Status
 

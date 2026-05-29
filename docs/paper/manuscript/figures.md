@@ -1,7 +1,11 @@
 # Figure Plan
 
-Use generated composite figures from current source tables where possible.
-Regenerate the current paper panels with:
+The current source tables and figure assets are historical bounded-error
+carryover unless explicitly regenerated from
+`results/log_surprisal_spine_smoke_postfix_20260528/`. Do not use the old
+panels as final current-evidence figures.
+
+Regenerate paper panels with:
 
 ```bash
 python scripts/analysis/make_paper_figures.py
@@ -35,43 +39,56 @@ Must show:
 
 ## Main Figure 2: Open-Regime Deployment And Social Choice
 
-Current asset: `figures/fig_deployment_social_summary.png`
+Current asset: stale carryover; regenerate before submission.
 
-Primary numbers:
+Current smoke numbers:
 
-- Affect payoff `1884.6`, entropy `7.94`.
-- Lesioned/no-affect payoff `1859.4`, entropy `8.80`.
-- Belief readouts remain similar or slightly favor lesion.
+- Affect payoff `1851.3`, entropy `8.59`.
+- No-affect / lesioned payoff `1864.2`, entropy `8.79`.
+- Global beta payoff `1851.3`, entropy `8.64`.
+- Belief readouts do not support a local-affect payoff win at smoke scale.
 
 Caption claim: In the open graded regime, affective precision changes policy
-deployment and payoff without improving belief accuracy; partner-selection
-rates also move before whole-run payoff separates.
+deployment, but the reduced log-surprisal smoke does not establish a local
+affect payoff advantage.
 
 ## Main Figure 3: Model Fitness Versus Reward
 
-Draft asset: `figures/fig_model_fitness_beta_reward_divergence.png`
+Draft asset: stale carryover; regenerate before submission.
 
 Source tables:
 
-- `source_tables/h1_evidence_effect_summary.csv`
-- `source_tables/h1_model_fitness_correlation_summary.csv`
+- `source_tables/postfix_smoke_20260528/h1_evidence_effect_summary.csv`
+- `source_tables/postfix_smoke_20260528/h1_model_fitness_correlation_summary.csv`
 
-Primary numbers:
+Current smoke numbers:
 
-- `|corr(precision, surprise)| = 0.701`
-- `|corr(precision, payoff)| = 0.419`
-- reliability-over-reward effect `+0.096`, CI `[0.027, 0.164]`
-- no payoff advantage for affect: `534.6` versus `542.1`
+- Local beta: `|corr(precision, surprise)| = 0.226`
+- Local beta: `|corr(precision, payoff)| = 0.615`
+- Global beta: `0.115` versus `0.103`
+- no payoff advantage for affect: `492.7` versus `552.0`
 
-Caption claim: Precision follows predictive reliability more strongly than
-realized payoff, consistent with model fitness rather than cached value.
+Caption claim: The current post-fix H1 smoke does not yet establish the
+surprise-over-reward model-fitness dissociation; treat this panel as a target
+for confirmation/rework rather than final evidence.
 
 ## Main Figure 4: Betrayal Boundary Condition
 
-Draft assets:
+Draft assets: stale carryover; regenerate before submission.
 
 - `figures/fig_betrayal_confirm_cumulative_payoff.png`
 - `figures/fig_betrayal_signal_trajectories.png`
+
+Current smoke numbers:
+
+- Affect payoff `1322.3`.
+- No-affect / lesioned payoff `1225.0`.
+- Global beta payoff `1216.2`.
+- Affect entropy `7.47` versus no-affect / lesioned `8.68`.
+
+Caption claim: under the corrected selector, abrupt betrayal is the strongest
+candidate positive behavioral anchor, but the three-seed smoke must be replaced
+before submission.
 
 Source tables:
 
@@ -79,19 +96,21 @@ Source tables:
 - `source_tables/h3_betrayal_reallocation_summary.csv`
 - `source_tables/h3_betrayal_misdeployment_summary.csv`
 
-Primary numbers:
+Current smoke numbers:
 
-- Affect payoff `1136.1` versus no-affect/lesion `1172.1`, `p = 0.0169`.
-- Affect entropy `8.38` versus no-affect `8.74`.
-- Affect reencounters switched partner less often (`4.4` versus `6.1`) but does
-  not improve payoff conditional on return (`8.76` versus `8.91`).
+- Affect payoff `1127.0` versus no-affect/lesion `1225.0`.
+- Affect entropy `8.37` versus no-affect/lesion `8.68`.
+- Affect joint accuracy `0.067` versus no-affect/lesion `0.425`.
+- Affect reencounters the switched partner less often (`0.037` selection rate
+  versus `0.322`) but appears to reallocate poorly.
 
 Caption claim: Abrupt betrayal reveals an active but risky precision channel:
 policy sharpening is not equivalent to safer recovery.
 
 ## Main Figure 5: Shock Shape And Sensitivity
 
-Current asset: `figures/fig_shock_shape_summary.png`
+Current asset: historical carryover. Shock-shape sensitivity has not yet been
+rerun under the current log-surprisal spine.
 
 Source tables:
 
@@ -100,24 +119,27 @@ Source tables:
 - `source_tables/h3_gradual_sensitivity_final_round_summary.csv`
 - `source_tables/h3_gradual_sensitivity_pairwise_payoff_tests.csv`
 
-Primary numbers:
+Historical bounded-error numbers:
 
 - Abrupt default affect: `1140.4` versus no-affect `1153.6`, `p = 0.370`.
 - Abrupt combined caution: `1115.0` versus no-affect, `p = 0.003`.
 - Gradual default affect: `1147.6` versus no-affect `1148.9`, `p = 0.906`.
 - Gradual combined caution: `1118.3` versus no-affect, `p = 0.005`.
 
-Caption claim: Generic caution does not rescue abrupt betrayal; gradual shock
-mostly removes the default affect payoff penalty.
+Caption claim: Hold until the abrupt/gradual sensitivity sweep is rerun under
+log-surprisal.
 
 ## Main Figure 6: Perturbation Dynamics
 
-Current asset: `figures/fig_phenotype_dynamics_summary.png`
+Current asset: stale carryover; regenerate before submission.
 
 Source tables:
 
 - `source_tables/h5_clinical_dynamics_phenotype_validation_summary.csv`
 - `source_tables/h5_clinical_betrayal_phenotype_validation_summary.csv`
 
-Use as a bounded computational phenotyping result. The caption must say
+Current smoke beta ranges: alexithymia-like `0.180`, affect `1.126`,
+borderline-like `1.412`, depression-like `1.464`.
+
+Use as a bounded computational phenotyping result only. The caption must say
 "computational perturbations", not "clinical validation".

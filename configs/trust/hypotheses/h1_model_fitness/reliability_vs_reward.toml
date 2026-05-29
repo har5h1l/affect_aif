@@ -6,7 +6,7 @@ name = "model_fitness"
 id = "reliability_vs_reward"
 family = "trust"
 rounds = 200
-replications = 5
+replications = 3
 seed = 42
 
 [scenario]

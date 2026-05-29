@@ -18,46 +18,57 @@ The neutral baseline is `sigma_0_sq = (-log 0.5)^2`, so a fifty-fifty binary
 prediction produces zero affective charge. Low surprisal lowers beta and raises
 policy precision; high surprisal raises beta and softens policy precision.
 
-Movement is controlled mainly by:
-
-- `alpha_charge`: gain on affective charge.
-- `beta_persistence`: inertia of the categorical beta posterior.
-- `beta_levels`: discrete support and range of allowed beta values.
-- `gamma`: base policy precision before inverse-beta modulation.
-
 Continuous beta remains future work. It would require a new variational or
-numerical posterior over beta rather than the current categorical filter, so it
-is not part of this rebaseline.
+numerical posterior over beta rather than the current categorical filter.
+
+## Final Hypothesis Spine
+
+The maintained spine is now H0-H8. The manuscript does not have to use every
+lane, but configs and docs should use this single numbering.
+
+| Card | Role | Active config status |
+|---|---|---|
+| H0 Policy Openness | Gate: can precision move policy here? | active |
+| H1 Model Fitness | Precision tracks predictive reliability, not reward. | active |
+| H2 Deployment | Beta-to-gamma changes deployment with beliefs preserved. | active |
+| H3 Locality / Global Precision | Local beta versus shared global beta. | active |
+| H4 Social Allocation | Partner choice, avoidance, probing, and return. | active |
+| H5 Timescale / Volatility | Abrupt versus gradual social change. | active |
+| H6 Perturbation Phenotypes | Parameter perturbations of precision dynamics. | active, supplemental |
+| H7 Signal Source | Partner-action versus joint surprise. | future/exploratory |
+| H8 Observation Noise / Robustness | Noisy social observations. | future/exploratory |
 
 ## Config Surface
 
-The main H0-H4 configs now include `global_beta` variants where relevant:
+Active TOML specs now live under directories that match the final spine:
 
-- `configs/trust/hypotheses/h0_openness/shallow_binary.toml`
-- `configs/trust/hypotheses/h0_openness/graded_choice.toml`
-- `configs/trust/hypotheses/h0_openness/graded_betrayal.toml`
-- `configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml`
-- `configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml`
-- `configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml`
-- `configs/trust/hypotheses/h3_stress_response/betrayal_reallocation.toml`
-- `configs/trust/hypotheses/h4_social_choice/partner_choice.toml`
+- `configs/trust/hypotheses/h0_policy_openness/`
+- `configs/trust/hypotheses/h1_model_fitness/`
+- `configs/trust/hypotheses/h2_deployment/`
+- `configs/trust/hypotheses/h3_locality/`
+- `configs/trust/hypotheses/h4_social_allocation/`
+- `configs/trust/hypotheses/h5_timescale_volatility/`
+- `configs/trust/hypotheses/h6_perturbation/`
 
-The confirmation configs for H1, H2, H3 reallocation, and H4 also include
-`global_beta`. H6 remains available for focused locality/interference probes.
+H7 and H8 are documented exploratory lanes. Do not add active TOML for them
+until the intended implementation and readouts are explicit.
 
-## Smoke Queue
+## First Smoke Queue
 
-Run this first with one worker:
+Run this first with one worker. It is deliberately smoke-scale, not a final
+statistical confirmation.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h0_policy_openness/graded_choice.toml \
   --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml \
   --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml \
-  --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml \
-  --config configs/trust/hypotheses/h4_social_choice/partner_choice.toml \
-  --config configs/trust/hypotheses/h6_locality_interference/global_beta_focal_switch_probe.toml \
+  --config configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml \
+  --config configs/trust/hypotheses/h4_social_allocation/partner_choice.toml \
+  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml \
+  --config configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml \
   --output-dir results \
-  --batch-name log_surprisal_core_smoke_20260527 \
+  --batch-name log_surprisal_spine_smoke_20260527 \
   --workers 1
 ```
 
@@ -65,37 +76,69 @@ Analyze each completed result with `scripts/analysis/analyze.py`.
 
 Primary smoke readouts:
 
-- H1: precision-surprise association remains stronger than precision-payoff.
+- H0: policy entropy and payoff/action effects move together only when the
+  policy posterior is open.
+- H1: test whether the precision-surprise association remains stronger than
+  precision-payoff after the selector fix.
 - H2: tracked-only preserves beliefs while losing deployment effects.
-- H3: abrupt betrayal still tests the timing/misdeployment boundary.
-- H4: partner selection entropy and selection rates shift before payoff moves.
-- H6: global beta versus local beta separates signal quality and allocation.
+- H3: local beta versus global beta separates signal quality, allocation, or
+  cross-partner interference.
+- H4: partner-selection entropy and selection rates shift before payoff moves.
+- H5: abrupt switch exposes timing/misdeployment boundary conditions.
+- H6: perturbation variants separate first in beta/precision dynamics.
+
+## Smoke Outcome
+
+The reduced H0-H6 post-fix smoke completed at
+`results/log_surprisal_spine_smoke_postfix_20260528/`. It is current smoke
+evidence, not confirmation-scale evidence. The earlier
+`results/log_surprisal_spine_smoke_20260527/` run is pre-fix diagnostic
+provenance only.
+
+Current read:
+
+- H1 does not preserve the old surprise-over-reward model-fitness readout under
+  the post-fix smoke; treat it as a confirmation/rework item.
+- H0/H2 show an active deployment channel through entropy changes, but the old
+  local-affect payoff benefit does not replicate at three seeds.
+- H3 supports locality as cleaner signal quality, not behavioral necessity;
+  global beta has the best smoke payoff.
+- H5 betrayal choice is repaired under the centered selector: local affect beats
+  no-affect/lesioned at three seeds and should be the first confirmation target.
+- H4 and H6 should remain supplemental until larger runs justify stronger
+  claims.
 
 ## Confirmation Queue
 
-Only run after smoke logs and analysis outputs look sane:
+Do not launch this queue until the verification gate in
+`docs/active/progress.md` passes. Prioritize H5. Keep H1 only as a
+confirmation/rework target, and keep H0/H2/H4 only if the manuscript needs
+confirmation of deployment/entropy support:
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h0_policy_openness/graded_choice_confirm.toml \
   --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml \
   --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
-  --config configs/trust/hypotheses/h3_stress_response/betrayal_reallocation_confirm.toml \
-  --config configs/trust/hypotheses/h4_social_choice/partner_choice_confirm.toml \
+  --config configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml \
+  --config configs/trust/hypotheses/h4_social_allocation/partner_choice_confirm.toml \
+  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml \
   --output-dir results \
-  --batch-name log_surprisal_core_confirm_20260527 \
+  --batch-name log_surprisal_spine_confirm_20260527 \
   --workers 1
 ```
 
-H0 graded-choice confirmation can be added if the smoke run shows that the
-openness effect changes materially under log-surprisal.
+H6 confirmation is optional and should stay supplemental unless the manuscript
+needs a stronger precision-dynamics phenotype table.
 
 ## Manuscript Policy
 
-Do not update result numbers from the old bounded-error evidence. Until the
-log-surprisal reruns complete, the manuscript should describe the current
-mechanism but treat numeric result claims as provisional carryover evidence.
+Do not reuse result numbers from the old bounded-error evidence as current
+evidence. The reduced log-surprisal smoke has replaced them as the current
+diagnostic read, but it is not final publication evidence.
 
-If log-surprisal preserves the qualitative signs, update figures and text with
-the new results and retain the same argument. If it inverts H1, H2, or H3, the
-paper should be reframed around the difference between model-fitness signal
-definitions before submission.
+The manuscript should now be framed around deployment changes through
+beta-to-gamma coupling and H5 as the repaired behavioral anchor. It should not
+claim a general affect payoff advantage, a proven behavioral necessity for
+partner-local beta, or a settled model-fitness dissociation until
+confirmation-scale runs support those claims.

@@ -30,11 +30,13 @@ Partial runs are not current evidence.
 
 ## Current Evidence
 
-As of May 27, 2026, the canonical affect update uses Hesp-style partner-action
+As of May 29, 2026, the canonical affect update uses Hesp-style partner-action
 surprisal, `-log P(observed partner action)`, with
 `sigma_0_sq = (-log 0.5)^2`. Earlier interpreted results were produced with the
-bounded action-error proxy. Keep them as historical/provisional evidence until
-the current H0-H6 configs are rerun.
+bounded action-error proxy, and the first log-surprisal smoke is pre-fix
+diagnostic evidence. The current smoke-scale result is the post-fix H0-H6 run
+recorded in `docs/results/runs/2026-05-29-log-surprisal-postfix-smoke.md`.
+Treat it as current smoke evidence only, not publication-grade confirmation.
 
 The May 18, 2026 H0-H5 queue is now historical interpreted evidence for the
 supported architecture. See `docs/results/current.md` for the scorecard and

@@ -5,7 +5,7 @@
 | Claim | Status | Evidence | How to write it |
 |---|---|---|---|
 | Affective precision can move policy only when the policy space is open. | Supported with caveat | H0 graded-choice and graded/stress runs show entropy and behavior shifts; saturated binary regimes are weaker. | "Policy openness gates visible affect effects." |
-| Partner-local precision tracks model fitness more than reward. | Supported | H1 30-seed confirmation: precision-surprise association is stronger than precision-payoff association. | "Precision is a predictive-reliability signal, not cached partner value." |
+| Partner-local precision tracks model fitness more than reward. | Post-fix unresolved | Older H1 confirmation supported this, but the post-fix smoke reverses the readout (`0.226` surprise vs `0.615` payoff). | Treat as a target claim requiring confirmation or design revision. |
 | Affect changes deployment more than belief inference. | Supported | H2 open-regime lesion: belief accuracy remains similar while policy entropy and payoff move. | "The lesion resembles knowing-without-using rather than ignorance." |
 | Stress amplifies the mechanism. | Supported as boundary condition | H3 betrayal runs show lower entropy, altered return/reallocation, and worse payoff under abrupt shocks. | "Stress reveals the precision channel and its failure mode." |
 | Affect improves recovery after betrayal. | Not supported | The 30-seed H3 confirmation does not show a robust conditional-return payoff advantage. | Do not claim this. |
@@ -24,8 +24,8 @@ a theory-to-code-to-result chain:
    `type x stance` POMDPs, and external beta-to-gamma modulation.
 3. Experiments test openness, model fitness, deployment, stress, social choice,
    and perturbation dynamics.
-4. Results show both positive deployment effects and a theoretically useful
-   stress failure mode.
+4. Current post-fix smoke shows deployment effects and a repaired H5 behavioral
+   anchor, while H1 remains unresolved.
 
 The evidence is not complete enough for a broad empirical psychology claim, a
 clinical claim, or a universal performance claim. Those would require human
@@ -42,9 +42,10 @@ that open regimes can also expose maladaptive precision.
 
 ### H1: Model Fitness
 
-Supported. This is the cleanest mechanism result. The 30-seed confirmation
-shows precision tracks surprise/predictability more strongly than payoff. Write
-this as a dissociation from reward, not as a payoff advantage.
+Post-fix unresolved. The older 30-seed bounded-proxy confirmation showed
+precision tracking surprise/predictability more strongly than payoff, but the
+post-fix log-surprisal smoke does not preserve that result. Do not use H1 as a
+current manuscript anchor until it is confirmed or redesigned.
 
 ### H2: Deployment
 
@@ -79,4 +80,5 @@ Do not claim:
 - affect always helps recovery after betrayal;
 - the model validates clinical diagnoses;
 - partner-local beta has been directly compared against global beta;
+- H1 is currently confirmed under the post-fix selector;
 - the project is the first active-inference model of trust.

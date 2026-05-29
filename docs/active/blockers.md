@@ -2,8 +2,10 @@
 
 ## Requires Human Decision
 
-- No immediate blocker. Current steering is to pause experiments and consolidate
-  the results narrative.
+- Immediate publication-readiness blocker: none at the smoke-execution level.
+  The post-fix H0-H6 smoke completed under the corrected selector. The remaining
+  blocker is evidential scale: three seeds are not enough for publication-grade
+  claims.
 - Optional later decision: whether any paper/reviewer-specific stress-regime
   robustness check is needed after write-up stabilization.
 
@@ -17,6 +19,10 @@
 
 ## Technical Follow-Ups
 
+- Run confirmation-scale reruns only after the verification gate passes.
+- Prioritize H5 betrayal-choice confirmation. Treat H1 as a model-fitness
+  confirmation/rework item, and treat H0/H2/H4 as support checks that may need
+  softened language if payoff remains flat.
 - Complete any remaining import-boundary cleanup toward
   `scripts -> experiments -> tasks -> inferactively-pymdp`.
 - Add import-boundary and package-surface tests for the moved structure in later

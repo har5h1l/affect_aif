@@ -34,17 +34,17 @@ partner redesign:
 - binary trust games use factorized controls for partner, stance, and own action
 - the trust-game generative model exposes `o_action` and `o_payoff` observations over latent `type × stance`, with `own_action` tracked as a separate control/state factor
 - the default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`) driven by partner-action surprisal, `-log P(observed action)`
-- the current hypothesis surface is the H0-H6 behavior-card spine in [docs/theory/hypotheses.md](docs/theory/hypotheses.md)
+- the current hypothesis surface is the H0-H8 behavior-card spine in [docs/theory/hypotheses.md](docs/theory/hypotheses.md)
 - runnable experiment specs are TOML files under `configs/`; trust specs live in `configs/trust/...`, benchmark specs in `configs/benchmark/...`, and each file declares a shared hypothesis/experiment/scenario/variant envelope with `experiment.family`
 
 Common entry points:
 
 ```bash
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
+python scripts/experiment/run.py --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml --output-dir results --batch-name h5_timescale_volatility --workers 1
 python scripts/experiment/preliminary.py --replications 5 --output results/preliminary.csv
-python scripts/analysis/analyze.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/analysis
-python scripts/analysis/visualize.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/gifs
-python scripts/analysis/model_comparison.py --results results/h3_stress_response/h3/betrayal_choice/results.csv --output-dir results/h3_stress_response/h3/betrayal_choice/model_comparison
+python scripts/analysis/analyze.py --results results/h5_timescale_volatility/h5/betrayal_choice/results.csv --output-dir results/h5_timescale_volatility/h5/betrayal_choice/analysis
+python scripts/analysis/visualize.py --results results/h5_timescale_volatility/h5/betrayal_choice/results.csv --output-dir results/h5_timescale_volatility/h5/betrayal_choice/gifs
+python scripts/analysis/model_comparison.py --results results/h5_timescale_volatility/h5/betrayal_choice/results.csv --output-dir results/h5_timescale_volatility/h5/betrayal_choice/model_comparison
 python scripts/benchmark/run.py --config configs/benchmark/e1_arena/default.toml
 python scripts/benchmark/analyze.py --results results/benchmark/benchmark_results.csv
 ```

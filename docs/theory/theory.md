@@ -9,7 +9,7 @@ redesign described in `docs/theory/pomdp_spec.md` and
 `docs/design/implementation.md`.
 
 For the current canonical hypothesis surface, use
-`docs/theory/hypotheses.md`. That file organizes the project around H0-H6
+`docs/theory/hypotheses.md`. That file organizes the project around H0-H8
 behavior cards.
 
 - The hidden social state is `partner type × partner stance`, not partner type plus exploiter phase.
@@ -452,7 +452,7 @@ partner, driven by trial-to-trial evidence rather than sustained calibration.
 When the initial beta prior is high, the agent starts with low policy precision
 for every partner. Combined with high beta persistence, this creates an agent
 that is slow to develop confident partner-local deployment even when partners
-are reliably cooperative. Current H5 configs instantiate this with
+are reliably cooperative. Current H6 configs instantiate this with
 `initial_beta = 2.0`.
 
 **Important caveats.** These phenotype labels are heuristic mappings, not diagnostic claims. The current model lacks several features that would be required for serious clinical modeling: continuous (not discrete) action spaces, richer emotional state representations, developmental trajectories, and integration with physiological variables.
@@ -460,18 +460,19 @@ are reliably cooperative. Current H5 configs instantiate this with
 ### 4.11 Predictive and Comparative Extensions
 
 Predictive model comparison remains useful future work, but it is separate from
-the active H0-H6 evidence spine. A clean comparison should score matched
+the active H0-H8 evidence spine. A clean comparison should score matched
 observation sequences and avoid mixing reward optimization with predictive
-fitness. Global beta is now the maintained H6 ablation; reward-history
+fitness. Global beta is now the maintained H3 locality ablation; reward-history
 baselines and richer model-selection variants remain future work unless rerun
 and documented under the current architecture.
 
 ### 4.12 Task Generalization and Perturbation Tests
 
 Cross-game and clinical-like perturbation tests remain useful future extensions,
-but the active spine now evaluates them through the H0-H6 behavior cards:
-openness first, model fitness second, deployment third, then stress, social
-choice, perturbation dynamics, and locality/global-beta controls. Any
+but the active spine now evaluates them through the H0-H8 behavior cards:
+openness first, model fitness second, deployment third, then locality/global
+precision, social allocation, timescale/volatility, perturbation dynamics,
+signal-source alternatives, and observation-noise robustness. Any
 clinical-like interpretation must first
 show the intended beta/precision dynamics and then show behavior only in regimes
 where H0 confirms policy-space openness.

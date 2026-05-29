@@ -86,11 +86,11 @@ Examples:
 # smoke dry run
 python scripts/experiment/run.py --config configs/trust/smoke/smoke.toml --output-dir results --batch-name dry_run --dry-run
 
-# H3 betrayal stress response
-python scripts/experiment/run.py --config configs/trust/hypotheses/h3_stress_response/betrayal_choice.toml --output-dir results --batch-name h3_stress_response --workers 1
+# H5 timescale / volatility stress response
+python scripts/experiment/run.py --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml --output-dir results --batch-name h5_timescale_volatility --workers 1
 
 # multiple H0 openness experiments in one batch
-python scripts/experiment/run.py --config configs/trust/hypotheses/h0_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_openness/graded_choice.toml --config configs/trust/hypotheses/h0_openness/graded_betrayal.toml --output-dir results --batch-name h0_openness --workers 1
+python scripts/experiment/run.py --config configs/trust/hypotheses/h0_policy_openness/shallow_binary.toml --config configs/trust/hypotheses/h0_policy_openness/graded_choice.toml --config configs/trust/hypotheses/h0_policy_openness/graded_betrayal.toml --output-dir results --batch-name h0_policy_openness --workers 1
 ```
 
 ## Preliminary Run

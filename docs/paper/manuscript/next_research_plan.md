@@ -11,21 +11,50 @@ explicitly authorizes otherwise.
 
 The manuscript can already support a constrained claim:
 
-- partner-local precision tracks predictive reliability more than reward;
 - it changes deployment in open policy regimes;
 - it shifts partner choice before payoff clearly separates;
-- abrupt betrayal exposes misdeployment rather than recovery.
+- abrupt betrayal is repaired under the centered selector at smoke scale.
+
+The post-fix H1 smoke does not currently support the stronger claim that
+partner-local precision tracks predictive reliability more than reward.
 
 The main unresolved architectural question is whether partner-local beta is
 necessary. A reviewer can still ask whether one shared global model-fitness
 tracker would explain the same effects.
 
-## Priority 1: Global-Beta Ablation
+## Priority 1: Confirm H5 Betrayal
 
-**Status.** Implemented as `affect = "global_beta"` and smoke-tested in the
-H6 locality/interference config. The completed quick smoke lives under
-`results/global_beta_locality_smoke_quick_20260525/h6/global_beta_smoke/`.
-Use it to check logging and analysis, not to revise manuscript claims yet.
+**Status.** The post-fix three-seed smoke completed under
+`results/log_surprisal_spine_smoke_postfix_20260528/`. H5 is the strongest
+current behavioral anchor: local affect beats no-affect/lesioned after abrupt
+betrayal.
+
+**Purpose.** Replace the smoke-scale H5 result with publication-grade evidence
+under the corrected centered selector.
+
+**Next run.** This is a more-seeds confirmation, so do not launch it without
+explicit approval:
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml \
+  --output-dir results \
+  --batch-name log_surprisal_h5_confirm_postfix_20260529 \
+  --workers 1
+```
+
+## Priority 2: Rework H1 Reliability Versus Reward
+
+The post-fix H1 smoke does not preserve the old model-fitness readout:
+`|corr(precision, surprise)| = 0.226` versus
+`|corr(precision, payoff)| = 0.615` for local affect. Before adding seeds,
+inspect whether the current H1 task is measuring reward exposure rather than
+predictive reliability under partner-action surprisal.
+
+Run only design-level or diagnostic checks here unless the user explicitly asks
+for a higher-seed confirmation.
+
+## Priority 3: Global-Beta Ablation
 
 **Purpose.** Test whether partner-local precision is necessary, or whether a
 single global volatility/model-fitness tracker explains the same behavior.
@@ -42,19 +71,19 @@ single global volatility/model-fitness tracker explains the same behavior.
 - Log global beta, per-partner local beta when available, selected partner,
   partner-indexed surprise, payoff, entropy, and gamma used.
 
-**Next smoke pass.** After reviewing the H6 quick smoke, run 3-5 seeds first,
+**Next smoke pass.** After reviewing the H3 locality quick smoke, run 3-5 seeds first,
 not 30, on the older manuscript regimes:
 
 - H1 reliability-versus-reward;
 - H2 open-regime deployment;
 - H4 partner choice;
-- H3 abrupt betrayal if the first three smoke tests pass.
-- H6 locality/interference only after changing the design or diagnostics; the
+- H5 abrupt betrayal if the first three smoke tests pass.
+- H3 locality/interference only after changing the design or diagnostics; the
   first quick smoke has already run.
 
 **Decision rule.**
 
-- If global beta matches partner-local beta on H1/H2/H4/H3, soften manuscript
+- If global beta matches partner-local beta on H1/H2/H4/H5, soften manuscript
   language from "partner-specific is necessary" to "partner-specific is an
   interpretable implementation."
 - If global beta spreads precision changes to unaffected partners or blurs
@@ -75,7 +104,7 @@ partners whose behavior did not change.
 - scheduled stance-switch partner.
 
 The first implemented version uses
-`configs/trust/hypotheses/h6_locality_interference/global_beta_smoke.toml`:
+`configs/trust/hypotheses/h3_locality/global_beta_smoke.toml`:
 two seeds, 40 rounds, one scheduled stance switch, and variants `none`,
 `precision`, `tracked_only`, and `global_beta`.
 
@@ -161,7 +190,7 @@ recalibration. This directly tests the proposed misdeployment mechanism.
 - Do not run full 30-seed sweeps until smoke logs and analysis outputs are
   verified.
 - Do not rewrite manuscript claims from new outputs without user review.
-- Do not treat H5 labels as clinical validation.
+- Do not treat H6 labels as clinical validation.
 - Do not start a run expected to take more than 30 minutes in an interactive
   session without explicit approval.
 - Keep all experiment commands at `--workers 1`.
