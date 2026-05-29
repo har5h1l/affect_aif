@@ -105,6 +105,33 @@ H6: perturbation dynamics separate; clinical claims remain supplemental only.
 
 ## Follow-Up Before Confirmation
 
+### Phenotype Follow-Up Queue
+
+The May 29 follow-up prompt adds four manuscript-facing phenotype experiments:
+
+- `scripts/experiment/run_exp_a_alpha_sweep.py`: alpha sweep across open graded
+  and betrayal regimes, defaulting to 20 seeds and writing full outputs under
+  `results/exp_a/`.
+- `scripts/experiment/run_exp_b_prior_factorial.py`: naive/cautious beta-prior
+  by low/high alpha factorial across open, betrayal, and partner-choice regimes,
+  defaulting to 20 seeds under `results/exp_b/`.
+- `scripts/experiment/run_exp_c_forgiveness.py`: cooperative, hostile, repaired
+  partner trajectory with phenotype and no-affect controls, defaulting to
+  20 seeds under `results/exp_c/`.
+- `scripts/experiment/run_exp_d_mixed_volatility.py`: partner-choice mixed
+  volatility environment with stable, exploitative, abrupt-switch, and
+  gradual-proxy partners, defaulting to 20 seeds under `results/exp_d/`.
+
+These are more-seed follow-up experiments. Run them only after the verification
+gate, and run them detached on `server` via tmux plus Mango registration. Do not
+promote manuscript text from these scripts until their `metrics.csv` files and
+manuscript figures have been inspected.
+
+The scripts mirror compact metrics into
+`docs/paper/manuscript/source_tables/exp_*` and figures into
+`docs/paper/manuscript/figures/` when the server jobs complete. Full per-round
+CSV outputs remain under `results/exp_*`.
+
 1. Refresh the verification gate immediately before any confirmation-scale run.
 2. Queue a confirmation-scale H5 betrayal-choice run first, because it is the
    repaired positive behavioral anchor after the selector fix.

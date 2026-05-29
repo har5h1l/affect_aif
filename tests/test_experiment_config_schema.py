@@ -121,6 +121,48 @@ def test_expanded_run_builds_runtime_config(example_spec):
     assert not cfg.log_policy_traces
 
 
+def test_variant_beta_prior_flows_to_runtime_config(tmp_path):
+    path = write_example_toml(tmp_path / "prior.toml")
+    text = path.read_text(encoding="utf-8")
+    text = text.replace(
+        'planning_horizon = 4\n\n[[variants]]\nid = "no_affect"',
+        'planning_horizon = 4\nbeta_prior = [0.4, 0.4, 0.15, 0.04, 0.01]\n\n[[variants]]\nid = "no_affect"',
+    )
+    path.write_text(text, encoding="utf-8")
+
+    run = ExperimentSpec.from_toml(path).expand_runs()[0]
+    cfg = run.to_runtime_config()
+
+    assert cfg.initial_beta_prior == [0.4, 0.4, 0.15, 0.04, 0.01]
+
+
+def test_scenario_type_switches_flow_to_runtime_config(tmp_path):
+    path = write_example_toml(tmp_path / "type_switch.toml")
+    text = path.read_text(encoding="utf-8")
+    text = text.replace(
+        "type_volatility = 0.0\n",
+        'type_volatility = 0.0\ntype_switches = [{ round = 81, partner = 0, to = "exploiter" }]\n',
+    )
+    path.write_text(text, encoding="utf-8")
+
+    cfg = ExperimentSpec.from_toml(path).expand_runs()[0].to_runtime_config()
+
+    assert cfg.scheduled_type_switches == [{"round": 81, "partner_idx": 0, "to_type": "exploiter"}]
+
+
+def test_rejects_mismatched_variant_beta_prior(tmp_path):
+    path = write_example_toml(tmp_path / "bad_prior.toml")
+    text = path.read_text(encoding="utf-8")
+    text = text.replace(
+        'planning_horizon = 4\n\n[[variants]]',
+        'planning_horizon = 4\nbeta_prior = [1.0]\n\n[[variants]]',
+    )
+    path.write_text(text, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="beta_prior"):
+        ExperimentSpec.from_toml(path)
+
+
 def test_runtime_debug_mode_enables_policy_trace_logging(tmp_path):
     path = write_example_toml(tmp_path / "debug.toml")
     path.write_text(

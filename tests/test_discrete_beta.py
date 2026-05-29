@@ -49,6 +49,16 @@ class TestDiscreteBetaState:
         assert betas.shape == (4,)
         np.testing.assert_allclose(betas, 1.0, atol=0.1)
 
+    def test_initial_prior_sets_distribution_and_expectation(self):
+        state = DiscreteBetaState(
+            num_entities=2,
+            beta_levels=[0.5, 1.0, 2.0],
+            initial_prior=[0.25, 0.25, 0.50],
+        )
+
+        np.testing.assert_allclose(state.get_belief(0), [0.25, 0.25, 0.50])
+        np.testing.assert_allclose(state.get_all_betas(), [1.375, 1.375])
+
     def test_low_surprise_decreases_beta(self):
         """Observing low surprise should decrease HESP beta toward higher precision."""
         state = DiscreteBetaState(num_entities=1, initial_beta=1.0)
@@ -114,6 +124,19 @@ class TestDiscreteBetaState:
             state.update(entity=0, surprise=0.2)
         history = state.get_history(0)
         assert len(history) == 6  # initial + 5 updates
+
+    @pytest.mark.parametrize(
+        "initial_prior",
+        [
+            [1.0, 0.0],
+            [1.0, -0.1, 0.1],
+            [1.0, np.inf, 0.0],
+            [0.0, 0.0, 0.0],
+        ],
+    )
+    def test_invalid_initial_prior_rejected(self, initial_prior):
+        with pytest.raises(ValueError):
+            DiscreteBetaState(num_entities=1, beta_levels=[0.5, 1.0, 2.0], initial_prior=initial_prior)
 
 
 @pytest.mark.skip(

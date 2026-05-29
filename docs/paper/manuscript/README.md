@@ -15,6 +15,8 @@ into a new project scaffold.
   and include/exclude decisions.
 - `figures.md`: figure plan, copied figure assets, captions, and source paths.
 - `future_work.md`: two-week follow-up menu and longer-term work.
+- `followup_experiment_plan.md`: evidence-gated phenotype extension plan and
+  A-D experiment commands.
 - `figures/`: copied PNGs from current analysis outputs.
 - `source_tables/`: compact CSVs copied from analysis outputs for the writing
   model and later manual checking.
@@ -50,6 +52,12 @@ confirmation-scale post-fix reruns exist:
 
 Publication-ready evidence requires confirmation-scale reruns of the post-fix
 claim spine.
+
+The Exp A-D phenotype scripts are not current evidence until their server-side
+20-seed outputs have completed and been analyzed. Their compact outputs should
+enter this folder as `source_tables/exp_*` and `figures/fig_alpha_sweep.pdf`,
+`figures/fig_phenotype_quadrants.pdf`, `figures/fig_forgiveness.pdf`, and
+`figures/fig_mixed_volatility.pdf`.
 
 ## Writing Guardrails
 

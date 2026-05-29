@@ -97,6 +97,7 @@ def create_agents_from_multi_focal_config(
         "alpha_charge",
         "sigma_0_sq",
         "initial_beta",
+        "initial_beta_prior",
         "num_levels",
         "persistence",
         "lesion_mode",
@@ -134,6 +135,11 @@ def create_agents_from_multi_focal_config(
             alpha_charge=float(spec.get("alpha_charge", 3.0)),
             sigma_0_sq=float(spec.get("sigma_0_sq", LOG_SURPRISE_BASELINE_SQ)),
             initial_beta=float(spec.get("initial_beta", 1.0)),
+            initial_beta_prior=(
+                None
+                if spec.get("initial_beta_prior") is None
+                else [float(value) for value in spec["initial_beta_prior"]]
+            ),
             beta_num_levels=int(spec.get("num_levels", 5)),
             beta_persistence=float(spec.get("persistence", 0.8)),
         )
@@ -151,6 +157,7 @@ def create_agents_from_multi_focal_config(
             alpha_charge=runtime_config.alpha_charge,
             sigma_0_sq=runtime_config.sigma_0_sq,
             initial_beta=runtime_config.initial_beta,
+            beta_prior=None if runtime_config.initial_beta_prior is None else tuple(runtime_config.initial_beta_prior),
             beta_persistence=runtime_config.beta_persistence,
             beta_levels=tuple(
                 runtime_config.beta_levels
@@ -216,6 +223,7 @@ def _create_runtime_from_config_and_variant(
             alpha_charge=config.alpha_charge,
             sigma_0_sq=config.sigma_0_sq,
             initial_beta=config.initial_beta,
+            initial_prior=config.initial_beta_prior,
         )
 
     return NativeTrustRuntime(

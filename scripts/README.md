@@ -12,6 +12,10 @@ These wrappers define the stable end-user workflow documented in `docs/operation
 - `experiment/smoke.py`
 - `experiment/inspect.py`
 - `experiment/preliminary.py`
+- `experiment/run_exp_a_alpha_sweep.py`
+- `experiment/run_exp_b_prior_factorial.py`
+- `experiment/run_exp_c_forgiveness.py`
+- `experiment/run_exp_d_mixed_volatility.py`
 - `analysis/analyze.py`
 - `analysis/summarize.py`
 - `analysis/visualize.py`

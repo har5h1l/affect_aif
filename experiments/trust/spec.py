@@ -72,6 +72,16 @@ class StanceSwitchSpec:
 
 
 @dataclass(frozen=True)
+class TypeSwitchSpec:
+    round: int
+    partner: int
+    to: str
+
+    def to_runtime_dict(self) -> dict[str, Any]:
+        return {"round": int(self.round), "partner_idx": int(self.partner), "to_type": str(self.to)}
+
+
+@dataclass(frozen=True)
 class ScenarioSpec:
     payoff: str
     assignment: str
@@ -81,6 +91,7 @@ class ScenarioSpec:
     partner_types: tuple[str, ...] = tuple(PARTNER_TYPE_ORDER)
     initial_types: tuple[str, ...] | None = None
     initial_stances: tuple[str, ...] | None = None
+    type_switches: tuple[TypeSwitchSpec, ...] = ()
     stance_switches: tuple[StanceSwitchSpec, ...] = ()
     investment_levels: int = 6
     endowment: float = 10.0
@@ -97,6 +108,7 @@ class VariantSpec:
     alpha_charge: float = 3.0
     sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ
     initial_beta: float = 1.0
+    beta_prior: tuple[float, ...] | None = None
     beta_persistence: float = 0.8
     beta_levels: tuple[float, ...] = (0.5, 0.67, 1.0, 1.5, 2.0)
     action_selection: str = "marginal"
@@ -162,6 +174,7 @@ class ExpandedRunSpec:
             initial_partner_stances=(
                 None if self.scenario.initial_stances is None else list(self.scenario.initial_stances)
             ),
+            scheduled_type_switches=[switch.to_runtime_dict() for switch in self.scenario.type_switches],
             scheduled_stance_switches=[switch.to_runtime_dict() for switch in self.scenario.stance_switches],
             num_investment_levels=self.scenario.investment_levels,
             endowment=self.scenario.endowment,
@@ -171,6 +184,7 @@ class ExpandedRunSpec:
             alpha_charge=self.variant.alpha_charge,
             sigma_0_sq=self.variant.sigma_0_sq,
             initial_beta=self.variant.initial_beta,
+            initial_beta_prior=None if self.variant.beta_prior is None else list(self.variant.beta_prior),
             beta_persistence=self.variant.beta_persistence,
             beta_levels=list(self.variant.beta_levels),
             max_policies=self.runtime.max_policies,
@@ -194,8 +208,13 @@ class ExpandedRunSpec:
         scenario_data["stance_switches"] = tuple(
             StanceSwitchSpec(**item) for item in scenario_data.get("stance_switches", ())
         )
+        scenario_data["type_switches"] = tuple(
+            TypeSwitchSpec(**item) for item in scenario_data.get("type_switches", ())
+        )
         variant_data = dict(payload["variant"])
         variant_data["beta_levels"] = tuple(variant_data.get("beta_levels", (0.5, 0.67, 1.0, 1.5, 2.0)))
+        if variant_data.get("beta_prior") is not None:
+            variant_data["beta_prior"] = tuple(variant_data["beta_prior"])
         return cls(
             hypothesis_id=str(payload["hypothesis_id"]),
             experiment_id=str(payload["experiment_id"]),
@@ -314,9 +333,16 @@ class ExperimentSpec:
         scenario["stance_switches"] = tuple(
             StanceSwitchSpec(**item) for item in scenario.get("stance_switches", ())
         )
+        scenario["type_switches"] = tuple(TypeSwitchSpec(**item) for item in scenario.get("type_switches", ()))
         data["scenario"] = ScenarioSpec(**scenario)
         data["variants"] = tuple(
-            VariantSpec(**{**item, "beta_levels": tuple(item.get("beta_levels", ()))})
+            VariantSpec(
+                **{
+                    **item,
+                    "beta_levels": tuple(item.get("beta_levels", ())),
+                    "beta_prior": None if item.get("beta_prior") is None else tuple(item["beta_prior"]),
+                }
+            )
             for item in data["variants"]
         )
         data["sweeps"] = tuple(
@@ -364,6 +390,7 @@ def _parse_scenario(data: dict[str, Any]) -> ScenarioSpec:
     if "initial_stances" in scenario:
         scenario["initial_stances"] = tuple(scenario["initial_stances"])
     scenario["stance_switches"] = tuple(StanceSwitchSpec(**item) for item in scenario.get("stance_switches", ()))
+    scenario["type_switches"] = tuple(TypeSwitchSpec(**item) for item in scenario.get("type_switches", ()))
     return ScenarioSpec(**scenario)
 
 
@@ -393,6 +420,14 @@ def _parse_variant(data: dict[str, Any]) -> VariantSpec:
     if variant.get("affect") not in AFFECT_VALUES:
         raise ValueError(f"variant.affect must be one of {sorted(AFFECT_VALUES)}")
     variant["beta_levels"] = tuple(float(value) for value in variant.get("beta_levels", (0.5, 0.67, 1.0, 1.5, 2.0)))
+    if variant.get("beta_prior") is not None:
+        variant["beta_prior"] = tuple(float(value) for value in variant["beta_prior"])
+        if len(variant["beta_prior"]) != len(variant["beta_levels"]):
+            raise ValueError("variant.beta_prior must match variant.beta_levels length")
+        if any(value < 0.0 for value in variant["beta_prior"]):
+            raise ValueError("variant.beta_prior must be non-negative")
+        if sum(variant["beta_prior"]) <= 0.0:
+            raise ValueError("variant.beta_prior must have positive mass")
     return VariantSpec(**variant)
 
 
@@ -433,5 +468,6 @@ __all__ = [
     "ScenarioSpec",
     "StanceSwitchSpec",
     "SweepSpec",
+    "TypeSwitchSpec",
     "VariantSpec",
 ]

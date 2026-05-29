@@ -63,6 +63,7 @@ class DiscreteBetaState:
         alpha_charge: float = 3.0,
         sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ,
         persistence: float = 0.8,
+        initial_prior: Sequence[float] | None = None,
     ) -> None:
         self.num_entities = int(num_entities)
         self.alpha_charge = float(alpha_charge)
@@ -92,12 +93,26 @@ class DiscreteBetaState:
             raise ValueError("beta_levels must be finite")
         if not np.all(self.beta_levels > 0.0):
             raise ValueError("beta_levels must be strictly positive")
+        self._specified_initial_prior = None if initial_prior is None else np.asarray(list(initial_prior), dtype=float)
+        if self._specified_initial_prior is not None:
+            if self._specified_initial_prior.shape != (self.num_levels,):
+                raise ValueError("initial_prior must match beta_levels length")
+            if not np.all(np.isfinite(self._specified_initial_prior)):
+                raise ValueError("initial_prior must be finite")
+            if np.any(self._specified_initial_prior < 0.0):
+                raise ValueError("initial_prior must be non-negative")
+            if float(self._specified_initial_prior.sum()) <= 0.0:
+                raise ValueError("initial_prior must have positive mass")
 
         self._transition = _build_transition_matrix(self.num_levels, self.persistence)
         self._initial_posterior = self._build_initial_posterior()
         self.reset()
 
     def _build_initial_posterior(self) -> np.ndarray:
+        if self._specified_initial_prior is not None:
+            posterior = self._specified_initial_prior.astype(np.float64, copy=True)
+            posterior /= posterior.sum()
+            return posterior
         distances = np.abs(self.beta_levels - self.initial_beta)
         posterior = np.zeros((self.num_levels,), dtype=np.float64)
         posterior[int(np.argmin(distances))] = 1.0

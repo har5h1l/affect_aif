@@ -21,6 +21,37 @@ The plan has four lanes, ordered by manuscript value:
 All runs should use `--workers 1` unless the user explicitly authorizes a
 different worker count.
 
+## Manuscript Phenotype Extension
+
+The current manuscript-facing extension reframes the contribution around
+partner-specific affective precision as social metacognition: precision dynamics
+should produce recognizable social behaviors and interpretable individual
+differences in trust calibration. Four new scripts implement this extension and
+write full outputs only under `results/exp_*`:
+
+```bash
+.venv/bin/python scripts/experiment/run_exp_a_alpha_sweep.py
+.venv/bin/python scripts/experiment/run_exp_b_prior_factorial.py
+.venv/bin/python scripts/experiment/run_exp_c_forgiveness.py
+.venv/bin/python scripts/experiment/run_exp_d_mixed_volatility.py
+```
+
+Each script defaults to 20 seeds, checkpoints each replication, writes compact
+`metrics.csv` files into both its result root and
+`docs/paper/manuscript/source_tables/`, and generates the requested manuscript
+figure PDF when run without `--no-figures`.
+
+The manuscript should not be rewritten from the supplied template until these
+new outputs are analyzed. After analysis, the appropriate insertion points are:
+
+- abstract and introduction: replace only after Exp A-D establish the social
+  metacognition/individual-difference evidence;
+- Section 3.6: replace placeholders with Exp A-D metric means and uncertainty;
+- discussion: add the individual-differences subsection only with cited
+  boundaries and the completed phenotype result read;
+- limitations/future directions: update from observed failures as well as
+  positive results.
+
 ## Lane 1: H5 Betrayal Confirmation
 
 ### Question
