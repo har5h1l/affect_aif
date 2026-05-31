@@ -1,344 +1,228 @@
-# Follow-Up Experiment Design Plan
+# Follow-Up Experiment Plan
 
-## Purpose
+Last updated: 2026-05-31
 
-The next experiment phase should strengthen the manuscript-facing result spine
-while keeping H3 locality in the right evidential position. The current post-fix
-H0-H6 smoke supports partner-local precision as an active deployment signal and
-repairs H5 betrayal-choice behavior at smoke scale. It does not yet support the
-old H1 surprise-over-reward model-fitness readout, so H1 must be confirmed or
-redesigned before carrying a central manuscript claim. H3 should remain a
-mechanism decomposition, not a necessity claim.
+## Overview
 
-The plan has four lanes, ordered by manuscript value:
+The manuscript's contribution now has two layers:
+1. **Core mechanism**: partner-local affective precision as social metacognition
+   (H0-H6 spine)
+2. **Individual differences extension**: affective precision parameters produce
+   recognisable social trust phenotypes (Exp A-D)
 
-1. Confirm H5 as the repaired behavioral anchor.
-2. Rework or confirm H1 before using the model-fitness claim.
-3. Confirm H0/H2/H4 manuscript support only if payoff/deployment language
-   remains in the draft.
-4. Keep H3 as a locality/global-beta decomposition.
+Exp A-D are running on the server. Core confirmation runs follow after Exp A-D
+complete and are reviewed.
 
-All runs should use `--workers 1` unless the user explicitly authorizes a
-different worker count.
+---
 
-## Manuscript Phenotype Extension
+## Phenotype Experiments (Exp A-D)
+### Status: running on server as of May 2026
 
-The current manuscript-facing extension reframes the contribution around
-partner-specific affective precision as social metacognition: precision dynamics
-should produce recognizable social behaviors and interpretable individual
-differences in trust calibration. Four new scripts implement this extension and
-write full outputs only under `results/exp_*`:
+These experiments fill the `\resultp{}` placeholders in Section 3.6 of the
+manuscript. Each script is standalone (not TOML-based) and writes outputs
+directly to `results/exp_*/` plus compact metric tables to
+`docs/paper/manuscript/source_tables/exp_*/` and figures to
+`docs/paper/manuscript/figures/`.
 
-```bash
-.venv/bin/python scripts/experiment/run_exp_a_alpha_sweep.py
-.venv/bin/python scripts/experiment/run_exp_b_prior_factorial.py
-.venv/bin/python scripts/experiment/run_exp_c_forgiveness.py
-.venv/bin/python scripts/experiment/run_exp_d_mixed_volatility.py
-```
+### Exp A — α Sweep
 
-Each script defaults to 20 seeds, checkpoints each replication, writes compact
-`metrics.csv` files into both its result root and
-`docs/paper/manuscript/source_tables/`, and generates the requested manuscript
-figure PDF when run without `--no-figures`.
+**Script**: `scripts/experiment/run_exp_a_alpha_sweep.py`
 
-The manuscript should not be rewritten from the supplied template until these
-new outputs are analyzed. After analysis, the appropriate insertion points are:
+**Purpose**: Establish a systematic behavioural phenotype profile across
+precision-gain values. Replaces the Section 3.6 parameter sanity check with a
+proper sweep.
 
-- abstract and introduction: replace only after Exp A-D establish the social
-  metacognition/individual-difference evidence;
-- Section 3.6: replace placeholders with Exp A-D metric means and uncertainty;
-- discussion: add the individual-differences subsection only with cited
-  boundaries and the completed phenotype result read;
-- limitations/future directions: update from observed failures as well as
-  positive results.
+**Design**:
+- α values: `[0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0]`
+- Environments: open graded + betrayal (both required)
+- Seeds: 20 per condition
 
-## Lane 1: H5 Betrayal Confirmation
+**Metrics**:
+- `early_exploitation_rate`: cooperation rate with exploiter-type, rounds 1–30
+- `betrayal_recovery_time`: rounds post-switch until selection rate returns
+  within 10% of pre-betrayal baseline
+- `selection_gini`: Gini coefficient of partner selection distribution
+- `entropy_trajectory`: rolling 20-round policy entropy at early/mid/late
+- `beta_range`: mean per-partner beta range across episode
 
-### Question
+**Expected pattern**: monotonic relationship between α and reactive social
+confidence. Low α → rigid, stable, slow-updating. High α → rapid swings, sharp
+concentration but noisy. Payoff does not rank α monotonically.
 
-Does the post-fix H5 betrayal-choice advantage survive a confirmation-scale run?
+**Figure A**: 5-panel. Top: exploitation rate, recovery time, selection Gini
+(line plots, α on x-axis, 95% CI). Bottom: entropy trajectory (three lines per
+α), beta range. Cool-to-warm color gradient. Annotate phenotype zones: Rigid
+(α ≤ 0.1), Calibrated (default ± 0.3), Reactive (α ≥ 3.0).
 
-### Run
+**Output**: `docs/paper/manuscript/figures/fig_alpha_sweep.pdf`
 
-This is a more-seeds confirmation, so do not launch it without explicit user
-approval.
+---
 
-```bash
-.venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml \
-  --output-dir results \
-  --batch-name log_surprisal_h5_confirm_postfix_YYYYMMDD \
-  --workers 1
-```
+### Exp B — 2×2 Prior × α Factorial
 
-### Primary Readouts
+**Script**: `scripts/experiment/run_exp_b_prior_factorial.py`
 
-- total payoff by variant;
-- post-switch reallocation and reencounter rate;
-- policy entropy and joint accuracy;
-- payoff conditional on returned/switched partner.
+**Purpose**: Establish four behavioural phenotypes from crossing prior belief
+(naive vs cautious) with precision gain (low vs high).
 
-## Lane 2: H1 Reliability-Versus-Reward Rework
+**Design**:
+- Prior conditions:
+  - Naive: `q(β_k)` weights `{0.5: 0.4, 0.67: 0.4, 1.0: 0.15, 1.5: 0.04, 2.0: 0.01}`
+  - Cautious: `q(β_k)` weights `{0.5: 0.01, 0.67: 0.04, 1.0: 0.15, 1.5: 0.4, 2.0: 0.4}`
+  - Default: current initialisation (reference arm)
+- α conditions: `low = 0.1`, `high = 3.0`, plus default reference
+- Full factorial: 2 priors × 2 α levels = 4 phenotype conditions + default
+- Environments: open graded, betrayal, partner-choice
+- Seeds: 20 per condition
 
-### Question
+**Additional metric**: `trust_asymmetry` — ratio of (rounds to first high-
+confidence approach of new partner) to (rounds to first high-confidence
+withdrawal after first defection). Values > 1 mean faster to approach than to
+withdraw.
 
-Why does the post-fix smoke show local precision more payoff-correlated than
-surprise-correlated?
+**Target phenotypes**:
 
-### Next Step
+| Phenotype | Prior | α | Core signature |
+|---|---|---|---|
+| Anxious-Reactive | Naive | High | Fast to trust and distrust, high βk volatility |
+| Hypervigilant | Cautious | High | Slow to trust even with evidence, fast to distrust |
+| Naive-Stubborn | Naive | Low | Slow to update, high early exploitation rate |
+| Avoidant-Rigid | Cautious | Low | Chronically wary, low payoff, low trust asymmetry |
 
-Do not add seeds first. Inspect whether the current H1 task creates exposure
-confounds where reward and partner-action predictability are not cleanly
-separated. A useful follow-up would be a design-level diagnostic with the same
-seed count, not a broad confirmation sweep.
+**Figure B**: 2×2 radar charts, one per phenotype. Five axes: exploitation
+rate, recovery time, selection Gini, trust asymmetry, mean payoff (normalised
+0–1). Overlay default agent profile as dashed line on each. Label each
+quadrant with phenotype name and 1-line human analogue.
 
-### Primary Readouts
+**Output**: `docs/paper/manuscript/figures/fig_phenotype_quadrants.pdf`
 
-- partner-level action surprisal versus payoff exposure;
-- whether active partner sampling changes the correlation denominator;
-- whether a reliability manipulation with matched reward removes the reversal.
+---
 
-## Lane 3: Manuscript Support Confirmation
+### Exp C — Forgiveness Paradigm
 
-### Question
+**Script**: `scripts/experiment/run_exp_c_forgiveness.py`
 
-Do H0/H2/H4 support results hold at higher replication if the draft keeps those
-claims?
+**Purpose**: Test re-engagement and trust recovery after a betraying partner
+reverts to cooperative behaviour. Connects to forgiveness and reconciliation
+literature.
 
-### Run
+**Episode structure**:
+- Rounds 1–80: cooperative baseline
+- Rounds 81–120: betrayal (switch to hostile)
+- Rounds 121–200: reversion to cooperative
 
-This is also a more-seeds confirmation and should wait for approval.
+**Conditions**: all 4 phenotype conditions from Exp B + default + no-affect
+baseline.
 
-```bash
-.venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h0_policy_openness/graded_choice_confirm.toml \
-  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
-  --config configs/trust/hypotheses/h4_social_allocation/partner_choice_confirm.toml \
-  --output-dir results \
-  --batch-name manuscript_open_social_confirm_YYYYMMDD \
-  --workers 1
-```
+**Seeds**: 20 per condition.
 
-Promote only the readouts that replicate. Do not rewrite H3 locality into a
-necessity claim from these runs.
+**Metrics**:
+- `reengagement_rate`: mean selection rate of reverted partner, rounds 121–200
+- `payoff_recovery`: payoff from reverted partner rounds 151–200 vs rounds
+  50–80 (late pre-betrayal baseline)
+- `beta_recovery_trajectory`: βk for reverted partner, rounds 80–200
+- `reengagement_latency`: rounds after reversion before first re-approach
 
-## Lane 4: Locality / Interference Diagnostic
+**Key dissociation**: low-gain → slow forgiveness but complete recovery once
+started (α effect). Cautious-prior → faster initial re-approach but lower
+payoff recovery ceiling (prior effect). Maps onto: forgiveness = dynamic
+re-engagement (α-driven) vs trust repair = structural confidence restoration
+(prior-driven).
 
-### Question
+**Figure C**: 3-panel. Left: reengagement rate as bar chart by condition.
+Middle: beta recovery trajectory lines (rounds 80–200) with vertical dashed
+lines at betrayal onset and reversion. Right: payoff recovery ratio bar chart
+with reference line at 1.0.
 
-When one partner changes, does affective precision stay attached to the partner
-whose model failed, or does it contaminate policy deployment for untouched
-partners?
+**Output**: `docs/paper/manuscript/figures/fig_forgiveness.pdf`
 
-### Task Design
+---
 
-Use four partners in a single mixed regime:
+### Exp D — Mixed Volatility Environment
 
-- one stable cooperator;
-- one reliable exploiter;
-- one random or volatile partner;
-- one partner with a scheduled stance switch mid-run.
+**Script**: `scripts/experiment/run_exp_d_mixed_volatility.py`
 
-The key comparison is not overall payoff first. The first readout is whether the
-shock to the switching partner changes selection, entropy, or payoff for the
-three partners whose behavior did not change.
+**Purpose**: Test whether partner-local affective precision correctly
+discriminates between stationary and shifting partners within the same episode.
+Critical test of behavioral necessity of partner-local vs global precision.
 
-### Conditions
+**Environment**:
+- P0: stationary cooperator (never changes)
+- P1: stationary exploiter (never changes)
+- P2: abrupt-shift (cooperative 1–99, hostile 100–200)
+- P3: gradual-drift (transitioning 50–150)
 
-Run the same task under:
+**Regime**: partner-choice.
 
-- `local_beta`: partner-local beta updates and beta-to-policy deployment;
-- `global_beta`: one shared beta posterior updated by all interactions;
-- `tracked_only`: beta updates but does not set policy precision;
-- `no_affect`: no beta tracker.
+**Conditions**: default, low α (0.1), high α (3.0), no-affect baseline.
 
-Keep partner-local POMDP beliefs unchanged in every condition. Only the source
-of policy precision should differ.
+**Seeds**: 20 per condition.
 
-### Primary Readouts
+**Metrics**:
+- `discrimination_index`: Pearson correlation between per-partner βk trajectory
+  and per-partner behavioural stability score
+- `concentration_toward_P0`: rolling 20-round selection rate of P0
+- `per_partner_beta_trajectories`: βk over time for each P0–P3
+- `false_positive_rate`: rate where agent reduces engagement with P0 below 15%
+  of baseline (P0 never changes, so all reductions are false alarms)
 
-For each partner separately, compute pre-switch and post-switch summaries:
+**Expected tradeoff**: high-α → better discrimination of P2/P3, higher
+false-positive rate for P0. Low-α → poor P2/P3 discrimination, lower false
+positives. Default → best tradeoff. This is the sensitivity-specificity
+tradeoff in signal detection theory, applied to social confidence.
 
-- selection rate;
-- policy entropy conditional on selecting that partner;
-- payoff conditional on selecting that partner;
-- beta or gamma trajectory;
-- KL shift in policy posterior for untouched partners after the switch;
-- return latency to the switched partner;
-- wrong-type-on-return after reencounter.
+**Figure D**: 4-panel. Top left: per-partner βk trajectories, default agent.
+Top right: same, high-α agent. Bottom left: discrimination index by agent type
+(bar chart, 95% CI). Bottom right: concentration-toward-P0 line plot for all
+agent types, with reference lines at P2 switch and P3 drift onset/end.
 
-The strongest locality result would be a selective change for the switched
-partner under `local_beta`, but broader entropy/payoff disruption for untouched
-partners under `global_beta`.
+**Output**: `docs/paper/manuscript/figures/fig_mixed_volatility.pdf`
 
-### Smoke Run
+---
 
-Run 3-5 seeds first and inspect logs before any confirmation sweep:
+## After Exp A-D Complete
 
-```bash
-.venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml \
-  --output-dir results \
-  --batch-name h3_global_beta_locality_probe_YYYYMMDD \
-  --workers 1
-```
+### Inspection Checklist (do before filling placeholders)
 
-Analyze the smoke output before increasing replication:
+1. `mango cloud sync fetch affect_aif` — pull results from server
+2. Run `scripts/analysis/analyze.py` on each `results/exp_*/` output
+3. Read the phenotype metric values — verify direction of effects matches
+   Section 3.6 narrative
+4. Check that `fig_alpha_sweep.pdf`, `fig_phenotype_quadrants.pdf`,
+   `fig_forgiveness.pdf`, `fig_mixed_volatility.pdf` exist and are readable
+5. Ask user before updating any interpretation narrative in `docs/results/`
 
-```bash
-.venv/bin/python scripts/analysis/analyze.py \
-  --results results/h3_global_beta_locality_probe_YYYYMMDD/h3/global_beta_locality_probe/results.csv \
-  --output-dir results/h3_global_beta_locality_probe_YYYYMMDD/h3/global_beta_locality_probe/analysis
-```
+### Placeholder Fill Checklist
 
-### Current Smoke Read
+After inspection is approved:
+- Section 3.6.1: fill `\resultp{Exp A: ...}` with actual metric values and CIs
+- Section 3.6.2: fill `\resultp{Exp B: ...}` per phenotype condition
+- Section 3.6.3: fill `\resultp{Exp C: ...}` per condition
+- Section 3.6.4: fill `\resultp{Exp D: ...}` per agent type
 
-The completed 2026-05-26 smoke is documented in
-`docs/results/runs/2026-05-26-h6-locality-probe.md`. It should not be scaled
-directly to 30 seeds yet.
+---
 
-The smoke verified that partner-indexed logs and analysis outputs exist, but it
-did not confirm the simple prediction that global beta contaminates untouched
-partners more than local beta. Local beta preserved the stronger
-precision-surprise association, while global beta had better aggregate payoff.
-The next design should separate those two questions explicitly.
+## Core Mechanism Confirmation Queue
 
-### Promotion Rule
+See `docs/active/progress.md` for full commands and ordering. Priority:
 
-Promote this to a larger confirmation run only if the smoke pass shows usable
-partner-indexed logs for:
+1. **H5 betrayal** (30+ seeds) — primary positive anchor
+2. **H1 redesign diagnostic** — must inspect before adding seeds
+3. **H0/H2/H4 support** — only if payoff language stays in manuscript
+4. **H3 global-beta ablation** — Exp D provides partial answer; dedicated run
+   optional
 
-- selected partner;
-- payoff;
-- surprise or prediction error;
-- `q_pi_entropy`;
-- `gamma_used` or enough beta/precision state to reconstruct the deployed
-  precision;
-- global beta, when present;
-- local beta, when present.
-
-Do not promote based on aggregate payoff alone. Also do not promote the exact
-2026-05-26 design unless the stance-switch timing and post-switch comparison
-window are revised so the same shock is cleanly represented across seeds.
-
-## Lane 3: Global-Beta Interpretation
-
-### Question
-
-Does one shared beta tracker preserve the same model-fitness signal as
-partner-local beta, or does it mix partner-specific reliability with overall
-episode quality?
-
-### Current Discovery Read
-
-The global-beta discovery batch suggests that global beta is not an equivalent
-replacement for partner-local beta. In the discovery probes, local beta showed a
-stronger precision-surprise association, while global beta weakened or changed
-that association in deployment and lesion-family settings.
-
-This remains discovery evidence only. It should shape the next experiment and
-the manuscript limitations, not support a manuscript-level necessity claim.
-
-### Decision Criteria
-
-After the locality smoke and any confirmation run, interpret global beta with
-four questions:
-
-- Does global beta spread precision changes to untouched partners after a shock?
-- Does global beta reduce partner-selection entropy in a way that local beta
-  does not?
-- Does global beta track reward/payoff more than predictive surprise in
-  multi-partner settings?
-- If local beta preserves a cleaner reliability signal, does that signal improve
-  allocation or merely concentrate choices?
-
-If yes, the manuscript can say partner-local precision appears important for
-containing volatility to the partner whose model failed. If no, soften the claim
-to: partner-local precision is an interpretable implementation of a more general
-volatility/fitness signal.
-
-## Lane 4: Focused Lesion-Family Follow-Up
-
-### Question
-
-Which failure mode best explains maladaptive deployment: fixed precision, stale
-precision, noisy precision, asymmetric updating, or global sharing?
-
-### Run After Lane 2
-
-Do not start with a broad lesion sweep. Add lesions only after the locality logs
-are verified, because the lesion results are most useful when they can be read
-against partner-specific interference metrics.
-
-Priority lesions:
-
-- `frozen_beta`: beta posterior never updates and precision stays fixed;
-- `tracked_only_decouple`: beta updates but policy precision uses the base
-  gamma;
-- `delayed_deployment`: beta updates immediately but precision uses beta from
-  `d` rounds earlier;
-- `noisy_beta`: beta update receives controlled noise;
-- `asymmetric_charge`: negative surprises receive higher gain than positive
-  surprises;
-- `joint_surprise_beta`: epsilon comes from joint action-plus-payoff likelihood
-  rather than partner action alone.
-
-### Readout Map
-
-For each lesion, report dynamics before payoff:
-
-- beta range;
-- entropy change;
-- choice churn;
-- return latency;
-- wrong-type-on-return;
-- payoff conditional on selected partner;
-- untouched-partner entropy and payoff after a betrayal elsewhere.
-
-The useful product is a phenotyping table: lesion type -> expected beta
-dynamics -> deployment signature -> behavioral consequence.
-
-## Lane 5: Figure-Quality Outputs
-
-Create one figure-generation path that reads canonical analysis CSVs and emits
-reviewable PDF/PNG panels. This should happen before more exploratory sweeps,
-because it turns existing evidence into inspectable manuscript material.
-
-Required panels:
-
-- model-fitness dissociation: precision-surprise versus precision-payoff;
-- deployment dissociation: payoff, entropy, and belief readouts;
-- partner choice: selection rates and partner-selection entropy;
-- betrayal: payoff, entropy, reencounters, and wrong-type-on-return;
-- shock shape: abrupt versus gradual payoff and entropy;
-- H6 supplement: local versus global beta ranges and perturbation dynamics;
-- lesion supplement: beta range, entropy, choice churn, and return latency by
-  lesion type.
-
-Recommended output location:
-
-```text
-docs/paper/manuscript/figures/generated/
-```
-
-Recommended script name:
-
-```text
-scripts/analysis/make_paper_figures.py
-```
-
-The script should not rewrite manuscript claims. It should produce figures and
-summary CSVs that make the evidence easier to review.
+---
 
 ## Stop Conditions
 
 Pause before changing manuscript claims if:
 
-- global beta matches local beta on the locality/interference readouts;
-- the locality smoke lacks partner-indexed logs needed for interpretation;
-- lesion variants change belief updating instead of only beta/precision
-  deployment;
-- aggregate payoff improves while untouched-partner interference worsens.
-
-In those cases, update the research plan first and decide whether the manuscript
-should make a weaker interpretive claim.
+- Exp A-D phenotype direction contradicts Section 3.6 predictions (flag to
+  user; do not silently rewrite)
+- Global beta matches local beta in Exp D interference/discrimination readouts
+  (would weaken the locality claim)
+- H5 confirmation run reverses the betrayal advantage (catastrophic for the
+  paper; stop and redesign)
+- Any design issue surfaces where affect inadvertently changes belief updating
+  rather than only beta/precision deployment

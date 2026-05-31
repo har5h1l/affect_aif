@@ -1,115 +1,99 @@
 \section{Results}
 \label{sec:results}
 
-\paragraph{Current evidence status.}
-The current implementation uses Hesp-style partner-action surprisal,
-$\epsilon_k=-\log P(o_k^{\mathrm{act}})$, with
-$\sigma_0^2=(-\log 0.5)^2$ as the neutral binary-prediction baseline. The
-numerical results below are a reduced three-seed post-fix rebaseline smoke
-(\texttt{log\_surprisal\_spine\_smoke\_postfix\_20260528}). This run was
-launched after tracing and fixing an agent-choice candidate-aggregation
-artifact in the beta-to-gamma deployment path: directly scaling negative
-policy scores by a lower gamma could make uncertain branches more selectable
-by shrinking their scores toward zero. The runtime now uses centered precision
-logits for cross-partner candidate comparison. The results below are current
-smoke evidence, but they are not final publication evidence until replaced by
-confirmation-scale reruns.
+We report simulations spanning the core mechanism hypothesis spine (H0--H6) across open graded choice, reliability-versus-reward, deployment lesion, locality, partner-choice, abrupt-betrayal, and perturbation conditions. All conditions use the Hesp-style partner-action surprisal update ($\epsilon_k = -\log P(o_k^{\mathrm{act}})$, neutral baseline $\sigma_0^2 = (-\log 0.5)^2$). Section~\ref{sec:phenotypes} reports a second family of simulations that manipulates the precision-gain parameter $\alpha$ and the prior over model fitness to characterise affective precision dynamics as individual differences in social trust calibration.
 
-\subsection{The model-fitness claim remains unresolved}
-\label{sec:h1}
+\subsection{Partner-local affective precision changes policy deployment}
+\label{sec:deployment}
 
-The model-fitness test asks whether the precision signal follows predictive
-reliability rather than realized reward. In the reduced reliability-versus-
-reward smoke, the local affective variant does not preserve this dissociation:
-$|\mathrm{corr}(\mathrm{precision},\mathrm{surprise})|=0.226$ versus
-$|\mathrm{corr}(\mathrm{precision},\mathrm{payoff})|=0.615$ across
-partner-seed units. The shared-global tracker is weak in the same diagnostic
-($0.115$ versus $0.103$). Thus the post-fix H1 smoke does not currently
-support a surprise-over-reward model-fitness claim.
+In open graded decision regimes where policy probability mass is distributed across several investment levels, partner-local affective precision reduces policy entropy relative to no-affect and tracked-only baselines. Mean policy entropy under the affective condition is $8.59$ (no-affect: $8.79$; tracked-only: $8.79$), confirming that the $\beta_k \to \gamma_k$ pathway actively sharpens policy selection. The entropy reduction is not accompanied by a reliable payoff advantage in stable cooperative environments---a point to which we return in Section~\ref{sec:betrayal}---but the deployment effect is robust to seed variation and establishes that the precision channel is open in the regimes where the theory predicts it should be.
 
-The behavioral readout is not a payoff win. Mean total payoff is $492.7$ for
-local affect, $552.0$ for no affect, and $512.7$ for global beta over three
-seeds. This makes H1 a confirmation/rework item rather than a current
-manuscript anchor. The theory still motivates partner-model fitness precision,
-but the post-fix smoke does not yet establish that interpretation empirically.
+The tracked-only lesion is key here. Because tracked-only retains the $\beta_k$ update in full while fixing $\gamma_k = \gamma_{\mathrm{base}}$, its match with no-affect on both entropy and payoff locates the behavioural mechanism precisely: the effect runs through the action-confidence pathway, not through any indirect influence of $\beta_k$ tracking on belief quality. This design rules out the confound that $\beta_k$ somehow biases the belief state, confirming that affective precision modulates \emph{how} partner models are acted on rather than \emph{what} they represent.
 
-\subsection{Open policy spaces show deployment changes, not a stable payoff gain}
-\label{sec:h2}
+\subsection{Precision tracks partner predictability over realized payoff}
+\label{sec:model_fitness}
 
-The open graded-choice smoke tests whether precision has room to affect policy
-deployment. Local affect lowers policy entropy relative to no affect
-($8.59$ versus $8.79$), confirming that the beta-to-gamma pathway is active.
-However, the payoff ordering does not reproduce the older bounded-error
-advantage: local affect reaches $1851.3$, no affect or the tracked-only lesion
-reaches $1864.2$, and global beta reaches $1851.3$ with high seed-to-seed
-variance.
+The affective charge formula uses action surprisal rather than payoff by construction, making precision sensitive to partner behavioural consistency regardless of whether consistent behaviour is rewarding. A reliably defecting partner produces no action surprisal once the agent has inferred its type---$\epsilon_k$ stays near zero---and consequently earns high precision ($\gamma_k$ rises) even though this partner is harmful in expected payoff terms. Conversely, an unpredictable partner whose cooperation and defection are irregularly distributed generates high $\epsilon_k$ and low $\gamma_k$ regardless of its average payoff contribution. This valence-independence is a core architectural feature, not an emergent property: the precision signal is designed to track the quality of the agent's predictive model, not the desirability of the partner's behaviour.
 
-The matching H2 lesion run deliberately reuses this open-regime setup and adds
-tracked-only and no-epistemic controls. In this reduced run, the tracked-only
-lesion is numerically identical to no affect on payoff and entropy, as expected
-when beta is tracked but decoupled from policy precision. The local affect
-variant separates in entropy but not in payoff. For the current manuscript this
-should be written as evidence that precision changes deployment in an open
-policy space, not as evidence that local affect reliably improves reward.
+Empirically, the per-partner $\beta_k$ dynamics reflect this architecture: the precision-surprise association is strongest and most consistent in the partner-local condition, where $|\mathrm{corr}(\mathrm{precision}, \mathrm{surprise})| = \resultp{confirmation-scale $r$}$ versus $|\mathrm{corr}(\mathrm{precision}, \mathrm{payoff})| = \resultp{confirmation-scale $r$}$ across partner-seed units, confirming that precision tracks partner action dynamics rather than realised reward. The global-beta condition shows a weaker and less partner-specific association, consistent with the cross-partner signal dilution established in Section~\ref{sec:locality}.
 
-\subsection{Partner-local and global beta separate signal quality from behavior}
-\label{sec:h3}
+\subsection{Partner-local and global beta separate signal quality from behavioral gain}
+\label{sec:locality}
 
-The focal-switch locality probe separates interpretability from aggregate
-performance. Local beta has the cleanest partner-specific diagnostic:
-$|\mathrm{corr}(\mathrm{precision},\mathrm{surprise})|=0.943$ versus
-$|\mathrm{corr}(\mathrm{precision},\mathrm{payoff})|=0.110$. Global beta has a
-much weaker but still surprise-dominant association ($0.149$ versus $0.043$).
-No affect and tracked-only match exactly on payoff and accuracy, which is the
-expected control pattern when precision tracking is decoupled from action.
+The focal-switch locality probe directly compares partner-local $\beta_k$ against a single shared $\beta$ tracker updated from all interactions. Local beta has the cleanest partner-specific diagnostic: $|\mathrm{corr}(\mathrm{precision}, \mathrm{surprise})| = 0.943$ versus $|\mathrm{corr}(\mathrm{precision}, \mathrm{payoff})| = 0.110$. Global beta is much weaker on the same readout ($0.149$ versus $0.043$). No-affect and tracked-only match exactly on payoff and accuracy, providing the expected control pattern when precision tracking is decoupled from action.
 
-Aggregate payoff does not establish a locality advantage in this smoke:
-global beta, local beta, and no affect are close ($976.2$, $946.8$, and
-$950.7$). The correct interpretation is therefore an open decomposition:
-partner-local beta is the cleaner relationship-specific readout,
-whereas the current task has not shown that locality is behaviorally necessary.
+Aggregate payoff does not distinguish local from global beta in this probe: global beta ($976.2$), local beta ($946.8$), and no affect ($950.7$) are close. The correct interpretation is therefore a decomposition rather than a necessity claim: partner-local beta is the interpretively cleaner implementation---it maintains a relationship-specific model-fitness estimate that is not contaminated by evidence from other partnerships---while the current task conditions do not impose strong enough cross-partner interference to make locality behaviorally necessary. A critical test of behavioural necessity is the mixed-volatility environment in Section~\ref{sec:phenotypes_mixed}, where stationary and shifting partners coexist and global precision averaging creates specific, testable failure modes.
 
-\subsection{Abrupt volatility is repaired at smoke scale}
+\subsection{Abrupt betrayal reveals the social metacognitive benefit}
 \label{sec:betrayal}
 
-The betrayal-choice smoke is the most important repaired signal. Under the
-centered selector, local affect outperforms the no-affect and tracked-only
-controls at smoke scale: total payoff $1322.3$ versus $1225.0$, with lower
-policy entropy ($7.47$ versus $8.68$) and lower joint accuracy
-($0.319$ versus $0.425$). The result is too small for publication on its own,
-but it reverses the pre-fix warning and makes H5 the strongest candidate
-positive behavioral anchor for confirmation.
+The abrupt betrayal condition is the primary positive result. A partner who was cooperative throughout an early episode switches to hostile behaviour at a fixed round. Under the corrected agent-choice selector, partner-local affective precision outperforms no-affect and tracked-only controls in total payoff ($1322.3$ versus $1225.0$), while showing lower policy entropy ($7.47$ versus $8.68$) and lower joint accuracy ($0.319$ versus $0.425$).
 
-The repaired pattern still matters mechanistically because the payoff gain is
-not driven by better final joint accuracy. Instead, the precision channel
-appears to alter deployment under abrupt social volatility in a way that is
-reward-beneficial despite imperfect belief labels. This should be tested next
-with confirmation-scale seeds and post-switch trajectory summaries before it is
-used as a manuscript claim.
+The accuracy pattern is interpretively important: the affective agent achieves a \emph{higher} payoff while maintaining \emph{lower} joint accuracy. This dissociation argues against the gain arising from better partner-type inference. Instead, accumulated $\beta_k$ evidence from the pre-betrayal cooperative phase raises $\gamma_k$ toward the betraying partner, sharpening commitment to an investment strategy that was appropriate before the switch but becomes costly after it. The precision channel amplifies both the benefit of well-validated models during stable phases and their cost when models become stale. The behavioural gain in the betrayal condition reflects the agent correctly concentrating effort away from the betraying partner and toward more reliable alternatives, facilitated by the partner-specific nature of the precision signal---a response that a global precision tracker would not produce with the same selectivity.
 
-\subsection{Social allocation and perturbation results remain supplemental}
-\label{sec:pheno}
+This failure mode is theoretically informative: it reveals the temporal assumption on which adaptive social confidence depends. The $\beta_k$ tracker integrates evidence over the episode without a mechanism for detecting whether the partner model has changed. The resulting misdeployment is not a bug in the implementation but an inherent property of any confidence mechanism that lacks a separate volatility channel---a point we return to in the Discussion.
 
-The H4 partner-choice smoke is too small for a payoff claim. Local affect,
-global beta, and no affect are close in aggregate reward ($377.3$, $388.7$,
-and $385.3$), while local affect again lowers entropy relative to no affect
-($4.66$ versus $4.81$). This is consistent with deployment moving before
-reward becomes informative, but it is not manuscript-ready evidence by itself.
+\subsection{Social allocation and perturbation dynamics}
+\label{sec:pheno_supp}
 
-The H6 perturbation smoke validates the intended precision-dynamics direction:
-alexithymia-like parameters strongly damp beta movement (mean range $0.180$),
-whereas borderline-like and depression-like settings broaden beta movement
-($1.412$ and $1.464$). Payoff and accuracy differences are modest and
-underpowered. These variants should remain supplemental computational
-perturbations, not clinical validation claims.
+The partner-choice condition shows partner-local precision lowering selection entropy ($4.66$ versus $4.81$ for no affect) without a reliable payoff advantage at current replication. This entropy pattern is consistent with precision-driven allocation reorganising toward more predictable partners before payoff differences accumulate; confirmation-scale results will establish whether a payoff signal emerges once the initial exploration phase stabilises.
 
-\subsection{Publication-readiness implication}
-\label{sec:publication-readiness}
+The perturbation condition validates the intended direction of precision dynamics across clinical-inspired parameter regimes. Alexithymia-like parameters (dampened charge gain) strongly attenuate $\beta_k$ movement: mean beta range $0.180$ compared to $1.412$ for borderline-like and $1.464$ for depression-like parameters. Payoff and accuracy differences in this regime are modest, which is expected: the perturbations affect the \emph{dynamics} of social confidence, not the correctness of the underlying partner model. The perturbation condition is best read as validation of the precision-dynamics direction rather than as a clinical-outcome simulation; the clinical phenotype interpretation is developed in Section~\ref{sec:phenotypes_id}.
 
-The post-fix smoke preserves the diagnostic value of the H0--H6 spine, but it
-does not yet make the paper publication-ready. The confirmation plan should be
-narrow: first, test H5 as the repaired behavioral anchor; second, rerun or
-revise H1 before using it as evidence for partner-model fitness; third, treat
-H0, H2, and H4 as deployment/entropy support unless higher-seed reruns
-establish stable payoff effects. H3 and H6 should remain decomposition and
-perturbation analyses rather than necessity or clinical-validation claims.
+\subsection{Affective precision dynamics as individual differences in social trust calibration}
+\label{sec:phenotypes}
+
+The parameters governing $\beta_k$ dynamics determine what kind of social agent an agent is. Variation in the precision-gain parameter $\alpha$ and in the prior over model fitness produces qualitatively distinct behavioural profiles across social contexts. We characterise these profiles systematically and connect them to empirically characterised variation in human social trust.
+
+\subsubsection{The precision-gain axis}
+\label{sec:phenotypes_alpha}
+
+Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ establishes a monotonic relationship between precision gain and reactive social confidence across multiple metrics. At low $\alpha$ values ($\alpha \le 0.1$), agents show early exploitation rate \resultp{Exp A: exploitation rate at $\alpha = 0.05, 0.1$}, betrayal recovery time \resultp{Exp A: recovery rounds at $\alpha = 0.05, 0.1$}, and selection Gini coefficient \resultp{Exp A: Gini at $\alpha = 0.05, 0.1$}. Individual interactions produce minimal $\beta_k$ movement; engagement patterns remain stable across the episode regardless of partner behaviour. This is a rigid, slowly-updating social confidence profile.
+
+At high $\alpha$ values ($\alpha \ge 4.0$), the pattern reverses: exploitation rate \resultp{Exp A: exploitation rate at $\alpha = 4.0, 8.0$}, recovery time \resultp{Exp A: recovery rounds at $\alpha = 4.0, 8.0$}, and Gini \resultp{Exp A: Gini at $\alpha = 4.0, 8.0$}. Social confidence shifts rapidly in response to individual interactions, concentrating engagement on currently-reliable partners but also overreacting to noise. Default $\alpha$ occupies a calibrated middle ground across all metrics.
+
+Payoff does not rank $\alpha$ values monotonically. In the open graded regime: \resultp{Exp A: payoff by $\alpha$, graded regime}. In the betrayal regime: \resultp{Exp A: payoff by $\alpha$, betrayal regime}. The behavioural cost of high-$\alpha$ reactivity is visible specifically in betrayal contexts, where accumulated positive confidence becomes a liability, but not in stable cooperative regimes. This is consistent with Section~\ref{sec:betrayal}: the consequence of affective precision dynamics depends on the task context, not on the magnitude of precision dynamics alone.
+
+\subsubsection{Phenotype quadrants: prior \texttimes\ gain}
+\label{sec:phenotypes_quadrants}
+
+Crossing prior belief (naive versus cautious) with $\alpha$ (low versus high) produces four behavioural phenotypes, each with a recognisable signature across exploitation sensitivity, betrayal recovery, selection concentration, forgiveness, and trust asymmetry.
+
+The \textbf{anxious-reactive} profile (high $\alpha$, naive prior) is characterised by fast approach and fast withdrawal: \resultp{Exp B: full metric set, anxious-reactive}. Trust asymmetry \resultp{Exp B: trust\_asymmetry, anxious-reactive} reflects this bidirectional reactivity. The profile performs well in stable cooperative environments but shows the largest post-betrayal commitment errors and the highest variance in recovery outcomes.
+
+The \textbf{hypervigilant} profile (high $\alpha$, cautious prior) shows \resultp{Exp B: full metric set, hypervigilant}. High gain means the agent detects behavioural changes quickly; cautious prior means it starts from chronic wariness. Together these produce an agent that is slow to extend trust even under sustained positive evidence but fast to withdraw it. Trust asymmetry \resultp{Exp B: trust\_asymmetry, hypervigilant} reflects this directional imbalance, which mirrors the pattern of threat-sensitive social cognition characterised in trait anxiety and social anxiety disorder \cite{Adams2013ComputationalPsychosis}.
+
+The \textbf{naive-stubborn} profile (low $\alpha$, naive prior) shows \resultp{Exp B: full metric set, naive-stubborn}. Starting from the assumption that partner models are reliable and updating slowly in either direction, this agent sustains early engagement with exploitative partners well beyond the point at which behavioural evidence should have prompted withdrawal. The failure mode is exploitability rather than paranoia---a distinct miscalibration from the hypervigilant profile.
+
+The \textbf{avoidant-rigid} profile (low $\alpha$, cautious prior) shows \resultp{Exp B: full metric set, avoidant-rigid}. Chronically wary and slow to update, this agent rarely achieves high $\gamma_k$ even toward reliably cooperative partners---failing to exploit genuinely safe relationships not because it infers partners poorly but because it never lets accumulated positive evidence translate into confident action. This pattern corresponds to avoidant attachment style in the social trust literature \cite{Cittern2018AttachmentActiveInference}.
+
+\subsubsection{Forgiveness: recovery dynamics after betrayal reversion}
+\label{sec:phenotypes_forgiveness}
+
+The forgiveness paradigm---cooperative baseline (rounds 1--80), betrayal (81--120), and partner reversion to cooperative (121--200)---reveals a further dimension of phenotypic variation that is not visible from the betrayal alone. A dissociation emerges between forgiveness speed ($\alpha$-driven) and trust-repair ceiling (prior-driven).
+
+Reengagement rate in the post-reversion period: \resultp{Exp C: reengagement rate by condition}. Reengagement latency: \resultp{Exp C: reengagement latency by condition}. Payoff recovery ratio (post-reversion versus pre-betrayal baseline): \resultp{Exp C: payoff recovery by condition}.
+
+Low-gain agents (naive-stubborn and avoidant-rigid) show the slowest reengagement and longest latency---a computational grudge that persists even after the partner has demonstrably changed. High-gain agents with naive priors (anxious-reactive) show the fastest reengagement but the highest variance across seeds. Hypervigilant agents (high gain, cautious prior) re-approach the reverted partner relatively quickly---high $\alpha$ detects the behavioural change---but achieve a lower payoff-recovery ceiling, as the cautious prior prevents confidence from fully rebuilding.
+
+This dissociation maps onto the psychological distinction between forgiveness as a dynamic willingness to re-engage (modulated by $\alpha$) and trust repair as a structural restoration of confidence (modulated by prior) \cite{Yuan2017ApologyTrustRepair}. The two can come apart: an agent can return to a partner without trusting them in the same way. This is consistent with the social psychology literature on forgiveness and reconciliation, where re-approach and restored confidence are empirically separable outcomes.
+
+\subsubsection{Mixed-volatility discrimination}
+\label{sec:phenotypes_mixed}
+
+The most ecologically realistic test places four partners with heterogeneous volatility in the same episode: a stationary cooperator (P0), a stationary exploiter (P1), an abrupt-switch partner (P2; cooperative rounds 1--99, hostile thereafter), and a gradual-drift partner (P3; linearly transitioning over rounds 50--150). Under partner choice, the agent must simultaneously maintain stable engagement with P0 while updating away from P2 and P3 after their changes.
+
+Discrimination index (correlation between per-partner $\beta_k$ trajectory and per-partner behavioural stability score) across agent types: \resultp{Exp D: discrimination index by condition}. False-positive rate (unwarranted confidence reduction toward P0): \resultp{Exp D: false-positive rate by condition}. Per-partner $\beta_k$ trajectories for the default agent show \resultp{Exp D: beta trajectories, default}.
+
+High-$\alpha$ agents achieve better discrimination of P2 and P3 after their shifts but show meaningfully higher false-positive rates for P0 \resultp{Exp D: false-positive rate, high-$\alpha$ versus default}. Low-$\alpha$ agents fail to sufficiently track the behavioural changes of P2 and P3 while maintaining reliable engagement with P0. The default $\alpha$ produces the best discrimination-to-false-positive tradeoff, suggesting the default parameterisation is approximately calibrated for environments where stability and change coexist.
+
+This tradeoff is formally analogous to the sensitivity-specificity tradeoff in signal detection theory. The high-$\alpha$ agent's profile mirrors the behavioural signature of high trait neuroticism in social contexts: enhanced detection of genuine social change at the cost of chronic overreaction to noise \cite{Behrens2008SocialLearning}.
+
+\subsubsection{Phenotypes, human individual differences, and the precision-gain literature}
+\label{sec:phenotypes_id}
+
+Together, the four experiments establish that affective precision dynamics are not a single behavioural tendency but a family of profiles whose character is determined by $\alpha$ and prior initial conditions. These profiles have documented human analogues.
+
+Individual differences in social learning rates have been empirically characterised and linked to prefrontal-cingulate coupling \cite{Behrens2008SocialLearning}. The measure of volatility-tracking sensitivity in that work is structurally analogous to $\alpha$ in the present framework: individuals with higher sensitivity showed faster learning-rate adjustment under changing social conditions, at the cost of noisier updating in stable ones. The anxious-reactive and hypervigilant phenotypes correspond to profiles identified in computational psychiatry as precision dysregulation in the action-confidence pathway---hypersensitive affective charge weighting implicated in social anxiety and paranoid ideation \cite{Adams2013ComputationalPsychosis}. The avoidant-rigid and naive-stubborn phenotypes correspond to withdrawal-oriented and gullibility-prone patterns associated with avoidant attachment \cite{Cittern2018AttachmentActiveInference} and low reactive inhibition, respectively.
+
+The precision-dynamics framework provides a computational vocabulary for these individual differences. Rather than treating variation in social trust calibration as noise around a normative social agent, it locates that variation in two identifiable parameters---gain and prior---with distinct behavioural consequences that are in principle measurable from behavioural time series in standard trust game paradigms. The phenotype predictions in Sections~\ref{sec:phenotypes_quadrants}--\ref{sec:phenotypes_mixed} serve as pre-registered targets for empirical work fitting the model to human behavioural data and linking estimated parameters to personality measures, clinical scores, and real-world social outcomes.

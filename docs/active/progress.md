@@ -16,156 +16,210 @@ git diff --check
 
 ## Current Queue Status
 
-As of May 27, 2026, the canonical affect update uses Hesp-style surprisal,
-`-log P(observed partner action)`, with neutral baseline
-`sigma_0_sq = (-log 0.5)^2`. Earlier bounded-error results are historical. The
-first reduced log-surprisal smoke queue has completed at:
+As of May 31, 2026, the manuscript has been substantially revised toward the
+full individual-differences / phenotype framing. The canonical affect update
+uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
-```text
-results/log_surprisal_spine_smoke_20260527/
-```
-
-The completed smoke is now treated as pre-fix diagnostic evidence because H5
-follow-up found an agent-choice candidate aggregation bug in the beta-to-gamma
-path. The bug let low-precision branches with negative policy scores become
-more selectable by shrinking scores toward zero. The runtime now uses centered
-precision logits for agent-choice candidate comparison.
-
-The pre-fix run command was:
-
-```bash
-.venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h0_policy_openness/graded_choice.toml \
-  --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml \
-  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml \
-  --config configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml \
-  --config configs/trust/hypotheses/h4_social_allocation/partner_choice.toml \
-  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml \
-  --config configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml \
-  --output-dir results \
-  --batch-name log_surprisal_spine_smoke_20260527 \
-  --workers 1
-```
-
-Analysis outputs have been generated for all seven queued configs:
-
-- `h0/graded_choice/analysis`
-- `h1/reliability_vs_reward/analysis`
-- `h2/lesion_open_regime/analysis`
-- `h3/global_beta_focal_switch_probe/analysis`
-- `h4/partner_choice/analysis`
-- `h5/betrayal_choice/analysis`
-- `h6/clinical_dynamics/analysis`
-
-Do not run the confirmation queue from the pre-fix smoke.
-
-The post-fix smoke rerun has completed under the corrected selector:
+The post-fix H0-H6 smoke rebaseline completed at:
 
 ```text
 results/log_surprisal_spine_smoke_postfix_20260528/
 ```
 
-Analysis outputs exist for all seven queued configs:
+This is the current diagnostic baseline. Four phenotype experiments (Exp A-D)
+are running on the server to fill the Section 3.6 placeholders. Confirmation-
+scale runs for the core hypothesis spine are the next priority after Exp A-D
+complete.
 
-- `h0/graded_choice/analysis`
-- `h1/reliability_vs_reward/analysis`
-- `h2/lesion_open_regime/analysis`
-- `h3/global_beta_focal_switch_probe/analysis`
-- `h4/partner_choice/analysis`
-- `h5/betrayal_choice/analysis`
-- `h6/clinical_dynamics/analysis`
+## Phenotype Experiment Queue (Exp A-D)
+### Status: running on server
 
-The stale Mango monitor `affect_aif_postfix_spine_smoke_20260528` has been
-removed after tmux exited and no matching experiment or analysis process was
-running.
+These fill Section 3.6 of the manuscript with actual numbers. They run via
+standalone scripts rather than TOML spec configs.
 
-## Pre-Fix Smoke Read
+### Exp A — α Sweep
 
-```text
-H0: affect lowers entropy but does not improve payoff over no-affect.
-H1: local beta tracks surprise more cleanly than reward.
-H2: deployment path is active, but no payoff win for local affect.
-H3: local beta has cleaner signal quality; no locality payoff advantage.
-H4: underpowered partner-choice readout.
-H5: main follow-up risk; local affect underperforms no-affect/lesioned.
-H6: beta dynamics separate; clinical claims remain supplemental only.
+```bash
+.venv/bin/python scripts/experiment/run_exp_a_alpha_sweep.py
 ```
 
-## Post-Fix Smoke Read
+- **α values**: `[0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0]`
+- **Environments**: open graded + betrayal
+- **Seeds**: 20 per condition
+- **Outputs**: `results/exp_a/`, figures → `docs/paper/manuscript/figures/fig_alpha_sweep.pdf`
+- **Metrics**: `early_exploitation_rate`, `betrayal_recovery_time`, `selection_gini`,
+  `entropy_trajectory` (early/mid/late), `beta_range`
+- **Manuscript target**: Section 3.6.1 placeholders (`\resultp{Exp A: ...}`)
+
+### Exp B — 2×2 Prior × α Factorial
+
+```bash
+.venv/bin/python scripts/experiment/run_exp_b_prior_factorial.py
+```
+
+- **Prior conditions**: naive (low-β weights), cautious (high-β weights), default
+- **α conditions**: `low = 0.1`, `high = 3.0`, default reference
+- **Environments**: open graded, betrayal, partner-choice
+- **Seeds**: 20 per condition
+- **Outputs**: `results/exp_b/`, figures → `docs/paper/manuscript/figures/fig_phenotype_quadrants.pdf`
+- **Metrics**: all Exp A metrics + `trust_asymmetry`
+- **Target phenotypes**: anxious-reactive, hypervigilant, naive-stubborn, avoidant-rigid
+- **Manuscript target**: Section 3.6.2 placeholders
+
+### Exp C — Forgiveness Paradigm
+
+```bash
+.venv/bin/python scripts/experiment/run_exp_c_forgiveness.py
+```
+
+- **Episode structure**: cooperative (1–80), betrayal (81–120), reversion (121–200)
+- **Conditions**: all 4 phenotype conditions + default + no-affect baseline
+- **Seeds**: 20 per condition
+- **Outputs**: `results/exp_c/`, figures → `docs/paper/manuscript/figures/fig_forgiveness.pdf`
+- **Metrics**: `reengagement_rate`, `payoff_recovery`, `beta_recovery_trajectory`,
+  `reengagement_latency`
+- **Manuscript target**: Section 3.6.3 placeholders
+
+### Exp D — Mixed Volatility Environment
+
+```bash
+.venv/bin/python scripts/experiment/run_exp_d_mixed_volatility.py
+```
+
+- **Partner setup**: P0 stationary cooperator, P1 stationary exploiter,
+  P2 abrupt-shift (cooperative rounds 1–99 → hostile), P3 gradual-drift (rounds 50–150)
+- **Regime**: partner-choice
+- **Conditions**: default, low α (0.1), high α (3.0), no-affect baseline
+- **Seeds**: 20 per condition
+- **Outputs**: `results/exp_d/`, figures → `docs/paper/manuscript/figures/fig_mixed_volatility.pdf`
+- **Metrics**: `discrimination_index`, `concentration_toward_P0`, per-partner beta
+  trajectories, `false_positive_rate`
+- **Manuscript target**: Section 3.6.4 placeholders
+
+### After Exp A-D Complete
+
+1. Run `scripts/analysis/analyze.py` on each `results/exp_*/` output.
+2. Fill `\resultp{...}` placeholders in `sections/03_results.tex` Section 3.6.
+3. Check that phenotype descriptions match the actual metric values.
+4. Update `docs/results/current.md` with phenotype findings (ask user before
+   updating interpretation narrative).
+5. Proceed to confirmation-scale runs below.
+
+---
+
+## Core Hypothesis Confirmation Queue
+
+Do not launch this queue until the verification gate passes and Exp A-D are
+complete or explicitly approved by user.
+
+### Priority 1: H5 Betrayal Confirmation (most important)
+
+H5 is the repaired positive behavioral anchor after the selector fix.
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml \
+  --output-dir results \
+  --batch-name log_surprisal_h5_confirm_postfix_20260601 \
+  --workers 1
+```
+
+**Primary readouts**: total payoff by variant; post-switch reallocation and
+reencounter rate; policy entropy and joint accuracy; payoff conditional on
+returned/switched partner.
+
+**Seed target**: 30+ seeds minimum for publication-grade claim.
+
+### Priority 2: H1 Model Fitness Redesign/Confirmation
+
+H1 does not preserve the surprise-over-reward readout in the post-fix smoke
+(surprise corr 0.226 vs payoff corr 0.615). Must redesign the task to cleanly
+separate partner reliability from realized payoff before using model-fitness as
+a manuscript claim.
+
+```bash
+# diagnostic first — do not add seeds before inspecting design
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml \
+  --output-dir results \
+  --batch-name log_surprisal_h1_diagnostic_YYYYMMDD \
+  --workers 1
+```
+
+**Action items before running**:
+- Inspect whether current H1 task creates exposure confounds where payoff and
+  partner-action predictability are not cleanly separated.
+- Check whether active partner sampling in agent-choice confounds the
+  correlation denominator.
+- Consider a reliability manipulation with matched expected reward.
+
+### Priority 3: H0/H2/H4 Manuscript Support (run if language stays in draft)
+
+Only launch if the manuscript keeps deployment/entropy and partner-choice
+language and needs higher-seed confirmation for those claims.
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h0_policy_openness/graded_choice_confirm.toml \
+  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
+  --config configs/trust/hypotheses/h4_social_allocation/partner_choice_confirm.toml \
+  --output-dir results \
+  --batch-name manuscript_open_social_confirm_YYYYMMDD \
+  --workers 1
+```
+
+### Priority 4: H3 Global-Beta Ablation
+
+Whether partner-local precision is necessary or whether a shared tracker
+produces comparable stable-regime gains is now a stated question in the
+manuscript (Discussion, Future Directions) and Section 3.3. The mixed-
+volatility paradigm (Exp D) provides a partial answer; a dedicated H3 confirm
+run at higher seeds will strengthen the locality claim if Exp D shows the
+expected interference pattern.
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml \
+  --output-dir results \
+  --batch-name h3_global_beta_confirm_YYYYMMDD \
+  --workers 1
+```
+
+---
+
+## Post-Fix Smoke Evidence Summary
+
+Results from `results/log_surprisal_spine_smoke_postfix_20260528/` — current
+diagnostic baseline, not final publication evidence.
 
 ```text
 H0: no stable payoff advantage; affect/global beta/no-affect are close.
-H1: post-fix smoke does not preserve the old surprise-over-reward readout.
-H2: deployment path is active; payoff remains flat-to-negative for affect.
-H3: global beta has the best smoke payoff; local beta remains a cleaner signal.
-H4: partner-choice payoff is noisy and flat at three seeds.
-H5: repaired under the centered selector; affect beats no-affect/lesioned.
+H1: smoke does not preserve the old surprise-over-reward readout. REDESIGN.
+H2: deployment path is active (entropy 8.59 vs 8.79); payoff flat.
+H3: global beta has the best smoke payoff; local beta = cleaner signal.
+H4: partner-choice payoff noisy and flat at three seeds.
+H5: repaired under centered selector; affect beats no-affect/lesioned.
 H6: perturbation dynamics separate; clinical claims remain supplemental only.
 ```
 
-## Follow-Up Before Confirmation
+Numbers used in manuscript:
+- H2: policy entropy 8.59 (local affect) vs 8.79 (no-affect)
+- H3: local corr(precision,surprise)=0.943 vs 0.110 (payoff); payoffs: global
+  976.2, local 946.8, no-affect 950.7
+- H5: payoff 1322.3 (local affect) vs 1225.0 (no-affect); entropy 7.47 vs
+  8.68; joint accuracy 0.319 vs 0.425
+- H6: alexithymia beta range 0.180, borderline 1.412, depression 1.464
 
-### Phenotype Follow-Up Queue
-
-The May 29 follow-up prompt adds four manuscript-facing phenotype experiments:
-
-- `scripts/experiment/run_exp_a_alpha_sweep.py`: alpha sweep across open graded
-  and betrayal regimes, defaulting to 20 seeds and writing full outputs under
-  `results/exp_a/`.
-- `scripts/experiment/run_exp_b_prior_factorial.py`: naive/cautious beta-prior
-  by low/high alpha factorial across open, betrayal, and partner-choice regimes,
-  defaulting to 20 seeds under `results/exp_b/`.
-- `scripts/experiment/run_exp_c_forgiveness.py`: cooperative, hostile, repaired
-  partner trajectory with phenotype and no-affect controls, defaulting to
-  20 seeds under `results/exp_c/`.
-- `scripts/experiment/run_exp_d_mixed_volatility.py`: partner-choice mixed
-  volatility environment with stable, exploitative, abrupt-switch, and
-  gradual-proxy partners, defaulting to 20 seeds under `results/exp_d/`.
-
-These are more-seed follow-up experiments. Run them only after the verification
-gate, and run them detached on `server` via tmux plus Mango registration. Do not
-promote manuscript text from these scripts until their `metrics.csv` files and
-manuscript figures have been inspected.
-
-The scripts mirror compact metrics into
-`docs/paper/manuscript/source_tables/exp_*` and figures into
-`docs/paper/manuscript/figures/` when the server jobs complete. Full per-round
-CSV outputs remain under `results/exp_*`.
-
-1. Refresh the verification gate immediately before any confirmation-scale run.
-2. Queue a confirmation-scale H5 betrayal-choice run first, because it is the
-   repaired positive behavioral anchor after the selector fix.
-3. Queue H1 only if the next step is a confirmation/rework of the
-   reliability-versus-reward design; current smoke should not carry the
-   model-fitness claim.
-4. Treat H0/H2/H4 as manuscript-support checks: either confirm at higher seeds
-   or soften them to deployment/entropy diagnostics rather than payoff claims.
-5. Keep H3 local/global as a decomposition result unless a revised task makes
-   locality behaviorally necessary.
-
-## Superseded Partial Smoke Provenance
-
-The first reduced smoke queue was initially stopped after a clean H0 checkpoint:
-
-```text
-results/log_surprisal_spine_smoke_20260527/h0/graded_choice/checkpoint_manifest.json
-results/log_surprisal_spine_smoke_20260527/h0/graded_choice/results_partial.csv
-```
-
-That partial state is superseded by the completed batch at the same root.
+---
 
 ## Result Interpretation Rules
 
 - Do not treat partial detached rerun outputs as current evidence.
-- Do not promote new outputs into manuscript-level claims until the user reviews
-  the result read.
-- Treat pre-log-surprisal batches as historical/provisional, even if they remain
-  useful for design provenance.
-- Keep H7 signal-source and H8 observation-noise lanes exploratory unless the
-  user explicitly promotes them.
+- Do not promote new outputs into manuscript-level claims without user review.
+- Keep H7 signal-source and H8 observation-noise lanes exploratory.
+- Ask user before updating interpretation narrative in `docs/results/current.md`.
 
 ## Historical Provenance
 
-Historical bounded-error and earlier log-surprisal discovery outputs remain
-documented in `docs/results/`. They should not be used as current manuscript
-evidence after the H0-H8 rebaseline begins.
+Pre-log-surprisal and pre-fix diagnostic outputs remain in `docs/results/`.
+They should not be used as current manuscript evidence.

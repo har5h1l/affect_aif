@@ -2,31 +2,52 @@
 
 ## Requires Human Decision
 
-- Immediate publication-readiness blocker: none at the smoke-execution level.
-  The post-fix H0-H6 smoke completed under the corrected selector. The remaining
-  blocker is evidential scale: three seeds are not enough for publication-grade
-  claims.
-- Optional later decision: whether any paper/reviewer-specific stress-regime
-  robustness check is needed after write-up stabilization.
+- **H1 redesign**: the post-fix smoke does not preserve the surprise-over-reward
+  model-fitness readout (corr 0.226 vs 0.615 for payoff). Before running
+  confirmation seeds, decide whether to (a) inspect whether active partner
+  sampling confounds the correlation denominator in the current design, or
+  (b) construct a new reliability-vs-reward task with matched expected payoff
+  across partner types. Do not run H1 confirmation without this decision.
+
+- **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
+  The manuscript currently uses deployment/entropy language for H0/H2 and
+  allocation-reorganisation language for H4, both with `\resultp{}` placeholders
+  for confirmation-scale payoff results. Decide whether to run confirmation-
+  scale seeds for these or to soften language to entropy/deployment only.
+
+- **Exp A-D review**: once the server runs complete, inspect the phenotype
+  outputs before filling `\resultp{}` placeholders. Do not update the
+  Section 3.6 interpretation narrative without user review of the phenotype
+  metric values (see AGENTS.md rule on result interpretation).
 
 ## Current Interpretation Guardrails
 
-- Prior shallow-confirm and factorial numbers are not comparable to current
-  architecture runs because factorized controls and environment decoding changed.
-- Result interpretation docs should not be updated from new experiment outputs
-  without asking the user first, unless the current user request explicitly asks
-  to interpret and update docs.
+- Pre-fix and bounded-error result numbers are not comparable to current
+  architecture runs. Do not cite them in manuscript sections.
+- Result interpretation docs (`docs/results/current.md`) should not be updated
+  from new experiment outputs without asking the user first.
+- The post-fix smoke numbers (H5: 1322.3 vs 1225.0; H2 entropy 8.59 vs 8.79;
+  H3 local corr 0.943) are used directly in the manuscript and are the only
+  confirmed numbers in the current draft.
 
 ## Technical Follow-Ups
 
-- Run confirmation-scale reruns only after the verification gate passes.
-- Prioritize H5 betrayal-choice confirmation. Treat H1 as a model-fitness
-  confirmation/rework item, and treat H0/H2/H4 as support checks that may need
-  softened language if payoff remains flat.
+- H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
+  with `--workers 1` after the verification gate passes.
+- H1 needs inspection/redesign before confirmation. Do not add seeds first.
 - Complete any remaining import-boundary cleanup toward
   `scripts -> experiments -> tasks -> inferactively-pymdp`.
-- Add import-boundary and package-surface tests for the moved structure in later
-  phases.
-- The server checkout currently retains the current/provenance-bearing result
-  batches under `results/`. Older pilot, incomplete, and duplicate local result
-  directories were removed during cleanup.
+- After Exp A-D: run `scripts/analysis/analyze.py` on each `results/exp_*/`
+  and generate the four manuscript figures specified in `docs/active/progress.md`.
+- Phenotype figures (fig_alpha_sweep.pdf, fig_phenotype_quadrants.pdf,
+  fig_forgiveness.pdf, fig_mixed_volatility.pdf) need to be generated and
+  placed under `docs/paper/manuscript/figures/` once Exp A-D complete.
+
+## Not Blockers (Resolved or Deferred)
+
+- Agent-choice candidate-aggregation bug: fixed (centered precision logits).
+  Post-fix smoke verifies the fix.
+- H6 supplemental perturbation results: included in manuscript as
+  Section 3.5, designated as supplemental computational perturbations.
+- Manuscript hedging language: removed in May 31 revision; replaced with
+  clean narrative + `\resultp{}` placeholders.
