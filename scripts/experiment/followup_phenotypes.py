@@ -305,7 +305,8 @@ def common_group_metrics(results: pd.DataFrame) -> list[dict[str, Any]]:
     group_cols = ["experiment_id", "variant_id", "seed"]
     for keys, group in results.groupby(group_cols, dropna=False):
         experiment_id, variant_id, seed = keys
-        early = group[pd.to_numeric(group["round"], errors="coerce") <= 50]
+        rounds = pd.to_numeric(group["round"], errors="coerce")
+        early = group[(rounds >= 1) & (rounds <= 30)]
         exploiter = early["true_partner_type"].astype(str).eq("exploiter")
         cooperative = high_investment_mask(early)
         rows.append(

@@ -32,13 +32,16 @@ and `f86ede4` notes are stale as current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
-June 2 02:57 PDT, Exp A has written `results/exp_a/` and manuscript source
+June 2 03:04 PDT, Exp A has written `results/exp_a/` and manuscript source
 tables, while Exp B is still CPU-active in
-`scripts/experiment/run_exp_b_prior_factorial.py`; its
-`results/exp_b/betrayal/results_partial.csv` and the run log both last updated
-at 02:56-02:57 PDT. Exp C/D have not started and have no output files. Do not
-interpret Exp A or partial Exp B outputs as manuscript evidence until Exp A-D
-complete and the user approves result interpretation updates.
+`scripts/experiment/run_exp_b_prior_factorial.py`; its open-graded and
+betrayal sub-runs have final per-scenario files, and the process appears to be
+inside the remaining Exp B work. The run log and
+`results/exp_b/betrayal/results_partial.csv` last updated at 02:56-02:57 PDT,
+but the Exp B Python process is CPU-active. Exp C/D have not started and have
+no output files. Do not interpret Exp A or partial Exp B outputs as manuscript
+evidence until Exp A-D complete and the user approves result interpretation
+updates.
 
 The full local pytest gate is clean as of June 2 01:00 PDT. The previous
 stall was diagnosed as oversized test fixtures that imported the full H5
@@ -102,6 +105,16 @@ overlay. The live Exp B raw trajectories remain valid, but the currently
 running Python process loaded the older analysis code; after Exp A-D finality,
 rerun Exp B with `--analyze-only` so `results/exp_b/metrics.csv`, source
 tables, and `fig_phenotype_quadrants.pdf` use the updated readout.
+
+Also while Exp B was still running, the Exp A compact analysis and figure
+contract was aligned to the manuscript plan without changing task dynamics or
+the model process. `early_exploitation_rate` now uses rounds 1--30 as written,
+and `fig_alpha_sweep.pdf` now plots the planned early/mid/late entropy
+trajectory with 95% confidence intervals on the sweep panels. Exp A raw
+trajectories remain valid, but the already-written Exp A compact outputs were
+produced by the older analysis code; after Exp A-D finality, rerun Exp A with
+`--analyze-only` so `results/exp_a/metrics.csv`, source tables, and
+`fig_alpha_sweep.pdf` use the updated readout.
 
 Decision tree for H1:
 
@@ -231,15 +244,20 @@ standalone scripts rather than TOML spec configs.
    ended, `results/exp_abcd_20260529_logs/run.log` contains `DONE`, and
    `results/exp_a/` through `results/exp_d/` each contain final `results.csv`,
    `metrics.csv`, `manifest.json`, and `README.md`.
-2. Run `scripts/analysis/analyze.py` on each final `results/exp_*/results.csv`
+2. Regenerate Exp A and Exp B compact outputs with their updated analysis
+   contracts:
+   `.venv/bin/python scripts/experiment/run_exp_a_alpha_sweep.py --output-dir results/exp_a --paper-dir docs/paper/manuscript --analyze-only`
+   and
+   `.venv/bin/python scripts/experiment/run_exp_b_prior_factorial.py --output-dir results/exp_b --paper-dir docs/paper/manuscript --analyze-only`.
+3. Run `scripts/analysis/analyze.py` on each final `results/exp_*/results.csv`
    where the generic analysis is applicable; the standalone Exp A-D scripts
    also write compact `metrics.csv` files and manuscript source tables.
-3. Fill `\resultp{...}` placeholders in `sections/03_results.tex` Section 3.6
+4. Fill `\resultp{...}` placeholders in `sections/03_results.tex` Section 3.6
    only after finality is established and the metric directions are checked
    against the planned readouts.
-4. Update `docs/results/current.md` with phenotype findings only after asking
+5. Update `docs/results/current.md` with phenotype findings only after asking
    the user before interpretation narrative updates.
-5. Proceed to confirmation-scale runs below.
+6. Proceed to confirmation-scale runs below.
 
 ---
 

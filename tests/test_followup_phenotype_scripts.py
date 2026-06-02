@@ -1,5 +1,7 @@
 import pandas as pd
 
+from scripts.experiment.run_exp_a_alpha_sweep import EXP_A_PANELS, _summary_with_ci
+from scripts.experiment.run_exp_a_alpha_sweep import metrics as exp_a_metrics
 from scripts.experiment.run_exp_b_prior_factorial import EXP_B_RADAR_METRICS
 from scripts.experiment.run_exp_b_prior_factorial import metrics as exp_b_metrics
 from scripts.experiment.run_exp_c_forgiveness import _payoff_recovery
@@ -49,6 +51,55 @@ def test_exp_d_false_positive_rate_tracks_stable_partner_drop_not_non_p0_selecti
 
     assert float(summary.loc[0, "concentration_toward_p0"]) == 0.5
     assert float(summary.loc[0, "false_positive_rate"]) == 1.0
+
+
+def test_exp_a_early_exploitation_rate_uses_first_30_rounds():
+    rows = []
+    for round_idx in range(1, 51):
+        rows.append(
+            {
+                "experiment_id": "open_graded",
+                "variant_id": "alpha_1p0",
+                "seed": 1,
+                "round": round_idx,
+                "partner_idx": 2,
+                "agent_action": 5 if round_idx <= 30 else 0,
+                "payoff": 1.0,
+                "true_partner_type": "exploiter",
+                "q_pi_entropy": 0.5,
+                "local_betas": "[0.5, 0.8, 1.2, 1.5]",
+            }
+        )
+
+    summary = exp_a_metrics(pd.DataFrame(rows))
+
+    assert float(summary.loc[0, "early_exploitation_rate"]) == 1.0
+
+
+def test_exp_a_panels_match_manuscript_plan():
+    assert EXP_A_PANELS == (
+        "early_exploitation_rate",
+        "betrayal_recovery_time",
+        "selection_gini",
+        "entropy_trajectory",
+        "beta_range",
+    )
+
+
+def test_exp_a_summary_reports_mean_and_95_ci():
+    summary = _summary_with_ci(
+        pd.DataFrame(
+            [
+                {"experiment_id": "open_graded", "alpha": 1.0, "mean_payoff": 1.0},
+                {"experiment_id": "open_graded", "alpha": 1.0, "mean_payoff": 3.0},
+            ]
+        ),
+        ["experiment_id", "alpha"],
+        "mean_payoff",
+    )
+
+    assert float(summary.loc[0, "mean"]) == 2.0
+    assert round(float(summary.loc[0, "ci95"]), 2) == 1.96
 
 
 def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():

@@ -71,6 +71,12 @@
   Raw trajectories are not obsolete, but the final Exp B compact outputs must
   be regenerated with `--analyze-only` after Exp A-D finality so the metrics,
   source tables, and phenotype radar figure use the updated readout contract.
+- Exp A compact metric/figure alignment: fixed after Exp A raw outputs had
+  already been written. Raw trajectories are not obsolete, but the Exp A
+  compact outputs must be regenerated with `--analyze-only` after Exp A-D
+  finality so the 1--30 early-exploitation window, entropy trajectory panel,
+  and confidence intervals are reflected in `metrics.csv`, source tables, and
+  `fig_alpha_sweep.pdf`.
 - Import-boundary cleanup: benchmark orchestration moved to
   `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
   `experiments`, `analysis`, or `benchmarks`.

@@ -195,15 +195,20 @@ agent types, with reference lines at P2 switch and P3 drift onset/end.
    `metrics.csv`, `manifest.json`, and `README.md`.
 2. `mango cloud sync fetch affect_aif` — pull results from server if working
    from a local checkout.
-3. Run `scripts/analysis/analyze.py` on each `results/exp_*/results.csv` where
+3. Regenerate compact outputs whose analysis contracts were aligned while the
+   server run was already active:
+   `.venv/bin/python scripts/experiment/run_exp_a_alpha_sweep.py --output-dir results/exp_a --paper-dir docs/paper/manuscript --analyze-only`
+   and
+   `.venv/bin/python scripts/experiment/run_exp_b_prior_factorial.py --output-dir results/exp_b --paper-dir docs/paper/manuscript --analyze-only`.
+4. Run `scripts/analysis/analyze.py` on each `results/exp_*/results.csv` where
    the generic analysis is applicable; the standalone Exp A-D scripts also
    write their own compact `metrics.csv` files and manuscript source tables.
-4. Read the phenotype metric values only after finality is established; verify
+5. Read the phenotype metric values only after finality is established; verify
    direction of effects against Section 3.6 narrative before filling any
    placeholders.
-5. Check that `fig_alpha_sweep.pdf`, `fig_phenotype_quadrants.pdf`,
+6. Check that `fig_alpha_sweep.pdf`, `fig_phenotype_quadrants.pdf`,
    `fig_forgiveness.pdf`, `fig_mixed_volatility.pdf` exist and are readable
-6. Ask user before updating any interpretation narrative in `docs/results/`
+7. Ask user before updating any interpretation narrative in `docs/results/`
 
 ### Placeholder Fill Checklist
 

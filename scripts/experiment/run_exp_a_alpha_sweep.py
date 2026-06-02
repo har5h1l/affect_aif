@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import sys
+from math import sqrt
 from pathlib import Path
 
 SCRIPT_DIR = str(Path(__file__).resolve().parent)
@@ -24,10 +25,16 @@ from scripts.experiment.followup_phenotypes import (
     open_graded_scenario,
     run_suite_main,
     save_figure,
-    summarize_for_plot,
 )
 
 ALPHAS = (0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0)
+EXP_A_PANELS = (
+    "early_exploitation_rate",
+    "betrayal_recovery_time",
+    "selection_gini",
+    "entropy_trajectory",
+    "beta_range",
+)
 
 
 def build_specs(*, rounds: int, seeds: int, seed: int):
@@ -64,25 +71,62 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
+def _summary_with_ci(metrics_df: pd.DataFrame, by: list[str], metric: str) -> pd.DataFrame:
+    summary = (
+        metrics_df.groupby(by, dropna=False)[metric]
+        .agg(mean="mean", std="std", count="count")
+        .reset_index()
+    )
+    summary["ci95"] = summary.apply(
+        lambda row: 0.0 if row["count"] <= 1 else 1.96 * float(row["std"]) / sqrt(float(row["count"])),
+        axis=1,
+    ).fillna(0.0)
+    return summary
+
+
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     fig, axes = plt.subplots(2, 3, figsize=(12, 7))
     axes = axes.reshape(-1)
-    panels = [
-        ("early_exploitation_rate", "Early exploiter investment"),
-        ("betrayal_recovery_time", "Betrayal recovery rounds"),
-        ("selection_gini", "Selection Gini"),
-        ("entropy_late", "Late policy entropy"),
-        ("beta_range", "Mean beta range"),
-    ]
-    for ax, (metric, title) in zip(axes, panels, strict=False):
-        summary = summarize_for_plot(metrics_df, ["experiment_id", "alpha"], metric)
-        for experiment_id, group in summary.groupby("experiment_id"):
-            ax.plot(group["alpha"], group[metric], marker="o", label=str(experiment_id))
+    titles = {
+        "early_exploitation_rate": "Early exploiter investment",
+        "betrayal_recovery_time": "Betrayal recovery rounds",
+        "selection_gini": "Selection Gini",
+        "entropy_trajectory": "Policy entropy trajectory",
+        "beta_range": "Mean beta range",
+    }
+    for ax, metric in zip(axes, EXP_A_PANELS, strict=False):
+        if metric == "entropy_trajectory":
+            for entropy_metric, label in (
+                ("entropy_early", "early"),
+                ("entropy_mid", "mid"),
+                ("entropy_late", "late"),
+            ):
+                summary = _summary_with_ci(metrics_df, ["alpha"], entropy_metric)
+                ax.errorbar(
+                    summary["alpha"],
+                    summary["mean"],
+                    yerr=summary["ci95"],
+                    marker="o",
+                    capsize=2,
+                    label=label,
+                )
+        else:
+            summary = _summary_with_ci(metrics_df, ["experiment_id", "alpha"], metric)
+            for experiment_id, group in summary.groupby("experiment_id"):
+                ax.errorbar(
+                    group["alpha"],
+                    group["mean"],
+                    yerr=group["ci95"],
+                    marker="o",
+                    capsize=2,
+                    label=str(experiment_id),
+                )
         ax.set_xscale("log")
         ax.set_xlabel("alpha")
-        ax.set_title(title)
+        ax.set_title(titles[metric])
     axes[-1].axis("off")
     axes[0].legend(frameon=False)
+    axes[3].legend(frameon=False)
     save_figure(fig, figure_dir / "fig_alpha_sweep.pdf")
 
 
