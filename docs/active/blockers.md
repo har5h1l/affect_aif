@@ -42,8 +42,6 @@
   model-fitness diagnostics before manuscript use. Do not promote the corrected
   smoke read directly to a publication claim. The new controlled H1 configs are
   diagnostic surfaces, not current evidence.
-- Complete any remaining import-boundary cleanup toward
-  `scripts -> experiments -> tasks -> inferactively-pymdp`.
 - After Exp A-D: run `scripts/analysis/analyze.py` on each `results/exp_*/`
   and generate the four manuscript figures specified in `docs/active/progress.md`.
 - Phenotype figures (fig_alpha_sweep.pdf, fig_phenotype_quadrants.pdf,
@@ -62,3 +60,6 @@
   Section 3.5, designated as supplemental computational perturbations.
 - Manuscript hedging language: removed in May 31 revision; replaced with
   clean narrative + `\resultp{}` placeholders.
+- Import-boundary cleanup: benchmark orchestration moved to
+  `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
+  `experiments`, `analysis`, or `benchmarks`.

@@ -71,6 +71,12 @@ the dominance diagnostic, and
 the strict reward-neutral diagnostic analyzable as a reliability test rather
 than failing because reward variance was intentionally removed.
 
+On June 2, the benchmark trust backend was moved out of
+`tasks.trust.evaluation` into `benchmarks.trust_backend`, leaving task-local
+evaluation to hold only baseline agents. The import-boundary guard now checks
+that `tasks/` does not import `experiments`, `analysis`, or `benchmarks`,
+preserving the intended `scripts -> experiments -> tasks -> pymdp` direction.
+
 ```text
 tmux: affect_aif_full_pytest_20260602_final
 log: /tmp/affect_aif_full_pytest_20260602_final.log

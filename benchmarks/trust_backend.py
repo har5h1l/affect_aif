@@ -1,4 +1,4 @@
-"""Trust-task evaluation arena backend."""
+"""Benchmark-layer backend for the trust task."""
 
 from __future__ import annotations
 

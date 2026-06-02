@@ -23,6 +23,10 @@ Trust-game semantics belong in a trust task package: partners, stances, payoffs,
 trust environments, trust model construction, pymdp agent wrappers, external
 affective precision tracking, and trust-task evaluation.
 
+Benchmark orchestration lives above the task layer. Trust-task baseline agents
+may remain in `tasks.trust.evaluation`, but backend adapters that depend on
+`benchmarks` or `experiments` belong in the benchmark layer.
+
 ## Reference Notebook
 
 The reference trust notebook records useful factorized-control, policy-prior,
