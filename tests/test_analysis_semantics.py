@@ -334,6 +334,49 @@ def test_model_fitness_correlation_reports_partial_signal_dominance():
     assert corr["partial_surprise_dominates_reward"]
 
 
+def test_model_fitness_correlation_reports_reward_exposure_confound():
+    rows = []
+    partner_specs = [
+        (0, 0.10, 1.0, 2.00, 2),
+        (1, 0.30, 1.2, 1.40, 4),
+        (2, 0.60, 1.7, 0.90, 8),
+        (3, 0.90, 2.5, 0.55, 16),
+    ]
+    round_idx = 0
+    for partner_idx, _surprise, payoff, _precision, encounters in partner_specs:
+        for _ in range(encounters):
+            round_idx += 1
+            rows.append(
+                {
+                    "variant_id": "affect",
+                    "seed": 0,
+                    "round": round_idx,
+                    "partner_idx": partner_idx,
+                    "payoff": payoff,
+                    "betas": [
+                        1.0 / spec_precision
+                        for _, _, _, spec_precision, _ in partner_specs
+                    ],
+                    "prediction_errors": [
+                        spec_surprise
+                        for _, spec_surprise, _, _, _ in partner_specs
+                    ],
+                    "reward_avgs": [float("nan")] * len(partner_specs),
+                    "inferred_type_correct": 1.0,
+                }
+            )
+
+    corr = model_fitness_correlation_summary(pd.DataFrame(rows)).iloc[0]
+
+    assert corr["alignment"] == "active_encounter"
+    assert corr["surprise_dominates_reward"]
+    assert corr["corr_surprise_reward"] > 0.95
+    assert corr["corr_reward_active_encounters"] > 0.9
+    assert corr["active_encounter_min"] == 2
+    assert corr["active_encounter_max"] == 16
+    assert corr["active_encounter_imbalance"] == 8
+
+
 def test_betrayal_misdeployment_summary_flags_low_entropy_bad_payoff_after_switch():
     rows = []
     for round_idx in range(1, 7):

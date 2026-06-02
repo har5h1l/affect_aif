@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, cast
 
@@ -88,7 +88,10 @@ class ScenarioSpec:
     partners: int = 4
     type_volatility: float = 0.05
     observation_noise: float = 0.0
+    correlation_pairs: tuple[tuple[int, int], ...] = ()
+    correlation_strength: float = 0.9
     partner_types: tuple[str, ...] = tuple(PARTNER_TYPE_ORDER)
+    partner_type_params: dict[str, dict[str, Any]] = field(default_factory=dict)
     initial_types: tuple[str, ...] | None = None
     initial_stances: tuple[str, ...] | None = None
     type_switches: tuple[TypeSwitchSpec, ...] = ()
@@ -96,6 +99,10 @@ class ScenarioSpec:
     investment_levels: int = 6
     endowment: float = 10.0
     multiplier: float = 3.0
+    mutual_coop: tuple[float, float] = (3.0, 3.0)
+    sucker: tuple[float, float] = (-1.0, 5.0)
+    temptation: tuple[float, float] = (5.0, -1.0)
+    mutual_defect: tuple[float, float] = (1.0, 1.0)
 
 
 @dataclass(frozen=True)
@@ -169,7 +176,10 @@ class ExpandedRunSpec:
             num_rounds=self.rounds,
             p_switch=self.scenario.type_volatility,
             observation_noise=self.scenario.observation_noise,
+            correlation_pairs=[list(pair) for pair in self.scenario.correlation_pairs],
+            correlation_strength=self.scenario.correlation_strength,
             partner_types=list(self.scenario.partner_types),
+            partner_type_params=dict(self.scenario.partner_type_params),
             initial_partner_types=None if self.scenario.initial_types is None else list(self.scenario.initial_types),
             initial_partner_stances=(
                 None if self.scenario.initial_stances is None else list(self.scenario.initial_stances)
@@ -179,6 +189,10 @@ class ExpandedRunSpec:
             num_investment_levels=self.scenario.investment_levels,
             endowment=self.scenario.endowment,
             multiplier=self.scenario.multiplier,
+            mutual_coop=self.scenario.mutual_coop,
+            sucker=self.scenario.sucker,
+            temptation=self.scenario.temptation,
+            mutual_defect=self.scenario.mutual_defect,
             gamma=self.variant.gamma,
             action_sampling=self.variant.action_selection,
             alpha_charge=self.variant.alpha_charge,
@@ -201,10 +215,14 @@ class ExpandedRunSpec:
     def from_payload(cls, payload: dict[str, Any]) -> ExpandedRunSpec:
         scenario_data = dict(payload["scenario"])
         scenario_data["partner_types"] = tuple(scenario_data.get("partner_types", PARTNER_TYPE_ORDER))
+        scenario_data["partner_type_params"] = dict(scenario_data.get("partner_type_params", {}))
+        scenario_data["correlation_pairs"] = tuple(tuple(pair) for pair in scenario_data.get("correlation_pairs", ()))
         if scenario_data.get("initial_types") is not None:
             scenario_data["initial_types"] = tuple(scenario_data["initial_types"])
         if scenario_data.get("initial_stances") is not None:
             scenario_data["initial_stances"] = tuple(scenario_data["initial_stances"])
+        for key in ("mutual_coop", "sucker", "temptation", "mutual_defect"):
+            scenario_data[key] = tuple(scenario_data.get(key, getattr(ScenarioSpec, key)))
         scenario_data["stance_switches"] = tuple(
             StanceSwitchSpec(**item) for item in scenario_data.get("stance_switches", ())
         )
@@ -326,10 +344,14 @@ class ExperimentSpec:
         data["experiment"] = ExperimentMeta(**data["experiment"])
         scenario = dict(data["scenario"])
         scenario["partner_types"] = tuple(scenario.get("partner_types", PARTNER_TYPE_ORDER))
+        scenario["partner_type_params"] = dict(scenario.get("partner_type_params", {}))
+        scenario["correlation_pairs"] = tuple(tuple(pair) for pair in scenario.get("correlation_pairs", ()))
         if scenario.get("initial_types") is not None:
             scenario["initial_types"] = tuple(scenario["initial_types"])
         if scenario.get("initial_stances") is not None:
             scenario["initial_stances"] = tuple(scenario["initial_stances"])
+        for key in ("mutual_coop", "sucker", "temptation", "mutual_defect"):
+            scenario[key] = tuple(scenario.get(key, getattr(ScenarioSpec, key)))
         scenario["stance_switches"] = tuple(
             StanceSwitchSpec(**item) for item in scenario.get("stance_switches", ())
         )
@@ -385,10 +407,14 @@ def _parse_scenario(data: dict[str, Any]) -> ScenarioSpec:
     if scenario.get("assignment") not in ASSIGNMENT_VALUES:
         raise ValueError(f"scenario.assignment must be one of {sorted(ASSIGNMENT_VALUES)}")
     scenario["partner_types"] = tuple(scenario.get("partner_types", PARTNER_TYPE_ORDER))
+    scenario["partner_type_params"] = dict(scenario.get("partner_type_params", {}))
+    scenario["correlation_pairs"] = tuple(tuple(pair) for pair in scenario.get("correlation_pairs", ()))
     if "initial_types" in scenario:
         scenario["initial_types"] = tuple(scenario["initial_types"])
     if "initial_stances" in scenario:
         scenario["initial_stances"] = tuple(scenario["initial_stances"])
+    for key in ("mutual_coop", "sucker", "temptation", "mutual_defect"):
+        scenario[key] = tuple(scenario.get(key, getattr(ScenarioSpec, key)))
     scenario["stance_switches"] = tuple(StanceSwitchSpec(**item) for item in scenario.get("stance_switches", ()))
     scenario["type_switches"] = tuple(TypeSwitchSpec(**item) for item in scenario.get("type_switches", ()))
     return ScenarioSpec(**scenario)

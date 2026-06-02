@@ -1,0 +1,56 @@
+[hypothesis]
+id = "h1"
+name = "model_fitness"
+
+[experiment]
+id = "reliability_reward_neutral_diagnostic"
+family = "trust"
+rounds = 200
+replications = 5
+seed = 720
+
+[scenario]
+payoff = "binary"
+assignment = "random"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+partner_types = ["reliable_cooperator", "reliable_exploiter", "random_partner", "stance_sensitive_partner"]
+initial_types = ["reliable_cooperator", "reliable_exploiter", "random_partner", "stance_sensitive_partner"]
+initial_stances = ["neutral", "neutral", "neutral", "neutral"]
+partner_type_params = { reliable_cooperator = { cooperation_probabilities = { trusting = 0.9, neutral = 0.9, hostile = 0.9 } }, reliable_exploiter = { cooperation_probabilities = { trusting = 0.1, neutral = 0.1, hostile = 0.1 } }, random_partner = { cooperation_probabilities = { trusting = 0.5, neutral = 0.5, hostile = 0.5 } }, stance_sensitive_partner = { cooperation_probabilities = { trusting = 0.85, neutral = 0.5, hostile = 0.15 } } }
+mutual_coop = [3.0, 3.0]
+sucker = [3.0, 3.0]
+temptation = [3.0, 3.0]
+mutual_defect = [3.0, 3.0]
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
+[[variants]]
+id = "tracked_only"
+affect = "tracked_only"
+planning_horizon = 4
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[analysis]
+auto = true
+primary = "h1_model_fitness_reward_neutral"
+compare = ["affect", "global_beta", "tracked_only", "no_affect"]
+metrics = [
+  "precision",
+  "model_fitness_correlation",
+  "evidence_effects",
+  "active_encounter_imbalance",
+]

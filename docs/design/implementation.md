@@ -75,6 +75,16 @@ The shipped trust-game path now uses the action-dependent stance redesign.
   `experiment x variants x sweeps x replications`.
 - Each expanded run adapts to `ExperimentConfig` immediately before environment
   and `pymdp.Agent` construction.
+- Scenario specs can override `partner_types` and `partner_type_params` for
+  controlled reliability diagnostics. The same partner parameters are used by
+  the scripted environment and by the partner-local POMDP likelihood, so these
+  controls change task structure rather than introducing hidden mismatch between
+  the world and the agent's model.
+- Binary trust specs can override `mutual_coop`, `sucker`, `temptation`, and
+  `mutual_defect`. This is reserved for controlled diagnostics such as
+  reward-neutral H1 checks; manuscript-facing social-trust runs should prefer
+  the standard binary or graded payoff spine unless a payoff-control claim is
+  explicitly being tested.
 - Planning horizon is a normal variant knob (`planning_horizon`) rather than a
   numeric condition category.
 - `affect = "none"` builds a base runtime, `affect = "precision"` builds the

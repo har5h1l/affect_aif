@@ -1009,6 +1009,10 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
         precision, surprise, reward_proxy, reward_source, alignment = _model_fitness_correlation_inputs(group)
         corr_surprise = _safe_corr(precision, surprise)
         corr_reward = _safe_corr(precision, reward_proxy)
+        corr_surprise_reward = _safe_corr(surprise, reward_proxy)
+        corr_precision_encounters = _safe_corr(precision, group["active_encounters"])
+        corr_surprise_encounters = _safe_corr(surprise, group["active_encounters"])
+        corr_reward_encounters = _safe_corr(reward_proxy, group["active_encounters"])
         partial_corr_surprise = _partial_corr(
             precision,
             surprise,
@@ -1027,8 +1031,25 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
                 "alignment": alignment,
                 "corr_precision_surprise": corr_surprise,
                 "corr_precision_reward": corr_reward,
+                "corr_surprise_reward": corr_surprise_reward,
+                "corr_precision_active_encounters": corr_precision_encounters,
+                "corr_surprise_active_encounters": corr_surprise_encounters,
+                "corr_reward_active_encounters": corr_reward_encounters,
                 "abs_corr_precision_surprise": abs(corr_surprise) if np.isfinite(corr_surprise) else np.nan,
                 "abs_corr_precision_reward": abs(corr_reward) if np.isfinite(corr_reward) else np.nan,
+                "abs_corr_surprise_reward": (
+                    abs(corr_surprise_reward) if np.isfinite(corr_surprise_reward) else np.nan
+                ),
+                "abs_corr_reward_active_encounters": (
+                    abs(corr_reward_encounters) if np.isfinite(corr_reward_encounters) else np.nan
+                ),
+                "active_encounter_min": float(group["active_encounters"].min()),
+                "active_encounter_max": float(group["active_encounters"].max()),
+                "active_encounter_imbalance": (
+                    float(group["active_encounters"].max() / group["active_encounters"].min())
+                    if float(group["active_encounters"].min()) > 0.0
+                    else np.nan
+                ),
                 "surprise_dominates_reward": (
                     bool(abs(corr_surprise) > abs(corr_reward))
                     if np.isfinite(corr_surprise) and np.isfinite(corr_reward)

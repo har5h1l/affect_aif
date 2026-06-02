@@ -8,8 +8,10 @@
   surprise-over-reward dominance in the smoke, including partial correlations
   controlling active payoff and encounter count. This is still smoke evidence;
   run confirmation before manuscript use. If confirmation remains heavily
-  reward/exposure-confounded, construct a balanced-exposure reliability-vs-
-  reward task with matched expected payoff across partner cases.
+  reward/exposure-confounded, use the bounded diagnostic ladder now documented
+  in `progress.md`: corrected confirmation -> balanced-exposure graded
+  reliability spine -> strict reward-neutral H1. Only treat H1 as model-level
+  failure if the strict reward-neutral diagnostic also fails.
 
 - **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
   The manuscript currently uses deployment/entropy language for H0/H2 and
@@ -38,7 +40,8 @@
   with `--workers 1` after the verification gate passes.
 - H1 needs confirmation with the corrected active-aligned and partial
   model-fitness diagnostics before manuscript use. Do not promote the corrected
-  smoke read directly to a publication claim.
+  smoke read directly to a publication claim. The new controlled H1 configs are
+  diagnostic surfaces, not current evidence.
 - Complete any remaining import-boundary cleanup toward
   `scripts -> experiments -> tasks -> inferactively-pymdp`.
 - After Exp A-D: run `scripts/analysis/analyze.py` on each `results/exp_*/`

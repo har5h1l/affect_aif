@@ -289,6 +289,18 @@ defected against, or disengaged from, not treated as rewarding.
 **Failure mode:** Precision mostly tracks average payoff, collapsing the
 mechanism into cached value.
 
+**Controlled diagnostic path:** The first confirmation read remains the
+corrected active-encounter analysis on the current H1 setup. If reward,
+surprise, and encounter count remain coupled, use a balanced-exposure reliability
+spine before adding seeds: random assignment, fixed partner roster, custom
+partner action probabilities for reliable cooperator, reliable exploiter,
+random, and stance-sensitive partners, and the corrected partial-correlation
+readouts. The manuscript-consistent diagnostic is the graded spine; the stricter
+reward-neutral binary spine is an escalation test that removes partner-dependent
+reward entirely. Passing the strict diagnostic but failing the graded spine
+would identify a task-design/readout confound rather than a failure of the
+affective precision mechanism.
+
 ### H2: Deployment
 
 **Prediction:** Lesioning the beta-to-policy pathway should preserve partner

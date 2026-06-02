@@ -20,20 +20,19 @@ As of May 31, 2026, the manuscript has been substantially revised toward the
 full individual-differences / phenotype framing. The canonical affect update
 uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
-### June 1 H1 Analysis Checkpoint
+### June 2 H1 Analysis/Design Checkpoint
 
-Server `master` and GitHub `origin/master` are at commit `942c595` after the
-H1 active-encounter alignment fix and corrected H1 smoke source-table refresh.
-The default Mango repo status still reports the desktop-local checkout at
-`e616ba9`; continue local development by fast-forwarding the local checkout:
-
-```bash
-git pull origin master
-```
+Server `master` and GitHub `origin/master` are at commit `3a36756` after the
+H1 active-encounter alignment fix and follow-up handoff notes. The previous
+`942c595` note is stale; later H1 handoff commits sit on top of it.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
-`affect_aif_exp_abcd_20260529` is still running; the active child process is
-currently `scripts/experiment/run_exp_b_prior_factorial.py`.
+`affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
+June 2, Exp A has written `results/exp_a/` and manuscript source tables, while
+Exp B is active in `scripts/experiment/run_exp_b_prior_factorial.py` with
+`results/exp_b/betrayal/results_partial.csv` in progress. Do not interpret Exp
+A or partial Exp B outputs as manuscript evidence until Exp A-D complete and
+the user approves result interpretation updates.
 
 The post-fix H0-H6 smoke rebaseline completed at:
 
@@ -170,9 +169,31 @@ reward/exposure-confounded.
   `partial_corr_precision_reward`.
 - Treat whole-run payoff as secondary; H1 is about model fitness, not reward
   advantage.
-- If corrected confirmation remains confounded, build a balanced-exposure
-  reliability manipulation with matched expected reward before adding more
-  seeds.
+- If corrected confirmation remains confounded, run the balanced-exposure
+  graded reliability spine before adding more seeds:
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h1_model_fitness/reliability_spine_graded_diagnostic.toml \
+  --output-dir results \
+  --batch-name log_surprisal_h1_graded_spine_diagnostic_YYYYMMDD \
+  --workers 1
+```
+
+- If the graded spine still cannot separate reward/exposure from predictive
+  reliability, run the strict reward-neutral diagnostic:
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h1_model_fitness/reliability_reward_neutral_diagnostic.toml \
+  --output-dir results \
+  --batch-name log_surprisal_h1_reward_neutral_diagnostic_YYYYMMDD \
+  --workers 1
+```
+
+Interpretation rule: a pass on reward-neutral H1 with a failure on graded H1 is
+an analysis/task-design confound, not a model-level failure. A failure on both
+would justify reframing H1 before more confirmation-scale seeds.
 
 ### Priority 3: H0/H2/H4 Manuscript Support (run if language stays in draft)
 

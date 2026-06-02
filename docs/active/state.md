@@ -57,7 +57,8 @@ See `docs/active/progress.md` for commands and expected outputs.
 - Active runtime cutover to official `inferactively-pymdp==1.0.0` is complete.
 - Post-fix H0-H6 smoke completed under corrected centered selector.
 - Manuscript draft revised toward phenotype/individual-differences framing.
-- Exp A-D scripts implemented and running on server.
+- Exp A-D scripts implemented and running on server. Exp A has written outputs;
+  Exp B is still running, so phenotype outputs are not final evidence.
 - Confirmation-scale runs for H5 (and H1 corrected-readout confirmation) are the next planned
   experiments after Exp A-D complete.
 
@@ -89,7 +90,9 @@ The next active lane is:
 3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers.
 4. Queue H5 confirmation run after verification gate passes.
 5. Run H1 confirmation with the corrected active-aligned and partial-correlation
-   readouts; redesign only if confirmation remains reward/exposure-confounded.
+   readouts; if confirmation remains reward/exposure-confounded, use the
+   balanced graded reliability spine and then the reward-neutral diagnostic
+   before treating the model as failed.
 
 Do not create a separate handoff document; keep the live handoff in this
 `docs/active/` state/progress surface.

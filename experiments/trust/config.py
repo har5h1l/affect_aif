@@ -51,6 +51,7 @@ class ExperimentConfig:
     num_replications: int = 1
     random_seed: int = 42
     partner_types: list[str] = field(default_factory=lambda: list(PARTNER_TYPE_ORDER))
+    partner_type_params: dict[str, dict] = field(default_factory=dict)
 
     def __post_init__(self):
         self.num_partners = int(self.num_partners)

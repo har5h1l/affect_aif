@@ -136,6 +136,47 @@ def test_variant_beta_prior_flows_to_runtime_config(tmp_path):
     assert cfg.initial_beta_prior == [0.4, 0.4, 0.15, 0.04, 0.01]
 
 
+def test_scenario_partner_type_params_and_payoffs_flow_to_runtime_config(tmp_path):
+    path = write_example_toml(tmp_path / "controlled_h1.toml")
+    text = path.read_text(encoding="utf-8")
+    params = (
+        "{ "
+        "reliable_cooperator = { cooperation_probabilities = "
+        "{ trusting = 0.9, neutral = 0.9, hostile = 0.9 } }, "
+        "reliable_exploiter = { cooperation_probabilities = "
+        "{ trusting = 0.1, neutral = 0.1, hostile = 0.1 } }, "
+        "random_partner = { cooperation_probabilities = "
+        "{ trusting = 0.5, neutral = 0.5, hostile = 0.5 } }, "
+        "volatile_partner = { cooperation_probabilities = "
+        "{ trusting = 0.8, neutral = 0.5, hostile = 0.2 } } "
+        "}"
+    )
+    text = text.replace(
+        "type_volatility = 0.0\n",
+        """
+type_volatility = 0.0
+partner_types = ["reliable_cooperator", "reliable_exploiter", "random_partner", "volatile_partner"]
+"""
+        + f"partner_type_params = {params}\n"
+        + """
+mutual_coop = [3.0, 3.0]
+sucker = [3.0, 3.0]
+temptation = [3.0, 3.0]
+mutual_defect = [3.0, 3.0]
+""",
+    )
+    path.write_text(text, encoding="utf-8")
+
+    cfg = ExperimentSpec.from_toml(path).expand_runs()[0].to_runtime_config()
+
+    assert cfg.partner_types == ["reliable_cooperator", "reliable_exploiter", "random_partner", "volatile_partner"]
+    assert cfg.partner_type_params["reliable_exploiter"]["cooperation_probabilities"]["neutral"] == 0.1
+    assert cfg.mutual_coop == (3.0, 3.0)
+    assert cfg.sucker == (3.0, 3.0)
+    assert cfg.temptation == (3.0, 3.0)
+    assert cfg.mutual_defect == (3.0, 3.0)
+
+
 def test_scenario_type_switches_flow_to_runtime_config(tmp_path):
     path = write_example_toml(tmp_path / "type_switch.toml")
     text = path.read_text(encoding="utf-8")

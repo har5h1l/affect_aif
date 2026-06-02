@@ -24,7 +24,6 @@ from tasks.trust.payoffs import (
 from tasks.trust.stance import (
     STANCE_ORDER,
     cooperation_evidence_strength,
-    get_type_stance_cooperation_table,
     interpolate_stance_transition,
 )
 from tasks.trust.types import PARTNER_TYPE_ORDER, PartnerType, default_partner_type_params
@@ -162,7 +161,13 @@ def build_trust_pomdp_template(
     num_types = len(partner_type_names)
     num_stances = len(stance_names)
     num_states = (num_types, num_stances, num_social_actions)
-    partner_action_prob_table = get_type_stance_cooperation_table(partner_type_names)
+    partner_action_prob_table = np.asarray(
+        [
+            [partner_type.get_action_probability(stance_name) for stance_name in stance_names]
+            for partner_type in partner_types
+        ],
+        dtype=float,
+    )
     payoff_index_table = _build_payoff_index_table(
         payoff_matrix=payoff_matrix,
         payoff_values=payoff_values,
