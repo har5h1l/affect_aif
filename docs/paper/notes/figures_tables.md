@@ -50,6 +50,11 @@ Primary source:
 - `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h1_model_fitness_correlation_summary.csv`
 - `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h1_evidence_effect_summary.csv`
 
+Figure generation should use the partial H1 readout, not the raw correlation
+gap: `abs_partial_corr_precision_surprise`,
+`abs_partial_corr_precision_reward`, and
+`abs_partial_corr_precision_surprise_minus_reward`.
+
 Current corrected post-fix smoke: local affect has
 `|corr(precision, surprise)| = 0.976` and
 `|corr(precision, payoff)| = 0.721`; the partial readout controlling active

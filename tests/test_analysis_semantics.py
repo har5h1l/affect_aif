@@ -461,8 +461,11 @@ def test_betrayal_reallocation_summary_reports_return_and_no_return_events():
 def test_evidence_effect_summary_reports_h1_and_h3_split_readouts():
     rows = []
     for seed in [0, 1, 2]:
+        affect_betas = [0.5 + 0.02 * seed, 2.0 - 0.05 * seed, 0.67 + 0.03 * seed]
+        affect_prediction_errors = [0.1 + 0.03 * seed, 0.8 - 0.04 * seed, 0.2 + 0.02 * seed]
+        affect_reward_avgs = [1.0 + 0.2 * seed, 5.0 - 0.1 * seed, 5.0 + 0.3 * seed]
         for variant_id, beta_values, selected_after, payoff_after in [
-            ("affect", [0.5, 2.0, 0.67], [1, 1, 0], [1.0, 1.0, 10.0]),
+            ("affect", affect_betas, [1, 1, 0], [1.0, 1.0, 10.0]),
             ("no_affect", [float("nan"), float("nan"), float("nan")], [0, 0, 1], [7.0, 7.0, 1.0]),
         ]:
             for round_idx in range(1, 7):
@@ -484,8 +487,8 @@ def test_evidence_effect_summary_reports_h1_and_h3_split_readouts():
                         "selected_partner": selected_partner,
                         "selected_action": 1,
                         "betas": beta_values,
-                        "prediction_errors": [0.1, 0.8, 0.2],
-                        "reward_avgs": [1.0, 5.0, 5.0],
+                        "prediction_errors": affect_prediction_errors,
+                        "reward_avgs": affect_reward_avgs,
                         "scheduled_stance_switch_partner_ids": [0] if round_idx == 4 else [],
                         "scheduled_switch_partner_ids": [],
                         "type_switched": False,
@@ -511,6 +514,11 @@ def test_evidence_effect_summary_reports_h1_and_h3_split_readouts():
     h1 = summary.loc[summary["readout"] == "model_fitness"].iloc[0]
     assert h1["metric"] == "abs_corr_precision_surprise_minus_reward"
     assert h1["treatment_mean"] > 0
+    h1_partial = summary.loc[
+        (summary["readout"] == "model_fitness")
+        & (summary["metric"] == "abs_partial_corr_precision_surprise_minus_reward")
+    ].iloc[0]
+    assert h1_partial["treatment_mean"] > 0
 
     reallocation = summary.loc[
         (summary["readout"] == "betrayal_reallocation")

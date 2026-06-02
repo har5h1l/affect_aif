@@ -61,6 +61,12 @@ Source tables:
 - `source_tables/postfix_smoke_20260528/h1_evidence_effect_summary.csv`
 - `source_tables/postfix_smoke_20260528/h1_model_fitness_correlation_summary.csv`
 
+Generation rule: use the active-encounter partial columns
+`abs_partial_corr_precision_surprise` and
+`abs_partial_corr_precision_reward`, plus the
+`abs_partial_corr_precision_surprise_minus_reward` effect row. Raw correlation
+columns are retained as secondary diagnostics only.
+
 Current smoke numbers:
 
 - Local beta: `|corr(precision, surprise)| = 0.976`

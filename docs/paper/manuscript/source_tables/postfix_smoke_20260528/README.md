@@ -17,6 +17,8 @@ after active-encounter alignment:
 - local affect: `|corr(precision, payoff)| = 0.721`
 - local affect partial readout controlling active payoff and encounter count:
   `0.951` versus `0.172`
+- local affect partial surprise-minus-reward effect row:
+  `0.7795`
 
 H5 remains the strongest post-fix behavioral anchor at smoke scale:
 

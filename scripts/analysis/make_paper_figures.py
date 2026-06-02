@@ -123,17 +123,18 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         "h1_model_fitness_correlation_summary.csv",
         {
             "variant_id",
-            "corr_precision_surprise",
-            "corr_precision_reward",
-            "abs_corr_precision_surprise",
-            "abs_corr_precision_reward",
+            "alignment",
+            "partial_corr_precision_surprise",
+            "partial_corr_precision_reward",
+            "abs_partial_corr_precision_surprise",
+            "abs_partial_corr_precision_reward",
         },
     )
     if correlation.empty:
         raise ValueError("h1_model_fitness_correlation_summary.csv has no rows")
 
     corr_row = correlation.iloc[0]
-    fitness = _effect_row(evidence, "model_fitness", "abs_corr_precision_surprise_minus_reward")
+    fitness = _effect_row(evidence, "model_fitness", "abs_partial_corr_precision_surprise_minus_reward")
     payoff = _effect_row(evidence, "final", "total_payoff")
 
     fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
@@ -141,13 +142,13 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[0],
         ["predictive surprise", "reward proxy"],
         [
-            float(corr_row["abs_corr_precision_surprise"]),
-            float(corr_row["abs_corr_precision_reward"]),
+            float(corr_row["abs_partial_corr_precision_surprise"]),
+            float(corr_row["abs_partial_corr_precision_reward"]),
         ],
-        title="Precision correlations",
-        ylabel="absolute correlation",
+        title="Partial precision correlations",
+        ylabel="absolute partial correlation",
     )
-    axes[0].set_ylim(0, max(0.05, float(corr_row["abs_corr_precision_surprise"])) + 0.12)
+    axes[0].set_ylim(0, max(0.05, float(corr_row["abs_partial_corr_precision_surprise"])) + 0.12)
 
     _plot_difference_with_ci(
         axes[1],

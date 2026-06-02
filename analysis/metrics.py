@@ -908,6 +908,7 @@ def evidence_effect_summary(
         for variant_id, group in partner_fitness.groupby("variant_id"):
             precision, surprise, reward_proxy, _, _ = _model_fitness_correlation_inputs(group)
             seed_rows = []
+            partial_seed_rows = []
             for seed, seed_group in group.groupby("seed"):
                 seed_precision = precision.loc[seed_group.index]
                 seed_surprise = surprise.loc[seed_group.index]
@@ -919,6 +920,29 @@ def evidence_effect_summary(
                         {
                             "seed": int(seed),
                             "dominance": abs(corr_surprise) - abs(corr_reward),
+                        }
+                    )
+                partial_corr_surprise = _partial_corr(
+                    seed_precision,
+                    seed_surprise,
+                    {
+                        "reward": seed_reward,
+                        "active_encounters": seed_group["active_encounters"],
+                    },
+                )
+                partial_corr_reward = _partial_corr(
+                    seed_precision,
+                    seed_reward,
+                    {
+                        "surprise": seed_surprise,
+                        "active_encounters": seed_group["active_encounters"],
+                    },
+                )
+                if np.isfinite(partial_corr_surprise) and np.isfinite(partial_corr_reward):
+                    partial_seed_rows.append(
+                        {
+                            "seed": int(seed),
+                            "dominance": abs(partial_corr_surprise) - abs(partial_corr_reward),
                         }
                     )
             seed_frame = pd.DataFrame(seed_rows)
@@ -936,6 +960,44 @@ def evidence_effect_summary(
                         metric="abs_corr_precision_surprise_minus_reward",
                         treatment_variant=str(variant_id),
                         treatment_values=seed_frame["dominance"],
+                        bootstrap_iterations=bootstrap_iterations,
+                        random_seed=random_seed,
+                    )
+                )
+            partial_seed_frame = pd.DataFrame(partial_seed_rows)
+            if partial_seed_frame.empty:
+                partial_corr_surprise = _partial_corr(
+                    precision,
+                    surprise,
+                    {
+                        "reward": reward_proxy,
+                        "active_encounters": group["active_encounters"],
+                    },
+                )
+                partial_corr_reward = _partial_corr(
+                    precision,
+                    reward_proxy,
+                    {
+                        "surprise": surprise,
+                        "active_encounters": group["active_encounters"],
+                    },
+                )
+                if np.isfinite(partial_corr_surprise) and np.isfinite(partial_corr_reward):
+                    partial_seed_frame = pd.DataFrame(
+                        [
+                            {
+                                "seed": -1,
+                                "dominance": abs(partial_corr_surprise) - abs(partial_corr_reward),
+                            }
+                        ]
+                    )
+            if not partial_seed_frame.empty:
+                rows.append(
+                    _effect_row(
+                        readout="model_fitness",
+                        metric="abs_partial_corr_precision_surprise_minus_reward",
+                        treatment_variant=str(variant_id),
+                        treatment_values=partial_seed_frame["dominance"],
                         bootstrap_iterations=bootstrap_iterations,
                         random_seed=random_seed,
                     )

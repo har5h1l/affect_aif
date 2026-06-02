@@ -50,6 +50,17 @@ notes remain as provenance, but current planning pages now treat H1 as
 smoke-supported and awaiting confirmation or controlled diagnostic escalation
 before manuscript use.
 
+As of June 2 01:22 PDT, Exp B is still CPU-active in the same tmux/Mango
+process; `results/exp_b/betrayal/results_partial.csv` updated at 01:20 PDT.
+Continue monitor-only and do not interpret Exp A/B outputs until Exp A-D
+complete.
+
+The H1 manuscript figure/source-table path now uses the partial model-fitness
+readout (`abs_partial_corr_precision_surprise_minus_reward`) alongside the
+active-encounter partial correlation columns. The default paper figure builder
+was verified against the current source-table packet in `/tmp` after refreshing
+the H1 source tables from the post-fix smoke results.
+
 ```text
 tmux: affect_aif_full_pytest_20260602_final
 log: /tmp/affect_aif_full_pytest_20260602_final.log
@@ -200,6 +211,9 @@ reward/exposure-confounded.
 - Use the corrected `model_fitness_correlation_summary.csv` columns:
   `alignment`, `partial_corr_precision_surprise`, and
   `partial_corr_precision_reward`.
+- Use `evidence_effect_summary.csv` metric
+  `abs_partial_corr_precision_surprise_minus_reward` for manuscript figure
+  effect panels; the raw correlation gap remains a secondary diagnostic.
 - Treat whole-run payoff as secondary; H1 is about model fitness, not reward
   advantage.
 - If corrected confirmation remains confounded, run the balanced-exposure

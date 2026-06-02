@@ -32,17 +32,34 @@ def _write_source_tables(source_dir):
                 "bootstrap_ci_low": 0.027,
                 "bootstrap_ci_high": 0.164,
             },
+            {
+                "readout": "model_fitness",
+                "metric": "abs_partial_corr_precision_surprise_minus_reward",
+                "treatment_variant": "affect",
+                "reference_variant": "",
+                "treatment_mean": 0.779,
+                "reference_mean": "",
+                "difference": 0.779,
+                "bootstrap_ci_low": "",
+                "bootstrap_ci_high": "",
+            },
         ]
     ).to_csv(source_dir / "h1_evidence_effect_summary.csv", index=False)
     pd.DataFrame(
         [
             {
                 "variant_id": "affect",
+                "alignment": "active_encounter",
                 "corr_precision_surprise": -0.70,
                 "corr_precision_reward": -0.42,
                 "abs_corr_precision_surprise": 0.70,
                 "abs_corr_precision_reward": 0.42,
+                "partial_corr_precision_surprise": -0.95,
+                "partial_corr_precision_reward": 0.17,
+                "abs_partial_corr_precision_surprise": 0.95,
+                "abs_partial_corr_precision_reward": 0.17,
                 "surprise_dominates_reward": True,
+                "partial_surprise_dominates_reward": True,
             }
         ]
     ).to_csv(source_dir / "h1_model_fitness_correlation_summary.csv", index=False)
@@ -136,9 +153,9 @@ def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
     output_dir = tmp_path / "figures"
     _write_source_tables(source_dir)
     broken = pd.read_csv(source_dir / "h1_model_fitness_correlation_summary.csv").drop(
-        columns=["abs_corr_precision_reward"]
+        columns=["abs_partial_corr_precision_reward"]
     )
     broken.to_csv(source_dir / "h1_model_fitness_correlation_summary.csv", index=False)
 
-    with pytest.raises(ValueError, match="missing required columns.*abs_corr_precision_reward"):
+    with pytest.raises(ValueError, match="missing required columns.*abs_partial_corr_precision_reward"):
         make_paper_figures.model_fitness_figure(source_dir, output_dir)
