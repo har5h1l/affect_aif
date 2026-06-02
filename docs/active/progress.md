@@ -30,13 +30,13 @@ and architecture commits on top. The previous `3a36756`, `942c595`,
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
-June 2 01:00 PDT, Exp A has written `results/exp_a/` and manuscript source
+June 2 02:10 PDT, Exp A has written `results/exp_a/` and manuscript source
 tables, while Exp B is active in
 `scripts/experiment/run_exp_b_prior_factorial.py`; its
-`results/exp_b/betrayal/results_partial.csv` last updated at
-June 2 00:41:42 PDT and Exp C/D have not started. Do not interpret Exp A or
-partial Exp B outputs as manuscript evidence until Exp A-D complete and the
-user approves result interpretation updates.
+`results/exp_b/betrayal/results_partial.csv` last updated at 01:53:55 PDT and
+the run log last updated at 01:53:56 PDT. Exp C/D have not started. Do not
+interpret Exp A or partial Exp B outputs as manuscript evidence until Exp A-D
+complete and the user approves result interpretation updates.
 
 The full local pytest gate is clean as of June 2 01:00 PDT. The previous
 stall was diagnosed as oversized test fixtures that imported the full H5
@@ -50,11 +50,9 @@ notes remain as provenance, but current planning pages now treat H1 as
 smoke-supported and awaiting confirmation or controlled diagnostic escalation
 before manuscript use.
 
-As of June 2 01:54 PDT, Exp B is still active in the same tmux/Mango process.
-Mango reports `affect_aif_exp_abcd_20260529` as running and monitor-only;
-`results/exp_b/betrayal/results_partial.csv` last updated at 01:53:55 PDT and
-the run log last updated at 01:53:56 PDT. Continue monitor-only and do not
-interpret Exp A/B outputs until Exp A-D complete.
+Mango reports `affect_aif_exp_abcd_20260529` as running and monitor-only.
+Continue monitor-only and do not interpret Exp A/B outputs until Exp A-D
+complete.
 
 The H1 manuscript figure/source-table path now uses the partial model-fitness
 readout (`abs_partial_corr_precision_surprise_minus_reward`) alongside the

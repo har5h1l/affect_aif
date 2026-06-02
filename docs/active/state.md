@@ -91,8 +91,9 @@ The next active lane is:
 4. Queue H5 confirmation run after verification gate passes.
 5. Run H1 confirmation with the corrected active-aligned and partial-correlation
    readouts; if confirmation remains reward/exposure-confounded, use the
-   balanced graded reliability spine and then the reward-neutral diagnostic
-   before treating the model as failed.
+   balanced graded reliability spine, then the reward-matched graded spine, and
+   then the strict reward-neutral diagnostic before treating the model as
+   failed.
 
 Do not create a separate handoff document; keep the live handoff in this
 `docs/active/` state/progress surface.
