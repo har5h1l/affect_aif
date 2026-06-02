@@ -4,8 +4,10 @@ from scripts.experiment.run_exp_a_alpha_sweep import EXP_A_PANELS, _summary_with
 from scripts.experiment.run_exp_a_alpha_sweep import metrics as exp_a_metrics
 from scripts.experiment.run_exp_b_prior_factorial import EXP_B_RADAR_METRICS
 from scripts.experiment.run_exp_b_prior_factorial import metrics as exp_b_metrics
-from scripts.experiment.run_exp_c_forgiveness import _payoff_recovery
-from scripts.experiment.run_exp_d_mixed_volatility import build_specs, metrics
+from scripts.experiment.run_exp_c_forgiveness import EXP_C_PANELS, _payoff_recovery
+from scripts.experiment.run_exp_c_forgiveness import metrics as exp_c_metrics
+from scripts.experiment.run_exp_d_mixed_volatility import EXP_D_PANELS, build_specs
+from scripts.experiment.run_exp_d_mixed_volatility import metrics as exp_d_metrics
 
 
 def test_exp_d_alpha_conditions_are_distinct_and_ordered():
@@ -47,7 +49,7 @@ def test_exp_d_false_positive_rate_tracks_stable_partner_drop_not_non_p0_selecti
             }
         )
 
-    summary = metrics(pd.DataFrame(rows))
+    summary = exp_d_metrics(pd.DataFrame(rows))
 
     assert float(summary.loc[0, "concentration_toward_p0"]) == 0.5
     assert float(summary.loc[0, "false_positive_rate"]) == 1.0
@@ -100,6 +102,73 @@ def test_exp_a_summary_reports_mean_and_95_ci():
 
     assert float(summary.loc[0, "mean"]) == 2.0
     assert round(float(summary.loc[0, "ci95"]), 2) == 1.96
+
+
+def test_exp_c_panels_match_manuscript_plan():
+    assert EXP_C_PANELS == (
+        "reengagement_rate",
+        "beta_recovery_trajectory",
+        "payoff_recovery",
+    )
+
+
+def test_exp_c_metrics_include_partner0_beta_recovery_trajectory():
+    rows = []
+    for round_idx in range(1, 201):
+        rows.append(
+            {
+                "experiment_id": "forgiveness",
+                "variant_id": "default_reference",
+                "seed": 1,
+                "round": round_idx,
+                "partner_idx": 0,
+                "payoff": 1.0,
+                "true_partner_type": "cooperator",
+                "agent_action": 1,
+                "q_pi_entropy": 0.5,
+                "local_betas": f"[{round_idx / 100.0}, 0.8, 1.2, 1.5]",
+            }
+        )
+
+    summary = exp_c_metrics(pd.DataFrame(rows))
+
+    assert float(summary.loc[0, "beta_recovery_r080"]) == 0.8
+    assert float(summary.loc[0, "beta_recovery_r200"]) == 2.0
+
+
+def test_exp_d_panels_match_manuscript_plan():
+    assert EXP_D_PANELS == (
+        "default_beta_trajectories",
+        "high_alpha_beta_trajectories",
+        "discrimination_index",
+        "concentration_toward_p0",
+    )
+
+
+def test_exp_d_metrics_include_beta_and_p0_selection_trajectories():
+    rows = []
+    for round_idx in range(1, 201):
+        rows.append(
+            {
+                "experiment_id": "mixed_volatility",
+                "variant_id": "default_reference",
+                "seed": 1,
+                "round": round_idx,
+                "partner_idx": 0 if round_idx <= 100 else 1,
+                "local_betas": f"[{round_idx / 100.0}, {1 + round_idx / 100.0}, 1.2, 1.5]",
+                "payoff": 1.0,
+                "true_partner_type": "cooperator",
+                "agent_action": 1,
+                "q_pi_entropy": 0.5,
+            }
+        )
+
+    summary = exp_d_metrics(pd.DataFrame(rows))
+
+    assert float(summary.loc[0, "p0_beta_r050"]) == 0.5
+    assert float(summary.loc[0, "p1_beta_r200"]) == 3.0
+    assert float(summary.loc[0, "p0_selection_r050"]) == 1.0
+    assert float(summary.loc[0, "p0_selection_r150"]) == 0.0
 
 
 def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():

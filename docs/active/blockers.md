@@ -77,6 +77,10 @@
   finality so the 1--30 early-exploitation window, entropy trajectory panel,
   and confidence intervals are reflected in `metrics.csv`, source tables, and
   `fig_alpha_sweep.pdf`.
+- Exp C/D figure-contract alignment: fixed before Exp C/D had started. Exp C
+  now emits the beta recovery trajectory columns needed by the forgiveness
+  figure, and Exp D now emits beta and P0-selection trajectory snapshots needed
+  by the mixed-volatility figure. No interruption or rerun is required.
 - Import-boundary cleanup: benchmark orchestration moved to
   `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
   `experiments`, `analysis`, or `benchmarks`.

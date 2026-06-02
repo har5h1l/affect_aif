@@ -32,16 +32,14 @@ and `f86ede4` notes are stale as current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
-June 2 03:04 PDT, Exp A has written `results/exp_a/` and manuscript source
+June 2 03:14 PDT, Exp A has written `results/exp_a/` and manuscript source
 tables, while Exp B is still CPU-active in
 `scripts/experiment/run_exp_b_prior_factorial.py`; its open-graded and
-betrayal sub-runs have final per-scenario files, and the process appears to be
-inside the remaining Exp B work. The run log and
-`results/exp_b/betrayal/results_partial.csv` last updated at 02:56-02:57 PDT,
-but the Exp B Python process is CPU-active. Exp C/D have not started and have
-no output files. Do not interpret Exp A or partial Exp B outputs as manuscript
-evidence until Exp A-D complete and the user approves result interpretation
-updates.
+betrayal sub-runs have final per-scenario files, and
+`results/exp_b/partner_choice/results_partial.csv` now exists. The Exp B
+Python process is CPU-active. Exp C/D have not started and have no output
+files. Do not interpret Exp A or partial Exp B outputs as manuscript evidence
+until Exp A-D complete and the user approves result interpretation updates.
 
 The full local pytest gate is clean as of June 2 01:00 PDT. The previous
 stall was diagnosed as oversized test fixtures that imported the full H5
@@ -93,6 +91,17 @@ and Exp D's `false_positive_rate` was aligned to the planned stable-partner
 readout by measuring rolling P0 engagement drops more than 15% below its early
 baseline. Exp A/B outputs are not obsolete; no interruption or rerun was
 required.
+
+Still before Exp C/D had started, the Exp C/D compact figure contracts were
+aligned to the manuscript plan without changing task dynamics or the model
+process. Exp C now writes partner-0 beta recovery trajectory columns for the
+planned forgiveness figure and uses the planned three panels: reengagement
+rate, beta recovery trajectory, and payoff recovery. Exp D now writes
+per-partner beta trajectory snapshots and rolling P0-selection snapshots for
+the planned mixed-volatility figure: default and high-alpha beta trajectories,
+discrimination index with 95% CI, and concentration toward P0 with switch/drift
+reference lines. Since Exp C/D had no outputs, no rerun or analyze-only
+regeneration is required for those two experiments.
 
 On June 2, while Exp B was still running, the Exp B compact analysis and figure
 contract was aligned to the manuscript plan without changing task dynamics or

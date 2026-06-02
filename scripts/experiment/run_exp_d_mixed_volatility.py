@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import sys
+from math import sqrt
 from pathlib import Path
 
 SCRIPT_DIR = str(Path(__file__).resolve().parent)
@@ -25,10 +26,17 @@ from scripts.experiment.followup_phenotypes import (
     no_affect_variant,
     run_suite_main,
     save_figure,
-    summarize_for_plot,
     variant_label,
     vector_value,
 )
+
+EXP_D_PANELS = (
+    "default_beta_trajectories",
+    "high_alpha_beta_trajectories",
+    "discrimination_index",
+    "concentration_toward_p0",
+)
+TRAJECTORY_ROUNDS = (50, 100, 150, 200)
 
 
 def build_specs(*, rounds: int, seeds: int, seed: int):
@@ -62,6 +70,25 @@ def _partner_beta_range(group: pd.DataFrame, partner: int) -> float:
     if values.empty:
         return float("nan")
     return float(values.max() - values.min())
+
+
+def _partner_beta_at_round(group: pd.DataFrame, partner: int, target_round: int) -> float:
+    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rows = group[rounds == int(target_round)]
+    if rows.empty:
+        rows = group[rounds == rounds[rounds <= int(target_round)].max()]
+    if rows.empty:
+        return float("nan")
+    values = [vector_value(value, partner) for value in rows["local_betas"]]
+    return float(pd.Series(values).mean()) if values else float("nan")
+
+
+def _p0_selection_at_round(group: pd.DataFrame, target_round: int, *, window: int = 20) -> float:
+    rounds = pd.to_numeric(group["round"], errors="coerce")
+    selected = (pd.to_numeric(group["partner_idx"], errors="coerce") == 0).astype(float)
+    mask = (rounds <= int(target_round)) & (rounds > int(target_round) - int(window))
+    values = selected[mask]
+    return float(values.mean()) if len(values) else float("nan")
 
 
 def _stable_partner_false_positive_rate(
@@ -117,24 +144,74 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
                 "p1_beta_range": _partner_beta_range(group, 1),
                 "p2_beta_range": _partner_beta_range(group, 2),
                 "p3_beta_range": _partner_beta_range(group, 3),
+                **{
+                    f"p{partner_idx}_beta_r{target_round:03d}": _partner_beta_at_round(
+                        group,
+                        partner_idx,
+                        target_round,
+                    )
+                    for partner_idx in range(4)
+                    for target_round in TRAJECTORY_ROUNDS
+                },
+                **{
+                    f"p0_selection_r{target_round:03d}": _p0_selection_at_round(group, target_round)
+                    for target_round in TRAJECTORY_ROUNDS
+                },
             }
         )
     return data.merge(pd.DataFrame(rows), on=["experiment_id", "variant_id", "seed"], how="left")
 
 
+def _summary_with_ci(metrics_df: pd.DataFrame, by: list[str], metric: str) -> pd.DataFrame:
+    summary = (
+        metrics_df.groupby(by, dropna=False)[metric]
+        .agg(mean="mean", std="std", count="count")
+        .reset_index()
+    )
+    summary["ci95"] = summary.apply(
+        lambda row: 0.0 if row["count"] <= 1 else 1.96 * float(row["std"]) / sqrt(float(row["count"])),
+        axis=1,
+    ).fillna(0.0)
+    return summary
+
+
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(10, 7))
-    panels = [
-        ("discrimination_index", "Discrimination index"),
-        ("concentration_toward_p0", "Concentration toward P0"),
-        ("false_positive_rate", "False-positive allocation"),
-        ("beta_range", "Mean beta range"),
-    ]
-    for ax, (metric, title) in zip(axes.reshape(-1), panels, strict=True):
-        summary = summarize_for_plot(metrics_df, ["variant_id"], metric)
-        ax.bar([variant_label(item) for item in summary["variant_id"]], summary[metric])
-        ax.set_title(title)
-        ax.tick_params(axis="x", rotation=30)
+    for ax, metric in zip(axes.reshape(-1), EXP_D_PANELS, strict=True):
+        if metric in {"default_beta_trajectories", "high_alpha_beta_trajectories"}:
+            variant_id = "default_reference" if metric == "default_beta_trajectories" else "high_alpha"
+            rows = metrics_df[metrics_df["variant_id"].astype(str) == variant_id]
+            for partner_idx in range(4):
+                cols = [f"p{partner_idx}_beta_r{target_round:03d}" for target_round in TRAJECTORY_ROUNDS]
+                means = rows[cols].mean(numeric_only=True)
+                ax.plot(TRAJECTORY_ROUNDS, [means[col] for col in cols], marker="o", label=f"P{partner_idx}")
+            ax.axvline(100, color="0.4", linestyle="--", linewidth=1)
+            ax.axvline(50, color="0.7", linestyle=":", linewidth=1)
+            ax.axvline(150, color="0.7", linestyle=":", linewidth=1)
+            ax.set_title(variant_label(metric))
+            ax.set_xlabel("round")
+            ax.legend(frameon=False, fontsize=7)
+        elif metric == "discrimination_index":
+            summary = _summary_with_ci(metrics_df, ["variant_id"], metric)
+            ax.bar([variant_label(item) for item in summary["variant_id"]], summary["mean"], yerr=summary["ci95"])
+            ax.set_title("Discrimination index")
+            ax.tick_params(axis="x", rotation=30)
+        else:
+            cols = [f"p0_selection_r{target_round:03d}" for target_round in TRAJECTORY_ROUNDS]
+            summary = metrics_df.groupby("variant_id", dropna=False)[cols].mean().reset_index()
+            for _, row in summary.iterrows():
+                ax.plot(
+                    TRAJECTORY_ROUNDS,
+                    [row[col] for col in cols],
+                    marker="o",
+                    label=variant_label(str(row["variant_id"])),
+                )
+            ax.axvline(100, color="0.4", linestyle="--", linewidth=1)
+            ax.axvline(50, color="0.7", linestyle=":", linewidth=1)
+            ax.axvline(150, color="0.7", linestyle=":", linewidth=1)
+            ax.set_title("Concentration toward P0")
+            ax.set_xlabel("round")
+            ax.legend(frameon=False, fontsize=7)
     save_figure(fig, figure_dir / "fig_mixed_volatility.pdf")
 
 

@@ -28,6 +28,13 @@ from scripts.experiment.followup_phenotypes import (
     vector_value,
 )
 
+EXP_C_PANELS = (
+    "reengagement_rate",
+    "beta_recovery_trajectory",
+    "payoff_recovery",
+)
+BETA_RECOVERY_ROUNDS = (80, 100, 120, 140, 160, 180, 200)
+
 
 def build_specs(*, rounds: int, seeds: int, seed: int):
     return (
@@ -66,6 +73,17 @@ def _partner0_beta_epoch(group: pd.DataFrame, start: int, end: int) -> float:
     return float(pd.Series(values).mean()) if values else float("nan")
 
 
+def _partner0_beta_at_round(group: pd.DataFrame, target_round: int) -> float:
+    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rows = group[rounds == int(target_round)]
+    if rows.empty:
+        rows = group[rounds == rounds[rounds <= int(target_round)].max()]
+    if rows.empty:
+        return float("nan")
+    values = [vector_value(value, 0) for value in rows["local_betas"]]
+    return float(pd.Series(values).mean()) if values else float("nan")
+
+
 def metrics(results: pd.DataFrame) -> pd.DataFrame:
     data = pd.DataFrame(common_group_metrics(results))
     rows = []
@@ -85,6 +103,10 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
                 "beta_pre": _partner0_beta_epoch(group, 1, 80),
                 "beta_betrayal": _partner0_beta_epoch(group, 81, 120),
                 "beta_repair": _partner0_beta_epoch(group, 121, 200),
+                **{
+                    f"beta_recovery_r{target_round:03d}": _partner0_beta_at_round(group, target_round)
+                    for target_round in BETA_RECOVERY_ROUNDS
+                },
             }
         )
     return data.merge(pd.DataFrame(rows), on=["experiment_id", "variant_id", "seed"], how="left")
@@ -92,16 +114,29 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
-    panels = [
-        ("reengagement_rate", "Reengagement rate"),
-        ("payoff_recovery", "Payoff recovery"),
-        ("reengagement_latency", "Reengagement latency"),
-    ]
-    for ax, (metric, title) in zip(axes, panels, strict=True):
-        summary = summarize_for_plot(metrics_df, ["variant_id"], metric)
-        ax.bar([variant_label(item) for item in summary["variant_id"]], summary[metric])
-        ax.set_title(title)
-        ax.tick_params(axis="x", rotation=35)
+    for ax, metric in zip(axes, EXP_C_PANELS, strict=True):
+        if metric == "beta_recovery_trajectory":
+            trajectory_cols = [f"beta_recovery_r{target_round:03d}" for target_round in BETA_RECOVERY_ROUNDS]
+            summary = metrics_df.groupby("variant_id", dropna=False)[trajectory_cols].mean().reset_index()
+            for _, row in summary.iterrows():
+                ax.plot(
+                    BETA_RECOVERY_ROUNDS,
+                    [row[col] for col in trajectory_cols],
+                    marker="o",
+                    label=variant_label(str(row["variant_id"])),
+                )
+            ax.axvline(81, color="0.4", linestyle="--", linewidth=1)
+            ax.axvline(121, color="0.4", linestyle="--", linewidth=1)
+            ax.set_title("Beta recovery trajectory")
+            ax.set_xlabel("round")
+            ax.legend(frameon=False, fontsize=7)
+        else:
+            summary = summarize_for_plot(metrics_df, ["variant_id"], metric)
+            ax.bar([variant_label(item) for item in summary["variant_id"]], summary[metric])
+            ax.set_title(variant_label(metric))
+            ax.tick_params(axis="x", rotation=35)
+            if metric == "payoff_recovery":
+                ax.axhline(1.0, color="0.4", linestyle="--", linewidth=1)
     save_figure(fig, figure_dir / "fig_forgiveness.pdf")
 
 
