@@ -130,12 +130,15 @@ returned/switched partner.
 
 **Seed target**: 30+ seeds minimum for publication-grade claim.
 
-### Priority 2: H1 Model Fitness Redesign/Confirmation
+### Priority 2: H1 Model Fitness Corrected-Readout Confirmation
 
-H1 does not preserve the surprise-over-reward readout in the post-fix smoke
-(surprise corr 0.226 vs payoff corr 0.615). Must redesign the task to cleanly
-separate partner reliability from realized payoff before using model-fitness as
-a manuscript claim.
+The old post-fix H1 smoke read mixed carried per-partner precision/surprise
+state with active-encounter payoff. The corrected active-encounter readout
+restores the surprise-over-reward diagnostic in the smoke, and the stricter
+partial-correlation readout controls active payoff and encounter count. This
+does not make H1 publication-grade; confirm before using model-fitness as a
+manuscript claim. Redesign the task only if the corrected confirmation remains
+reward/exposure-confounded.
 
 ```bash
 # diagnostic first — do not add seeds before inspecting design
@@ -147,11 +150,14 @@ a manuscript claim.
 ```
 
 **Action items before running**:
-- Inspect whether current H1 task creates exposure confounds where payoff and
-  partner-action predictability are not cleanly separated.
-- Check whether active partner sampling in agent-choice confounds the
-  correlation denominator.
-- Consider a reliability manipulation with matched expected reward.
+- Use the corrected `model_fitness_correlation_summary.csv` columns:
+  `alignment`, `partial_corr_precision_surprise`, and
+  `partial_corr_precision_reward`.
+- Treat whole-run payoff as secondary; H1 is about model fitness, not reward
+  advantage.
+- If corrected confirmation remains confounded, build a balanced-exposure
+  reliability manipulation with matched expected reward before adding more
+  seeds.
 
 ### Priority 3: H0/H2/H4 Manuscript Support (run if language stays in draft)
 
@@ -194,7 +200,8 @@ diagnostic baseline, not final publication evidence.
 
 ```text
 H0: no stable payoff advantage; affect/global beta/no-affect are close.
-H1: smoke does not preserve the old surprise-over-reward readout. REDESIGN.
+H1: corrected active-aligned read preserves surprise-over-reward in smoke;
+requires confirmation before manuscript use.
 H2: deployment path is active (entropy 8.59 vs 8.79); payoff flat.
 H3: global beta has the best smoke payoff; local beta = cleaner signal.
 H4: partner-choice payoff noisy and flat at three seeds.

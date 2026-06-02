@@ -58,7 +58,7 @@ See `docs/active/progress.md` for commands and expected outputs.
 - Post-fix H0-H6 smoke completed under corrected centered selector.
 - Manuscript draft revised toward phenotype/individual-differences framing.
 - Exp A-D scripts implemented and running on server.
-- Confirmation-scale runs for H5 (and H1 redesign) are the next planned
+- Confirmation-scale runs for H5 (and H1 corrected-readout confirmation) are the next planned
   experiments after Exp A-D complete.
 
 ## Current Evidence State per Hypothesis
@@ -66,7 +66,7 @@ See `docs/active/progress.md` for commands and expected outputs.
 | Hypothesis | Smoke read | Manuscript treatment | Next step |
 |---|---|---|---|
 | H0 Policy Openness | flat payoff, active deployment | deployment channel established | H2 confirm if payoff language stays |
-| H1 Model Fitness | smoke contradicts claim | claims framed with `\resultp{}` | redesign/confirm |
+| H1 Model Fitness | corrected active-aligned read supports surprise-over-reward but smoke only | claims framed with `\resultp{}` | confirm; redesign only if confounded |
 | H2 Deployment | entropy active, payoff flat | deployment interpretation | confirm if needed |
 | H3 Locality | local=cleaner signal, global=higher smoke payoff | decomposition claim, not necessity | Exp D provides partial test |
 | H4 Social Allocation | underpowered | allocation reorganisation claim with `\resultp{}` | confirm if language stays |
@@ -88,7 +88,8 @@ The next active lane is:
 2. Run `scripts/analysis/analyze.py` on each `results/exp_*/` output.
 3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers.
 4. Queue H5 confirmation run after verification gate passes.
-5. Decide on H1 redesign approach before scheduling H1 confirmation.
+5. Run H1 confirmation with the corrected active-aligned and partial-correlation
+   readouts; redesign only if confirmation remains reward/exposure-confounded.
 
 Do not create a separate handoff document; keep the live handoff in this
 `docs/active/` state/progress surface.

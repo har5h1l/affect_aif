@@ -89,6 +89,13 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 - Concretely, it uses `-log P(observed action)` under the current predictive
   distribution for that partner.
 - The `prediction_errors` logging field records surprise magnitude.
+- H1 model-fitness analysis distinguishes carried state signals from
+  encounter-aligned readouts. When reward history is unavailable and analysis
+  falls back to active payoff, precision and surprise correlations are computed
+  from active encounters for the same partner rather than from inactive
+  carried-forward beta/surprise states. The H1 correlation table also reports
+  partial precision-surprise and precision-reward correlations that control for
+  active payoff and active encounter count.
 - Affective variants use task-local precision tracking around `pymdp.Agent` policy inference; beta is external to the POMDP state space and remains owned by trust-task modules.
 - In that default path, beta is the **rate parameter** of precision: low surprise decreases beta toward `{0.5, 0.67}`, high surprise increases beta toward `{1.5, 2.0}`, and `initial_beta` defaults to `1.0`.
 - The default `sigma_0_sq` is `(-log 0.5)^2`, preserving a fifty-fifty binary

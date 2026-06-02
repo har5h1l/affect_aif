@@ -2,12 +2,14 @@
 
 ## Requires Human Decision
 
-- **H1 redesign**: the post-fix smoke does not preserve the surprise-over-reward
-  model-fitness readout (corr 0.226 vs 0.615 for payoff). Before running
-  confirmation seeds, decide whether to (a) inspect whether active partner
-  sampling confounds the correlation denominator in the current design, or
-  (b) construct a new reliability-vs-reward task with matched expected payoff
-  across partner types. Do not run H1 confirmation without this decision.
+- **H1 confirmation/design**: the old post-fix smoke read used a mismatched
+  denominator, comparing carried per-partner precision/surprise state against
+  active-encounter payoff. The corrected active-encounter readout restores
+  surprise-over-reward dominance in the smoke, including partial correlations
+  controlling active payoff and encounter count. This is still smoke evidence;
+  run confirmation before manuscript use. If confirmation remains heavily
+  reward/exposure-confounded, construct a balanced-exposure reliability-vs-
+  reward task with matched expected payoff across partner cases.
 
 - **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
   The manuscript currently uses deployment/entropy language for H0/H2 and
@@ -34,7 +36,9 @@
 
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
-- H1 needs inspection/redesign before confirmation. Do not add seeds first.
+- H1 needs confirmation with the corrected active-aligned and partial
+  model-fitness diagnostics before manuscript use. Do not promote the corrected
+  smoke read directly to a publication claim.
 - Complete any remaining import-boundary cleanup toward
   `scripts -> experiments -> tasks -> inferactively-pymdp`.
 - After Exp A-D: run `scripts/analysis/analyze.py` on each `results/exp_*/`

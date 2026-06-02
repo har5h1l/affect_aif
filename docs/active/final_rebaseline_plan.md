@@ -97,8 +97,9 @@ provenance only.
 
 Current read:
 
-- H1 does not preserve the old surprise-over-reward model-fitness readout under
-  the post-fix smoke; treat it as a confirmation/rework item.
+- H1 preserves the surprise-over-reward model-fitness readout after correcting
+  active-encounter alignment, including a partial readout controlling payoff and
+  encounter count; treat it as smoke evidence that still needs confirmation.
 - H0/H2 show an active deployment channel through entropy changes, but the old
   local-affect payoff benefit does not replicate at three seeds.
 - H3 supports locality as cleaner signal quality, not behavioral necessity;
@@ -111,8 +112,8 @@ Current read:
 ## Confirmation Queue
 
 Do not launch this queue until the verification gate in
-`docs/active/progress.md` passes. Prioritize H5. Keep H1 only as a
-confirmation/rework target, and keep H0/H2/H4 only if the manuscript needs
+`docs/active/progress.md` passes. Prioritize H5. Keep H1 as a corrected-readout
+confirmation target, and keep H0/H2/H4 only if the manuscript needs
 confirmation of deployment/entropy support:
 
 ```bash

@@ -661,6 +661,12 @@ def partner_model_fitness_summary(results: pd.DataFrame) -> pd.DataFrame:
             if not np.isfinite(beta):
                 continue
             is_active = active_partner == partner_idx
+            precision = float(1.0 / beta) if beta > 0 else np.nan
+            surprise = (
+                float(prediction_errors[partner_idx])
+                if len(prediction_errors) > partner_idx
+                else np.nan
+            )
             rows.append(
                 {
                     "variant_id": str(row["variant_id"]),
@@ -668,12 +674,10 @@ def partner_model_fitness_summary(results: pd.DataFrame) -> pd.DataFrame:
                     "round": int(row["round"]),
                     "partner_idx": int(partner_idx),
                     "beta": float(beta),
-                    "precision": float(1.0 / beta) if beta > 0 else np.nan,
-                    "surprise": (
-                        float(prediction_errors[partner_idx])
-                        if len(prediction_errors) > partner_idx
-                        else np.nan
-                    ),
+                    "precision": precision,
+                    "active_precision": precision if is_active else np.nan,
+                    "surprise": surprise,
+                    "active_surprise": surprise if is_active else np.nan,
                     "reward_signal": (
                         float(reward_avgs[partner_idx]) if len(reward_avgs) > partner_idx else np.nan
                     ),
@@ -692,13 +696,36 @@ def partner_model_fitness_summary(results: pd.DataFrame) -> pd.DataFrame:
     summary = tidy.groupby(["variant_id", "seed", "partner_idx"], as_index=False).agg(
         beta_mean=("beta", "mean"),
         precision_mean=("precision", "mean"),
+        active_precision_mean=("active_precision", "mean"),
         surprise_mean=("surprise", "mean"),
+        active_surprise_mean=("active_surprise", "mean"),
         reward_signal_mean=("reward_signal", "mean"),
         active_mean_payoff=("active_payoff", "mean"),
         active_accuracy=("active_accuracy", "mean"),
         active_encounters=("active_encounter", "sum"),
     )
     return summary
+
+
+def _model_fitness_correlation_inputs(group: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series, str, str]:
+    """Choose aligned precision, surprise, and reward columns for H1 correlations."""
+
+    reward_proxy = group["reward_signal_mean"]
+    reward_source = "reward_signal"
+    precision = group["precision_mean"]
+    surprise = group["surprise_mean"]
+    alignment = "state"
+    if reward_proxy.notna().sum() < 3:
+        reward_proxy = group["active_mean_payoff"]
+        reward_source = "active_mean_payoff"
+        if {"active_precision_mean", "active_surprise_mean"} <= set(group.columns):
+            active_precision = group["active_precision_mean"]
+            active_surprise = group["active_surprise_mean"]
+            if active_precision.notna().sum() >= 3 and active_surprise.notna().sum() >= 3:
+                precision = active_precision
+                surprise = active_surprise
+                alignment = "active_encounter"
+    return precision, surprise, reward_proxy, reward_source, alignment
 
 
 def _safe_corr(left: pd.Series, right: pd.Series) -> float:
@@ -708,6 +735,38 @@ def _safe_corr(left: pd.Series, right: pd.Series) -> float:
     if np.isclose(pair["left"].std(ddof=0), 0.0) or np.isclose(pair["right"].std(ddof=0), 0.0):
         return np.nan
     return float(pair["left"].corr(pair["right"]))
+
+
+def _partial_corr(left: pd.Series, right: pd.Series, controls: dict[str, pd.Series]) -> float:
+    frame = pd.DataFrame({"left": left, "right": right, **controls}).replace([np.inf, -np.inf], np.nan).dropna()
+    if len(frame) < 3:
+        return np.nan
+    usable_controls = [
+        name
+        for name in controls
+        if name in frame.columns and not np.isclose(frame[name].std(ddof=0), 0.0)
+    ]
+    if not usable_controls:
+        return _safe_corr(frame["left"], frame["right"])
+    if len(frame) <= len(usable_controls) + 2:
+        return np.nan
+    design = np.column_stack(
+        [
+            np.ones(len(frame), dtype=float),
+            frame[usable_controls].to_numpy(dtype=float),
+        ]
+    )
+    left_resid = frame["left"].to_numpy(dtype=float) - design @ np.linalg.lstsq(
+        design,
+        frame["left"].to_numpy(dtype=float),
+        rcond=None,
+    )[0]
+    right_resid = frame["right"].to_numpy(dtype=float) - design @ np.linalg.lstsq(
+        design,
+        frame["right"].to_numpy(dtype=float),
+        rcond=None,
+    )[0]
+    return _safe_corr(pd.Series(left_resid), pd.Series(right_resid))
 
 
 def _cohen_d(left: pd.Series, right: pd.Series) -> float:
@@ -847,13 +906,14 @@ def evidence_effect_summary(
     partner_fitness = partner_model_fitness_summary(results)
     if not partner_fitness.empty:
         for variant_id, group in partner_fitness.groupby("variant_id"):
-            reward_proxy = group["reward_signal_mean"]
-            if reward_proxy.notna().sum() < 3:
-                reward_proxy = group["active_mean_payoff"]
+            precision, surprise, reward_proxy, _, _ = _model_fitness_correlation_inputs(group)
             seed_rows = []
             for seed, seed_group in group.groupby("seed"):
-                corr_surprise = _safe_corr(seed_group["precision_mean"], seed_group["surprise_mean"])
-                corr_reward = _safe_corr(seed_group["precision_mean"], reward_proxy.loc[seed_group.index])
+                seed_precision = precision.loc[seed_group.index]
+                seed_surprise = surprise.loc[seed_group.index]
+                seed_reward = reward_proxy.loc[seed_group.index]
+                corr_surprise = _safe_corr(seed_precision, seed_surprise)
+                corr_reward = _safe_corr(seed_precision, seed_reward)
                 if np.isfinite(corr_surprise) and np.isfinite(corr_reward):
                     seed_rows.append(
                         {
@@ -863,8 +923,8 @@ def evidence_effect_summary(
                     )
             seed_frame = pd.DataFrame(seed_rows)
             if seed_frame.empty:
-                corr_surprise = _safe_corr(group["precision_mean"], group["surprise_mean"])
-                corr_reward = _safe_corr(group["precision_mean"], reward_proxy)
+                corr_surprise = _safe_corr(precision, surprise)
+                corr_reward = _safe_corr(precision, reward_proxy)
                 if np.isfinite(corr_surprise) and np.isfinite(corr_reward):
                     seed_frame = pd.DataFrame(
                         [{"seed": -1, "dominance": abs(corr_surprise) - abs(corr_reward)}]
@@ -946,18 +1006,25 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     rows: list[dict] = []
     for variant_id, group in partner_summary.groupby("variant_id"):
-        reward_proxy = group["reward_signal_mean"]
-        reward_source = "reward_signal"
-        if reward_proxy.notna().sum() < 3:
-            reward_proxy = group["active_mean_payoff"]
-            reward_source = "active_mean_payoff"
-        corr_surprise = _safe_corr(group["precision_mean"], group["surprise_mean"])
-        corr_reward = _safe_corr(group["precision_mean"], reward_proxy)
+        precision, surprise, reward_proxy, reward_source, alignment = _model_fitness_correlation_inputs(group)
+        corr_surprise = _safe_corr(precision, surprise)
+        corr_reward = _safe_corr(precision, reward_proxy)
+        partial_corr_surprise = _partial_corr(
+            precision,
+            surprise,
+            {"reward": reward_proxy, "active_encounters": group["active_encounters"]},
+        )
+        partial_corr_reward = _partial_corr(
+            precision,
+            reward_proxy,
+            {"surprise": surprise, "active_encounters": group["active_encounters"]},
+        )
         rows.append(
             {
                 "variant_id": str(variant_id),
                 "n_partner_seed_units": int(len(group)),
                 "reward_proxy": reward_source,
+                "alignment": alignment,
                 "corr_precision_surprise": corr_surprise,
                 "corr_precision_reward": corr_reward,
                 "abs_corr_precision_surprise": abs(corr_surprise) if np.isfinite(corr_surprise) else np.nan,
@@ -965,6 +1032,19 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
                 "surprise_dominates_reward": (
                     bool(abs(corr_surprise) > abs(corr_reward))
                     if np.isfinite(corr_surprise) and np.isfinite(corr_reward)
+                    else False
+                ),
+                "partial_corr_precision_surprise": partial_corr_surprise,
+                "partial_corr_precision_reward": partial_corr_reward,
+                "abs_partial_corr_precision_surprise": (
+                    abs(partial_corr_surprise) if np.isfinite(partial_corr_surprise) else np.nan
+                ),
+                "abs_partial_corr_precision_reward": (
+                    abs(partial_corr_reward) if np.isfinite(partial_corr_reward) else np.nan
+                ),
+                "partial_surprise_dominates_reward": (
+                    bool(abs(partial_corr_surprise) > abs(partial_corr_reward))
+                    if np.isfinite(partial_corr_surprise) and np.isfinite(partial_corr_reward)
                     else False
                 ),
             }

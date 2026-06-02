@@ -262,6 +262,78 @@ def test_partner_model_fitness_summary_separates_surprise_from_reward():
     assert corr["abs_corr_precision_surprise"] > corr["abs_corr_precision_reward"]
 
 
+def test_model_fitness_correlation_uses_active_encounter_alignment():
+    rows = [
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 1,
+            "partner_idx": 0,
+            "payoff": 3.0,
+            "betas": [0.5, 2.0, 1.0],
+            "prediction_errors": [0.1, 0.1, 0.5],
+            "reward_avgs": [float("nan"), float("nan"), float("nan")],
+            "inferred_type_correct": 1.0,
+        },
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 2,
+            "partner_idx": 1,
+            "payoff": 3.0,
+            "betas": [0.5, 2.0, 1.0],
+            "prediction_errors": [0.9, 0.9, 0.5],
+            "reward_avgs": [float("nan"), float("nan"), float("nan")],
+            "inferred_type_correct": 0.0,
+        },
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 3,
+            "partner_idx": 2,
+            "payoff": 3.0,
+            "betas": [0.5, 2.0, 1.0],
+            "prediction_errors": [0.9, 0.1, 0.5],
+            "reward_avgs": [float("nan"), float("nan"), float("nan")],
+            "inferred_type_correct": 1.0,
+        },
+    ]
+
+    corr = model_fitness_correlation_summary(pd.DataFrame(rows)).iloc[0]
+
+    assert corr["corr_precision_surprise"] < 0
+
+
+def test_model_fitness_correlation_reports_partial_signal_dominance():
+    rows = []
+    for seed, surprise, payoff, precision in [
+        (0, 0.10, 4.9, 2.00),
+        (1, 0.20, 4.7, 1.80),
+        (2, 0.35, 4.4, 1.55),
+        (3, 0.55, 4.2, 1.15),
+        (4, 0.70, 4.1, 0.85),
+        (5, 0.90, 3.8, 0.55),
+    ]:
+        rows.append(
+            {
+                "variant_id": "affect",
+                "seed": seed,
+                "round": 1,
+                "partner_idx": 0,
+                "payoff": payoff,
+                "betas": [1.0 / precision],
+                "prediction_errors": [surprise],
+                "reward_avgs": [float("nan")],
+                "inferred_type_correct": 1.0,
+            }
+        )
+
+    corr = model_fitness_correlation_summary(pd.DataFrame(rows)).iloc[0]
+
+    assert corr["abs_partial_corr_precision_surprise"] > corr["abs_partial_corr_precision_reward"]
+    assert corr["partial_surprise_dominates_reward"]
+
+
 def test_betrayal_misdeployment_summary_flags_low_entropy_bad_payoff_after_switch():
     rows = []
     for round_idx in range(1, 7):
