@@ -22,11 +22,12 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 ### June 2 H1 Analysis/Design Checkpoint
 
-The current code/config checkpoint is `c5bc373`, after the H1
-active-encounter alignment fix, richer H1 confound diagnostics, and the two
-controlled H1 diagnostic configs. Current `master` may have docs-only
-synchronization commits on top. The previous `3a36756` and `942c595` notes are
-stale; later H1 handoff and controlled-diagnostic commits sit on top.
+The current pushed `master` checkpoint is `f86ede4`. The H1 analysis/config
+checkpoint itself is `a5161e0`, after the H1 active-encounter alignment fix,
+richer H1 confound diagnostics, reward-neutral readout handling, and the two
+controlled H1 diagnostic configs. `f86ede4` adds the import-boundary cleanup on
+top. The previous `3a36756`, `942c595`, and `c5bc373` notes are stale as
+current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
@@ -50,10 +51,11 @@ notes remain as provenance, but current planning pages now treat H1 as
 smoke-supported and awaiting confirmation or controlled diagnostic escalation
 before manuscript use.
 
-As of June 2 01:22 PDT, Exp B is still CPU-active in the same tmux/Mango
-process; `results/exp_b/betrayal/results_partial.csv` updated at 01:20 PDT.
-Continue monitor-only and do not interpret Exp A/B outputs until Exp A-D
-complete.
+As of June 2 01:54 PDT, Exp B is still active in the same tmux/Mango process.
+Mango reports `affect_aif_exp_abcd_20260529` as running and monitor-only;
+`results/exp_b/betrayal/results_partial.csv` and the run log last updated at
+01:20:24 PDT. Continue monitor-only and do not interpret Exp A/B outputs until
+Exp A-D complete.
 
 The H1 manuscript figure/source-table path now uses the partial model-fitness
 readout (`abs_partial_corr_precision_surprise_minus_reward`) alongside the
@@ -70,6 +72,24 @@ the dominance diagnostic, and
 `abs_partial_corr_precision_surprise_minus_reward` rows are emitted. This keeps
 the strict reward-neutral diagnostic analyzable as a reliability test rather
 than failing because reward variance was intentionally removed.
+
+Decision tree for H1:
+
+1. Run `reliability_vs_reward_confirm.toml` first, because it confirms the
+   corrected active-encounter analysis on the manuscript's current H1 surface.
+2. If it passes the partial surprise-over-reward readout with tolerable active-
+   encounter imbalance, keep H1 framed as model-fitness sensitivity and treat
+   whole-run payoff as secondary.
+3. If it fails mainly through reward/exposure coupling, classify the problem as
+   analysis/task-design ambiguity and run the balanced graded reliability spine
+   before adding seeds.
+4. If the balanced graded spine still cannot separate predictive reliability
+   from reward or exposure, run the strict reward-neutral diagnostic.
+5. Treat H1 as a model-level failure only if the strict reward-neutral
+   diagnostic also fails to produce a precision-surprise association. A pass on
+   reward-neutral H1 after a graded-spine failure means the earlier failure was
+   caused by task or analysis confounding, not the core affective precision
+   mechanism.
 
 On June 2, the benchmark trust backend was moved out of
 `tasks.trust.evaluation` into `benchmarks.trust_backend`, leaving task-local

@@ -4,15 +4,14 @@
 
 | Claim | Status | Evidence | How to write it |
 |---|---|---|---|
-| Affective precision can move policy only when the policy space is open. | Supported with caveat | H0 graded-choice and graded/stress runs show entropy and behavior shifts; saturated binary regimes are weaker. | "Policy openness gates visible affect effects." |
-| Partner-local precision tracks model fitness more than reward. | Post-fix smoke-supported; needs confirmation | Corrected post-fix smoke restores the readout (`0.976` surprise vs `0.721` payoff; partial `0.951` vs `0.172` controlling payoff and encounter count). | Treat as a target claim requiring confirmation before manuscript use. |
-| Affect changes deployment more than belief inference. | Supported | H2 open-regime lesion: belief accuracy remains similar while policy entropy and payoff move. | "The lesion resembles knowing-without-using rather than ignorance." |
-| Stress amplifies the mechanism. | Supported as boundary condition | H3 betrayal runs show lower entropy, altered return/reallocation, and worse payoff under abrupt shocks. | "Stress reveals the precision channel and its failure mode." |
-| Affect improves recovery after betrayal. | Not supported | The 30-seed H3 confirmation does not show a robust conditional-return payoff advantage. | Do not claim this. |
-| Generic caution fixes H3 misdeployment. | Not supported | H3 precision sensitivity: cautious variants often raise entropy but do not rescue payoff. | "The failure is shock-regime dependent, not just excessive gain." |
-| Partner-specific precision guides social choice. | Supported behaviorally | H4 partner-choice distribution and entropy move while payoff is flat. | "Partner choice is the readout; payoff is secondary here." |
-| Clinical-like variants map to validated clinical phenotypes. | Not supported | Current variants are parameter perturbations only. | "Clinical-like" or "computational phenotype", not diagnosis. |
-| Clinical-like variants separate in precision dynamics. | Supported | H5 beta ranges, entropy, and selection dynamics differ by perturbation. | "Perturbations separate first in dynamics; payoff remains underpowered." |
+| Affective precision can move policy only when the policy space is open. | Post-fix smoke-supported; needs confirmation if payoff language stays. | H0/H2 smoke shows entropy/deployment movement while payoff remains flat. | "Policy openness gates visible affect effects"; do not claim a general payoff advantage. |
+| Partner-local precision tracks model fitness more than reward. | Post-fix smoke-supported; needs confirmation or controlled diagnostics. | Corrected post-fix H1 smoke restores the readout (`0.976` surprise vs `0.721` payoff; partial `0.951` vs `0.172` controlling payoff and encounter count). | Treat as a target claim requiring the H1 ladder before manuscript use. |
+| Affect changes deployment more than belief inference. | Smoke-supported as a deployment-channel claim. | H2 open-regime lesion/no-affect readouts leave payoff flat but show policy-entropy movement. | "The lesion tests knowing-without-using"; keep payoff language conditional on confirmation. |
+| Partner-local beta is behaviorally necessary. | Not established. | H3 smoke shows local beta has the cleaner model-fitness signal, while global beta has higher aggregate payoff. | Write H3 as a decomposition of signal quality versus allocation, not as necessity. |
+| Partner-specific precision guides social choice. | Underpowered; keep as allocation-reorganisation claim. | H4 partner-choice smoke is noisy and payoff-flat. | "Partner choice is the planned readout; payoff is secondary here." |
+| Stress amplifies the mechanism. | Best current positive behavioral anchor, but smoke only. | H5 betrayal smoke shows local affect beating no-affect after the selector fix (`1322.3` vs `1225.0`). | Use as the priority confirmation target, not final publication evidence. |
+| Clinical-like variants map to validated clinical phenotypes. | Not supported. | Current variants are parameter perturbations only; Exp A-D are computational phenotype runs. | "Clinical-like" or "computational phenotype", not diagnosis. |
+| Clinical-like variants separate in precision dynamics. | Pending final Exp A-D review. | Exp A-D are running; outputs are not final evidence until complete and approved for interpretation. | Keep Section 3.6 placeholders until final valid outputs are reviewed. |
 
 ## Completeness Read
 
@@ -25,7 +24,7 @@ a theory-to-code-to-result chain:
 3. Experiments test openness, model fitness, deployment, stress, social choice,
    and perturbation dynamics.
 4. Current post-fix smoke shows deployment effects and a repaired H5 behavioral
-   anchor, while H1 remains unresolved.
+   anchor, while H1 remains smoke-supported but not confirmation-scale.
 
 The evidence is not complete enough for a broad empirical psychology claim, a
 clinical claim, or a universal performance claim. Those would require human
@@ -53,28 +52,35 @@ count.
 
 ### H2: Deployment
 
-Supported. The beta-to-policy-precision lesion preserves much of the
-partner-belief readout while changing policy entropy and payoff in the open
-graded-choice regime. This is the strongest "knowing versus using" result.
+Smoke-supported as a deployment-channel result. The beta-to-policy-precision
+lesion/no-affect comparisons preserve the knowing-versus-using framing, but
+payoff is flat at smoke scale and should stay conditional on confirmation.
 
-### H3: Stress Response
+### H3: Locality / Global Precision
 
-Supported only as a boundary condition. Stress makes the precision mechanism
-visible, but abrupt betrayal causes lower entropy with worse payoff and no
-confirmed conditional-return benefit. The precision-sensitivity follow-up rules
-out a simple generic-caution repair and points to shock-shape dependence.
+Supported only as a decomposition. Partner-local beta preserves the cleaner
+partner-level model-fitness signal, while global beta currently has higher
+smoke payoff. Do not claim that partner-local beta is behaviorally necessary
+until Exp D or a dedicated higher-seed H3 run shows cross-partner interference
+or allocation benefit.
 
 ### H4: Social Choice
 
-Supported behaviorally. Partner selection changes before reward clearly moves.
-This is useful evidence because H4 predicts approach/avoidance/probing shifts,
-not necessarily immediate payoff gain.
+Underpowered. Partner selection is still the right readout because H4 predicts
+approach/avoidance/probing shifts rather than immediate payoff gain, but the
+post-fix smoke is too noisy for a strong manuscript claim.
 
-### H5: Perturbation Phenotypes
+### H5: Timescale / Volatility
 
-Partly supported. The precision dynamics separate as intended, but payoff
-comparisons are underpowered and task-dependent. Keep H5 as supporting
-computational phenotype plausibility, not as a central empirical result.
+Smoke-supported as the strongest current behavioral anchor. The corrected
+selector repairs the betrayal result at three seeds; run confirmation before
+using it as a publication-grade claim.
+
+### H6: Perturbation Phenotypes
+
+Pending Exp A-D. Keep phenotype claims as computational precision-dynamics
+claims and do not fill Section 3.6 interpretation text until the running
+outputs are complete and approved for interpretation.
 
 ## Unsupported Or Overstrong Claims
 
@@ -83,6 +89,6 @@ Do not claim:
 - affective precision monotonically improves payoff;
 - affect always helps recovery after betrayal;
 - the model validates clinical diagnoses;
-- partner-local beta has been directly compared against global beta;
+- partner-local beta is behaviorally necessary under the current task design;
 - H1 is currently confirmed under the post-fix selector;
 - the project is the first active-inference model of trust.

@@ -132,6 +132,16 @@ confirmation of deployment/entropy support:
 H6 confirmation is optional and should stay supplemental unless the manuscript
 needs a stronger precision-dynamics phenotype table.
 
+H1 has a bounded diagnostic ladder rather than a single all-or-nothing
+confirmation. Run `reliability_vs_reward_confirm.toml` first to confirm the
+corrected active-encounter readout. If reward/exposure coupling remains heavy,
+run `reliability_spine_graded_diagnostic.toml` to use balanced exposure on a
+graded reliability spine. If the graded spine still cannot separate
+predictive reliability from reward or exposure, run
+`reliability_reward_neutral_diagnostic.toml`. Only a failure of the strict
+reward-neutral diagnostic should be treated as evidence against the model-level
+H1 mechanism.
+
 ## Manuscript Policy
 
 Do not reuse result numbers from the old bounded-error evidence as current

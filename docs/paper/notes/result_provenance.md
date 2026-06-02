@@ -14,10 +14,10 @@ Primary interpreted status is maintained in:
 
 ## Frozen Repository State
 
-Current documentation cleanup was prepared from local commit:
+Current planning/provenance cleanup began from pushed `master` commit:
 
 ```text
-39faa3f8834fa4805695ca65ef682af45c6942fb
+f86ede4
 ```
 
 The run notes for May 21 and May 24 did not originally record exact experiment
@@ -64,7 +64,11 @@ See `docs/results/runs/2026-05-18-h0-h5-rerun.md` for the historical bounded-
 error run digest. Do not reuse those numbers as current evidence after the
 log-surprisal cutover.
 
-### H1/H3 Split Confirmation
+### Historical H1/H5 Split Confirmation
+
+This run predates the current log-surprisal spine and the corrected
+active-encounter H1 readout. Keep it as provenance only; do not use it as
+current manuscript evidence.
 
 ```bash
 python scripts/experiment/run.py --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml --output-dir results --batch-name confirm_h1_h3_split_20260519 --workers 1
@@ -72,7 +76,16 @@ python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_2026051
 python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/results.csv --output-dir results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/analysis
 ```
 
-### H3 Precision Sensitivity
+Current H1 confirmation should follow the active ladder in
+`docs/active/progress.md`: corrected active-encounter confirmation first, then
+the balanced graded reliability spine if reward/exposure remains confounded,
+then the strict reward-neutral diagnostic before treating H1 as model-level
+failure.
+
+### Historical H5 Precision Sensitivity
+
+This run also predates the current log-surprisal spine. Treat it as historical
+stress-boundary provenance until rerun under current H5 configs and analysis.
 
 ```bash
 python scripts/experiment/run.py --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity.toml --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity_gradual.toml --output-dir results --batch-name h3_precision_sensitivity_20260522 --workers 1
