@@ -23,10 +23,12 @@ Drafting rules:
 
 - Preserve the central claim as a target claim: partner-specific affective
   precision is designed to track model fitness and gate social policy
-  deployment; the current post-fix smoke only supports the deployment/H5 side.
-- Make H5 the strongest current empirical anchor. Treat H1 as a
-  confirmation/rework item because the post-fix smoke does not preserve the old
-  surprise-over-reward diagnostic.
+  deployment; the current post-fix smoke supports this at diagnostic scale but
+  still needs confirmation-scale reruns.
+- Make H5 the strongest current behavioral anchor. Treat H1 as a
+  corrected-readout confirmation item: active-aligned and partial-correlation
+  smoke analyses support surprise-over-reward, but reward/exposure correlations
+  remain a design confound to monitor.
 - Present H0/H2/H4 as supporting five-seed evidence.
 - Present H6 as supplemental precision-dynamics evidence only.
 - Do not write "affect improves payoff" without the boundary conditions.
@@ -43,8 +45,8 @@ Recommended manuscript spine:
 2. Social interaction requires partner-specific model-fitness estimates.
 3. The implementation keeps state/policy inference in official `pymdp.Agent`
    instances and keeps beta as an external HESP-style tracker.
-4. H1 is currently unresolved under post-fix smoke and needs confirmation or
-   redesign before carrying the model-fitness claim.
+4. H1 is supported by corrected post-fix smoke readouts but needs
+   confirmation-scale replication before carrying the model-fitness claim.
 5. H2/H4 show the tracker changes deployment and partner choice in open regimes.
 6. H5 shows the corrected selector can improve abrupt-betrayal behavior at
    smoke scale.

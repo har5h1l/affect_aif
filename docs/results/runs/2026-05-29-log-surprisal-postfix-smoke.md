@@ -31,7 +31,7 @@ Analysis outputs exist for all queued experiments:
 | Card | Mean payoff read | Interpretation |
 |---|---:|---|
 | H0 graded choice | affect `1851.3`, global beta `1851.3`, no-affect `1864.2` | No local-affect payoff win; entropy channel remains active. |
-| H1 model fitness | affect `492.7`, global beta `512.7`, no-affect `552.0` | Does not preserve the old surprise-over-reward readout; requires confirmation or design revision. |
+| H1 model fitness | affect `492.7`, global beta `512.7`, no-affect `552.0` | Corrected active-aligned and partial-correlation readouts support surprise-over-reward at smoke scale; requires confirmation and exposure-confound monitoring. |
 | H2 deployment | affect `1851.3`, global beta `1851.3`, lesioned `1864.2`, no-epistemic `1863.3` | Deployment path exists, but payoff is flat-to-negative. |
 | H3 locality | global beta `976.2`, local beta `946.8`, no-affect/tracked-only `950.7` | Locality remains a decomposition/signal-quality question, not a behavioral necessity claim. |
 | H4 social allocation | affect `377.3`, global beta `388.7`, no-affect `385.3` | Underpowered and noisy; keep supplemental until confirmation. |
@@ -42,8 +42,9 @@ Analysis outputs exist for all queued experiments:
 
 This run clears the immediate H5 smoke blocker but does not make the manuscript
 publication-ready. The next confirmation lane should prioritize H5 as the
-repaired behavioral anchor. H1 should be treated as a model-fitness
-confirmation/rework item because the post-fix smoke does not preserve the
-surprise-over-reward diagnostic. H0, H2, and H4 should either be confirmed at
-higher seed count or written as deployment/entropy support rather than payoff
-claims.
+repaired behavioral anchor. H1 should be treated as a corrected-readout
+model-fitness confirmation item: active-aligned and partial-correlation smoke
+analyses support the surprise-over-reward diagnostic, while reward/exposure
+correlations remain a design confound to monitor. H0, H2, and H4 should either
+be confirmed at higher seed count or written as deployment/entropy support
+rather than payoff claims.
