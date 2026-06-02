@@ -24,19 +24,20 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 The H1 analysis/config checkpoint is `a5161e0`, after the H1 active-encounter
 alignment fix, richer H1 confound diagnostics, reward-neutral readout handling,
-and the controlled H1 diagnostic configs. Current pushed `master` has planning
-and architecture commits on top. The previous `3a36756`, `942c595`,
-`c5bc373`, and `f86ede4` notes are stale as current-state references.
+and the controlled H1 diagnostic configs. Current pushed `master` is `07b31d0`,
+which adds manuscript evidence-boundary prose on top of the planning and
+architecture commits. The previous `3a36756`, `942c595`, `c5bc373`, and
+`f86ede4` notes are stale as current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
-June 2 02:10 PDT, Exp A has written `results/exp_a/` and manuscript source
+June 2 02:25 PDT, Exp A has written `results/exp_a/` and manuscript source
 tables, while Exp B is active in
 `scripts/experiment/run_exp_b_prior_factorial.py`; its
-`results/exp_b/betrayal/results_partial.csv` last updated at 01:53:55 PDT and
-the run log last updated at 01:53:56 PDT. Exp C/D have not started. Do not
-interpret Exp A or partial Exp B outputs as manuscript evidence until Exp A-D
-complete and the user approves result interpretation updates.
+`results/exp_b/betrayal/results_partial.csv` and the run log both last updated
+at 02:25 PDT. Exp C/D have not started. Do not interpret Exp A or partial Exp B
+outputs as manuscript evidence until Exp A-D complete and the user approves
+result interpretation updates.
 
 The full local pytest gate is clean as of June 2 01:00 PDT. The previous
 stall was diagnosed as oversized test fixtures that imported the full H5
@@ -45,8 +46,9 @@ tiny scheduled-switch specs; no model math, task runtime, or manuscript
 experiment config changed.
 
 On June 2, the planning/manuscript docs were synchronized with the corrected
-H1 active-encounter analysis status. Historical pre-log-surprisal confirmation
-notes remain as provenance, but current planning pages now treat H1 as
+H1 active-encounter analysis status and the manuscript prose was aligned with
+the current evidence tier. Historical pre-log-surprisal confirmation notes
+remain as provenance, but current planning pages now treat H1 as
 smoke-supported and awaiting confirmation or controlled diagnostic escalation
 before manuscript use.
 
@@ -60,10 +62,12 @@ active-encounter partial correlation columns. The default paper figure builder
 was verified against the current source-table packet in `/tmp` after refreshing
 the H1 source tables from the post-fix smoke results.
 
-The H1 diagnostic ladder was dry-run locally on June 2: the corrected
-confirmation expands to 90 runs, while the balanced graded, reward-matched
-graded, and reward-neutral diagnostics expand to 20 runs each. A reduced-round
-local smoke of `reliability_spine_graded_reward_matched_diagnostic.toml`
+The H1 diagnostic ladder was dry-run locally on June 2 and rechecked at
+02:31 PDT: the corrected confirmation expands to 90 runs, the balanced graded,
+reward-matched graded, and reward-neutral diagnostics expand to 20 runs each,
+and the historical smoke `reliability_vs_reward.toml` expands to 9 runs. A
+reduced-round local smoke of
+`reliability_spine_graded_reward_matched_diagnostic.toml`
 verified that the reward-matched graded spine executes end to end (40 rows:
 4 variants x 1 seed x 10 rounds). A reduced-round local smoke of
 `reliability_reward_neutral_diagnostic.toml` verified that constant payoff is

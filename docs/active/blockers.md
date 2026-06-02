@@ -15,10 +15,12 @@
   also fails.
 
 - **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
-  The manuscript currently uses deployment/entropy language for H0/H2 and
-  allocation-reorganisation language for H4, both with `\resultp{}` placeholders
-  for confirmation-scale payoff results. Decide whether to run confirmation-
-  scale seeds for these or to soften language to entropy/deployment only.
+  The manuscript has been softened to deployment/entropy language for H0/H2
+  and allocation-reorganisation language for H4 rather than broad payoff
+  advantage claims. Decide whether these diagnostic claims still need
+  confirmation-scale seeds for manuscript support, or whether they can remain
+  as smoke-scale mechanism readouts while H5 and H1 carry the main
+  confirmation burden.
 
 - **Exp A-D review**: once the server runs complete, inspect the phenotype
   outputs before filling `\resultp{}` placeholders. Do not update the
@@ -59,8 +61,9 @@
   `/tmp/affect_aif_full_pytest_20260602_final.log`; static gates also passed.
 - H6 supplemental perturbation results: included in manuscript as
   Section 3.5, designated as supplemental computational perturbations.
-- Manuscript hedging language: removed in May 31 revision; replaced with
-  clean narrative + `\resultp{}` placeholders.
+- Manuscript evidence-boundary language: aligned through `07b31d0`; H1 and H5
+  are framed as confirmation targets, and phenotype outputs remain pending
+  `\resultp{}` placeholders rather than interpreted results.
 - Import-boundary cleanup: benchmark orchestration moved to
   `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
   `experiments`, `analysis`, or `benchmarks`.

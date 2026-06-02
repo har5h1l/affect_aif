@@ -34,7 +34,9 @@ individual differences in social trust calibration.
 
 ## Current Phase: Manuscript Revision + Phenotype Experiments
 
-The manuscript has been substantially revised (May 31, 2026):
+The manuscript has been substantially revised (May 31, 2026) and evidence
+claims were softened on June 2 so smoke-scale findings are not presented as
+publication-grade results:
 
 - Abstract: replaced with new 3-paragraph version foregrounding affect as
   social metacognition, the action-sharpening dissociation, and the
@@ -48,6 +50,9 @@ The manuscript has been substantially revised (May 31, 2026):
 - Discussion: individual-differences subsection added; 4th limitation added;
   future directions replaced with a more focused and ambitious version.
 - `\resultp{}` LaTeX command added to macros.tex for visible blue placeholders.
+- `07b31d0` aligns the abstract, introduction, results, and discussion with the
+  current evidence tier: H1 and H5 are confirmation targets, and phenotype
+  profiles are pending computational targets rather than final outputs.
 
 The four phenotype experiment scripts (Exp A-D) are running on the server.
 See `docs/active/progress.md` for commands and expected outputs.
@@ -56,7 +61,8 @@ See `docs/active/progress.md` for commands and expected outputs.
 
 - Active runtime cutover to official `inferactively-pymdp==1.0.0` is complete.
 - Post-fix H0-H6 smoke completed under corrected centered selector.
-- Manuscript draft revised toward phenotype/individual-differences framing.
+- Manuscript draft revised toward phenotype/individual-differences framing and
+  current smoke-vs-confirmation evidence boundaries.
 - Exp A-D scripts implemented and running on server. Exp A has written outputs;
   Exp B is still running, so phenotype outputs are not final evidence.
 - Confirmation-scale runs for H5 (and H1 corrected-readout confirmation) are the next planned
@@ -66,12 +72,12 @@ See `docs/active/progress.md` for commands and expected outputs.
 
 | Hypothesis | Smoke read | Manuscript treatment | Next step |
 |---|---|---|---|
-| H0 Policy Openness | flat payoff, active deployment | deployment channel established | H2 confirm if payoff language stays |
+| H0 Policy Openness | flat payoff, active deployment | diagnostic deployment-channel readout | confirm only if stronger payoff/general-performance language returns |
 | H1 Model Fitness | corrected active-aligned read supports surprise-over-reward but smoke only | claims framed with `\resultp{}` | confirm; redesign only if confounded |
 | H2 Deployment | entropy active, payoff flat | deployment interpretation | confirm if needed |
 | H3 Locality | local=cleaner signal, global=higher smoke payoff | decomposition claim, not necessity | Exp D provides partial test |
-| H4 Social Allocation | underpowered | allocation reorganisation claim with `\resultp{}` | confirm if language stays |
-| H5 Betrayal | repaired; affect beats no-affect | primary positive anchor, full numbers | PRIORITY confirmation |
+| H4 Social Allocation | underpowered | smoke-scale allocation reorganisation readout | confirm only if this remains a core manuscript claim |
+| H5 Betrayal | repaired; affect beats no-affect in smoke | primary behavioral confirmation target | PRIORITY confirmation |
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
 | Exp A α Sweep | not yet | Section 3.6.1 all `\resultp{}` | running on server |
 | Exp B Prior Factorial | not yet | Section 3.6.2 all `\resultp{}` | running on server |
