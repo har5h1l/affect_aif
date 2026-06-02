@@ -22,10 +22,11 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 ### June 2 H1 Analysis/Design Checkpoint
 
-Server `master` and GitHub `origin/master` are at commit `c5bc373` after the
-H1 active-encounter alignment fix, richer H1 confound diagnostics, and the two
-controlled H1 diagnostic configs. The previous `3a36756` and `942c595` notes
-are stale; later H1 handoff and controlled-diagnostic commits sit on top.
+The current code/config checkpoint is `c5bc373`, after the H1
+active-encounter alignment fix, richer H1 confound diagnostics, and the two
+controlled H1 diagnostic configs. Current `master` may have docs-only
+synchronization commits on top. The previous `3a36756` and `942c595` notes are
+stale; later H1 handoff and controlled-diagnostic commits sit on top.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
