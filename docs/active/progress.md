@@ -30,28 +30,36 @@ stale; later H1 handoff and controlled-diagnostic commits sit on top.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
-June 2, Exp A has written `results/exp_a/` and manuscript source tables, while
-Exp B is active in `scripts/experiment/run_exp_b_prior_factorial.py`; its
-`results/exp_b/betrayal/results_partial.csv` continues to update and Exp C/D
-have not started. Do not interpret Exp A or partial Exp B outputs as manuscript
-evidence until Exp A-D complete and the user approves result interpretation
-updates.
+June 2 01:00 PDT, Exp A has written `results/exp_a/` and manuscript source
+tables, while Exp B is active in
+`scripts/experiment/run_exp_b_prior_factorial.py`; its
+`results/exp_b/betrayal/results_partial.csv` last updated at
+June 2 00:41:42 PDT and Exp C/D have not started. Do not interpret Exp A or
+partial Exp B outputs as manuscript evidence until Exp A-D complete and the
+user approves result interpretation updates.
 
-The full local pytest gate was previously interrupted after remaining
-CPU-active for about 26 minutes. A durable rerun is now running in tmux/Mango:
+The full local pytest gate is clean as of June 2 01:00 PDT. The previous
+stall was diagnosed as oversized test fixtures that imported the full H5
+betrayal config for narrow integration/theory assertions. Those tests now use
+tiny scheduled-switch specs; no model math, task runtime, or manuscript
+experiment config changed.
 
 ```text
-tmux/Mango: affect_aif_full_pytest_20260602
-log: /tmp/affect_aif_full_pytest_20260602.log
-commit under test: c5bc373
+tmux: affect_aif_full_pytest_20260602_final
+log: /tmp/affect_aif_full_pytest_20260602_final.log
+HEAD under test: 2424211
+working-tree fixture diff hash: c2695914b969ab5bd299bd32f9a78a3a7cc10fa6ada98d3f00aa78adb81b2e08
+pytest: 308 passed, 7 skipped, 74 warnings in 730.13s
+ruff: All checks passed
+mypy: Success, no issues found in 15 source files
+git diff --check: clean
 ```
 
-Do not launch confirmation-scale experiments until this full-suite rerun exits
-cleanly or the slow-test blocker is diagnosed and documented. A short process
-sample of the active pytest worker showed it inside JAX/MLIR
-`PjitFunction`/`CompileAndLoad`, so the current evidence points to native JAX
-compilation in the integration-test section rather than a Python-level analysis
-or visualization hang.
+Mango registration for the final full-pytest tmux process failed because
+`mango_service` timed out, but the process ran isolated in tmux and completed.
+The Exp A-D Mango entry remained visible and running. Re-run the verification
+gate before scheduling any later confirmation-scale experiments if code changes
+again.
 
 The post-fix H0-H6 smoke rebaseline completed at:
 

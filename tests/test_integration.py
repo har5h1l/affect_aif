@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+from dataclasses import replace
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -11,7 +12,23 @@ from analysis.metrics import post_switch_window_summary
 from analysis.visualization import build_run_gifs, load_results
 from experiments.trust.batch import BatchExperimentRunner
 from experiments.trust.runner import ExperimentRunner
-from experiments.trust.spec import ExperimentSpec
+from experiments.trust.spec import ExperimentSpec, StanceSwitchSpec, VariantSpec
+
+
+def _tiny_stance_switch_spec(tiny_spec, *, rounds: int, switch_round: int = 1, variants=None):
+    base = tiny_spec.with_overrides(rounds=rounds, replications=1)
+    return replace(
+        base,
+        scenario=replace(
+            base.scenario,
+            assignment="agent_choice",
+            partners=2,
+            initial_types=("cooperator", "random"),
+            initial_stances=("trusting", "neutral"),
+            stance_switches=(StanceSwitchSpec(round=switch_round, partner=0, to="hostile"),),
+        ),
+        variants=base.variants if variants is None else variants,
+    )
 
 
 def test_full_experiment_runs_and_produces_records(tiny_spec):
@@ -44,9 +61,8 @@ def test_runner_logs_joint_posteriors(tiny_spec):
     assert "partner_joint_posteriors" in records[-1]
 
 
-def test_betrayal_metrics_and_analysis_outputs(tmp_path):
-    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
-    spec = spec.with_overrides(rounds=35, replications=1)
+def test_betrayal_metrics_and_analysis_outputs(tmp_path, tiny_spec):
+    spec = _tiny_stance_switch_spec(tiny_spec, rounds=14, switch_round=3)
     runner = ExperimentRunner.from_spec(spec)
     results = runner.run_all()
     results_path = tmp_path / "betrayal.csv"
@@ -96,9 +112,12 @@ def test_build_run_gifs_writes_one_file_per_primary_run(tmp_path, tiny_spec):
     assert all(path.exists() for path in written)
 
 
-def test_visualization_handles_betrayal_switch_runs(tmp_path):
-    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
-    spec = spec.with_overrides(rounds=35, replications=1)
+def test_visualization_handles_betrayal_switch_runs(tmp_path, tiny_spec):
+    spec = _tiny_stance_switch_spec(
+        tiny_spec,
+        rounds=3,
+        variants=(VariantSpec(id="affect", affect="precision", planning_horizon=1),),
+    )
     results = ExperimentRunner.from_spec(spec).run_all()
     output_csv = tmp_path / "betrayal.csv"
     results.to_csv(output_csv, index=False)

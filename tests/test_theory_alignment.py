@@ -3,7 +3,14 @@ from runtime_helpers import build_runtime
 
 from experiments.trust.config import ExperimentConfig
 from experiments.trust.runner import ExperimentRunner
-from experiments.trust.spec import ExperimentSpec
+from experiments.trust.spec import (
+    ExperimentMeta,
+    ExperimentSpec,
+    HypothesisSpec,
+    ScenarioSpec,
+    StanceSwitchSpec,
+    VariantSpec,
+)
 from tasks.trust.runtime import update_beta_after_observation
 
 
@@ -63,8 +70,26 @@ def test_lesion_freeze_constant_beta():
 
 
 def test_betrayal_run_affect_mechanism_is_active():
-    spec = ExperimentSpec.from_toml("configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
-    results = ExperimentRunner.from_spec(spec.with_overrides(rounds=35, replications=1)).run_all()
+    switch_round = 2
+    spec = ExperimentSpec(
+        hypothesis=HypothesisSpec(id="h5", name="timescale_volatility"),
+        experiment=ExperimentMeta(id="tiny_betrayal", rounds=5, replications=1, seed=42),
+        scenario=ScenarioSpec(
+            payoff="binary",
+            assignment="agent_choice",
+            partners=2,
+            type_volatility=0.0,
+            observation_noise=0.0,
+            initial_types=("cooperator", "random"),
+            initial_stances=("trusting", "neutral"),
+            stance_switches=(StanceSwitchSpec(round=switch_round, partner=0, to="hostile"),),
+        ),
+        variants=(
+            VariantSpec(id="no_affect", affect="none", planning_horizon=1),
+            VariantSpec(id="affect", affect="precision", planning_horizon=1),
+        ),
+    )
+    results = ExperimentRunner.from_spec(spec).run_all()
 
     no_affect = results[results["variant_id"] == "no_affect"].sort_values("round")
     affect = results[results["variant_id"] == "affect"].sort_values("round")
@@ -73,7 +98,7 @@ def test_betrayal_run_affect_mechanism_is_active():
     affect_betas_0 = affect["betas"].apply(lambda b: b[0])
     assert no_affect_betas_0.isna().all() or np.isnan(no_affect_betas_0.values).all()
     assert not np.isnan(affect_betas_0.values).all()
-    assert len(affect_betas_0[affect["round"] >= 31].dropna().values) > 0
+    assert len(affect_betas_0[affect["round"] >= switch_round].dropna().values) > 0
 
 
 def test_clinical_variants_configure_native_beta_path():

@@ -36,14 +36,6 @@
 
 ## Technical Follow-Ups
 
-- Full pytest needs a clean rerun before confirmation-scale experiments. The
-  latest direct local attempt was interrupted after staying CPU-active for
-  about 26 minutes; a durable tmux/Mango rerun is now active as
-  `affect_aif_full_pytest_20260602` with log
-  `/tmp/affect_aif_full_pytest_20260602.log`. A short process sample placed the
-  active worker in JAX/MLIR `PjitFunction`/`CompileAndLoad`, consistent with
-  slow native compilation during integration tests rather than a Python-level
-  analysis or visualization hang.
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
 - H1 needs confirmation with the corrected active-aligned and partial
@@ -62,6 +54,10 @@
 
 - Agent-choice candidate-aggregation bug: fixed (centered precision logits).
   Post-fix smoke verifies the fix.
+- Full pytest gate: clean on June 2 after replacing oversized full-H5
+  integration/theory fixtures with tiny scheduled-switch fixtures. Evidence:
+  `308 passed, 7 skipped, 74 warnings` in
+  `/tmp/affect_aif_full_pytest_20260602_final.log`; static gates also passed.
 - H6 supplemental perturbation results: included in manuscript as
   Section 3.5, designated as supplemental computational perturbations.
 - Manuscript hedging language: removed in May 31 revision; replaced with
