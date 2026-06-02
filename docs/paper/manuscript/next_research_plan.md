@@ -15,8 +15,11 @@ The manuscript can already support a constrained claim:
 - it shifts partner choice before payoff clearly separates;
 - abrupt betrayal is repaired under the centered selector at smoke scale.
 
-The post-fix H1 smoke does not currently support the stronger claim that
-partner-local precision tracks predictive reliability more than reward.
+The corrected post-fix H1 smoke supports the surprise-over-reward
+model-fitness readout at diagnostic scale, but it is not publication-grade
+evidence. H1 still needs confirmation with active-encounter and
+partial-correlation diagnostics, followed by the controlled reliability spine
+only if reward/exposure confounds remain.
 
 The main unresolved architectural question is whether partner-local beta is
 necessary. A reviewer can still ask whether one shared global model-fitness

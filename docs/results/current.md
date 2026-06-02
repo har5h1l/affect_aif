@@ -12,9 +12,11 @@
 > `results/log_surprisal_spine_smoke_postfix_20260528/`. Treat it as current
 > smoke evidence only. It repairs the H5 betrayal-choice warning at smoke scale
 > (affect `1322.3` mean payoff versus `1225.0` for no-affect/lesioned), while
-> H0/H1/H2/H4 remain flat-to-negative on payoff, H1 no longer preserves the old
-> surprise-over-reward model-fitness readout at smoke scale, and H3 still favors
-> global beta on aggregate reward.
+> H0/H1/H2/H4 remain flat-to-negative on payoff. The corrected
+> active-encounter and partial-correlation H1 readouts restore the
+> surprise-over-reward model-fitness diagnostic at smoke scale, but H1 remains a
+> confirmation/rework item before manuscript use. H3 still favors global beta on
+> aggregate reward.
 
 Historical interpreted evidence has three tiers. The primary evidence was
 promoted from the completed May 2026 H0-H5 run queue on the supported

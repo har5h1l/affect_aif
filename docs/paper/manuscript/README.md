@@ -40,8 +40,9 @@ Do not write a broad "affect improves reward" claim. The supported thesis is:
 Current manuscript evidence should be written as diagnostic/provisional until
 confirmation-scale post-fix reruns exist:
 
-- Three-seed H1 smoke: post-fix evidence does not yet preserve the old
-  surprise-over-reward model-fitness tracking claim.
+- Three-seed H1 smoke: the corrected active-encounter and
+  partial-correlation readouts restore the surprise-over-reward diagnostic at
+  smoke scale, but H1 is not yet a publication-grade model-fitness claim.
 - Three-seed H0/H2 smoke: beta-to-gamma coupling changes deployment, but local
   affect does not yet have a payoff advantage.
 - Three-seed H3 smoke: locality improves signal quality, not demonstrated
