@@ -25,10 +25,10 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 The H1 analysis/config checkpoint is `a5161e0`, after the H1 active-encounter
 alignment fix, richer H1 confound diagnostics, reward-neutral readout handling,
 and the controlled H1 diagnostic configs. Current pushed `master` includes
-`b87e5f7`, which adds active-handoff synchronization on top of the manuscript
-evidence-boundary prose, planning, and architecture commits. The previous
-`3a36756`, `942c595`, `c5bc373`, and `f86ede4` notes are stale as current-state
-references.
+`ff8c3fe`, which separates Exp D's default and high-gain alpha arms on top of
+the active-handoff, manuscript evidence-boundary, planning, and architecture
+commits. The previous `3a36756`, `942c595`, `c5bc373`, and `f86ede4` notes are
+stale as current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
@@ -202,7 +202,8 @@ standalone scripts rather than TOML spec configs.
 - **Seeds**: 20 per condition
 - **Outputs**: `results/exp_d/`, figures → `docs/paper/manuscript/figures/fig_mixed_volatility.pdf`
 - **Metrics**: `discrimination_index`, `concentration_toward_P0`, per-partner beta
-  trajectories, `false_positive_rate`
+  trajectories, `false_positive_rate` (rolling rate where stable-P0 engagement
+  drops more than 15% below its early baseline)
 - **Manuscript target**: Section 3.6.4 placeholders
 
 ### After Exp A-D Complete

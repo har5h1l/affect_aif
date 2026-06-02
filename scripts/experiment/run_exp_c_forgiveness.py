@@ -53,7 +53,7 @@ def _reengagement_latency(group: pd.DataFrame) -> float:
 
 
 def _payoff_recovery(group: pd.DataFrame) -> float:
-    pre = pd.to_numeric(group.loc[group["round"].between(1, 80), "payoff"], errors="coerce").mean()
+    pre = pd.to_numeric(group.loc[group["round"].between(50, 80), "payoff"], errors="coerce").mean()
     repaired = pd.to_numeric(group.loc[group["round"].between(151, 200), "payoff"], errors="coerce").mean()
     if pd.isna(pre) or abs(float(pre)) < 1e-12:
         return float("nan")

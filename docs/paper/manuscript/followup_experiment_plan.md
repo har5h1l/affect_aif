@@ -165,8 +165,9 @@ the mixed-volatility tradeoff can compare calibrated and reactive gain.
   and per-partner behavioural stability score
 - `concentration_toward_P0`: rolling 20-round selection rate of P0
 - `per_partner_beta_trajectories`: βk over time for each P0–P3
-- `false_positive_rate`: rate where agent reduces engagement with P0 below 15%
-  of baseline (P0 never changes, so all reductions are false alarms)
+- `false_positive_rate`: rolling rate where engagement with P0 drops more than
+  15% below its early baseline (P0 never changes, so these reductions are false
+  alarms)
 
 **Expected tradeoff**: high-α → better discrimination of P2/P3, higher
 false-positive rate for P0. Low-α → poor P2/P3 discrimination, lower false

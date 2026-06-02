@@ -64,6 +64,34 @@ def _partner_beta_range(group: pd.DataFrame, partner: int) -> float:
     return float(values.max() - values.min())
 
 
+def _stable_partner_false_positive_rate(
+    group: pd.DataFrame,
+    *,
+    partner: int = 0,
+    baseline_end: int = 50,
+    evaluation_start: int = 51,
+    window: int = 20,
+    drop_fraction: float = 0.15,
+) -> float:
+    rounds = pd.to_numeric(group["round"], errors="coerce")
+    selected = (pd.to_numeric(group["partner_idx"], errors="coerce") == int(partner)).astype(float)
+    baseline = selected[rounds <= baseline_end]
+    evaluation = pd.DataFrame(
+        {
+            "round": rounds[rounds >= evaluation_start],
+            "selected": selected[rounds >= evaluation_start],
+        }
+    )
+    if baseline.empty or evaluation.empty:
+        return float("nan")
+    baseline_rate = float(baseline.mean())
+    if baseline_rate <= 0.0:
+        return float("nan")
+    threshold = baseline_rate * (1.0 - float(drop_fraction))
+    rolling = evaluation["selected"].rolling(window, min_periods=1).mean()
+    return float((rolling < threshold).mean())
+
+
 def metrics(results: pd.DataFrame) -> pd.DataFrame:
     data = pd.DataFrame(common_group_metrics(results))
     rows = []
@@ -84,7 +112,7 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
                 "seed": int(seed),
                 "discrimination_index": discrimination,
                 "concentration_toward_p0": float(counts[0]),
-                "false_positive_rate": float(counts[1:].sum()),
+                "false_positive_rate": _stable_partner_false_positive_rate(group),
                 "p0_beta_range": _partner_beta_range(group, 0),
                 "p1_beta_range": _partner_beta_range(group, 1),
                 "p2_beta_range": _partner_beta_range(group, 2),
