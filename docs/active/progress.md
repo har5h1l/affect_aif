@@ -44,6 +44,12 @@ betrayal config for narrow integration/theory assertions. Those tests now use
 tiny scheduled-switch specs; no model math, task runtime, or manuscript
 experiment config changed.
 
+On June 2, the planning/manuscript docs were synchronized with the corrected
+H1 active-encounter analysis status. Historical pre-log-surprisal confirmation
+notes remain as provenance, but current planning pages now treat H1 as
+smoke-supported and awaiting confirmation or controlled diagnostic escalation
+before manuscript use.
+
 ```text
 tmux: affect_aif_full_pytest_20260602_final
 log: /tmp/affect_aif_full_pytest_20260602_final.log

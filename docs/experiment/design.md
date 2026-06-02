@@ -468,7 +468,7 @@ Reference implementation: Hesp et al.'s "Deeply Felt Affect" code (https://githu
 | Beta persistence | 0.8 | Tridiagonal persistence for the discrete beta posterior; higher values make beta less reactive |
 | Beta levels | `[0.5, 0.67, 1.0, 1.5, 2.0]` | HESP-style inverse-beta support for partner-local precision |
 | Policy precision | `gamma_base / E[beta_k]` | Native pymdp policy precision set before each partner-local policy inference |
-| Replications per variant | Declared per TOML spec | Current evidence uses 5-seed pilots and 30-seed confirmations; 100 remains a future high-power target if needed |
+| Replications per variant | Declared per TOML spec | Current post-fix evidence uses three-seed smoke for H0-H6 plus targeted diagnostics; confirmation-scale reruns should use 30+ seeds when promoted to manuscript claims |
 
 ### 6.3 Analysis Plan
 
@@ -550,22 +550,25 @@ behavior cards and the provenance recorded in `docs/results/`.
 | Build 2 | Implement affective state and partner-local precision modulation | 1-2 weeks | Done |
 | Build 3 | Implement lesion, no-affect, and clinical-like perturbation variants | 1 week | Done |
 | Build 4 | Cut over to official `inferactively-pymdp==1.0.0` and factorized controls | 1 week | Done |
-| Build 5 | Run current H0-H8 queue and targeted confirmation runs | 1 week | Done |
-| Build 6 | Analysis and result documentation | 1 week | Done |
-| Build 7 | Write-up stabilization | 2-3 weeks | Current phase |
+| Build 5 | Run current H0-H8 queue and targeted confirmation runs | 1 week | Historical pre-log-surprisal queue done; post-fix confirmations pending |
+| Build 6 | Analysis and result documentation | 1 week | Current active-document surface maintained |
+| Build 7 | Write-up stabilization and phenotype experiments | 2-3 weeks | Current phase |
 
 ### 6.6 Current Empirical Status
 
 Current evidence comes from completed runs on the native pymdp,
 factorized-control architecture, with provenance recorded in
-`docs/results/current.md` and `docs/results/runs/`.
+`docs/results/current.md`, `docs/results/runs/`, and the active handoff under
+`docs/active/`. Pre-log-surprisal confirmations remain historical context; the
+post-fix log-surprisal H0-H6 run is smoke evidence, not publication-grade
+confirmation.
 
 Current scorecard:
 
 | Card | Current reading | Status |
 |---|---|---|
 | H0 Openness Gate | Affect has little room in shallow binary settings, but lowers entropy and can improve payoff in graded choice. Open policy space is necessary but not sufficient; graded betrayal shows lower entropy with worse payoff. | Supported with caveat |
-| H1 Model Fitness | The 30-seed confirmation shows precision tracks surprise more strongly than payoff, while total payoff remains flat-to-worse for affect. | Supported |
+| H1 Model Fitness | Corrected active-encounter and partial-correlation smoke readouts show surprise-over-reward dominance; confirmation or controlled diagnostic escalation is still required before manuscript use. | Smoke-supported; confirm |
 | H2 Deployment | In the open graded-choice regime, affect and lesion/no-affect have similar belief accuracy while affect changes entropy and payoff. | Supported |
 | H3 Locality / Global Precision | Discovery runs show local beta preserves a cleaner model-fitness signal than global beta, but global beta can have higher aggregate payoff in small probes. | Open decomposition |
 | H4 Social Allocation | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. | Supported behaviorally |
@@ -582,9 +585,10 @@ Interpretation guardrails:
 - Treat H3 as a stress boundary-condition result, not as a clean affective
   recovery win.
 
-There is no immediate run queue. The recommended next action is write-up
-stabilization; optional confirmation commands remain in
-`docs/active/progress.md`.
+The immediate run queue is governed by `docs/active/progress.md`: Exp A-D are
+currently running to fill the phenotype section, and H5/H1 confirmation follows
+only after those runs complete or the user explicitly approves a different
+sequence.
 
 ---
 
@@ -672,7 +676,7 @@ H0 precision-channel tests.
 |---|---|---|---|
 | Phase 3 | Theory tightening: formalize the H0-H8 behavior cards and expected behavior | Current docs | Done |
 | Phase 4 | Discrete beta: supported task-local `DiscreteBetaState` | Phase 3 | Done |
-| Phase 5 | Current H0-H8 run queue and targeted confirmation | Phase 4 | Done |
-| Phase 6 | Write-up stabilization and public documentation cleanup | Phase 5 | Done |
-| Phase 7 | Log-surprisal H0-H8 rebaseline with global-beta controls | Phase 6 | Current |
+| Phase 5 | Historical H0-H8 run queue and targeted confirmation | Phase 4 | Superseded as manuscript evidence by log-surprisal/post-fix queue |
+| Phase 6 | Write-up stabilization and public documentation cleanup | Phase 5 | Current |
+| Phase 7 | Confirmation-scale log-surprisal reruns and phenotype evidence | Phase 6 | Current |
 | Phase 8 | Human data: fit behavioral data and estimate individual-difference parameters | Stable manuscript | Future |

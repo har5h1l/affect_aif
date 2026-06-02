@@ -86,8 +86,11 @@ that openness permits movement but does not guarantee payoff improvement.
 
 ### Result 2: Precision Tracks Model Fitness, Not Reward
 
-Use the 30-seed H1 confirmation as the primary mechanism result. Show
-precision-surprise and precision-payoff associations.
+Use the corrected post-fix H1 smoke as a mechanism diagnostic, not as final
+publication evidence. The manuscript should show precision-surprise and
+precision-payoff associations only after confirmation-scale active-encounter
+and partial-correlation readouts are complete, or after the controlled H1
+diagnostic ladder resolves any reward/exposure confound.
 
 ### Result 3: Affect Changes Deployment
 
@@ -129,7 +132,9 @@ Position against alternatives:
 
 - Simulation-only.
 - Scripted partner behaviors in the primary trust task.
-- No global-beta ablation yet.
+- Global-beta ablation is discovery-scale only; partner-local beta remains an
+  interpretable model-fitness implementation, not yet a proven behavioral
+  necessity.
 - H5 payoff effects are underpowered.
 - H3 stress result is task-regime dependent.
 

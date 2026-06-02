@@ -46,15 +46,17 @@ are large; compact analysis artifacts and provenance notes should be kept with
 the repository when practical.
 
 The May 19, 2026 H3 reallocation follow-up is recorded as a small pilot. The
-May 2026 H1/H3 split confirmation is now the targeted follow-up evidence: it
-promotes H1 as a confirmed model-fitness readout and keeps H3 as a stress
-boundary condition rather than an affective recovery win. The May 2026 H3
-precision-sensitivity follow-up narrows that boundary condition: generic
-caution knobs do not rescue abrupt betrayal, while gradual betrayal makes
-default affect nearly payoff-neutral relative to no-affect/lesioned baselines.
-The May 26, 2026 H4 social-choice pair check is recorded as a five-seed
-replication of the partner-choice deployment pattern, not as a 30-seed
-confirmation.
+May 2026 H1/H3 split confirmation remains useful historical context from the
+pre-log-surprisal evidence chain, but it no longer promotes H1 to a current
+publication-grade claim. Under the corrected post-fix analysis, H1 is
+smoke-supported by active-encounter and partial-correlation readouts and still
+needs confirmation or controlled diagnostic escalation before manuscript use.
+The May 2026 H3 precision-sensitivity follow-up remains historical context for
+the stress boundary condition: generic caution knobs do not rescue abrupt
+betrayal, while gradual betrayal makes default affect nearly payoff-neutral
+relative to no-affect/lesioned baselines. The May 26, 2026 H4 social-choice
+pair check is recorded as a five-seed replication of the partner-choice
+deployment pattern, not as a 30-seed confirmation.
 
 The May 2026 H6 global-beta discovery batch is recorded in
 `docs/results/runs/2026-05-26-h6-global-beta-discovery.md`. It is current

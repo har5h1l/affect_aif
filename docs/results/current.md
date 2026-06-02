@@ -91,15 +91,19 @@ bad post-switch model.
 
 ## What This Means
 
-The project is no longer in the "no current evidence" state. The H0-H5 queue
-establishes that the precision channel is behaviorally active on the current
-runtime, and the H1/H3 confirmation removes the main uncertainty about whether
-the weakest readouts were only five-seed artifacts.
+The project is no longer in the "no current evidence" state. The historical
+H0-H5 queue established that the precision channel is behaviorally active on
+the supported runtime, but post-fix manuscript claims should now use the
+log-surprisal evidence hierarchy described at the top of this page and in
+`docs/active/`.
 
-H1 confirmation read: affect does not improve total payoff (`534.6` vs
-`542.1`; bootstrap CI for the difference crosses zero), but the precision
-signal tracks surprise more strongly than payoff (`|r| = 0.701` vs `0.419`).
-This supports H1 as a model-fitness claim rather than a reward claim.
+Historical H1 confirmation read: affect did not improve total payoff (`534.6`
+vs `542.1`; bootstrap CI for the difference crosses zero), but the precision
+signal tracked surprise more strongly than payoff (`|r| = 0.701` vs `0.419`).
+This remains useful context for the model-fitness claim, but it is not current
+publication-grade H1 evidence after the log-surprisal and active-encounter
+analysis corrections. Current H1 status is corrected-smoke support requiring
+confirmation or controlled diagnostic escalation before manuscript use.
 
 H3 confirmation read: affect has lower whole-run payoff (`1136.1` vs `1172.1`
 for no-affect/lesion; pairwise `p = 0.0169`) while lowering entropy (`8.38` vs

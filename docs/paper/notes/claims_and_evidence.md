@@ -30,6 +30,9 @@ a theory-to-code-to-result chain:
 The evidence is not complete enough for a broad empirical psychology claim, a
 clinical claim, or a universal performance claim. Those would require human
 data, stronger phenotype validation, and broader benchmark comparison.
+It is also not yet complete enough to use H1 as a publication-grade
+model-fitness anchor; the corrected H1 readout still needs confirmation or the
+controlled diagnostic ladder described in `docs/active/progress.md`.
 
 ## Supported Results
 

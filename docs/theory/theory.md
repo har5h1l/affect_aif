@@ -345,11 +345,14 @@ when the model is wrong.
 
 ### 4.6 Affect as Deployment, Not Reward
 
-The current H1/H2 evidence supports the deployment interpretation:
+The current H1/H2 evidence supports the deployment interpretation, but with
+different evidential strength across the two cards:
 
-- H1: partner-specific precision tracks predictive reliability more strongly
-  than realized payoff. In the 30-seed confirmation, the absolute correlation
-  with surprise was larger than with payoff.
+- H1: the corrected post-fix smoke readout shows partner-specific precision
+  tracking predictive reliability more strongly than realized payoff, including
+  active-encounter and partial-correlation diagnostics. This is the current
+  model-fitness diagnostic, but it still requires confirmation-scale evidence
+  before carrying a manuscript-level claim.
 - H2: lesion/no-affect preserves much of the partner inference surface while
   changing policy entropy and behavior in the open graded-choice regime.
 
