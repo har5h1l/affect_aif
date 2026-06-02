@@ -20,6 +20,21 @@ As of May 31, 2026, the manuscript has been substantially revised toward the
 full individual-differences / phenotype framing. The canonical affect update
 uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
+### June 1 H1 Analysis Checkpoint
+
+Server `master` and GitHub `origin/master` are at commit `942c595` after the
+H1 active-encounter alignment fix and corrected H1 smoke source-table refresh.
+The default Mango repo status still reports the desktop-local checkout at
+`e616ba9`; continue local development by fast-forwarding the local checkout:
+
+```bash
+git pull origin master
+```
+
+Keep long experiments on `server`. The Exp A-D tmux/Mango process
+`affect_aif_exp_abcd_20260529` is still running; the active child process is
+currently `scripts/experiment/run_exp_b_prior_factorial.py`.
+
 The post-fix H0-H6 smoke rebaseline completed at:
 
 ```text
