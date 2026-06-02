@@ -22,17 +22,31 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 ### June 2 H1 Analysis/Design Checkpoint
 
-Server `master` and GitHub `origin/master` are at commit `3a36756` after the
-H1 active-encounter alignment fix and follow-up handoff notes. The previous
-`942c595` note is stale; later H1 handoff commits sit on top of it.
+Server `master` and GitHub `origin/master` are at commit `c5bc373` after the
+H1 active-encounter alignment fix, richer H1 confound diagnostics, and the two
+controlled H1 diagnostic configs. The previous `3a36756` and `942c595` notes
+are stale; later H1 handoff and controlled-diagnostic commits sit on top.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
 June 2, Exp A has written `results/exp_a/` and manuscript source tables, while
-Exp B is active in `scripts/experiment/run_exp_b_prior_factorial.py` with
-`results/exp_b/betrayal/results_partial.csv` in progress. Do not interpret Exp
-A or partial Exp B outputs as manuscript evidence until Exp A-D complete and
-the user approves result interpretation updates.
+Exp B is active in `scripts/experiment/run_exp_b_prior_factorial.py`; its
+`results/exp_b/betrayal/results_partial.csv` continues to update and Exp C/D
+have not started. Do not interpret Exp A or partial Exp B outputs as manuscript
+evidence until Exp A-D complete and the user approves result interpretation
+updates.
+
+The full local pytest gate was previously interrupted after remaining
+CPU-active for about 26 minutes. A durable rerun is now running in tmux/Mango:
+
+```text
+tmux/Mango: affect_aif_full_pytest_20260602
+log: /tmp/affect_aif_full_pytest_20260602.log
+commit under test: c5bc373
+```
+
+Do not launch confirmation-scale experiments until this full-suite rerun exits
+cleanly or the slow-test blocker is diagnosed and documented.
 
 The post-fix H0-H6 smoke rebaseline completed at:
 

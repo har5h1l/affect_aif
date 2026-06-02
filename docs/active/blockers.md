@@ -36,6 +36,11 @@
 
 ## Technical Follow-Ups
 
+- Full pytest needs a clean rerun before confirmation-scale experiments. The
+  latest direct local attempt was interrupted after staying CPU-active for
+  about 26 minutes; a durable tmux/Mango rerun is now active as
+  `affect_aif_full_pytest_20260602` with log
+  `/tmp/affect_aif_full_pytest_20260602.log`.
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
 - H1 needs confirmation with the corrected active-aligned and partial
