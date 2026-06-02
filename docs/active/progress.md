@@ -53,9 +53,9 @@ before manuscript use.
 
 As of June 2 01:54 PDT, Exp B is still active in the same tmux/Mango process.
 Mango reports `affect_aif_exp_abcd_20260529` as running and monitor-only;
-`results/exp_b/betrayal/results_partial.csv` and the run log last updated at
-01:20:24 PDT. Continue monitor-only and do not interpret Exp A/B outputs until
-Exp A-D complete.
+`results/exp_b/betrayal/results_partial.csv` last updated at 01:53:55 PDT and
+the run log last updated at 01:53:56 PDT. Continue monitor-only and do not
+interpret Exp A/B outputs until Exp A-D complete.
 
 The H1 manuscript figure/source-table path now uses the partial model-fitness
 readout (`abs_partial_corr_precision_surprise_minus_reward`) alongside the
