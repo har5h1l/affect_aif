@@ -35,7 +35,7 @@ def build_specs(*, rounds: int, seeds: int, seed: int):
     variants = (
         affect_variant("default_reference", alpha=3.0),
         affect_variant("low_alpha", alpha=0.1),
-        affect_variant("high_alpha", alpha=3.0),
+        affect_variant("high_alpha", alpha=8.0),
         no_affect_variant(),
     )
     return (

@@ -24,10 +24,11 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 The H1 analysis/config checkpoint is `a5161e0`, after the H1 active-encounter
 alignment fix, richer H1 confound diagnostics, reward-neutral readout handling,
-and the controlled H1 diagnostic configs. Current pushed `master` is `07b31d0`,
-which adds manuscript evidence-boundary prose on top of the planning and
-architecture commits. The previous `3a36756`, `942c595`, `c5bc373`, and
-`f86ede4` notes are stale as current-state references.
+and the controlled H1 diagnostic configs. Current pushed `master` includes
+`b87e5f7`, which adds active-handoff synchronization on top of the manuscript
+evidence-boundary prose, planning, and architecture commits. The previous
+`3a36756`, `942c595`, `c5bc373`, and `f86ede4` notes are stale as current-state
+references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
@@ -76,6 +77,12 @@ the dominance diagnostic, and
 `abs_partial_corr_precision_surprise_minus_reward` rows are emitted. This keeps
 the strict reward-neutral diagnostic analyzable as a reliability test rather
 than failing because reward variance was intentionally removed.
+
+On June 2, before Exp C/D had started, Exp D's mixed-volatility high-gain arm
+was corrected from `alpha=3.0` to `alpha=8.0`. This keeps the project default
+(`alpha=3.0`) as the calibrated reference while making the high-gain arm a
+distinct reactive comparison. Exp A/B outputs are not obsolete; Exp D had not
+started, so no interruption or rerun was required.
 
 Decision tree for H1:
 
@@ -191,7 +198,7 @@ standalone scripts rather than TOML spec configs.
 - **Partner setup**: P0 stationary cooperator, P1 stationary exploiter,
   P2 abrupt-shift (cooperative rounds 1–99 → hostile), P3 gradual-drift (rounds 50–150)
 - **Regime**: partner-choice
-- **Conditions**: default, low α (0.1), high α (3.0), no-affect baseline
+- **Conditions**: default α (3.0), low α (0.1), high α (8.0), no-affect baseline
 - **Seeds**: 20 per condition
 - **Outputs**: `results/exp_d/`, figures → `docs/paper/manuscript/figures/fig_mixed_volatility.pdf`
 - **Metrics**: `discrimination_index`, `concentration_toward_P0`, per-partner beta

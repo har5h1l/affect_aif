@@ -1,14 +1,14 @@
 # Follow-Up Experiment Plan
 
-Last updated: 2026-05-31
+Last updated: 2026-06-02
 
 ## Overview
 
 The manuscript's contribution now has two layers:
 1. **Core mechanism**: partner-local affective precision as social metacognition
    (H0-H6 spine)
-2. **Individual differences extension**: affective precision parameters produce
-   recognisable social trust phenotypes (Exp A-D)
+2. **Individual differences extension**: affective precision parameters define
+   testable social trust calibration profiles (Exp A-D)
 
 Exp A-D are running on the server. Core confirmation runs follow after Exp A-D
 complete and are reviewed.
@@ -16,7 +16,7 @@ complete and are reviewed.
 ---
 
 ## Phenotype Experiments (Exp A-D)
-### Status: running on server as of May 2026
+### Status: running on server as of June 2, 2026
 
 These experiments fill the `\resultp{}` placeholders in Section 3.6 of the
 manuscript. Each script is standalone (not TOML-based) and writes outputs
@@ -28,9 +28,9 @@ directly to `results/exp_*/` plus compact metric tables to
 
 **Script**: `scripts/experiment/run_exp_a_alpha_sweep.py`
 
-**Purpose**: Establish a systematic behavioural phenotype profile across
-precision-gain values. Replaces the Section 3.6 parameter sanity check with a
-proper sweep.
+**Purpose**: Test whether precision-gain values produce a systematic
+behavioural profile across the planned Section 3.6 readouts. Replaces the
+earlier parameter sanity check with a controlled sweep.
 
 **Design**:
 - α values: `[0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0]`
@@ -62,8 +62,8 @@ concentration but noisy. Payoff does not rank α monotonically.
 
 **Script**: `scripts/experiment/run_exp_b_prior_factorial.py`
 
-**Purpose**: Establish four behavioural phenotypes from crossing prior belief
-(naive vs cautious) with precision gain (low vs high).
+**Purpose**: Test four behavioural phenotype targets from crossing prior
+belief (naive vs cautious) with precision gain (low vs high).
 
 **Design**:
 - Prior conditions:
@@ -154,7 +154,9 @@ Critical test of behavioral necessity of partner-local vs global precision.
 
 **Regime**: partner-choice.
 
-**Conditions**: default, low α (0.1), high α (3.0), no-affect baseline.
+**Conditions**: default α (3.0), low α (0.1), high α (8.0), no-affect
+baseline. The high-α arm is deliberately distinct from the project default so
+the mixed-volatility tradeoff can compare calibrated and reactive gain.
 
 **Seeds**: 20 per condition.
 
@@ -184,13 +186,21 @@ agent types, with reference lines at P2 switch and P3 drift onset/end.
 
 ### Inspection Checklist (do before filling placeholders)
 
-1. `mango cloud sync fetch affect_aif` — pull results from server
-2. Run `scripts/analysis/analyze.py` on each `results/exp_*/` output
-3. Read the phenotype metric values — verify direction of effects matches
-   Section 3.6 narrative
-4. Check that `fig_alpha_sweep.pdf`, `fig_phenotype_quadrants.pdf`,
+1. Confirm finality before reading metric values: the tmux/Mango process has
+   ended, `results/exp_abcd_20260529_logs/run.log` contains `DONE`, and
+   `results/exp_a/` through `results/exp_d/` each contain a final `results.csv`,
+   `metrics.csv`, `manifest.json`, and `README.md`.
+2. `mango cloud sync fetch affect_aif` — pull results from server if working
+   from a local checkout.
+3. Run `scripts/analysis/analyze.py` on each `results/exp_*/results.csv` where
+   the generic analysis is applicable; the standalone Exp A-D scripts also
+   write their own compact `metrics.csv` files and manuscript source tables.
+4. Read the phenotype metric values only after finality is established; verify
+   direction of effects against Section 3.6 narrative before filling any
+   placeholders.
+5. Check that `fig_alpha_sweep.pdf`, `fig_phenotype_quadrants.pdf`,
    `fig_forgiveness.pdf`, `fig_mixed_volatility.pdf` exist and are readable
-5. Ask user before updating any interpretation narrative in `docs/results/`
+6. Ask user before updating any interpretation narrative in `docs/results/`
 
 ### Placeholder Fill Checklist
 
@@ -206,9 +216,10 @@ After inspection is approved:
 
 See `docs/active/progress.md` for full commands and ordering. Priority:
 
-1. **H5 betrayal** (30+ seeds) — primary positive anchor
+1. **H5 betrayal** (30+ seeds) — primary behavioral confirmation target
 2. **H1 redesign diagnostic** — must inspect before adding seeds
-3. **H0/H2/H4 support** — only if payoff language stays in manuscript
+3. **H0/H2/H4 support** — only if diagnostic deployment/allocation language
+   needs confirmation-scale support
 4. **H3 global-beta ablation** — Exp D provides partial answer; dedicated run
    optional
 
