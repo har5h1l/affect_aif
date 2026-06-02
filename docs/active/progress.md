@@ -47,7 +47,11 @@ commit under test: c5bc373
 ```
 
 Do not launch confirmation-scale experiments until this full-suite rerun exits
-cleanly or the slow-test blocker is diagnosed and documented.
+cleanly or the slow-test blocker is diagnosed and documented. A short process
+sample of the active pytest worker showed it inside JAX/MLIR
+`PjitFunction`/`CompileAndLoad`, so the current evidence points to native JAX
+compilation in the integration-test section rather than a Python-level analysis
+or visualization hang.
 
 The post-fix H0-H6 smoke rebaseline completed at:
 

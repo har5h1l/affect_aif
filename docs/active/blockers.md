@@ -40,7 +40,10 @@
   latest direct local attempt was interrupted after staying CPU-active for
   about 26 minutes; a durable tmux/Mango rerun is now active as
   `affect_aif_full_pytest_20260602` with log
-  `/tmp/affect_aif_full_pytest_20260602.log`.
+  `/tmp/affect_aif_full_pytest_20260602.log`. A short process sample placed the
+  active worker in JAX/MLIR `PjitFunction`/`CompileAndLoad`, consistent with
+  slow native compilation during integration tests rather than a Python-level
+  analysis or visualization hang.
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
 - H1 needs confirmation with the corrected active-aligned and partial
