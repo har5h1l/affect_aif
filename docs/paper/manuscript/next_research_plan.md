@@ -19,7 +19,8 @@ The corrected post-fix H1 smoke supports the surprise-over-reward
 model-fitness readout at diagnostic scale, but it is not publication-grade
 evidence. H1 still needs confirmation with active-encounter and
 partial-correlation diagnostics, followed by the controlled reliability spine
-only if reward/exposure confounds remain.
+only if reward/exposure confounds remain: normal graded reliability spine,
+reward-matched graded reliability spine, then strict reward-neutral diagnostic.
 
 The main unresolved architectural question is whether partner-local beta is
 necessary. A reviewer can still ask whether one shared global model-fitness
@@ -57,13 +58,13 @@ Run confirmation with the corrected active-aligned and partial-correlation
 columns before using H1 as manuscript evidence. Redesign the task only if the
 confirmation remains reward/exposure-confounded.
 
-## Priority 3: Global-Beta Ablation
+## Priority 3: H3 Locality / Global-Beta Ablation
 
 **Purpose.** Test whether partner-local precision is necessary, or whether a
 single global volatility/model-fitness tracker explains the same behavior.
 
-**Condition.** `global_beta` is a fourth affect condition alongside `none`,
-`precision`, and `tracked_only`.
+**Condition.** `global_beta` is already a maintained affect condition alongside
+`none`, `precision`, and `tracked_only`.
 
 - Maintain one categorical beta posterior shared across all partners.
 - Update that posterior after every interaction using the existing
@@ -74,26 +75,28 @@ single global volatility/model-fitness tracker explains the same behavior.
 - Log global beta, per-partner local beta when available, selected partner,
   partner-indexed surprise, payoff, entropy, and gamma used.
 
-**Next smoke pass.** After reviewing the H3 locality quick smoke, run 3-5 seeds first,
-not 30, on the older manuscript regimes:
+**Next pass.** Do not rerun older manuscript regimes as a broad sweep. Use Exp D
+as the next partial test of cross-partner interference. If Exp D shows the
+expected interference pattern, run the dedicated higher-seed H3 confirm:
 
-- H1 reliability-versus-reward;
-- H2 open-regime deployment;
-- H4 partner choice;
-- H5 abrupt betrayal if the first three smoke tests pass.
-- H3 locality/interference only after changing the design or diagnostics; the
-  first quick smoke has already run.
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml \
+  --output-dir results \
+  --batch-name h3_global_beta_confirm_YYYYMMDD \
+  --workers 1
+```
 
 **Decision rule.**
 
-- If global beta matches partner-local beta on H1/H2/H4/H5, soften manuscript
-  language from "partner-specific is necessary" to "partner-specific is an
-  interpretable implementation."
+- If global beta matches partner-local beta on the locality/interference
+  readouts, keep manuscript language at "partner-specific is an interpretable
+  implementation" rather than "necessary."
 - If global beta spreads precision changes to unaffected partners or blurs
   partner-specific reallocation, promote locality as a stronger manuscript
   claim after user review of the new results.
 
-## Priority 2: Locality/Interference Diagnostic
+## Priority 4: Locality/Interference Diagnostic Details
 
 **Working claim.** Partner-local affect should contain volatility to the
 partner whose model failed; global affect should contaminate decisions about
@@ -107,9 +110,8 @@ partners whose behavior did not change.
 - scheduled stance-switch partner.
 
 The first implemented version uses
-`configs/trust/hypotheses/h3_locality/global_beta_smoke.toml`:
-two seeds, 40 rounds, one scheduled stance switch, and variants `none`,
-`precision`, `tracked_only`, and `global_beta`.
+`configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml`,
+with `global_beta` compared against `none`, `precision`, and `tracked_only`.
 
 **Variants.** Compare:
 
@@ -135,9 +137,10 @@ Current analysis outputs include `cross_partner_interference_summary.csv` and
 important result is not simply payoff. It is whether local beta confines
 precision changes while global beta causes cross-partner interference.
 
-## Priority 3: Figure-Quality Script
+## Priority 5: Figure-Quality Script
 
-Before broad reruns, add `scripts/analysis/make_paper_figures.py`.
+Keep `scripts/analysis/make_paper_figures.py` as the canonical figure builder
+and update source tables only from valid, reviewed runs.
 
 **Inputs.** Canonical analysis CSVs and source tables already referenced in
 `docs/paper/manuscript/results_digest.md`.
@@ -154,7 +157,7 @@ Before broad reruns, add `scripts/analysis/make_paper_figures.py`.
 **Reason.** This makes current and future evidence reviewable. It also prevents
 manual plot edits from drifting away from the source CSVs.
 
-## Priority 4: Lesion Family Discovery
+## Priority 6: Lesion Family Discovery
 
 Only after global beta and locality diagnostics are smoke-tested, expand the
 lesion family.
@@ -174,7 +177,7 @@ Candidate variants:
 Report dynamics first: beta range, entropy, choice churn, return latency, and
 wrong-type-on-return. Payoff should remain secondary.
 
-## Priority 5: Shock-Timing Gradient
+## Priority 7: Shock-Timing Gradient
 
 Continue the shock-shape line only if it answers timing.
 

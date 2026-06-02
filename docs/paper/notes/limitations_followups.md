@@ -14,23 +14,25 @@ The primary trust task uses environment-owned partner policies. That is
 appropriate for isolating focal-agent mechanisms, but it does not yet establish
 fully reciprocal multi-agent dynamics.
 
-### No Global-Beta Ablation Yet
+### Global-Beta Evidence Is Discovery-Scale
 
-Partner-specific beta is an architectural premise. A future global-beta
-ablation would directly test whether partner-local precision is better than a
-shared affective precision state.
+Partner-specific beta is an architectural premise. Current global-beta probes
+support a signal-quality decomposition but do not yet establish that
+partner-local precision is behaviorally necessary. Exp D and a higher-seed H3
+locality probe are the planned tests of cross-partner interference.
 
-### H3 Is A Boundary Condition
+### H5 Is A Boundary Condition
 
-The stress response is not a clean recovery win. Abrupt betrayal reveals
-misdeployment risk. This should be a central discussion point, not hidden as a
-negative result.
+The volatility result is not a generic recovery claim. Abrupt betrayal reveals
+both the candidate behavioral benefit and the temporal boundary condition of
+precision-guided deployment. This should be a central discussion point, not
+hidden as a negative result.
 
-### H5 Payoff Is Underpowered
+### H6 / Exp A-D Phenotypes Need Final Review
 
 Clinical-like variants separate in precision dynamics and some behavioral
-readouts. Payoff claims need higher replication and possibly better calibrated
-tasks.
+readouts at smoke scale, and Exp A-D are running to fill the phenotype section.
+Do not update interpretation narrative until final outputs are reviewed.
 
 ### Literature Scope
 
@@ -47,16 +49,16 @@ is enough for a mechanistic simulation paper if the claims stay narrow.
 
 ### If One More Experiment Is Needed
 
-Run a focused shock-shape experiment:
+Run the H1 controlled diagnostic ladder if confirmation remains confounded:
 
-- vary betrayal abruptness;
-- vary observation noise;
-- vary number of pre-switch confirmations;
-- keep default affect fixed;
-- compare against no-affect and tracked-only lesion.
+- corrected active-encounter confirmation;
+- normal graded reliability spine;
+- reward-matched graded reliability spine;
+- strict reward-neutral diagnostic.
 
-This directly tests whether H3 misdeployment is caused by sudden temporal
-credit-assignment mismatch.
+This directly tests whether any H1 failure is an analysis/task-design confound
+or a model-level failure. H5 confirmation remains the top behavioral run after
+Exp A-D complete.
 
 ### Reviewer-Driven Checks
 
@@ -67,8 +69,8 @@ Potential reviewer asks and the appropriate response:
 | "Is partner-local beta necessary?" | Add global-beta ablation. |
 | "Does this generalize beyond scripted partners?" | Add AIF-vs-AIF descriptive runs or benchmark-facing follow-up. |
 | "Are clinical labels justified?" | Soften language to computational perturbations; do not add diagnostic claims. |
-| "Is this just reward averaging?" | Lead with H1 model-fitness dissociation. |
-| "Why does H3 hurt payoff?" | Present the boundary condition as the point: precision can sharpen wrong deployment under abrupt shocks. |
+| "Is this just reward averaging?" | Lead with the H1 corrected-readout plus controlled diagnostic ladder. |
+| "Why does volatility help or hurt payoff?" | Present the H5 boundary condition: precision can sharpen deployment when confidence is timely and can mislead when the model is stale. |
 
 ## Stopping Rule
 

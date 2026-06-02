@@ -21,8 +21,8 @@ operational manifest remains `docs/experiments/manifest.md`.
 
 | Evidence tier | Batch root | Use in paper |
 |---|---|---|
-| Primary May H0-H5 queue | `results/updated_h0_h5_20260517_w2/`, `results/updated_h0_h5_20260518_remainder/` | Broad H0-H5 evidence and H5 dynamics. |
-| H0/H1/H2/H4 local confirmation | `results/confirm_h0_h1_h2_h4_20260518/` | Open-regime, model-fitness, deployment, and social-choice summaries. |
+| Historical May H0-H5 queue | `results/updated_h0_h5_20260517_w2/`, `results/updated_h0_h5_20260518_remainder/` | Historical bounded-error provenance; do not use as current manuscript evidence. |
+| Historical H0/H1/H2/H4 local confirmation | `results/confirm_h0_h1_h2_h4_20260518/` | Historical open-regime/model-fitness/deployment/social-choice provenance; do not use as current manuscript evidence. |
 | Historical H1/H5 split confirmation | `results/confirm_h1_h3_split_20260519/` | Historical pre-log-surprisal H1/H5 confirmation provenance; do not use as current manuscript evidence. |
 | Historical H5 precision sensitivity | `results/h3_precision_sensitivity_20260522/` | Historical stress boundary-condition provenance; rerun under current H5/log-surprisal spine before manuscript use. |
 

@@ -12,13 +12,15 @@ action precision. We extend this account to social interaction by factorizing
 affective precision over partners in a repeated trust game. Each partner is
 modeled with an official `pymdp` POMDP over type, stance, and own action, while
 an external HESP-style beta tracker updates from partner-action prediction
-error and modulates policy precision. Across current-architecture simulations,
-partner-local precision is behaviorally active when the policy posterior has
-room to move, tracks prediction reliability more than payoff, and changes
-deployment even when partner beliefs remain similar. Under abrupt betrayal,
-however, the same precision channel can sharpen a wrong post-switch model and
-reduce payoff. These results support affective precision as a partner-local
-model-fitness signal, not as a generic reward booster.
+error and modulates policy precision. Across current-architecture diagnostic
+simulations, partner-local precision is behaviorally active when the policy
+posterior has room to move, supports a corrected surprise-over-reward readout
+at smoke scale, and changes deployment even when partner beliefs remain
+similar. Under abrupt betrayal, the same precision channel becomes a candidate
+positive behavioral anchor and a boundary condition requiring confirmation.
+These results motivate affective precision as a partner-local model-fitness
+signal, not as a generic reward booster, while leaving publication-grade H1/H5
+confirmation as planned work.
 
 ## Introduction
 
@@ -62,20 +64,24 @@ and avoid or defect against them confidently.
 
 ## Experiments
 
-Use the H0-H5 behavior-card spine:
+Use the H0-H6 behavior-card spine:
 
 - H0: openness gate
 - H1: model fitness
 - H2: deployment
-- H3: stress response
-- H4: social choice
-- H5: perturbation phenotypes
+- H3: locality / global precision
+- H4: social allocation
+- H5: timescale / volatility
+- H6: perturbation phenotypes
 
-Primary results should be reported from:
+Primary current diagnostic results should be reported from:
 
-- `docs/results/runs/2026-05-18-h0-h5-rerun.md`
-- `docs/results/runs/2026-05-21-h1-h3-confirmation.md`
-- `docs/results/runs/2026-05-24-h3-precision-sensitivity.md`
+- `results/log_surprisal_spine_smoke_postfix_20260528/`
+- `docs/paper/manuscript/results_digest.md`
+- `docs/active/progress.md`
+
+Historical bounded-error and pre-log-surprisal notes are provenance only, not
+current manuscript evidence.
 
 ## Results
 
@@ -102,15 +108,22 @@ policy entropy and payoff.
 Use H4. Show partner selection and entropy changes even when total payoff is
 flat.
 
-### Result 5: Stress Reveals Misdeployment
+### Result 5: Locality Separates Signal Quality From Necessity
 
-Use H3 confirmation and precision sensitivity. Show abrupt betrayal as a
-failure mode, and gradual betrayal as less harmful for default affect.
+Use H3 locality/global-beta results. Show partner-local beta as a cleaner
+partner-specific model-fitness signal, while avoiding a behavioral necessity
+claim unless Exp D or a higher-seed H3 run shows cross-partner interference.
 
-### Result 6: Perturbation Phenotypes Separate Dynamically
+### Result 6: Volatility Reveals Boundary Conditions
 
-Use H5 as secondary evidence. Emphasize beta dynamics and policy/choice
-readouts rather than clinical validity.
+Use H5 betrayal results. Show abrupt betrayal as the priority behavioral
+confirmation target and keep recovery/payoff claims conditional until
+confirmation-scale reruns complete.
+
+### Result 7: Perturbation Phenotypes Separate Dynamically
+
+Use H6 and Exp A-D only after final outputs are reviewed. Emphasize beta
+dynamics and policy/choice readouts rather than clinical validity.
 
 ## Discussion
 
@@ -135,8 +148,9 @@ Position against alternatives:
 - Global-beta ablation is discovery-scale only; partner-local beta remains an
   interpretable model-fitness implementation, not yet a proven behavioral
   necessity.
-- H5 payoff effects are underpowered.
-- H3 stress result is task-regime dependent.
+- H5 payoff effects are smoke-scale until confirmation.
+- H1 remains smoke-supported but needs the active confirmation/diagnostic
+  ladder before carrying the model-fitness claim.
 
 ## Conclusion
 

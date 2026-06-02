@@ -37,8 +37,8 @@ regime:
 
 Source artifacts:
 
-- `results/confirm_h0_h1_h2_h4_20260518/h0/graded_choice/analysis/final_round_summary.csv`
-- `results/confirm_h0_h1_h2_h4_20260518/h2/lesion_open_regime/analysis/deployment_dissociation_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h0_final_round_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h2_deployment_dissociation_summary.csv`
 
 ### Figure 3: H1 Model Fitness
 
@@ -76,7 +76,7 @@ Primary source:
 - `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h5_betrayal_reallocation_summary.csv`
 - `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h5_betrayal_misdeployment_summary.csv`
 
-### Figure 5: H3 Shock-Shape / Sensitivity
+### Figure 5: H5 Shock-Shape / Sensitivity
 
 Compare abrupt and gradual betrayal:
 
@@ -90,6 +90,9 @@ Primary source:
 - `results/h3_precision_sensitivity_20260522/h3/betrayal_precision_sensitivity_gradual/analysis/final_round_summary.csv`
 - paired `pairwise_payoff_tests.csv` and `betrayal_reallocation_summary.csv`
 
+Status: historical bounded-error provenance only. Rerun under the current H5
+log-surprisal spine before using this as current manuscript evidence.
+
 ## Secondary Figures
 
 ### H4 Social Choice
@@ -99,18 +102,20 @@ is flat.
 
 Source:
 
-- `results/confirm_h0_h1_h2_h4_20260518/h4/partner_choice/analysis/partner_choice_summary.csv`
+- `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h4_partner_choice_summary.csv`
 
-### H5 Perturbation Dynamics
+### H6 / Exp A-D Perturbation Dynamics
 
 Use beta range, beta autocorrelation, action-flip rate, and selection entropy.
-Keep in supplement unless the manuscript centers perturbation phenotypes.
+Keep as computational phenotype evidence and fill from Exp A-D only after final
+outputs are reviewed.
 
 Source:
 
-- `results/updated_h0_h5_20260517_w2/h5/clinical_dynamics/analysis/phenotype_validation_summary.csv`
-- `results/updated_h0_h5_20260517_w2/h5/clinical_betrayal/analysis/phenotype_validation_summary.csv`
-- `results/updated_h0_h5_20260518_remainder/h5/affect_sensitivity/analysis/affective_movement_summary.csv`
+- `results/exp_a/`
+- `results/exp_b/`
+- `results/exp_c/`
+- `results/exp_d/`
 
 ## Main Tables
 

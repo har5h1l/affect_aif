@@ -28,9 +28,13 @@ Drafting rules:
 - Make H5 the strongest current behavioral anchor. Treat H1 as a
   corrected-readout confirmation item: active-aligned and partial-correlation
   smoke analyses support surprise-over-reward, but reward/exposure correlations
-  remain a design confound to monitor.
-- Present H0/H2/H4 as supporting five-seed evidence.
-- Present H6 as supplemental precision-dynamics evidence only.
+  remain a design confound to monitor through the active ladder:
+  corrected confirmation, normal graded spine, reward-matched graded spine,
+  then strict reward-neutral diagnostic if needed.
+- Present H0/H2/H4 as smoke-supported deployment/allocation readouts, not as
+  confirmed payoff advantages.
+- Present H6 and Exp A-D as computational phenotype evidence only after final
+  run outputs have been reviewed; do not infer clinical validity.
 - Do not write "affect improves payoff" without the boundary conditions.
 - Do not write "affect recovers after betrayal"; write that abrupt betrayal
   exposes precision-driven misdeployment risk.
@@ -47,8 +51,11 @@ Recommended manuscript spine:
    instances and keeps beta as an external HESP-style tracker.
 4. H1 is supported by corrected post-fix smoke readouts but needs
    confirmation-scale replication before carrying the model-fitness claim.
-5. H2/H4 show the tracker changes deployment and partner choice in open regimes.
-6. H5 shows the corrected selector can improve abrupt-betrayal behavior at
+5. H2/H4 show the tracker changes deployment and partner choice in open regimes
+   at smoke scale.
+6. H3 decomposes partner-local signal quality from global-beta allocation;
+   locality is not yet proven behaviorally necessary.
+7. H5 shows the corrected selector can improve abrupt-betrayal behavior at
    smoke scale.
-7. H6 suggests clinical-like perturbations separate precision dynamics, but this
-   is not clinical validation.
+8. H6/Exp A-D should be framed as computational phenotype work only after final
+   outputs are reviewed; this is not clinical validation.
