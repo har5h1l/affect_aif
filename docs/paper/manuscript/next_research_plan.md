@@ -43,16 +43,16 @@ explicit approval:
   --workers 1
 ```
 
-## Priority 2: Rework H1 Reliability Versus Reward
+## Priority 2: Confirm H1 Reliability Versus Reward
 
-The post-fix H1 smoke does not preserve the old model-fitness readout:
-`|corr(precision, surprise)| = 0.226` versus
-`|corr(precision, payoff)| = 0.615` for local affect. Before adding seeds,
-inspect whether the current H1 task is measuring reward exposure rather than
-predictive reliability under partner-action surprisal.
+The corrected post-fix H1 smoke preserves the model-fitness readout:
+`|corr(precision, surprise)| = 0.976` versus
+`|corr(precision, payoff)| = 0.721` for local affect, and the partial readout
+controlling active payoff and encounter count is `0.951` versus `0.172`.
 
-Run only design-level or diagnostic checks here unless the user explicitly asks
-for a higher-seed confirmation.
+Run confirmation with the corrected active-aligned and partial-correlation
+columns before using H1 as manuscript evidence. Redesign the task only if the
+confirmation remains reward/exposure-confounded.
 
 ## Priority 3: Global-Beta Ablation
 

@@ -5,7 +5,7 @@
 | Claim | Status | Evidence | How to write it |
 |---|---|---|---|
 | Affective precision can move policy only when the policy space is open. | Supported with caveat | H0 graded-choice and graded/stress runs show entropy and behavior shifts; saturated binary regimes are weaker. | "Policy openness gates visible affect effects." |
-| Partner-local precision tracks model fitness more than reward. | Post-fix unresolved | Older H1 confirmation supported this, but the post-fix smoke reverses the readout (`0.226` surprise vs `0.615` payoff). | Treat as a target claim requiring confirmation or design revision. |
+| Partner-local precision tracks model fitness more than reward. | Post-fix smoke-supported; needs confirmation | Corrected post-fix smoke restores the readout (`0.976` surprise vs `0.721` payoff; partial `0.951` vs `0.172` controlling payoff and encounter count). | Treat as a target claim requiring confirmation before manuscript use. |
 | Affect changes deployment more than belief inference. | Supported | H2 open-regime lesion: belief accuracy remains similar while policy entropy and payoff move. | "The lesion resembles knowing-without-using rather than ignorance." |
 | Stress amplifies the mechanism. | Supported as boundary condition | H3 betrayal runs show lower entropy, altered return/reallocation, and worse payoff under abrupt shocks. | "Stress reveals the precision channel and its failure mode." |
 | Affect improves recovery after betrayal. | Not supported | The 30-seed H3 confirmation does not show a robust conditional-return payoff advantage. | Do not claim this. |
@@ -42,10 +42,11 @@ that open regimes can also expose maladaptive precision.
 
 ### H1: Model Fitness
 
-Post-fix unresolved. The older 30-seed bounded-proxy confirmation showed
-precision tracking surprise/predictability more strongly than payoff, but the
-post-fix log-surprisal smoke does not preserve that result. Do not use H1 as a
-current manuscript anchor until it is confirmed or redesigned.
+Corrected post-fix smoke-supported, but not yet confirmation-scale. The
+active-encounter and partial-correlation readouts show precision tracking
+surprise/predictability more strongly than payoff, but H1 should not be used as
+a manuscript anchor until the corrected readout is confirmed at higher seed
+count.
 
 ### H2: Deployment
 

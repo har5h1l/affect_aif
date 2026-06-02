@@ -63,14 +63,16 @@ Source tables:
 
 Current smoke numbers:
 
-- Local beta: `|corr(precision, surprise)| = 0.226`
-- Local beta: `|corr(precision, payoff)| = 0.615`
-- Global beta: `0.115` versus `0.103`
+- Local beta: `|corr(precision, surprise)| = 0.976`
+- Local beta: `|corr(precision, payoff)| = 0.721`
+- Local beta partial readout controlling payoff and encounter count:
+  `0.951` versus `0.172`
+- Global beta partial readout: `0.278` versus `0.058`
 - no payoff advantage for affect: `492.7` versus `552.0`
 
-Caption claim: The current post-fix H1 smoke does not yet establish the
-surprise-over-reward model-fitness dissociation; treat this panel as a target
-for confirmation/rework rather than final evidence.
+Caption claim: The corrected post-fix H1 smoke restores the
+surprise-over-reward model-fitness dissociation at diagnostic scale; treat this
+panel as a confirmation target rather than final publication evidence.
 
 ## Main Figure 4: Betrayal Boundary Condition
 

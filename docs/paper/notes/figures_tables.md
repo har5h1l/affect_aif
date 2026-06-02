@@ -50,10 +50,11 @@ Primary source:
 - `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h1_model_fitness_correlation_summary.csv`
 - `docs/paper/manuscript/source_tables/postfix_smoke_20260528/h1_evidence_effect_summary.csv`
 
-Current post-fix smoke: local affect has
-`|corr(precision, surprise)| = 0.226` and
-`|corr(precision, payoff)| = 0.615`, so the old model-fitness panel should be
-treated as unresolved.
+Current corrected post-fix smoke: local affect has
+`|corr(precision, surprise)| = 0.976` and
+`|corr(precision, payoff)| = 0.721`; the partial readout controlling active
+payoff and encounter count is `0.951` versus `0.172`. Treat this as a
+confirmation target, not final manuscript evidence.
 
 ### Figure 4: H5 Betrayal Anchor
 

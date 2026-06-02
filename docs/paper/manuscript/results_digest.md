@@ -31,21 +31,23 @@ as smoke-scale and underpowered.
 
 ## Headline Post-Fix Smoke Read
 
-### R1: H1 is not yet rescued under post-fix smoke
+### R1: H1 is rescued at corrected smoke-readout scale
 
 H1 reliability-versus-reward smoke:
 
-- Local affect: `|corr(precision, surprise)| = 0.226`,
-  `|corr(precision, payoff)| = 0.615`.
-- Global beta: `0.115` versus `0.103`, a weak and nearly flat readout.
+- Local affect: `|corr(precision, surprise)| = 0.976`,
+  `|corr(precision, payoff)| = 0.721`.
+- Local affect partial readout controlling active payoff and encounter count:
+  `0.951` versus `0.172`.
+- Global beta partial readout: `0.278` versus `0.058`, a weaker but still
+  surprise-dominant readout.
 - Total payoff: affect `492.7`, no-affect `552.0`, global beta `512.7`.
-- Interpretation: the post-fix H1 smoke does not support the old
-  surprise-over-reward model-fitness claim. Treat H1 as a required
-  confirmation/rework item, not as a current manuscript anchor.
+- Interpretation: the corrected post-fix H1 smoke supports the
+  surprise-over-reward model-fitness claim at diagnostic scale. Treat H1 as a
+  required confirmation item, not as a current manuscript anchor.
 - Follow-up exposure diagnostic: grouped by selected partner/seed, beta is
-  strongly associated with both mean surprisal and mean payoff, suggesting the
-  current task may not cleanly separate reliability from reward exposure at
-  smoke scale.
+  associated with both mean surprisal and mean payoff in the raw readout, so
+  confirmation should use the active-aligned and partial-correlation columns.
 
 ### R2: Open-regime deployment changes without stable payoff gain
 

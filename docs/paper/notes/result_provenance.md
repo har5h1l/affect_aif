@@ -85,7 +85,7 @@ python scripts/analysis/analyze.py --results results/h3_precision_sensitivity_20
 | Card | Current status | Evidence tier |
 |---|---|---|
 | H0 | Mixed | Post-fix three-seed smoke; active entropy channel, no local-affect payoff win. |
-| H1 | Rework / confirm | Post-fix three-seed smoke does not preserve the old surprise-over-reward model-fitness diagnostic. |
+| H1 | Confirm | Corrected post-fix three-seed smoke preserves the surprise-over-reward model-fitness diagnostic; confirmation still required. |
 | H2 | Deployment active | Post-fix three-seed smoke; lesion/no-affect match, local affect changes entropy but not payoff. |
 | H3 | Decomposition only | Post-fix three-seed smoke; global beta has higher aggregate payoff, local beta remains cleaner as a partner-specific signal. |
 | H4 | Underpowered | Post-fix three-seed smoke; keep supplemental until confirmation. |
