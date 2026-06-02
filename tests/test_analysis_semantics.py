@@ -325,6 +325,12 @@ def test_model_fitness_correlation_reports_partial_signal_dominance():
                 "prediction_errors": [surprise],
                 "reward_avgs": [float("nan")],
                 "inferred_type_correct": 1.0,
+                "inferred_stance_correct": 1.0,
+                "inferred_joint_correct": 1.0,
+                "q_pi_entropy": 0.5,
+                "mean_abs_step_efe": 1.0,
+                "planning_cost": 1.0,
+                "planning_cost_ratio": 1.0,
             }
         )
 
@@ -332,6 +338,53 @@ def test_model_fitness_correlation_reports_partial_signal_dominance():
 
     assert corr["abs_partial_corr_precision_surprise"] > corr["abs_partial_corr_precision_reward"]
     assert corr["partial_surprise_dominates_reward"]
+
+
+def test_model_fitness_correlation_handles_reward_neutral_constant_payoff():
+    rows = []
+    for seed, surprise, precision in [
+        (0, 0.10, 2.00),
+        (1, 0.20, 1.80),
+        (2, 0.35, 1.55),
+        (3, 0.55, 1.15),
+        (4, 0.70, 0.85),
+        (5, 0.90, 0.55),
+    ]:
+        rows.append(
+            {
+                "variant_id": "affect",
+                "seed": seed,
+                "round": 1,
+                "partner_idx": 0,
+                "payoff": 3.0,
+                "betas": [1.0 / precision],
+                "prediction_errors": [surprise],
+                "reward_avgs": [float("nan")],
+                "inferred_type_correct": 1.0,
+                "inferred_stance_correct": 1.0,
+                "inferred_joint_correct": 1.0,
+                "q_pi_entropy": 0.5,
+                "mean_abs_step_efe": 1.0,
+                "planning_cost": 1.0,
+                "planning_cost_ratio": 1.0,
+            }
+        )
+
+    results = pd.DataFrame(rows)
+    corr = model_fitness_correlation_summary(results).iloc[0]
+
+    assert corr["reward_proxy_constant"]
+    assert corr["alignment"] == "active_encounter"
+    assert corr["partial_corr_precision_surprise"] < 0
+    assert corr["partial_corr_precision_reward"] == 0.0
+    assert corr["partial_surprise_dominates_reward"]
+
+    effects = evidence_effect_summary(results, bootstrap_iterations=50, random_seed=0)
+    h1_partial = effects.loc[
+        (effects["readout"] == "model_fitness")
+        & (effects["metric"] == "abs_partial_corr_precision_surprise_minus_reward")
+    ].iloc[0]
+    assert h1_partial["treatment_mean"] > 0
 
 
 def test_model_fitness_correlation_reports_reward_exposure_confound():

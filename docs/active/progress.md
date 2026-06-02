@@ -61,6 +61,16 @@ active-encounter partial correlation columns. The default paper figure builder
 was verified against the current source-table packet in `/tmp` after refreshing
 the H1 source tables from the post-fix smoke results.
 
+The H1 diagnostic ladder was dry-run locally on June 2: the corrected
+confirmation expands to 90 runs, while the balanced graded and reward-neutral
+diagnostics expand to 20 runs each. A reduced-round local smoke of
+`reliability_reward_neutral_diagnostic.toml` verified that constant payoff is
+flagged as `reward_proxy_constant`, reward association is treated as zero for
+the dominance diagnostic, and
+`abs_partial_corr_precision_surprise_minus_reward` rows are emitted. This keeps
+the strict reward-neutral diagnostic analyzable as a reliability test rather
+than failing because reward variance was intentionally removed.
+
 ```text
 tmux: affect_aif_full_pytest_20260602_final
 log: /tmp/affect_aif_full_pytest_20260602_final.log
@@ -214,6 +224,10 @@ reward/exposure-confounded.
 - Use `evidence_effect_summary.csv` metric
   `abs_partial_corr_precision_surprise_minus_reward` for manuscript figure
   effect panels; the raw correlation gap remains a secondary diagnostic.
+- In the strict reward-neutral diagnostic, expect `reward_proxy_constant =
+  True`; this means reward has no variance by design, so the partial dominance
+  readout compares precision-surprise association against zero reward
+  association rather than an undefined payoff correlation.
 - Treat whole-run payoff as secondary; H1 is about model fitness, not reward
   advantage.
 - If corrected confirmation remains confounded, run the balanced-exposure

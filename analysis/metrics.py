@@ -737,6 +737,11 @@ def _safe_corr(left: pd.Series, right: pd.Series) -> float:
     return float(pair["left"].corr(pair["right"]))
 
 
+def _series_is_constant(series: pd.Series) -> bool:
+    clean = pd.Series(series, dtype=float).replace([np.inf, -np.inf], np.nan).dropna()
+    return len(clean) >= 3 and bool(np.isclose(clean.std(ddof=0), 0.0))
+
+
 def _partial_corr(left: pd.Series, right: pd.Series, controls: dict[str, pd.Series]) -> float:
     frame = pd.DataFrame({"left": left, "right": right, **controls}).replace([np.inf, -np.inf], np.nan).dropna()
     if len(frame) < 3:
@@ -915,6 +920,8 @@ def evidence_effect_summary(
                 seed_reward = reward_proxy.loc[seed_group.index]
                 corr_surprise = _safe_corr(seed_precision, seed_surprise)
                 corr_reward = _safe_corr(seed_precision, seed_reward)
+                if _series_is_constant(seed_reward) and np.isfinite(corr_surprise):
+                    corr_reward = 0.0
                 if np.isfinite(corr_surprise) and np.isfinite(corr_reward):
                     seed_rows.append(
                         {
@@ -938,6 +945,8 @@ def evidence_effect_summary(
                         "active_encounters": seed_group["active_encounters"],
                     },
                 )
+                if _series_is_constant(seed_reward) and np.isfinite(partial_corr_surprise):
+                    partial_corr_reward = 0.0
                 if np.isfinite(partial_corr_surprise) and np.isfinite(partial_corr_reward):
                     partial_seed_rows.append(
                         {
@@ -949,6 +958,8 @@ def evidence_effect_summary(
             if seed_frame.empty:
                 corr_surprise = _safe_corr(precision, surprise)
                 corr_reward = _safe_corr(precision, reward_proxy)
+                if _series_is_constant(reward_proxy) and np.isfinite(corr_surprise):
+                    corr_reward = 0.0
                 if np.isfinite(corr_surprise) and np.isfinite(corr_reward):
                     seed_frame = pd.DataFrame(
                         [{"seed": -1, "dominance": abs(corr_surprise) - abs(corr_reward)}]
@@ -982,6 +993,8 @@ def evidence_effect_summary(
                         "active_encounters": group["active_encounters"],
                     },
                 )
+                if _series_is_constant(reward_proxy) and np.isfinite(partial_corr_surprise):
+                    partial_corr_reward = 0.0
                 if np.isfinite(partial_corr_surprise) and np.isfinite(partial_corr_reward):
                     partial_seed_frame = pd.DataFrame(
                         [
@@ -1069,6 +1082,7 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
     rows: list[dict] = []
     for variant_id, group in partner_summary.groupby("variant_id"):
         precision, surprise, reward_proxy, reward_source, alignment = _model_fitness_correlation_inputs(group)
+        reward_proxy_constant = _series_is_constant(reward_proxy)
         corr_surprise = _safe_corr(precision, surprise)
         corr_reward = _safe_corr(precision, reward_proxy)
         corr_surprise_reward = _safe_corr(surprise, reward_proxy)
@@ -1085,11 +1099,19 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
             reward_proxy,
             {"surprise": surprise, "active_encounters": group["active_encounters"]},
         )
+        if reward_proxy_constant:
+            if np.isfinite(corr_surprise):
+                corr_reward = 0.0
+            corr_surprise_reward = 0.0
+            corr_reward_encounters = 0.0
+            if np.isfinite(partial_corr_surprise):
+                partial_corr_reward = 0.0
         rows.append(
             {
                 "variant_id": str(variant_id),
                 "n_partner_seed_units": int(len(group)),
                 "reward_proxy": reward_source,
+                "reward_proxy_constant": bool(reward_proxy_constant),
                 "alignment": alignment,
                 "corr_precision_surprise": corr_surprise,
                 "corr_precision_reward": corr_reward,
