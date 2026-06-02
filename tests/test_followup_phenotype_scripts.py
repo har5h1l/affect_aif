@@ -1,5 +1,7 @@
 import pandas as pd
 
+from scripts.experiment.run_exp_b_prior_factorial import EXP_B_RADAR_METRICS
+from scripts.experiment.run_exp_b_prior_factorial import metrics as exp_b_metrics
 from scripts.experiment.run_exp_c_forgiveness import _payoff_recovery
 from scripts.experiment.run_exp_d_mixed_volatility import build_specs, metrics
 
@@ -47,3 +49,76 @@ def test_exp_d_false_positive_rate_tracks_stable_partner_drop_not_non_p0_selecti
 
     assert float(summary.loc[0, "concentration_toward_p0"]) == 0.5
     assert float(summary.loc[0, "false_positive_rate"]) == 1.0
+
+
+def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():
+    rows = [
+        {
+            "experiment_id": "partner_choice",
+            "variant_id": "naive_high_alpha",
+            "seed": 1,
+            "round": 1,
+            "partner_idx": 0,
+            "agent_action": 1,
+            "partner_action": 0,
+            "payoff": 1.0,
+            "true_partner_type": "cooperator",
+            "q_pi_entropy": 0.5,
+            "local_betas": "[0.5, 0.8, 1.2, 1.5]",
+        },
+        {
+            "experiment_id": "partner_choice",
+            "variant_id": "naive_high_alpha",
+            "seed": 1,
+            "round": 2,
+            "partner_idx": 0,
+            "agent_action": 5,
+            "partner_action": 0,
+            "payoff": 1.0,
+            "true_partner_type": "cooperator",
+            "q_pi_entropy": 0.5,
+            "local_betas": "[0.5, 0.8, 1.2, 1.5]",
+        },
+        {
+            "experiment_id": "partner_choice",
+            "variant_id": "naive_high_alpha",
+            "seed": 1,
+            "round": 4,
+            "partner_idx": 1,
+            "agent_action": 5,
+            "partner_action": 1,
+            "payoff": 1.0,
+            "true_partner_type": "exploiter",
+            "q_pi_entropy": 0.5,
+            "local_betas": "[0.5, 0.8, 1.2, 1.5]",
+        },
+        {
+            "experiment_id": "partner_choice",
+            "variant_id": "naive_high_alpha",
+            "seed": 1,
+            "round": 10,
+            "partner_idx": 1,
+            "agent_action": 1,
+            "partner_action": 1,
+            "payoff": 1.0,
+            "true_partner_type": "exploiter",
+            "q_pi_entropy": 0.5,
+            "local_betas": "[0.5, 0.8, 1.2, 1.5]",
+        },
+    ]
+
+    summary = exp_b_metrics(pd.DataFrame(rows))
+
+    assert float(summary.loc[0, "trust_approach_latency"]) == 2.0
+    assert float(summary.loc[0, "trust_withdrawal_latency"]) == 6.0
+    assert float(summary.loc[0, "trust_asymmetry"]) == 3.0
+
+
+def test_exp_b_radar_metrics_match_manuscript_plan():
+    assert EXP_B_RADAR_METRICS == (
+        "early_exploitation_rate",
+        "betrayal_recovery_time",
+        "selection_gini",
+        "trust_asymmetry",
+        "mean_payoff",
+    )

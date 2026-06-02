@@ -67,6 +67,10 @@
 - Exp C/D pre-run metric alignment: fixed through `e66fc16` before those
   scripts started; Exp C recovery and Exp D false-positive readouts now match
   the manuscript plan.
+- Exp B compact metric/figure alignment: fixed while Exp B was still running.
+  Raw trajectories are not obsolete, but the final Exp B compact outputs must
+  be regenerated with `--analyze-only` after Exp A-D finality so the metrics,
+  source tables, and phenotype radar figure use the updated readout contract.
 - Import-boundary cleanup: benchmark orchestration moved to
   `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
   `experiments`, `analysis`, or `benchmarks`.

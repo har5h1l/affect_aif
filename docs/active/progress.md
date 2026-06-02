@@ -24,19 +24,19 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 The H1 analysis/config checkpoint is `a5161e0`, after the H1 active-encounter
 alignment fix, richer H1 confound diagnostics, reward-neutral readout handling,
-and the controlled H1 diagnostic configs. Current pushed `master` is
-`e66fc16`, which aligns pre-run Exp C/D phenotype metrics on top of the Exp D
-alpha-arm separation, active-handoff, manuscript evidence-boundary, planning,
-and architecture commits. The previous `3a36756`, `942c595`, `c5bc373`, and
-`f86ede4` notes are stale as current-state references.
+and the controlled H1 diagnostic configs. Later checkpoints aligned the
+manuscript evidence boundary (`07b31d0`), Exp D alpha-arm separation
+(`ff8c3fe`), Exp C/D pre-run metric definitions (`e66fc16`), and active
+phenotype handoff (`b236bf8`). The previous `3a36756`, `942c595`, `c5bc373`,
+and `f86ede4` notes are stale as current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
-June 2 02:48 PDT, Exp A has written `results/exp_a/` and manuscript source
+June 2 02:57 PDT, Exp A has written `results/exp_a/` and manuscript source
 tables, while Exp B is still CPU-active in
 `scripts/experiment/run_exp_b_prior_factorial.py`; its
 `results/exp_b/betrayal/results_partial.csv` and the run log both last updated
-at 02:25 PDT. Exp C/D have not started and have no output files. Do not
+at 02:56-02:57 PDT. Exp C/D have not started and have no output files. Do not
 interpret Exp A or partial Exp B outputs as manuscript evidence until Exp A-D
 complete and the user approves result interpretation updates.
 
@@ -90,6 +90,18 @@ and Exp D's `false_positive_rate` was aligned to the planned stable-partner
 readout by measuring rolling P0 engagement drops more than 15% below its early
 baseline. Exp A/B outputs are not obsolete; no interruption or rerun was
 required.
+
+On June 2, while Exp B was still running, the Exp B compact analysis and figure
+contract was aligned to the manuscript plan without changing task dynamics or
+the model process. `metrics.csv` now reports `trust_approach_latency`,
+`trust_withdrawal_latency`, and `trust_asymmetry =
+trust_withdrawal_latency / trust_approach_latency`; the phenotype radar figure
+uses the planned five axes: early exploitation rate, betrayal recovery time,
+selection Gini, trust asymmetry, and mean payoff, with a dashed default-agent
+overlay. The live Exp B raw trajectories remain valid, but the currently
+running Python process loaded the older analysis code; after Exp A-D finality,
+rerun Exp B with `--analyze-only` so `results/exp_b/metrics.csv`, source
+tables, and `fig_phenotype_quadrants.pdf` use the updated readout.
 
 Decision tree for H1:
 

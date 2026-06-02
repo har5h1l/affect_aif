@@ -75,10 +75,12 @@ belief (naive vs cautious) with precision gain (low vs high).
 - Environments: open graded, betrayal, partner-choice
 - Seeds: 20 per condition
 
-**Additional metric**: `trust_asymmetry` — ratio of (rounds to first high-
-confidence approach of new partner) to (rounds to first high-confidence
-withdrawal after first defection). Values > 1 mean faster to approach than to
-withdraw.
+**Additional metrics**: `trust_approach_latency` (rounds to first high
+investment), `trust_withdrawal_latency` (rounds from first observed defection
+to first low investment), and `trust_asymmetry =
+trust_withdrawal_latency / trust_approach_latency`. Values > 1 mean the agent
+approaches trust faster than it withdraws after defection; values < 1 mean
+withdrawal is faster than approach.
 
 **Target phenotypes**:
 
