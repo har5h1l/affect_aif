@@ -10,8 +10,9 @@
   run confirmation before manuscript use. If confirmation remains heavily
   reward/exposure-confounded, use the bounded diagnostic ladder now documented
   in `progress.md`: corrected confirmation -> balanced-exposure graded
-  reliability spine -> strict reward-neutral H1. Only treat H1 as model-level
-  failure if the strict reward-neutral diagnostic also fails.
+  reliability spine -> reward-matched graded spine -> strict reward-neutral H1.
+  Only treat H1 as model-level failure if the strict reward-neutral diagnostic
+  also fails.
 
 - **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
   The manuscript currently uses deployment/entropy language for H0/H2 and

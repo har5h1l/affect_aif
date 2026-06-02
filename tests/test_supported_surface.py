@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -98,6 +99,17 @@ def test_supported_cli_scripts_parse_and_run_smoke(tmp_path):
     assert run_model_comparison.main(["--results", str(results_path), "--output-dir", str(model_dir)]) == 0
     assert (figures_dir / "final_round_summary.csv").exists()
     assert (model_dir / "model_comparison_report.json").exists()
+
+
+def test_preliminary_cli_help_avoids_stdlib_inspect_shadow():
+    result = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "experiment" / "preliminary.py"), "--help"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "Run a small preliminary affect_aif experiment" in result.stdout
 
 
 def test_run_cli_dry_run_reports_toml_manifest(tmp_path):
@@ -202,6 +214,7 @@ def test_core_hypothesis_experiments_exist():
         "configs/trust/hypotheses/h0_policy_openness/graded_choice.toml",
         "configs/trust/hypotheses/h0_policy_openness/graded_betrayal.toml",
         "configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml",
+        "configs/trust/hypotheses/h1_model_fitness/reliability_spine_graded_reward_matched_diagnostic.toml",
         "configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml",
         "configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml",
         "configs/trust/hypotheses/h4_social_allocation/partner_choice.toml",

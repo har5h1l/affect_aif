@@ -136,8 +136,11 @@ H1 has a bounded diagnostic ladder rather than a single all-or-nothing
 confirmation. Run `reliability_vs_reward_confirm.toml` first to confirm the
 corrected active-encounter readout. If reward/exposure coupling remains heavy,
 run `reliability_spine_graded_diagnostic.toml` to use balanced exposure on a
-graded reliability spine. If the graded spine still cannot separate
-predictive reliability from reward or exposure, run
+graded reliability spine. If the normal graded spine still couples reliability
+to reward, run `reliability_spine_graded_reward_matched_diagnostic.toml`; this
+keeps the graded investment task while setting the multiplier to zero so own
+payoff is independent of partner action at each investment level. If that still
+cannot separate predictive reliability from reward or exposure, run
 `reliability_reward_neutral_diagnostic.toml`. Only a failure of the strict
 reward-neutral diagnostic should be treated as evidence against the model-level
 H1 mechanism.

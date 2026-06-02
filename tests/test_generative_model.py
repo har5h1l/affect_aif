@@ -63,6 +63,12 @@ def test_graded_payoff_matrix_shape():
         assert matrix[i, 1, 0] >= matrix[i + 1, 1, 0]
 
 
+def test_zero_multiplier_graded_payoff_matches_partner_action_rewards():
+    matrix = build_graded_payoff_matrix(num_levels=6, endowment=10.0, multiplier=0.0)
+
+    assert np.allclose(matrix[:, 0, 0], matrix[:, 1, 0])
+
+
 def test_graded_encode_decode_roundtrip():
     for partner in range(4):
         for action in range(6):

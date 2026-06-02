@@ -22,12 +22,11 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 ### June 2 H1 Analysis/Design Checkpoint
 
-The current pushed `master` checkpoint is `f86ede4`. The H1 analysis/config
-checkpoint itself is `a5161e0`, after the H1 active-encounter alignment fix,
-richer H1 confound diagnostics, reward-neutral readout handling, and the two
-controlled H1 diagnostic configs. `f86ede4` adds the import-boundary cleanup on
-top. The previous `3a36756`, `942c595`, and `c5bc373` notes are stale as
-current-state references.
+The H1 analysis/config checkpoint is `a5161e0`, after the H1 active-encounter
+alignment fix, richer H1 confound diagnostics, reward-neutral readout handling,
+and the controlled H1 diagnostic configs. Current pushed `master` has planning
+and architecture commits on top. The previous `3a36756`, `942c595`,
+`c5bc373`, and `f86ede4` notes are stale as current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
@@ -64,8 +63,11 @@ was verified against the current source-table packet in `/tmp` after refreshing
 the H1 source tables from the post-fix smoke results.
 
 The H1 diagnostic ladder was dry-run locally on June 2: the corrected
-confirmation expands to 90 runs, while the balanced graded and reward-neutral
-diagnostics expand to 20 runs each. A reduced-round local smoke of
+confirmation expands to 90 runs, while the balanced graded, reward-matched
+graded, and reward-neutral diagnostics expand to 20 runs each. A reduced-round
+local smoke of `reliability_spine_graded_reward_matched_diagnostic.toml`
+verified that the reward-matched graded spine executes end to end (40 rows:
+4 variants x 1 seed x 10 rounds). A reduced-round local smoke of
 `reliability_reward_neutral_diagnostic.toml` verified that constant payoff is
 flagged as `reward_proxy_constant`, reward association is treated as zero for
 the dominance diagnostic, and
@@ -83,9 +85,13 @@ Decision tree for H1:
 3. If it fails mainly through reward/exposure coupling, classify the problem as
    analysis/task-design ambiguity and run the balanced graded reliability spine
    before adding seeds.
-4. If the balanced graded spine still cannot separate predictive reliability
-   from reward or exposure, run the strict reward-neutral diagnostic.
-5. Treat H1 as a model-level failure only if the strict reward-neutral
+4. If the normal graded spine remains reward-coupled, run the reward-matched
+   graded spine. It keeps the graded investment task but sets the multiplier to
+   zero so own payoff is independent of partner action at each investment level.
+5. If the reward-matched graded spine still cannot separate predictive
+   reliability from reward or exposure, run the strict reward-neutral
+   diagnostic.
+6. Treat H1 as a model-level failure only if the strict reward-neutral
    diagnostic also fails to produce a precision-surprise association. A pass on
    reward-neutral H1 after a graded-spine failure means the earlier failure was
    caused by task or analysis confounding, not the core affective precision
@@ -267,8 +273,19 @@ reward/exposure-confounded.
   --workers 1
 ```
 
-- If the graded spine still cannot separate reward/exposure from predictive
-  reliability, run the strict reward-neutral diagnostic:
+- If the normal graded spine still cannot separate reward/exposure from
+  predictive reliability, run the reward-matched graded spine:
+
+```bash
+.venv/bin/python scripts/experiment/run.py \
+  --config configs/trust/hypotheses/h1_model_fitness/reliability_spine_graded_reward_matched_diagnostic.toml \
+  --output-dir results \
+  --batch-name log_surprisal_h1_graded_reward_matched_diagnostic_YYYYMMDD \
+  --workers 1
+```
+
+- If the reward-matched graded spine still cannot separate reward/exposure from
+  predictive reliability, run the strict reward-neutral diagnostic:
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \

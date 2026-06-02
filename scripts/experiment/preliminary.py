@@ -1,10 +1,16 @@
 """Run a small preliminary experiment and print directional hypothesis checks."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse
 import sys
 from pathlib import Path
+
+SCRIPT_DIR = str(Path(__file__).resolve().parent)
+if sys.path and str(Path(sys.path[0]).resolve()) == SCRIPT_DIR:
+    sys.path.pop(0)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 

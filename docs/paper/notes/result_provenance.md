@@ -79,8 +79,8 @@ python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_2026051
 Current H1 confirmation should follow the active ladder in
 `docs/active/progress.md`: corrected active-encounter confirmation first, then
 the balanced graded reliability spine if reward/exposure remains confounded,
-then the strict reward-neutral diagnostic before treating H1 as model-level
-failure.
+then the reward-matched graded reliability spine, then the strict
+reward-neutral diagnostic before treating H1 as model-level failure.
 
 ### Historical H5 Precision Sensitivity
 
