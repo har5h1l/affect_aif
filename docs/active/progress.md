@@ -24,21 +24,21 @@ uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
 
 The H1 analysis/config checkpoint is `a5161e0`, after the H1 active-encounter
 alignment fix, richer H1 confound diagnostics, reward-neutral readout handling,
-and the controlled H1 diagnostic configs. Current pushed `master` includes
-`ff8c3fe`, which separates Exp D's default and high-gain alpha arms on top of
-the active-handoff, manuscript evidence-boundary, planning, and architecture
-commits. The previous `3a36756`, `942c595`, `c5bc373`, and `f86ede4` notes are
-stale as current-state references.
+and the controlled H1 diagnostic configs. Current pushed `master` is
+`e66fc16`, which aligns pre-run Exp C/D phenotype metrics on top of the Exp D
+alpha-arm separation, active-handoff, manuscript evidence-boundary, planning,
+and architecture commits. The previous `3a36756`, `942c595`, `c5bc373`, and
+`f86ede4` notes are stale as current-state references.
 
 Keep long experiments on `server`. The Exp A-D tmux/Mango process
 `affect_aif_exp_abcd_20260529` is still running and monitor-only. As of
-June 2 02:25 PDT, Exp A has written `results/exp_a/` and manuscript source
-tables, while Exp B is active in
+June 2 02:48 PDT, Exp A has written `results/exp_a/` and manuscript source
+tables, while Exp B is still CPU-active in
 `scripts/experiment/run_exp_b_prior_factorial.py`; its
 `results/exp_b/betrayal/results_partial.csv` and the run log both last updated
-at 02:25 PDT. Exp C/D have not started. Do not interpret Exp A or partial Exp B
-outputs as manuscript evidence until Exp A-D complete and the user approves
-result interpretation updates.
+at 02:25 PDT. Exp C/D have not started and have no output files. Do not
+interpret Exp A or partial Exp B outputs as manuscript evidence until Exp A-D
+complete and the user approves result interpretation updates.
 
 The full local pytest gate is clean as of June 2 01:00 PDT. The previous
 stall was diagnosed as oversized test fixtures that imported the full H5
@@ -83,6 +83,13 @@ was corrected from `alpha=3.0` to `alpha=8.0`. This keeps the project default
 (`alpha=3.0`) as the calibrated reference while making the high-gain arm a
 distinct reactive comparison. Exp A/B outputs are not obsolete; Exp D had not
 started, so no interruption or rerun was required.
+
+Also before Exp C/D had started, Exp C's payoff-recovery metric was aligned to
+the manuscript plan by using rounds 50--80 as the late pre-betrayal baseline,
+and Exp D's `false_positive_rate` was aligned to the planned stable-partner
+readout by measuring rolling P0 engagement drops more than 15% below its early
+baseline. Exp A/B outputs are not obsolete; no interruption or rerun was
+required.
 
 Decision tree for H1:
 
@@ -208,11 +215,18 @@ standalone scripts rather than TOML spec configs.
 
 ### After Exp A-D Complete
 
-1. Run `scripts/analysis/analyze.py` on each `results/exp_*/` output.
-2. Fill `\resultp{...}` placeholders in `sections/03_results.tex` Section 3.6.
-3. Check that phenotype descriptions match the actual metric values.
-4. Update `docs/results/current.md` with phenotype findings (ask user before
-   updating interpretation narrative).
+1. Confirm finality before reading metric values: the tmux/Mango process has
+   ended, `results/exp_abcd_20260529_logs/run.log` contains `DONE`, and
+   `results/exp_a/` through `results/exp_d/` each contain final `results.csv`,
+   `metrics.csv`, `manifest.json`, and `README.md`.
+2. Run `scripts/analysis/analyze.py` on each final `results/exp_*/results.csv`
+   where the generic analysis is applicable; the standalone Exp A-D scripts
+   also write compact `metrics.csv` files and manuscript source tables.
+3. Fill `\resultp{...}` placeholders in `sections/03_results.tex` Section 3.6
+   only after finality is established and the metric directions are checked
+   against the planned readouts.
+4. Update `docs/results/current.md` with phenotype findings only after asking
+   the user before interpretation narrative updates.
 5. Proceed to confirmation-scale runs below.
 
 ---

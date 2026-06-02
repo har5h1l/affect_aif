@@ -53,6 +53,10 @@ publication-grade results:
 - `07b31d0` aligns the abstract, introduction, results, and discussion with the
   current evidence tier: H1 and H5 are confirmation targets, and phenotype
   profiles are pending computational targets rather than final outputs.
+- `e66fc16` aligns pre-run Exp C/D phenotype metrics with their manuscript
+  readouts: Exp C payoff recovery uses the late pre-betrayal baseline, and Exp
+  D false positives measure stable-P0 engagement drops rather than generic
+  non-P0 allocation.
 
 The four phenotype experiment scripts (Exp A-D) are running on the server.
 See `docs/active/progress.md` for commands and expected outputs.
@@ -91,9 +95,12 @@ Paper-facing evidence in `docs/paper/manuscript/`. Interpreted results in
 `docs/results/`.
 
 The next active lane is:
-1. Wait for Exp A-D to complete on server (`mango cloud sync fetch affect_aif`).
-2. Run `scripts/analysis/analyze.py` on each `results/exp_*/` output.
-3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers.
+1. Wait for Exp A-D to complete on server and confirm finality before reading
+   metric values.
+2. Run the applicable analysis on final `results/exp_*/results.csv` outputs and
+   inspect the standalone Exp A-D `metrics.csv` files/source tables.
+3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers only after
+   finality and user-approved interpretation review.
 4. Queue H5 confirmation run after verification gate passes.
 5. Run H1 confirmation with the corrected active-aligned and partial-correlation
    readouts; if confirmation remains reward/exposure-confounded, use the

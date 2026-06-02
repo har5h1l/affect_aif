@@ -64,6 +64,9 @@
 - Manuscript evidence-boundary language: aligned through `07b31d0`; H1 and H5
   are framed as confirmation targets, and phenotype outputs remain pending
   `\resultp{}` placeholders rather than interpreted results.
+- Exp C/D pre-run metric alignment: fixed through `e66fc16` before those
+  scripts started; Exp C recovery and Exp D false-positive readouts now match
+  the manuscript plan.
 - Import-boundary cleanup: benchmark orchestration moved to
   `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
   `experiments`, `analysis`, or `benchmarks`.
