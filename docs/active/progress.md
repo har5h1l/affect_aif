@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 3 15:38 PDT:
+Current recovery status on June 3 16:11 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -74,7 +74,7 @@ Current recovery status on June 3 15:38 PDT:
   analysis completed under `results/exp_b/analysis/`.
 - Exp D started at 14:47 PDT and is now the active recovery stage. The process
   is CPU-active and writing `results/exp_d/mixed_volatility/results_partial.csv`;
-  a structural-only check at 15:38 PDT found 3 complete seed groups out of the
+  a structural-only check at 16:11 PDT found 5 complete seed groups out of the
   planned 80 groups. Continue monitor-only unless the process exits, loses CPU
   without I/O, or logs an error. Do not read metric values until recovery
   finality.
@@ -85,7 +85,7 @@ Manuscript-critical evidence audit at 14:47 PDT:
 |---|---:|---|---|
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Running as the active recovery stage after Exp B analysis; partial checkpoint has 3/80 complete seed groups as of 15:38 PDT | Pending; critical for mixed-volatility/locality readout |
+| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Running as the active recovery stage after Exp B analysis; partial checkpoint has 5/80 complete seed groups as of 16:11 PDT | Pending; critical for mixed-volatility/locality readout |
 | Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | No output yet; queued after Exp D analysis | Pending; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Not yet queued in recovery | Top core-mechanism confirmation after Exp A-D |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |
