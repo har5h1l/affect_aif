@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 3 14:02 PDT:
+Current recovery status on June 3 14:47 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -64,21 +64,25 @@ Current recovery status on June 3 14:02 PDT:
   `docs/paper/manuscript/figures/fig_alpha_sweep.pdf`. Do not interpret the
   printed metric values as manuscript results until full Exp A-D finality and
   user-approved review.
-- Exp B resume started at 13:31 PDT and is the current active stage. The
-  Python process is CPU-active in JAX runtime/compile paths. The
-  `partner_choice/results_partial.csv` checkpoint advanced again by 14:02 PDT
-  from 117/120 to 118/120 complete runs; the remaining missing runs are
-  no-affect replications 18--19. The Python process remains CPU-active.
-  Continue monitor-only unless the process exits, loses CPU without I/O, or
-  logs an error.
+- Exp B resume completed. Structural audit shows all three Exp B environments
+  complete: `open_graded`, `betrayal`, and `partner_choice` each have 120
+  run groups x 200 rounds, and top-level `results/exp_b/results.csv` has 360
+  run groups / 72,000 data rows. Compact outputs exist at
+  `results/exp_b/metrics.csv`,
+  `docs/paper/manuscript/source_tables/exp_b_prior_factorial/`, and
+  `docs/paper/manuscript/figures/fig_phenotype_quadrants.pdf`. Generic
+  analysis completed under `results/exp_b/analysis/`.
+- Exp D started at 14:47 PDT and is now the active recovery stage. Continue
+  monitor-only unless the process exits, loses CPU without I/O, or logs an
+  error.
 
-Manuscript-critical evidence audit at 14:02 PDT:
+Manuscript-critical evidence audit at 14:47 PDT:
 
 | Evidence surface | Planned size | Current artifact state | Manuscript status |
 |---|---:|---|---|
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | `open_graded` and `betrayal` final raw outputs exist; `partner_choice/results_partial.csv` has 118/120 complete runs; no top-level Exp B `results.csv` or compact outputs yet | Pending final partner-choice runs, top-level merge, compact analysis, and generic analysis |
-| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | No output yet; queued after Exp B analysis | Pending; critical for mixed-volatility/locality readout |
+| Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
+| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Running as the active recovery stage after Exp B analysis | Pending; critical for mixed-volatility/locality readout |
 | Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | No output yet; queued after Exp D analysis | Pending; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Not yet queued in recovery | Top core-mechanism confirmation after Exp A-D |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |

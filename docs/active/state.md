@@ -87,9 +87,9 @@ recovery process reaches finality.
 | H5 Betrayal | repaired; affect beats no-affect in smoke | primary behavioral confirmation target | PRIORITY confirmation |
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
 | Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
-| Exp B Prior Factorial | open/betrayal complete; partner-choice 118/120 complete as of June 3 14:02 PDT | Section 3.6.2 all `\resultp{}` | recovery running |
+| Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
 | Exp C Forgiveness | not yet | Section 3.6.3 all `\resultp{}` | queued in recovery |
-| Exp D Mixed Volatility | not yet | Section 3.6.4 all `\resultp{}` | queued in recovery |
+| Exp D Mixed Volatility | running as of June 3 14:47 PDT | Section 3.6.4 all `\resultp{}` | recovery running |
 
 ## Current Handoff
 
