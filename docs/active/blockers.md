@@ -25,7 +25,9 @@
 - **Exp A-D review**: once the server runs complete, inspect the phenotype
   outputs before filling `\resultp{}` placeholders. Do not update the
   Section 3.6 interpretation narrative without user review of the phenotype
-  metric values (see AGENTS.md rule on result interpretation).
+  metric values (see AGENTS.md rule on result interpretation). The original
+  `affect_aif_exp_abcd_20260529` run stopped during Exp B and has been
+  superseded by `affect_aif_exp_recovery_20260603`.
 
 ## Current Interpretation Guardrails
 
@@ -39,6 +41,12 @@
 
 ## Technical Follow-Ups
 
+- Monitor `affect_aif_exp_recovery_20260603`. It runs verification first, then
+  Exp A analyze-only, Exp B resume, Exp D, and Exp C, with generic analysis
+  after each experiment stage. Treat `RECOVERY_DONE` in
+  `results/exp_abcd_recovery_20260603_logs/run.log` plus final
+  `results.csv`/`metrics.csv`/`manifest.json`/`README.md` files for Exp A-D as
+  the recovery finality gate.
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
 - H1 needs confirmation with the corrected active-aligned and partial

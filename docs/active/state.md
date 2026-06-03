@@ -58,8 +58,10 @@ publication-grade results:
   D false positives measure stable-P0 engagement drops rather than generic
   non-P0 allocation.
 
-The four phenotype experiment scripts (Exp A-D) are running on the server.
-See `docs/active/progress.md` for commands and expected outputs.
+The original four-script phenotype run stopped before finality and has been
+superseded by the recovery tmux/Mango process documented in
+`docs/active/progress.md`. Do not interpret phenotype outputs until the
+recovery process reaches finality.
 
 ## Completion State
 
@@ -67,8 +69,9 @@ See `docs/active/progress.md` for commands and expected outputs.
 - Post-fix H0-H6 smoke completed under corrected centered selector.
 - Manuscript draft revised toward phenotype/individual-differences framing and
   current smoke-vs-confirmation evidence boundaries.
-- Exp A-D scripts implemented and running on server. Exp A has written outputs;
-  Exp B is still running, so phenotype outputs are not final evidence.
+- Exp A-D scripts implemented. The original server run stopped during Exp B;
+  recovery is running on server to regenerate Exp A compact outputs, finish Exp
+  B, then run Exp D and Exp C with analysis between stages.
 - Confirmation-scale runs for H5 (and H1 corrected-readout confirmation) are the next planned
   experiments after Exp A-D complete.
 
@@ -83,10 +86,10 @@ See `docs/active/progress.md` for commands and expected outputs.
 | H4 Social Allocation | underpowered | smoke-scale allocation reorganisation readout | confirm only if this remains a core manuscript claim |
 | H5 Betrayal | repaired; affect beats no-affect in smoke | primary behavioral confirmation target | PRIORITY confirmation |
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
-| Exp A α Sweep | not yet | Section 3.6.1 all `\resultp{}` | running on server |
-| Exp B Prior Factorial | not yet | Section 3.6.2 all `\resultp{}` | running on server |
-| Exp C Forgiveness | not yet | Section 3.6.3 all `\resultp{}` | running on server |
-| Exp D Mixed Volatility | not yet | Section 3.6.4 all `\resultp{}` | running on server |
+| Exp A α Sweep | raw complete; compact outputs need regeneration | Section 3.6.1 all `\resultp{}` | recovery running |
+| Exp B Prior Factorial | open/betrayal complete; partner-choice missing 4 runs | Section 3.6.2 all `\resultp{}` | recovery running |
+| Exp C Forgiveness | not yet | Section 3.6.3 all `\resultp{}` | queued in recovery |
+| Exp D Mixed Volatility | not yet | Section 3.6.4 all `\resultp{}` | queued in recovery |
 
 ## Current Handoff
 
