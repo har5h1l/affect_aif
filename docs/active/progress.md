@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 3 13:31 PDT:
+Current recovery status on June 3 13:42 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -64,7 +64,11 @@ Current recovery status on June 3 13:31 PDT:
   `docs/paper/manuscript/figures/fig_alpha_sweep.pdf`. Do not interpret the
   printed metric values as manuscript results until full Exp A-D finality and
   user-approved review.
-- Exp B resume started at 13:31 PDT and is the current active stage.
+- Exp B resume started at 13:31 PDT and is the current active stage. The
+  Python process is CPU-active in JAX runtime/compile paths; the
+  `partner_choice/results_partial.csv` checkpoint has not advanced beyond the
+  known 116/120 complete runs yet. Continue monitor-only unless the process
+  exits, loses CPU without I/O, or logs an error.
 
 Do not read or interpret phenotype metric values until recovery finality is
 confirmed and the user approves result interpretation updates.
