@@ -54,10 +54,11 @@
   smoke read directly to a publication claim. The new controlled H1 configs are
   diagnostic surfaces, not current evidence.
 - After Exp A-D: run `scripts/analysis/analyze.py` on each `results/exp_*/`
-  and generate the four manuscript figures specified in `docs/active/progress.md`.
+  and verify the four manuscript figures specified in `docs/active/progress.md`.
 - Phenotype figures (fig_alpha_sweep.pdf, fig_phenotype_quadrants.pdf,
-  fig_forgiveness.pdf, fig_mixed_volatility.pdf) need to be generated and
-  placed under `docs/paper/manuscript/figures/` once Exp A-D complete.
+  fig_forgiveness.pdf, fig_mixed_volatility.pdf) need finality-gated review
+  before manuscript use. `fig_alpha_sweep.pdf` exists from the recovery
+  analyze-only step; Exp B-D figures are still pending.
 
 ## Not Blockers (Resolved or Deferred)
 

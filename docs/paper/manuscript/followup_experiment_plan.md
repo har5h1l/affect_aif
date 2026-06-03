@@ -1,6 +1,6 @@
 # Follow-Up Experiment Plan
 
-Last updated: 2026-06-02
+Last updated: 2026-06-03
 
 ## Overview
 
@@ -10,13 +10,14 @@ The manuscript's contribution now has two layers:
 2. **Individual differences extension**: affective precision parameters define
    testable social trust calibration profiles (Exp A-D)
 
-Exp A-D are running on the server. Core confirmation runs follow after Exp A-D
+Exp A-D are running on the server through the recovery session
+`affect_aif_exp_recovery_20260603`. Core confirmation runs follow after Exp A-D
 complete and are reviewed.
 
 ---
 
 ## Phenotype Experiments (Exp A-D)
-### Status: running on server as of June 2, 2026
+### Status: recovery running on server as of June 3, 2026
 
 These experiments fill the `\resultp{}` placeholders in Section 3.6 of the
 manuscript. Each script is standalone (not TOML-based) and writes outputs
@@ -190,13 +191,14 @@ agent types, with reference lines at P2 switch and P3 drift onset/end.
 ### Inspection Checklist (do before filling placeholders)
 
 1. Confirm finality before reading metric values: the tmux/Mango process has
-   ended, `results/exp_abcd_20260529_logs/run.log` contains `DONE`, and
+   ended, `results/exp_abcd_recovery_20260603_logs/run.log` contains
+   `RECOVERY_DONE`, and
    `results/exp_a/` through `results/exp_d/` each contain a final `results.csv`,
    `metrics.csv`, `manifest.json`, and `README.md`.
-2. `mango cloud sync fetch affect_aif` — pull results from server if working
-   from a local checkout.
-3. Regenerate compact outputs whose analysis contracts were aligned while the
-   server run was already active:
+2. If working from a non-server checkout, fetch results with the project Mango
+   workflow before inspection.
+3. Regenerate compact outputs whose analysis contracts were aligned while
+   earlier raw outputs were already active:
    `.venv/bin/python scripts/experiment/run_exp_a_alpha_sweep.py --output-dir results/exp_a --paper-dir docs/paper/manuscript --analyze-only`
    and
    `.venv/bin/python scripts/experiment/run_exp_b_prior_factorial.py --output-dir results/exp_b --paper-dir docs/paper/manuscript --analyze-only`.
