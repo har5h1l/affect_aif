@@ -54,6 +54,18 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
+Current recovery status on June 3 13:31 PDT:
+
+- Verification gate passed in the recovery log:
+  `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
+  `git diff --check` passed.
+- Exp A analyze-only regeneration and generic analysis completed. Operational
+  artifacts now exist at `results/exp_a/analysis/` and
+  `docs/paper/manuscript/figures/fig_alpha_sweep.pdf`. Do not interpret the
+  printed metric values as manuscript results until full Exp A-D finality and
+  user-approved review.
+- Exp B resume started at 13:31 PDT and is the current active stage.
+
 Do not read or interpret phenotype metric values until recovery finality is
 confirmed and the user approves result interpretation updates.
 
