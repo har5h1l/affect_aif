@@ -89,7 +89,7 @@ recovery process reaches finality.
 | Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
 | Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
 | Exp C Forgiveness | not yet | Section 3.6.3 all `\resultp{}` | queued in recovery |
-| Exp D Mixed Volatility | running as of June 3 16:38 PDT; partial checkpoint has 6/80 complete seed groups | Section 3.6.4 all `\resultp{}` | recovery running; not ready for interpretation |
+| Exp D Mixed Volatility | running as of June 3 23:41 PDT; partial checkpoint has 25/80 complete seed groups | Section 3.6.4 all `\resultp{}` | recovery running; not ready for interpretation |
 
 ## Current Handoff
 
@@ -101,7 +101,10 @@ The next active lane is:
 1. Wait for Exp A-D to complete on server and confirm finality before reading
    metric values.
 2. Run the applicable analysis on final `results/exp_*/results.csv` outputs and
-   inspect the standalone Exp A-D `metrics.csv` files/source tables.
+   inspect the standalone Exp A-D `metrics.csv` files/source tables. Before
+   filling Exp A/B placeholders, resolve the analysis-language issue that the
+   current `betrayal_recovery_time` readout measures return-to-P0 engagement,
+   not withdrawal from a partner that became exploitative.
 3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers only after
    finality and user-approved interpretation review.
 4. Queue H5 confirmation run after verification gate passes.
