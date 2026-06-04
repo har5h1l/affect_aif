@@ -78,6 +78,33 @@ def test_exp_a_early_exploitation_rate_uses_first_30_rounds():
     assert float(summary.loc[0, "early_exploitation_rate"]) == 1.0
 
 
+def test_exp_a_post_betrayal_commitment_metrics_are_betrayal_scoped():
+    rows = []
+    for experiment_id in ("betrayal", "open_graded"):
+        for round_idx in range(1, 101):
+            rows.append(
+                {
+                    "experiment_id": experiment_id,
+                    "variant_id": "alpha_1p0",
+                    "seed": 1,
+                    "round": round_idx,
+                    "partner_idx": 0,
+                    "agent_action": 5 if 81 <= round_idx <= 90 else 1,
+                    "payoff": 1.0,
+                    "true_partner_type": "cooperator",
+                    "q_pi_entropy": 0.5,
+                    "local_betas": "[0.5, 0.8, 1.2, 1.5]",
+                }
+            )
+
+    summary = exp_a_metrics(pd.DataFrame(rows)).set_index("experiment_id")
+
+    assert float(summary.loc["betrayal", "post_betrayal_p0_selection_rate"]) == 1.0
+    assert float(summary.loc["betrayal", "post_betrayal_p0_high_investment_rate"]) == 0.5
+    assert pd.isna(summary.loc["open_graded", "post_betrayal_p0_selection_rate"])
+    assert pd.isna(summary.loc["open_graded", "post_betrayal_p0_high_investment_rate"])
+
+
 def test_exp_a_panels_match_manuscript_plan():
     assert EXP_A_PANELS == (
         "early_exploitation_rate",

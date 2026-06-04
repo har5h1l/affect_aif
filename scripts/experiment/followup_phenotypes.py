@@ -300,6 +300,32 @@ def betrayal_recovery_time(group: pd.DataFrame, *, partner: int = 0, switch_roun
     return float(hits.iloc[0] - switch_round) if len(hits) else float("nan")
 
 
+def has_betrayal_window(experiment_id: str) -> bool:
+    return str(experiment_id) in {"betrayal", "forgiveness"}
+
+
+def post_betrayal_p0_selection_rate(group: pd.DataFrame, *, switch_round: int = 81, window_end: int = 120) -> float:
+    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rows = group[(rounds >= int(switch_round)) & (rounds <= int(window_end))]
+    if rows.empty:
+        return float("nan")
+    return float((pd.to_numeric(rows["partner_idx"], errors="coerce") == 0).mean())
+
+
+def post_betrayal_p0_high_investment_rate(
+    group: pd.DataFrame,
+    *,
+    switch_round: int = 81,
+    window_end: int = 120,
+) -> float:
+    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rows = group[(rounds >= int(switch_round)) & (rounds <= int(window_end))]
+    if rows.empty:
+        return float("nan")
+    selected_p0 = pd.to_numeric(rows["partner_idx"], errors="coerce") == 0
+    return float((selected_p0 & high_investment_mask(rows)).mean())
+
+
 def common_group_metrics(results: pd.DataFrame) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     group_cols = ["experiment_id", "variant_id", "seed"]
@@ -309,6 +335,7 @@ def common_group_metrics(results: pd.DataFrame) -> list[dict[str, Any]]:
         early = group[(rounds >= 1) & (rounds <= 30)]
         exploiter = early["true_partner_type"].astype(str).eq("exploiter")
         cooperative = high_investment_mask(early)
+        betrayal_window = has_betrayal_window(str(experiment_id))
         rows.append(
             {
                 "experiment_id": experiment_id,
@@ -318,6 +345,12 @@ def common_group_metrics(results: pd.DataFrame) -> list[dict[str, Any]]:
                 "mean_payoff": float(pd.to_numeric(group["payoff"], errors="coerce").mean()),
                 "early_exploitation_rate": float((exploiter & cooperative).mean()) if len(early) else float("nan"),
                 "betrayal_recovery_time": betrayal_recovery_time(group),
+                "post_betrayal_p0_selection_rate": post_betrayal_p0_selection_rate(group)
+                if betrayal_window
+                else float("nan"),
+                "post_betrayal_p0_high_investment_rate": post_betrayal_p0_high_investment_rate(group)
+                if betrayal_window
+                else float("nan"),
                 "selection_gini": selected_counts_gini(group["partner_idx"]),
                 "entropy_early": epoch_mean(group, "q_pi_entropy", 1, 50),
                 "entropy_mid": epoch_mean(group, "q_pi_entropy", 51, 150),
