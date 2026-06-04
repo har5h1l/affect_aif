@@ -91,11 +91,13 @@ recovery process reaches finality.
 | Exp C Forgiveness | not yet | Section 3.6.3 all `\resultp{}` | queued in recovery |
 | Exp D Mixed Volatility | running as of June 4 00:08 PDT; `mixed_volatility/results_partial.csv` has 26/80 complete seed groups | Section 3.6.4 all `\resultp{}` | recovery running; not ready for interpretation |
 
-## Current Handoff
+## Active Read Order
 
 Read this folder in order: `state.md`, `progress.md`, then `blockers.md`.
 Paper-facing evidence in `docs/paper/manuscript/`. Interpreted results in
-`docs/results/`.
+`docs/results/`. Task-specific handoffs, when needed, live in
+`docs/handoffs/`; read them only when named, linked, newly created, or
+task-matched.
 
 The next active lane is:
 1. Wait for Exp A-D to complete on server and confirm finality before reading
@@ -114,8 +116,9 @@ The next active lane is:
    then the strict reward-neutral diagnostic before treating the model as
    failed.
 
-Do not create a separate handoff document; keep the live handoff in this
-`docs/active/` state/progress surface.
+Do not create a task-specific handoff document unless a current task needs one.
+When a handoff is needed, create it under `docs/handoffs/` and keep durable
+project state in this `docs/active/` state/progress/blockers surface.
 
 ## Stop Conditions
 

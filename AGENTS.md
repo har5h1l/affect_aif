@@ -4,7 +4,12 @@ This document provides comprehensive system documentation for AI agents operatin
 
 ## Documentation First
 
-- Read `docs/active/README.md` and `docs/active/state.md` before taking over a research or restructure task.
+- Read `docs/active/README.md`, `docs/active/state.md`,
+  `docs/active/progress.md`, and `docs/active/blockers.md` before taking over
+  a research or restructure task.
+- Read `docs/handoffs/` only when a handoff is named, linked, newly created,
+  or directly matched to the task. Handoffs are task-specific transfer packets,
+  not part of the default active-doc read order.
 - Read `docs/theory/goals.md`, `docs/theory/hypotheses.md`, and `docs/theory/pomdp_spec.md` before changing computational claims, affect dynamics, terminal values, or the interpretation of results.
 - Read `docs/decisions/architecture.md` before changing factorized controls, policy priors, learning hooks, or pymdp/JAX alignment claims.
 - Read `docs/experiment/design.md` before changing task design, configs, variants, metrics, or sensitivity sweeps.

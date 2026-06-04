@@ -7,6 +7,10 @@ This directory records interpreted result status and provenance.
 - `../paper/`: submission-readiness, claims, outline, literature positioning,
   and figure/table plan
 
+Do not refresh interpreted result prose from new outputs without explicit user
+approval. Active run status and finality gates belong in `docs/active/`;
+task-specific transfer notes belong in `docs/handoffs/` when needed.
+
 ## Artifact Hygiene
 
 Large row-level result files are not assumed to be present in every checkout.

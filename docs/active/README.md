@@ -1,7 +1,7 @@
 # Active State
 
-This directory is the current handoff surface for humans and agents. Read it
-before changing claims, experiments, or docs.
+This directory is the always-read active context surface for humans and
+agents. Read it before changing claims, experiments, or docs.
 
 - `state.md`: active mission, scope, constraints, and stop conditions
 - `progress.md`: verification gate, current run status, and next-run options
@@ -9,3 +9,5 @@ before changing claims, experiments, or docs.
 
 Stable decisions live in `docs/decisions/`. Interpreted evidence lives in
 `docs/results/`. Manuscript-facing material lives in `docs/paper/`.
+Task-specific transfer packets live in `docs/handoffs/` and should be read
+only when named, linked, newly created, or task-matched.
