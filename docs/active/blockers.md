@@ -64,7 +64,9 @@
   after each experiment stage. Treat `RECOVERY_DONE` in
   `results/exp_abcd_recovery_20260603_logs/run.log` plus final
   `results.csv`/`metrics.csv`/`manifest.json`/`README.md` files for Exp A-D as
-  the recovery finality gate.
+  the recovery finality gate. As of June 4 00:08 PDT, the process is still in
+  Exp D and has 26/80 complete `mixed_volatility/results_partial.csv` seed
+  groups; Exp C has not started.
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
 - H1 needs confirmation with the corrected active-aligned and partial

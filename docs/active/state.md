@@ -89,7 +89,7 @@ recovery process reaches finality.
 | Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
 | Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
 | Exp C Forgiveness | not yet | Section 3.6.3 all `\resultp{}` | queued in recovery |
-| Exp D Mixed Volatility | running as of June 3 23:41 PDT; partial checkpoint has 25/80 complete seed groups | Section 3.6.4 all `\resultp{}` | recovery running; not ready for interpretation |
+| Exp D Mixed Volatility | running as of June 4 00:08 PDT; `mixed_volatility/results_partial.csv` has 26/80 complete seed groups | Section 3.6.4 all `\resultp{}` | recovery running; not ready for interpretation |
 
 ## Current Handoff
 
