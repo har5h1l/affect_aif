@@ -11,6 +11,19 @@ This document provides comprehensive system documentation for AI agents operatin
 - Read `docs/design/implementation.md` before changing environment semantics, switching logic, or analysis helpers.
 - Read `README.md` before changing setup, entry points, or repo layout.
 
+## Graphify Context First
+
+- For any non-trivial codebase task, use Graphify for orientation before broad raw-file exploration. Start with the Graphify MCP server when available (for example `god_nodes` and `shortest_path` around user-named concepts), then use the graph results to choose which files to inspect.
+- Before architecture or codebase-navigation questions, read `graphify-out/GRAPH_REPORT.md` if it exists.
+- If `graphify-out/wiki/index.md` exists, navigate from there before opening many raw files.
+- Treat Graphify as the map and raw files/tests as the source of truth for exact behavior, edits, and line references.
+- If Graphify is missing, stale, or unavailable, say so explicitly and continue with targeted raw-file search.
+- After modifying code structure, refresh the graph:
+
+```bash
+$(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"
+```
+
 ## Required Follow-Through
 
 - If code behavior changes, update the relevant docs in the same change.

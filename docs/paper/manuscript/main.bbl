@@ -1,0 +1,99 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{Adams2013ComputationalPsychosis}
+Adams, R.A., Stephan, K.E., Brown, H.R., Frith, C.D., Friston, K.J.: The
+  computational anatomy of psychosis. Frontiers in Psychiatry  \textbf{4}, ~47
+  (2013). \doi{10.3389/fpsyt.2013.00047}
+
+\bibitem{Barrett2006EmotionParadox}
+Barrett, L.F.: Solving the emotion paradox: Categorization and the experience
+  of emotion. Personality and Social Psychology Review  \textbf{10}(1),  20--46
+  (2006). \doi{10.1207/s15327957pspr1001_2}
+
+\bibitem{Behrens2008SocialLearning}
+Behrens, T.E.J., Hunt, L.T., Woolrich, M.W., Rushworth, M.F.S.: Associative
+  learning of social value. Nature  \textbf{456},  245--249 (2008).
+  \doi{10.1038/nature07538}
+
+\bibitem{Berg1995Trust}
+Berg, J., Dickhaut, J., McCabe, K.: Trust, reciprocity, and social history.
+  Games and Economic Behavior  \textbf{10}(1),  122--142 (1995).
+  \doi{10.1006/game.1995.1027}
+
+\bibitem{Cittern2018AttachmentActiveInference}
+Cittern, D., Nolte, T., Friston, K., Edalat, A.: Intrinsic and extrinsic
+  motivators of attachment under active inference. PLOS ONE  \textbf{13}(4),
+  e0193955 (2018). \doi{10.1371/journal.pone.0193955}
+
+\bibitem{DaCosta2020DiscreteSynthesis}
+Da~Costa, L., Parr, T., Sajid, N., Veselic, S., Neacsu, V., Friston, K.J.:
+  Active inference on discrete state-spaces: A synthesis. Journal of
+  Mathematical Psychology  \textbf{99},  102447 (2020).
+  \doi{10.1016/j.jmp.2020.102447}
+
+\bibitem{Friston2010FreeEnergy}
+Friston, K.: The free-energy principle: a unified brain theory? Nature Reviews
+  Neuroscience  \textbf{11},  127--138 (2010). \doi{10.1038/nrn2787}
+
+\bibitem{Friston2017ProcessTheory}
+Friston, K., FitzGerald, T., Rigoli, F., Schwartenbeck, P., Pezzulo, G.: Active
+  inference: A process theory. Neural Computation  \textbf{29}(1),  1--49
+  (2017). \doi{10.1162/NECO_a_00912}
+
+\bibitem{Friston2015EpistemicValue}
+Friston, K., Rigoli, F., Ognibene, D., Mathys, C., Fitzgerald, T., Pezzulo, G.:
+  Active inference and epistemic value. Cognitive Neuroscience  \textbf{6}(4),
+  187--214 (2015). \doi{10.1080/17588928.2015.1020053}
+
+\bibitem{FrithFrith2012}
+Frith, C.D., Frith, U.: Mechanisms of social cognition. Annual Review of
+  Psychology  \textbf{63},  287--313 (2012).
+  \doi{10.1146/annurev-psych-120710-100449}
+
+\bibitem{Heins2022Pymdp}
+Heins, C., Millidge, B., Demekas, D., Klein, B., Friston, K., Couzin, I.D.,
+  Tschantz, A.: pymdp: A python library for active inference in discrete state
+  spaces. Journal of Open Source Software  \textbf{7}(73), ~4098 (2022).
+  \doi{10.21105/joss.04098}
+
+\bibitem{Hesp2021DeeplyFeltAffect}
+Hesp, C., Smith, R., Parr, T., Allen, M., Friston, K.J., Ramstead, M.J.D.:
+  Deeply felt affect: The emergence of valence in deep active inference. Neural
+  Computation  \textbf{33}(2),  398--446 (2021). \doi{10.1162/neco_a_01341}
+
+\bibitem{KingCasas2005Trust}
+King-Casas, B., Tomlin, D., Anen, C., Camerer, C.F., Quartz, S.R., Montague,
+  P.R.: Getting to know you: reputation and trust in a two-person economic
+  exchange. Science  \textbf{308}(5718),  78--83 (2005).
+  \doi{10.1126/science.1108062}
+
+\bibitem{Mathys2011HGF}
+Mathys, C., Daunizeau, J., Friston, K.J., Stephan, K.E.: A {Bayesian}
+  foundation for individual learning under uncertainty. Frontiers in Human
+  Neuroscience  \textbf{5}, ~39 (2011). \doi{10.3389/fnhum.2011.00039}
+
+\bibitem{Parr2022ActiveInference}
+Parr, T., Pezzulo, G., Friston, K.J.: Active Inference: The Free Energy
+  Principle in Mind, Brain, and Behavior. MIT Press (2022)
+
+\bibitem{Pitliya2025ToMActiveInference}
+Pitliya, R.J., {\c C}atal, O., Van~de Maele, T., Pezzato, C., Verbelen, T.:
+  Theory of mind using active inference: A framework for multi-agent
+  cooperation (2025). \doi{10.48550/arXiv.2508.00401}
+
+\bibitem{RuizSerra2025Factorised}
+Ruiz-Serra, J., Sweeney, P., Harr{\'e}, M.S.: Factorised active inference for
+  strategic multi-agent interactions. In: Proceedings of the 24th International
+  Conference on Autonomous Agents and Multiagent Systems. pp. 1793--1802.
+  International Foundation for Autonomous Agents and Multiagent Systems (2025).
+  \doi{10.5555/3709347.3743815}
+
+\bibitem{Yuan2017ApologyTrustRepair}
+Yuan, B., Dong, Y., Li, W.: The trust repair effect of apology: A systematic
+  review and meta-analysis. Advances in Psychological Science  \textbf{25}(7),
+  1103--1113 (2017). \doi{10.3724/SP.J.1042.2017.01103}
+
+\end{thebibliography}

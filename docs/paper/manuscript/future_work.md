@@ -40,7 +40,9 @@ Suggested design:
 - Hold default affect fixed.
 - Vary scheduled stance-switch abruptness or number/timing of pre-switch
   confirmations.
-- Keep 30 seeds per variant.
+- Use 20-30 seeds per variant depending on manuscript role: 20 seeds is enough
+  for a supplemental shock-shape figure, while 30 seeds is reserved for a main
+  behavioural confirmation.
 - Report payoff, entropy, reencounters, payoff-on-return, wrong-type rate, and
   overconfident-wrong rate.
 

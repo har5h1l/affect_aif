@@ -38,6 +38,9 @@ artifacts/
 docs/paper/*.aux
 docs/paper/*.log
 docs/paper/*.out
+docs/paper/manuscript/*.aux
+docs/paper/manuscript/*.blg
+docs/paper/manuscript/*.log
 
 # Claude Code local settings (not shared)
 .claude/settings.local.json

@@ -51,8 +51,11 @@ confirmation-scale post-fix reruns exist:
   and is now the strongest candidate positive behavioral anchor.
 - Three-seed H4/H6 smoke: supplemental only.
 
-Publication-ready evidence requires confirmation-scale reruns of the post-fix
-claim spine.
+Publication-ready evidence does not require scaling every old hypothesis
+family. It requires 20-seed descriptive phenotype outputs for the Section 3.6
+figures, a 30-seed abrupt-betrayal confirmation for the main behavioural
+anchor, and targeted confirmation or softening for any other claim that remains
+central after manuscript triage.
 
 The Exp A-D phenotype scripts are not current evidence until their server-side
 20-seed outputs have completed and been analyzed. Their compact outputs should
