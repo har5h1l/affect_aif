@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 4 17:22 PDT:
+Current recovery status on June 4 17:50 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -79,8 +79,16 @@ Current recovery status on June 4 17:22 PDT:
   `results/exp_d/analysis/`, `docs/paper/manuscript/source_tables/exp_d_mixed_volatility/metrics.csv`,
   and `docs/paper/manuscript/figures/fig_mixed_volatility.pdf` exist. Do not
   interpret metric values until Exp A-D finality and user-approved review.
+  Preliminary user-requested Exp D review on June 4 found that the current
+  compact readout is not manuscript-ready for the strong planned
+  mixed-volatility claim. Raw outputs are structurally valid, but the
+  whole-episode `discrimination_index` and derived time-resolved beta-drop
+  diagnostic only partially match expectations. Before filling Section 3.6.4,
+  either revise/soften the claim around what Exp D actually supports or add a
+  clearer time-resolved discrimination/tradeoff readout from existing raw
+  trajectories.
 - Exp C started at 14:16 PDT and is now the active recovery stage. A
-  structural-only check at 17:22 PDT found 44 complete seed groups out of the
+  structural-only check at 17:50 PDT found 47 complete seed groups out of the
   planned 120 groups (`naive_low_alpha` and `naive_high_alpha` complete,
   `cautious_low_alpha` in progress). Continue monitor-only unless the process
   exits, loses CPU without I/O, or logs an error.
@@ -101,7 +109,7 @@ Manuscript-critical evidence audit at 14:47 PDT:
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_mixed_volatility.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 44/120 complete seed groups as of June 4 17:22 PDT | Pending; critical for forgiveness/trust-repair readout |
+| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 47/120 complete seed groups as of June 4 17:50 PDT | Pending; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Not yet queued in recovery | Top core-mechanism confirmation after Exp A-D |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
@@ -156,11 +164,8 @@ Mango reports `affect_aif_exp_recovery_20260603` as running and monitor-only.
 Continue monitor-only and do not interpret Exp A/B outputs until Exp A-D
 complete.
 
-June 4 00:08 PDT monitor check: local Mango did not list watched processes, but
-server-side Mango still reports `affect_aif_exp_recovery_20260603` as running
-and monitor-only. The recovery tmux session exists, the active child is
-`.venv/bin/python scripts/experiment/run_exp_d_mixed_volatility.py`, and the
-log has no `Traceback`, `ERROR`, `Killed`, or `RECOVERY_DONE` marker. The old
+June 4 monitor checks: server-side Mango still reports
+`affect_aif_exp_recovery_20260603` as running and monitor-only. The old
 `affect_aif_exp_abcd_20260529` Mango registration is obsolete and still points
 to a missing tmux session; use the recovery process and log as source of truth.
 
@@ -172,9 +177,9 @@ Status classification from this monitor check:
 - Exp B: final raw trajectories and compact outputs are structurally valid,
   but the `betrayal_recovery_time` language/readout risk remains an
   analysis/manuscript issue, not a raw-rerun issue.
-- Exp D: in-progress and structurally sane so far; not final, not obsolete,
+- Exp D: structurally complete and operationally analyzed, but not interpreted.
+- Exp C: in-progress and structurally sane so far; not final, not obsolete,
   and not ready for analysis or interpretation.
-- Exp C: not started; no output exists yet.
 - H1/H5 confirmations: not queued during recovery; next agent should not launch
   them until Exp A-D finality is established or the user explicitly changes the
   queue order.

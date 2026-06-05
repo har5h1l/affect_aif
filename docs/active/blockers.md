@@ -37,6 +37,16 @@
   Exp D placeholder, decide whether this summary is sufficient or whether the
   compact analysis should add a time-resolved post-change discrimination
   metric from the existing raw trajectory output.
+  Preliminary post-completion review says the current Exp D evidence is not
+  manuscript-ready for the strong planned claim: the whole-episode
+  `discrimination_index` does not order conditions as expected, and a
+  time-resolved beta-drop diagnostic only partially supports the story. Default
+  and high-alpha conditions show more changed-partner beta reduction than
+  low-alpha, and high-alpha has higher false-positive rate than default, but
+  high-alpha is not clearly better than default at tracking changed partners
+  and default is not cleanly the best discrimination/false-positive tradeoff.
+  Treat this as an analysis/readout and possibly task-claim issue before any
+  manuscript interpretation; do not delete or rerun Exp D raw trajectories yet.
 
 ## Current Interpretation Guardrails
 
@@ -55,9 +65,9 @@
   after each experiment stage. Treat `RECOVERY_DONE` in
   `results/exp_abcd_recovery_20260603_logs/run.log` plus final
   `results.csv`/`metrics.csv`/`manifest.json`/`README.md` files for Exp A-D as
-  the recovery finality gate. As of June 4 00:08 PDT, the process is still in
-  Exp D and has 26/80 complete `mixed_volatility/results_partial.csv` seed
-  groups; Exp C has not started.
+  the recovery finality gate. As of June 4 17:50 PDT, Exp D is operationally
+  complete and Exp C is running with 47/120 complete
+  `forgiveness/results_partial.csv` seed groups.
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
 - H1 needs confirmation with the corrected active-aligned and partial
