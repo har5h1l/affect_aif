@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 4 18:18 PDT:
+Current recovery status on June 4 21:03 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -88,13 +88,23 @@ Current recovery status on June 4 18:18 PDT:
   clearer time-resolved discrimination/tradeoff readout from existing raw
   trajectories.
 - Exp C started at 14:16 PDT and is now the active recovery stage. A
-  structural-only check at 18:18 PDT found 51 complete seed groups out of the
-  planned 120 groups (`naive_low_alpha` and `naive_high_alpha` complete,
-  `cautious_low_alpha` in progress). Final `results/exp_c/results.csv`,
-  `results/exp_c/metrics.csv`, generic analysis, and
-  `docs/paper/manuscript/figures/fig_forgiveness.pdf` do not exist yet.
+  structural-only check at 21:03 PDT found 72 complete seed groups out of the
+  planned 120 groups (`naive_low_alpha`, `naive_high_alpha`, and
+  `cautious_low_alpha` complete, `cautious_high_alpha` in progress). Final
+  `results/exp_c/results.csv`, `results/exp_c/metrics.csv`, generic analysis,
+  and `docs/paper/manuscript/figures/fig_forgiveness.pdf` do not exist yet.
   Continue monitor-only unless the process exits, loses CPU without I/O, or
   logs an error.
+- A fresh confirmation-launch verification gate passed on June 4 21:00 PDT at
+  `78e42ae`: `325 passed, 7 skipped, 74 warnings in 317.12s`; ruff passed;
+  mypy passed; `git diff --check` passed. Log:
+  `results/confirm_gate_20260604_logs/run.log`.
+- H5 confirmation was launched in parallel after the fresh verification gate
+  because the active goal explicitly prioritizes safe use of available server
+  compute. It is running in tmux/Mango as `affect_aif_h5_confirm_20260604`
+  with batch `results/log_surprisal_h5_confirm_postfix_20260604/`, using
+  `betrayal_reallocation_confirm.toml` and `--workers 1`. Do not interpret
+  outputs until final `results.csv` plus configured analysis artifacts exist.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
@@ -112,8 +122,8 @@ Manuscript-critical evidence audit at 14:47 PDT:
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_mixed_volatility.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 51/120 complete seed groups as of June 4 18:18 PDT | Pending; critical for forgiveness/trust-repair readout |
-| H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Not yet queued in recovery | Top core-mechanism confirmation after Exp A-D |
+| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 72/120 complete seed groups as of June 4 21:03 PDT | Pending; critical for forgiveness/trust-repair readout |
+| H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Running in `affect_aif_h5_confirm_20260604` after fresh verification gate | Top core-mechanism confirmation |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
 
@@ -186,9 +196,10 @@ Status classification from this monitor check:
 - Exp D: structurally complete and operationally analyzed, but not interpreted.
 - Exp C: in-progress and structurally sane so far; not final, not obsolete,
   and not ready for analysis or interpretation.
-- H1/H5 confirmations: not queued during recovery; next agent should not launch
-  them until Exp A-D finality is established or the user explicitly changes the
-  queue order.
+- H5 confirmation: running in parallel as
+  `affect_aif_h5_confirm_20260604` after the user-provided active goal
+  explicitly prioritized safe confirmation parallelization. H1 remains unqueued;
+  do not launch it while the host is saturated by Exp C plus H5.
 
 The H1 manuscript figure/source-table path now uses the partial model-fitness
 readout (`abs_partial_corr_precision_surprise_minus_reward`) alongside the

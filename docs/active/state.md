@@ -72,8 +72,9 @@ recovery process reaches finality.
 - Exp A-D scripts implemented. The original server run stopped during Exp B;
   recovery is running on server to regenerate Exp A compact outputs, finish Exp
   B, then run Exp D and Exp C with analysis between stages.
-- Confirmation-scale runs for H5 (and H1 corrected-readout confirmation) are the next planned
-  experiments after Exp A-D complete.
+- H5 confirmation is running in parallel with the tail of Exp C after a fresh
+  June 4 verification gate passed; H1 corrected-readout confirmation remains
+  the next core mechanism run once server headroom is available.
 
 ## Current Evidence State per Hypothesis
 
@@ -88,8 +89,9 @@ recovery process reaches finality.
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
 | Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
 | Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
-| Exp C Forgiveness | running as of June 4 18:18 PDT; partial checkpoint has 51/120 complete seed groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
+| Exp C Forgiveness | running as of June 4 21:03 PDT; partial checkpoint has 72/120 complete seed groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
 | Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | Section 3.6.4 all `\resultp{}` | operationally ready, but not interpreted |
+| H5 Betrayal Confirmation | running as `affect_aif_h5_confirm_20260604` after fresh June 4 verification gate | primary behavioral confirmation target | monitor, then analyze after finality |
 
 ## Active Read Order
 
@@ -109,7 +111,7 @@ The next active lane is:
    readout does not need to carry withdrawal-language claims by itself.
 3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers only after
    finality and user-approved interpretation review.
-4. Queue H5 confirmation run after verification gate passes.
+4. Monitor the running H5 confirmation and analyze only after finality.
 5. Run H1 confirmation with the corrected active-aligned and partial-correlation
    readouts; if confirmation remains reward/exposure-confounded, use the
    balanced graded reliability spine, then the reward-matched graded spine, and
