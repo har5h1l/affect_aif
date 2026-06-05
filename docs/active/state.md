@@ -88,7 +88,7 @@ recovery process reaches finality.
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
 | Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
 | Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
-| Exp C Forgiveness | running as of June 4 17:50 PDT; partial checkpoint has 47/120 complete seed groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
+| Exp C Forgiveness | running as of June 4 18:18 PDT; partial checkpoint has 51/120 complete seed groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
 | Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | Section 3.6.4 all `\resultp{}` | operationally ready, but not interpreted |
 
 ## Active Read Order

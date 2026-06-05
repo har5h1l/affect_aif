@@ -65,8 +65,8 @@
   after each experiment stage. Treat `RECOVERY_DONE` in
   `results/exp_abcd_recovery_20260603_logs/run.log` plus final
   `results.csv`/`metrics.csv`/`manifest.json`/`README.md` files for Exp A-D as
-  the recovery finality gate. As of June 4 17:50 PDT, Exp D is operationally
-  complete and Exp C is running with 47/120 complete
+  the recovery finality gate. As of June 4 18:18 PDT, Exp D is operationally
+  complete and Exp C is running with 51/120 complete
   `forgiveness/results_partial.csv` seed groups.
 - H5 confirmation is the top priority after Exp A-D complete. Run at 30+ seeds
   with `--workers 1` after the verification gate passes.
@@ -78,8 +78,9 @@
   and verify the four manuscript figures specified in `docs/active/progress.md`.
 - Phenotype figures (fig_alpha_sweep.pdf, fig_phenotype_quadrants.pdf,
   fig_forgiveness.pdf, fig_mixed_volatility.pdf) need finality-gated review
-  before manuscript use. `fig_alpha_sweep.pdf` exists from the recovery
-  analyze-only step; Exp B-D figures are still pending.
+  before manuscript use. Exp A, Exp B, and Exp D figures exist from the
+  recovery/regenerated outputs; Exp C's forgiveness figure is still pending
+  because Exp C is not final.
 
 ## Not Blockers (Resolved or Deferred)
 
@@ -98,15 +99,13 @@
   scripts started; Exp C recovery and Exp D false-positive readouts now match
   the manuscript plan.
 - Exp B compact metric/figure alignment: fixed while Exp B was still running.
-  Raw trajectories are not obsolete, but the final Exp B compact outputs must
-  be regenerated with `--analyze-only` after Exp A-D finality so the metrics,
-  source tables, and phenotype radar figure use the updated readout contract.
+  Raw trajectories are not obsolete, and final compact outputs have since been
+  regenerated with the updated readout contract.
 - Exp A compact metric/figure alignment: fixed after Exp A raw outputs had
-  already been written. Raw trajectories are not obsolete, but the Exp A
-  compact outputs must be regenerated with `--analyze-only` after Exp A-D
-  finality so the 1--30 early-exploitation window, entropy trajectory panel,
-  and confidence intervals are reflected in `metrics.csv`, source tables, and
-  `fig_alpha_sweep.pdf`.
+  already been written. Raw trajectories are not obsolete, and final compact
+  outputs have since been regenerated so the 1--30 early-exploitation window,
+  entropy trajectory panel, and confidence intervals are reflected in
+  `metrics.csv`, source tables, and `fig_alpha_sweep.pdf`.
 - Exp C/D figure-contract alignment: fixed before Exp C/D had started. Exp C
   now emits the beta recovery trajectory columns needed by the forgiveness
   figure, and Exp D now emits beta and P0-selection trajectory snapshots needed

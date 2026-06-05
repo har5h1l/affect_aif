@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 4 17:50 PDT:
+Current recovery status on June 4 18:18 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -88,10 +88,13 @@ Current recovery status on June 4 17:50 PDT:
   clearer time-resolved discrimination/tradeoff readout from existing raw
   trajectories.
 - Exp C started at 14:16 PDT and is now the active recovery stage. A
-  structural-only check at 17:50 PDT found 47 complete seed groups out of the
+  structural-only check at 18:18 PDT found 51 complete seed groups out of the
   planned 120 groups (`naive_low_alpha` and `naive_high_alpha` complete,
-  `cautious_low_alpha` in progress). Continue monitor-only unless the process
-  exits, loses CPU without I/O, or logs an error.
+  `cautious_low_alpha` in progress). Final `results/exp_c/results.csv`,
+  `results/exp_c/metrics.csv`, generic analysis, and
+  `docs/paper/manuscript/figures/fig_forgiveness.pdf` do not exist yet.
+  Continue monitor-only unless the process exits, loses CPU without I/O, or
+  logs an error.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
@@ -109,7 +112,7 @@ Manuscript-critical evidence audit at 14:47 PDT:
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_mixed_volatility.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 47/120 complete seed groups as of June 4 17:50 PDT | Pending; critical for forgiveness/trust-repair readout |
+| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 51/120 complete seed groups as of June 4 18:18 PDT | Pending; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Not yet queued in recovery | Top core-mechanism confirmation after Exp A-D |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
@@ -174,9 +177,12 @@ Status classification from this monitor check:
 - Exp A: final raw trajectories and regenerated compact outputs are
   structurally valid, but interpretation remains gated until full Exp A-D
   finality and user-approved review.
-- Exp B: final raw trajectories and compact outputs are structurally valid,
-  but the `betrayal_recovery_time` language/readout risk remains an
-  analysis/manuscript issue, not a raw-rerun issue.
+- Exp B: final raw trajectories and regenerated compact outputs are
+  structurally valid. The immediate `betrayal_recovery_time`
+  language/readout risk has been resolved at the compact-analysis layer by
+  adding explicit post-betrayal P0 selection and high-investment commitment
+  rates; interpretation remains gated until Exp A-D finality and user-approved
+  review.
 - Exp D: structurally complete and operationally analyzed, but not interpreted.
 - Exp C: in-progress and structurally sane so far; not final, not obsolete,
   and not ready for analysis or interpretation.
