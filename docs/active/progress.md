@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 4 00:08 PDT:
+Current recovery status on June 4 17:22 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -72,26 +72,27 @@ Current recovery status on June 4 00:08 PDT:
   `docs/paper/manuscript/source_tables/exp_b_prior_factorial/`, and
   `docs/paper/manuscript/figures/fig_phenotype_quadrants.pdf`. Generic
   analysis completed under `results/exp_b/analysis/`.
-- Exp D started at 14:47 PDT on June 3 and is still the active recovery stage.
-  The process is active in tmux/Mango and writing
-  `results/exp_d/mixed_volatility/results_partial.csv`; a structural-only check
-  at 00:08 PDT on June 4 found 26 complete seed groups out of the planned 80
-  groups (`default_reference` complete, `low_alpha` in progress). The top-level
-  `results/exp_d/results.csv`, `metrics.csv`, `manifest.json`, and `README.md`
-  are still absent, which is expected before the subrun finalizes. Continue
-  monitor-only unless the process exits, loses CPU without I/O, or logs an
-  error. Do not read metric values until recovery finality.
+- Exp D completed operationally. Structural audit found 80/80 complete seed
+  groups x 200 rounds, with all four variants complete. Final
+  `results/exp_d/results.csv`, `results/exp_d/metrics.csv`,
+  `results/exp_d/manifest.json`, `results/exp_d/README.md`,
+  `results/exp_d/analysis/`, `docs/paper/manuscript/source_tables/exp_d_mixed_volatility/metrics.csv`,
+  and `docs/paper/manuscript/figures/fig_mixed_volatility.pdf` exist. Do not
+  interpret metric values until Exp A-D finality and user-approved review.
+- Exp C started at 14:16 PDT and is now the active recovery stage. A
+  structural-only check at 17:22 PDT found 44 complete seed groups out of the
+  planned 120 groups (`naive_low_alpha` and `naive_high_alpha` complete,
+  `cautious_low_alpha` in progress). Continue monitor-only unless the process
+  exits, loses CPU without I/O, or logs an error.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
-  trajectory deletion or task rerun is indicated from this structural audit.
-  However, the manuscript-facing `betrayal_recovery_time` readout is an
-  analysis-language risk: it measures return-to-P0 engagement relative to the
-  pre-switch baseline, so for betrayal contexts it is not a direct withdrawal
-  or disengagement latency. Treat this as an analysis/manuscript-readout issue
-  before filling Exp A/B placeholders; likely fix by adding or substituting a
-  clearer post-betrayal withdrawal/commitment-error metric and regenerating
-  compact outputs from existing raw trajectories.
+  trajectory deletion or task rerun is indicated from this structural audit. On
+  June 4, compact Exp A/B outputs were regenerated from existing raw
+  trajectories after adding explicit post-betrayal P0 selection and
+  high-investment commitment rates. This resolves the immediate
+  analysis-language risk without changing task dynamics, model math, or raw
+  trajectories.
 
 Manuscript-critical evidence audit at 14:47 PDT:
 
@@ -99,8 +100,8 @@ Manuscript-critical evidence audit at 14:47 PDT:
 |---|---:|---|---|
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Running as the active recovery stage after Exp B analysis; partial checkpoint has 26/80 complete seed groups as of June 4 00:08 PDT | Pending; critical for mixed-volatility/locality readout |
-| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | No output yet; queued after Exp D analysis | Pending; critical for forgiveness/trust-repair readout |
+| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_mixed_volatility.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
+| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 44/120 complete seed groups as of June 4 17:22 PDT | Pending; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Not yet queued in recovery | Top core-mechanism confirmation after Exp A-D |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |

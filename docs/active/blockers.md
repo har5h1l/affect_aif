@@ -29,15 +29,6 @@
   `affect_aif_exp_abcd_20260529` run stopped during Exp B and has been
   superseded by `affect_aif_exp_recovery_20260603`.
 
-- **Exp A/B betrayal readout language**: structural audit shows Exp A/B raw
-  trajectories are complete and do not need deletion or raw rerun, but the
-  manuscript-facing `betrayal_recovery_time` metric is easy to misuse. It
-  currently measures return-to-P0 engagement relative to the pre-switch
-  baseline, not withdrawal from a newly exploitative partner. Before using
-  Exp A/B placeholders, either relabel the readout as return-to-engagement or
-  add/substitute a clearer post-betrayal withdrawal/commitment-error metric and
-  regenerate compact outputs from the existing raw trajectories.
-
 - **Exp D discrimination readout review**: pre-finality code audit found the
   mixed-volatility task structure matches the manuscript design, and raw
   trajectories should remain valid. The compact `discrimination_index` is a
@@ -110,6 +101,11 @@
   now emits the beta recovery trajectory columns needed by the forgiveness
   figure, and Exp D now emits beta and P0-selection trajectory snapshots needed
   by the mixed-volatility figure. No interruption or rerun is required.
+- Exp A/B betrayal readout language: resolved at the compact-analysis layer.
+  Exp A/B raw trajectories are complete and do not need deletion or raw rerun;
+  source tables now include explicit post-betrayal P0 selection and
+  high-investment commitment rates so `betrayal_recovery_time` does not need to
+  carry withdrawal-language claims by itself.
 - Import-boundary cleanup: benchmark orchestration moved to
   `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
   `experiments`, `analysis`, or `benchmarks`.

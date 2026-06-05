@@ -88,8 +88,8 @@ recovery process reaches finality.
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
 | Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
 | Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
-| Exp C Forgiveness | not yet | Section 3.6.3 all `\resultp{}` | queued in recovery |
-| Exp D Mixed Volatility | running as of June 4 00:08 PDT; `mixed_volatility/results_partial.csv` has 26/80 complete seed groups | Section 3.6.4 all `\resultp{}` | recovery running; not ready for interpretation |
+| Exp C Forgiveness | running as of June 4 17:22 PDT; partial checkpoint has 44/120 complete seed groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
+| Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | Section 3.6.4 all `\resultp{}` | operationally ready, but not interpreted |
 
 ## Active Read Order
 
@@ -103,10 +103,10 @@ The next active lane is:
 1. Wait for Exp A-D to complete on server and confirm finality before reading
    metric values.
 2. Run the applicable analysis on final `results/exp_*/results.csv` outputs and
-   inspect the standalone Exp A-D `metrics.csv` files/source tables. Before
-   filling Exp A/B placeholders, resolve the analysis-language issue that the
-   current `betrayal_recovery_time` readout measures return-to-P0 engagement,
-   not withdrawal from a partner that became exploitative.
+   inspect the standalone Exp A-D `metrics.csv` files/source tables. Exp A/B
+   compact outputs now include explicit post-betrayal P0 selection and
+   high-investment commitment rates so the older `betrayal_recovery_time`
+   readout does not need to carry withdrawal-language claims by itself.
 3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers only after
    finality and user-approved interpretation review.
 4. Queue H5 confirmation run after verification gate passes.
