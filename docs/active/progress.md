@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 4 21:03 PDT:
+Current recovery status on June 4 21:10 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -88,9 +88,8 @@ Current recovery status on June 4 21:03 PDT:
   clearer time-resolved discrimination/tradeoff readout from existing raw
   trajectories.
 - Exp C started at 14:16 PDT and is now the active recovery stage. A
-  structural-only check at 21:03 PDT found 72 complete seed groups out of the
-  planned 120 groups (`naive_low_alpha`, `naive_high_alpha`, and
-  `cautious_low_alpha` complete, `cautious_high_alpha` in progress). Final
+  structural-only check at 21:10 PDT found 107 complete seed groups out of the
+  planned 120 groups; `no_affect` is the remaining in-progress variant. Final
   `results/exp_c/results.csv`, `results/exp_c/metrics.csv`, generic analysis,
   and `docs/paper/manuscript/figures/fig_forgiveness.pdf` do not exist yet.
   Continue monitor-only unless the process exits, loses CPU without I/O, or
@@ -103,8 +102,10 @@ Current recovery status on June 4 21:03 PDT:
   because the active goal explicitly prioritizes safe use of available server
   compute. It is running in tmux/Mango as `affect_aif_h5_confirm_20260604`
   with batch `results/log_surprisal_h5_confirm_postfix_20260604/`, using
-  `betrayal_reallocation_confirm.toml` and `--workers 1`. Do not interpret
-  outputs until final `results.csv` plus configured analysis artifacts exist.
+  `betrayal_reallocation_confirm.toml` and `--workers 1`. A structural-only
+  check at 21:10 PDT found 64 complete groups out of 120 (`affect` and
+  `no_affect` complete, `lesioned` in progress). Do not interpret outputs until
+  final `results.csv` plus configured analysis artifacts exist.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
@@ -122,8 +123,8 @@ Manuscript-critical evidence audit at 14:47 PDT:
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_mixed_volatility.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 72/120 complete seed groups as of June 4 21:03 PDT | Pending; critical for forgiveness/trust-repair readout |
-| H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Running in `affect_aif_h5_confirm_20260604` after fresh verification gate | Top core-mechanism confirmation |
+| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 107/120 complete seed groups as of June 4 21:10 PDT | Pending; critical for forgiveness/trust-repair readout |
+| H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Running in `affect_aif_h5_confirm_20260604`; partial checkpoint has 64/120 complete groups as of June 4 21:10 PDT | Top core-mechanism confirmation |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
 

@@ -89,9 +89,9 @@ recovery process reaches finality.
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
 | Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
 | Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
-| Exp C Forgiveness | running as of June 4 21:03 PDT; partial checkpoint has 72/120 complete seed groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
+| Exp C Forgiveness | running as of June 4 21:10 PDT; partial checkpoint has 107/120 complete seed groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
 | Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | Section 3.6.4 all `\resultp{}` | operationally ready, but not interpreted |
-| H5 Betrayal Confirmation | running as `affect_aif_h5_confirm_20260604` after fresh June 4 verification gate | primary behavioral confirmation target | monitor, then analyze after finality |
+| H5 Betrayal Confirmation | running as `affect_aif_h5_confirm_20260604`; partial checkpoint has 64/120 complete groups | primary behavioral confirmation target | monitor, then analyze after finality |
 
 ## Active Read Order
 
