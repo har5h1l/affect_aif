@@ -18,7 +18,7 @@ All reported experiments use one focal active-inference agent with four partners
 
 \textbf{Abrupt betrayal.} A partner-choice graded environment with scheduled stance betrayal on a previously cooperative partner tests post-switch reallocation, entropy, payoff, and joint accuracy (Section~\ref{sec:betrayal}).
 
-\textbf{Precision-dynamics perturbations.} Clinical-like computational variants (alexithymia-like, borderline-like, depression-like) perturb $\beta_k$ amplitude and stability in the graded decision regime without claiming clinical validity (Appendix~\ref{app:extended_results}).
+\textbf{Precision-dynamics perturbations.} Phenotype-inspired computational variants (alexithymia-like, borderline-like, depression-like) perturb $\beta_k$ amplitude and stability in the graded decision regime without claiming clinical validity (Appendix~\ref{app:extended_results}).
 
 \textbf{Phenotype program (Exp A--D).} Parameter sweeps and factorial designs vary precision gain $\alpha$ and prior over model fitness to define computational trust-calibration profiles in open graded, betrayal, partner-choice, forgiveness, and mixed-volatility environments (Section~\ref{sec:phenotypes}).
 
@@ -48,6 +48,9 @@ Exp A--D phenotypes & sweeps / factorial / forgiveness / mixed volatility & 200 
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Supplementary materials.}
+The supplementary repository contains the simulation environments, affect-runtime variants, experiment configuration files, analysis scripts, and figure-generation code used for the reported experiments. During review, this repository is anonymized; after acceptance, it will be replaced with the public archival repository.
 
 \subsection{Betrayal schedule}
 
@@ -104,6 +107,6 @@ The following readouts remain pending confirmation-scale values. Main-text place
 \item \textbf{Shared-$\beta$ ablation} (Section~\ref{sec:shared_beta}): partner-local versus shared precision on payoff, entropy, reliability-specificity, partner allocation, and false-positive suppression in mixed-volatility or focal-switch regimes.
 \item \textbf{Partner-choice allocation rates} (Section~\ref{sec:partner_choice}): selection share by partner under affect and no-affect, and whether aggregate payoff remains flat at confirmation scale.
 \item \textbf{Forgiveness / trust-repair experiment} (Section~\ref{sec:phenotypes}; Appendix~\ref{app:extended_results}): reengagement latency, post-return selection, payoff recovery, and whether high-$\alpha$ controls reengagement speed while cautious priors limit the trust-repair ceiling.
-\item \textbf{H1 locality-probe confirmation}: replace focal-switch surprise--payoff correlation and aggregate payoff values with final 30-seed confirmation if they differ from current exploratory diagnostic values.
+\item \textbf{H1 locality-probe confirmation}: replace focal-switch surprise--payoff correlation and aggregate payoff values with final 30-seed confirmation if they differ from current manuscript values.
 \item \textbf{H5 betrayal confirmation}: replace abrupt-betrayal payoff, entropy, and joint-accuracy values with final 30-seed H5 confirmation values when available.
 \end{itemize}
