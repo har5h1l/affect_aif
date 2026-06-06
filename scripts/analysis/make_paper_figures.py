@@ -13,10 +13,11 @@ VARIANT_LABELS = {
     "affect": "local beta",
     "local_beta": "local beta",
     "no_affect": "no affect",
-    "lesioned": "tracked only",
     "tracked_only": "tracked only",
+    "lesioned": "tracked only",
+    "tracked-only": "tracked only",
     "no_epistemic": "no epistemic",
-    "global_beta": "global beta",
+    "global_beta": "shared beta",
     "affect_default": "local beta",
     "affect_combined_caution": "combined caution",
     "alexithymia": "low gain",
@@ -103,79 +104,61 @@ def _plot_difference_with_ci(
 
 
 def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
-    evidence = _read_required(
+    locality = _read_required(
         source_dir,
-        "h1_evidence_effect_summary.csv",
-        {
-            "readout",
-            "metric",
-            "treatment_variant",
-            "reference_variant",
-            "treatment_mean",
-            "reference_mean",
-            "difference",
-            "bootstrap_ci_low",
-            "bootstrap_ci_high",
-        },
-    )
-    correlation = _read_required(
-        source_dir,
-        "h1_model_fitness_correlation_summary.csv",
+        "h3_locality_probe_summary.csv",
         {
             "variant_id",
-            "alignment",
-            "partial_corr_precision_surprise",
-            "partial_corr_precision_reward",
-            "abs_partial_corr_precision_surprise",
-            "abs_partial_corr_precision_reward",
+            "abs_corr_precision_surprise",
+            "abs_corr_precision_payoff",
+            "total_payoff",
         },
     )
-    if correlation.empty:
-        raise ValueError("h1_model_fitness_correlation_summary.csv has no rows")
-
-    corr_row = correlation.iloc[0]
-    fitness = _effect_row(evidence, "model_fitness", "abs_partial_corr_precision_surprise_minus_reward")
-    payoff = _effect_row(evidence, "final", "total_payoff")
+    local = locality.loc[locality["variant_id"] == "local_beta"].iloc[0]
+    shared = locality.loc[locality["variant_id"] == "global_beta"].iloc[0]
+    payoff_rows = locality.dropna(subset=["total_payoff"])
 
     fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
     _bar(
         axes[0],
-        ["predictive surprise", "reward proxy"],
+        ["surprise", "payoff"],
         [
-            float(corr_row["abs_partial_corr_precision_surprise"]),
-            float(corr_row["abs_partial_corr_precision_reward"]),
+            float(local["abs_corr_precision_surprise"]),
+            float(local["abs_corr_precision_payoff"]),
         ],
-        title="Partial precision correlations",
-        ylabel="absolute partial correlation",
+        title="Local beta correlations",
+        ylabel="absolute correlation",
     )
-    axes[0].set_ylim(0, max(0.05, float(corr_row["abs_partial_corr_precision_surprise"])) + 0.12)
+    axes[0].set_ylim(0, 1.05)
 
-    _plot_difference_with_ci(
+    _bar(
         axes[1],
-        ["surprise - reward"],
-        [float(fitness["difference"])],
-        [float(fitness["bootstrap_ci_low"])],
-        [float(fitness["bootstrap_ci_high"])],
-        title="Model fitness gap",
-        ylabel="absolute correlation delta",
+        ["surprise", "payoff"],
+        [
+            float(shared["abs_corr_precision_surprise"]),
+            float(shared["abs_corr_precision_payoff"]),
+        ],
+        title="Shared beta correlations",
+        ylabel="absolute correlation",
     )
+    axes[1].set_ylim(0, 1.05)
 
     _bar(
         axes[2],
-        [str(payoff["treatment_variant"]), str(payoff["reference_variant"])],
-        [float(payoff["treatment_mean"]), float(payoff["reference_mean"])],
-        title="Reward is not improved",
+        payoff_rows["variant_id"].tolist(),
+        payoff_rows["total_payoff"].tolist(),
+        title="Focal-switch payoff",
         ylabel="total payoff",
     )
 
-    fig.suptitle("Model fitness versus realized reward", y=1.04, fontsize=12)
+    fig.suptitle("Model fitness versus realized reward (focal-switch locality probe)", y=1.04, fontsize=12)
     return _save(fig, output_dir, "fig_model_fitness_beta_reward_divergence")
 
 
 def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     evidence = _read_required(
         source_dir,
-        "h3_evidence_effect_summary.csv",
+        "h5_evidence_effect_summary.csv",
         {
             "readout",
             "metric",
@@ -237,19 +220,11 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
 
 def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     h2 = _read(source_dir, "h2_deployment_dissociation_summary.csv")
-    h4 = _read(source_dir, "h4_partner_choice_summary.csv")
 
-    order = ["affect", "lesioned", "no_epistemic"]
+    order = ["affect", "no_affect", "tracked_only"]
     h2 = h2.set_index("variant_id").loc[order]
-    choice = (
-        h4.groupby(["variant_id", "selected_partner"], as_index=False)
-        .agg(selection_rate=("selection_rate", "mean"))
-        .pivot(index="selected_partner", columns="variant_id", values="selection_rate")
-        .sort_index()
-    )
 
-    fig, axes_grid = plt.subplots(2, 2, figsize=(7.2, 5.4))
-    axes = axes_grid.ravel()
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
     _bar(
         axes[0],
         order,
@@ -264,28 +239,8 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         title="Policy entropy",
         ylabel="mean entropy",
     )
-    x = np.arange(len(order))
-    axes[2].plot(x, h2["mean_joint_accuracy"], marker="o", label="joint")
-    axes[2].plot(x, h2["mean_stance_accuracy"], marker="o", label="stance")
-    axes[2].set_xticks(x, _label(order), rotation=20, ha="right")
-    axes[2].set_ylim(0, 1)
-    axes[2].set_title("Belief readouts", pad=8)
-    axes[2].set_ylabel("accuracy")
-    axes[2].legend(frameon=False, fontsize=8)
-    axes[2].spines[["top", "right"]].set_visible(False)
 
-    partners = choice.index.to_numpy()
-    width = 0.34
-    axes[3].bar(partners - width / 2, choice["affect"], width=width, label="local beta", color="#2f6f9f")
-    axes[3].bar(partners + width / 2, choice["no_affect"], width=width, label="no affect", color="#c47f2c")
-    axes[3].set_xticks(partners, [f"P{int(item)}" for item in partners])
-    axes[3].set_ylim(0, max(choice.max()) + 0.08)
-    axes[3].set_title("Partner choice", pad=8)
-    axes[3].set_ylabel("selection rate")
-    axes[3].legend(frameon=False, fontsize=8)
-    axes[3].spines[["top", "right"]].set_visible(False)
-
-    fig.suptitle("Deployment and social choice", y=1.01, fontsize=12)
+    fig.suptitle("Deployment dissociation (open graded regime)", y=1.04, fontsize=12)
     fig.tight_layout()
     return _save(fig, output_dir, "fig_deployment_social_summary")
 

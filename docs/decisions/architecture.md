@@ -23,6 +23,11 @@ Trust-game semantics belong in a trust task package: partners, stances, payoffs,
 trust environments, trust model construction, pymdp agent wrappers, external
 affective precision tracking, and trust-task evaluation.
 
+Reported trust experiments use a **focal** `pymdp.Agent` runtime against
+**scripted** environment-side partner policies (`tasks.trust.envs.partners`).
+Reciprocal multi-agent AIF partners are not part of the supported hypothesis
+spine.
+
 Benchmark orchestration lives above the task layer. Trust-task baseline agents
 may remain in `tasks.trust.evaluation`, but backend adapters that depend on
 `benchmarks` or `experiments` belong in the benchmark layer.

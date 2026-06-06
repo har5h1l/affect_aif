@@ -1,0 +1,56 @@
+\section{Affective Precision Update and Policy Selection}
+\label{app:precision_update}
+
+\paragraph{Scope.}
+This appendix provides supporting technical detail for the corresponding main-text sections. Essential claims and results remain in the main paper.
+
+\subsection{Categorical beta support}
+
+Each partner maintains a categorical posterior $q(\beta_k)$ over discrete levels $\{0.5, 0.67, 1.0, 1.5, 2.0\}$, updated each round from affective charge $\phi_k$. The posterior is categorical rather than continuous; this keeps the inverse-$\beta$ convention identifiable while preserving a compact implementation of the precision dynamics.
+
+\subsection{Persistence prior}
+
+The update proceeds in three steps. First, a persistence prior smooths the previous posterior via a tridiagonal transition matrix:
+\begin{equation}
+p(\beta_k) \leftarrow T \cdot q_{\text{prev}}(\beta_k),
+\label{eq:persistence}
+\end{equation}
+where $T$ is tridiagonal with persistence parameter 0.8 and reflecting boundaries, encoding the prior expectation that precision evolves slowly.
+
+\subsection{Charge-based pseudo-likelihood}
+
+Second, a pseudo-likelihood is constructed directly from affective charge, mapping positive charge to high precision (low $\beta$) and negative charge to low precision (high $\beta$):
+\begin{equation}
+\log \ell(\beta_\ell) = \phi_k \cdot \frac{1}{\beta_\ell},
+\label{eq:pseudo_lik}
+\end{equation}
+where $\beta_\ell$ ranges over the five support points. This is a hand-designed update rule (not derived from the POMDP generative model) chosen to satisfy monotonicity: strong positive charge reinforces low $\beta$, strong negative charge reinforces high $\beta$, and the effect scales with effective precision at each level.
+
+\subsection{Posterior update and policy precision}
+
+Third, the posterior is normalized:
+\begin{equation}
+q(\beta_k) \propto \exp\left(\log \ell(\beta_\ell)\right) \cdot p(\beta_k).
+\label{eq:beta_posterior}
+\end{equation}
+
+The agent then uses the posterior mean to set policy precision:
+\begin{equation}
+\gamma_k = \gamma_{\text{base}} \,/\, \mathbb{E}_{q(\beta_k)}[\beta_k].
+\label{eq:gamma_update_appendix}
+\end{equation}
+
+The $\beta_k$ posterior is maintained as an external auxiliary tracker rather than a proper hidden state in the generative model, which simplifies implementation at the cost of losing the agent's ability to form prior expectations over its own future affective states (discussed in Section~\ref{sec:discussion}).
+
+\subsection{Centered cross-partner policy logits}
+
+In partner-choice regimes, precision must sharpen policies within a partner branch without creating artifacts when branches are compared across partners. Let $u_{k,\pi}$ denote the pre-precision policy logit for policy $\pi$ toward partner $k$, and let $\bar{u}_k$ be that partner branch's mean logit. Precision is applied to centered logits:
+\begin{equation}
+\tilde{u}_{k,\pi} = \bar{u}_k + \gamma_k\left(u_{k,\pi} - \bar{u}_k\right).
+\label{eq:centered_logits}
+\end{equation}
+The agent then samples or selects policies from the combined set of $\tilde{u}_{k,\pi}$ values. Centering preserves the mean score of each partner branch while allowing $\gamma_k$ to sharpen or flatten the within-partner policy distribution. This prevents low-precision scaling from moving a uniformly poor branch toward zero and making it spuriously attractive in cross-partner comparison.
+
+\subsection{Ablation variants}
+
+Reported comparisons use four affect-runtime variants. The \emph{no-affect} control disables the beta tracker and fixes policy precision at $\gamma_{\mathrm{base}}$. The \emph{tracked-only} ablation updates $q(\beta_k)$ normally but fixes $\gamma_k = \gamma_{\mathrm{base}}$, allowing the precision estimate to be analyzed without letting it affect action selection. The default \emph{partner-local precision} variant applies the full update and sets $\gamma_k$ from each partner's posterior mean. The \emph{shared-$\beta$} ablation maintains a single pooled beta state updated from partner evidence while keeping partner-local POMDP beliefs intact; all partner branches then inherit precision from the shared expected $\beta$.

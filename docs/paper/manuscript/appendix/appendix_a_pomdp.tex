@@ -1,0 +1,149 @@
+\section{Full POMDP Specification}
+\label{app:pomdp}
+
+\paragraph{Scope.}
+This appendix provides supporting technical detail for the corresponding main-text sections. Essential claims and results remain in the main paper.
+
+\subsection{Hidden state factors and observations}
+
+The focal agent's generative model for each partner $k$ maintains three latent factors:
+\begin{align}
+s_k^{\text{type}} &\in \{\text{cooperator, reciprocator,} \nonumber\\
+  &\phantom{s_k^{\text{type}} \in \{}\;\text{exploiter, random}\} && \text{(latent behavioral type)} \label{eq:s_type}\\
+s_k^{\text{stance}} &\in \{\text{trusting, neutral, hostile}\} && \text{(latent stance)} \label{eq:s_stance}\\
+s^{\text{own}} &\in \mathcal{A} && \text{(agent's executed social action)}
+\end{align}
+The own-action state is \emph{deterministic bookkeeping}: the agent always knows its own action, and this factor makes that knowledge available to the observation model. It is not a psychological hidden variable. In the binary task, the joint hidden state per partner spans $4 \times 3 \times 2 = 24$ possibilities; graded regimes replace the binary action factor with the configured investment levels.
+
+Observations are partner action and payoff:
+\begin{align}
+o_k^{\text{act}} &\in \{\text{cooperate, defect}\} & &\text{(partner response)}\\
+o_k^{\text{pay}} &\in \{-1, 1, 3, 5\} & &\text{(focal agent's realized payoff)}
+\end{align}
+
+\subsection{Partner-action likelihood}
+
+The core of the generative model is the \emph{partner cooperation likelihood table}, which defines the probability the partner cooperates given type and stance:
+\begin{table}[H]
+\centering
+\caption{Cooperation likelihood $P(\text{cooperate} \mid s^{\text{type}}, s^{\text{stance}})$.}
+\label{tab:coop_table}
+\begin{tabular}{lccc}
+\toprule
+Partner type & Trusting & Neutral & Hostile \\
+\midrule
+Cooperator & 0.95 & 0.80 & 0.55 \\
+Reciprocator & 0.90 & 0.70 & 0.30 \\
+Exploiter & 0.70 & 0.35 & 0.10 \\
+Random & 0.60 & 0.50 & 0.35 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This table is the foundation of the likelihood modality $A^{\text{act}}_k$. Entries define
+\begin{equation}
+P\!\left(o_k^{\mathrm{act}}=\mathrm{cooperate}\mid s_k^{\mathrm{type}}, s_k^{\mathrm{stance}}\right),
+\label{eq:a_act_coop}
+\end{equation}
+with $P(o_k^{\mathrm{act}}=\mathrm{defect}\mid\cdot)=1-P(o_k^{\mathrm{act}}=\mathrm{cooperate}\mid\cdot)$. The modality is uniform over $s^{\mathrm{own}}$: partner action depends only on inferred type and stance. This operationalizes what the agent considers a predictable partner---a cooperative reciprocator in a trusting stance has high predicted cooperation; an exploiter in a hostile stance has low predicted cooperation.
+
+\subsection{Payoff likelihood}
+
+Payoff enters as a second observation modality $A^{\mathrm{pay}}_k=P(o_k^{\mathrm{pay}}\mid s^{\mathrm{own}},s_k^{\mathrm{type}},s_k^{\mathrm{stance}})$ rather than as external reward. The environment payoff table is deterministic (Table~\ref{tab:payoff} in the main text); in the generative model, partner action is marginalized through the cooperation likelihood:
+\begin{equation}
+P\!\left(o_k^{\mathrm{pay}}=v \mid s^{\mathrm{own}}, s_k^{\mathrm{type}}, s_k^{\mathrm{stance}}\right)
+= \sum_{a^{\mathrm{partner}}\in\{\mathrm{C},\mathrm{D}\}}
+\mathbb{I}\!\left[\pi(s^{\mathrm{own}}, a^{\mathrm{partner}})=v\right]
+P\!\left(o_k^{\mathrm{act}}=a^{\mathrm{partner}}\mid s_k^{\mathrm{type}}, s_k^{\mathrm{stance}}\right),
+\label{eq:a_pay_marginal}
+\end{equation}
+where $\pi(\cdot,\cdot)$ maps joint actions to focal payoffs $\{-1,1,3,5\}$ and $P(o_k^{\mathrm{act}}\mid\cdot)$ comes from Eq.~\eqref{eq:a_act_coop}. This preserves the Prisoner's Dilemma incentive structure at horizon~1 while allowing trust-building dynamics to emerge over longer horizons.
+
+\subsection{Transition dynamics}
+
+\paragraph{Type drift ($B_k^{\mathrm{type}}$).}
+Partner type is uncontrollable and drifts slowly:
+\begin{equation}
+P(s_k^{\mathrm{type}\prime}=j\mid s_k^{\mathrm{type}}=i)=
+\begin{cases}
+1-p_{\mathrm{switch}} & j=i,\\
+p_{\mathrm{switch}}/(K_{\mathrm{type}}-1) & j\neq i,
+\end{cases}
+\label{eq:b_type}
+\end{equation}
+with $K_{\mathrm{type}}=4$ and default $p_{\mathrm{switch}}=0.05$. Scheduled betrayal and mixed-volatility scenarios set $p_{\mathrm{switch}}=0$.
+
+\paragraph{Stance dynamics ($B_k^{\mathrm{stance}}$).}
+Stance transitions are action-dependent on the focal agent's social action $a$:
+\begin{equation}
+P\!\left(s_k^{\mathrm{stance}\prime}\mid s_k^{\mathrm{stance}}, a\right),
+\label{eq:b_stance}
+\end{equation}
+as specified below. Cooperation tends to build trust; defection damages trust; recovery from hostility is slower than collapse.
+
+\begin{table}[H]
+\centering
+\caption{Stance transition dynamics $P(s'^{\text{stance}} \mid s^{\text{stance}}, a)$ conditional on focal agent action.}
+\label{tab:b_stance}
+\begin{tabular}{lccc}
+\toprule
+\multicolumn{4}{c}{\textbf{Agent cooperates}} \\
+\midrule
+To $\setminus$ From & Trusting & Neutral & Hostile \\
+\midrule
+Trusting & 0.90 & 0.30 & 0.05 \\
+Neutral & 0.10 & 0.60 & 0.35 \\
+Hostile & 0.00 & 0.10 & 0.60 \\
+\midrule
+\multicolumn{4}{c}{\textbf{Agent defects}} \\
+\midrule
+To $\setminus$ From & Trusting & Neutral & Hostile \\
+\midrule
+Trusting & 0.10 & 0.05 & 0.02 \\
+Neutral & 0.50 & 0.35 & 0.18 \\
+Hostile & 0.40 & 0.60 & 0.80 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These dynamics instantiate the asymmetry of trust: cooperation gradually builds trust (neutral $\to$ trusting in $\sim 3$--4 steps), while defection rapidly damages trust (trusting $\to$ hostile in $\sim 2$ steps); recovery from hostility is slow ($\sim 4$--5 steps to neutral).
+
+\paragraph{Own-action bookkeeping ($B^{\mathrm{own}}$).}
+The own-action factor updates deterministically from the executed social action:
+\begin{equation}
+P(s^{\mathrm{own}\prime}=a^\prime \mid s^{\mathrm{own}}, a)=\mathbb{I}[a^\prime=a].
+\label{eq:b_own}
+\end{equation}
+This factor is not a psychological hidden variable; it makes the agent's executed action available to the payoff likelihood in standard factorized form.
+
+\subsection{Preferences, priors, and policy priors}
+
+\paragraph{Observation preferences ($C_k$).}
+There is no direct preference over partner actions:
+\begin{equation}
+C_k^{\mathrm{act}} = [0,\,0] \quad \text{over } \{\mathrm{cooperate},\mathrm{defect}\}.
+\label{eq:c_act}
+\end{equation}
+Payoff preferences ascend over $\{-1,1,3,5\}$:
+\begin{equation}
+C_k^{\mathrm{pay}} = \mathrm{log\_softmax}\!\left(\frac{[-1,1,3,5]}{\tau}\right),
+\label{eq:c_pay}
+\end{equation}
+where $\tau$ is a temperature parameter controlling preference sharpness. Instrumental motivation therefore enters through payoff observations and multi-step planning rather than direct action preferences.
+
+\paragraph{Initial-state priors ($D_k$).}
+Type, stance, and own-action priors are
+\begin{align}
+D_k^{\mathrm{type}} &= \left[\tfrac{1}{4},\tfrac{1}{4},\tfrac{1}{4},\tfrac{1}{4}\right], \label{eq:d_type}\\
+D_k^{\mathrm{stance}} &= [0.2,\,0.6,\,0.2], \label{eq:d_stance}\\
+D^{\mathrm{own}} &= [0.5,\,0.5] \quad \text{(binary task; uniform over graded levels in graded regimes).} \label{eq:d_own}
+\end{align}
+
+\paragraph{Policy priors ($E_k$).}
+Policy priors are uniform over admissible action sequences at the configured planning horizon (no habitual bias toward cooperation or defection). For horizon~1 in the binary task, $E_k=[0.5,0.5]$ over $\{\mathrm{cooperate},\mathrm{defect}\}$; longer horizons enumerate all length-$\tau$ sequences with equal prior mass.
+
+Partner selection across $k$ is handled outside the per-partner POMDP by evaluating policy branches for each partner with precision-adjusted logits before executing the chosen action (Appendix~\ref{app:precision_update}).
+
+\subsection{Partner implementation}
+
+Reported experiments use one focal active-inference agent with per-partner generative models as described above. Partners are parameterized environment-side policies, not reciprocal active-inference agents. Each partner maintains a latent type and stance, follows the type-by-stance cooperation probabilities in Table~\ref{tab:coop_table}, and undergoes action-dependent stance transitions in Table~\ref{tab:b_stance}. Partners do not run variational inference, maintain their own policy precision $\gamma_k$, or update affective estimates $\beta_k$. This design isolates the focal agent's precision-tracking mechanism before adding reciprocal belief and policy updating on the partner side.

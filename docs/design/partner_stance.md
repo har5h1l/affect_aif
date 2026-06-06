@@ -11,9 +11,13 @@ Each partner has:
 - a latent behavioral `type`: cooperator, reciprocator, exploiter, or random
 - a latent `stance`: trusting, neutral, or hostile
 
-The agent maintains partner-local beliefs over `type x stance`. Stance is the
-partner's disposition toward the agent, not the agent's own attitude. The agent
-influences stance through its actions, but does not observe stance directly.
+Partners are implemented as **environment-side parameterized policies**, not as
+active-inference agents. They sample cooperate/defect from
+`P(action | type, stance)` and update stance reactively from the focal agent's
+actions. The focal agent maintains partner-local beliefs over `type x stance`
+via `pymdp.Agent`. Stance is the partner's disposition toward the agent, not
+the agent's own attitude. The agent influences stance through its actions, but
+does not observe stance directly.
 
 ## Generative Model
 

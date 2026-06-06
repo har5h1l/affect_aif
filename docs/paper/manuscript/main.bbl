@@ -53,6 +53,12 @@ Frith, C.D., Frith, U.: Mechanisms of social cognition. Annual Review of
   Psychology  \textbf{63},  287--313 (2012).
   \doi{10.1146/annurev-psych-120710-100449}
 
+\bibitem{Hampton2008Mentalizing}
+Hampton, A.N., Bossaerts, P., O'Doherty, J.P.: Neural correlates of
+  mentalizing-related computations during strategic interactions in humans.
+  Proceedings of the National Academy of Sciences  \textbf{105}(18),
+  6741--6746 (2008). \doi{10.1073/pnas.0711099105}
+
 \bibitem{Heins2022Pymdp}
 Heins, C., Millidge, B., Demekas, D., Klein, B., Friston, K., Couzin, I.D.,
   Tschantz, A.: pymdp: A python library for active inference in discrete state
@@ -90,10 +96,5 @@ Ruiz-Serra, J., Sweeney, P., Harr{\'e}, M.S.: Factorised active inference for
   Conference on Autonomous Agents and Multiagent Systems. pp. 1793--1802.
   International Foundation for Autonomous Agents and Multiagent Systems (2025).
   \doi{10.5555/3709347.3743815}
-
-\bibitem{Yuan2017ApologyTrustRepair}
-Yuan, B., Dong, Y., Li, W.: The trust repair effect of apology: A systematic
-  review and meta-analysis. Advances in Psychological Science  \textbf{25}(7),
-  1103--1113 (2017). \doi{10.3724/SP.J.1042.2017.01103}
 
 \end{thebibliography}

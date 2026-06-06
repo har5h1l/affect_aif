@@ -5,6 +5,9 @@ operational manifest remains `docs/experiments/manifest.md`.
 
 ## Primary / Exploratory H0-H8 Specs
 
+Manuscript results map to five linked claims (see `notes/manuscript_outline.md`),
+not to H-card section titles in the `.tex` file.
+
 | Card | Purpose | Primary configs |
 |---|---|---|
 | H0 Policy Openness | Test whether policy-space openness gates affect effects. | `configs/trust/hypotheses/h0_policy_openness/shallow_binary.toml`, `configs/trust/hypotheses/h0_policy_openness/graded_choice.toml`, `configs/trust/hypotheses/h0_policy_openness/graded_betrayal.toml` |
@@ -12,7 +15,7 @@ operational manifest remains `docs/experiments/manifest.md`.
 | H2 Deployment | Test beta-to-policy lesion in an open regime. | `configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml` |
 | H3 Locality / Global Precision | Test local beta against shared global beta. | `configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml`, `configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml` |
 | H4 Social Allocation | Test partner selection, avoidance, and probing. | `configs/trust/hypotheses/h4_social_allocation/partner_choice.toml` |
-| H5 Timescale / Volatility | Test betrayal/stress windows and misdeployment. | `configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity_gradual.toml` |
+| H5 Timescale / Volatility | Test betrayal temporal dependency (payoff vs accuracy tradeoff). | `configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity_gradual.toml` |
 | H6 Perturbation Phenotypes | Test clinical-like precision-dynamics perturbations. | `configs/trust/hypotheses/h6_perturbation/clinical_betrayal.toml`, `configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml`, `configs/trust/hypotheses/h6_perturbation/affect_sensitivity.toml` |
 | H7 Signal Source | Compare partner-action surprisal with joint surprise. | Future-work; no active config. |
 | H8 Observation Noise / Robustness | Test beta inertia under noisy observations. | Future exploratory config. |

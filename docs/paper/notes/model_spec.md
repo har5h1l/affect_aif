@@ -1,5 +1,10 @@
 # Supplement: Model Specification
 
+Manuscript alignment: Methods describes the focal agent's POMDP and external
+$\beta_k$ tracker; Discussion states partners are scripted parameterized
+policies (reciprocal AIF is future work). An explicit partner-implementation
+Methods paragraph is still incoming in `.tex`.
+
 ## Runtime Boundary
 
 The supported runtime is official `inferactively-pymdp==1.0.0`. Project code
@@ -7,7 +12,24 @@ constructs trust-game matrices, manages partner-local agents, updates the
 external affective beta tracker, and logs analysis fields. The repository does
 not provide a custom active-inference engine.
 
-## Per-Partner POMDP
+Reported trust experiments use a **focal active-inference agent** plus
+**scripted parameterized partner policies** in the environment. Partners do not
+run `pymdp.Agent`; reciprocal multi-agent AIF is future work
+(`docs/theory/pomdp_spec.md` §13).
+
+## Partner Environment
+
+Ground-truth partners are `tasks.trust.envs.partners.Partner` instances:
+
+- latent type label (cooperator, reciprocator, exploiter, random)
+- latent stance label (trusting, neutral, hostile)
+- action choice: sample from `P(cooperate | type, stance)` tables shared with
+  the focal agent's `A[0]` likelihood
+- stance evolution: reactive update from focal-agent actions (not AIF)
+- exogenous switches: stochastic type drift (`p_switch`) and
+  `scheduled_stance_switches` for betrayal-style scenarios
+
+## Per-Partner POMDP (Focal Agent)
 
 Each tracked partner has one partner-local `pymdp.Agent` built from
 `tasks.trust.pomdp.build_trust_pomdp_template(...)`.

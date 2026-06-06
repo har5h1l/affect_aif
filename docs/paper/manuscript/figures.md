@@ -31,89 +31,68 @@ partner action prediction error
 
 Must show:
 
-- one official `pymdp.Agent` per partner;
+- **focal agent only** runs official `pymdp.Agent`; partners are scripted
+  parameterized policies (same type×stance tables in world and likelihood);
+- one official `pymdp.Agent` per tracked partner;
 - hidden factors `type x stance x own_action`;
 - observations `partner action` and `payoff`;
 - external beta tracker outside the POMDP;
 - tracked-only lesion where beta updates but gamma is decoupled.
 
-## Main Figure 2: Open-Regime Deployment And Social Choice
+## Main Figure 2: Model Fitness (H3 Focal-Switch Locality Probe)
 
-Current asset: stale carryover; regenerate before submission.
+Source table: `source_tables/h3_locality_probe_summary.csv` (manuscript-aligned;
+correlations from postfix H3 smoke, payoffs from
+`postfix_smoke_20260528/h3_final_round_summary.csv`).
 
-Current smoke numbers:
+Do **not** use `h1_evidence_effect_summary.csv` or
+`h1_model_fitness_correlation_summary.csv` for this panel; those reflect a
+different experiment (H1 reliability-vs-reward).
 
-- Affect payoff `1851.3`, entropy `8.59`.
-- No-affect / lesioned payoff `1864.2`, entropy `8.79`.
-- Global beta payoff `1851.3`, entropy `8.64`.
-- Belief readouts do not support a local-affect payoff win at smoke scale.
+Output asset: `figures/fig_model_fitness_beta_reward_divergence.pdf`
 
-Caption claim: In the open graded regime, affective precision changes policy
-deployment, but the reduced log-surprisal smoke does not establish a local
-affect payoff advantage.
+Manuscript numbers (Section 3.1):
 
-## Main Figure 3: Model Fitness Versus Reward
+- Local beta: `|corr(precision, surprise)| = 0.943`, payoff `0.110`.
+- Shared/global beta: surprise `0.149`, payoff `0.043`.
+- Payoff: local `946.8`, global `976.2`, no-affect `950.7`.
 
-Draft asset: stale carryover; regenerate before submission.
+## Main Figure 3: Open-Regime Deployment Dissociation
 
-Source tables:
+Source table: `source_tables/h2_deployment_dissociation_summary.csv`
+(manuscript-aligned variant ids: `affect`, `no_affect`, `tracked_only`).
 
-- `source_tables/postfix_smoke_20260528/h1_evidence_effect_summary.csv`
-- `source_tables/postfix_smoke_20260528/h1_model_fitness_correlation_summary.csv`
+Output asset: `figures/fig_deployment_social_summary.pdf`
 
-Generation rule: use the active-encounter partial columns
-`abs_partial_corr_precision_surprise` and
-`abs_partial_corr_precision_reward`, plus the
-`abs_partial_corr_precision_surprise_minus_reward` effect row. Raw correlation
-columns are retained as secondary diagnostics only.
+Manuscript numbers (Section 3.3; `postfix_smoke_20260528/h2` + `h0`):
 
-Current smoke numbers:
+- Affect: payoff `1851.3`, entropy `8.6`.
+- No-affect: payoff `1864.2`, entropy `8.8`.
+- Tracked-only: payoff `1864.2`, entropy `8.8`.
 
-- Local beta: `|corr(precision, surprise)| = 0.976`
-- Local beta: `|corr(precision, payoff)| = 0.721`
-- Local beta partial readout controlling payoff and encounter count:
-  `0.951` versus `0.172`
-- Global beta partial readout: `0.278` versus `0.058`
-- no payoff advantage for affect: `492.7` versus `552.0`
-
-Caption claim: The corrected post-fix H1 smoke restores the
-surprise-over-reward model-fitness dissociation at diagnostic scale; treat this
-panel as a confirmation target rather than final publication evidence.
+Do not claim open-regime payoff improvement from this smoke batch.
 
 ## Main Figure 4: Betrayal Boundary Condition
 
-Draft assets: stale carryover; regenerate before submission.
+Source table: `source_tables/h5_evidence_effect_summary.csv` (built from
+`postfix_smoke_20260528/h5_*` summaries). Do **not** use
+`h3_evidence_effect_summary.csv`; that file reflects the pre-fix failure
+direction (affect payoff below no-affect).
 
-- `figures/fig_betrayal_confirm_cumulative_payoff.png`
-- `figures/fig_betrayal_signal_trajectories.png`
+Output asset:
 
-Current smoke numbers:
+- `figures/fig_betrayal_boundary_summary.pdf`
+
+Current smoke numbers (3 seeds):
 
 - Affect payoff `1322.3`.
 - No-affect / lesioned payoff `1225.0`.
-- Global beta payoff `1216.2`.
-- Affect entropy `7.47` versus no-affect / lesioned `8.68`.
+- Affect entropy `7.47` versus no-affect `8.68`.
+- Affect joint accuracy `0.319` versus no-affect `0.425`.
 
-Caption claim: under the corrected selector, abrupt betrayal is the strongest
-candidate positive behavioral anchor, but the three-seed smoke must be replaced
-before submission.
-
-Source tables:
-
-- `source_tables/h3_evidence_effect_summary.csv`
-- `source_tables/h3_betrayal_reallocation_summary.csv`
-- `source_tables/h3_betrayal_misdeployment_summary.csv`
-
-Current smoke numbers:
-
-- Affect payoff `1127.0` versus no-affect/lesion `1225.0`.
-- Affect entropy `8.37` versus no-affect/lesion `8.68`.
-- Affect joint accuracy `0.067` versus no-affect/lesion `0.425`.
-- Affect reencounters the switched partner less often (`0.037` selection rate
-  versus `0.322`) but appears to reallocate poorly.
-
-Caption claim: Abrupt betrayal reveals an active but risky precision channel:
-policy sharpening is not equivalent to safer recovery.
+Caption claim: partner-local affect achieves higher payoff with lower joint
+accuracy, consistent with portfolio reallocation rather than superior inference
+about the changed partner. Replace three-seed smoke before submission.
 
 ## Main Figure 5: Shock Shape And Sensitivity
 

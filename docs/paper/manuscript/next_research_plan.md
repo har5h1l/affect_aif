@@ -9,18 +9,24 @@ explicitly authorizes otherwise.
 
 ## Current Position
 
-The manuscript can already support a constrained claim:
+The manuscript draft already supports a constrained claim (see
+`sections/03_results.tex` and `notes/manuscript_outline.md`):
 
-- it changes deployment in open policy regimes;
-- it shifts partner choice before payoff clearly separates;
-- abrupt betrayal is repaired under the centered selector at smoke scale.
+- partner-local precision tracks predictability rather than partner value;
+- behavioural effects run through metacognitive deployment (tracked-only lesion);
+- partner choice reorganises before aggregate payoff separates;
+- abrupt betrayal shows a **temporal dependency**: payoff can rise while joint
+  accuracy falls (portfolio reallocation, not better type inference);
+- phenotype sweeps describe computational trust-calibration profiles, not
+  clinical categories.
 
-The corrected post-fix H1 smoke supports the surprise-over-reward
-model-fitness readout at diagnostic scale, but it is not publication-grade
-evidence. H1 still needs confirmation with active-encounter and
-partial-correlation diagnostics, followed by the controlled reliability spine
-only if reward/exposure confounds remain: normal graded reliability spine,
-reward-matched graded reliability spine, then strict reward-neutral diagnostic.
+Discussion limitations already state: external $\beta_k$, scripted partners,
+predictive phenotypes. Methods still needs an explicit partner-implementation
+paragraph and fuller POMDP subsection.
+
+H1 locality numbers are in the manuscript; 30-seed confirmation TODOs remain for
+betrayal and locality probe headline values. H1 controlled reliability ladder
+still applies if reward/exposure confounds need ruling out.
 
 The main unresolved architectural question is whether partner-local beta is
 necessary. A reviewer can still ask whether one shared global model-fitness

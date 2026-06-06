@@ -68,15 +68,19 @@ Risk: low scientific risk, high manuscript value.
 
 ## Longer-Term Work
 
-- Human or behavioral validation: test whether beta-like reliability signals
-  predict human partner choice or return behavior.
-- Model comparison: compare partner-specific beta against global beta, reward
-  averaging, and belief-only baselines.
-- Variational beta: implement beta as a fuller auxiliary state rather than the
-  current external discrete tracker.
-- Richer social environments: noisy observations, correlated partners, and
-  multi-focal agents interacting with each other.
-- Clinical modeling: only after stronger validation; current variants are
+Aligned with manuscript Discussion future directions:
+
+- **Human behavioural validation:** fit $\alpha$, prior, and coupling from
+  iterated trust games with individual-difference measures.
+- **Global-$\beta$ ablation:** test whether partner-local precision is necessary
+  (mixed-volatility regime in §3.6).
+- **Reciprocal multi-agent AIF:** replace scripted partners with full AIF agents
+  (`docs/theory/pomdp_spec.md` §13).
+- **Explicit ToM inference:** combine metacognitive precision with mentalistic
+  partner-state models (Pitliya; Ruiz-Serra).
+- Variational beta as proper auxiliary hidden state.
+- Richer social environments: noisy observations, correlated partners.
+- Clinical modeling only after stronger validation; current variants are
   computational perturbations, not diagnoses.
 
 ## Current Recommendation

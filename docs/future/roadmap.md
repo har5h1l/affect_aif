@@ -98,8 +98,12 @@ These are future research tracks, not current blockers.
 
 1. **Human data fitting**: estimate `alpha_charge`, `beta_persistence`,
    `initial_beta`, and policy-precision coupling from behavioral data.
-2. **AIF partners**: replace scripted partners with active-inference agents for
-   genuine multi-agent inference.
+2. **AIF partners**: replace scripted parameterized partner policies with full
+   active-inference agents for genuine reciprocal multi-agent inference (both
+   sides updating beliefs, affective precision, and policies). Current partners
+   already share the focal agent's type-by-stance structure in the world model;
+   this track would replace cooperation-table sampling with partner-side
+   `pymdp.Agent` rollouts.
 3. **Structure learning**: test whether persistent low precision can signal
    model inadequacy and trigger model-structure search.
 4. **Richer task regimes**: noisy observations, larger action spaces, delayed

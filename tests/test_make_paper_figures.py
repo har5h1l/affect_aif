@@ -11,58 +11,25 @@ def _write_source_tables(source_dir):
     pd.DataFrame(
         [
             {
-                "readout": "final",
-                "metric": "total_payoff",
-                "treatment_variant": "affect",
-                "reference_variant": "no_affect",
-                "treatment_mean": 534.6,
-                "reference_mean": 542.1,
-                "difference": -7.5,
-                "bootstrap_ci_low": -27.9,
-                "bootstrap_ci_high": 13.8,
+                "variant_id": "local_beta",
+                "abs_corr_precision_surprise": 0.943,
+                "abs_corr_precision_payoff": 0.110,
+                "total_payoff": 946.8,
             },
             {
-                "readout": "model_fitness",
-                "metric": "abs_corr_precision_surprise_minus_reward",
-                "treatment_variant": "affect",
-                "reference_variant": "",
-                "treatment_mean": 0.096,
-                "reference_mean": "",
-                "difference": 0.096,
-                "bootstrap_ci_low": 0.027,
-                "bootstrap_ci_high": 0.164,
+                "variant_id": "global_beta",
+                "abs_corr_precision_surprise": 0.149,
+                "abs_corr_precision_payoff": 0.043,
+                "total_payoff": 976.2,
             },
             {
-                "readout": "model_fitness",
-                "metric": "abs_partial_corr_precision_surprise_minus_reward",
-                "treatment_variant": "affect",
-                "reference_variant": "",
-                "treatment_mean": 0.779,
-                "reference_mean": "",
-                "difference": 0.779,
-                "bootstrap_ci_low": "",
-                "bootstrap_ci_high": "",
+                "variant_id": "no_affect",
+                "abs_corr_precision_surprise": float("nan"),
+                "abs_corr_precision_payoff": float("nan"),
+                "total_payoff": 950.7,
             },
         ]
-    ).to_csv(source_dir / "h1_evidence_effect_summary.csv", index=False)
-    pd.DataFrame(
-        [
-            {
-                "variant_id": "affect",
-                "alignment": "active_encounter",
-                "corr_precision_surprise": -0.70,
-                "corr_precision_reward": -0.42,
-                "abs_corr_precision_surprise": 0.70,
-                "abs_corr_precision_reward": 0.42,
-                "partial_corr_precision_surprise": -0.95,
-                "partial_corr_precision_reward": 0.17,
-                "abs_partial_corr_precision_surprise": 0.95,
-                "abs_partial_corr_precision_reward": 0.17,
-                "surprise_dominates_reward": True,
-                "partial_surprise_dominates_reward": True,
-            }
-        ]
-    ).to_csv(source_dir / "h1_model_fitness_correlation_summary.csv", index=False)
+    ).to_csv(source_dir / "h3_locality_probe_summary.csv", index=False)
     pd.DataFrame(
         [
             {
@@ -70,22 +37,22 @@ def _write_source_tables(source_dir):
                 "metric": "total_payoff",
                 "treatment_variant": "affect",
                 "reference_variant": "no_affect",
-                "treatment_mean": 1136.1,
-                "reference_mean": 1172.1,
-                "difference": -36.0,
-                "bootstrap_ci_low": -63.7,
-                "bootstrap_ci_high": -10.9,
+                "treatment_mean": 1322.3,
+                "reference_mean": 1225.0,
+                "difference": 97.3,
+                "bootstrap_ci_low": 29.8,
+                "bootstrap_ci_high": 164.8,
             },
             {
                 "readout": "final",
                 "metric": "mean_q_pi_entropy",
                 "treatment_variant": "affect",
                 "reference_variant": "no_affect",
-                "treatment_mean": 8.38,
-                "reference_mean": 8.74,
-                "difference": -0.36,
-                "bootstrap_ci_low": -0.45,
-                "bootstrap_ci_high": -0.26,
+                "treatment_mean": 7.47,
+                "reference_mean": 8.68,
+                "difference": -1.21,
+                "bootstrap_ci_low": -1.82,
+                "bootstrap_ci_high": -0.52,
             },
             {
                 "readout": "betrayal_reallocation",
@@ -121,7 +88,7 @@ def _write_source_tables(source_dir):
                 "bootstrap_ci_high": 0.26,
             },
         ]
-    ).to_csv(source_dir / "h3_evidence_effect_summary.csv", index=False)
+    ).to_csv(source_dir / "h5_evidence_effect_summary.csv", index=False)
 
 
 def test_new_paper_figures_generate_manifest(tmp_path, capsys):
@@ -152,10 +119,10 @@ def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
     source_dir = tmp_path / "source_tables"
     output_dir = tmp_path / "figures"
     _write_source_tables(source_dir)
-    broken = pd.read_csv(source_dir / "h1_model_fitness_correlation_summary.csv").drop(
-        columns=["abs_partial_corr_precision_reward"]
+    broken = pd.read_csv(source_dir / "h3_locality_probe_summary.csv").drop(
+        columns=["abs_corr_precision_payoff"]
     )
-    broken.to_csv(source_dir / "h1_model_fitness_correlation_summary.csv", index=False)
+    broken.to_csv(source_dir / "h3_locality_probe_summary.csv", index=False)
 
-    with pytest.raises(ValueError, match="missing required columns.*abs_partial_corr_precision_reward"):
+    with pytest.raises(ValueError, match="missing required columns.*abs_corr_precision_payoff"):
         make_paper_figures.model_fitness_figure(source_dir, output_dir)

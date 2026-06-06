@@ -6,9 +6,32 @@ Specifies the generative model in standard pymdp A/B/C/D/E format.
 
 ## 1. Overview
 
-N agents interact in a repeated trust game with turn-taking. Each round, one focal agent selects an action (cooperate/defect, and optionally which partner to engage). All agents run active inference — behavioral "types" are inferred social categories in the focal agent's model; in simulations, partner behavior is shaped by internal parameterizations including preference temperature, planning horizon, and policy noise. Each agent maintains per-partner beliefs over (type, stance) via the POMDP, plus a per-partner precision tracker (beta) that operates outside the generative model.
+The supported trust-game simulations use a **focal active-inference agent** plus
+**environment-side parameterized partner policies**. Each round, the focal agent
+selects an action (cooperate/defect, and optionally which partner to engage) via
+official `pymdp.Agent` policy inference and partner-local affective precision.
+Partners are **not** active-inference agents in the current implementation; they
+sample actions from stance-conditioned cooperation probabilities and maintain
+reactive stance dynamics, but they do not run variational inference, expected
+free energy, or affective precision updates.
 
-Precision tracking reads social prediction errors and modulates policy precision, without being part of the POMDP state space. This matches Hesp et al.'s hierarchical approach where precision is inferred from inference dynamics rather than from a dedicated sensory channel.
+Behavioral "types" are latent social categories in the focal agent's generative
+model. In the world, each partner is assigned a type label and evolves stance as
+a function of the focal agent's actions; action choice follows the same
+type-by-stance cooperation tables that populate the focal agent's `A[0]`
+likelihood. This keeps the inference problem well posed without modeling
+reciprocal multi-agent active inference.
+
+The focal agent maintains per-partner beliefs over `(type, stance)` via the
+POMDP, plus a per-partner precision tracker (`beta`) that operates outside the
+generative model. Precision tracking reads social prediction errors and modulates
+policy precision, without being part of the POMDP state space. This matches Hesp
+et al.'s hierarchical approach where precision is inferred from inference
+dynamics rather than from a dedicated sensory channel.
+
+Section 12 documents the current partner environment. Section 13 describes a
+planned reciprocal multi-agent extension that is **not** used in the reported
+trust experiments.
 
 **Version history**: v1 had F=4, M=3 with non-standard payoff. v2 dropped payoff (M=2). v3 restores payoff as a proper modality via s_own factor and re-parameterizes beta to match Hesp's convention. v4 removes beta from POMDP state space and intero from observations; precision tracking becomes an external module operating on inference dynamics. The current implementation also follows the factorized-control convention from the reference trust notebook.
 
@@ -322,9 +345,52 @@ The POMDP is a purely social inference model: type and stance posteriors are upd
 
 ---
 
-## 12. Multi-Agent Extension
+## 12. Partner Environment (Current Implementation)
 
-All agents (including "partners") run active inference with the same model structure. In simulations, behavioral differences arise from **parameter regimes** — combinations of preference sharpness, planning horizon, and action noise — rather than from temperature alone. Type labels are latent social categories inferred by the focal agent; the simulation instantiates them as follows:
+Reported trust experiments instantiate partners as environment-owned scripted
+policies in `tasks.trust.envs.partners.Partner`. Official `pymdp.Agent` objects
+are used only on the focal side (`PartnerBank` in `tasks.trust.runtime`).
+
+Each partner has:
+
+- a latent **type** label: cooperator, reciprocator, exploiter, or random
+- a latent **stance** label: trusting, neutral, or hostile
+- a type-conditioned cooperation table shared with the focal agent's `A[0]`
+  likelihood (`tasks.trust.stance`, `tasks.trust.types`)
+
+On each round, the engaged partner samples cooperate/defect from
+`P(cooperate | type, stance)` and then updates stance from the focal agent's
+action via a lightweight character posterior (`agent_character_posterior →
+posterior_to_stance`). This reactive stance process is **not** active inference:
+there is no partner-side `infer_states`, no expected free energy, and no
+partner-local `beta` or `gamma`.
+
+Additional partner dynamics:
+
+- stochastic type drift via `p_switch` and `maybe_switch_type`
+- exogenous betrayal-style disruptions via `scheduled_stance_switches`
+- optional observation noise and partner correlation in selected task variants
+
+The focal agent's generative model therefore matches the world at the level of
+type-by-stance cooperation probabilities and action-dependent stance
+transitions, while isolating the mechanism under study: partner-local affective
+precision on the focal side only. The present simulations do **not** address
+the reciprocal case in which both agents update beliefs, confidence, and
+policies simultaneously.
+
+---
+
+## 13. Multi-Agent Extension (Planned, Not Shipped)
+
+This section records a **future** reciprocal multi-agent design. It is **not**
+part of the supported trust-game runtime and is **not** used in the reported
+experiments. See `docs/future/roadmap.md` ("AIF partners").
+
+In the planned extension, all agents (including partners) would run active
+inference with the same model structure. Behavioral differences would arise from
+**parameter regimes** — combinations of preference sharpness, planning horizon,
+and action noise — rather than from fixed cooperation tables alone. Example
+sketch:
 
 | Type | C[1] temp | Horizon | Notes |
 |------|-----------|---------|-------|
@@ -333,9 +399,9 @@ All agents (including "partners") run active inference with the same model struc
 | Reciprocator | 1.0 (moderate) | 4+ | Moderate preference + deep planning → reciprocates via stance dynamics |
 | Random | 5.0 (very flat) | 1 | Nearly indifferent + myopic → near-random behavior |
 
-These are example parameterizations, not a claim that temperature alone generates each phenotype.
+These are design sketches, not claims about the current scripted partner surface.
 
-### Turn-Taking Protocol
+### Planned Turn-Taking Protocol
 
 Each round:
 1. Focal agent selected (round-robin or random)
@@ -347,7 +413,7 @@ Each round:
 
 ---
 
-## 13. Lesion Conditions
+## 14. Lesion Conditions
 
 | Condition | What changes | Behavioral prediction |
 |-----------|-------------|----------------------|
@@ -359,10 +425,11 @@ Each round:
 
 ---
 
-## 14. Summary: What to Build
+## 15. Summary: What to Build
 
-1. **Standard pymdp model**: A[0] (2x4x3xN), A[1] (payoff_levels x 4 x 3 x N), B[0] (4x4x1), B[1] (3x3xN), B[2] (NxNxN), C[0-1], D[0-2], E, where `N = num_social_actions`.
-2. **External precision tracker**: Per-partner categorical over 5 beta levels, updated via affective charge pseudo-likelihood (Section 10). Runs after each trial observation, before policy selection.
+1. **Standard pymdp model (focal agent)**: A[0] (2x4x3xN), A[1] (payoff_levels x 4 x 3 x N), B[0] (4x4x1), B[1] (3x3xN), B[2] (NxNxN), C[0-1], D[0-2], E, where `N = num_social_actions`.
+2. **External precision tracker (focal agent)**: Per-partner categorical over 5 beta levels, updated via affective charge pseudo-likelihood (Section 10). Runs after each trial observation, before policy selection.
 3. **Separated inference channels**: Type × stance inference via A[0]+A[1] in the POMDP. Beta inference via external tracker. Beta is not a POMDP factor and does not enter A/B; computationally the tracker is downstream of belief updates (reads prediction errors) and upstream of policy selection (modulates gamma).
 4. **Per-partner gamma**: `gamma_k = gamma_base / E[beta_k]` in the policy softmax.
-5. **Multi-agent**: All agents run AIF with shared architecture. Partner phenotypes emerge from different internal parameterizations (preference temperature, planning depth, noise).
+5. **Scripted partner environment**: Environment-owned `Partner` policies sample from type-by-stance cooperation tables, update stance reactively from focal-agent actions, and support scheduled switches. Same tables feed the focal agent's `A[0]` likelihood.
+6. **Future multi-agent extension (not shipped)**: Reciprocal AIF partners with shared architecture and parameter-regime phenotypes (Section 13).

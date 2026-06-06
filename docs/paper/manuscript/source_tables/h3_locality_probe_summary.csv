@@ -1,0 +1,4 @@
+variant_id,abs_corr_precision_surprise,abs_corr_precision_payoff,total_payoff
+local_beta,0.943,0.11,946.8333333333334
+global_beta,0.149,0.043,976.1666666666666
+no_affect,,,950.6666666666666

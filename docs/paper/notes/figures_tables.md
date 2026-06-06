@@ -19,8 +19,9 @@ partner prediction reliability
 
 Include the architectural split:
 
-- partner-local `pymdp.Agent` over `type x stance x own_action`;
-- external beta tracker;
+- focal agent: partner-local `pymdp.Agent` over `type x stance x own_action`;
+- environment: scripted parameterized partners (cooperation-table sampling);
+- external beta tracker on focal side only;
 - beta-to-gamma modulation;
 - tracked-only lesion.
 

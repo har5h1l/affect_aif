@@ -13,7 +13,9 @@ partners, and recover under social uncertainty.
 
 - Affect is modeled as partner-specific model fitness, updated from
   partner-action surprisal and deployed as inverse-beta policy precision.
-- The trust task is a testbed for social inference under volatility.
+- The trust task is a testbed for social inference under volatility. Reported
+  experiments use a focal active-inference agent against environment-side
+  parameterized partner policies; reciprocal AIF partners are future work.
 - Clinical-like variants are perturbations of affective precision dynamics, not
   validated clinical diagnoses.
 - Current claims require completed H0-H8 runs on the supported architecture,

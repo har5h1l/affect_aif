@@ -9,7 +9,7 @@ into a new project scaffold.
 
 - `main.tex`: anonymized LNCS manuscript source using the approved title.
 - `sections/`: manuscript section files included by `main.tex`.
-- `manuscript.pdf`: rendered PDF produced from `main.tex`.
+- `main.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
 - `results_digest.md`: audited seed counts, promoted result roots, key numbers,
   and include/exclude decisions.
@@ -30,38 +30,29 @@ this packet as the current diagnostic evidence surface. The completed post-fix
 log-surprisal smoke is current smoke evidence, but not publication-grade
 confirmation. Do not promote old bounded-error numbers or pre-fix smoke numbers
 as current manuscript evidence.
-Do not write a broad "affect improves reward" claim. The supported thesis is:
+Do not write a broad "affect improves reward" claim. The supported thesis matches
+the current manuscript abstract and Discussion:
 
-> Partner-specific affective precision changes social policy deployment when
-> the policy space is open, and under the corrected selector it can improve
-> abrupt-betrayal behavior at smoke scale. The model-fitness interpretation
-> remains a target claim that requires post-fix confirmation.
+> Partner-local affective precision tracks predictability rather than partner
+> value, modulates action confidence (metacognitive deployment), reorganises
+> engagement under choice, and under abrupt change can improve payoff via
+> portfolio reallocation while joint accuracy may fall—a temporal dependency,
+> not a generic reward boost or inference gain.
 
-Current manuscript evidence should be written as diagnostic/provisional until
-confirmation-scale post-fix reruns exist:
+Current manuscript evidence uses mixed seed scales as stated in Methods:
 
-- Three-seed H1 smoke: the corrected active-encounter and
-  partial-correlation readouts restore the surprise-over-reward diagnostic at
-  smoke scale, but H1 is not yet a publication-grade model-fitness claim.
-- Three-seed H0/H2 smoke: beta-to-gamma coupling changes deployment, but local
-  affect does not yet have a payoff advantage.
-- Three-seed H3 smoke: locality improves signal quality, not demonstrated
-  aggregate behavior.
-- Three-seed H5 smoke: abrupt betrayal is repaired under the centered selector
-  and is now the strongest candidate positive behavioral anchor.
-- Three-seed H4/H6 smoke: supplemental only.
+- **20 seeds:** phenotype / Exp A–D descriptive figures (§3.5–3.6).
+- **30 seeds:** central behavioural confirmations (stated in Methods; some
+  headline numbers still carry TODO comments in `.tex` pending final runs).
+- **3-seed smoke:** `results/log_surprisal_spine_smoke_postfix_20260528/` remains
+  diagnostic provenance for early H-card readouts; prefer manuscript-embedded
+  numbers where they supersede smoke at higher seed count.
 
-Publication-ready evidence does not require scaling every old hypothesis
-family. It requires 20-seed descriptive phenotype outputs for the Section 3.6
-figures, a 30-seed abrupt-betrayal confirmation for the main behavioural
-anchor, and targeted confirmation or softening for any other claim that remains
-central after manuscript triage.
+Incoming `.tex` edits (not yet required in this packet): explicit partner-
+implementation paragraph and fuller POMDP Methods subsection.
 
-The Exp A-D phenotype scripts are not current evidence until their server-side
-20-seed outputs have completed and been analyzed. Their compact outputs should
-enter this folder as `source_tables/exp_*` and `figures/fig_alpha_sweep.pdf`,
-`figures/fig_phenotype_quadrants.pdf`, `figures/fig_forgiveness.pdf`, and
-`figures/fig_mixed_volatility.pdf`.
+Publication-ready tightening still requires replacing TODO betrayal/locality
+numbers with final 30-seed confirmation values if they differ.
 
 ## Writing Guardrails
 
@@ -71,4 +62,8 @@ enter this folder as `source_tables/exp_*` and `figures/fig_alpha_sweep.pdf`,
 - State that H6 variants are clinical-like perturbations, not clinical models.
 - State that beta is an external HESP-style precision tracker, not a POMDP
   hidden state.
+- State that reported experiments use a focal active-inference agent against
+  scripted parameterized partner policies (Discussion limitation).
+- Frame betrayal as temporal dependency (payoff gain with lower accuracy when
+  reallocation succeeds), not as generic recovery or pure misdeployment.
 - Do not add unverified citations, DOIs, venues, quotes, or BibTeX entries.

@@ -26,8 +26,19 @@ The shipped trust-game path now uses the action-dependent stance redesign.
 
 ## Partner Environment Interface
 
-- Scripted `Partner` instances remain environment-owned stochastic policies with latent type switching.
-- Their small environment-facing protocol is separate from the active-inference runtime. Official `pymdp.Agent` objects are used only on the focal experiment side.
+- Scripted `Partner` instances remain environment-owned stochastic policies with
+  latent type switching and reactive stance updates. They sample actions from
+  type-by-stance cooperation tables; they do **not** run `pymdp.Agent` inference,
+  expected free energy, or affective precision.
+- Their small environment-facing protocol is separate from the active-inference
+  runtime. Official `pymdp.Agent` objects are used only on the focal experiment
+  side.
+- The same type-by-stance cooperation parameters feed both the scripted
+  environment and the focal agent's partner-local `A[0]` likelihood, so
+  scenario overrides change task structure without hidden model-world mismatch.
+- Reciprocal multi-agent active inference (partners as full AIF agents) is
+  planned future work; see `docs/theory/pomdp_spec.md` §13 and
+  `docs/future/roadmap.md`.
 
 ## Precision Modulation
 

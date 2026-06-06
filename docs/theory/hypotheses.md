@@ -256,5 +256,7 @@ separate external benchmark.
 
 ### E2: Multi-Focal Emergent Dynamics
 
-AIF agents interacting with each other remain descriptive until a specific
-hypothesis is promoted.
+Reciprocal active-inference agents interacting with each other (replacing the
+current scripted partner surface) remain descriptive until a specific hypothesis
+is promoted. The supported trust-hypothesis spine uses a focal AIF agent against
+parameterized partner policies.

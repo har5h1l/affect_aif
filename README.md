@@ -29,6 +29,7 @@ experiments, logging, and analysis.
 
 The supported trust-game workflow uses the action-dependent, factorized-control
 partner redesign:
+- the **focal agent** runs full active inference via official `pymdp.Agent`; **partners** are environment-side parameterized policies (cooperation-table sampling plus reactive stance), not reciprocal AIF agents
 - partner behavior depends on latent `type × stance`
 - stance changes are action-dependent and can also be scheduled explicitly with `scheduled_stance_switches`
 - binary trust games use factorized controls for partner, stance, and own action

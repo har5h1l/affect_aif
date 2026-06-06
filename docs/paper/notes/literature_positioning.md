@@ -11,7 +11,24 @@ expected action precision and subjective model fitness:
   [PubMed](https://pubmed.ncbi.nlm.nih.gov/33253028/)).
 
 This project extends that account from one action-model precision signal to
-multiple partner-local social model-fitness signals.
+multiple partner-local social model-fitness signals on the **focal agent** side.
+Reported simulations use **scripted parameterized partner policies** in the
+environment, not reciprocal AIF partners (Discussion limitation).
+
+## Social Metacognition Vs Theory Of Mind
+
+The manuscript Discussion positions partner-local affective precision as **social
+metacognition**: confidence in the focal agent's own behavioural model of a
+partner, not inference over that partner's mental states. Relevant comparators:
+
+- Pitliya et al., ToM active-inference accounts of perspective-taking
+  (manuscript cites `Pitliya2025ToMActiveInference`).
+- Ruiz-Serra et al., factorised active inference for strategic multi-agent
+  interaction (`RuizSerra2025Factorised`).
+
+Complementary framing: ToM models what partners believe; affective precision
+models how confidently to act on behavioural predictions. Future work may
+combine both.
 
 ## Active Inference In Psychology And Psychiatry
 
@@ -69,8 +86,15 @@ The manuscript can credibly claim novelty on four points:
    a custom active-inference engine.
 3. Testing model-fitness precision against reward, deployment lesion, social
    choice, and betrayal stress readouts.
-4. Showing a productive boundary condition: affective precision can sharpen
-   wrong deployment under abrupt social shocks.
+4. Showing a productive boundary condition: under abrupt social change, precision
+   can improve payoff via portfolio reallocation while joint accuracy falls—a
+   temporal dependency, not a simple success or failure of affect.
+
+## Simulation Boundary
+
+The manuscript states (Discussion limitations) that partners are scripted
+parameterized policies, not active-inference agents. Position reciprocal
+multi-AIF as future work, not as a limitation the current paper resolves.
 
 ## Claims To Avoid
 

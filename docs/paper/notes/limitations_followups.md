@@ -10,9 +10,14 @@ claiming psychological validity.
 
 ### Scripted Partner Surface
 
-The primary trust task uses environment-owned partner policies. That is
-appropriate for isolating focal-agent mechanisms, but it does not yet establish
-fully reciprocal multi-agent dynamics.
+The primary trust task uses environment-owned **parameterized partner policies**,
+not reciprocal active-inference agents. Each partner samples from
+type-by-stance cooperation tables and updates stance reactively from the focal
+agent's actions; only the focal agent runs full `pymdp.Agent` inference plus
+partner-local affective precision. That isolates the focal mechanism, but it
+does not yet establish fully reciprocal multi-agent dynamics in which both sides
+update beliefs, confidence, and policies simultaneously. See
+`docs/theory/pomdp_spec.md` §12–§13.
 
 ### Global-Beta Evidence Is Discovery-Scale
 
@@ -21,18 +26,21 @@ support a signal-quality decomposition but do not yet establish that
 partner-local precision is behaviorally necessary. Exp D and a higher-seed H3
 locality probe are the planned tests of cross-partner interference.
 
-### H5 Is A Boundary Condition
+### H5 Is A Temporal Dependency, Not A Simple Win Or Loss
 
-The volatility result is not a generic recovery claim. Abrupt betrayal reveals
-both the candidate behavioral benefit and the temporal boundary condition of
-precision-guided deployment. This should be a central discussion point, not
-hidden as a negative result.
+The manuscript treats abrupt betrayal as a structural readout: partner-local
+precision can raise total payoff (1322.3 vs 1225.0 in current draft) while
+**lowering** joint accuracy (0.319 vs 0.425). The story is portfolio
+reallocation when accumulated confidence redirects toward reliable alternatives,
+not better inference about the switched partner and not a generic misdeployment
+failure. Keep this as a central Discussion point. Final 30-seed numbers may
+replace draft values (TODO in `.tex`).
 
-### H6 / Exp A-D Phenotypes Need Final Review
+### Phenotypes In Manuscript; Exp C Still Open
 
-Clinical-like variants separate in precision dynamics and some behavioral
-readouts at smoke scale, and Exp A-D are running to fill the phenotype section.
-Do not update interpretation narrative until final outputs are reviewed.
+Section 3.5–3.6 includes 20-seed phenotype, $\alpha$-sweep, quadrant, and
+mixed-volatility results. Exp C forgiveness remains TODO in the `.tex` source.
+Do not upgrade computational profiles to clinical categories or human validation.
 
 ### Literature Scope
 
@@ -70,7 +78,8 @@ Potential reviewer asks and the appropriate response:
 | "Does this generalize beyond scripted partners?" | Add AIF-vs-AIF descriptive runs or benchmark-facing follow-up. |
 | "Are clinical labels justified?" | Soften language to computational perturbations; do not add diagnostic claims. |
 | "Is this just reward averaging?" | Lead with the H1 corrected-readout plus controlled diagnostic ladder. |
-| "Why does volatility help or hurt payoff?" | Present the H5 boundary condition: precision can sharpen deployment when confidence is timely and can mislead when the model is stale. |
+| "Why does volatility help or hurt payoff?" | Present the manuscript temporal-dependency framing: payoff can rise via reallocation while accuracy falls; stale confidence is the risk. |
+| "Is this ToM?" | No—manuscript positions affect as social metacognition over behavioural model fitness; ToM combination is future work. |
 
 ## Stopping Rule
 

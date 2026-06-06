@@ -41,6 +41,13 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
 - Before updating result-interpretation docs from new experiment outputs, ask the user first.
 - When the user asks about branch state, merge readiness, or pruning stale remote branches, run git (fetch or prune as needed) and summarise concrete outputs instead of only listing commands.
 - For active-doc-driven research, treat `docs/active/state.md` as the source of truth for phase autonomy; do not default to “blocked” framing when the mission tells the agent to proceed or to choose the next phase.
+- For manuscript work, keep pending experiment work in `docs/active`; use latest confirmed results and placeholders in the manuscript, and do not state that experiments still need to run.
+- When revising the manuscript, do not invent results or alter present technical content, equations, or core argument.
+- Use American English spelling in the manuscript (behavior, modeling, formalize, characterize, etc.).
+- In manuscript phenotype claims, use "computational phenotype" or "computational analogue" — not clinical validation or diagnosis.
+- When manuscript framing changes, update supporting paper docs under `docs/paper/` (notes, README, planning docs) to match; do not silently rewrite `docs/results/` interpretation.
+- When syncing to mango while remote experiments are running, do not stop or disrupt active sessions.
+- Prefer hard renames without legacy code paths or deprecation aliases.
 
 ## Learned Workspace Facts
 
@@ -54,6 +61,8 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
 - Benchmark runs use `scripts/benchmark/run.py` plus `docs/operations/benchmark.md` for trust-task evaluation arena TOML configs such as `configs/benchmark/e1_arena/default.toml` and `configs/benchmark/e1_arena/betrayal.toml`.
 - Primary trust-hypothesis configs are under `configs/trust/hypotheses/` (and smoke under `configs/trust/smoke/`); benchmark configs are benchmark-family TOML specs under `configs/benchmark/`—see `docs/experiments/manifest.md`.
 - Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is rsync and does not delete remote-only files under `results/`). Do not add orchestration or deployment scripts to this repo.
+- Manuscript PDF builds in `docs/paper/manuscript/` via `pdflatex` → `bibtex` → `pdflatex` × 2; output is `main.pdf`.
+- Phenotype experiment summaries for the paper live in `docs/paper/manuscript/source_tables/` with figures in `docs/paper/manuscript/figures/`.
 
 ---
 
@@ -204,10 +213,11 @@ expanded TOML runs. Key runtime fields:
 
 1. **Sophisticated inference**: Policy evaluation uses observation-branching, not mean-field rollout
 2. **Native pymdp boundary**: policy/state inference stays inside official `pymdp.Agent`; task code only constructs matrices and manages partner-local beta/gamma
-3. **Deterministic seeds**: `random_seed + replication_index` ensures reproducibility
-4. **Variant equality**: same-horizon no-affect and tracked-only variants should match when precision is decoupled
-5. **Binary saturation**: EFE gaps ~10.83 in binary game → softmax is hard argmax → precision modulation inert
-6. **Graded activation**: q_pi_entropy ~5.8 in graded game → precision modulation channel active
+3. **Focal AIF, scripted partners**: reported trust experiments use a focal active-inference agent against environment-side parameterized partner policies; partners do not run `pymdp.Agent` or affective precision (see `docs/theory/pomdp_spec.md` §12)
+4. **Deterministic seeds**: `random_seed + replication_index` ensures reproducibility
+5. **Variant equality**: same-horizon no-affect and tracked-only variants should match when precision is decoupled
+6. **Binary saturation**: EFE gaps ~10.83 in binary game → softmax is hard argmax → precision modulation inert
+7. **Graded activation**: q_pi_entropy ~5.8 in graded game → precision modulation channel active
 
 ## Troubleshooting
 

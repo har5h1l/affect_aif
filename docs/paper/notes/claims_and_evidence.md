@@ -1,94 +1,73 @@
 # Claims and Evidence
 
+Synced to the current manuscript framing in `docs/paper/manuscript/sections/`.
+The paper organises evidence around five linked claims; H-card IDs remain the
+experiment spine.
+
 ## Status Summary
 
-| Claim | Status | Evidence | How to write it |
+| Claim (manuscript framing) | Status | Evidence | How to write it |
 |---|---|---|---|
-| Affective precision can move policy only when the policy space is open. | Post-fix smoke-supported; needs confirmation if payoff language stays. | H0/H2 smoke shows entropy/deployment movement while payoff remains flat. | "Policy openness gates visible affect effects"; do not claim a general payoff advantage. |
-| Partner-local precision tracks model fitness more than reward. | Post-fix smoke-supported; needs confirmation or controlled diagnostics. | Corrected post-fix H1 smoke restores the readout (`0.976` surprise vs `0.721` payoff; partial `0.951` vs `0.172` controlling payoff and encounter count). | Treat as a target claim requiring the H1 ladder before manuscript use. |
-| Affect changes deployment more than belief inference. | Smoke-supported as a deployment-channel claim. | H2 open-regime lesion/no-affect readouts leave payoff flat but show policy-entropy movement. | "The lesion tests knowing-without-using"; keep payoff language conditional on confirmation. |
-| Partner-local beta is behaviorally necessary. | Not established. | H3 smoke shows local beta has the cleaner model-fitness signal, while global beta has higher aggregate payoff. | Write H3 as a decomposition of signal quality versus allocation, not as necessity. |
-| Partner-specific precision guides social choice. | Underpowered; keep as allocation-reorganisation claim. | H4 partner-choice smoke is noisy and payoff-flat. | "Partner choice is the planned readout; payoff is secondary here." |
-| Stress amplifies the mechanism. | Best current positive behavioral anchor, but smoke only. | H5 betrayal smoke shows local affect beating no-affect after the selector fix (`1322.3` vs `1225.0`). | Use as the priority confirmation target, not final publication evidence. |
-| Clinical-like variants map to validated clinical phenotypes. | Not supported. | Current variants are parameter perturbations only; Exp A-D are computational phenotype runs. | "Clinical-like" or "computational phenotype", not diagnosis. |
-| Clinical-like variants separate in precision dynamics. | Pending final Exp A-D review. | Exp A-D are running; outputs are not final evidence until complete and approved for interpretation. | Keep Section 3.6 placeholders until final valid outputs are reviewed. |
+| Partner-local precision tracks predictability, not partner value. | In manuscript at locality-probe scale; 30-seed confirm TODO. | §3.1: surprise vs payoff correlations (0.943 vs 0.110 local). | "Designed for model fitness"; cite action surprisal; note global-beta dilution. |
+| Behavioural gains arise through action sharpening, not belief quality. | In manuscript (open graded + tracked-only). | §3.2: entropy 7.94 vs 8.80; tracked-only matches no-affect. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
+| Partner engagement reorganises around reliability before payoff separates. | In manuscript at current seed scale. | §3.3: entropy 4.66 vs 4.81; selection shifts; flat payoff. | Allocation reorganisation, not payoff headline. |
+| Abrupt betrayal exposes temporal dependency (payoff gain, accuracy cost). | In manuscript; 30-seed confirm TODO. | §3.4: payoff 1322.3 vs 1225.0; accuracy 0.319 vs 0.425. | Portfolio reallocation story, not "better inference" or pure misdeployment failure. |
+| Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed phenotype scale; Exp C TODO. | §3.5–3.6: perturbations, $\alpha$ sweep, quadrants, mixed volatility. | "Computational analogues"; not clinical categories. |
+| Policy openness gates visible affect effects. | Underpins §3.2; not a separate subsection. | Graded open-regime readouts. | Openness necessary, not sufficient. |
+| Partner-local beta is behaviorally necessary. | Not established. | Local cleaner signal; global beta can win on payoff in probes. | Signal-quality decomposition only. |
+| Focal AIF vs scripted partners. | Stated in Discussion limitation. | Methods opening + Discussion §Limitations. | Parameterized partner policies; reciprocal AIF is future work. |
 
 ## Completeness Read
 
-The core computational story is complete enough for a paper draft because it has
-a theory-to-code-to-result chain:
+The manuscript has a complete theory-to-code-to-result chain for a mechanistic
+simulation paper at the seed scales stated in Methods:
 
-1. Theory defines affect as partner-local model-fitness precision.
-2. Implementation uses official `inferactively-pymdp==1.0.0`, partner-local
-   `type x stance` POMDPs, and external beta-to-gamma modulation.
-3. Experiments test openness, model fitness, deployment, stress, social choice,
-   and perturbation dynamics.
-4. Current post-fix smoke shows deployment effects and a repaired H5 behavioral
-   anchor, while H1 remains smoke-supported but not confirmation-scale.
+1. Theory: partner-local model-fitness precision as metacognitive deployment.
+2. Implementation: focal `pymdp.Agent` + external beta; scripted partner
+   environment (`docs/paper/notes/model_spec.md`).
+3. Results: five linked claims from H1–H6 experiment spine.
+4. Discussion: metacognition vs ToM, deployment lesion, betrayal temporal
+   dependency, three limitations, future directions.
 
-The evidence is not complete enough for a broad empirical psychology claim, a
-clinical claim, or a universal performance claim. Those would require human
-data, stronger phenotype validation, and broader benchmark comparison.
-It is also not yet complete enough to use H1 as a publication-grade
-model-fitness anchor; the corrected H1 readout still needs confirmation or the
-controlled diagnostic ladder described in `docs/active/progress.md`.
+Not ready for: human empirical claims, clinical diagnosis, reciprocal multi-AIF,
+or universal payoff improvement.
 
-## Supported Results
+## Supported Results (manuscript language)
 
-### H0: Openness Gate
+### Predictability not value (H1 / §3.1)
 
-Supported with caveat. Affect has little room in constrained/saturated policy
-regimes but can move entropy, action, partner choice, and sometimes payoff in
-graded or choice regimes. Openness is necessary but not sufficient: H3 shows
-that open regimes can also expose maladaptive precision.
+Manuscript uses locality-probe correlations and global-beta dilution. Treat
+30-seed confirmation as open if numbers change.
 
-### H1: Model Fitness
+### Metacognitive deployment (H2 / §3.2)
 
-Corrected post-fix smoke-supported, but not yet confirmation-scale. The
-active-encounter and partial-correlation readouts show precision tracking
-surprise/predictability more strongly than payoff, but H1 should not be used as
-a manuscript anchor until the corrected readout is confirmed at higher seed
-count.
+Tracked-only matches no-affect on entropy and payoff while full precision
+modulation differs—deployment-channel claim is the manuscript anchor here.
 
-### H2: Deployment
+### Social reorganisation (H4 / §3.3)
 
-Smoke-supported as a deployment-channel result. The beta-to-policy-precision
-lesion/no-affect comparisons preserve the knowing-versus-using framing, but
-payoff is flat at smoke scale and should stay conditional on confirmation.
+Partner-choice entropy and engagement shifts; payoff flat at stated scale.
 
-### H3: Locality / Global Precision
+### Temporal dependency under betrayal (H5 / §3.4)
 
-Supported only as a decomposition. Partner-local beta preserves the cleaner
-partner-level model-fitness signal, while global beta currently has higher
-smoke payoff. Do not claim that partner-local beta is behaviorally necessary
-until Exp D or a dedicated higher-seed H3 run shows cross-partner interference
-or allocation benefit.
+Manuscript's central stress readout: higher payoff with lower joint accuracy.
+Write as adaptive reallocation when alternatives exist, not as recovery or as
+pure failure.
 
-### H4: Social Choice
+### Phenotype programme (H6 / Exp A–D / §3.5–3.6)
 
-Underpowered. Partner selection is still the right readout because H4 predicts
-approach/avoidance/probing shifts rather than immediate payoff gain, but the
-post-fix smoke is too noisy for a strong manuscript claim.
-
-### H5: Timescale / Volatility
-
-Smoke-supported as the strongest current behavioral anchor. The corrected
-selector repairs the betrayal result at three seeds; run confirmation before
-using it as a publication-grade claim.
-
-### H6: Perturbation Phenotypes
-
-Pending Exp A-D. Keep phenotype claims as computational precision-dynamics
-claims and do not fill Section 3.6 interpretation text until the running
-outputs are complete and approved for interpretation.
+20-seed descriptive profiles in manuscript. Exp C forgiveness subsection still
+TODO in `.tex`. Do not infer clinical validity.
 
 ## Unsupported Or Overstrong Claims
 
 Do not claim:
 
 - affective precision monotonically improves payoff;
-- affect always helps recovery after betrayal;
-- the model validates clinical diagnoses;
-- partner-local beta is behaviorally necessary under the current task design;
-- H1 is currently confirmed under the post-fix selector;
-- the project is the first active-inference model of trust.
+- betrayal success means better partner-type inference;
+- the model validates clinical diagnoses or attachment/anxiety phenotypes as
+  categories;
+- partner-local beta is behaviorally necessary under current task design;
+- reciprocal multi-agent active inference (partners as full AIF agents);
+- the project is the first active-inference model of trust;
+- human empirical support.

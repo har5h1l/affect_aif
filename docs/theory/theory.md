@@ -176,6 +176,13 @@ $$s_t = (s_{\mathrm{type}}, s_{\mathrm{stance}}, s_{\mathrm{own}})$$
 - $s_{\mathrm{stance}}$ — the partner's disposition toward the agent
 - $s_{\mathrm{own}}$ — deterministic bookkeeping for the agent's own executed action
 
+**Simulation boundary.** The focal agent runs this POMDP via official
+`pymdp.Agent`. Ground-truth partners are environment-side parameterized policies
+that sample from the same type-by-stance cooperation tables and update stance
+reactively from the focal agent's actions; they do not run reciprocal active
+inference or partner-local affective precision. Reciprocal multi-agent AIF is
+planned future work (`pomdp_spec.md` §13).
+
 Partner identity / interaction context is directly observed, and the affective
 state $\beta_k$ is tracked as an auxiliary per-partner summary that influences
 policy evaluation without becoming a POMDP hidden-state factor.

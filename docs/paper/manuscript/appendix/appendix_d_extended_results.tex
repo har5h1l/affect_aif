@@ -1,0 +1,117 @@
+\section{Extended Phenotype and Robustness Results}
+\label{app:extended_results}
+
+\paragraph{Scope.}
+This appendix provides supporting technical detail for the corresponding main-text sections. Essential claims and results remain in the main paper.
+
+\subsection{Precision-dynamics perturbations}
+\label{sec:clinical_dynamics}
+
+To connect the basic mechanism to the phenotype program, we perturb the amplitude and stability of $\beta_k$ dynamics using phenotype-inspired computational variants. These variants are not diagnostic models; they are controlled ways of asking how flattened, expanded, or unstable precision dynamics alter action commitment.
+
+\begin{table}[H]
+\centering
+\caption{Precision-dynamics perturbations in the graded decision regime. Variants are computational profiles, not clinical diagnoses.}
+\label{tab:clinical_dynamics}
+\begin{tabular}{lccc}
+\toprule
+Variant & $\beta_k$ range & Total payoff & Policy entropy \\
+\midrule
+affect & 1.32 & 1851.3 & 8.6 \\
+alexithymia-like & 0.24 & 1840.5 & 8.9 \\
+borderline-like & 1.48 & 1859.0 & 8.1 \\
+depression-like & 1.48 & 1877.7 & 8.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{sloppypar}
+Signal flattening produces the clearest behavioral consequence. The alexithymia-like variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. This motivates the parameter sweeps below: social confidence differences are better captured by gain and prior structure than by a single high-versus-low trust axis.
+\end{sloppypar}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_phenotype_dynamics_summary.pdf}
+\caption{Precision-dynamics perturbations in the graded decision regime (supporting diagnostic). Variants are computational profiles, not clinical diagnoses.}
+\label{fig:phenotype_dynamics_appendix}
+\end{figure}
+
+\subsection{Alpha sweep}
+\label{sec:phenotypes_alpha}
+
+Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whether precision gain controls reactive social confidence across metrics. $\beta_k$ movement range increases monotonically with $\alpha$ in the betrayal regime:
+
+\begin{table}[H]
+\centering
+\caption{$\beta_k$ range by precision-gain $\alpha$ (betrayal regime, 20 seeds).}
+\label{tab:alpha_sweep}
+\begin{tabular}{cc}
+\toprule
+$\alpha$ & Mean $\beta_k$ range \\
+\midrule
+0.05 & 0.147 \\
+0.1  & 0.182 \\
+0.3  & 0.326 \\
+0.5  & 0.416 \\
+1.0  & 0.580 \\
+2.0  & 0.862 \\
+4.0  & 1.051 \\
+8.0  & 1.218 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_alpha_sweep.pdf}
+\caption{Precision-gain sweep across open graded and betrayal environments (20 seeds). Higher $\alpha$ expands $\beta_k$ range and reshapes engagement readouts without monotonic payoff ranking.}
+\label{fig:alpha_sweep_appendix}
+\end{figure}
+
+\subsection{Phenotype quadrants}
+\label{sec:phenotypes_quadrants}
+
+Crossing prior belief (naive versus cautious) with $\alpha$ (low versus high) defines four behavioral profiles tested in the betrayal environment (20 seeds). Table~\ref{tab:phenotypes} gives key metrics.
+
+\begin{table}[H]
+\centering
+\caption{Behavioral metrics by phenotype (betrayal environment, 20 seeds). Default agent shown for reference.}
+\label{tab:phenotypes}
+\begin{tabular}{lccccc}
+\toprule
+Profile & Payoff & Recovery & Gini & $\beta$ range & Trust asymmetry \\
+\midrule
+Anxious-reactive   & 1932 & 26.5 & 0.338 & 1.084 & 0.98 \\
+Hypervigilant      & 1951 & 20.1 & 0.423 & 0.892 & 1.65 \\
+Naive-stubborn     & 1894 & 21.3 & 0.304 & 0.364 & 1.19 \\
+Avoidant-rigid     & 1889 & 14.9 & 0.357 & 0.322 & 1.21 \\
+Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_phenotype_quadrants.pdf}
+\caption{Phenotype quadrant profiles from the prior-by-$\alpha$ factorial (betrayal environment, 20 seeds). Profiles are computational analogues, not clinical classifications.}
+\label{fig:phenotype_quadrants_appendix}
+\end{figure}
+
+\subsection{Forgiveness and trust repair}
+
+The forgiveness paradigm uses a 200-round partner-choice episode: cooperative baseline (rounds 1--80), betrayal on P0 (rounds 81--120), then reversion to cooperative/trusting behavior (rounds 121--200). Readouts include reengagement latency, post-return selection, payoff recovery, and $\beta_k$ recovery trajectories for the reverted partner.
+
+\resultp{Forgiveness results pending: report reengagement latency, post-return selection, payoff recovery, and whether high-$\alpha$ controls reengagement speed while cautious priors limit the trust-repair ceiling.}
+
+\subsection{Mixed-volatility extended diagnostics}
+
+The primary mixed-volatility table and figure remain in Section~\ref{sec:phenotypes_mixed}. Extended Exp D diagnostics include per-partner $\beta_k$ trajectories, rolling P0 selection concentration, and pairwise stability--precision correlations used to compute the discrimination index and P0 false-positive rate reported in the main text.
+
+\subsection{Additional robustness figures}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_shock_shape_summary.pdf}
+\caption{Shock-shape sensitivity summary (supporting diagnostic). Abrupt versus gradual betrayal schedules under precision-gain and prior perturbations.}
+\label{fig:shock_shape_appendix}
+\end{figure}

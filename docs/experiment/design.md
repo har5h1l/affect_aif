@@ -7,7 +7,9 @@
 The supported experiment surface has moved to the action-dependent stance model
 described in `docs/theory/pomdp_spec.md` and `docs/design/implementation.md`.
 
-- Ground-truth partners now have a fixed type and an evolving stance.
+- Ground-truth partners are environment-side parameterized policies, not
+  reciprocal active-inference agents (`pomdp_spec.md` §12).
+- Ground-truth partners have a fixed type and an evolving stance.
 - The agent jointly infers `type × stance` and plans with action-dependent stance transitions.
 - The trust-game generative model now uses two observation modalities (`o_action`, `o_payoff`) over latent `type × stance`, with `own_action` tracked separately.
 - The default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`, beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`).
@@ -21,6 +23,8 @@ described in `docs/theory/pomdp_spec.md` and `docs/design/implementation.md`.
 The following require new implementation and tests before they become runnable
 surface:
 
+- **AIF partners** — replace scripted parameterized partner policies with full
+  reciprocal active-inference agents (see `docs/theory/pomdp_spec.md` §13).
 - **Variational beta** — a variational auxiliary state would be new code.
 
 ---
@@ -171,6 +175,12 @@ The beta state remains outside the POMDP hidden-state factors. It is a task-loca
 ## 3. Environment and Task
 
 ### 3.1 Multi-Partner Trust Game
+
+The **focal agent** runs active inference via official `pymdp.Agent` instances
+(one per tracked partner). **Partners** are environment-side parameterized
+policies: they sample actions from type-by-stance cooperation tables and update
+stance reactively from the focal agent's actions, but they do not run variational
+inference or affective precision. See `docs/theory/pomdp_spec.md` §12.
 
 The agent interacts with $K = 4$ partners over $N = 200$ rounds. Each round:
 

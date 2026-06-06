@@ -1,12 +1,16 @@
 \section{Methods}
 
+A focal active-inference agent plays a repeated trust game with four partners whose types and stances are hidden and must be inferred from behavioral evidence. Rather than maintaining a single pooled social model, the agent keeps a separate generative model for each partner, allowing evidence to accumulate independently across relationships. Partner-local affective precision is then layered on top: each partner has its own model-fitness estimate that modulates how confidently the agent acts on that partner's model.
+
 \subsection{Trust game}
 
-A focal active-inference agent plays a repeated trust game \cite{Berg1995Trust,KingCasas2005Trust} with four partners over an episode of up to 200 rounds. Each partner has a latent \emph{type} (cooperator, reciprocator, exploiter, or random) and a latent \emph{disposition} toward the agent (trusting, neutral, or hostile)---neither directly observable; both must be inferred from behavioral evidence.
+The trust game \cite{Berg1995Trust,KingCasas2005Trust} is a natural testbed because partner types are hidden and must be inferred, creating a genuine gap between social knowledge and actionable confidence. The policy space can also be varied: binary settings offer two actions, while graded settings distribute probability mass across several investment levels, and a partner-choice regime makes approach and avoidance explicit policy outputs.
 
-In the binary game both players choose to cooperate or defect. Table~\ref{tab:payoff} gives the focal agent's payoffs. The structure creates a genuine inference problem: defecting is individually tempting regardless of partner behavior, but a cooperative partner is worth engaging, so the agent must infer the partner's type and disposition to choose well. In the graded regime, the binary choice is replaced by a discretized investment level; the agent commits a resource along a continuous scale rather than making a binary commitment. This distributes policy probability mass across several options, giving partner-local affective precision meaningful room to influence which level is selected. A partner-choice regime adds a prior decision each round: the agent selects which partner to engage before choosing an action, turning approach and avoidance into explicit policy outputs.
+Each partner has a latent \emph{type} (cooperator, reciprocator, exploiter, or random) and a latent \emph{stance} toward the agent (trusting, neutral, or hostile)---neither directly observable; both must be inferred from behavioral evidence. Episodes run for up to 200 rounds.
 
-\begin{table}[t]
+In the binary game both players choose to cooperate or defect. Table~\ref{tab:payoff} gives the focal agent's payoffs.
+
+\begin{table}[H]
 \centering
 \caption{Focal agent payoffs in the binary trust game.}
 \label{tab:payoff}
@@ -20,73 +24,53 @@ Agent defects & $5$ & $1$ \\
 \end{tabular}
 \end{table}
 
+The structure poses a social inference problem: defecting is individually tempting regardless of partner behavior, but a cooperative partner is worth engaging, so the agent must infer type and stance to choose well. In the graded regime, the binary choice is replaced by a discretized investment level; the agent commits a resource along a continuous scale rather than making a binary commitment. In the partner-choice regime, the agent selects which partner to engage before choosing an action each round.
+
 \subsection{Per-partner generative models}
 
-The focal agent maintains a separate discrete generative model $\mathcal{M}_k$ for each partner $k$, rather than a single pooled social model. This keeps evidence about each partner's behavior independent and---critical for the analysis below---allows the confidence with which each model is acted upon to differ across partners. For partner $k$:
-\begin{align}
-s_k &= (s_k^{\text{type}},\; s_k^{\text{disp}}) & &\text{(hidden: partner type and disposition)}\label{eq:states}\\
-o_k &= (o_k^{\text{act}},\; o_k^{\text{pay}}) & &\text{(observed: partner response and payoff)}\label{eq:obs}\\
-a   &\in \mathcal{A}                            & &\text{(cooperate/defect or investment level)}\label{eq:act}
-\end{align}
-The model $\mathcal{M}_k = \{A^{\text{act}}_k,\, A^{\text{pay}}_k,\, B_k,\, C_k,\, D_k,\, E_k\}$ encodes likelihoods ($A^{\text{act}}_k$, $A^{\text{pay}}_k$), transition dynamics ($B_k$), prior beliefs ($D_k$), preferred observations ($C_k$), and policy priors ($E_k$). Payoff enters as an observation modality rather than an external reward cache, so the agent's preferences are part of the same inference problem as its partner beliefs. State and policy inference use the official \texttt{pymdp} discrete active-inference implementation \cite{Heins2022Pymdp,DaCosta2020DiscreteSynthesis}.
+Given this environment, the focal agent maintains a separate discrete generative model $\mathcal{M}_k$ for each partner $k$, rather than a single pooled social model. This keeps evidence about each partner's behavior independent and allows the confidence with which each model is acted upon to differ across partners. Each model encodes observation likelihoods ($A^{\text{act}}_k$, $A^{\text{pay}}_k$), transition dynamics ($B_k$), preferred observations ($C_k$), prior beliefs ($D_k$), and policy priors ($E_k$). Payoff enters as an observation modality rather than an external reward cache, so the agent's preferences are part of the same inference problem as its partner beliefs. State and policy inference use the official \texttt{pymdp} discrete active-inference implementation \cite{Heins2022Pymdp,DaCosta2020DiscreteSynthesis}.
+
+\subsection{Generative model specification}
+\label{sec:generative_model}
+
+For each partner \(k\), the focal agent maintains a discrete generative model with three latent factors: partner type \(s_k^{\mathrm{type}}\in\{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\}\), partner stance \(s_k^{\mathrm{stance}}\in\{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}\), and a deterministic own-action bookkeeping factor \(s^{\mathrm{own}}\). The own-action factor is not a psychological hidden variable; it makes the focal agent's executed action available to the payoff likelihood in a standard factorized POMDP representation. Observations are partner action \(o_k^{\mathrm{act}}\in\{\mathrm{cooperate},\mathrm{defect}\}\) and focal payoff \(o_k^{\mathrm{pay}}\in\{-1,1,3,5\}\).
+
+The partner-action likelihood \(A_k^{\mathrm{act}}\) is defined by type- and stance-conditioned cooperation probabilities. This table operationalizes predictive reliability: both reliably cooperative and reliably hostile partners can be predictable, even though their payoff consequences differ. Payoff enters as an observation modality \(P(o_k^{\mathrm{pay}}\mid s^{\mathrm{own}},s_k^{\mathrm{type}},s_k^{\mathrm{stance}})\), with partner action marginalized through the cooperation likelihood. Thus payoff is deterministic in the environment but represented as a likelihood in the focal agent's generative model. Stance transitions are action-dependent: cooperation tends to build trust, defection tends to damage trust, and recovery from hostility is slower than collapse. Full \(A/B/C/D/E\) matrices, cooperation probabilities, stance-transition matrices, priors, and payoff construction are provided in Appendix~\ref{app:pomdp}.
 
 \subsection{Partner-local affective precision}
 
-Hesp et al.\ \cite{Hesp2021DeeplyFeltAffect} treat the policy precision parameter $\gamma$ as an inferred quantity rather than a fixed hyperparameter. The agent maintains a higher-order belief $\beta$ over its expected action precision, representing subjective model fitness---how well the generative model is supporting confident action. An affective charge signal $\phi$ drives updates to $\beta$: it rises when the model performs better than a prior baseline and falls when it performs worse, making it a derivative of model fitness that responds to changes in predictive performance rather than to absolute reward level.
+Hesp et al.\ \cite{Hesp2021DeeplyFeltAffect} treat policy precision as an inferred quantity rather than a fixed hyperparameter. The agent maintains a higher-order belief $\beta$ over inverse policy precision, representing uncertainty about subjective model fitness: how reliably the generative model is supporting confident action. An affective charge signal $\phi$ drives updates to $\beta$, shifting the agent toward higher confidence when the model performs better than a prior baseline and toward lower confidence when it performs worse.
 
-We extend this to the per-partner case. After interacting with partner $k$, the agent computes surprisal from the predicted probability of the observed partner response:
+We extend this to the per-partner case by giving each partner its own $\beta_k$ estimate, updated from that partner's behavioral evidence alone. After interacting with partner $k$, the agent computes surprisal from the predicted probability of the observed partner response:
 \begin{equation}
-\epsilon_k =
--\log P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \;\middle|\; q(s_k^{\text{type}}, s_k^{\text{disp}})\right).
+\epsilon_k = -\log P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \;\middle|\; q(s_k^{\text{type}}, s_k^{\text{stance}})\right).
 \label{eq:epsilon}
 \end{equation}
-This is computed from partner \emph{action} rather than payoff because action is the most direct test of type-by-disposition model fit: a reliably defecting partner produces no action surprise even though the payoff is poor. We set the neutral fitness baseline at $\sigma_0^2 = (-\log 0.5)^2$, so a fifty-fifty binary prediction carries zero affective charge.
-
-Affective charge is:
+This is computed from partner \emph{action} rather than payoff because action is the most direct test of type-by-stance model fit: a reliably defecting partner produces no action surprise even though the payoff is poor. We set the neutral fitness baseline at $\sigma_0^2 = (-\log 0.5)^2$, so a fifty-fifty binary prediction carries zero affective charge. Affective charge is then:
 \begin{equation}
 \phi_k = \alpha\!\left(\sigma_0^2 - \epsilon_k^2\right),
 \label{eq:charge}
 \end{equation}
-where $\sigma_0^2$ is a prior fitness baseline and $\alpha$ is a gain parameter. Positive $\phi_k$ means partner $k$'s model predicted better than the baseline; negative $\phi_k$ means it predicted worse. A categorical posterior $q(\beta_k)$ over discrete levels $\{0.5, 0.67, 1.0, 1.5, 2.0\}$ is updated each round by $\phi_k$. Higher $\beta_k$ represents lower expected model fitness---the agent has accumulated evidence that its model of this partner is unreliable. The partner-specific policy precision is:
+where $\alpha$ is a gain parameter. Positive $\phi_k$ means partner $k$'s model predicted better than the baseline; negative $\phi_k$ means it predicted worse. The categorical posterior \(q(\beta_k)\) is updated by combining a slowly evolving persistence prior with a charge-based pseudo-likelihood that shifts mass toward low \(\beta\) after accurate prediction and toward high \(\beta\) after surprise; the full update rule is given in Appendix~\ref{app:precision_update}.
+
+The agent then uses the posterior mean to set policy precision:
 \begin{equation}
 \gamma_k = \gamma_{\text{base}} \,/\, \mathbb{E}_{q(\beta_k)}[\beta_k].
-\label{eq:gamma}
+\label{eq:gamma_update}
 \end{equation}
-Note the direction: $\beta_k$ represents precision \emph{volatility}, not precision itself. Higher $\beta_k$ means the model has been less reliable, producing a broader, less committed policy distribution. This runs opposite to the intuition that higher $\beta$ equals more confidence --- it is the inverse that drives action sharpening. A well-validated partner model drives $\mathbb{E}[\beta_k]$ toward low values, raising $\gamma_k$ and sharpening policy selection for that partner. An unreliable partner model keeps $\mathbb{E}[\beta_k]$ high, lowering $\gamma_k$ and leaving policy selection diffuse. The mechanism thus translates accumulated evidence about predictive reliability into action confidence---independently for each social relationship.
 
-The $\beta_k$ posterior is maintained as an external auxiliary tracker rather than a proper hidden state in the generative model, which simplifies implementation at the cost of losing the agent's ability to form prior expectations over its own future affective states (discussed in Section~\ref{sec:discussion}).
+Here, $\beta_k$ represents inverse precision or model-fitness uncertainty: higher $\beta_k$ means the model has been less reliable, producing a broader, less committed policy distribution; it is the inverse relationship that drives action sharpening. The mechanism thus translates accumulated evidence about predictive reliability into action confidence---independently for each social relationship.
 
-\begin{figure}[t]
-\centering
-\small
-\setlength{\fboxsep}{5pt}
-\begin{tabular}{c@{\hspace{0.7em}}c@{\hspace{0.7em}}c}
-\fbox{\begin{minipage}{0.27\linewidth}\centering
-Per-partner beliefs\\
-$q_k(s_k^{\text{type}}, s_k^{\text{disp}})$
-\end{minipage}}
-&
-$\rightarrow$
-&
-\fbox{\begin{minipage}{0.27\linewidth}\centering
-Prediction error\\
-$\epsilon_k \xrightarrow{\phi_k} q(\beta_k)$
-\end{minipage}}
-\\[0.8em]
-& $\searrow$ & $\downarrow$ \\
-&
-\fbox{\begin{minipage}{0.27\linewidth}\centering
-Action confidence\\
-$\gamma_k = \gamma_{\text{base}} / \mathbb{E}[\beta_k]$
-\end{minipage}}
-& $\rightarrow$ \quad action toward $k$
-\end{tabular}
-\caption{Partner-local affective precision. Each partner has an independent belief state and precision estimate. Prediction error on partner action updates $\beta_k$, which sets how sharply the agent commits to policies involving that partner.}
-\label{fig:model}
-\end{figure}
+The $\beta_k$ posterior is maintained as an external auxiliary tracker rather than a proper hidden state in the generative model (discussed in Section~\ref{sec:discussion}).
 
-\paragraph{Tracked-only condition.}
-To establish that any behavioral effect of the signal runs specifically through action confidence---rather than through indirect effects on belief quality---we include a tracked-only variant. This variant retains the $\beta_k$ update in full but fixes $\gamma_k = \gamma_{\text{base}}$ for all partners at all times, severing the link from the precision estimate to the softmax temperature. The $\beta_k$ posterior evolves normally and is available for analysis, but it never changes how policies are selected. If tracked-only behavior matches the no-affect baseline while full precision modulation differs from both, the behavioral effect runs through the $\gamma_k$ pathway. If tracked-only matches full precision modulation, the effect is mediated by belief quality, not action sharpening.
+\paragraph{Cross-partner policy selection.}
+In partner-choice regimes, each candidate policy branch inherits the precision of the partner it targets. Precision is applied to centered branch logits so that \(\gamma_k\) sharpens or flattens policies within a partner branch without changing that branch's mean score in cross-partner comparison. Details are provided in Appendix~\ref{app:precision_update}.
+
+\paragraph{Partner implementation.}
+Reported experiments use one focal active-inference agent with per-partner generative models. Partners are parameterized environment-side policies, not reciprocal active-inference agents: they maintain latent type and stance, sample actions from type-by-stance cooperation probabilities, and undergo action-dependent stance transitions, but they do not run variational inference or maintain their own affective precision estimates. This isolates the focal agent's precision-tracking mechanism before adding reciprocal belief and policy updating on the partner side. Full implementation details are provided in Appendix~\ref{app:pomdp}.
 
 \paragraph{Simulation scale.}
-Diagnostic sweeps use small seed counts to identify mechanisms and failure modes; they are not treated as the final evidence standard for central behavioural claims. The phenotype experiments use 20 seeds per condition over 200-round episodes, which is the planned scale for descriptive individual-difference profiles and manuscript figures. Central behavioural confirmations use 30 seeds per condition. The abrupt-betrayal confirmation uses a 120-round episode because the switch is scheduled explicitly and the primary readouts are post-switch reallocation, return latency, conditional payoff, entropy, and joint accuracy. Open-regime, lesion, social-allocation, and mixed-volatility profiles use 200 rounds so that learning curves, partner allocation, and beta trajectories can stabilise over multiple interaction phases.
+Unless otherwise stated, simulations use 200-round episodes. Phenotype and mixed-volatility profiles use 20 seeds per condition, while central behavioral confirmations use 30 seeds per condition. The abrupt-betrayal condition uses 120 rounds because the switch is scheduled explicitly and the main readouts are post-switch behavior. Full condition definitions, schedules, metrics, and seed counts are provided in Appendix~\ref{app:protocols}.
+
+\paragraph{Code availability.}
+All simulations, analysis scripts, and experiment configurations are available at \url{https://github.com/har5h1l/affect_aif}.
