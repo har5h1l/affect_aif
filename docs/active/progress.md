@@ -54,7 +54,7 @@ stages:
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for the recovery session.
 
-Current recovery status on June 4 21:10 PDT:
+Current recovery status on June 5 21:12 PDT:
 
 - Verification gate passed in the recovery log:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
@@ -87,9 +87,12 @@ Current recovery status on June 4 21:10 PDT:
   either revise/soften the claim around what Exp D actually supports or add a
   clearer time-resolved discrimination/tradeoff readout from existing raw
   trajectories.
-- Exp C started at 14:16 PDT and is now the active recovery stage. A
-  structural-only check at 21:10 PDT found 107 complete seed groups out of the
-  planned 120 groups; `no_affect` is the remaining in-progress variant. Final
+- Exp C started at 14:16 PDT and was interrupted by the June 5 server reboot
+  before finality. The latest pre-reboot structural check at 21:10 PDT found
+  107 complete seed groups out of the planned 120 groups; immediately after the
+  reboot audit, the checkpoint had 109/120 complete groups. It was resumed in
+  tmux/Mango as `affect_aif_exp_c_resume_20260605` against the same
+  `results/exp_c/` output directory. Final
   `results/exp_c/results.csv`, `results/exp_c/metrics.csv`, generic analysis,
   and `docs/paper/manuscript/figures/fig_forgiveness.pdf` do not exist yet.
   Continue monitor-only unless the process exits, loses CPU without I/O, or
@@ -106,6 +109,11 @@ Current recovery status on June 4 21:10 PDT:
   check at 21:10 PDT found 64 complete groups out of 120 (`affect` and
   `no_affect` complete, `lesioned` in progress). Do not interpret outputs until
   final `results.csv` plus configured analysis artifacts exist.
+- The June 5 server reboot also killed the original H5 tmux session before
+  finality. The post-reboot checkpoint had 67/120 complete groups. H5 was
+  resumed in tmux/Mango as `affect_aif_h5_confirm_resume_20260605`, using the
+  same batch directory `results/log_surprisal_h5_confirm_postfix_20260604/` so
+  `run.py` can resume from `results_partial.csv`.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
@@ -123,8 +131,8 @@ Manuscript-critical evidence audit at 14:47 PDT:
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_mixed_volatility.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Running as active recovery stage; partial checkpoint has 107/120 complete seed groups as of June 4 21:10 PDT | Pending; critical for forgiveness/trust-repair readout |
-| H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Running in `affect_aif_h5_confirm_20260604`; partial checkpoint has 64/120 complete groups as of June 4 21:10 PDT | Top core-mechanism confirmation |
+| Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Resumed as `affect_aif_exp_c_resume_20260605` after reboot; pre-resume checkpoint had 109/120 complete groups | Pending; critical for forgiveness/trust-repair readout |
+| H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Resumed as `affect_aif_h5_confirm_resume_20260605` after reboot; pre-resume checkpoint had 67/120 complete groups | Top core-mechanism confirmation |
 | H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Not yet queued in recovery | Required before using H1 as publication-grade model-fitness evidence |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
 
@@ -155,11 +163,12 @@ phenotype handoff (`b236bf8`). The previous `3a36756`, `942c595`, `c5bc373`,
 and `f86ede4` notes are stale as current-state references.
 
 Keep long experiments on `server`. The original Exp A-D tmux/Mango process
-`affect_aif_exp_abcd_20260529` is superseded by
-`affect_aif_exp_recovery_20260603`; use the recovery log and finality gate
-above as the source of truth. Do not interpret Exp A/B partial outputs as
-manuscript evidence until recovery completes and the user approves result
-interpretation updates.
+`affect_aif_exp_abcd_20260529` was superseded by
+`affect_aif_exp_recovery_20260603`, which was then interrupted by the June 5
+server reboot. Use the resumed Exp C process/log plus finality gate above as
+the source of truth. Do not interpret Exp A/B/C/D outputs as manuscript
+evidence until recovery completes and the user approves result interpretation
+updates.
 
 The full local pytest gate is clean as of June 2 01:00 PDT. The previous
 stall was diagnosed as oversized test fixtures that imported the full H5
@@ -174,14 +183,17 @@ remain as provenance, but current planning pages now treat H1 as
 smoke-supported and awaiting confirmation or controlled diagnostic escalation
 before manuscript use.
 
-Mango reports `affect_aif_exp_recovery_20260603` as running and monitor-only.
-Continue monitor-only and do not interpret Exp A/B outputs until Exp A-D
-complete.
+The pre-reboot Mango registrations `affect_aif_exp_recovery_20260603` and
+`affect_aif_h5_confirm_20260604` are stale/missing after the June 5 reboot.
+Use `affect_aif_exp_c_resume_20260605` and
+`affect_aif_h5_confirm_resume_20260605` as the live process registrations.
+Continue monitor-only and do not interpret Exp A/B/C/D or H5 outputs until
+their finality gates are met.
 
-June 4 monitor checks: server-side Mango still reports
-`affect_aif_exp_recovery_20260603` as running and monitor-only. The old
-`affect_aif_exp_abcd_20260529` Mango registration is obsolete and still points
-to a missing tmux session; use the recovery process and log as source of truth.
+June 5 monitor checks: the old `affect_aif_exp_abcd_20260529`,
+`affect_aif_exp_recovery_20260603`, and `affect_aif_h5_confirm_20260604`
+registrations are obsolete/missing after reboot. Use the resumed Exp C and H5
+processes plus their logs/checkpoints as source of truth.
 
 Status classification from this monitor check:
 
@@ -197,8 +209,8 @@ Status classification from this monitor check:
 - Exp D: structurally complete and operationally analyzed, but not interpreted.
 - Exp C: in-progress and structurally sane so far; not final, not obsolete,
   and not ready for analysis or interpretation.
-- H5 confirmation: running in parallel as
-  `affect_aif_h5_confirm_20260604` after the user-provided active goal
+- H5 confirmation: resumed in parallel as
+  `affect_aif_h5_confirm_resume_20260605` after the user-provided active goal
   explicitly prioritized safe confirmation parallelization. H1 remains unqueued;
   do not launch it while the host is saturated by Exp C plus H5.
 

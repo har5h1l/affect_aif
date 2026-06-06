@@ -60,19 +60,25 @@
 
 ## Technical Follow-Ups
 
-- Monitor `affect_aif_exp_recovery_20260603`. It runs verification first, then
+- Monitor `affect_aif_exp_c_resume_20260605`; it resumes the Exp C tail after
+  the June 5 server reboot. The original recovery ran verification first, then
   Exp A analyze-only, Exp B resume, Exp D, and Exp C, with generic analysis
   after each experiment stage. Treat `RECOVERY_DONE` in
   `results/exp_abcd_recovery_20260603_logs/run.log` plus final
   `results.csv`/`metrics.csv`/`manifest.json`/`README.md` files for Exp A-D as
-  the recovery finality gate. As of June 4 21:10 PDT, Exp D is operationally
-  complete and Exp C is running with 107/120 complete
-  `forgiveness/results_partial.csv` seed groups.
+  the recovery finality gate. The original recovery tmux session was killed by
+  the June 5 server reboot before Exp C finality. Exp C was resumed as
+  `affect_aif_exp_c_resume_20260605`; the pre-resume checkpoint had 109/120
+  complete `forgiveness/results_partial.csv` seed groups.
 - H5 confirmation is running in parallel as `affect_aif_h5_confirm_20260604`
   after a fresh June 4 verification gate passed at `78e42ae`. Monitor the
   batch at `results/log_surprisal_h5_confirm_postfix_20260604/`; as of June 4
   21:10 PDT it has 64/120 complete checkpoint groups. Do not interpret outputs
   until finality and configured analysis artifacts exist.
+  The original H5 tmux session was killed by the June 5 server reboot before
+  finality; H5 was resumed as `affect_aif_h5_confirm_resume_20260605` against
+  the same batch directory. The pre-resume checkpoint had 67/120 complete
+  groups.
 - H1 needs confirmation with the corrected active-aligned and partial
   model-fitness diagnostics before manuscript use. Do not promote the corrected
   smoke read directly to a publication claim. The new controlled H1 configs are
