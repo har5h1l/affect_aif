@@ -1,90 +1,48 @@
-# Future Work And Two-Week Follow-Up Menu
+# Future Work
 
-## Highest-Value Follow-Up Before Deadline
+## Reviewer-Driven Follow-Ups
 
-### 1. Global-Beta Ablation
+### H1 Diagnostic Escalation
 
-Question: is partner-specific affective precision necessary, or would one
-global beta summary explain the same behavior?
+The June 6 H1 confirmation reached structural finality and is interpreted in
+the manuscript as a model-fitness dissociation rather than a reward advantage.
+If reviewers ask for a stronger reward-control decomposition, use the bounded
+diagnostic ladder: balanced-exposure graded reliability spine, reward-matched
+graded reliability spine, then strict reward-neutral diagnostic.
 
-Why it matters: the manuscript's architectural novelty is partner-local affect.
-Right now, partner specificity is a premise of the model and indirectly useful
-in H4, but it has not been directly compared to a global-affect control.
+### Shared-Beta / Locality Ablation
 
-Implemented starting point:
+Question: is partner-specific affective precision behaviorally necessary, or
+does a shared beta tracker explain the same behavior?
 
-- `affect = "global_beta"` now shares one beta tracker across partners while
-  preserving partner-local POMDP beliefs.
-- `configs/trust/hypotheses/h3_locality/global_beta_smoke.toml`
-  provides a first locality/interference smoke run.
-- The next queued global-beta discovery batch extends this to model-fitness,
-  deployment, partner-choice, betrayal, and lesion-family probes.
-- Optional H5 abrupt/gradual stress check if time allows.
-- Primary readout: partner choice, entropy, payoff, and precision-reward versus
-  precision-surprise association.
+Current stance: local beta gives the cleaner partner-specific reliability
+signal in the H1 confirmation, but universal behavioral necessity is not
+established. Exp D supplies a partial mixed-volatility boundary condition; a
+dedicated behavioral shared-beta confirmation is optional and should be
+motivated by reviewer pressure.
 
-Risk: the first global-beta run is smoke-scale only; do not promote it to manuscript
-evidence until the design and diagnostics are reviewed.
+### Reciprocal Social Active Inference
 
-### 2. Focused Shock-Shape Gradient
+Reported experiments use one focal active-inference agent against scripted
+parameterized partners. A future extension should replace partners with full
+active-inference agents that update their own beliefs, confidence, and policies.
 
-Question: is H5 failure driven by temporal abruptness rather than generic
-overconfidence?
+### Human Behavioral Validation
 
-Why it matters: the H5 precision-sensitivity follow-up suggests shock shape is
-the right axis. This would strengthen the boundary-condition story without
-another broad sweep.
+Fit alpha, prior, and coupling parameters to iterated trust-game behavior with
+individual-difference measures. Current phenotype profiles are computational
+analogues only.
 
-Suggested design:
+## Longer-Term Model Extensions
 
-- Hold default affect fixed.
-- Vary scheduled stance-switch abruptness or number/timing of pre-switch
-  confirmations.
-- Use 20-30 seeds per variant depending on manuscript role: 20 seeds is enough
-  for a supplemental shock-shape figure, while 30 seeds is reserved for a main
-  behavioural confirmation.
-- Report payoff, entropy, reencounters, payoff-on-return, wrong-type rate, and
-  overconfident-wrong rate.
+- Variational beta as a proper auxiliary hidden state.
+- Explicit theory-of-mind factors combined with metacognitive precision.
+- Noisy observations and richer social ecologies.
+- Correlated partner histories and group-level reliability.
+- Clinical modeling only after stronger empirical validation.
 
-Risk: new configs should be easy, but interpretation must be approved before
-updating result docs.
+## Not Current Priorities
 
-### 3. Figure-Quality Composite Script
-
-Question: can the current evidence be made visually clear enough for the paper?
-
-Why it matters: this may help more than another experiment. Current figures are
-useful diagnostics but not final manuscript panels.
-
-Suggested design:
-
-- One script under `scripts/analysis/` or `docs/paper/manuscript/` that reads
-  copied source tables and emits 4-5 clean composite PNG/PDF figures.
-- Use existing analysis outputs only; do not recompute experiment results.
-- Panels: H2 deployment, H1 model fitness, H5 boundary, H5 shock shape, H6
-  supplement.
-
-Risk: low scientific risk, high manuscript value.
-
-## Longer-Term Work
-
-Aligned with manuscript Discussion future directions:
-
-- **Human behavioural validation:** fit $\alpha$, prior, and coupling from
-  iterated trust games with individual-difference measures.
-- **Global-$\beta$ ablation:** test whether partner-local precision is necessary
-  (mixed-volatility regime in §3.6).
-- **Reciprocal multi-agent AIF:** replace scripted partners with full AIF agents
-  (`docs/theory/pomdp_spec.md` §13).
-- **Explicit ToM inference:** combine metacognitive precision with mentalistic
-  partner-state models (Pitliya; Ruiz-Serra).
-- Variational beta as proper auxiliary hidden state.
-- Richer social environments: noisy observations, correlated partners.
-- Clinical modeling only after stronger validation; current variants are
-  computational perturbations, not diagnoses.
-
-## Current Recommendation
-
-For a two-week deadline, prioritize reviewing the global-beta discovery batch and
-deciding whether global beta needs a manuscript paragraph. Avoid another broad
-hyperparameter sweep until these structural probes are interpreted.
+- Broad hyperparameter sweeps.
+- Reviving historical stress-shape figures from bounded-error outputs.
+- Treating payoff as the primary success metric for every hypothesis.

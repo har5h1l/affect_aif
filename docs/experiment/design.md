@@ -15,7 +15,7 @@ described in `docs/theory/pomdp_spec.md` and `docs/design/implementation.md`.
 - The default affective path uses the discrete HESP beta filter (`DiscreteBetaState`, `initial_beta=1.0`, beta levels `[0.5, 0.67, 1.0, 1.5, 2.0]`).
 - Policy inference is performed by official `pymdp.Agent` instances built from `tasks.trust.pomdp`; affect modulates partner-local policy precision as `gamma_k = gamma_base / E[beta_k]`.
 - The primary maintained experiment surface is now TOML specs under `configs/trust/hypotheses/`.
-- Planning horizon, affect mode, lesions, no-epistemic variants, and clinical-like perturbations are explicit `[[variants]]` rather than numeric conditions or presets.
+- Planning horizon, affect mode, lesions, no-epistemic variants, and phenotype-inspired perturbations are explicit `[[variants]]` rather than numeric conditions or presets.
 - Scheduled betrayal should be expressed via `scheduled_stance_switches`, not `scheduled_type_switches`, unless the experiment is explicitly about exogenous type volatility.
 
 ### Future-work experiment surfaces
@@ -50,7 +50,7 @@ The current card order is:
    and return?
 6. **H5 Timescale / Volatility**: when does social change outrun confidence
    calibration?
-7. **H6 Perturbation Phenotypes**: do clinical-like parameter changes first
+7. **H6 Perturbation Phenotypes**: do phenotype-inspired parameter changes first
    separate in precision dynamics, then behavior?
 8. **H7 Signal Source**: does partner-action surprisal remain cleaner than
    exploratory joint action-plus-payoff surprisal?
@@ -397,12 +397,13 @@ recovery/reallocation readouts and misdeployment readouts.
 
 ### H6: Perturbation Phenotypes
 
-**Prediction:** Clinical-like variants should separate first in beta/precision
-dynamics and only then in behavior, and mainly in open policy regimes.
+**Prediction:** Phenotype-inspired perturbation variants should separate first
+in beta/precision dynamics and only then in behavior, and mainly in open policy
+regimes.
 
-**Expected behavior:** Alexithymia-like settings blunt precision updates;
-borderline-like settings create fast precision swings; depression-like settings
-start low-confidence; slow-updating settings lag after real changes.
+**Expected behavior:** Low-gain settings blunt precision updates; high-gain
+settings create fast precision swings; cautious-prior settings start
+low-confidence; slow-updating settings lag after real changes.
 
 **Primary metrics:**
 - precision mean, variance, autocorrelation, and reaction time
@@ -508,7 +509,7 @@ alone.
   diagnostic, not the timescale claim by itself
 - H6: verify beta/precision range, volatility, autocorrelation, action churn,
   partner-selection entropy, and recovery timing before interpreting payoff or
-  clinical-like labels
+  phenotype-inspired labels
 
 **Supplementary analyses**:
 - cumulative payoff ANOVA and pairwise tests remain useful summaries, but they
@@ -558,7 +559,7 @@ behavior cards and the provenance recorded in `docs/results/`.
 |---|---|---|---|
 | Build 1 | Implement basic multi-partner trust-task POMDP | 2 weeks | Done |
 | Build 2 | Implement affective state and partner-local precision modulation | 1-2 weeks | Done |
-| Build 3 | Implement lesion, no-affect, and clinical-like perturbation variants | 1 week | Done |
+| Build 3 | Implement lesion, no-affect, and phenotype-inspired perturbation variants | 1 week | Done |
 | Build 4 | Cut over to official `inferactively-pymdp==1.0.0` and factorized controls | 1 week | Done |
 | Build 5 | Run current H0-H8 queue and targeted confirmation runs | 1 week | Historical pre-log-surprisal queue done; post-fix confirmations pending |
 | Build 6 | Analysis and result documentation | 1 week | Current active-document surface maintained |
@@ -578,12 +579,12 @@ Current scorecard:
 | Card | Current reading | Status |
 |---|---|---|
 | H0 Openness Gate | Affect has little room in shallow binary settings, but lowers entropy and can improve payoff in graded choice. Open policy space is necessary but not sufficient; graded betrayal shows lower entropy with worse payoff. | Supported with caveat |
-| H1 Model Fitness | Corrected active-encounter and partial-correlation smoke readouts show surprise-over-reward dominance; confirmation or controlled diagnostic escalation is still required before manuscript use. | Smoke-supported; confirm |
+| H1 Model Fitness | The 30-seed confirmation shows surprise-over-reward dominance after active-encounter controls; payoff favors no-affect, so this is model-fitness evidence rather than reward evidence. | Confirmed mechanism |
 | H2 Deployment | In the open graded-choice regime, affect and lesion/no-affect have similar belief accuracy while affect changes entropy and payoff. | Supported |
 | H3 Locality / Global Precision | Discovery runs show local beta preserves a cleaner model-fitness signal than global beta, but global beta can have higher aggregate payoff in small probes. | Open decomposition |
 | H4 Social Allocation | Affect changes partner-selection distribution and policy entropy while payoff is essentially flat. | Supported behaviorally |
 | H5 Timescale / Volatility | Confirmation and sensitivity runs show abrupt shocks can produce precision-driven misdeployment, while gradual shocks are less harmful. | Boundary condition confirmed |
-| H6 Perturbation Phenotypes | Clinical-like variants separate in beta range, entropy, partner selection, and payoff ordering, but five-seed payoff tests are underpowered. | Supported for dynamics |
+| H6 Perturbation Phenotypes | Phenotype-inspired variants separate in beta range, entropy, partner selection, and payoff ordering, but five-seed payoff tests are underpowered. | Supported for dynamics |
 | H7 Signal Source | Partner-action surprisal is canonical; joint action-plus-payoff surprise is future work. | Exploratory |
 | H8 Observation Noise / Robustness | Observation-noise configs are possible but not part of current manuscript evidence. | Exploratory |
 
@@ -595,10 +596,9 @@ Interpretation guardrails:
 - Treat H3 as a stress boundary-condition result, not as a clean affective
   recovery win.
 
-The immediate run queue is governed by `docs/active/progress.md`: Exp A-D are
-currently running to fill the phenotype section, and H5/H1 confirmation follows
-only after those runs complete or the user explicitly approves a different
-sequence.
+The immediate run queue is governed by `docs/active/progress.md`: Exp A-D,
+H5, and H1 have reached structural finality for the current manuscript. New
+runs should be reviewer-driven diagnostics or explicitly approved extensions.
 
 ---
 
@@ -649,7 +649,7 @@ H0-H8 failure condition.
 
 ### 8.1 From Simulated Affect to Fitted Behavior (Phase 8: Human Data)
 
-Fit the model to human behavioral data from multi-partner trust games. Estimate `beta_persistence` (affective timescale), `alpha_charge` (prediction-error gain), `initial_beta` (precision prior), and the policy-precision channel as individual-difference parameters. Test whether estimated affective parameters correlate with self-reported emotional awareness, interoceptive accuracy, or alexithymia scores.
+Fit the model to human behavioral data from multi-partner trust games. Estimate `beta_persistence` (affective timescale), `alpha_charge` (prediction-error gain), `initial_beta` (precision prior), and the policy-precision channel as individual-difference parameters. Test whether estimated affective parameters correlate with self-reported emotional awareness, interoceptive accuracy, or related individual-difference measures.
 
 ### 8.2 Bridge to Structure Learning (Phase 7: Richer Tasks)
 
@@ -666,9 +666,9 @@ Initialize agents with no prior knowledge and simulate the full developmental tr
 ### 8.4 Clinical Parameter Sensitivity Analysis (Phase 5)
 
 Vary model parameters to probe clinically relevant behavioral signatures:
-- **Alexithymia** ($\alpha \to 0$): attenuated affective charge, near-flat beta trajectories
-- **Borderline patterns** (high $\alpha$ + low beta persistence): intense, volatile affective states
-- **Depression** (high initial beta): chronically low policy precision, reduced engagement
+- **Low gain** ($\alpha \to 0$): attenuated affective charge, near-flat beta trajectories
+- **High gain / low persistence**: intense, volatile affective states
+- **Cautious prior** (high initial beta): chronically low policy precision, reduced engagement
 - **Anxiety**: increased epistemic drive weighting when $\beta_k$ is low (uncertainty triggers excessive information-seeking)
 
 **Critical analysis warning**: These are sensitivity analyses, not a unified clinical framework. The parameter-to-phenotype mappings are illustrative and should not be interpreted as validated clinical models. The configs exist for H6 Perturbation Phenotypes, but moving from sensitivity analysis to clinical modeling requires: (a) fitting to human behavioral data, (b) formal model comparison showing the affective model outperforms simpler alternatives on clinical populations, and (c) demonstrating that the parameter variations are identifiable from behavioral data alone rather than being degenerate with other model parameters.

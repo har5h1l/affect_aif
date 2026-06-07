@@ -65,7 +65,7 @@ Consolidate the public narrative around:
 - openness as the gate for observable policy effects
 - deployment dissociation as the strongest behavioral evidence
 - H5 as a timescale boundary condition, not an affect-wins-after-betrayal claim
-- clinical-like variants as perturbation dynamics, not diagnoses
+- phenotype-inspired variants as perturbation dynamics, not diagnoses
 
 ### 2. Documentation Hygiene
 

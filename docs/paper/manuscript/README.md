@@ -26,44 +26,45 @@ into a new project scaffold.
 ## Evidence Contract
 
 Use `docs/results/current.md`, `docs/paper/manuscript/results_digest.md`, and
-this packet as the current diagnostic evidence surface. The completed post-fix
-log-surprisal smoke is current smoke evidence, but not publication-grade
-confirmation. Do not promote old bounded-error numbers or pre-fix smoke numbers
-as current manuscript evidence.
+this packet as the current diagnostic evidence surface. H5 and Exp A--D now use
+the reviewed source tables in this packet; the post-fix three-seed smoke remains
+diagnostic provenance only. Do not promote old bounded-error numbers or pre-fix
+smoke numbers as current manuscript evidence.
 Do not write a broad "affect improves reward" claim. The supported thesis matches
 the current manuscript abstract and Discussion:
 
 > Partner-local affective precision tracks predictability rather than partner
 > value, modulates action confidence (metacognitive deployment), reorganises
-> engagement under choice, and under abrupt change can improve payoff via
-> portfolio reallocation while joint accuracy may fall—a temporal dependency,
-> not a generic reward boost or inference gain.
+> engagement under choice, and under abrupt change sharpens policy commitment
+> with modest behavioral benefit. The mechanism is a temporal dependency, not a
+> generic reward boost or inference gain.
 
 Current manuscript evidence uses mixed seed scales as stated in Methods:
 
 - **20 seeds:** phenotype / Exp A–D descriptive figures (§3.5–3.6).
-- **30 seeds:** central behavioural confirmations (stated in Methods; some
-  headline numbers still carry TODO comments in `.tex` pending final runs).
-- **3-seed smoke:** `results/log_surprisal_spine_smoke_postfix_20260528/` remains
-  diagnostic provenance for early H-card readouts; prefer manuscript-embedded
-  numbers where they supersede smoke at higher seed count.
+- **30 seeds:** central behavioural confirmations, including H1 model fitness
+  and H5 abrupt betrayal.
+- **3-seed smoke:** `results/log_surprisal_spine_smoke_postfix_20260528/`
+  remains diagnostic provenance for early H-card readouts; prefer
+  manuscript-embedded numbers where they supersede smoke at higher seed count.
 
 Incoming `.tex` edits (not yet required in this packet): explicit partner-
 implementation paragraph and fuller POMDP Methods subsection.
 
-Publication-ready tightening still requires replacing TODO betrayal/locality
-numbers with final 30-seed confirmation values if they differ.
+Publication-ready tightening no longer has a numeric experiment placeholder;
+remaining work is manuscript polish and any reviewer-driven follow-up decision.
 
 ## Writing Guardrails
 
 - Every paragraph should have one claim tied to a result, method detail, source,
   or explicit assumption.
 - Report seed counts with every headline result.
-- State that H6 variants are clinical-like perturbations, not clinical models.
+- State that H6 variants are phenotype-inspired computational perturbations,
+  not clinical models.
 - State that beta is an external HESP-style precision tracker, not a POMDP
   hidden state.
 - State that reported experiments use a focal active-inference agent against
   scripted parameterized partner policies (Discussion limitation).
-- Frame betrayal as temporal dependency (payoff gain with lower accuracy when
-  reallocation succeeds), not as generic recovery or pure misdeployment.
+- Frame betrayal as temporal dependency in deployment: lower entropy and higher
+  joint accuracy at confirmation scale, with uncertain payoff size.
 - Do not add unverified citations, DOIs, venues, quotes, or BibTeX entries.

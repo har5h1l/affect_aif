@@ -18,7 +18,7 @@ All reported experiments use one focal active-inference agent with four partners
 
 \textbf{Abrupt betrayal.} A partner-choice graded environment with scheduled stance betrayal on a previously cooperative partner tests post-switch reallocation, entropy, payoff, and joint accuracy (Section~\ref{sec:betrayal}).
 
-\textbf{Precision-dynamics perturbations.} Phenotype-inspired computational variants (alexithymia-like, borderline-like, depression-like) perturb $\beta_k$ amplitude and stability in the graded decision regime without claiming clinical validity (Appendix~\ref{app:extended_results}).
+\textbf{Precision-dynamics perturbations.} Phenotype-inspired computational variants (low-gain, high-gain, and cautious-prior profiles) perturb $\beta_k$ amplitude and stability in the graded decision regime without claiming clinical validity (Appendix~\ref{app:extended_results}).
 
 \textbf{Phenotype program (Exp A--D).} Parameter sweeps and factorial designs vary precision gain $\alpha$ and prior over model fitness to define computational trust-calibration profiles in open graded, betrayal, partner-choice, forgiveness, and mixed-volatility environments (Section~\ref{sec:phenotypes}).
 
@@ -43,7 +43,7 @@ H1 model fitness & graded / reliability probes & 200 & 30 (confirm.) / 3 (explor
 H3 focal-switch locality & partner choice, single switch & 100 & 30 (confirm.) / 3 (explor. diag.) \\
 H4 partner choice & partner choice & 200 & 30 (confirm.) / 3 (explor. diag.) \\
 H5 abrupt betrayal & partner choice, scheduled betrayal & 120 & 30 (confirm.) / 3 (explor. diag.) \\
-H6 clinical dynamics & graded perturbations & 200 & 30 (confirm.) / 3 (explor. diag.) \\
+H6 perturbation dynamics & graded perturbations & 200 & 30 (confirm.) / 3 (explor. diag.) \\
 Exp A--D phenotypes & sweeps / factorial / forgiveness / mixed volatility & 200 & 20 \\
 \bottomrule
 \end{tabular}
@@ -99,14 +99,11 @@ Partner-choice readouts quantify how precision reshapes \emph{who} the agent eng
 
 \textbf{Betrayal timing metrics.} Recovery time and related latency readouts measure rounds after a switch until selection or payoff returns toward baseline thresholds (phenotype Exp A/B and betrayal analyses).
 
-\subsection{Placeholder results awaiting final runs}
+\subsection{Confirmation status}
 
-The following readouts remain pending confirmation-scale values. Main-text placeholders and TODO comments are retained in Section~\ref{sec:results}; this list records what still awaits final runs without filling numbers.
+The June 6 H1 confirmation reached structural finality and supplies the
+main-text model-fitness values in Section~\ref{sec:results}.
 
 \begin{itemize}
-\item \textbf{Shared-$\beta$ ablation} (Section~\ref{sec:shared_beta}): partner-local versus shared precision on payoff, entropy, reliability-specificity, partner allocation, and false-positive suppression in mixed-volatility or focal-switch regimes.
-\item \textbf{Partner-choice allocation rates} (Section~\ref{sec:partner_choice}): selection share by partner under affect and no-affect, and whether aggregate payoff remains flat at confirmation scale.
-\item \textbf{Forgiveness / trust-repair experiment} (Section~\ref{sec:phenotypes}; Appendix~\ref{app:extended_results}): reengagement latency, post-return selection, payoff recovery, and whether high-$\alpha$ controls reengagement speed while cautious priors limit the trust-repair ceiling.
-\item \textbf{H1 locality-probe confirmation}: replace focal-switch surprise--payoff correlation and aggregate payoff values with final 30-seed confirmation if they differ from current manuscript values.
-\item \textbf{H5 betrayal confirmation}: replace abrupt-betrayal payoff, entropy, and joint-accuracy values with final 30-seed H5 confirmation values when available.
+\item \textbf{H1 model-fitness confirmation}: the final 30-seed readout uses active-encounter partial correlations to compare precision--surprise against precision--payoff associations, with shared $\beta$ included as the relational-specificity ablation.
 \end{itemize}

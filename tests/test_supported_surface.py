@@ -219,8 +219,8 @@ def test_core_hypothesis_experiments_exist():
         "configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml",
         "configs/trust/hypotheses/h4_social_allocation/partner_choice.toml",
         "configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml",
-        "configs/trust/hypotheses/h6_perturbation/clinical_betrayal.toml",
-        "configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml",
+        "configs/trust/hypotheses/h6_perturbation/perturbation_betrayal.toml",
+        "configs/trust/hypotheses/h6_perturbation/perturbation_dynamics.toml",
         "configs/trust/hypotheses/h6_perturbation/affect_sensitivity.toml",
         "configs/trust/smoke/smoke.toml",
     ]

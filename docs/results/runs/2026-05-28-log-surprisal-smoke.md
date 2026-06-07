@@ -32,7 +32,7 @@ MPLCONFIGDIR=/private/tmp/affect_aif_matplotlib .venv/bin/python scripts/experim
   --config configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml \
   --config configs/trust/hypotheses/h4_social_allocation/partner_choice.toml \
   --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml \
-  --config configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml \
+  --config configs/trust/hypotheses/h6_perturbation/perturbation_dynamics.toml \
   --output-dir results \
   --batch-name log_surprisal_spine_smoke_20260527 \
   --workers 1 \

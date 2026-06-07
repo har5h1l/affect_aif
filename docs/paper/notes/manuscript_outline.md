@@ -63,11 +63,12 @@ The manuscript organises results around five claims, not the H-card numbering:
    dissociation; metacognitive not epistemic; open graded entropy/payoff numbers.
 3. **Partner engagement reorganises around reliability** (`sec:partner_choice`).
    Entropy and selection shifts; flat aggregate payoff at current scale.
-4. **Abrupt betrayal reveals temporal structure** (`sec:betrayal`). Payoff gain
-   with lower joint accuracy; portfolio reallocation, not superior type inference.
+4. **Abrupt betrayal reveals temporal structure** (`sec:betrayal`). Lower policy
+   entropy and higher joint accuracy at confirmation scale, with a small and
+   uncertain payoff advantage; temporal dependency, not superior reward seeking.
 5. **Precision dynamics as individual differences** (`sec:phenotypes`). Clinical-style
-   perturbations; $\alpha$ sweep; phenotype quadrants; mixed-volatility
-   discrimination. Exp C (forgiveness) still TODO in source.
+   perturbations; $\alpha$ sweep; phenotype quadrants; forgiveness; mixed-volatility
+   discrimination. Exp C separates reengagement from confidence restoration.
 
 ## Discussion (as written)
 
@@ -108,7 +109,8 @@ research.
 
 - Simulation-only; scripted parameterized partners; external beta tracker.
 - Phenotype taxonomy predictive, not validated.
-- Several headline numbers still carry TODOs for 30-seed confirmation runs.
+- H1, H5, and Exp A--D have been interpreted in the current manuscript; no
+  numeric experiment placeholder remains.
 - Do not claim reciprocal multi-agent AIF or clinical diagnosis.
 
 ## Conclusion (packet-level)

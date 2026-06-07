@@ -44,7 +44,7 @@ MPLCONFIGDIR=/private/tmp/affect_aif_matplotlib .venv/bin/python scripts/experim
   --config configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml \
   --config configs/trust/hypotheses/h4_social_allocation/partner_choice.toml \
   --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml \
-  --config configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml \
+  --config configs/trust/hypotheses/h6_perturbation/perturbation_dynamics.toml \
   --output-dir results \
   --batch-name log_surprisal_spine_smoke_postfix_20260528 \
   --workers 1 \
@@ -98,7 +98,7 @@ python scripts/analysis/analyze.py --results results/h3_precision_sensitivity_20
 | Card | Current status | Evidence tier |
 |---|---|---|
 | H0 | Mixed | Post-fix three-seed smoke; active entropy channel, no local-affect payoff win. |
-| H1 | Confirm | Corrected post-fix three-seed smoke preserves the surprise-over-reward model-fitness diagnostic; confirmation still required. |
+| H1 | Confirmed | June 6 30-seed confirmation preserves the surprise-over-reward model-fitness diagnostic after active-encounter controls; payoff favors no-affect, so do not frame as reward gain. |
 | H2 | Deployment active | Post-fix three-seed smoke; lesion/no-affect match, local affect changes entropy but not payoff. |
 | H3 | Decomposition only | Post-fix three-seed smoke; global beta has higher aggregate payoff, local beta remains cleaner as a partner-specific signal. |
 | H4 | Underpowered | Post-fix three-seed smoke; keep supplemental until confirmation. |

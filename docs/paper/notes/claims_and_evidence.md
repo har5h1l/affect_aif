@@ -8,11 +8,11 @@ experiment spine.
 
 | Claim (manuscript framing) | Status | Evidence | How to write it |
 |---|---|---|---|
-| Partner-local precision tracks predictability, not partner value. | In manuscript at locality-probe scale; 30-seed confirm TODO. | §3.1: surprise vs payoff correlations (0.943 vs 0.110 local). | "Designed for model fitness"; cite action surprisal; note global-beta dilution. |
+| Partner-local precision tracks predictability, not partner value. | In manuscript with 30-seed confirmation. | §3.1: active-encounter partials local surprise vs payoff (0.882 vs 0.130); shared beta weaker (0.380 vs 0.049). | "Designed for model fitness"; cite action surprisal; note global-beta dilution and no reward-gain claim. |
 | Behavioural gains arise through action sharpening, not belief quality. | In manuscript (open graded + tracked-only). | §3.2: entropy 7.94 vs 8.80; tracked-only matches no-affect. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
 | Partner engagement reorganises around reliability before payoff separates. | In manuscript at current seed scale. | §3.3: entropy 4.66 vs 4.81; selection shifts; flat payoff. | Allocation reorganisation, not payoff headline. |
-| Abrupt betrayal exposes temporal dependency (payoff gain, accuracy cost). | In manuscript; 30-seed confirm TODO. | §3.4: payoff 1322.3 vs 1225.0; accuracy 0.319 vs 0.425. | Portfolio reallocation story, not "better inference" or pure misdeployment failure. |
-| Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed phenotype scale; Exp C TODO. | §3.5–3.6: perturbations, $\alpha$ sweep, quadrants, mixed volatility. | "Computational analogues"; not clinical categories. |
+| Abrupt betrayal exposes temporal dependency. | In manuscript with 30-seed confirmation. | §3.4: payoff 1185.9 vs 1172.1, CI crosses zero; entropy 8.36 vs 8.74; joint accuracy 0.372 vs 0.266. | Action sharpening with modest behavioral benefit; not generic reward improvement. |
+| Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed phenotype scale; Exp A-D interpreted. | §3.5–3.6: perturbations, $\alpha$ sweep, quadrants, forgiveness, mixed volatility. | "Computational analogues"; not clinical categories. |
 | Policy openness gates visible affect effects. | Underpins §3.2; not a separate subsection. | Graded open-regime readouts. | Openness necessary, not sufficient. |
 | Partner-local beta is behaviorally necessary. | Not established. | Local cleaner signal; global beta can win on payoff in probes. | Signal-quality decomposition only. |
 | Focal AIF vs scripted partners. | Stated in Discussion limitation. | Methods opening + Discussion §Limitations. | Parameterized partner policies; reciprocal AIF is future work. |
@@ -36,8 +36,11 @@ or universal payoff improvement.
 
 ### Predictability not value (H1 / §3.1)
 
-Manuscript uses locality-probe correlations and global-beta dilution. Treat
-30-seed confirmation as open if numbers change.
+Manuscript uses the 30-seed H1 confirmation. Partner-local precision tracks
+action surprisal more strongly than realized payoff after active-encounter
+controls; shared beta preserves the ordering with weaker specificity. Payoff
+favors no-affect in this probe, so write H1 as model-fitness tracking rather
+than reward improvement.
 
 ### Metacognitive deployment (H2 / §3.2)
 
@@ -50,14 +53,18 @@ Partner-choice entropy and engagement shifts; payoff flat at stated scale.
 
 ### Temporal dependency under betrayal (H5 / §3.4)
 
-Manuscript's central stress readout: higher payoff with lower joint accuracy.
-Write as adaptive reallocation when alternatives exist, not as recovery or as
-pure failure.
+The 30-seed confirmation replaces the earlier smoke-scale payoff--accuracy
+story. Partner-local affect lowers policy entropy and raises joint accuracy,
+while the payoff advantage is small and uncertain. Write this as
+precision-weighted commitment under abrupt change, not as a broad reward gain or
+as evidence that affect simply improves partner-type inference.
 
 ### Phenotype programme (H6 / Exp A–D / §3.5–3.6)
 
-20-seed descriptive profiles in manuscript. Exp C forgiveness subsection still
-TODO in `.tex`. Do not infer clinical validity.
+20-seed descriptive profiles in manuscript. Exp C forgiveness is now
+interpreted as a dissociation between reengagement and restored confidence:
+no-affect and cautious-low-$\alpha$ profiles reengage most, while payoff
+recovery remains near baseline across profiles. Do not infer clinical validity.
 
 ## Unsupported Or Overstrong Claims
 

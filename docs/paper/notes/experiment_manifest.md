@@ -15,8 +15,8 @@ not to H-card section titles in the `.tex` file.
 | H2 Deployment | Test beta-to-policy lesion in an open regime. | `configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml` |
 | H3 Locality / Global Precision | Test local beta against shared global beta. | `configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml`, `configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml` |
 | H4 Social Allocation | Test partner selection, avoidance, and probing. | `configs/trust/hypotheses/h4_social_allocation/partner_choice.toml` |
-| H5 Timescale / Volatility | Test betrayal temporal dependency (payoff vs accuracy tradeoff). | `configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity_gradual.toml` |
-| H6 Perturbation Phenotypes | Test clinical-like precision-dynamics perturbations. | `configs/trust/hypotheses/h6_perturbation/clinical_betrayal.toml`, `configs/trust/hypotheses/h6_perturbation/clinical_dynamics.toml`, `configs/trust/hypotheses/h6_perturbation/affect_sensitivity.toml` |
+| H5 Timescale / Volatility | Test betrayal temporal dependency and action sharpening under abrupt change. | `configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity.toml`, `configs/trust/hypotheses/h5_timescale_volatility/betrayal_precision_sensitivity_gradual.toml` |
+| H6 Perturbation Phenotypes | Test phenotype-inspired precision-dynamics perturbations. | `configs/trust/hypotheses/h6_perturbation/perturbation_betrayal.toml`, `configs/trust/hypotheses/h6_perturbation/perturbation_dynamics.toml`, `configs/trust/hypotheses/h6_perturbation/affect_sensitivity.toml` |
 | H7 Signal Source | Compare partner-action surprisal with joint surprise. | Future-work; no active config. |
 | H8 Observation Noise / Robustness | Test beta inertia under noisy observations. | Future exploratory config. |
 
@@ -28,6 +28,8 @@ not to H-card section titles in the `.tex` file.
 | Historical H0/H1/H2/H4 local confirmation | `results/confirm_h0_h1_h2_h4_20260518/` | Historical open-regime/model-fitness/deployment/social-choice provenance; do not use as current manuscript evidence. |
 | Historical H1/H5 split confirmation | `results/confirm_h1_h3_split_20260519/` | Historical pre-log-surprisal H1/H5 confirmation provenance; do not use as current manuscript evidence. |
 | Historical H5 precision sensitivity | `results/h3_precision_sensitivity_20260522/` | Historical stress boundary-condition provenance; rerun under current H5/log-surprisal spine before manuscript use. |
+| H5 confirmation | `results/log_surprisal_h5_confirm_postfix_20260604/` | Current 30-seed betrayal confirmation; use paper source table summary. |
+| Exp A-D phenotype program | `results/exp_a/`, `results/exp_b/`, `results/exp_c/`, `results/exp_d/` | Current 20-seed computational phenotype evidence; use paper source tables. |
 
 ## Secondary Tracks
 

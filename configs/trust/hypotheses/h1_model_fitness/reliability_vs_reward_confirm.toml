@@ -9,6 +9,11 @@ rounds = 200
 replications = 30
 seed = 420
 
+# Confirmation target:
+# - rerun the corrected active-encounter H1 readout at 30 seeds;
+# - judge precision-model-fitness coupling with active-aligned and
+#   partial-correlation analysis columns;
+# - do not treat aggregate payoff as the primary claim gate.
 [scenario]
 payoff = "binary"
 assignment = "agent_choice"

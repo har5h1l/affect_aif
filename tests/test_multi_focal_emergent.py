@@ -43,17 +43,17 @@ def _coop_rate_last_quartile(rows: list[dict]) -> float:
     return float((actions == 0).mean())
 
 
-def test_clinical_mix_short_run_completes():
+def test_perturbation_mix_short_run_completes():
     """Always-on smoke: heterogeneous agents, few rounds, no exceptions."""
     spec = [
         {"kind": "affective", "planning_horizon": 2, "alpha_charge": 3.0, "_label": "healthy"},
-        {"kind": "affective", "planning_horizon": 2, "alpha_charge": 0.5, "_label": "alexithymia"},
+        {"kind": "affective", "planning_horizon": 2, "alpha_charge": 0.5, "_label": "low_gain"},
         {"kind": "lesioned", "planning_horizon": 2, "lesion_mode": "decouple", "_label": "lesioned"},
     ]
     rows = _build(spec, num_rounds=8, seed=0)
     assert len(rows) == 8 * 2
     kinds = {r["agent_kind"] for r in rows}
-    assert kinds == {"healthy", "alexithymia", "lesioned"}
+    assert kinds == {"healthy", "low_gain", "lesioned"}
 
 
 @pytest.mark.slow

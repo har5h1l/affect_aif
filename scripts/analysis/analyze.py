@@ -69,7 +69,7 @@ def _hypothesis_summary_frame(results: dict) -> pd.DataFrame:
             row["primary_metric"] = len(evidence.get("partner_selection_counts", {}))
             row["secondary_metric"] = evidence.get("partner_column")
         elif hypothesis_id == "h5":
-            row["primary_metric"] = len(evidence.get("clinical_variants", []))
+            row["primary_metric"] = len(evidence.get("perturbation_variants", []))
             row["secondary_metric"] = None
         rows.append(row)
     return pd.DataFrame(rows)

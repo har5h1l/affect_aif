@@ -101,15 +101,15 @@ def test_betrayal_run_affect_mechanism_is_active():
     assert len(affect_betas_0[affect["round"] >= switch_round].dropna().values) > 0
 
 
-def test_clinical_variants_configure_native_beta_path():
-    alex = build_runtime(ExperimentConfig(alpha_charge=0.1), variant_id="alexithymia", affect="precision")
-    border = build_runtime(ExperimentConfig(alpha_charge=12.0), variant_id="borderline", affect="precision")
-    depressed = build_runtime(ExperimentConfig(initial_beta=2.0), variant_id="depression", affect="precision")
+def test_perturbation_variants_configure_native_beta_path():
+    low_gain = build_runtime(ExperimentConfig(alpha_charge=0.1), variant_id="low_gain", affect="precision")
+    high_gain = build_runtime(ExperimentConfig(alpha_charge=12.0), variant_id="high_gain", affect="precision")
+    cautious = build_runtime(ExperimentConfig(initial_beta=2.0), variant_id="cautious_prior", affect="precision")
 
-    assert alex.partner_bank.beta is not None
-    assert border.partner_bank.beta is not None
-    assert depressed.partner_bank.beta is not None
-    assert alex.partner_bank.beta.alpha_charge == 0.1
-    assert border.partner_bank.beta.alpha_charge == 12.0
-    assert depressed.partner_bank.beta.initial_beta == 2.0
-    assert np.allclose(depressed.partner_bank.beta.expected_beta(), 2.0)
+    assert low_gain.partner_bank.beta is not None
+    assert high_gain.partner_bank.beta is not None
+    assert cautious.partner_bank.beta is not None
+    assert low_gain.partner_bank.beta.alpha_charge == 0.1
+    assert high_gain.partner_bank.beta.alpha_charge == 12.0
+    assert cautious.partner_bank.beta.initial_beta == 2.0
+    assert np.allclose(cautious.partner_bank.beta.expected_beta(), 2.0)

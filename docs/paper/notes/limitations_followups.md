@@ -28,19 +28,20 @@ locality probe are the planned tests of cross-partner interference.
 
 ### H5 Is A Temporal Dependency, Not A Simple Win Or Loss
 
-The manuscript treats abrupt betrayal as a structural readout: partner-local
-precision can raise total payoff (1322.3 vs 1225.0 in current draft) while
-**lowering** joint accuracy (0.319 vs 0.425). The story is portfolio
-reallocation when accumulated confidence redirects toward reliable alternatives,
-not better inference about the switched partner and not a generic misdeployment
-failure. Keep this as a central Discussion point. Final 30-seed numbers may
-replace draft values (TODO in `.tex`).
+The manuscript treats abrupt betrayal as a structural readout. In the 30-seed
+confirmation, partner-local precision lowers policy entropy (8.36 vs 8.74) and
+raises joint accuracy (0.372 vs 0.266), while the payoff advantage is small and
+uncertain (1185.9 vs 1172.1; paired bootstrap interval crosses zero). The story
+is precision-weighted commitment under temporal change, not better reward
+maximization and not a generic misdeployment failure.
 
-### Phenotypes In Manuscript; Exp C Still Open
+### Phenotypes In Manuscript; Exp C Reviewed
 
 Section 3.5–3.6 includes 20-seed phenotype, $\alpha$-sweep, quadrant, and
-mixed-volatility results. Exp C forgiveness remains TODO in the `.tex` source.
-Do not upgrade computational profiles to clinical categories or human validation.
+mixed-volatility results. Exp C forgiveness is interpreted as a dissociation:
+reengagement after repair and restoration of model-fitness confidence need not
+move together, and payoff recovery remains near baseline across profiles. Do
+not upgrade computational profiles to clinical categories or human validation.
 
 ### Literature Scope
 
@@ -65,8 +66,8 @@ Run the H1 controlled diagnostic ladder if confirmation remains confounded:
 - strict reward-neutral diagnostic.
 
 This directly tests whether any H1 failure is an analysis/task-design confound
-or a model-level failure. H5 confirmation remains the top behavioral run after
-Exp A-D complete.
+or a model-level failure. H5 confirmation has already replaced the smoke-scale
+betrayal read in the manuscript.
 
 ### Reviewer-Driven Checks
 
@@ -78,7 +79,7 @@ Potential reviewer asks and the appropriate response:
 | "Does this generalize beyond scripted partners?" | Add AIF-vs-AIF descriptive runs or benchmark-facing follow-up. |
 | "Are clinical labels justified?" | Soften language to computational perturbations; do not add diagnostic claims. |
 | "Is this just reward averaging?" | Lead with the H1 corrected-readout plus controlled diagnostic ladder. |
-| "Why does volatility help or hurt payoff?" | Present the manuscript temporal-dependency framing: payoff can rise via reallocation while accuracy falls; stale confidence is the risk. |
+| "Why does volatility help or hurt payoff?" | Present the manuscript temporal-dependency framing: precision sharpens action under change, but payoff effects depend on portfolio structure and need not be monotonic. |
 | "Is this ToM?" | No—manuscript positions affect as social metacognition over behavioural model fitness; ToM combination is future work. |
 
 ## Stopping Rule

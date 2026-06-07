@@ -2,130 +2,105 @@
 
 ## Inclusion Decision
 
-Use the post-fix reduced log-surprisal smoke as current smoke evidence only. It
-was run after fixing the agent-choice candidate aggregation bug in the
-beta-to-gamma deployment path. The old bounded-error / bounded-surprise numbers
-and the first log-surprisal smoke are historical diagnostic evidence and should
-not be promoted as current evidence.
+Use the reviewed paper source tables in this folder for current manuscript
+claims. The post-fix three-seed log-surprisal smoke remains diagnostic
+provenance for early H-card readouts; old bounded-error, bounded-surprise, and
+pre-fix smoke outputs must not be promoted as current evidence.
 
-Current canonical batch:
+Current confirmation / manuscript-scale surfaces:
 
-```text
-results/log_surprisal_spine_smoke_postfix_20260528/
-```
+| Evidence family | Source | Scale | Manuscript status |
+|---|---|---:|---|
+| H5 abrupt betrayal | `source_tables/h5_evidence_effect_summary.csv` | 30 seeds | interpreted |
+| Exp A alpha sweep | `source_tables/exp_a_alpha_sweep/metrics.csv` | 20 seeds | interpreted |
+| Exp B prior factorial | `source_tables/exp_b_prior_factorial/metrics.csv` | 20 seeds | interpreted |
+| Exp C forgiveness | `source_tables/exp_c_forgiveness/metrics.csv` | 20 seeds | interpreted |
+| Exp D mixed volatility | `source_tables/exp_d_mixed_volatility/metrics.csv` | 20 seeds | interpreted narrowly |
+| H1 model fitness | `source_tables/h1_model_fitness_confirm/` | 30 seeds | interpreted |
 
-Run scale: three seeds per variant. Treat all payoff and pairwise-test readouts
-as smoke-scale and underpowered.
+## Current Read
 
-## Current Smoke Run Sizes
+### R1: H1 confirms model-fitness tracking, not reward gain
 
-| Experiment | Path | Variants | Seeds | Rounds |
-|---|---|---:|---:|---:|
-| H0 graded choice | `results/log_surprisal_spine_smoke_postfix_20260528/h0/graded_choice/results.csv` | 3 | 3 each | 200 |
-| H1 reliability versus reward | `results/log_surprisal_spine_smoke_postfix_20260528/h1/reliability_vs_reward/results.csv` | 3 | 3 each | 200 |
-| H2 lesion open regime | `results/log_surprisal_spine_smoke_postfix_20260528/h2/lesion_open_regime/results.csv` | 4 | 3 each | 200 |
-| H3 focal-switch locality | `results/log_surprisal_spine_smoke_postfix_20260528/h3/global_beta_focal_switch_probe/results.csv` | 4 | 3 each | 100 |
-| H4 partner choice | `results/log_surprisal_spine_smoke_postfix_20260528/h4/partner_choice/results.csv` | 3 | 3 each | 200 |
-| H5 betrayal choice | `results/log_surprisal_spine_smoke_postfix_20260528/h5/betrayal_choice/results.csv` | 4 | 3 each | 120 |
-| H6 clinical dynamics | `results/log_surprisal_spine_smoke_postfix_20260528/h6/clinical_dynamics/results.csv` | 4 | 3 each | 200 |
-
-## Headline Post-Fix Smoke Read
-
-### R1: H1 is rescued at corrected smoke-readout scale
-
-H1 reliability-versus-reward smoke:
-
-- Local affect: `|corr(precision, surprise)| = 0.976`,
-  `|corr(precision, payoff)| = 0.721`.
-- Local affect partial readout controlling active payoff and encounter count:
-  `0.951` versus `0.172`.
-- Global beta partial readout: `0.278` versus `0.058`, a weaker but still
-  surprise-dominant readout.
-- Total payoff: affect `492.7`, no-affect `552.0`, global beta `512.7`.
-- Interpretation: the corrected post-fix H1 smoke supports the
-  surprise-over-reward model-fitness claim at diagnostic scale. Treat H1 as a
-  required confirmation item, not as a current manuscript anchor.
-- Follow-up exposure diagnostic: grouped by selected partner/seed, beta is
-  associated with both mean surprisal and mean payoff in the raw readout, so
-  confirmation should use the active-aligned and partial-correlation columns.
+The 30-seed confirmation reached structural finality at 90/90 groups x 200
+rounds. Partner-local precision tracks action surprisal more strongly than
+realized payoff: absolute active-encounter partial associations are `0.882`
+versus `0.130`. Shared beta preserves the ordering but is weaker (`0.380`
+versus `0.049`). Payoff moves in the opposite direction (`483.5` local,
+`517.6` shared, `542.1` no-affect), so H1 should be written as a
+model-fitness dissociation, not a reward advantage.
 
 ### R2: Open-regime deployment changes without stable payoff gain
 
-H0/H2 graded open regime:
+H0/H2 diagnostic read:
 
-- H0 payoff: affect `1851.3`, no-affect `1864.2`, global beta `1851.3`.
-- H0 entropy: affect `8.59`, no-affect `8.79`, global beta `8.64`.
-- H2 repeats the same open-regime setup with lesion/no-epistemic controls;
-  no-affect and tracked-only/lesioned match in the shared comparisons.
-- Interpretation: the beta-to-gamma path changes policy entropy, but the older
-  local-affect payoff benefit does not survive this three-seed log-surprisal
-  smoke.
+- Affect: payoff `1851.3`, entropy `8.6`.
+- No-affect/tracked-only: payoff `1864.2`, entropy `8.8`.
 
-### R3: Locality is signal quality, not behavioral necessity
+Interpretation: the beta-to-gamma path changes policy entropy, while payoff
+does not support a broad reward-improvement claim in this open graded readout.
 
-H3 focal-switch locality smoke:
+### R3: Locality is signal quality, not universal behavioral necessity
 
-- Local beta: `|corr(precision, surprise)| = 0.943`, reward `0.110`.
-- Global beta: surprise `0.149`, reward `0.043`.
-- Payoff: global beta `976.2`, local beta `946.8`, no-affect/tracked-only
-  `950.7`.
-- Interpretation: local beta is the cleaner partner-specific readout in this
-  focal-switch task, but the current task does not show a locality payoff
-  advantage.
+H1 confirmation read:
 
-### R4: Betrayal is repaired but needs confirmation
+- Local beta partials: surprise `0.882`, reward `0.130`.
+- Shared/global beta partials: surprise `0.380`, reward `0.049`.
+- Payoff: local `483.5`, shared/global `517.6`, no-affect `542.1`.
 
-H5 betrayal-choice smoke:
+Interpretation: local beta is the cleaner partner-specific signal in this
+probe, while payoff does not establish a universal behavioral advantage for
+local beta.
 
-- Total payoff: affect `1322.3`, global beta `1216.2`, no-affect/lesioned
-  `1225.0`.
-- Entropy: affect `7.47`, no-affect/lesioned `8.68`.
-- Joint accuracy: affect `0.319`, no-affect/lesioned `0.425`.
-- Interpretation: the centered selector fixes the pre-fix H5 warning at smoke
-  scale. This is now the strongest candidate positive behavioral anchor, but it
-  needs confirmation-scale reruns before publication.
+### R4: H5 confirmation supports action sharpening, not a payoff headline
 
-### R5: H4 and H6 are supplemental at smoke scale
+H5 abrupt-betrayal confirmation:
 
-- H4 payoff is noisy: affect `377.3`, global beta `388.7`, no-affect `385.3`;
-  local affect slightly lowers entropy (`4.66` versus `4.81` for no-affect).
-- H6 beta dynamics separate as intended: alexithymia-like range `0.180`,
-  affect `1.126`, borderline-like `1.412`, depression-like `1.464`.
-- Interpretation: H4 needs confirmation before manuscript claims; H6 can
-  support a supplemental precision-dynamics table but not clinical validation.
+- Total payoff: affect `1185.9`, no-affect `1172.1`; paired bootstrap interval
+  for the difference crosses zero (`-25.2` to `53.2`).
+- Policy entropy: affect `8.36`, no-affect `8.74`; interval for the difference
+  is negative (`-0.62` to `-0.14`).
+- Joint accuracy: affect `0.372`, no-affect `0.266`; interval for the
+  difference is positive (`0.034` to `0.185`).
 
-## Follow-Up Fix
+Interpretation: the earlier smoke-scale payoff--accuracy story is obsolete.
+The confirmation supports precision-weighted action commitment under abrupt
+change, with modest behavioral benefit and uncertain payoff size. Do not write
+H5 as generic recovery, generic reward improvement, or an accuracy cost.
 
-The H5 follow-up traced a runtime issue in `agent_choice` candidate comparison.
-The previous selector scaled negative policy scores directly by partner gamma;
-for low-precision partners this could shrink all scores toward zero and make a
-bad uncertain branch more selectable. The runtime now compares partner-local
-branches with centered precision logits,
-`center(G_k) + gamma_k * (G_k - center(G_k))`, which preserves within-partner
-sharpening while avoiding this cross-partner sign artifact.
+### R5: Phenotype program supports non-monotonic profile effects
 
-A one-seed post-fix H5 trace changed affect seed 42 from `1134.5` payoff with
-near-locking onto partner 3 to `1260.0` payoff with branch mass concentrated on
-partner 2. The post-fix H5 probe and full reduced H0-H6 smoke completed under
-`results/log_surprisal_h5_candidate_fix_probe_20260528/` and
-`results/log_surprisal_spine_smoke_postfix_20260528/`.
+The 20-seed Exp A-D program should be written as computational profile evidence,
+not clinical validation:
+
+- Alpha gain expands beta movement but does not monotonically rank payoff.
+- Prior-by-gain quadrants separate diffuse, rigid, and reactive social
+  confidence profiles.
+- Exp C forgiveness separates post-repair reengagement from restored
+  model-fitness confidence. No-affect and cautious-low-alpha reengage most,
+  while payoff recovery remains near baseline across profiles.
+- Exp D mixed volatility supports a boundary condition: high gain can raise
+  payoff while worsening discrimination and false-positive suppression toward
+  the stationary cooperator.
 
 ## Claims To Use Now
 
-- The canonical affect update is partner-action surprisal,
-  `epsilon = -log P(observed partner action)`.
-- The pre-fix smoke should not be used for final evidence.
-- Post-fix smoke restores H5 as a candidate positive behavioral anchor.
-- H1 needs confirmation or a revised reliability-vs-reward design before it can
-  carry the model-fitness claim.
+- Partner-local affective precision is a model-fitness / reliability signal,
+  not a partner-value signal.
+- Its clearest behavioral channel is metacognitive deployment through
+  beta-to-gamma action sharpening.
+- H5 confirms that abrupt change activates the deployment channel, but payoff
+  effects remain portfolio- and regime-dependent.
+- Exp A-D define computational trust-calibration profiles from gain and prior
+  structure.
 - The corrected agent-choice path uses centered precision logits.
 
 ## Claims To Avoid
 
 - Do not claim affect globally improves payoff.
-- Do not claim local affect wins in the open graded regime under log-surprisal.
-- Do not claim partner-local beta is behaviorally necessary.
-- Do not claim H5 is publication-ready from three seeds.
-- Do not claim H6 variants validate clinical phenotypes.
-- Do not reuse old bounded-error numbers as current manuscript evidence.
-- Do not promote pre-fix smoke numbers as current manuscript evidence.
+- Do not claim local affect wins in the open graded regime.
+- Do not claim partner-local beta is behaviorally necessary in all settings.
+- Do not describe H5 confirmation as payoff improvement with lower accuracy.
+- Do not claim H6 or Exp A-D validate clinical phenotypes.
+- Do not reuse old bounded-error numbers or pre-fix smoke numbers as current
+  manuscript evidence.

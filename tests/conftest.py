@@ -118,7 +118,7 @@ def agent_factory(tiny_config):
         for key, value in kwargs.items():
             if hasattr(config, key):
                 setattr(config, key, value)
-        affect = "precision" if variant_id in {"affect", "alexithymia", "borderline", "depression"} else "none"
+        affect = "precision" if variant_id in {"affect", "low_gain", "high_gain", "cautious_prior"} else "none"
         if variant_id in {"lesioned", "tracked_only"}:
             affect = "tracked_only"
         variant = VariantSpec(id=str(variant_id), affect=affect, planning_horizon=1)

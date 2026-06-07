@@ -3,7 +3,7 @@ id = "h6"
 name = "perturbation_phenotypes"
 
 [experiment]
-id = "clinical_dynamics"
+id = "perturbation_dynamics"
 family = "trust"
 rounds = 200
 replications = 3
@@ -22,19 +22,19 @@ affect = "precision"
 planning_horizon = 4
 
 [[variants]]
-id = "alexithymia"
+id = "low_gain"
 affect = "precision"
 planning_horizon = 4
 alpha_charge = 0.1
 
 [[variants]]
-id = "borderline"
+id = "high_gain"
 affect = "precision"
 planning_horizon = 4
 alpha_charge = 12.0
 
 [[variants]]
-id = "depression"
+id = "cautious_prior"
 affect = "precision"
 planning_horizon = 4
 initial_beta = 2.0
@@ -42,5 +42,5 @@ initial_beta = 2.0
 [analysis]
 auto = true
 primary = "h6_perturbation"
-compare = ["affect", "alexithymia", "borderline", "depression"]
+compare = ["affect", "low_gain", "high_gain", "cautious_prior"]
 metrics = ["payoff", "precision", "partner_choice"]

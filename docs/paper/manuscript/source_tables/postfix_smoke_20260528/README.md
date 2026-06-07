@@ -9,7 +9,8 @@ results/log_surprisal_spine_smoke_postfix_20260528/
 They are small analysis artifacts for manuscript review. Row-level experiment
 outputs remain on `server` under `results/`.
 
-Use these tables as current smoke evidence only. The key correction from the
+Use these tables as diagnostic smoke provenance only. They are superseded by
+reviewed higher-seed tables where those exist. The key correction from the
 analysis is that H1 preserves the surprise-over-reward model-fitness readout
 after active-encounter alignment:
 
@@ -20,10 +21,9 @@ after active-encounter alignment:
 - local affect partial surprise-minus-reward effect row:
   `0.7795`
 
-H5 remains the strongest post-fix behavioral anchor at smoke scale:
-
-- local affect mean payoff: `1322.3`
-- no-affect / tracked-only mean payoff: `1225.0`
+H5 smoke values are superseded by the 30-seed confirmation table at
+`../h5_evidence_effect_summary.csv`. Do not use the smoke-scale H5 payoff or
+accuracy values in manuscript prose.
 
 The raw H1 exposure diagnostic remains useful because partner beta is
 associated with both mean surprisal and mean payoff when grouped by selected

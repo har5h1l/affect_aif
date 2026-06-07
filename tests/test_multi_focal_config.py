@@ -91,10 +91,10 @@ def test_factory_label_override():
             "experiment_name": "x",
             "agents": [
                 {"kind": "affective", "_label": "healthy"},
-                {"kind": "affective", "_label": "alexithymia", "alpha_charge": 0.5},
+                {"kind": "affective", "_label": "low_gain", "alpha_charge": 0.5},
             ],
         }
     )
     agents = create_agents_from_multi_focal_config(cfg, seed=0)
     assert agents[0]._kind_label == "healthy"
-    assert agents[1]._kind_label == "alexithymia"
+    assert agents[1]._kind_label == "low_gain"

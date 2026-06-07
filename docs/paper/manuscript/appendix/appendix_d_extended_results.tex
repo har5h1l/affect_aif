@@ -5,28 +5,28 @@
 This appendix provides supporting technical detail for the corresponding main-text sections. Essential claims and results remain in the main paper.
 
 \subsection{Precision-dynamics perturbations}
-\label{sec:clinical_dynamics}
+\label{sec:perturbation_dynamics}
 
 To connect the basic mechanism to the phenotype program, we perturb the amplitude and stability of $\beta_k$ dynamics using phenotype-inspired computational variants. These variants are not diagnostic models; they are controlled ways of asking how flattened, expanded, or unstable precision dynamics alter action commitment.
 
 \begin{table}[H]
 \centering
 \caption{Precision-dynamics perturbations in the graded decision regime. Variants are computational profiles, not clinical diagnoses.}
-\label{tab:clinical_dynamics}
+\label{tab:perturbation_dynamics}
 \begin{tabular}{lccc}
 \toprule
 Variant & $\beta_k$ range & Total payoff & Policy entropy \\
 \midrule
 affect & 1.32 & 1851.3 & 8.6 \\
-alexithymia-like & 0.24 & 1840.5 & 8.9 \\
-borderline-like & 1.48 & 1859.0 & 8.1 \\
-depression-like & 1.48 & 1877.7 & 8.4 \\
+low-gain & 0.24 & 1840.5 & 8.9 \\
+high-gain & 1.48 & 1859.0 & 8.1 \\
+cautious-prior & 1.48 & 1877.7 & 8.4 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{sloppypar}
-Signal flattening produces the clearest behavioral consequence. The alexithymia-like variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. This motivates the parameter sweeps below: social confidence differences are better captured by gain and prior structure than by a single high-versus-low trust axis.
+Signal flattening produces the clearest behavioral consequence. The low-gain variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. This motivates the parameter sweeps below: social confidence differences are better captured by gain and prior structure than by a single high-versus-low trust axis.
 \end{sloppypar}
 
 \begin{figure}[H]
@@ -101,17 +101,31 @@ Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
 
 The forgiveness paradigm uses a 200-round partner-choice episode: cooperative baseline (rounds 1--80), betrayal on P0 (rounds 81--120), then reversion to cooperative/trusting behavior (rounds 121--200). Readouts include reengagement latency, post-return selection, payoff recovery, and $\beta_k$ recovery trajectories for the reverted partner.
 
-\todo{Insert forgiveness/trust-repair results: report reengagement latency, post-return selection, payoff recovery, and $\beta_k$ recovery, and whether high-$\alpha$ controls reengagement speed while cautious priors limit the trust-repair ceiling.}
+\begin{table}[H]
+\centering
+\caption{Forgiveness and trust-repair metrics by precision profile (20 seeds). Reengagement is the post-repair P0 selection rate; payoff recovery compares late post-repair payoff with the late pre-betrayal baseline.}
+\label{tab:forgiveness}
+\begin{tabular}{lcccc}
+\toprule
+Variant & Reengagement & Payoff recovery & Latency & $\beta_k$ range \\
+\midrule
+cautious-high-$\alpha$ & 0.518 & 0.996 & 5.5 & 0.971 \\
+cautious-low-$\alpha$ & 0.630 & 1.014 & 1.5 & 0.287 \\
+default & 0.475 & 1.019 & 3.0 & 1.012 \\
+naive-high-$\alpha$ & 0.560 & 1.005 & 2.2 & 1.100 \\
+naive-low-$\alpha$ & 0.527 & 1.004 & 4.6 & 0.325 \\
+no-affect & 0.593 & 1.033 & 1.7 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{fig_forgiveness.pdf}
+\caption{Forgiveness/trust-repair diagnostic from the 20-seed phenotype program. Reengagement and payoff recovery do not collapse into a single monotonic gain effect: no-affect and cautious-low-$\alpha$ profiles reengage most often, while payoff recovery remains near baseline across profiles.}
+\label{fig:forgiveness_appendix}
+\end{figure}
 
 \subsection{Mixed-volatility extended diagnostics}
 
 The primary mixed-volatility table and figure remain in Section~\ref{sec:phenotypes_mixed}. Extended Exp D diagnostics include per-partner $\beta_k$ trajectories, rolling P0 selection concentration, and pairwise stability--precision correlations used to compute the discrimination index and P0 false-positive rate reported in the main text.
-
-\subsection{Additional robustness figures}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{fig_shock_shape_summary.pdf}
-\caption{Shock-shape sensitivity summary (supporting diagnostic). Abrupt versus gradual betrayal schedules under precision-gain and prior perturbations.}
-\label{fig:shock_shape_appendix}
-\end{figure}

@@ -630,7 +630,7 @@ def test_phenotype_validation_summary_includes_dynamics_and_behavior():
     for round_idx, beta in enumerate([1.0, 0.5, 1.5, 0.5], start=1):
         rows.append(
             {
-                "variant_id": "borderline",
+                "variant_id": "high_gain",
                 "seed": 0,
                 "round": round_idx,
                 "payoff": 1.0,
@@ -643,7 +643,7 @@ def test_phenotype_validation_summary_includes_dynamics_and_behavior():
 
     summary = phenotype_validation_summary(pd.DataFrame(rows))
     row = summary.iloc[0]
-    assert row["variant_id"] == "borderline"
+    assert row["variant_id"] == "high_gain"
     assert row["beta_range"] == 1.0
     assert row["action_flip_rate"] == 1.0
     assert row["partner_selection_entropy"] > 0

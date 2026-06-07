@@ -417,15 +417,15 @@ def test_h4_social_allocation(results: pd.DataFrame) -> dict[str, Any]:
 
 
 def test_h6_perturbation_phenotypes(results: pd.DataFrame) -> dict[str, Any]:
-    """Clinical-like regimes should separate by task regime."""
+    """Phenotype-inspired perturbations should separate by task regime."""
 
-    clinical_names = {"alexithymia", "borderline", "depression"}
+    perturbation_names = {"low_gain", "high_gain", "cautious_prior"}
     variant_ids = _variants(results)
-    present = sorted(variant_ids & clinical_names)
+    present = sorted(variant_ids & perturbation_names)
     summary = _summary_by_variant(results)
-    evidence: dict[str, Any] = {"clinical_variants": present}
+    evidence: dict[str, Any] = {"perturbation_variants": present}
     if present and "total_payoff" in summary.columns:
-        evidence["mean_total_payoff_by_clinical_variant"] = {
+        evidence["mean_total_payoff_by_perturbation_variant"] = {
             variant: _mean(_variant_values(summary, variant, "total_payoff")) for variant in present
         }
     return _payload(
@@ -433,7 +433,7 @@ def test_h6_perturbation_phenotypes(results: pd.DataFrame) -> dict[str, Any]:
         available=bool(present),
         summary={"claim": "perturbation phenotypes are task-regime dependent, not global traits"},
         evidence=evidence,
-        reason=None if present else "Requires alexithymia, borderline, or depression variants.",
+        reason=None if present else "Requires low_gain, high_gain, or cautious_prior variants.",
     )
 
 

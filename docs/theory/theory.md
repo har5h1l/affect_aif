@@ -478,12 +478,12 @@ and documented under the current architecture.
 
 ### 4.12 Task Generalization and Perturbation Tests
 
-Cross-game and clinical-like perturbation tests remain useful future extensions,
+Cross-game and phenotype-inspired perturbation tests remain useful future extensions,
 but the active spine now evaluates them through the H0-H8 behavior cards:
 openness first, model fitness second, deployment third, then locality/global
 precision, social allocation, timescale/volatility, perturbation dynamics,
 signal-source alternatives, and observation-noise robustness. Any
-clinical-like interpretation must first
+phenotype-inspired interpretation must first
 show the intended beta/precision dynamics and then show behavior only in regimes
 where H0 confirms policy-space openness.
 

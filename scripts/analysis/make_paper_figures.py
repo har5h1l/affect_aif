@@ -20,9 +20,9 @@ VARIANT_LABELS = {
     "global_beta": "shared beta",
     "affect_default": "local beta",
     "affect_combined_caution": "combined caution",
-    "alexithymia": "low gain",
-    "borderline": "high gain",
-    "depression": "cautious prior",
+    "low_gain": "low gain",
+    "high_gain": "high gain",
+    "cautious_prior": "cautious prior",
 }
 
 
@@ -104,27 +104,62 @@ def _plot_difference_with_ci(
 
 
 def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
-    locality = _read_required(
-        source_dir,
-        "h3_locality_probe_summary.csv",
-        {
-            "variant_id",
-            "abs_corr_precision_surprise",
-            "abs_corr_precision_payoff",
-            "total_payoff",
-        },
-    )
-    local = locality.loc[locality["variant_id"] == "local_beta"].iloc[0]
-    shared = locality.loc[locality["variant_id"] == "global_beta"].iloc[0]
-    payoff_rows = locality.dropna(subset=["total_payoff"])
+    confirm_path = source_dir / "h1_model_fitness_confirm" / "model_fitness_correlation_summary.csv"
+    if confirm_path.exists():
+        locality = _read_required(
+            source_dir,
+            "h1_model_fitness_confirm/model_fitness_correlation_summary.csv",
+            {
+                "variant_id",
+                "abs_partial_corr_precision_surprise",
+                "abs_partial_corr_precision_reward",
+                "abs_corr_precision_surprise",
+                "abs_corr_precision_reward",
+            },
+        )
+        payoff = _read_required(
+            source_dir,
+            "h1_model_fitness_confirm/final_round_summary.csv",
+            {"variant_id", "total_payoff"},
+        )
+        locality = locality.copy()
+        locality["plot_variant_id"] = locality["variant_id"]
+        locality["plot_abs_surprise"] = locality["abs_partial_corr_precision_surprise"]
+        locality["plot_abs_reward"] = locality["abs_partial_corr_precision_reward"]
+        payoff_rows = (
+            payoff.groupby("variant_id", as_index=False)["total_payoff"]
+            .mean()
+            .rename(columns={"variant_id": "plot_variant_id"})
+        )
+        local_id = "affect"
+    else:
+        locality = _read_required(
+            source_dir,
+            "h3_locality_probe_summary.csv",
+            {
+                "variant_id",
+                "abs_corr_precision_surprise",
+                "abs_corr_precision_payoff",
+                "total_payoff",
+            },
+        )
+        locality = locality.copy()
+        locality["plot_variant_id"] = locality["variant_id"]
+        locality["plot_abs_surprise"] = locality["abs_corr_precision_surprise"]
+        locality["plot_abs_reward"] = locality["abs_corr_precision_payoff"]
+        payoff_rows = locality.dropna(subset=["total_payoff"])
+        local_id = "local_beta"
+
+    local = locality.loc[locality["plot_variant_id"] == local_id].iloc[0]
+    shared = locality.loc[locality["plot_variant_id"] == "global_beta"].iloc[0]
 
     fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
     _bar(
         axes[0],
         ["surprise", "payoff"],
         [
-            float(local["abs_corr_precision_surprise"]),
-            float(local["abs_corr_precision_payoff"]),
+            float(local["plot_abs_surprise"]),
+            float(local["plot_abs_reward"]),
         ],
         title="Local beta correlations",
         ylabel="absolute correlation",
@@ -135,8 +170,8 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[1],
         ["surprise", "payoff"],
         [
-            float(shared["abs_corr_precision_surprise"]),
-            float(shared["abs_corr_precision_payoff"]),
+            float(shared["plot_abs_surprise"]),
+            float(shared["plot_abs_reward"]),
         ],
         title="Shared beta correlations",
         ylabel="absolute correlation",
@@ -145,13 +180,13 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
 
     _bar(
         axes[2],
-        payoff_rows["variant_id"].tolist(),
+        payoff_rows["plot_variant_id"].tolist(),
         payoff_rows["total_payoff"].tolist(),
-        title="Focal-switch payoff",
+        title="Model-fitness payoff",
         ylabel="total payoff",
     )
 
-    fig.suptitle("Model fitness versus realized reward (focal-switch locality probe)", y=1.04, fontsize=12)
+    fig.suptitle("Model fitness versus realized reward", y=1.04, fontsize=12)
     return _save(fig, output_dir, "fig_model_fitness_beta_reward_divergence")
 
 
@@ -173,8 +208,8 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     )
     payoff = _effect_row(evidence, "final", "total_payoff")
     entropy = _effect_row(evidence, "final", "mean_q_pi_entropy")
+    accuracy = _effect_row(evidence, "final", "mean_joint_accuracy")
     reencounters = _effect_row(evidence, "betrayal_reallocation", "reencounters")
-    reencounter_payoff = _effect_row(evidence, "betrayal_reallocation", "mean_payoff_on_reencounter")
     wrong_type = _effect_row(evidence, "betrayal_misdeployment", "wrong_type_rate")
 
     fig, axes = plt.subplots(1, 3, figsize=(11.2, 3.0))
@@ -194,27 +229,27 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     )
     _plot_difference_with_ci(
         axes[2],
-        ["reencounters", "return payoff", "wrong type"],
+        ["joint accuracy", "late P0 encounters", "wrong type"],
         [
+            float(accuracy["difference"]),
             float(reencounters["difference"]),
-            float(reencounter_payoff["difference"]),
             float(wrong_type["difference"]),
         ],
         [
+            float(accuracy["bootstrap_ci_low"]),
             float(reencounters["bootstrap_ci_low"]),
-            float(reencounter_payoff["bootstrap_ci_low"]),
             float(wrong_type["bootstrap_ci_low"]),
         ],
         [
+            float(accuracy["bootstrap_ci_high"]),
             float(reencounters["bootstrap_ci_high"]),
-            float(reencounter_payoff["bootstrap_ci_high"]),
             float(wrong_type["bootstrap_ci_high"]),
         ],
-        title="Boundary diagnostics",
+        title="Confirmation diagnostics",
         ylabel="affect - no affect",
     )
 
-    fig.suptitle("Betrayal boundary condition", y=1.04, fontsize=12)
+    fig.suptitle("Betrayal confirmation", y=1.04, fontsize=12)
     return _save(fig, output_dir, "fig_betrayal_boundary_summary")
 
 
@@ -245,69 +280,10 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     return _save(fig, output_dir, "fig_deployment_social_summary")
 
 
-def shock_shape_figure(source_dir: Path, output_dir: Path) -> list[Path]:
-    abrupt = _read(source_dir, "h3_abrupt_sensitivity_final_round_summary.csv")
-    gradual = _read(source_dir, "h3_gradual_sensitivity_final_round_summary.csv")
-    order = ["no_affect", "affect_default", "affect_combined_caution"]
-    rows = []
-    for label, frame in (("abrupt", abrupt), ("gradual", gradual)):
-        summary = frame[frame["variant_id"].isin(order)].groupby("variant_id", as_index=False).agg(
-            total_payoff=("total_payoff", "mean"),
-            mean_q_pi_entropy=("mean_q_pi_entropy", "mean"),
-        )
-        summary["shock"] = label
-        rows.append(summary)
-    data = pd.concat(rows, ignore_index=True)
-
-    fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
-    width = 0.25
-    x = np.arange(2)
-    for idx, variant in enumerate(order):
-        values = [
-            float(data[(data["shock"] == shock) & (data["variant_id"] == variant)]["total_payoff"].iloc[0])
-            for shock in ("abrupt", "gradual")
-        ]
-        axes[0].bar(x + (idx - 1) * width, values, width=width, label=VARIANT_LABELS[variant])
-    axes[0].set_xticks(x, ["abrupt", "gradual"])
-    axes[0].set_ylabel("total payoff")
-    axes[0].set_title("Payoff by shock shape", pad=8)
-    axes[0].legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=3)
-    axes[0].spines[["top", "right"]].set_visible(False)
-
-    for idx, variant in enumerate(order):
-        values = [
-            float(data[(data["shock"] == shock) & (data["variant_id"] == variant)]["mean_q_pi_entropy"].iloc[0])
-            for shock in ("abrupt", "gradual")
-        ]
-        axes[1].bar(x + (idx - 1) * width, values, width=width, label=VARIANT_LABELS[variant])
-    axes[1].set_xticks(x, ["abrupt", "gradual"])
-    axes[1].set_ylabel("mean entropy")
-    axes[1].set_title("Policy entropy", pad=8)
-    axes[1].spines[["top", "right"]].set_visible(False)
-
-    deltas = []
-    labels = []
-    for shock in ("abrupt", "gradual"):
-        base = float(data[(data["shock"] == shock) & (data["variant_id"] == "no_affect")]["total_payoff"].iloc[0])
-        for variant in ("affect_default", "affect_combined_caution"):
-            value = float(data[(data["shock"] == shock) & (data["variant_id"] == variant)]["total_payoff"].iloc[0])
-            deltas.append(value - base)
-            labels.append(f"{shock}\n{VARIANT_LABELS[variant]}")
-    axes[2].axhline(0, color="#555555", linewidth=0.8)
-    axes[2].bar(range(len(deltas)), deltas, color=["#2f6f9f", "#7a6aa8", "#2f6f9f", "#7a6aa8"])
-    axes[2].set_xticks(range(len(deltas)), labels, rotation=25, ha="right")
-    axes[2].set_ylabel("payoff delta vs no affect")
-    axes[2].set_title("Penalty is timing-specific", pad=8)
-    axes[2].spines[["top", "right"]].set_visible(False)
-
-    fig.suptitle("Shock shape and precision sensitivity", y=1.04, fontsize=12)
-    return _save(fig, output_dir, "fig_shock_shape_summary")
-
-
 def phenotype_figure(source_dir: Path, output_dir: Path) -> list[Path]:
-    dynamics = _read(source_dir, "h5_clinical_dynamics_phenotype_validation_summary.csv")
-    betrayal = _read(source_dir, "h5_clinical_betrayal_phenotype_validation_summary.csv")
-    order = ["affect", "alexithymia", "borderline", "depression"]
+    dynamics = _read(source_dir, "h6_perturbation_dynamics_summary.csv")
+    betrayal = _read(source_dir, "h6_perturbation_betrayal_summary.csv")
+    order = ["affect", "low_gain", "high_gain", "cautious_prior"]
     frames = []
     for label, frame in (("open", dynamics), ("betrayal", betrayal)):
         summary = frame.groupby("variant_id", as_index=False).agg(
@@ -382,7 +358,6 @@ def main() -> int:
         *model_fitness_figure(source_dir, output_dir),
         *betrayal_boundary_figure(source_dir, output_dir),
         *deployment_social_figure(source_dir, output_dir),
-        *shock_shape_figure(source_dir, output_dir),
         *phenotype_figure(source_dir, output_dir),
     ]
     print_manifest(generated)

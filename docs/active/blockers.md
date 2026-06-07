@@ -2,95 +2,51 @@
 
 ## Requires Human Decision
 
-- **H1 confirmation/design**: the old post-fix smoke read used a mismatched
-  denominator, comparing carried per-partner precision/surprise state against
-  active-encounter payoff. The corrected active-encounter readout restores
-  surprise-over-reward dominance in the smoke, including partial correlations
-  controlling active payoff and encounter count. This is still smoke evidence;
-  run confirmation before manuscript use. If confirmation remains heavily
-  reward/exposure-confounded, use the bounded diagnostic ladder now documented
-  in `progress.md`: corrected confirmation -> balanced-exposure graded
+- **H1 reviewer-control decision**: the June 6 confirmation supports
+  surprise-over-reward model-fitness tracking after active-encounter controls,
+  while payoff favors no-affect. This is sufficient for the current manuscript
+  framing. If reviewers ask for a stronger reward/exposure decomposition, use
+  the bounded diagnostic ladder in `progress.md`: balanced-exposure graded
   reliability spine -> reward-matched graded spine -> strict reward-neutral H1.
-  Only treat H1 as model-level failure if the strict reward-neutral diagnostic
-  also fails.
 
 - **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
   The manuscript has been softened to deployment/entropy language for H0/H2
   and allocation-reorganisation language for H4 rather than broad payoff
   advantage claims. Decide whether these diagnostic claims still need
   confirmation-scale seeds for manuscript support, or whether they can remain
-  as smoke-scale mechanism readouts while H5 and H1 carry the main
-  confirmation burden.
+  as smoke-scale mechanism readouts while H1 and H5 carry the main
+  confirmation evidence.
 
-- **Exp A-D review**: once the server runs complete, inspect the phenotype
-  outputs before filling `\resultp{}` placeholders. Do not update the
-  Section 3.6 interpretation narrative without user review of the phenotype
-  metric values (see AGENTS.md rule on result interpretation). The original
-  `affect_aif_exp_abcd_20260529` run stopped during Exp B and has been
-  superseded by `affect_aif_exp_recovery_20260603`.
-
-- **Exp D discrimination readout review**: pre-finality code audit found the
-  mixed-volatility task structure matches the manuscript design, and raw
-  trajectories should remain valid. The compact `discrimination_index` is a
-  whole-episode per-partner beta summary correlated with the stability score,
-  while the manuscript language refers to beta trajectories. Before using the
-  Exp D placeholder, decide whether this summary is sufficient or whether the
-  compact analysis should add a time-resolved post-change discrimination
-  metric from the existing raw trajectory output.
-  Preliminary post-completion review says the current Exp D evidence is not
-  manuscript-ready for the strong planned claim: the whole-episode
-  `discrimination_index` does not order conditions as expected, and a
-  time-resolved beta-drop diagnostic only partially supports the story. Default
-  and high-alpha conditions show more changed-partner beta reduction than
-  low-alpha, and high-alpha has higher false-positive rate than default, but
-  high-alpha is not clearly better than default at tracking changed partners
-  and default is not cleanly the best discrimination/false-positive tradeoff.
-  Treat this as an analysis/readout and possibly task-claim issue before any
-  manuscript interpretation; do not delete or rerun Exp D raw trajectories yet.
+- **Exp D discrimination caution**: Exp D has been interpreted narrowly. The
+  whole-episode `discrimination_index` does not support the originally stronger
+  sensitivity-specificity prediction, so the manuscript now states the
+  boundary: higher gain can raise payoff while worsening discrimination and
+  false-positive suppression. Do not restore the older stronger claim without a
+  new diagnostic.
 
 ## Current Interpretation Guardrails
 
 - Pre-fix and bounded-error result numbers are not comparable to current
   architecture runs. Do not cite them in manuscript sections.
-- Result interpretation docs (`docs/results/current.md`) should not be updated
-  from new experiment outputs without asking the user first.
-- The post-fix smoke numbers (H5: 1322.3 vs 1225.0; H2 entropy 8.59 vs 8.79;
-  H3 local corr 0.943) are used directly in the manuscript and are the only
-  confirmed numbers in the current draft.
+- The user approved interpretation updates on June 6 for Exp C, H5, H1, and
+  related paper cleanup. Resume the ask-first rule for future new outputs.
+- The post-fix smoke numbers remain diagnostic provenance. The current paper
+  uses 30-seed H1/H5 confirmation values and reviewed 20-seed Exp A-D phenotype
+  source tables.
 
 ## Technical Follow-Ups
 
-- Monitor `affect_aif_exp_c_resume_20260605`; it resumes the Exp C tail after
-  the June 5 server reboot. The original recovery ran verification first, then
-  Exp A analyze-only, Exp B resume, Exp D, and Exp C, with generic analysis
-  after each experiment stage. Treat `RECOVERY_DONE` in
-  `results/exp_abcd_recovery_20260603_logs/run.log` plus final
-  `results.csv`/`metrics.csv`/`manifest.json`/`README.md` files for Exp A-D as
-  the recovery finality gate. The original recovery tmux session was killed by
-  the June 5 server reboot before Exp C finality. Exp C was resumed as
-  `affect_aif_exp_c_resume_20260605`; the pre-resume checkpoint had 109/120
-  complete `forgiveness/results_partial.csv` seed groups.
-- H5 confirmation is running in parallel as `affect_aif_h5_confirm_20260604`
-  after a fresh June 4 verification gate passed at `78e42ae`. Monitor the
-  batch at `results/log_surprisal_h5_confirm_postfix_20260604/`; as of June 4
-  21:10 PDT it has 64/120 complete checkpoint groups. Do not interpret outputs
-  until finality and configured analysis artifacts exist.
-  The original H5 tmux session was killed by the June 5 server reboot before
-  finality; H5 was resumed as `affect_aif_h5_confirm_resume_20260605` against
-  the same batch directory. The pre-resume checkpoint had 67/120 complete
-  groups.
-- H1 needs confirmation with the corrected active-aligned and partial
-  model-fitness diagnostics before manuscript use. Do not promote the corrected
-  smoke read directly to a publication claim. The new controlled H1 configs are
-  diagnostic surfaces, not current evidence. Do not launch H1 while the host is
-  saturated by Exp C plus H5; launch only after fresh headroom/finality checks.
-- After Exp A-D: run `scripts/analysis/analyze.py` on each `results/exp_*/`
-  and verify the four manuscript figures specified in `docs/active/progress.md`.
-- Phenotype figures (fig_alpha_sweep.pdf, fig_phenotype_quadrants.pdf,
-  fig_forgiveness.pdf, fig_mixed_volatility.pdf) need finality-gated review
-  before manuscript use. Exp A, Exp B, and Exp D figures exist from the
-  recovery/regenerated outputs; Exp C's forgiveness figure is still pending
-  because Exp C is not final.
+- No live affect_aif experiment is currently blocking the manuscript packet.
+- H5 confirmation reached structural finality under
+  `results/log_surprisal_h5_confirm_postfix_20260604/h5/betrayal_reallocation_confirm/`
+  and has been interpreted in the paper packet.
+- H1 confirmation reached structural finality under
+  `results/log_surprisal_h1_confirm_postfix_20260606/h1/reliability_vs_reward_confirm/`
+  and has been interpreted in the paper packet. The controlled H1 configs are
+  reviewer-driven diagnostic surfaces, not current evidence.
+- Exp A-D generic analyses and manuscript figures now exist, including
+  `fig_forgiveness.pdf`, and have been reviewed for the current manuscript
+  framing. Future changes should preserve the non-monotonic phenotype language.
 
 ## Not Blockers (Resolved or Deferred)
 
@@ -102,9 +58,8 @@
   `/tmp/affect_aif_full_pytest_20260602_final.log`; static gates also passed.
 - H6 supplemental perturbation results: included in manuscript as
   Section 3.5, designated as supplemental computational perturbations.
-- Manuscript evidence-boundary language: aligned through `07b31d0`; H1 and H5
-  are framed as confirmation targets, and phenotype outputs remain pending
-  `\resultp{}` placeholders rather than interpreted results.
+- Manuscript evidence-boundary language: originally aligned through `07b31d0`;
+  June 6 updates now include final H1, H5, and Exp A-D interpretations.
 - Exp C/D pre-run metric alignment: fixed through `e66fc16` before those
   scripts started; Exp C recovery and Exp D false-positive readouts now match
   the manuscript plan.

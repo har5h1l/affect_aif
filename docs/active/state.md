@@ -50,9 +50,9 @@ publication-grade results:
 - Discussion: individual-differences subsection added; 4th limitation added;
   future directions replaced with a more focused and ambitious version.
 - `\resultp{}` LaTeX command added to macros.tex for visible blue placeholders.
-- `07b31d0` aligns the abstract, introduction, results, and discussion with the
-  current evidence tier: H1 and H5 are confirmation targets, and phenotype
-  profiles are pending computational targets rather than final outputs.
+- `07b31d0` aligned the abstract, introduction, results, and discussion with an
+  earlier evidence tier where H1/H5 and phenotype profiles were still pending;
+  June 6 docs now supersede that state for H5 and Exp A-D.
 - `e66fc16` aligns pre-run Exp C/D phenotype metrics with their manuscript
   readouts: Exp C payoff recovery uses the late pre-betrayal baseline, and Exp
   D false positives measure stable-P0 engagement drops rather than generic
@@ -69,29 +69,34 @@ recovery process reaches finality.
 - Post-fix H0-H6 smoke completed under corrected centered selector.
 - Manuscript draft revised toward phenotype/individual-differences framing and
   current smoke-vs-confirmation evidence boundaries.
-- Exp A-D scripts implemented. The original server run stopped during Exp B;
-  recovery is running on server to regenerate Exp A compact outputs, finish Exp
-  B, then run Exp D and Exp C with analysis between stages.
-- H5 confirmation is running in parallel with the tail of Exp C after a fresh
-  June 4 verification gate passed; H1 corrected-readout confirmation remains
-  the next core mechanism run once server headroom is available.
+- Exp A-D scripts implemented and interpreted for manuscript use after user
+  approval on June 6. Exp C forgiveness now has compact source tables and
+  `fig_forgiveness.pdf`; the paper readout is a reengagement/confidence
+  dissociation, not monotonic affective forgiveness.
+- H5 confirmation reached structural finality and has been interpreted for the
+  manuscript. The 30-seed read is lower entropy and higher joint accuracy under
+  partner-local affect, with a small/uncertain payoff advantage.
+- H1 confirmation reached structural finality and has been interpreted for the
+  manuscript. The 30-seed read supports model-fitness tracking after
+  active-encounter controls, but not reward improvement.
 
 ## Current Evidence State per Hypothesis
 
 | Hypothesis | Smoke read | Manuscript treatment | Next step |
 |---|---|---|---|
 | H0 Policy Openness | flat payoff, active deployment | diagnostic deployment-channel readout | confirm only if stronger payoff/general-performance language returns |
-| H1 Model Fitness | corrected active-aligned read supports surprise-over-reward but smoke only | claims framed with `\resultp{}` | confirm; redesign only if confounded |
+| H1 Model Fitness | 30-seed confirmation supports surprise-over-reward after active-encounter controls; payoff favors no-affect | interpreted as model-fitness tracking, not reward gain | reviewer diagnostics only if requested |
 | H2 Deployment | entropy active, payoff flat | deployment interpretation | confirm if needed |
 | H3 Locality | local=cleaner signal, global=higher smoke payoff | decomposition claim, not necessity | Exp D provides partial test |
 | H4 Social Allocation | underpowered | smoke-scale allocation reorganisation readout | confirm only if this remains a core manuscript claim |
-| H5 Betrayal | repaired; affect beats no-affect in smoke | primary behavioral confirmation target | PRIORITY confirmation |
+| H5 Betrayal | confirmation complete | primary behavioral confirmation: entropy/accuracy improve; payoff uncertain | interpreted in paper |
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-D supersede this |
-| Exp A α Sweep | raw complete; compact outputs regenerated operationally | Section 3.6.1 all `\resultp{}` | await Exp A-D finality + review |
-| Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 all `\resultp{}` | await Exp A-D finality + review |
-| Exp C Forgiveness | resumed as `affect_aif_exp_c_resume_20260605` after June 5 reboot; pre-resume checkpoint had 109/120 complete groups | Section 3.6.3 all `\resultp{}` | recovery running; not ready for interpretation |
-| Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | Section 3.6.4 all `\resultp{}` | operationally ready, but not interpreted |
-| H5 Betrayal Confirmation | resumed as `affect_aif_h5_confirm_resume_20260605` after June 5 reboot; pre-resume checkpoint had 67/120 complete groups | primary behavioral confirmation target | monitor, then analyze after finality |
+| Exp A α Sweep | complete; compact outputs regenerated | Section 3.6.1 interpreted | no rerun pending |
+| Exp B Prior Factorial | complete: 360/360 runs, compact outputs, and generic analysis | Section 3.6.2 interpreted | no rerun pending |
+| Exp C Forgiveness | structurally complete: 120/120 groups x 200 rounds; final `results.csv`, compact `metrics.csv`, analysis, source table, and `fig_forgiveness.pdf` exist | Section 3.6.3 interpreted as reengagement/confidence dissociation | no rerun pending |
+| Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | Section 3.6.4 interpreted narrowly | no rerun pending |
+| H5 Betrayal Confirmation | structurally complete: 120/120 groups x 120 rounds; final `results.csv`, checkpoint, and configured analysis artifacts exist | lower entropy/higher joint accuracy; payoff CI crosses zero | interpreted in paper |
+| H1 Confirmation | structurally complete: 90/90 groups x 200 rounds, final `results.csv`, configured analysis artifacts, and source tables exist | interpreted in Section 3.1 | no rerun pending |
 
 ## Active Read Order
 
@@ -102,21 +107,14 @@ Paper-facing evidence in `docs/paper/manuscript/`. Interpreted results in
 task-matched.
 
 The next active lane is:
-1. Wait for Exp A-D to complete on server and confirm finality before reading
-   metric values.
-2. Run the applicable analysis on final `results/exp_*/results.csv` outputs and
-   inspect the standalone Exp A-D `metrics.csv` files/source tables. Exp A/B
-   compact outputs now include explicit post-betrayal P0 selection and
+1. Keep paper/docs aligned to the reviewed H1, H5, and Exp A-D interpretations.
+   Exp A/B compact outputs now include explicit post-betrayal P0 selection and
    high-investment commitment rates so the older `betrayal_recovery_time`
    readout does not need to carry withdrawal-language claims by itself.
-3. Fill Section 3.6 `\resultp{}` placeholders with actual numbers only after
-   finality and user-approved interpretation review.
-4. Monitor the running H5 confirmation and analyze only after finality.
-5. Run H1 confirmation with the corrected active-aligned and partial-correlation
-   readouts; if confirmation remains reward/exposure-confounded, use the
+2. If reviewer pressure requires a stronger H1 reward/exposure control, use the
    balanced graded reliability spine, then the reward-matched graded spine, and
-   then the strict reward-neutral diagnostic before treating the model as
-   failed.
+   then the strict reward-neutral diagnostic before changing the mechanism
+   claim.
 
 Do not create a task-specific handoff document unless a current task needs one.
 When a handoff is needed, create it under `docs/handoffs/` and keep durable
@@ -126,8 +124,7 @@ project state in this `docs/active/` state/progress/blockers surface.
 
 - A required verification command fails in a way that suggests a design
   problem rather than a local fix.
-- Exp A-D produce results qualitatively inconsistent with the phenotype
-  predictions in Section 3.6 (flag to user before updating narrative).
-- Confirmation-scale H5 runs reverse the betrayal advantage.
+- H1 confirmation remains reward/exposure-confounded after the bounded
+  diagnostic ladder.
 - Clinical reruns on the current architecture qualitatively invert the
   expected phenotype ordering.

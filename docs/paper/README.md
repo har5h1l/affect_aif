@@ -35,16 +35,17 @@ the five linked results claims in `sections/03_results.tex`.
 
 - **Core mechanism:** predictability tracking, metacognitive (not epistemic)
   deployment via tracked-only dissociation, partner-choice reorganisation.
-- **Boundary / stress:** abrupt betrayal can raise payoff while lowering joint
-  accuracy—temporal dependency on portfolio structure, not a simple recovery
-  or failure story.
+- **Boundary / stress:** abrupt betrayal lowers policy entropy and raises joint
+  accuracy at confirmation scale, with only a small/uncertain payoff advantage.
+  Treat it as temporal dependency in action-confidence deployment, not a broad
+  reward-improvement claim.
 - **Individual differences:** phenotype programme ($\alpha$, prior) is in the
   manuscript at 20-seed descriptive scale; not clinical validation.
 - **Limitations already in Discussion:** external $\beta_k$, scripted partners,
   predictive phenotypes.
 - **Still incoming in `.tex`:** explicit partner-implementation paragraph and
   fuller POMDP subsection in Methods.
-- **Still TODO in numbers:** 30-seed confirmation values for betrayal and
-  locality probe (marked in source).
+- **Final result gate:** H1 reached structural finality on June 6 and is now
+  interpreted as model-fitness tracking rather than reward gain.
 
 Do not overclaim: human data, reciprocal AIF partners, or clinical diagnosis.

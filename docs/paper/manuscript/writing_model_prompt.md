@@ -34,14 +34,16 @@ Use these project docs for implementation detail if needed:
 
 - Preserve the deployment claim: tracked-only dissociation is the lesion
   evidence; do not collapse affect into belief improvement.
-- **Betrayal:** write payoff gain **with** lower joint accuracy as portfolio
-  reallocation and temporal dependency—not "affect recovers after betrayal" and
-  not "affect always misdeploys."
+- **Betrayal:** write lower entropy and higher joint accuracy at confirmation
+  scale, with uncertain payoff size. This is temporal dependency in
+  precision-weighted commitment, not "affect recovers after betrayal" and not
+  a broad reward-improvement claim.
 - Phenotypes: computational profiles from $\alpha$ and prior; not clinical
-  diagnoses. Exp C forgiveness is still TODO in source.
+  diagnoses. Exp C forgiveness separates reengagement from model-fitness
+  confidence restoration.
 - $\beta_k$ is an external HESP-style tracker, not a POMDP hidden state.
 - Report seed counts with headline numbers (20 phenotype, 30 confirmation where
-  stated; TODOs in `.tex` for final 30-seed betrayal/locality values).
+  stated); H1 and H5 confirmation values are now final for the current draft.
 - Do not invent citations, results, or reciprocal multi-AIF experiments.
 - Incoming Methods edits: add explicit POMDP subsection and partner-implementation
   paragraph without contradicting Discussion limitations.
@@ -61,6 +63,7 @@ Use these project docs for implementation detail if needed:
 ## Do Not Write
 
 - "Affect improves payoff" without regime and boundary conditions.
-- "Better partner inference after betrayal" (accuracy goes down in §3.4).
+- "Affect improves reward" or "better partner inference" without the stated
+  regime and diagnostics.
 - Clinical validation or named psychiatric phenotypes as established mappings.
 - All agents run active inference (partners are scripted in reported experiments).
