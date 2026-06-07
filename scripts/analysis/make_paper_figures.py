@@ -315,7 +315,7 @@ def phenotype_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ax.set_ylabel(ylabel)
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].legend(frameon=False, fontsize=8)
-    fig.suptitle("Precision-dynamics perturbation phenotypes", y=1.04, fontsize=12)
+    fig.suptitle("Precision-dynamics perturbation profiles", y=1.04, fontsize=12)
     return _save(fig, output_dir, "fig_phenotype_dynamics_summary")
 
 

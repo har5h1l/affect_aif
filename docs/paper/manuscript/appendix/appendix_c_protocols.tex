@@ -1,8 +1,7 @@
 \section{Simulation Protocols and Metrics}
 \label{app:protocols}
 
-\paragraph{Scope.}
-This appendix provides supporting technical detail for the corresponding main-text sections. Essential claims and results remain in the main paper.
+This appendix summarizes simulation conditions, replication counts, schedules, and metrics.
 
 \subsection{Simulation conditions}
 
@@ -18,13 +17,13 @@ All reported experiments use one focal active-inference agent with four partners
 
 \textbf{Abrupt betrayal.} A partner-choice graded environment with scheduled stance betrayal on a previously cooperative partner tests post-switch reallocation, entropy, payoff, and joint accuracy (Section~\ref{sec:betrayal}).
 
-\textbf{Precision-dynamics perturbations.} Profile-inspired computational variants (low-gain, high-gain, and cautious-prior profiles) perturb $\beta_k$ amplitude and stability in the graded decision regime without claiming clinical validity (Appendix~\ref{app:extended_results}).
+\textbf{Precision-dynamics perturbations.} Computational profile variants (low-gain, high-gain, and cautious-prior profiles) perturb $\beta_k$ amplitude and stability in the graded decision regime (Appendix~\ref{app:extended_results}).
 
-\textbf{Profile program (Exp A--D).} Parameter sweeps and factorial designs vary precision gain $\alpha$ and prior over model fitness to define computational trust-calibration profiles in open graded, betrayal, partner-choice, forgiveness, and mixed-volatility environments (Section~\ref{sec:phenotypes}).
+\textbf{Extended profile experiments (Exp A--D).} Parameter sweeps and factorial designs vary precision gain $\alpha$ and prior over model fitness to define computational trust-calibration profiles in open graded, betrayal, partner-choice, forgiveness, and mixed-volatility environments (Section~\ref{sec:phenotypes}).
 
 \subsection{Seed counts and episode lengths}
 
-Unless otherwise stated in the main text, episode length is 200 rounds. The abrupt-betrayal condition uses 120 rounds because post-switch readouts dominate interpretation. Profile-program and mixed-volatility tables use 20 seeds per condition. Central behavioral comparisons use 30 seeds per condition. Exploratory diagnostic runs used three seeds per variant and were used only for implementation validation; all main-text claims are based on the confirmation-scale or profile-scale runs reported in the relevant sections.
+Unless otherwise stated in the main text, episode length is 200 rounds. The abrupt-betrayal condition uses 120 rounds because post-switch readouts dominate interpretation. Profile-scale and mixed-volatility tables use 20 seeds per condition. Central behavioral comparisons use 30 seeds per condition. Exploratory diagnostic runs used three seeds per variant and were used only for implementation validation; all main-text claims are based on the confirmation-scale or profile-scale runs reported in the relevant sections.
 
 Representative configured scales:
 
@@ -54,7 +53,7 @@ The supplementary repository contains the simulation environments, affect-runtim
 
 The canonical abrupt-betrayal protocol (H5 \texttt{betrayal\_choice}) uses graded payoffs, agent-chosen partners, four partners with fixed initial types and stances, and no stochastic type switching ($p_{\mathrm{switch}}=0$). Partner P0 begins as a cooperator in a trusting stance. At round 31, P0 undergoes a scheduled stance switch to hostile while other partners retain their initial configurations. Primary readouts are post-switch cumulative payoff, policy entropy, partner reallocation, and joint partner-type accuracy over the remaining episode.
 
-The profile-program betrayal environment used in Exp A and Exp B applies the same single-switch structure within 200-round episodes for recovery-time and quadrant metrics. Exp C (forgiveness) extends this schedule: rounds 1--80 cooperative baseline, rounds 81--120 betrayal on P0, rounds 121--200 reversion to cooperative/trusting on P0.
+The profile-scale betrayal environment used in Exp A and Exp B applies the same single-switch structure within 200-round episodes for recovery-time and quadrant metrics. Exp C (forgiveness) extends this schedule: rounds 1--80 cooperative baseline, rounds 81--120 betrayal on P0, rounds 121--200 reversion to cooperative/trusting on P0.
 
 \subsection{Mixed-volatility schedule}
 
@@ -99,4 +98,4 @@ Partner-choice readouts quantify how precision reshapes \emph{who} the agent eng
 
 \subsection{Replication summary}
 
-Central behavioral comparisons in Section~\ref{sec:results} use 30 seeds per condition. Profile-program and mixed-volatility analyses use 20 seeds per condition. The model-fitness dissociation (Section~\ref{sec:model_fitness}) uses active-encounter partial correlations to compare precision--surprise against precision--payoff associations, with shared $\beta$ included as the relational-specificity ablation.
+Central behavioral comparisons in Section~\ref{sec:results} use 30 seeds per condition. Profile-scale and mixed-volatility analyses use 20 seeds per condition. The model-fitness dissociation (Section~\ref{sec:model_fitness}) uses active-encounter partial correlations to compare precision--surprise against precision--payoff associations, with shared $\beta$ included as the relational-specificity ablation.

@@ -1,17 +1,16 @@
 \section{Extended Profile and Robustness Results}
 \label{app:extended_results}
 
-\paragraph{Scope.}
-This appendix provides supporting technical detail for the corresponding main-text sections. Essential claims and results remain in the main paper.
+This appendix reports extended parameter sweeps, profile analyses, and robustness diagnostics that support the main-text results.
 
 \subsection{Precision-dynamics perturbations}
 \label{sec:perturbation_dynamics}
 
-To connect the basic mechanism to the profile program, we perturb the amplitude and stability of $\beta_k$ dynamics using profile-inspired computational variants. These variants are not diagnostic models; they are controlled ways of asking how flattened, expanded, or unstable precision dynamics alter action commitment.
+We first perturb the amplitude and stability of $\beta_k$ dynamics to test how precision dynamics affect action commitment. These variants are computational controls rather than diagnostic categories.
 
 \begin{table}[H]
 \centering
-\caption{Precision-dynamics perturbations in the graded decision regime. Variants are computational profiles, not clinical diagnoses.}
+\caption{Precision-dynamics perturbations in the graded decision regime.}
 \label{tab:perturbation_dynamics}
 \begin{tabular}{lccc}
 \toprule
@@ -26,13 +25,13 @@ cautious-prior & 1.48 & 1877.7 & 8.4 \\
 \end{table}
 
 \begin{sloppypar}
-Signal flattening produces the clearest behavioral consequence. The low-gain variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. This motivates the parameter sweeps below: social confidence differences are better captured by gain and prior structure than by a single high-versus-low trust axis.
+Flattening the precision signal produces the clearest behavioral change. The low-gain variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. The parameter sweeps below therefore vary gain and prior structure directly.
 \end{sloppypar}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_phenotype_dynamics_summary.pdf}
-\caption{Precision-dynamics perturbations in the graded decision regime. Variants are computational profiles, not clinical diagnoses or classifications.}
+\caption{Precision-dynamics perturbation profiles in the graded decision regime. Variants compare precision-dynamics settings in the graded decision regime.}
 \label{fig:phenotype_dynamics_appendix}
 \end{figure}
 
@@ -93,7 +92,7 @@ Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_phenotype_quadrants.pdf}
-\caption{Profile quadrant profiles from the prior-by-$\alpha$ factorial (betrayal environment, 20 seeds). Profiles are computational analogues, not clinical classifications.}
+\caption{Gain-prior profile quadrants from the prior-by-$\alpha$ factorial (betrayal environment, 20 seeds).}
 \label{fig:phenotype_quadrants_appendix}
 \end{figure}
 
@@ -122,7 +121,7 @@ no-affect & 0.593 & 1.033 & 1.7 & -- \\
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_forgiveness.pdf}
-\caption{Forgiveness/trust-repair diagnostic from the 20-seed profile program. Reengagement and payoff recovery do not collapse into a single monotonic gain effect: no-affect and cautious-low-$\alpha$ profiles reengage most often, while payoff recovery remains near baseline across profiles.}
+\caption{Forgiveness/trust-repair diagnostic from the 20-seed profile analyses. Reengagement and payoff recovery do not collapse into a single monotonic gain effect: no-affect and cautious-low-$\alpha$ profiles reengage most often, while payoff recovery remains near baseline across profiles.}
 \label{fig:forgiveness_appendix}
 \end{figure}
 
