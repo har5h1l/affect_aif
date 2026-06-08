@@ -211,22 +211,78 @@ source, not a top-level docs concept.
 
 ## Results Layout
 
-Keep tracked compact summaries:
+The results tree is the bridge between runnable configs, ignored full data, and
+tracked public summaries. The repo should be cloneable with the directory
+scaffold and compact summaries present, while full per-round CSVs stay outside
+git on local/server/Drive.
+
+Keep this canonical structure locally and on `server`:
 
 ```text
 results/
   README.md
   paper/
     model_fitness/
+      README.md
+      manifest.json
+      summary.csv
+      source_tables/
+      raw/
     betrayal_adaptation/
+      README.md
+      manifest.json
+      summary.csv
+      source_tables/
+      raw/
     alpha_sweep/
+      README.md
+      manifest.json
+      metrics.csv
+      raw/
     prior_factorial/
+      README.md
+      manifest.json
+      metrics.csv
+      raw/
     forgiveness/
+      README.md
+      manifest.json
+      metrics.csv
+      raw/
     mixed_volatility/
+      README.md
+      manifest.json
+      metrics.csv
+      raw/
   diagnostics/
     policy_openness/
+      README.md
+      manifest.json
+      summary.csv
     deployment/
+      README.md
+      manifest.json
+      summary.csv
     locality/
+      README.md
+      manifest.json
+      summary.csv
+    smoke/
+      README.md
+      manifest.json
+      summary.csv
+      raw/
+    precision_sensitivity/
+      README.md
+      manifest.json
+      summary.csv
+      raw/
+    social_allocation/
+      README.md
+      manifest.json
+      summary.csv
+      raw/
+  archive/
 ```
 
 Track:
@@ -242,6 +298,57 @@ Ignore:
 - full per-round `results.csv`
 - `results/archive/`
 - checkpoints, partial CSVs, and logs
+
+Do not delete completed full experiment data during cleanup. Moves and renames
+should preserve final raw CSVs and analysis artifacts unless the run is clearly
+incomplete, corrupt, or explicitly obsolete. For incomplete/corrupt runs,
+delete checkpoints and partial CSVs, and document the archival decision in
+`docs/results/cleanup/`.
+
+### Result-to-Config Hook
+
+Every tracked result folder needs a `manifest.json` that connects it back to
+the config(s) that produce it:
+
+```json
+{
+  "name": "alpha_sweep",
+  "category": "paper",
+  "status": "complete",
+  "config_paths": ["configs/paper/alpha_sweep.toml"],
+  "source_run_paths": ["results/paper/alpha_sweep/raw/results.csv"],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": ["metrics.csv"],
+  "paper_use": "Section 3.6.1 alpha sweep profile readout"
+}
+```
+
+For diagnostics, the same contract applies, but `paper_use` should make clear
+that the run is informative or reviewer-facing rather than primary manuscript
+evidence.
+
+### Local, Server, and Drive Policy
+
+- Local repo: keep full paper raw data and useful diagnostic raw data under the
+  same canonical `results/` layout. Raw files are gitignored.
+- Server repo: keep the same canonical layout plus fuller `results/archive/`
+  for extensive historical, dry-run, log, and incomplete material. The server
+  can retain more than local, but not under confusing top-level names.
+- Drive handoff: the user should be able to copy the local `results/` folder
+  into Drive. Therefore local `results/` must be clean enough to share:
+  paper raw data under `results/paper/*/raw/`, compact diagnostics under
+  `results/diagnostics/`, no checkpoints, no partial CSVs, no stale
+  `exp_a`/`exp_b`/`log_surprisal_*` top-level folders.
+
+### Naming Rules
+
+- Use semantic result folder names (`alpha_sweep`, `model_fitness`,
+  `betrayal_adaptation`) rather than historical batch IDs (`exp_a`,
+  `log_surprisal_h5_confirm_postfix_20260604`).
+- Keep seeds, timestamps, and run-recovery details inside manifests/logs, not
+  in the public folder name.
+- The top-level result categories are `paper`, `diagnostics`, and local/server
+  `archive` only.
 
 ## Notebooks
 
