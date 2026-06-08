@@ -36,6 +36,7 @@ results/**
 !results/paper/**/
 !results/diagnostics/
 !results/diagnostics/**/
+!results/archive/
 !results/**/README.md
 !results/**/manifest.json
 !results/**/metrics.csv
@@ -47,6 +48,7 @@ results/**
 !results/**/.gitkeep
 results/**/raw/**
 results/archive/**
+!results/archive/.gitkeep
 results/**/results.csv
 results/**/results_partial.csv
 results/**/checkpoint_manifest.json

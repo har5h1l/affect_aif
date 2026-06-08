@@ -7,7 +7,8 @@ agents. Read it before changing claims, experiments, or docs.
 - `progress.md`: verification gate, current run status, and next-run options
 - `blockers.md`: unresolved interpretation or execution blockers
 
-Stable decisions live in `docs/decisions/`. Interpreted evidence lives in
-`docs/results/`. Manuscript-facing material lives in `docs/manuscript/`.
-Task-specific transfer packets live in `docs/handoffs/` and should be read
-only when named, linked, newly created, or task-matched.
+Stable model and experiment references live in `docs/model/` and
+`docs/experiments/`. Interpreted evidence lives in `docs/results/`.
+Manuscript-facing material lives in `docs/manuscript/`. Task-specific transfer
+packets live in `docs/handoffs/` and should be read only when named, linked,
+newly created, or task-matched.

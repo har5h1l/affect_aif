@@ -347,7 +347,7 @@ tables and figures are generated afterward with
 ### Exp A — α Sweep
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/alpha_sweep.toml --batch-name exp_a --workers 1
+.venv/bin/python scripts/experiment/run.py --config configs/paper/alpha_sweep.toml --batch-name exp_a --workers 1
 .venv/bin/python scripts/analysis/phenotype_artifacts.py alpha_sweep --results-root results/paper/alpha_sweep/raw
 ```
 
@@ -362,7 +362,7 @@ tables and figures are generated afterward with
 ### Exp B — 2×2 Prior × α Factorial
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/prior_factorial.toml --batch-name exp_b --workers 1
+.venv/bin/python scripts/experiment/run.py --config configs/paper/prior_factorial.toml --batch-name exp_b --workers 1
 .venv/bin/python scripts/analysis/phenotype_artifacts.py prior_factorial --results-root results/paper/prior_factorial/raw
 ```
 
@@ -378,7 +378,7 @@ tables and figures are generated afterward with
 ### Exp C — Forgiveness Paradigm
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/forgiveness.toml --batch-name exp_c --workers 1
+.venv/bin/python scripts/experiment/run.py --config configs/paper/forgiveness.toml --batch-name exp_c --workers 1
 .venv/bin/python scripts/analysis/phenotype_artifacts.py forgiveness --results-root results/paper/forgiveness/raw
 ```
 
@@ -393,7 +393,7 @@ tables and figures are generated afterward with
 ### Exp D — Mixed Volatility Environment
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/mixed_volatility.toml --batch-name exp_d --workers 1
+.venv/bin/python scripts/experiment/run.py --config configs/paper/mixed_volatility.toml --batch-name exp_d --workers 1
 .venv/bin/python scripts/analysis/phenotype_artifacts.py mixed_volatility --results-root results/paper/mixed_volatility/raw
 ```
 
@@ -436,7 +436,7 @@ H5 is the repaired positive behavioral anchor after the selector fix.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml \
+  --config configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml \
   --output-dir results \
   --batch-name log_surprisal_h5_confirm_postfix_20260601 \
   --workers 1
@@ -462,7 +462,7 @@ reward/exposure decomposition.
 ```bash
 # diagnostic first — do not add seeds before inspecting design
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml \
+  --config configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml \
   --output-dir results \
   --batch-name log_surprisal_h1_diagnostic_YYYYMMDD \
   --workers 1

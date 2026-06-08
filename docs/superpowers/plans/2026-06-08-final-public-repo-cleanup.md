@@ -10,6 +10,49 @@
 
 ---
 
+## Review Addendum: 2026-06-08 Surface Audit
+
+This plan has been reviewed against the current local tree and a read-only
+server result check.
+
+Current state already satisfies the main structural decisions:
+
+- Public docs route through `README.md`, `docs/model/`, `docs/experiments/`,
+  `docs/results/`, `docs/manuscript/`, `configs/README.md`,
+  `scripts/README.md`, and `notebooks/README.md`.
+- Paper material is under `docs/manuscript/`, with `appendix/`, `sections/`,
+  `figures/`, `source_tables/`, and a reduced `notes/` surface.
+- Configs are split into `configs/paper/`, `configs/demo/`, and
+  `configs/diagnostics/`; the smoke config is under
+  `configs/diagnostics/smoke/`.
+- Experiment execution is consolidated around `scripts/experiment/run.py`;
+  `scripts/experiment/inspect.py` is the read-only inspection helper.
+- Analysis scripts are post-hoc surfaces under `scripts/analysis/`; they load
+  existing result CSVs or source tables and do not launch experiments.
+- Notebooks exist as `notebooks/demo.ipynb` and
+  `notebooks/reproduce.ipynb`. Both are Colab/local compatible, use
+  `scripts/experiment/run.py`, avoid old benchmark/paper-reproduce paths, and
+  include analysis/plotting cells.
+- Local results use `results/{paper,diagnostics,archive}`. Paper and
+  diagnostic raw `results.csv` files are present locally under `raw/`; no
+  `checkpoint_manifest.json` or `results_partial.csv` files were found.
+- Server results use the same top-level categories and retain fuller detail:
+  read-only audit found 32 raw CSVs under `results/paper` and
+  `results/diagnostics`, no checkpoint/partial residue, and sizes of roughly
+  `1.4G results/paper`, `425M results/diagnostics`, and
+  `814M results/archive`.
+
+Remaining cleanup items from this audit:
+
+- Keep `docs/results/README.md` aligned to the current result-card layout and
+  `docs/manuscript/` path.
+- Keep stale-reference verification commands excluding `docs/superpowers/**`,
+  because this plan and its spec intentionally mention old paths as migration
+  notes.
+- The old benchmark source is removed from Git; any surviving benchmark or
+  `__pycache__` directories are generated workspace junk and should be deleted
+  locally.
+
 ## Safety Rules
 
 - Do not delete completed full-data experiment outputs. Preserve final
@@ -60,7 +103,8 @@
 - Create: `docs/experiments/configs.md`
 - Create: `docs/experiments/paper.md`
 - Create: `docs/experiments/diagnostics.md`
-- Rename: `docs/manuscript/` -> `docs/manuscript/`
+- Rename, if still present in an older checkout: `docs/paper/` ->
+  `docs/manuscript/`
 - Keep: `docs/results/`
 - Keep: `docs/active/`
 - Keep: `docs/handoffs/`
@@ -641,7 +685,7 @@ duplicate folders.
 ## Task 6: Rename and Prune Manuscript Surface
 
 **Files:**
-- Move: `docs/manuscript/` -> `docs/manuscript/`
+- Move, if still present: `docs/paper/` -> `docs/manuscript/`
 - Delete: `docs/manuscript/prompts/`
 - Delete: `docs/manuscript/REPRODUCE.md`
 - Modify: `scripts/analysis/make_paper_figures.py`
@@ -653,11 +697,12 @@ duplicate folders.
 Run:
 
 ```bash
-git mv docs/manuscript docs/manuscript
+git mv docs/paper docs/manuscript
 ```
 
 Expected: manuscript source, figures, source tables, appendix, and notes move
-together.
+together. Skip this step in the current cleaned tree, where the folder is
+already named `docs/manuscript/`.
 
 - [ ] **Step 2: Delete prompt and empty pointer surfaces**
 
@@ -689,8 +734,8 @@ Move/fold:
 
 - [ ] **Step 4: Update code defaults**
 
-Update any script defaults from `docs/manuscript` or `docs/manuscript` to
-`docs/manuscript`. Likely files:
+Update any script defaults from `docs/paper` to `docs/manuscript`. Likely
+files:
 
 - `scripts/analysis/make_paper_figures.py`
 - `scripts/analysis/phenotype_artifacts.py`
@@ -707,10 +752,11 @@ Update `docs/manuscript/README.md` so build commands run from
 Run:
 
 ```bash
-rg -n "docs/manuscript|manuscript" README.md docs scripts tests notebooks configs results
+rg -n "docs/paper|paper/notes|paper/manuscript" README.md docs scripts tests notebooks configs results -g '!docs/superpowers/**'
 ```
 
-Expected: no references except historical plan/spec files if excluded.
+Expected: no references except historical migration notes in active docs or
+plan/spec files if intentionally retained.
 
 - [ ] **Step 7: Verify manuscript build path still has source files**
 
@@ -1039,13 +1085,14 @@ Expected: both dry-run manifests are written.
 Run:
 
 ```bash
-rg -n "configs/paper_reproduce|configs/smoke/trust_smoke|configs/benchmark|scripts/benchmark|benchmarks/|docs/manuscript|docs/experiment/|docs/design|docs/operations|docs/decisions" \
+rg -n "configs/paper_reproduce|configs/smoke/trust_smoke|configs/benchmark|scripts/benchmark|benchmarks/|docs/paper|docs/experiment/|docs/design|docs/operations|docs/decisions" \
   README.md docs configs scripts tests notebooks results \
   -g '!docs/superpowers/**'
 ```
 
-Expected: no output, except intentional historical notes if explicitly kept
-under `docs/active/`.
+Expected: no output for removed config/script/docs paths, except intentional
+historical notes if explicitly kept under `docs/active/`. Do not treat
+`docs/manuscript/` as stale; it is the current manuscript folder.
 
 - [ ] **Step 6: Check result data cleanliness**
 

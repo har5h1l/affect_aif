@@ -7,9 +7,9 @@ Read files here only when a handoff is named, linked, newly created, or
 directly matched to the task. Do not sweep all handoffs by default.
 
 Create handoffs as `YYYY-MM-DD-lowercase-kebab-slug.md`. Preserve durable
-project state in `docs/active/`, stable decisions in `docs/decisions/`,
-interpreted evidence in `docs/results/`, plans in `docs/roadmap/`, and stable
-commands or contracts in `docs/reference/`.
+project state in `docs/active/`, stable model/experiment references in
+`docs/model/` and `docs/experiments/`, interpreted evidence in
+`docs/results/`, and implementation plans in `docs/superpowers/plans/`.
 
 For server work, include tmux session, Mango process name, working directory,
 command, log path, finality markers, and stop conditions. Long experiments

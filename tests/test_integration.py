@@ -158,7 +158,7 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
     args = parser.parse_args(
         [
             "--config",
-            "configs/smoke/trust_smoke.toml",
+            "configs/diagnostics/smoke/trust_smoke.toml",
             "--config",
             "configs/diagnostics/h5_timescale_volatility/betrayal_choice.toml",
             "--output-dir",
@@ -169,7 +169,7 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
     )
 
     assert args.config == [
-        "configs/smoke/trust_smoke.toml",
+        "configs/diagnostics/smoke/trust_smoke.toml",
         "configs/diagnostics/h5_timescale_volatility/betrayal_choice.toml",
     ]
     assert args.output_dir == "results"

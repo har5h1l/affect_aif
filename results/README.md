@@ -15,5 +15,6 @@ are intentionally ignored and live on the server or Drive packet.
 
 ## Diagnostics
 
-`diagnostics/` contains complete informative non-paper runs that remain
-runnable from public configs.
+`diagnostics/` contains compact summaries and manifests for informative
+non-paper probes. The full diagnostic raw runs are retained on `server`; the
+public configs under `configs/diagnostics/` remain runnable.

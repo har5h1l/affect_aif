@@ -6,7 +6,7 @@
 
 The supported trust-family experiments now use the action-dependent stance
 redesign described in `docs/theory/pomdp_spec.md` and
-`docs/design/implementation.md`.
+`docs/model/pomdp.md`.
 
 For the current canonical hypothesis surface, use
 `docs/theory/hypotheses.md`. That file organizes the project around H0-H8

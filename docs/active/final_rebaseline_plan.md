@@ -119,11 +119,11 @@ confirmation of deployment/entropy support:
 ```bash
 .venv/bin/python scripts/experiment/run.py \
   --config configs/diagnostics/h0_policy_openness/graded_choice_confirm.toml \
-  --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml \
+  --config configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml \
   --config configs/diagnostics/h2_deployment/lesion_open_regime_confirm.toml \
   --config configs/diagnostics/h3_locality/global_beta_locality_probe.toml \
   --config configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml \
-  --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml \
+  --config configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml \
   --output-dir results \
   --batch-name log_surprisal_spine_confirm_20260527 \
   --workers 1
