@@ -44,9 +44,9 @@ The top-level public route should be:
   remain publicly runnable.
 - `configs/archive/` or documented archive notes for superseded configs that
   are no longer on the public run path.
-- `scripts/experiment/demo.py`, `scripts/experiment/paper.py`,
-  `scripts/experiment/smoke.py`, and `scripts/experiment/run.py`: the public
-  experiment CLI surface.
+- `scripts/experiment/run.py`: the single public experiment-running CLI.
+  Demo, smoke, diagnostic, and paper workflows should be config sets and
+  documented command examples, not separate wrapper scripts.
 - `docs/results/`: public result interpretation, run maps, and compact evidence
   summaries.
 - `docs/paper/`: manuscript source, figure/table provenance, and
@@ -194,13 +194,16 @@ remain CLI-first unless the notebook can stay clear and computationally honest.
 
 ## CLI And Config Design
 
-Keep the public CLI small:
+Consolidate experiment execution into `scripts/experiment/run.py`. Delete or
+migrate other experiment-running wrappers once their behavior is represented by
+TOML configs, documented `run.py` commands, or notebook cells.
+
+The public experiment CLI should be:
 
 ```bash
-python scripts/experiment/smoke.py
-python scripts/experiment/demo.py
-python scripts/experiment/paper.py
-python scripts/experiment/paper.py --run
+python scripts/experiment/run.py --config configs/smoke/trust_smoke.toml --dry-run
+python scripts/experiment/run.py --config configs/demo/model_fitness.toml --config configs/demo/betrayal_adaptation.toml --config configs/demo/alpha_sweep.toml --batch-name demo --workers 1
+python scripts/experiment/run.py --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml --batch-name paper_core_confirm --workers 1 --dry-run
 python scripts/experiment/run.py --config configs/diagnostics/<path>.toml
 python scripts/analysis/analyze.py --results <path>/results.csv --output-dir <path>/analysis
 ```
@@ -208,7 +211,7 @@ python scripts/analysis/analyze.py --results <path>/results.csv --output-dir <pa
 Public config groups:
 
 - `configs/demo/`: fast demo-scale configs used by `notebooks/demo.ipynb` and
-  `scripts/experiment/demo.py`.
+  direct `scripts/experiment/run.py` commands.
 - `configs/paper_reproduce/`: full paper configs.
 - `configs/diagnostics/`: complete informative non-paper configs.
 - `configs/smoke/`: minimal development sanity checks.
@@ -216,7 +219,10 @@ Public config groups:
 - `configs/archive/` or archive documentation: superseded configs not meant as
   public runnable surfaces.
 
-Do not keep compatibility aliases for old config paths.
+Do not keep compatibility aliases for old config paths or old wrapper script
+entry points. If a legacy script contains unique experiment-generation logic,
+move that logic into TOML configs, analysis code, or documented `run.py`
+invocations before deleting it.
 
 ## Documentation Design
 
@@ -260,9 +266,9 @@ writing, claim wording, figures, or tables.
 Before implementation is considered complete:
 
 ```bash
-.venv/bin/python scripts/experiment/demo.py
-.venv/bin/python scripts/experiment/paper.py
-.venv/bin/python scripts/experiment/smoke.py
+.venv/bin/python scripts/experiment/run.py --config configs/demo/model_fitness.toml --config configs/demo/betrayal_adaptation.toml --config configs/demo/alpha_sweep.toml --batch-name demo_dry_check --dry-run
+.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml --batch-name paper_dry_check --workers 1 --dry-run
+.venv/bin/python scripts/experiment/run.py --config configs/smoke/trust_smoke.toml --batch-name smoke_dry_check --dry-run
 .venv/bin/python -m pytest tests/test_scripts_smoke.py tests/test_supported_surface.py -q
 .venv/bin/python -m ruff check scripts/experiment tests
 git diff --check

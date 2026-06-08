@@ -6,7 +6,7 @@
 
 **Architecture:** Keep full trajectories out of git while tracking a reproducible `results/` scaffold, compact summaries, public configs, and docs. Split work into repo-local implementation first, then a dry-run server cleanup manifest, then gated server/Drive mutation.
 
-**Tech Stack:** Python 3, TOML experiment specs, existing `scripts/experiment/run.py`, pandas/matplotlib for notebook summaries, pytest/ruff/gitignore checks, Mango/ssh for server result cleanup.
+**Tech Stack:** Python 3, TOML experiment specs, canonical `scripts/experiment/run.py`, pandas/matplotlib for notebook summaries, pytest/ruff/gitignore checks, Mango/ssh for server result cleanup.
 
 ---
 
@@ -57,10 +57,12 @@ Create or modify these files:
 - Create `configs/demo/betrayal_adaptation.toml`: demo-scale betrayal adaptation spec.
 - Create `configs/demo/alpha_sweep.toml`: demo-scale alpha sweep spec.
 - Modify `configs/README.md`: document `demo/`, `paper_reproduce/`, `diagnostics/`, `smoke/`, `benchmark/`.
-- Create `scripts/experiment/demo.py`: friendly dry-run/run wrapper for demo configs.
-- Modify `scripts/README.md`: include demo route.
-- Modify `tests/test_scripts_smoke.py`: test demo wrapper dry-run.
-- Modify `tests/test_supported_surface.py`: include demo configs/scripts in supported surface expectations.
+- Modify `scripts/README.md`: document `run.py` as the only public experiment-running CLI.
+- Modify `tests/test_scripts_smoke.py`: test demo config dry-run through `run.py`.
+- Modify `tests/test_supported_surface.py`: include demo configs and verify old wrapper scripts are not the public surface.
+- Delete or migrate: `scripts/experiment/paper.py`, `scripts/experiment/smoke.py`,
+  `scripts/experiment/preliminary.py`, and other experiment-running wrappers
+  once their behavior is represented by configs plus `run.py`.
 - Create `tests/test_results_surface.py`: validate public result scaffold contracts and gitignore behavior where possible.
 - Create `notebooks/demo.ipynb`: runnable notebook that runs demo-scale experiments and plots compact outputs.
 - Modify `README.md`: public front door.
@@ -462,33 +464,41 @@ git commit -m "docs: add diagnostic result scaffold"
 
 ---
 
-### Task 4: Add Demo Configs And Demo CLI
+### Task 4: Add Demo Configs And Consolidate Run CLI
 
 **Files:**
 - Create: `configs/demo/model_fitness.toml`
 - Create: `configs/demo/betrayal_adaptation.toml`
 - Create: `configs/demo/alpha_sweep.toml`
-- Create: `scripts/experiment/demo.py`
 - Modify: `configs/README.md`
 - Modify: `scripts/README.md`
 - Modify: `tests/test_scripts_smoke.py`
 - Modify: `tests/test_supported_surface.py`
 
-- [ ] **Step 1: Write failing demo CLI test**
+- [ ] **Step 1: Write failing demo config dry-run test**
 
 Add to `tests/test_scripts_smoke.py`:
 
 ```python
-def test_demo_wrapper_dry_run_writes_manifest(tmp_path):
+def test_demo_configs_dry_run_through_run_py_writes_manifest(tmp_path):
     out = tmp_path / "results"
     result = subprocess.run(
         [
             sys.executable,
-            "scripts/experiment/demo.py",
+            "scripts/experiment/run.py",
+            "--config",
+            "configs/demo/model_fitness.toml",
+            "--config",
+            "configs/demo/betrayal_adaptation.toml",
+            "--config",
+            "configs/demo/alpha_sweep.toml",
             "--output-dir",
             str(out),
             "--batch-name",
             "demo_dry",
+            "--workers",
+            "1",
+            "--dry-run",
         ],
         check=False,
         text=True,
@@ -510,10 +520,10 @@ def test_demo_wrapper_dry_run_writes_manifest(tmp_path):
 Run:
 
 ```bash
-.venv/bin/python -m pytest tests/test_scripts_smoke.py::test_demo_wrapper_dry_run_writes_manifest -q
+.venv/bin/python -m pytest tests/test_scripts_smoke.py::test_demo_configs_dry_run_through_run_py_writes_manifest -q
 ```
 
-Expected: FAIL because `scripts/experiment/demo.py` does not exist.
+Expected: FAIL because `configs/demo/*.toml` do not exist yet.
 
 - [ ] **Step 3: Create demo configs**
 
@@ -538,62 +548,21 @@ Use reduced demo-scale specs:
 
 Keep `analysis.auto = true` only when the configured analysis supports the config at demo scale.
 
-- [ ] **Step 4: Create `scripts/experiment/demo.py`**
+- [ ] **Step 4: Keep `scripts/experiment/run.py` as the only demo runner**
 
-Pattern it after `scripts/experiment/paper.py`:
+Do not create a new demo wrapper. If `scripts/experiment/run.py` cannot dry-run all three demo configs with repeated `--config`, extend `run.py` directly while preserving its existing repeated-config behavior.
 
-```python
-"""Run or dry-run demo-scale public reproduction specs."""
+Run command to preserve as the public demo route:
 
-# ruff: noqa: E402
-
-from __future__ import annotations
-
-import argparse
-import subprocess
-import sys
-from pathlib import Path
-
-
-DEMO_CONFIGS = (
-    "configs/demo/model_fitness.toml",
-    "configs/demo/betrayal_adaptation.toml",
-    "configs/demo/alpha_sweep.toml",
-)
-
-
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run demo-scale affect_aif reproduction configs.")
-    parser.add_argument("--output-dir", default="results", help="Root directory for output folders.")
-    parser.add_argument("--batch-name", default="demo", help="Batch output folder name.")
-    parser.add_argument("--workers", type=int, default=1, help="Worker count for the shared batch.")
-    parser.add_argument("--run", action="store_true", help="Run demos instead of writing a dry-run manifest.")
-    return parser
-
-
-def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
-    root = Path(__file__).resolve().parents[2]
-    cmd = [sys.executable, str(root / "scripts" / "experiment" / "run.py")]
-    for config in DEMO_CONFIGS:
-        cmd.extend(["--config", str(root / config)])
-    cmd.extend(
-        [
-            "--output-dir",
-            args.output_dir,
-            "--batch-name",
-            args.batch_name,
-            "--workers",
-            str(args.workers),
-        ]
-    )
-    if not args.run:
-        cmd.append("--dry-run")
-    return subprocess.run(cmd, check=False).returncode
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+```bash
+python scripts/experiment/run.py \
+  --config configs/demo/model_fitness.toml \
+  --config configs/demo/betrayal_adaptation.toml \
+  --config configs/demo/alpha_sweep.toml \
+  --output-dir results \
+  --batch-name demo \
+  --workers 1 \
+  --dry-run
 ```
 
 - [ ] **Step 5: Update supported-surface tests**
@@ -603,30 +572,63 @@ In `tests/test_supported_surface.py`, add expectations that:
 - `configs/demo/model_fitness.toml` exists and expands.
 - `configs/demo/betrayal_adaptation.toml` exists and expands.
 - `configs/demo/alpha_sweep.toml` exists and expands.
-- `scripts/experiment/demo.py` parses `--help`.
+- `scripts/experiment/run.py --help` remains the public experiment-running help surface.
 
 - [ ] **Step 6: Update docs**
 
 Update `configs/README.md` and `scripts/README.md` to describe the demo route as public and fast.
 
-- [ ] **Step 7: Run tests**
+- [ ] **Step 7: Delete or migrate legacy experiment-running wrappers**
+
+Audit `scripts/experiment/` and remove public runner wrappers after docs/tests
+use `run.py` directly:
+
+```bash
+find scripts/experiment -maxdepth 1 -type f -name '*.py' -print | sort
+rg -n "scripts/experiment/(paper|smoke|preliminary|run_exp_|followup)" README.md docs scripts tests configs || true
+```
+
+Rules:
+
+- Delete thin wrappers whose behavior is now a documented `run.py --config ...`
+  command.
+- For specialized Exp A-D runner scripts, first identify whether they only run
+  experiments or also generate compact paper metrics/figures. Move reusable
+  analysis/table generation into `scripts/analysis/` or documented artifact
+  generation before deleting the runner entry point.
+- Do not keep compatibility aliases.
+
+Expected deletion candidates after migration:
+
+```bash
+git rm scripts/experiment/paper.py scripts/experiment/smoke.py scripts/experiment/preliminary.py
+```
+
+Only delete `scripts/experiment/run_exp_a_alpha_sweep.py`,
+`scripts/experiment/run_exp_b_prior_factorial.py`,
+`scripts/experiment/run_exp_c_forgiveness.py`,
+`scripts/experiment/run_exp_d_mixed_volatility.py`, or
+`scripts/experiment/followup_phenotypes.py` after their unique output logic has
+a new home or is proven unnecessary for public reproduction.
+
+- [ ] **Step 8: Run tests**
 
 Run:
 
 ```bash
 .venv/bin/python -m pytest tests/test_scripts_smoke.py tests/test_supported_surface.py -q
-.venv/bin/python scripts/experiment/demo.py --output-dir /tmp/affect_aif_demo_check --batch-name demo_dry_check
+.venv/bin/python scripts/experiment/run.py --config configs/demo/model_fitness.toml --config configs/demo/betrayal_adaptation.toml --config configs/demo/alpha_sweep.toml --output-dir /tmp/affect_aif_demo_check --batch-name demo_dry_check --workers 1 --dry-run
 ```
 
 Expected: tests pass; dry-run manifest is written.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 Run:
 
 ```bash
-git add configs/demo scripts/experiment/demo.py configs/README.md scripts/README.md tests/test_scripts_smoke.py tests/test_supported_surface.py
-git commit -m "feat: add demo reproduction route"
+git add configs/demo configs/README.md scripts/README.md tests/test_scripts_smoke.py tests/test_supported_surface.py scripts/experiment
+git commit -m "feat: consolidate experiment running into run cli"
 ```
 
 ---
@@ -659,7 +661,7 @@ import subprocess
 import sys
 
 ROOT = Path.cwd()
-if not (ROOT / "scripts" / "experiment" / "demo.py").exists():
+if not (ROOT / "scripts" / "experiment" / "run.py").exists():
     raise RuntimeError("Run this notebook from the affect_aif repository root.")
 ```
 
@@ -671,8 +673,13 @@ Use:
 DEMO_OUT = ROOT / "results" / "notebook_demo"
 cmd = [
     sys.executable,
-    "scripts/experiment/demo.py",
-    "--run",
+    "scripts/experiment/run.py",
+    "--config",
+    "configs/demo/model_fitness.toml",
+    "--config",
+    "configs/demo/betrayal_adaptation.toml",
+    "--config",
+    "configs/demo/alpha_sweep.toml",
     "--output-dir",
     "results",
     "--batch-name",
@@ -715,7 +722,7 @@ Expected: prints `notebook json ok`.
 Only run this if demo configs are known to finish quickly:
 
 ```bash
-.venv/bin/python scripts/experiment/demo.py --run --output-dir /tmp/affect_aif_notebook_demo --batch-name notebook_demo_check --workers 1
+.venv/bin/python scripts/experiment/run.py --config configs/demo/model_fitness.toml --config configs/demo/betrayal_adaptation.toml --config configs/demo/alpha_sweep.toml --output-dir /tmp/affect_aif_notebook_demo --batch-name notebook_demo_check --workers 1
 ```
 
 Expected: completes and writes three demo result groups.
@@ -755,7 +762,7 @@ Keep front door sections:
 
 - Setup
 - Run demo notebook
-- Run demo CLI
+- Run demo configs through `run.py`
 - Reproduce paper
 - Result summaries
 - Repository layout
@@ -767,11 +774,9 @@ Remove agent-facing prose from README unless it is required for public users.
 Include commands:
 
 ```bash
-python scripts/experiment/smoke.py
-python scripts/experiment/demo.py
-python scripts/experiment/demo.py --run
-python scripts/experiment/paper.py
-python scripts/experiment/paper.py --run
+python scripts/experiment/run.py --config configs/smoke/trust_smoke.toml --dry-run
+python scripts/experiment/run.py --config configs/demo/model_fitness.toml --config configs/demo/betrayal_adaptation.toml --config configs/demo/alpha_sweep.toml --batch-name demo --workers 1
+python scripts/experiment/run.py --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml --batch-name paper_core_confirm --workers 1 --dry-run
 python scripts/analysis/analyze.py --results results/notebook_demo/h5/betrayal_adaptation_demo/results.csv --output-dir results/notebook_demo/h5/betrayal_adaptation_demo/analysis
 ```
 
@@ -1111,9 +1116,9 @@ Expected: no junk files; size is reasonable for Drive.
 Run:
 
 ```bash
-.venv/bin/python scripts/experiment/smoke.py --output-dir /tmp/affect_aif_public_check --batch-name smoke_dry
-.venv/bin/python scripts/experiment/demo.py --output-dir /tmp/affect_aif_public_check --batch-name demo_dry
-.venv/bin/python scripts/experiment/paper.py --output-dir /tmp/affect_aif_public_check --batch-name paper_dry
+.venv/bin/python scripts/experiment/run.py --config configs/smoke/trust_smoke.toml --output-dir /tmp/affect_aif_public_check --batch-name smoke_dry --dry-run
+.venv/bin/python scripts/experiment/run.py --config configs/demo/model_fitness.toml --config configs/demo/betrayal_adaptation.toml --config configs/demo/alpha_sweep.toml --output-dir /tmp/affect_aif_public_check --batch-name demo_dry --workers 1 --dry-run
+.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml --output-dir /tmp/affect_aif_public_check --batch-name paper_dry --workers 1 --dry-run
 ```
 
 Expected: all return 0 and write manifests.
@@ -1187,7 +1192,7 @@ git commit -m "chore: finalize public reproduction cleanup"
 - Use @superpowers:subagent-driven-development for implementation if parallelizing tasks.
 - Keep workers on disjoint write sets:
   - Worker A: results scaffold and gitignore.
-  - Worker B: demo configs/CLI/tests.
+  - Worker B: demo configs, `run.py` consolidation, and CLI tests.
   - Worker C: docs cleanup.
   - Worker D: server dry-run manifest only.
 - Do not let any worker mutate server results until the dry-run manifest is reviewed.
