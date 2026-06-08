@@ -5,7 +5,7 @@ This appendix specifies the POMDP components used by the focal agent.
 
 \subsection{Hidden state factors and observations}
 
-The focal agent's generative model for each partner $k$ maintains three latent factors:
+As described in Section~2.2, the focal agent's generative model for each partner $k$ maintains three latent factors:
 \begin{align}
 s_k^{\text{type}} &\in \{\text{cooperator, reciprocator,} \nonumber\\
   &\phantom{s_k^{\text{type}} \in \{}\;\text{exploiter, random}\} && \text{(latent behavioral type)} \label{eq:s_type}\\
@@ -145,4 +145,4 @@ Partner selection across $k$ is handled outside the per-partner POMDP by evaluat
 
 \subsection{Partner implementation}
 
-Reported experiments use one focal active-inference agent with per-partner generative models as described above. Partners are parameterized environment-side policies, not reciprocal active-inference agents. Each partner maintains a latent type and stance, follows the type-by-stance cooperation probabilities in Table~\ref{tab:coop_table}, and undergoes action-dependent stance transitions in Table~\ref{tab:b_stance}. Partners do not run variational inference, maintain their own policy precision $\gamma_k$, or update affective estimates $\beta_k$. This design isolates the focal agent's precision-tracking mechanism before adding reciprocal belief and policy updating on the partner side.
+Partner implementation follows Section~2.1. Four environment-side partners maintain latent type and stance and sample actions from the cooperation likelihood in Table~\ref{tab:coop_table}, undergoing action-dependent stance transitions per Table~\ref{tab:b_stance}. Partners do not perform variational inference or maintain affective precision estimates, isolating the focal agent's precision mechanism before extending to reciprocal active-inference partners.

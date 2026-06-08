@@ -29,27 +29,15 @@ where $\beta_\ell$ ranges over the five support points. This is a hand-designed 
 
 Third, the posterior is normalized:
 \begin{equation}
-q(\beta_k) \propto \exp\left(\log \ell(\beta_\ell)\right) \cdot p(\beta_k).
-\label{eq:beta_posterior}
+q(\beta_k) \propto \exp(\log \ell(\beta_\ell)) \cdot p(\beta_k).
+\label{eq:posterior_update}
 \end{equation}
-
-The agent then uses the posterior mean to set policy precision:
-\begin{equation}
-\gamma_k = \gamma_{\text{base}} \,/\, \mathbb{E}_{q(\beta_k)}[\beta_k].
-\label{eq:gamma_update_appendix}
-\end{equation}
-
-The $\beta_k$ posterior is maintained as an external auxiliary tracker rather than a proper hidden state in the generative model, which simplifies implementation at the cost of losing the agent's ability to form prior expectations over its own future affective states (discussed in Section~\ref{sec:discussion}).
+Policy precision is then set from the posterior mean as given in Eq.~3 of the main text. The $\beta_k$ posterior is maintained as an external auxiliary tracker rather than a proper hidden state in the generative model, which simplifies implementation at the cost of losing the agent's ability to form prior expectations over its own future affective states (discussed in Section~4).
 
 \subsection{Centered cross-partner policy logits}
 
-In partner-choice regimes, precision must sharpen policies within a partner branch without creating artifacts when branches are compared across partners. Let $u_{k,\pi}$ denote the pre-precision policy logit for policy $\pi$ toward partner $k$, and let $\bar{u}_k$ be that partner branch's mean logit. Precision is applied to centered logits:
-\begin{equation}
-\tilde{u}_{k,\pi} = \bar{u}_k + \gamma_k\left(u_{k,\pi} - \bar{u}_k\right).
-\label{eq:centered_logits}
-\end{equation}
-The agent then samples or selects policies from the combined set of $\tilde{u}_{k,\pi}$ values. Centering preserves the mean score of each partner branch while allowing $\gamma_k$ to sharpen or flatten the within-partner policy distribution. This prevents low-precision scaling from moving a uniformly poor branch toward zero and making it spuriously attractive in cross-partner comparison.
+In partner-choice regimes, precision must sharpen policies within a partner branch without creating artifacts when branches are compared across partners. The centered logit procedure is given in Eq.~4 of the main text. The agent samples or selects policies from the combined set of centered logits across all partner branches. Centering preserves the mean score of each partner branch while allowing $\gamma_k$ to sharpen or flatten the within-partner policy distribution, preventing low-precision scaling from making uniformly poor partner branches spuriously attractive in cross-partner comparison.
 
 \subsection{Ablation variants}
 
-Reported comparisons use four affect-runtime variants. The \emph{no-affect} control disables the beta tracker and fixes policy precision at $\gamma_{\mathrm{base}}$. The \emph{tracked-only} ablation updates $q(\beta_k)$ normally but fixes $\gamma_k = \gamma_{\mathrm{base}}$, allowing the precision estimate to be analyzed without letting it affect action selection. The default \emph{partner-local precision} variant applies the full update and sets $\gamma_k$ from each partner's posterior mean. The \emph{shared-$\beta$} ablation maintains a single pooled beta state updated from partner evidence while keeping partner-local POMDP beliefs intact; all partner branches then inherit precision from the shared expected $\beta$.
+The four affect-runtime variants are defined in Section~2.5. For completeness: the no-affect control disables the $\beta$ tracker entirely and fixes $\gamma_k = \gamma_{\text{base}}$; the tracked-only ablation updates $q(\beta_k)$ normally but fixes $\gamma_k = \gamma_{\text{base}}$, allowing the precision estimate to be analyzed without influencing action selection; the default partner-local variant applies the full update pipeline described in B.1--B.4 and sets $\gamma_k$ from each partner's posterior mean; and the shared-$\beta$ ablation maintains a single pooled $\beta$ state updated from all partner evidence while keeping per-partner POMDP beliefs intact, with all partner branches inheriting precision from the shared expected $\beta$.
