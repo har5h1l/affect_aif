@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Tests in this directory cover the supported package, CLI, benchmark, and analysis surface.
+Tests in this directory cover the supported package, CLI, result, notebook, and analysis surface.
 
 ## Verification Flow
 

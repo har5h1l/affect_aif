@@ -14,7 +14,7 @@ import pandas as pd
 
 from analysis.visualization import build_run_gifs
 from experiments.trust.runner import checkpoint_group_complete
-from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec
+from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, load_experiment_specs
 from experiments.trust.tasks import run_variant_replication_task
 
 
@@ -88,17 +88,17 @@ class BatchExperimentRunner:
         states: list[ConfigBatchState] = []
         for config_path in self.config_paths:
             path = Path(config_path)
-            spec = ExperimentSpec.from_toml(path)
-            states.append(
-                ConfigBatchState(
-                    config_path=config_path,
-                    config_name=spec.experiment.id,
-                    output_dir=self.batch_dir / spec.hypothesis.id / spec.experiment.id,
-                    spec=spec,
-                    spec_payload=spec.to_payload(),
-                    expanded_runs=spec.expand_runs(),
+            for spec in load_experiment_specs(path):
+                states.append(
+                    ConfigBatchState(
+                        config_path=config_path,
+                        config_name=spec.experiment.id,
+                        output_dir=self.batch_dir / spec.hypothesis.id / spec.experiment.id,
+                        spec=spec,
+                        spec_payload=spec.to_payload(),
+                        expanded_runs=spec.expand_runs(),
+                    )
                 )
-            )
         return states
 
     def _load_checkpoint(self, state: ConfigBatchState) -> set[tuple[str, int, int]]:

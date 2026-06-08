@@ -16,7 +16,7 @@ def test_current_runtime_packages_are_discovered_by_pyproject():
     include = pyproject["tool"]["setuptools"]["packages"]["find"]["include"]
     assert "tasks*" in include
     assert "experiments*" in include
-    assert "benchmarks*" in include
+    assert "benchmarks*" not in include
     assert "trust*" not in include
     assert "env*" not in include
     assert "experiment*" not in include
@@ -26,7 +26,6 @@ def test_current_runtime_packages_are_discovered_by_pyproject():
     assert "tasks.trust.evaluation" in packages
     assert "experiments.trust" in packages
     assert "experiments.multifocal" in packages
-    assert "benchmarks.core" in packages
     assert "benchmark" not in packages
 
     importlib.import_module("tasks.trust.affect")

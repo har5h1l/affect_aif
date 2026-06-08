@@ -28,19 +28,38 @@ dist/
 .worktrees/
 
 # Local experiment outputs
-results/*
+results/**
+!results/
 !results/.gitkeep
 !results/README.md
+!results/paper/
+!results/paper/**/
+!results/diagnostics/
+!results/diagnostics/**/
+!results/**/README.md
+!results/**/manifest.json
+!results/**/metrics.csv
+!results/**/summary.csv
+!results/**/*.summary.csv
+!results/**/*summary*.csv
+!results/**/source_tables/
+!results/**/source_tables/*.csv
+!results/**/.gitkeep
+results/**/raw/**
+results/archive/**
+results/**/results.csv
+results/**/results_partial.csv
+results/**/checkpoint_manifest.json
+results/**/*checkpoint*
+results/**/*.log
 outputs/
 artifacts/
 
 # LaTeX build artifacts
-docs/paper/*.aux
-docs/paper/*.log
-docs/paper/*.out
-docs/paper/manuscript/*.aux
-docs/paper/manuscript/*.blg
-docs/paper/manuscript/*.log
+docs/manuscript/*.aux
+docs/manuscript/*.blg
+docs/manuscript/*.log
+docs/manuscript/*.out
 
 # Claude Code local settings (not shared)
 .claude/settings.local.json
@@ -56,6 +75,7 @@ conductor/log/
 
 # graphify knowledge graph outputs (local only)
 graphify-out/
+docs/archive/
 
 # Hook state files
 .pytest_last_run

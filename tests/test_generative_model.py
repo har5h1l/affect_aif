@@ -1,9 +1,10 @@
 import numpy as np
+import pytest
 
 from experiments.trust.config import ExperimentConfig
 from tasks.trust.payoffs import build_graded_payoff_matrix, decode_action, encode_action
 from tasks.trust.pomdp import build_trust_pomdp_template
-from tasks.trust.types import PartnerType
+from tasks.trust.types import PartnerType, default_partner_type_params
 
 
 def _build_model(config):
@@ -31,6 +32,33 @@ def test_c_and_d_shapes():
     assert np.isclose(model.D[0].sum(), 1.0)
     assert np.isclose(model.D[1].sum(), 1.0)
     assert np.isclose(model.D[2].sum(), 1.0)
+
+
+def test_default_partner_type_params_cover_canonical_types():
+    params = default_partner_type_params()
+
+    assert set(params) == {"cooperator", "reciprocator", "exploiter", "random"}
+    for type_params in params.values():
+        assert set(type_params["cooperation_probabilities"]) == {"trusting", "neutral", "hostile"}
+        assert 0.0 < type_params["cooperation_probabilities"]["trusting"] <= 1.0
+
+
+def test_partner_type_get_action_distribution_is_categorical():
+    cooperator = PartnerType(
+        "cooperator",
+        {"cooperation_probabilities": {"trusting": 0.95, "neutral": 0.8, "hostile": 0.55}},
+    )
+
+    dist = cooperator.get_action_distribution("neutral")
+
+    np.testing.assert_allclose(dist, np.asarray([0.8, 0.2]))
+
+
+def test_partner_type_unknown_stance_raises():
+    cooperator = PartnerType("cooperator", {"cooperation_probabilities": {"trusting": 0.95}})
+
+    with pytest.raises(ValueError, match="Unknown stance"):
+        cooperator.get_action_probability("hostile")
 
 
 def test_partner_type_probabilities():

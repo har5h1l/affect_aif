@@ -1,0 +1,18 @@
+{
+  "name": "locality",
+  "category": "diagnostic",
+  "status": "complete",
+  "config_paths": [
+    "configs/diagnostics/h3_locality/global_beta_locality_probe.toml",
+    "configs/diagnostics/h3_locality/global_beta_focal_switch_probe.toml"
+  ],
+  "source_run_paths": [
+    "results/diagnostics/locality/raw/global_beta_locality_probe_20260526/h6/global_beta_locality_probe/results.csv",
+    "results/diagnostics/locality/raw/global_beta_focal_switch_probe_20260526/h6/global_beta_focal_switch_probe/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "summary.csv"
+  ],
+  "paper_use": "not_paper_evidence"
+}

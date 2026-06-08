@@ -8,6 +8,6 @@ agents. Read it before changing claims, experiments, or docs.
 - `blockers.md`: unresolved interpretation or execution blockers
 
 Stable decisions live in `docs/decisions/`. Interpreted evidence lives in
-`docs/results/`. Manuscript-facing material lives in `docs/paper/`.
+`docs/results/`. Manuscript-facing material lives in `docs/manuscript/`.
 Task-specific transfer packets live in `docs/handoffs/` and should be read
 only when named, linked, newly created, or task-matched.

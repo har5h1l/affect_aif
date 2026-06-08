@@ -17,7 +17,7 @@ individual differences in social trust calibration.
 - Preserve the Hesp-extension behavior-card spine in
   `docs/theory/hypotheses.md`.
 - Treat pre-May-27 bounded-error results as historical/provisional.
-- The post-fix three-seed smoke (`results/log_surprisal_spine_smoke_postfix_20260528/`)
+- The post-fix three-seed smoke (`results/diagnostics/spine_smoke/raw/`)
   is the current diagnostic baseline. Do not promote smoke numbers to
   publication claims without confirmation-scale reruns.
 
@@ -101,7 +101,7 @@ recovery process reaches finality.
 ## Active Read Order
 
 Read this folder in order: `state.md`, `progress.md`, then `blockers.md`.
-Paper-facing evidence in `docs/paper/manuscript/`. Interpreted results in
+Paper-facing evidence in `docs/manuscript/`. Interpreted results in
 `docs/results/`. Task-specific handoffs, when needed, live in
 `docs/handoffs/`; read them only when named, linked, newly created, or
 task-matched.

@@ -329,12 +329,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--source-dir",
-        default="docs/paper/manuscript/source_tables",
+        default="docs/manuscript/source_tables",
         help="Directory containing manuscript source CSV tables.",
     )
     parser.add_argument(
         "--output-dir",
-        default="docs/paper/manuscript/figures",
+        default="docs/manuscript/figures",
         help="Directory for generated manuscript figures.",
     )
     return parser

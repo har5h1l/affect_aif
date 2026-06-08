@@ -67,10 +67,10 @@ Create or modify these files:
 - Create `notebooks/demo.ipynb`: runnable notebook that runs demo-scale experiments and plots compact outputs.
 - Modify `README.md`: public front door.
 - Create `docs/reproduce.md` as the canonical public reproduction route. Keep
-  `docs/paper/REPRODUCE.md` only as a short pointer if compatibility is useful
+  `docs/manuscript/REPRODUCE.md` only as a short pointer if compatibility is useful
   during the cleanup branch.
 - Modify `docs/results/README.md`, `docs/results/current.md`: concise public evidence map.
-- Modify `docs/paper/README.md` and selected `docs/paper/notes/*.md`: shrink paper docs to manuscript-facing notes and point general result interpretation to `docs/results/`.
+- Modify `docs/manuscript/README.md` and selected `docs/manuscript/notes/*.md`: shrink paper docs to manuscript-facing notes and point general result interpretation to `docs/results/`.
 - Create tracked public result directories:
   - `results/README.md`
   - `results/paper/model_fitness/`
@@ -225,8 +225,8 @@ Use this mapping:
 
 | Public path | Source raw result | Compact source |
 |---|---|---|
-| `results/paper/model_fitness/` | `results/log_surprisal_h1_confirm_postfix_20260606/h1/reliability_vs_reward_confirm/results.csv` | `docs/paper/manuscript/source_tables/h1_*` |
-| `results/paper/betrayal_adaptation/` | `results/log_surprisal_h5_confirm_postfix_20260604/h5/betrayal_reallocation_confirm/results.csv` | `docs/paper/manuscript/source_tables/h5_evidence_effect_summary.csv` plus H5 tables |
+| `results/paper/model_fitness/` | `results/log_surprisal_h1_confirm_postfix_20260606/h1/reliability_vs_reward_confirm/results.csv` | `docs/manuscript/source_tables/h1_*` |
+| `results/paper/betrayal_adaptation/` | `results/log_surprisal_h5_confirm_postfix_20260604/h5/betrayal_reallocation_confirm/results.csv` | `docs/manuscript/source_tables/h5_evidence_effect_summary.csv` plus H5 tables |
 | `results/paper/alpha_sweep/` | `results/exp_a/results.csv` | `results/exp_a/metrics.csv` |
 | `results/paper/prior_factorial/` | `results/exp_b/results.csv` | `results/exp_b/metrics.csv` |
 | `results/paper/forgiveness/` | `results/exp_c/results.csv` | `results/exp_c/metrics.csv` |
@@ -743,18 +743,18 @@ git commit -m "docs: add runnable demo notebook"
 **Files:**
 - Modify: `README.md`
 - Create: `docs/reproduce.md`
-- Modify: `docs/paper/REPRODUCE.md`
+- Modify: `docs/manuscript/REPRODUCE.md`
 - Modify: `docs/README.md`
 - Modify: `docs/results/README.md`
 - Modify: `docs/results/current.md`
-- Modify: `docs/paper/README.md`
-- Modify: selected `docs/paper/notes/*.md`
+- Modify: `docs/manuscript/README.md`
+- Modify: selected `docs/manuscript/notes/*.md`
 - Modify: `docs/operations/cli.md`
 
 - [ ] **Step 1: Create canonical reproduction doc**
 
 Create `docs/reproduce.md` as the public canonical route, then make
-`docs/paper/REPRODUCE.md` point to it or remove duplication.
+`docs/manuscript/REPRODUCE.md` point to it or remove duplication.
 
 - [ ] **Step 2: Update `README.md`**
 
@@ -790,9 +790,9 @@ Do not change interpretations. Move or summarize existing reviewed paper notes i
 - `docs/results/current.md`
 - `docs/results/runs/*.md`
 
-Keep `docs/paper/notes/claims_and_evidence.md` if it remains useful for manuscript wording, but make it point to `docs/results/current.md` for general evidence status.
+Keep `docs/manuscript/notes/claims_and_evidence.md` if it remains useful for manuscript wording, but make it point to `docs/results/current.md` for general evidence status.
 
-- [ ] **Step 5: Trim `docs/paper/README.md`**
+- [ ] **Step 5: Trim `docs/manuscript/README.md`**
 
 Make it manuscript-specific:
 

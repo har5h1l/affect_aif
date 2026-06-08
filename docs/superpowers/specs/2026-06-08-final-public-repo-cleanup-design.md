@@ -177,7 +177,7 @@ Consolidate old folders as follows:
 
 ## Manuscript Layout
 
-Rename `docs/paper/` to `docs/manuscript/` and prune it to paper-adjacent
+Rename `docs/manuscript/` to `docs/manuscript/` and prune it to paper-adjacent
 material:
 
 ```text
@@ -198,8 +198,8 @@ docs/manuscript/
 
 Remove or move:
 
-- delete `docs/paper/prompts/`
-- delete `docs/paper/REPRODUCE.md`
+- delete `docs/manuscript/prompts/`
+- delete `docs/manuscript/REPRODUCE.md`
 - move `notes/model_spec.md` into `docs/model/`
 - fold `notes/experiment_manifest.md` and `notes/reproducibility.md` into
   `docs/experiments/`

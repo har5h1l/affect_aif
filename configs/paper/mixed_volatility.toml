@@ -1,0 +1,88 @@
+[suite]
+id = "mixed_volatility"
+name = "Mixed volatility"
+
+[defaults.hypothesis]
+id = "exp_d"
+name = "mixed_volatility"
+
+[defaults.experiment]
+family = "trust"
+rounds = 200
+replications = 20
+seed = 4200
+
+[defaults.scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+initial_types = ["cooperator", "exploiter", "cooperator", "cooperator"]
+initial_stances = ["trusting", "hostile", "trusting", "trusting"]
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[defaults.runtime]
+max_policies = 4096
+
+[defaults.analysis]
+auto = false
+
+[[variants]]
+id = "default_reference"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 3.0
+
+[[variants]]
+id = "low_alpha"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.1
+
+[[variants]]
+id = "high_alpha"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 8.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[experiments]]
+id = "mixed_volatility"
+seed_offset = 0
+
+[[experiments.scenario.type_switches]]
+round = 101
+partner = 2
+to = "exploiter"
+
+[[experiments.scenario.type_switches]]
+round = 101
+partner = 3
+to = "reciprocator"
+
+[[experiments.scenario.type_switches]]
+round = 151
+partner = 3
+to = "exploiter"
+
+[[experiments.scenario.stance_switches]]
+round = 101
+partner = 2
+to = "hostile"
+
+[[experiments.scenario.stance_switches]]
+round = 51
+partner = 3
+to = "neutral"
+
+[[experiments.scenario.stance_switches]]
+round = 151
+partner = 3
+to = "hostile"

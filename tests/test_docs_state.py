@@ -10,8 +10,17 @@ def test_docs_state_steering_wheel_exists():
         "docs/active/state.md",
         "docs/active/progress.md",
         "docs/active/blockers.md",
-        "docs/decisions/architecture.md",
-        "docs/decisions/experiments.md",
+        "docs/model/README.md",
+        "docs/model/pomdp.md",
+        "docs/model/affective_precision.md",
+        "docs/model/hypotheses.md",
+        "docs/experiments/README.md",
+        "docs/experiments/running.md",
+        "docs/experiments/configs.md",
+        "docs/experiments/paper.md",
+        "docs/experiments/diagnostics.md",
+        "docs/results/README.md",
+        "docs/manuscript/README.md",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]
     assert missing == []
@@ -41,7 +50,7 @@ def test_top_level_doc_links_exist():
         ROOT / "README.md",
         ROOT / "AGENTS.md",
         ROOT / "scripts" / "README.md",
-        ROOT / "docs" / "operations" / "cli.md",
+        ROOT / "docs" / "experiments" / "running.md",
     ]
     pattern = re.compile(r"\[[^\]]+\]\(([^)]+\.md)(?:#[^)]+)?\)")
     missing = []

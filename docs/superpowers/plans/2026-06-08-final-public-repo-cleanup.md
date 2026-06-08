@@ -60,7 +60,7 @@
 - Create: `docs/experiments/configs.md`
 - Create: `docs/experiments/paper.md`
 - Create: `docs/experiments/diagnostics.md`
-- Rename: `docs/paper/` -> `docs/manuscript/`
+- Rename: `docs/manuscript/` -> `docs/manuscript/`
 - Keep: `docs/results/`
 - Keep: `docs/active/`
 - Keep: `docs/handoffs/`
@@ -641,7 +641,7 @@ duplicate folders.
 ## Task 6: Rename and Prune Manuscript Surface
 
 **Files:**
-- Move: `docs/paper/` -> `docs/manuscript/`
+- Move: `docs/manuscript/` -> `docs/manuscript/`
 - Delete: `docs/manuscript/prompts/`
 - Delete: `docs/manuscript/REPRODUCE.md`
 - Modify: `scripts/analysis/make_paper_figures.py`
@@ -653,7 +653,7 @@ duplicate folders.
 Run:
 
 ```bash
-git mv docs/paper docs/manuscript
+git mv docs/manuscript docs/manuscript
 ```
 
 Expected: manuscript source, figures, source tables, appendix, and notes move
@@ -689,7 +689,7 @@ Move/fold:
 
 - [ ] **Step 4: Update code defaults**
 
-Update any script defaults from `docs/paper/manuscript` or `docs/paper` to
+Update any script defaults from `docs/manuscript` or `docs/manuscript` to
 `docs/manuscript`. Likely files:
 
 - `scripts/analysis/make_paper_figures.py`
@@ -707,7 +707,7 @@ Update `docs/manuscript/README.md` so build commands run from
 Run:
 
 ```bash
-rg -n "docs/paper|paper/manuscript" README.md docs scripts tests notebooks configs results
+rg -n "docs/manuscript|manuscript" README.md docs scripts tests notebooks configs results
 ```
 
 Expected: no references except historical plan/spec files if excluded.
@@ -1039,7 +1039,7 @@ Expected: both dry-run manifests are written.
 Run:
 
 ```bash
-rg -n "configs/paper_reproduce|configs/smoke/trust_smoke|configs/benchmark|scripts/benchmark|benchmarks/|docs/paper|docs/experiment/|docs/design|docs/operations|docs/decisions" \
+rg -n "configs/paper_reproduce|configs/smoke/trust_smoke|configs/benchmark|scripts/benchmark|benchmarks/|docs/manuscript|docs/experiment/|docs/design|docs/operations|docs/decisions" \
   README.md docs configs scripts tests notebooks results \
   -g '!docs/superpowers/**'
 ```

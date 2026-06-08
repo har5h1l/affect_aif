@@ -1,0 +1,21 @@
+{
+  "name": "model_fitness",
+  "category": "paper",
+  "status": "complete",
+  "config_paths": [
+    "configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml"
+  ],
+  "source_run_paths": [
+    "results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "summary.csv",
+    "source_tables/deployment_dissociation_summary.csv",
+    "source_tables/final_round_summary.csv",
+    "source_tables/model_fitness_correlation_summary.csv",
+    "source_tables/h1_evidence_effect_summary.csv",
+    "source_tables/h1_model_fitness_correlation_summary.csv"
+  ],
+  "paper_use": "Section 3.1 model-fitness readout"
+}

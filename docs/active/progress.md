@@ -20,7 +20,7 @@ git diff --check
 
 The original Exp A-D tmux/Mango process `affect_aif_exp_abcd_20260529`
 stopped without reaching finality: no live `run_exp_*` process, no tmux
-session, no `DONE` marker in `results/exp_abcd_20260529_logs/run.log`, no
+session, no `DONE` marker in `results/paper/alpha_sweep/rawbcd_20260529_logs/run.log`, no
 Exp C/D outputs, and no top-level final Exp B `results.csv`. Exp B had
 completed `open_graded` and `betrayal`; `partner_choice` had 116/120 complete
 runs, missing only no-affect replications 16--19. Those completed raw
@@ -31,7 +31,7 @@ Recovery is running in tmux/Mango:
 
 ```text
 tmux: affect_aif_exp_recovery_20260603
-log: results/exp_abcd_recovery_20260603_logs/run.log
+log: results/paper/alpha_sweep/rawbcd_recovery_20260603_logs/run.log
 HEAD: 972f13b
 Mango: affect_aif_exp_recovery_20260603, monitor-only
 ```
@@ -47,9 +47,9 @@ stages:
 1. Full verification gate: `pytest tests/ -q`, `ruff check .`, `mypy`,
    `git diff --check`.
 2. Exp A `--analyze-only`, then generic `scripts/analysis/analyze.py` on
-   `results/exp_a/results.csv`.
+   `results/paper/alpha_sweep/raw/results.csv`.
 3. Exp B resume from checkpoints, then generic analysis on
-   `results/exp_b/results.csv`.
+   `results/paper/prior_factorial/raw/results.csv`.
 4. Exp D full run and generic analysis (80 runs: 4 variants x 20 seeds).
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for uninterrupted recovery sessions. After
@@ -62,24 +62,24 @@ Current recovery status on June 6 09:10 PDT:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
   `git diff --check` passed.
 - Exp A analyze-only regeneration and generic analysis completed. Operational
-  artifacts now exist at `results/exp_a/analysis/` and
-  `docs/paper/manuscript/figures/fig_alpha_sweep.pdf`. Do not interpret the
+  artifacts now exist at `results/paper/alpha_sweep/raw/analysis/` and
+  `docs/manuscript/figures/fig_alpha_sweep.pdf`. Do not interpret the
   printed metric values as manuscript results until full Exp A-D finality and
   user-approved review.
 - Exp B resume completed. Structural audit shows all three Exp B environments
   complete: `open_graded`, `betrayal`, and `partner_choice` each have 120
-  run groups x 200 rounds, and top-level `results/exp_b/results.csv` has 360
+  run groups x 200 rounds, and top-level `results/paper/prior_factorial/raw/results.csv` has 360
   run groups / 72,000 data rows. Compact outputs exist at
-  `results/exp_b/metrics.csv`,
-  `docs/paper/manuscript/source_tables/exp_b_prior_factorial/`, and
-  `docs/paper/manuscript/figures/fig_phenotype_quadrants.pdf`. Generic
-  analysis completed under `results/exp_b/analysis/`.
+  `results/paper/prior_factorial/raw/metrics.csv`,
+  `docs/manuscript/source_tables/exp_b_prior_factorial/`, and
+  `docs/manuscript/figures/fig_phenotype_quadrants.pdf`. Generic
+  analysis completed under `results/paper/prior_factorial/raw/analysis/`.
 - Exp D completed operationally. Structural audit found 80/80 complete seed
   groups x 200 rounds, with all four variants complete. Final
-  `results/exp_d/results.csv`, `results/exp_d/metrics.csv`,
-  `results/exp_d/manifest.json`, `results/exp_d/README.md`,
-  `results/exp_d/analysis/`, `docs/paper/manuscript/source_tables/exp_d_mixed_volatility/metrics.csv`,
-  and `docs/paper/manuscript/figures/fig_mixed_volatility.pdf` exist. Do not
+  `results/paper/mixed_volatility/raw/results.csv`, `results/paper/mixed_volatility/raw/metrics.csv`,
+  `results/paper/mixed_volatility/raw/manifest.json`, `results/paper/mixed_volatility/raw/README.md`,
+  `results/paper/mixed_volatility/raw/analysis/`, `docs/manuscript/source_tables/exp_d_mixed_volatility/metrics.csv`,
+  and `docs/manuscript/figures/fig_mixed_volatility.pdf` exist. Do not
   interpret metric values until Exp A-D finality and user-approved review.
   Preliminary user-requested Exp D review on June 4 found that the current
   compact readout is not manuscript-ready for the strong planned
@@ -91,10 +91,10 @@ Current recovery status on June 6 09:10 PDT:
   trajectories.
 - Exp C completed structurally after the June 5 resume. Structural audit found
   120/120 seed groups x 200 rounds in both final and checkpoint CSVs. Final
-  `results/exp_c/results.csv`, `results/exp_c/metrics.csv`,
-  `results/exp_c/manifest.json`, `results/exp_c/README.md`, generic analysis,
-  `docs/paper/manuscript/source_tables/exp_c_forgiveness/metrics.csv`, and
-  `docs/paper/manuscript/figures/fig_forgiveness.pdf` exist. The original
+  `results/paper/forgiveness/raw/results.csv`, `results/paper/forgiveness/raw/metrics.csv`,
+  `results/paper/forgiveness/raw/manifest.json`, `results/paper/forgiveness/raw/README.md`, generic analysis,
+  `docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv`, and
+  `docs/manuscript/figures/fig_forgiveness.pdf` exist. The original
   recovery script did not write a `RECOVERY_DONE` marker after the reboot
   interruption, so use the structural file/count gate as finality evidence. Do
   not interpret metric values until user-approved review.
@@ -104,17 +104,17 @@ Current recovery status on June 6 09:10 PDT:
   `results/confirm_gate_20260604_logs/run.log`.
 - H5 confirmation completed structurally after the June 5 resume. Structural
   audit found 120/120 groups x 120 rounds in
-  `results/log_surprisal_h5_confirm_postfix_20260604/h5/betrayal_reallocation_confirm/results.csv`
+  `results/paper/betrayal_adaptation/raw/h5/betrayal_reallocation_confirm/results.csv`
   and the matching checkpoint. Configured analysis artifacts exist under the
   same directory. Do not interpret confirmation values until user-approved
   review.
 - H1 confirmation completed on June 6 after server checkout alignment to
   `162a127`, Mango preflight, and a fresh verification gate. Structural audit
   found 90/90 groups x 200 rounds in
-  `results/log_surprisal_h1_confirm_postfix_20260606/h1/reliability_vs_reward_confirm/results.csv`.
+  `results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv`.
   Configured analysis artifacts exist under the same directory, and paper
   source tables were copied to
-  `docs/paper/manuscript/source_tables/h1_model_fitness_confirm/`.
+  `docs/manuscript/source_tables/h1_model_fitness_confirm/`.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
@@ -267,7 +267,7 @@ uses the planned five axes: early exploitation rate, betrayal recovery time,
 selection Gini, trust asymmetry, and mean payoff, with a dashed default-agent
 overlay. The live Exp B raw trajectories remain valid, but the currently
 running Python process loaded the older analysis code; after Exp A-D finality,
-rerun Exp B with `--analyze-only` so `results/exp_b/metrics.csv`, source
+rerun Exp B with `--analyze-only` so `results/paper/prior_factorial/raw/metrics.csv`, source
 tables, and `fig_phenotype_quadrants.pdf` use the updated readout.
 
 Also while Exp B was still running, the Exp A compact analysis and figure
@@ -277,7 +277,7 @@ and `fig_alpha_sweep.pdf` now plots the planned early/mid/late entropy
 trajectory with 95% confidence intervals on the sweep panels. Exp A raw
 trajectories remain valid, but the already-written Exp A compact outputs were
 produced by the older analysis code; after Exp A-D finality, rerun Exp A with
-`--analyze-only` so `results/exp_a/metrics.csv`, source tables, and
+`--analyze-only` so `results/paper/alpha_sweep/raw/metrics.csv`, source tables, and
 `fig_alpha_sweep.pdf` use the updated readout.
 
 Decision tree for H1:
@@ -302,11 +302,11 @@ Decision tree for H1:
    caused by task or analysis confounding, not the core affective precision
    mechanism.
 
-On June 2, the benchmark trust backend was moved out of
-`tasks.trust.evaluation` into `benchmarks.trust_backend`, leaving task-local
-evaluation to hold only baseline agents. The import-boundary guard now checks
-that `tasks/` does not import `experiments`, `analysis`, or `benchmarks`,
-preserving the intended `scripts -> experiments -> tasks -> pymdp` direction.
+The historical trust-task benchmark arena was removed from the active public
+surface during the June 2026 cleanup and can be restored from archive history
+if needed. The import-boundary guard now checks that `tasks/` does not import
+`experiments` or `analysis`, preserving the intended
+`scripts -> experiments -> tasks -> pymdp` direction.
 
 ```text
 tmux: affect_aif_full_pytest_20260602_final
@@ -328,7 +328,7 @@ again.
 The post-fix H0-H6 smoke rebaseline completed at:
 
 ```text
-results/log_surprisal_spine_smoke_postfix_20260528/
+results/diagnostics/spine_smoke/raw/
 ```
 
 This is the current diagnostic baseline. Four phenotype experiments (Exp A-D)
@@ -339,19 +339,22 @@ complete.
 ## Phenotype Experiment Queue (Exp A-D)
 ### Status: running on server
 
-These fill Section 3.6 of the manuscript with actual numbers. They run via
-standalone scripts rather than TOML spec configs.
+These fill Section 3.6 of the manuscript with actual numbers. Current reruns
+use suite TOML configs through `scripts/experiment/run.py`; compact phenotype
+tables and figures are generated afterward with
+`scripts/analysis/phenotype_artifacts.py`.
 
 ### Exp A — α Sweep
 
 ```bash
-.venv/bin/python scripts/experiment/run_exp_a_alpha_sweep.py
+.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/alpha_sweep.toml --batch-name exp_a --workers 1
+.venv/bin/python scripts/analysis/phenotype_artifacts.py alpha_sweep --results-root results/paper/alpha_sweep/raw
 ```
 
 - **α values**: `[0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0]`
 - **Environments**: open graded + betrayal
 - **Seeds**: 20 per condition
-- **Outputs**: `results/exp_a/`, figures → `docs/paper/manuscript/figures/fig_alpha_sweep.pdf`
+- **Outputs**: `results/paper/alpha_sweep/raw/`, figures → `docs/manuscript/figures/fig_alpha_sweep.pdf`
 - **Metrics**: `early_exploitation_rate`, `betrayal_recovery_time`, `selection_gini`,
   `entropy_trajectory` (early/mid/late), `beta_range`
 - **Manuscript target**: Section 3.6.1 placeholders (`\resultp{Exp A: ...}`)
@@ -359,14 +362,15 @@ standalone scripts rather than TOML spec configs.
 ### Exp B — 2×2 Prior × α Factorial
 
 ```bash
-.venv/bin/python scripts/experiment/run_exp_b_prior_factorial.py
+.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/prior_factorial.toml --batch-name exp_b --workers 1
+.venv/bin/python scripts/analysis/phenotype_artifacts.py prior_factorial --results-root results/paper/prior_factorial/raw
 ```
 
 - **Prior conditions**: naive (low-β weights), cautious (high-β weights), default
 - **α conditions**: `low = 0.1`, `high = 3.0`, default reference
 - **Environments**: open graded, betrayal, partner-choice
 - **Seeds**: 20 per condition
-- **Outputs**: `results/exp_b/`, figures → `docs/paper/manuscript/figures/fig_phenotype_quadrants.pdf`
+- **Outputs**: `results/paper/prior_factorial/raw/`, figures → `docs/manuscript/figures/fig_phenotype_quadrants.pdf`
 - **Metrics**: all Exp A metrics + `trust_asymmetry`
 - **Target phenotypes**: anxious-reactive, hypervigilant, naive-stubborn, avoidant-rigid
 - **Manuscript target**: Section 3.6.2 placeholders
@@ -374,13 +378,14 @@ standalone scripts rather than TOML spec configs.
 ### Exp C — Forgiveness Paradigm
 
 ```bash
-.venv/bin/python scripts/experiment/run_exp_c_forgiveness.py
+.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/forgiveness.toml --batch-name exp_c --workers 1
+.venv/bin/python scripts/analysis/phenotype_artifacts.py forgiveness --results-root results/paper/forgiveness/raw
 ```
 
 - **Episode structure**: cooperative (1–80), betrayal (81–120), reversion (121–200)
 - **Conditions**: all 4 phenotype conditions + default + no-affect baseline
 - **Seeds**: 20 per condition
-- **Outputs**: `results/exp_c/`, figures → `docs/paper/manuscript/figures/fig_forgiveness.pdf`
+- **Outputs**: `results/paper/forgiveness/raw/`, figures → `docs/manuscript/figures/fig_forgiveness.pdf`
 - **Metrics**: `reengagement_rate`, `payoff_recovery`, `beta_recovery_trajectory`,
   `reengagement_latency`
 - **Manuscript target**: Section 3.6.3 placeholders
@@ -388,7 +393,8 @@ standalone scripts rather than TOML spec configs.
 ### Exp D — Mixed Volatility Environment
 
 ```bash
-.venv/bin/python scripts/experiment/run_exp_d_mixed_volatility.py
+.venv/bin/python scripts/experiment/run.py --config configs/paper_reproduce/mixed_volatility.toml --batch-name exp_d --workers 1
+.venv/bin/python scripts/analysis/phenotype_artifacts.py mixed_volatility --results-root results/paper/mixed_volatility/raw
 ```
 
 - **Partner setup**: P0 stationary cooperator, P1 stationary exploiter,
@@ -396,7 +402,7 @@ standalone scripts rather than TOML spec configs.
 - **Regime**: partner-choice
 - **Conditions**: default α (3.0), low α (0.1), high α (8.0), no-affect baseline
 - **Seeds**: 20 per condition
-- **Outputs**: `results/exp_d/`, figures → `docs/paper/manuscript/figures/fig_mixed_volatility.pdf`
+- **Outputs**: `results/paper/mixed_volatility/raw/`, figures → `docs/manuscript/figures/fig_mixed_volatility.pdf`
 - **Metrics**: `discrimination_index`, `concentration_toward_P0`, per-partner beta
   trajectories, `false_positive_rate` (rolling rate where stable-P0 engagement
   drops more than 15% below its early baseline)
@@ -405,8 +411,8 @@ standalone scripts rather than TOML spec configs.
 ### After Exp A-D Recovery Complete
 
 1. Confirm finality before reading metric values: the tmux/Mango process has
-   ended, `results/exp_abcd_recovery_20260603_logs/run.log` contains
-   `RECOVERY_DONE`, and `results/exp_a/` through `results/exp_d/` each contain
+   ended, `results/paper/alpha_sweep/rawbcd_recovery_20260603_logs/run.log` contains
+   `RECOVERY_DONE`, and `results/paper/alpha_sweep/raw/` through `results/paper/mixed_volatility/raw/` each contain
    final `results.csv`, `metrics.csv`, `manifest.json`, and `README.md`.
 2. Confirm generic analysis directories exist for Exp A-D where applicable:
    `results/exp_*/analysis/`.
@@ -430,7 +436,7 @@ H5 is the repaired positive behavioral anchor after the selector fix.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml \
+  --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml \
   --output-dir results \
   --batch-name log_surprisal_h5_confirm_postfix_20260601 \
   --workers 1
@@ -456,7 +462,7 @@ reward/exposure decomposition.
 ```bash
 # diagnostic first — do not add seeds before inspecting design
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml \
+  --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml \
   --output-dir results \
   --batch-name log_surprisal_h1_diagnostic_YYYYMMDD \
   --workers 1
@@ -480,7 +486,7 @@ reward/exposure decomposition.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h1_model_fitness/reliability_spine_graded_diagnostic.toml \
+  --config configs/diagnostics/h1_model_fitness/reliability_spine_graded_diagnostic.toml \
   --output-dir results \
   --batch-name log_surprisal_h1_graded_spine_diagnostic_YYYYMMDD \
   --workers 1
@@ -491,7 +497,7 @@ reward/exposure decomposition.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h1_model_fitness/reliability_spine_graded_reward_matched_diagnostic.toml \
+  --config configs/diagnostics/h1_model_fitness/reliability_spine_graded_reward_matched_diagnostic.toml \
   --output-dir results \
   --batch-name log_surprisal_h1_graded_reward_matched_diagnostic_YYYYMMDD \
   --workers 1
@@ -502,7 +508,7 @@ reward/exposure decomposition.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h1_model_fitness/reliability_reward_neutral_diagnostic.toml \
+  --config configs/diagnostics/h1_model_fitness/reliability_reward_neutral_diagnostic.toml \
   --output-dir results \
   --batch-name log_surprisal_h1_reward_neutral_diagnostic_YYYYMMDD \
   --workers 1
@@ -519,9 +525,9 @@ language and needs higher-seed confirmation for those claims.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h0_policy_openness/graded_choice_confirm.toml \
-  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
-  --config configs/trust/hypotheses/h4_social_allocation/partner_choice_confirm.toml \
+  --config configs/diagnostics/h0_policy_openness/graded_choice_confirm.toml \
+  --config configs/diagnostics/h2_deployment/lesion_open_regime_confirm.toml \
+  --config configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml \
   --output-dir results \
   --batch-name manuscript_open_social_confirm_YYYYMMDD \
   --workers 1
@@ -538,7 +544,7 @@ expected interference pattern.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml \
+  --config configs/diagnostics/h3_locality/global_beta_locality_probe.toml \
   --output-dir results \
   --batch-name h3_global_beta_confirm_YYYYMMDD \
   --workers 1

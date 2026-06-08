@@ -32,7 +32,7 @@ dev = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["tasks*", "experiments*", "analysis*", "benchmarks*", "cli*"]
+include = ["tasks*", "experiments*", "analysis*", "cli*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -70,7 +70,6 @@ files = [
   "scripts/analysis/analyze.py",
   "scripts/analysis/model_comparison.py",
   "scripts/analysis/visualize.py",
-  "scripts/experiment/preliminary.py",
   "scripts/experiment/run.py",
 ]
 exclude = []

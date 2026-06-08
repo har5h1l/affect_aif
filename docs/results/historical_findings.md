@@ -11,7 +11,7 @@ Partial CSVs mentioned below are no longer available for inspection.
 
 ## Salvaged Paper-Era Claims
 
-The deleted `docs/paper/` surface framed affect as per-partner metacognitive
+The deleted `docs/manuscript/` surface framed affect as per-partner metacognitive
 precision tracking in multi-agent active inference. Useful historical claims to
 retain as hypotheses or motivation:
 

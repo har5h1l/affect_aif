@@ -10,13 +10,13 @@ diagnostics, and pre-fix smoke outputs are historical provenance only.
 Current provenance:
 
 - Post-fix smoke baseline:
-  `results/log_surprisal_spine_smoke_postfix_20260528/`
+  `results/diagnostics/spine_smoke/raw/`
 - H5 confirmation:
-  `results/log_surprisal_h5_confirm_postfix_20260604/h5/betrayal_reallocation_confirm/`
+  `results/paper/betrayal_adaptation/raw/h5/betrayal_reallocation_confirm/`
 - H1 confirmation:
-  `results/log_surprisal_h1_confirm_postfix_20260606/h1/reliability_vs_reward_confirm/`
+  `results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/`
 - Paper source tables:
-  `docs/paper/manuscript/source_tables/`
+  `docs/manuscript/source_tables/`
 
 ## Current Read
 

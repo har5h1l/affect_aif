@@ -3,6 +3,7 @@
 This directory records interpreted result status and provenance.
 
 - `current.md`: current evidence status for the active architecture
+- `../../results/`: tracked compact public result summaries and manifests
 - `runs/`: per-run provenance notes for completed current-architecture runs
 - `../paper/`: submission-readiness, claims, outline, literature positioning,
   and figure/table plan
@@ -15,9 +16,10 @@ task-specific transfer notes belong in `docs/handoffs/` when needed.
 
 Large row-level result files are not assumed to be present in every checkout.
 Current interpreted claims should point to compact provenance notes under this
-directory and to reproducible config paths. If a local or remote results mirror
-is pruned, keep the documentation trail intact and rerun experiments before
-refreshing interpreted numbers.
+directory, tracked summaries under `results/paper/` or `results/diagnostics/`,
+and reproducible config paths. If a local or remote results mirror is pruned,
+keep the documentation trail intact and rerun experiments before refreshing
+interpreted numbers.
 
 ## Evidence Contract
 

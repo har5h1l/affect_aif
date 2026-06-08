@@ -1,13 +1,13 @@
 import pandas as pd
 
-from scripts.experiment.run_exp_a_alpha_sweep import EXP_A_PANELS, _summary_with_ci
-from scripts.experiment.run_exp_a_alpha_sweep import metrics as exp_a_metrics
-from scripts.experiment.run_exp_b_prior_factorial import EXP_B_RADAR_METRICS
-from scripts.experiment.run_exp_b_prior_factorial import metrics as exp_b_metrics
-from scripts.experiment.run_exp_c_forgiveness import EXP_C_PANELS, _payoff_recovery
-from scripts.experiment.run_exp_c_forgiveness import metrics as exp_c_metrics
-from scripts.experiment.run_exp_d_mixed_volatility import EXP_D_PANELS, build_specs
-from scripts.experiment.run_exp_d_mixed_volatility import metrics as exp_d_metrics
+from analysis.phenotypes.alpha_sweep import EXP_A_PANELS, _summary_with_ci
+from analysis.phenotypes.alpha_sweep import metrics as exp_a_metrics
+from analysis.phenotypes.forgiveness import EXP_C_PANELS, _payoff_recovery
+from analysis.phenotypes.forgiveness import metrics as exp_c_metrics
+from analysis.phenotypes.mixed_volatility import EXP_D_PANELS, build_specs
+from analysis.phenotypes.mixed_volatility import metrics as exp_d_metrics
+from analysis.phenotypes.prior_factorial import EXP_B_RADAR_METRICS
+from analysis.phenotypes.prior_factorial import metrics as exp_b_metrics
 
 
 def test_exp_d_alpha_conditions_are_distinct_and_ordered():

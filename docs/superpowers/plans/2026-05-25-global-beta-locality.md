@@ -31,7 +31,7 @@
 - Create: `scripts/analysis/make_paper_figures.py`
   Regenerate manuscript figures from canonical CSV/source tables.
 - Test: add or extend tests under `tests/` for spec parsing, runtime gamma routing, logging, and analysis outputs.
-- Docs: update `docs/design/implementation.md`, `docs/experiment/design.md`, and `docs/paper/notes/limitations_and_followups.md`.
+- Docs: update `docs/design/implementation.md`, `docs/experiment/design.md`, and `docs/manuscript/notes/limitations_and_followups.md`.
 
 ### Task 1: Spec Surface
 
@@ -221,8 +221,8 @@ Run:
 
 ```bash
 .venv/bin/python scripts/analysis/make_paper_figures.py \
-  --source-root docs/paper/manuscript/source_tables \
-  --output-dir docs/paper/manuscript/figures \
+  --source-root docs/manuscript/source_tables \
+  --output-dir docs/manuscript/figures \
   --format png
 ```
 

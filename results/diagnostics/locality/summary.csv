@@ -1,0 +1,3 @@
+label,source_run_path,config_path,rows,run_groups,variants,rounds,status,note
+locality_1,results/diagnostics/locality/raw/global_beta_locality_probe_20260526/h6/global_beta_locality_probe/results.csv,configs/diagnostics/h3_locality/global_beta_locality_probe.toml,1600,20,global_beta;local_beta;no_affect;tracked_only,80,complete,structural summary only; no new interpretation
+locality_2,results/diagnostics/locality/raw/global_beta_focal_switch_probe_20260526/h6/global_beta_focal_switch_probe/results.csv,configs/diagnostics/h3_locality/global_beta_focal_switch_probe.toml,2000,20,global_beta;local_beta;no_affect;tracked_only,100,complete,structural summary only; no new interpretation

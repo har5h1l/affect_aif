@@ -1,6 +1,17 @@
 # Notebooks
 
-Notebooks are references only. They are not the canonical way to produce results and are not runtime dependencies.
+- `demo.ipynb`: Colab/local workflow demo using `configs/demo/`. It runs real
+  demo experiments, runs post-hoc analysis, plots payoff/entropy readouts, and
+  prints demo-scale interpretation snippets.
+- `reproduce.ipynb`: Colab/local paper reproduction notebook. It dry-runs all
+  `configs/paper/` specs by default, can launch the full paper run when enabled,
+  materializes completed raw outputs into `results/paper/*/raw/`, regenerates
+  analysis artifacts, plots paper readouts, and can export `results/` to Google
+  Drive.
+- `references/`: historical/reference notebooks, not the public route.
 
-- `references/apashea_trust_spec.ipynb`: reference math notebook for the apashea-aligned trust model.
-- The supported runtime is official `inferactively-pymdp==1.0.0`; the reference notebook informs model construction only.
+Both public notebooks avoid `.venv` and absolute local paths. In Colab they
+clone the repo, install it into the runtime, report CPU/GPU/JAX devices, and
+write scratch runs under `outputs/` before touching canonical `results/`. The
+command-line scripts are the canonical execution surface; notebooks call those
+scripts rather than implementing separate runners.

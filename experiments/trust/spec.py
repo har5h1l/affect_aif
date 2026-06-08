@@ -43,7 +43,7 @@ LEGACY_PUBLIC_KEYS = {
 PAYOFF_VALUES = {"binary", "graded"}
 ASSIGNMENT_VALUES = {"random", "agent_choice"}
 AFFECT_VALUES = {"none", "precision", "tracked_only", "global_beta"}
-FAMILY_VALUES = {"trust", "benchmark", "multifocal"}
+FAMILY_VALUES = {"trust", "multifocal"}
 
 
 @dataclass(frozen=True)
@@ -143,14 +143,6 @@ class AnalysisSpec:
     compare: tuple[str, ...] = ()
     switch_window: tuple[int, ...] = ()
     metrics: tuple[str, ...] = ()
-
-
-@dataclass(frozen=True)
-class BenchmarkSettings:
-    backends: tuple[str, ...]
-    agents: tuple[str | dict[str, Any], ...]
-    agent_specs: tuple[dict[str, Any], ...]
-    trust: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -256,7 +248,6 @@ class ExperimentSpec:
     sweeps: tuple[SweepSpec, ...] = ()
     runtime: RuntimeSpec = RuntimeSpec()
     analysis: AnalysisSpec = AnalysisSpec()
-    benchmark: BenchmarkSettings | None = None
     path: str | None = None
 
     @classmethod
@@ -267,8 +258,7 @@ class ExperimentSpec:
 
         hypothesis = HypothesisSpec(**_require_table(data, "hypothesis"))
         experiment = ExperimentMeta(**_require_table(data, "experiment"))
-        benchmark = _parse_benchmark(data.get("benchmark"))
-        _validate_family_sections(experiment, benchmark)
+        _validate_family_sections(experiment, data.get("benchmark"))
         scenario = _parse_scenario(_require_table(data, "scenario"))
         variants = tuple(_parse_variant(item) for item in data.get("variants", ()))
         if not variants:
@@ -284,7 +274,6 @@ class ExperimentSpec:
             sweeps=sweeps,
             runtime=runtime,
             analysis=analysis,
-            benchmark=benchmark,
             path=str(target),
         )
 
@@ -376,9 +365,79 @@ class ExperimentSpec:
         for key in ("compare", "switch_window", "metrics"):
             analysis[key] = tuple(analysis.get(key, ()))
         data["analysis"] = AnalysisSpec(**analysis)
-        benchmark = data.get("benchmark")
-        data["benchmark"] = None if benchmark is None else _parse_benchmark(benchmark)
         return cls(**data)
+
+
+def load_experiment_specs(path: str | Path) -> list[ExperimentSpec]:
+    """Load one TOML file as either a single experiment or an experiment suite."""
+    target = Path(path)
+    data = tomllib.loads(target.read_text(encoding="utf-8"))
+    _reject_legacy_keys(data)
+    if "suite" not in data:
+        return [ExperimentSpec.from_toml(target)]
+    return _parse_suite(data, target)
+
+
+def _merge_table(*tables: dict[str, Any] | None) -> dict[str, Any]:
+    merged: dict[str, Any] = {}
+    for table in tables:
+        if table:
+            merged.update(dict(table))
+    return merged
+
+
+def _parse_suite(data: dict[str, Any], path: Path) -> list[ExperimentSpec]:
+    defaults = dict(data.get("defaults", {}))
+    default_hypothesis = defaults.get("hypothesis", {})
+    default_experiment = defaults.get("experiment", {})
+    default_scenario = defaults.get("scenario", {})
+    default_runtime = defaults.get("runtime", {})
+    default_analysis = defaults.get("analysis", {})
+    shared_variants = tuple(_parse_variant(item) for item in data.get("variants", ()))
+    if not shared_variants:
+        raise ValueError("suite config requires at least one shared [[variants]] entry")
+
+    specs: list[ExperimentSpec] = []
+    experiments = data.get("experiments", ())
+    if not experiments:
+        raise ValueError("suite config requires at least one [[experiments]] entry")
+
+    for entry in experiments:
+        experiment_entry = dict(entry)
+        scenario_entry = experiment_entry.pop("scenario", {})
+        hypothesis_entry = experiment_entry.pop("hypothesis", {})
+        runtime_entry = experiment_entry.pop("runtime", {})
+        analysis_entry = experiment_entry.pop("analysis", {})
+        variant_entries = experiment_entry.pop("variants", None)
+        seed_offset = int(experiment_entry.pop("seed_offset", 0))
+
+        hypothesis = HypothesisSpec(**_merge_table(default_hypothesis, hypothesis_entry))
+        experiment_data = _merge_table(default_experiment, experiment_entry)
+        if "id" not in experiment_data:
+            raise ValueError("suite experiment entry requires id")
+        if "seed" in experiment_data:
+            experiment_data["seed"] = int(experiment_data["seed"]) + seed_offset
+        experiment = ExperimentMeta(**experiment_data)
+        scenario = _parse_scenario(_merge_table(default_scenario, scenario_entry))
+        variants = (
+            tuple(_parse_variant(item) for item in variant_entries)
+            if variant_entries is not None
+            else shared_variants
+        )
+        runtime = RuntimeSpec(**_merge_table(default_runtime, runtime_entry))
+        analysis = _parse_analysis(_merge_table(default_analysis, analysis_entry), hypothesis)
+        specs.append(
+            ExperimentSpec(
+                hypothesis=hypothesis,
+                experiment=experiment,
+                scenario=scenario,
+                variants=variants,
+                runtime=runtime,
+                analysis=analysis,
+                path=str(path),
+            )
+        )
+    return specs
 
 
 def _require_table(data: dict[str, Any], name: str) -> dict[str, Any]:
@@ -420,25 +479,11 @@ def _parse_scenario(data: dict[str, Any]) -> ScenarioSpec:
     return ScenarioSpec(**scenario)
 
 
-def _parse_benchmark(data: dict[str, Any] | None) -> BenchmarkSettings | None:
-    if data is None:
-        return None
-    raw = dict(data)
-    return BenchmarkSettings(
-        backends=tuple(str(item) for item in raw.get("backends", ())),
-        agents=tuple(raw.get("agents", ())),
-        agent_specs=tuple(dict(item) for item in raw.get("agent_specs", ())),
-        trust=dict(raw.get("trust", {})),
-    )
-
-
-def _validate_family_sections(experiment: ExperimentMeta, benchmark: BenchmarkSettings | None) -> None:
+def _validate_family_sections(experiment: ExperimentMeta, benchmark: object | None) -> None:
     if experiment.family not in FAMILY_VALUES:
         raise ValueError(f"experiment.family must be one of {sorted(FAMILY_VALUES)}")
-    if experiment.family == "benchmark" and benchmark is None:
-        raise ValueError("benchmark family requires [benchmark] settings")
-    if experiment.family == "trust" and benchmark is not None:
-        raise ValueError("trust family does not accept [benchmark] settings")
+    if benchmark is not None:
+        raise ValueError("benchmark settings are not part of the active experiment surface")
 
 
 def _parse_variant(data: dict[str, Any]) -> VariantSpec:
@@ -485,7 +530,6 @@ def _value_slug(value: float | int | str | bool) -> str:
 
 __all__ = [
     "AnalysisSpec",
-    "BenchmarkSettings",
     "ExpandedRunSpec",
     "ExperimentMeta",
     "ExperimentSpec",
@@ -496,4 +540,5 @@ __all__ = [
     "SweepSpec",
     "TypeSwitchSpec",
     "VariantSpec",
+    "load_experiment_specs",
 ]

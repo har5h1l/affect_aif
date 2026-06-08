@@ -8,11 +8,9 @@ def test_aif_does_not_import_higher_layers():
         "tasks.",
         "experiments.",
         "analysis.",
-        "benchmarks.",
         "trust.",
         "env.",
         "experiment.",
-        "benchmark.",
     )
     offenders = []
     for path in (ROOT / "aif").rglob("*.py"):
@@ -24,7 +22,7 @@ def test_aif_does_not_import_higher_layers():
 
 
 def test_tasks_do_not_import_higher_layers():
-    forbidden = ("experiments.", "analysis.", "benchmarks.")
+    forbidden = ("experiments.", "analysis.")
     offenders = []
     for path in (ROOT / "tasks").rglob("*.py"):
         text = path.read_text()

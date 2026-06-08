@@ -17,7 +17,7 @@ navigation layers:
 
 - Paper-used results are mixed with diagnostics, historical runs, partial CSVs,
   checkpoints, dry-run output, and log folders.
-- `docs/paper/notes/` mixes manuscript guardrails, result interpretation,
+- `docs/manuscript/notes/` mixes manuscript guardrails, result interpretation,
   provenance, and operational notes.
 - Public configs are being split into `paper_reproduce`, `smoke`, and
   `diagnostics`, but the final demo/reproduction path is not yet fully
@@ -49,7 +49,7 @@ The top-level public route should be:
   documented command examples, not separate wrapper scripts.
 - `docs/results/`: public result interpretation, run maps, and compact evidence
   summaries.
-- `docs/paper/`: manuscript source, figure/table provenance, and
+- `docs/manuscript/`: manuscript source, figure/table provenance, and
   manuscript-specific claim guardrails.
 - `docs/active/`: internal current-state and agent continuation surface; it
   should not be the public front door.
@@ -236,17 +236,17 @@ Simplify public docs around four questions:
 Recommended structure:
 
 - `README.md`: short public front door.
-- `docs/reproduce.md` or `docs/paper/REPRODUCE.md`: canonical reproduction
+- `docs/reproduce.md` or `docs/manuscript/REPRODUCE.md`: canonical reproduction
   route, including demo, full paper CLI, server/Drive artifact expectations,
   and tracked-vs-ignored results.
 - `docs/results/README.md`: result-map index.
 - `docs/results/current.md`: concise claim-oriented evidence summary.
 - `docs/results/runs/`: provenance for retained historical or diagnostic runs.
-- `docs/paper/`: manuscript source, figures/tables, and paper-specific
+- `docs/manuscript/`: manuscript source, figures/tables, and paper-specific
   guardrails only.
 - `docs/active/`: internal agent/current-state surface.
 
-Move general result interpretation out of `docs/paper/notes/` into
+Move general result interpretation out of `docs/manuscript/notes/` into
 `docs/results/`. Keep paper notes only when they directly guide manuscript
 writing, claim wording, figures, or tables.
 

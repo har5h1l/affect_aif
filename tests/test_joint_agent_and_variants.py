@@ -1,7 +1,6 @@
 import numpy as np
 from runtime_helpers import build_runtime
 
-from benchmarks.core.benchmark_config import AGENT_REGISTRY
 from experiments.trust.config import ExperimentConfig
 from tasks.trust.runtime import snapshot_partner_bank, update_partner_after_observation
 
@@ -49,9 +48,3 @@ def test_factory_builds_native_runtimes_from_explicit_variants():
     assert affect.planning_horizon == 4
     assert no_epistemic.partner_bank.beta is None
     assert all(agent.use_states_info_gain is False for agent in no_epistemic.partner_bank.agents)
-
-
-def test_benchmark_registry_uses_explicit_variant_declarations():
-    assert AGENT_REGISTRY["affect"]["variant"]["affect"] == "precision"
-    assert AGENT_REGISTRY["no_affect"]["variant"]["affect"] == "none"
-    assert AGENT_REGISTRY["lesioned"]["variant"]["affect"] == "tracked_only"

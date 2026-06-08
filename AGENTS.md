@@ -53,15 +53,27 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
 ## Learned Workspace Facts
 
 - Use `.venv` in project root; venv should auto-activate when in this folder (direnv with `.envrc`).
-- Recommended experiment run: queue the relevant TOML specs under `configs/trust/hypotheses/` in one batch with `--workers 1` unless the user explicitly authorizes more workers; results go under `results/<batch_name>/<hypothesis_id>/<experiment_id>/results.csv`; run `scripts/analysis/analyze.py` on those paths after.
+- Recommended paper confirmation run: `python scripts/experiment/paper.py --run`
+  with `--workers 1` unless the user explicitly authorizes more workers.
+  Results go under
+  `results/<batch_name>/<hypothesis_id>/<experiment_id>/results.csv`; run
+  `scripts/analysis/analyze.py` on those paths after. Retained probes and
+  reviewer controls live under `configs/diagnostics/`.
 - Random-assignment specs are weak discriminators for the current hypothesis spine; use agent-choice scheduled-stance-switch specs for stress-response results.
 - Official `inferactively-pymdp==1.0.0` is the supported runtime. Do not reintroduce a custom active-inference engine; keep affect and trust logic in task modules.
 - State inference (partner-type belief updating) is handled by official
   `pymdp.Agent` instances created from `tasks.trust.pomdp` templates and logged
   as matrix-based belief updates.
 - Benchmark runs use `scripts/benchmark/run.py` plus `docs/operations/benchmark.md` for trust-task evaluation arena TOML configs such as `configs/benchmark/e1_arena/default.toml` and `configs/benchmark/e1_arena/betrayal.toml`.
-- Primary trust-hypothesis configs are under `configs/trust/hypotheses/` (and smoke under `configs/trust/smoke/`); benchmark configs are benchmark-family TOML specs under `configs/benchmark/`—see `docs/experiments/manifest.md`.
-- Remote VMs, sync, and merge flows for this project use `mango` (CLI at `~/Desktop/mango/`, available globally). See "Mango" section in `CLAUDE.md` for full command reference. Key: `mango run affect_aif --cloud` to launch, `mango stop affect_aif --remote` to stop, `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is rsync and does not delete remote-only files under `results/`). Do not add orchestration or deployment scripts to this repo.
+- Paper reproduction configs are under `configs/paper_reproduce/`, diagnostic
+  configs under `configs/diagnostics/`, and smoke under `configs/smoke/`.
+  Benchmark configs are benchmark-family TOML specs under `configs/benchmark/`.
+- Remote VMs, sync, and merge flows for this project use `mango` (CLI at
+  `~/Desktop/mango/`, available globally). Key commands: `mango run affect_aif
+  --cloud` to launch, `mango stop affect_aif --remote` to stop, and
+  `mango cloud sync push/fetch affect_aif` to sync code/results (`sync push` is
+  rsync and does not delete remote-only files under `results/`). Do not add
+  orchestration or deployment scripts to this repo.
 - Manuscript PDF builds in `docs/paper/manuscript/` via `pdflatex` → `bibtex` → `pdflatex` × 2; output is `main.pdf`. Supplementary code link (`https://github.com/har5h1l/affect_aif`, placeholder for anonymous review) belongs in Appendix C (`appendix/appendix_c_protocols.tex`) after seed counts; update URL upon acceptance.
 - Phenotype experiment summaries for the paper live in `docs/paper/manuscript/source_tables/` with figures in `docs/paper/manuscript/figures/`.
 - Confirmed betrayal result (30-seed): partner-local affect lowers policy entropy and raises joint partner-type accuracy; payoff advantage is small with bootstrap CI crossing zero — not a payoff–accuracy tradeoff.
@@ -111,9 +123,9 @@ affect_aif/
 
 ### Experiment Variants
 
-Trust experiments are declared as TOML specs under
-`configs/trust/hypotheses/`. Each spec expands explicit `[[variants]]`
-instead of numeric condition IDs or presets.
+Trust experiments are declared as TOML specs under `configs/paper_reproduce/`
+for the current paper and `configs/diagnostics/` for retained probes. Each spec
+expands explicit `[[variants]]` instead of numeric condition IDs or presets.
 
 Core maintained variant knobs:
 
@@ -172,8 +184,9 @@ update_partner_after_observation(...)
 
 ## Configuration System
 
-Trust specs live in `configs/trust/hypotheses/`, smoke specs live in
-`configs/trust/smoke/`, benchmark specs live under `configs/benchmark/`,
+Trust specs live in `configs/paper_reproduce/` and `configs/diagnostics/`,
+smoke specs live in `configs/smoke/`, benchmark specs live under
+`configs/benchmark/`,
 and multi-focal configs currently live in `experiments/multifocal/configs/`. `ExperimentConfig` is now an internal runtime adapter derived from
 expanded TOML runs. Key runtime fields:
 

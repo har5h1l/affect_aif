@@ -1,0 +1,104 @@
+[suite]
+id = "prior_factorial"
+name = "Prior x alpha factorial"
+
+[defaults.hypothesis]
+id = "exp_b"
+name = "prior_alpha_factorial"
+
+[defaults.experiment]
+family = "trust"
+rounds = 200
+replications = 20
+seed = 4200
+
+[defaults.scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+observation_noise = 0.0
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[defaults.runtime]
+max_policies = 4096
+
+[defaults.analysis]
+auto = false
+
+[[variants]]
+id = "naive_low_alpha"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.1
+beta_prior = [0.40, 0.40, 0.15, 0.04, 0.01]
+
+[[variants]]
+id = "naive_high_alpha"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 3.0
+beta_prior = [0.40, 0.40, 0.15, 0.04, 0.01]
+
+[[variants]]
+id = "cautious_low_alpha"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.1
+beta_prior = [0.01, 0.04, 0.15, 0.40, 0.40]
+
+[[variants]]
+id = "cautious_high_alpha"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 3.0
+beta_prior = [0.01, 0.04, 0.15, 0.40, 0.40]
+
+[[variants]]
+id = "default_reference"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 3.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[experiments]]
+id = "open_graded"
+seed_offset = 0
+
+[experiments.scenario]
+type_volatility = 0.0
+initial_types = ["cooperator", "reciprocator", "exploiter", "random"]
+initial_stances = ["trusting", "neutral", "trusting", "neutral"]
+
+[[experiments]]
+id = "betrayal"
+seed_offset = 10000
+
+[experiments.scenario]
+type_volatility = 0.0
+initial_types = ["cooperator", "reciprocator", "cooperator", "random"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+
+[[experiments.scenario.type_switches]]
+round = 81
+partner = 0
+to = "exploiter"
+
+[[experiments.scenario.stance_switches]]
+round = 81
+partner = 0
+to = "hostile"
+
+[[experiments]]
+id = "partner_choice"
+seed_offset = 20000
+
+[experiments.scenario]
+type_volatility = 0.03
+initial_types = ["cooperator", "reciprocator", "exploiter", "random"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]

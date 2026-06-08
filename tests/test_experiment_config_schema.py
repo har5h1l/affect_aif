@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import replace
 
 import pytest
-from experiment_spec_helpers import write_benchmark_toml, write_example_toml
+from experiment_spec_helpers import write_example_toml
 
 from experiments.trust.factory import create_native_runtime_from_run
-from experiments.trust.spec import ExperimentSpec
+from experiments.trust.spec import ExperimentSpec, load_experiment_specs
 
 
 @pytest.fixture
@@ -24,21 +24,75 @@ def test_loads_hierarchical_toml_spec(tmp_path):
     assert spec.variants[0].id == "affect"
 
 
-def test_loads_benchmark_family_add_on(tmp_path):
-    spec = ExperimentSpec.from_toml(write_benchmark_toml(tmp_path / "benchmark_smoke.toml"))
+def test_loads_suite_toml_into_experiment_specs(tmp_path):
+    path = tmp_path / "alpha_suite.toml"
+    path.write_text(
+        """
+[suite]
+id = "alpha_sweep"
+name = "Alpha sweep"
 
-    assert spec.experiment.family == "benchmark"
-    assert spec.benchmark is not None
-    assert spec.benchmark.backends == ("trust",)
-    assert spec.benchmark.agents == ("affect", "random")
-    assert spec.benchmark.trust["scenario"] == "resource_sharing"
+[defaults.hypothesis]
+id = "exp_a"
+name = "alpha_sweep"
 
+[defaults.experiment]
+family = "trust"
+rounds = 50
+replications = 2
+seed = 100
 
-def test_benchmark_family_requires_benchmark_section(tmp_path):
-    path = write_benchmark_toml(tmp_path / "missing.toml", include_benchmark=False)
+[defaults.scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+initial_types = ["cooperator", "reciprocator", "exploiter", "random"]
+initial_stances = ["trusting", "neutral", "trusting", "neutral"]
 
-    with pytest.raises(ValueError, match="benchmark"):
-        ExperimentSpec.from_toml(path)
+[[variants]]
+id = "alpha_low"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.5
+
+[[variants]]
+id = "alpha_high"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 8.0
+
+[[experiments]]
+id = "open_graded"
+seed_offset = 0
+
+[[experiments]]
+id = "betrayal"
+seed_offset = 10000
+
+[experiments.scenario]
+initial_types = ["cooperator", "reciprocator", "cooperator", "random"]
+
+[[experiments.scenario.type_switches]]
+round = 21
+partner = 0
+to = "exploiter"
+
+[[experiments.scenario.stance_switches]]
+round = 21
+partner = 0
+to = "hostile"
+""",
+        encoding="utf-8",
+    )
+
+    specs = load_experiment_specs(path)
+
+    assert [spec.experiment.id for spec in specs] == ["open_graded", "betrayal"]
+    assert [spec.experiment.seed for spec in specs] == [100, 10100]
+    assert specs[0].hypothesis.id == "exp_a"
+    assert [variant.id for variant in specs[0].variants] == ["alpha_low", "alpha_high"]
+    assert specs[1].scenario.type_switches[0].round == 21
 
 
 def test_trust_family_rejects_benchmark_section(tmp_path):
@@ -255,6 +309,25 @@ def test_factory_uses_tracked_only_lesion(example_spec):
     runtime = create_native_runtime_from_run(lesioned)
 
     assert runtime.affect_mode == "decouple"
+
+
+def test_spec_payload_roundtrip_preserves_expand_runs(example_spec):
+    restored = ExperimentSpec.from_payload(example_spec.to_payload())
+
+    original_runs = example_spec.expand_runs()
+    restored_runs = restored.expand_runs()
+
+    assert len(restored_runs) == len(original_runs)
+    assert [run.variant_id for run in restored_runs] == [run.variant_id for run in original_runs]
+    assert restored_runs[0].to_runtime_config().payoff_mode == original_runs[0].to_runtime_config().payoff_mode
+
+
+def test_stance_switch_spec_exports_runtime_dict():
+    from experiments.trust.spec import StanceSwitchSpec
+
+    switch = StanceSwitchSpec(round=4, partner=0, to="hostile")
+
+    assert switch.to_runtime_dict() == {"round": 4, "partner_idx": 0, "to_stance": "hostile"}
 
 
 def test_factory_uses_global_beta_shared_tracker(example_spec):

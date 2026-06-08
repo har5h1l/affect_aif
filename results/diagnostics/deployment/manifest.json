@@ -1,0 +1,16 @@
+{
+  "name": "deployment",
+  "category": "diagnostic",
+  "status": "complete",
+  "config_paths": [
+    "configs/diagnostics/h2_deployment/lesion_open_regime.toml"
+  ],
+  "source_run_paths": [
+    "results/diagnostics/spine_smoke/raw/h2/lesion_open_regime/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "summary.csv"
+  ],
+  "paper_use": "not_paper_evidence"
+}

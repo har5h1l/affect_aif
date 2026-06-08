@@ -4,7 +4,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 from experiment_spec_helpers import write_example_toml
 from runtime_helpers import build_runtime
 
@@ -40,7 +39,7 @@ def test_config_uses_canonical_beta_level_name():
 
 
 def test_toml_spec_surface_uses_explicit_variants():
-    spec = ExperimentSpec.from_toml(REPO_ROOT / "configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml")
+    spec = ExperimentSpec.from_toml(REPO_ROOT / "configs/diagnostics/h5_timescale_volatility/betrayal_choice.toml")
     assert [variant.id for variant in spec.variants] == ["no_affect", "affect", "lesioned", "global_beta"]
     assert {run.variant_id for run in spec.expand_runs()} == {"no_affect", "affect", "lesioned", "global_beta"}
 
@@ -60,14 +59,10 @@ def test_supported_cli_scripts_parse_and_run_smoke(tmp_path):
     run_experiment = _load_script_module("experiment/run.py")
     run_analysis = _load_script_module("analysis/analyze.py")
     run_model_comparison = _load_script_module("analysis/model_comparison.py")
-    run_preliminary = _load_script_module("experiment/preliminary.py")
     run_visualization = _load_script_module("analysis/visualize.py")
 
-    config_path = REPO_ROOT / "configs" / "trust" / "smoke" / "smoke.toml"
+    config_path = REPO_ROOT / "configs" / "diagnostics" / "smoke" / "trust_smoke.toml"
 
-    assert run_preliminary.build_parser().parse_args(
-        ["--config", str(config_path), "--replications", "1", "--rounds", "2"]
-    )
     assert run_visualization.build_parser().parse_args(["--results", "x.csv", "--output-dir", "out"])
     assert run_model_comparison.build_parser().parse_args(["--results", "x.csv", "--output-dir", "out"])
 
@@ -101,17 +96,6 @@ def test_supported_cli_scripts_parse_and_run_smoke(tmp_path):
     assert (model_dir / "model_comparison_report.json").exists()
 
 
-def test_preliminary_cli_help_avoids_stdlib_inspect_shadow():
-    result = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts" / "experiment" / "preliminary.py"), "--help"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-
-    assert "Run a small preliminary affect_aif experiment" in result.stdout
-
-
 def test_run_cli_dry_run_reports_toml_manifest(tmp_path):
     run_experiment = _load_script_module("experiment/run.py")
     config_path = write_example_toml(tmp_path / "betrayal_choice.toml")
@@ -139,46 +123,11 @@ def test_run_cli_dry_run_reports_toml_manifest(tmp_path):
 
 def test_experiment_run_dry_run_reports_families(tmp_path):
     run_experiment = _load_script_module("experiment/run.py")
-    benchmark_path = tmp_path / "benchmark_smoke.toml"
-    benchmark_path.write_text(
-        """
-[hypothesis]
-id = "e1"
-name = "benchmark_arena"
-
-[experiment]
-id = "benchmark_smoke"
-family = "benchmark"
-rounds = 1
-replications = 1
-seed = 7
-
-[scenario]
-payoff = "binary"
-assignment = "random"
-partners = 2
-
-[[variants]]
-id = "benchmark"
-affect = "none"
-planning_horizon = 1
-
-[benchmark]
-backends = ["trust"]
-agents = ["random"]
-
-[benchmark.trust]
-scenario = "resource_sharing"
-""",
-        encoding="utf-8",
-    )
 
     sys.argv = [
         "scripts/experiment/run.py",
         "--config",
-        "configs/trust/smoke/smoke.toml",
-        "--config",
-        str(benchmark_path),
+        "configs/diagnostics/smoke/trust_smoke.toml",
         "--output-dir",
         str(tmp_path / "results"),
         "--batch-name",
@@ -190,39 +139,29 @@ scenario = "resource_sharing"
     manifest = json.loads((tmp_path / "results" / "dry" / "manifest.json").read_text())
     assert [(entry["family"], entry["experiment_id"]) for entry in manifest["configs"]] == [
         ("trust", "smoke"),
-        ("benchmark", "benchmark_smoke"),
     ]
-
-
-def test_benchmark_cli_uses_unified_toml_configs(tmp_path, capsys):
-    run_benchmark = _load_script_module("benchmark/run.py")
-    config_path = REPO_ROOT / "configs" / "benchmark" / "smoke" / "smoke.toml"
-
-    with pytest.raises(SystemExit):
-        run_benchmark.main(["--help"])
-    assert "Path to benchmark-family TOML spec" in capsys.readouterr().out
-
-    run_benchmark.main(["--config", str(config_path), "--output-dir", str(tmp_path / "benchmark")])
-
-    assert (tmp_path / "benchmark" / "benchmark_results.csv").exists()
-    assert (tmp_path / "benchmark" / "benchmark_config.resolved.toml").exists()
 
 
 def test_core_hypothesis_experiments_exist():
     expected = [
-        "configs/trust/hypotheses/h0_policy_openness/shallow_binary.toml",
-        "configs/trust/hypotheses/h0_policy_openness/graded_choice.toml",
-        "configs/trust/hypotheses/h0_policy_openness/graded_betrayal.toml",
-        "configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml",
-        "configs/trust/hypotheses/h1_model_fitness/reliability_spine_graded_reward_matched_diagnostic.toml",
-        "configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml",
-        "configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml",
-        "configs/trust/hypotheses/h4_social_allocation/partner_choice.toml",
-        "configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml",
-        "configs/trust/hypotheses/h6_perturbation/perturbation_betrayal.toml",
-        "configs/trust/hypotheses/h6_perturbation/perturbation_dynamics.toml",
-        "configs/trust/hypotheses/h6_perturbation/affect_sensitivity.toml",
-        "configs/trust/smoke/smoke.toml",
+        "configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml",
+        "configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml",
+        "configs/diagnostics/h0_policy_openness/shallow_binary.toml",
+        "configs/diagnostics/h0_policy_openness/graded_choice.toml",
+        "configs/diagnostics/h0_policy_openness/graded_betrayal.toml",
+        "configs/diagnostics/h1_model_fitness/reliability_vs_reward.toml",
+        "configs/diagnostics/h1_model_fitness/reliability_spine_graded_reward_matched_diagnostic.toml",
+        "configs/diagnostics/h2_deployment/lesion_open_regime.toml",
+        "configs/diagnostics/h3_locality/global_beta_focal_switch_probe.toml",
+        "configs/diagnostics/h4_social_allocation/partner_choice.toml",
+        "configs/diagnostics/h5_timescale_volatility/betrayal_choice.toml",
+        "configs/diagnostics/h6_perturbation/perturbation_betrayal.toml",
+        "configs/diagnostics/h6_perturbation/perturbation_dynamics.toml",
+        "configs/diagnostics/h6_perturbation/affect_sensitivity.toml",
+        "configs/diagnostics/smoke/trust_smoke.toml",
+        "configs/demo/model_fitness.toml",
+        "configs/demo/betrayal_adaptation.toml",
+        "configs/demo/alpha_sweep.toml",
     ]
     assert not (REPO_ROOT / "experiments" / "trust" / "hypotheses").exists()
     for raw_path in expected:
@@ -232,23 +171,40 @@ def test_core_hypothesis_experiments_exist():
 
 
 def test_removed_script_surface_stays_out_of_supported_cli():
-    supported_scripts = {
+    primary_scripts = {
         "experiment/run.py",
-        "experiment/preliminary.py",
-        "experiment/smoke.py",
         "experiment/inspect.py",
         "analysis/analyze.py",
+    }
+    retained_diagnostic_scripts = {
         "analysis/summarize.py",
         "analysis/visualize.py",
         "analysis/model_comparison.py",
-        "benchmark/analyze.py",
-        "benchmark/run.py",
+        "analysis/phenotype_artifacts.py",
     }
     top_level_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
     all_scripts = {str(path.relative_to(REPO_ROOT / "scripts")) for path in (REPO_ROOT / "scripts").rglob("*.py")}
-    cli_doc = (REPO_ROOT / "docs" / "operations" / "cli.md").read_text()
+    cli_doc = (REPO_ROOT / "docs" / "experiments" / "running.md").read_text()
 
     assert top_level_scripts == set()
-    assert supported_scripts <= all_scripts
-    for script_name in supported_scripts:
+    assert primary_scripts <= all_scripts
+    assert retained_diagnostic_scripts <= all_scripts
+    assert "experiment/smoke.py" not in all_scripts
+    assert "experiment/paper.py" not in all_scripts
+    assert "experiment/preliminary.py" not in all_scripts
+    assert "benchmark/run.py" not in all_scripts
+    assert "benchmark/analyze.py" not in all_scripts
+    for script_name in primary_scripts:
         assert script_name in cli_doc
+
+
+def test_run_cli_is_public_experiment_running_help_surface():
+    result = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "experiment" / "run.py"), "--help"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "--config" in result.stdout
+    assert "--dry-run" in result.stdout

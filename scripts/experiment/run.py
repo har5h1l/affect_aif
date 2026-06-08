@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from analysis.configured import run_configured_analysis
 from experiments.trust.batch import BatchExperimentRunner, default_batch_id
 from experiments.trust.runner import ExperimentRunner
-from experiments.trust.spec import ExperimentSpec
+from experiments.trust.spec import load_experiment_specs
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -76,23 +76,23 @@ def _write_dry_run_manifest(args) -> int:
     config_entries = []
     for raw_path in args.config:
         config_path = Path(raw_path).resolve()
-        spec = ExperimentSpec.from_toml(config_path)
-        runs = spec.expand_runs()
-        config_entries.append(
-            {
-                "path": str(config_path),
-                "name": spec.experiment.id,
-                "family": spec.experiment.family,
-                "hypothesis_id": spec.hypothesis.id,
-                "experiment_id": spec.experiment.id,
-                "rounds": spec.experiment.rounds,
-                "replications": spec.experiment.replications,
-                "variants": [variant.id for variant in spec.variants],
-                "sweeps": [sweep.parameter for sweep in spec.sweeps],
-                "expanded_runs": len(runs),
-                "analysis_auto": spec.analysis.auto,
-            }
-        )
+        for spec in load_experiment_specs(config_path):
+            runs = spec.expand_runs()
+            config_entries.append(
+                {
+                    "path": str(config_path),
+                    "name": spec.experiment.id,
+                    "family": spec.experiment.family,
+                    "hypothesis_id": spec.hypothesis.id,
+                    "experiment_id": spec.experiment.id,
+                    "rounds": spec.experiment.rounds,
+                    "replications": spec.experiment.replications,
+                    "variants": [variant.id for variant in spec.variants],
+                    "sweeps": [sweep.parameter for sweep in spec.sweeps],
+                    "expanded_runs": len(runs),
+                    "analysis_auto": spec.analysis.auto,
+                }
+            )
 
     manifest_path = batch_dir / "manifest.json"
     manifest_path.write_text(
@@ -116,13 +116,13 @@ def _write_dry_run_manifest(args) -> int:
 def _serial_single_config_run(args) -> int:
     batch_id = args.batch_name or default_batch_id()
     config_path = str(Path(args.config[0]).resolve())
+    loaded_specs = load_experiment_specs(config_path)
+    if len(loaded_specs) != 1:
+        return _batch_run(args)
     batch_dir = Path(args.output_dir) / batch_id
-    spec = ExperimentSpec.from_toml(config_path)
+    spec = loaded_specs[0]
     if spec.experiment.family != "trust":
-        raise ValueError(
-            "Only trust-family specs are executable through scripts/experiment/run.py; "
-            "use scripts/benchmark/run.py for benchmark-family specs."
-        )
+        raise ValueError("Only trust-family specs are executable through scripts/experiment/run.py.")
     config_name = spec.experiment.id
     config_dir = batch_dir / spec.hypothesis.id / spec.experiment.id
     results_path = config_dir / "results.csv"
@@ -161,12 +161,9 @@ def _serial_single_config_run(args) -> int:
 
 def _batch_run(args) -> int:
     for raw_path in args.config:
-        spec = ExperimentSpec.from_toml(raw_path)
-        if spec.experiment.family != "trust":
-            raise ValueError(
-                "Only trust-family specs are executable through scripts/experiment/run.py; "
-                "use scripts/benchmark/run.py for benchmark-family specs."
-            )
+        for spec in load_experiment_specs(raw_path):
+            if spec.experiment.family != "trust":
+                raise ValueError("Only trust-family specs are executable through scripts/experiment/run.py.")
     batch_id = args.batch_name or default_batch_id()
     runner = BatchExperimentRunner(
         config_paths=args.config,

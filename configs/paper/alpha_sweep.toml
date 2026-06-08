@@ -1,0 +1,103 @@
+[suite]
+id = "alpha_sweep"
+name = "Alpha sweep"
+
+[defaults.hypothesis]
+id = "exp_a"
+name = "alpha_sweep"
+
+[defaults.experiment]
+family = "trust"
+rounds = 200
+replications = 20
+seed = 4200
+
+[defaults.scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[defaults.runtime]
+max_policies = 4096
+
+[defaults.analysis]
+auto = false
+
+[[variants]]
+id = "alpha_0p05"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.05
+
+[[variants]]
+id = "alpha_0p1"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.1
+
+[[variants]]
+id = "alpha_0p3"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.3
+
+[[variants]]
+id = "alpha_0p5"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.5
+
+[[variants]]
+id = "alpha_1p0"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 1.0
+
+[[variants]]
+id = "alpha_2p0"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 2.0
+
+[[variants]]
+id = "alpha_4p0"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 4.0
+
+[[variants]]
+id = "alpha_8p0"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 8.0
+
+[[experiments]]
+id = "open_graded"
+seed_offset = 0
+
+[experiments.scenario]
+initial_types = ["cooperator", "reciprocator", "exploiter", "random"]
+initial_stances = ["trusting", "neutral", "trusting", "neutral"]
+
+[[experiments]]
+id = "betrayal"
+seed_offset = 10000
+
+[experiments.scenario]
+initial_types = ["cooperator", "reciprocator", "cooperator", "random"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+
+[[experiments.scenario.type_switches]]
+round = 81
+partner = 0
+to = "exploiter"
+
+[[experiments.scenario.stance_switches]]
+round = 81
+partner = 0
+to = "hostile"

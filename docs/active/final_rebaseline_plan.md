@@ -42,13 +42,13 @@ lane, but configs and docs should use this single numbering.
 
 Active TOML specs now live under directories that match the final spine:
 
-- `configs/trust/hypotheses/h0_policy_openness/`
-- `configs/trust/hypotheses/h1_model_fitness/`
-- `configs/trust/hypotheses/h2_deployment/`
-- `configs/trust/hypotheses/h3_locality/`
-- `configs/trust/hypotheses/h4_social_allocation/`
-- `configs/trust/hypotheses/h5_timescale_volatility/`
-- `configs/trust/hypotheses/h6_perturbation/`
+- `configs/diagnostics/h0_policy_openness/`
+- `configs/diagnostics/h1_model_fitness/`
+- `configs/diagnostics/h2_deployment/`
+- `configs/diagnostics/h3_locality/`
+- `configs/diagnostics/h4_social_allocation/`
+- `configs/diagnostics/h5_timescale_volatility/`
+- `configs/diagnostics/h6_perturbation/`
 
 H7 and H8 are documented exploratory lanes. Do not add active TOML for them
 until the intended implementation and readouts are explicit.
@@ -60,13 +60,13 @@ statistical confirmation.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h0_policy_openness/graded_choice.toml \
-  --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward.toml \
-  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime.toml \
-  --config configs/trust/hypotheses/h3_locality/global_beta_focal_switch_probe.toml \
-  --config configs/trust/hypotheses/h4_social_allocation/partner_choice.toml \
-  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_choice.toml \
-  --config configs/trust/hypotheses/h6_perturbation/perturbation_dynamics.toml \
+  --config configs/diagnostics/h0_policy_openness/graded_choice.toml \
+  --config configs/diagnostics/h1_model_fitness/reliability_vs_reward.toml \
+  --config configs/diagnostics/h2_deployment/lesion_open_regime.toml \
+  --config configs/diagnostics/h3_locality/global_beta_focal_switch_probe.toml \
+  --config configs/diagnostics/h4_social_allocation/partner_choice.toml \
+  --config configs/diagnostics/h5_timescale_volatility/betrayal_choice.toml \
+  --config configs/diagnostics/h6_perturbation/perturbation_dynamics.toml \
   --output-dir results \
   --batch-name log_surprisal_spine_smoke_20260527 \
   --workers 1
@@ -90,7 +90,7 @@ Primary smoke readouts:
 ## Smoke Outcome
 
 The reduced H0-H6 post-fix smoke completed at
-`results/log_surprisal_spine_smoke_postfix_20260528/`. It is current smoke
+`results/diagnostics/spine_smoke/raw/`. It is current smoke
 evidence, not confirmation-scale evidence. The earlier
 `results/log_surprisal_spine_smoke_20260527/` run is pre-fix diagnostic
 provenance only.
@@ -118,12 +118,12 @@ confirmation of deployment/entropy support:
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/trust/hypotheses/h0_policy_openness/graded_choice_confirm.toml \
-  --config configs/trust/hypotheses/h1_model_fitness/reliability_vs_reward_confirm.toml \
-  --config configs/trust/hypotheses/h2_deployment/lesion_open_regime_confirm.toml \
-  --config configs/trust/hypotheses/h3_locality/global_beta_locality_probe.toml \
-  --config configs/trust/hypotheses/h4_social_allocation/partner_choice_confirm.toml \
-  --config configs/trust/hypotheses/h5_timescale_volatility/betrayal_reallocation_confirm.toml \
+  --config configs/diagnostics/h0_policy_openness/graded_choice_confirm.toml \
+  --config configs/paper_reproduce/h1_model_fitness/reliability_vs_reward_confirm.toml \
+  --config configs/diagnostics/h2_deployment/lesion_open_regime_confirm.toml \
+  --config configs/diagnostics/h3_locality/global_beta_locality_probe.toml \
+  --config configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml \
+  --config configs/paper_reproduce/h5_betrayal/betrayal_reallocation_confirm.toml \
   --output-dir results \
   --batch-name log_surprisal_spine_confirm_20260527 \
   --workers 1

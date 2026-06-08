@@ -38,10 +38,10 @@
 
 - No live affect_aif experiment is currently blocking the manuscript packet.
 - H5 confirmation reached structural finality under
-  `results/log_surprisal_h5_confirm_postfix_20260604/h5/betrayal_reallocation_confirm/`
+  `results/paper/betrayal_adaptation/raw/h5/betrayal_reallocation_confirm/`
   and has been interpreted in the paper packet.
 - H1 confirmation reached structural finality under
-  `results/log_surprisal_h1_confirm_postfix_20260606/h1/reliability_vs_reward_confirm/`
+  `results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/`
   and has been interpreted in the paper packet. The controlled H1 configs are
   reviewer-driven diagnostic surfaces, not current evidence.
 - Exp A-D generic analyses and manuscript figures now exist, including
@@ -80,6 +80,6 @@
   source tables now include explicit post-betrayal P0 selection and
   high-investment commitment rates so `betrayal_recovery_time` does not need to
   carry withdrawal-language claims by itself.
-- Import-boundary cleanup: benchmark orchestration moved to
-  `benchmarks.trust_backend`, and `tasks/` is guarded against imports from
-  `experiments`, `analysis`, or `benchmarks`.
+- Import-boundary cleanup: the historical trust-task benchmark arena was
+  removed from the active public surface, and `tasks/` is guarded against
+  imports from `experiments` or `analysis`.

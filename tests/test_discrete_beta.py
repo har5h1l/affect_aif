@@ -139,33 +139,7 @@ class TestDiscreteBetaState:
             DiscreteBetaState(num_entities=1, beta_levels=[0.5, 1.0, 2.0], initial_prior=initial_prior)
 
 
-@pytest.mark.skip(
-    reason="AffectiveState removed — superseded by DiscreteBetaState; correspondence tests no longer applicable"
-)
-class TestDiscreteContinuousCorrespondence:
-    """Test that continuous beta and inverse discrete beta track precision similarly."""
-
-    def test_both_increase_on_low_surprise(self):
-        pass
-
-    def test_both_decrease_on_high_surprise(self):
-        pass
-
-    def test_same_direction_on_betrayal_pattern(self):
-        pass
-
-    def test_rank_correlation(self):
-        pass
-
-
 class TestDiscreteAffectiveRuntime:
-    """Integration test: discrete beta runs through the native runtime machinery."""
-
-    def test_no_epistemic_preset_is_registered(self):
-        from experiments.trust.spec import VariantSpec
-
-        assert VariantSpec(id="no_epistemic", affect="none", planning_horizon=2, epistemic_value=False).id
-
     def test_discrete_agent_instantiation(self):
         from runtime_helpers import build_runtime
 

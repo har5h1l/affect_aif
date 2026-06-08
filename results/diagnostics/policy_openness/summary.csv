@@ -1,0 +1,2 @@
+label,source_run_path,config_path,rows,run_groups,variants,rounds,status,note
+policy_openness,results/diagnostics/spine_smoke/raw/h0/graded_choice/results.csv,configs/diagnostics/h0_policy_openness/graded_choice.toml,1800,9,affect;global_beta;no_affect,200,complete,structural summary only; no new interpretation

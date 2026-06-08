@@ -146,17 +146,17 @@ boundary figure from source tables.
 ### Required Additions
 
 Use canonical source tables under
-`docs/paper/manuscript/source_tables/`. Add script-generated PNG/PDF outputs
+`docs/manuscript/source_tables/`. Add script-generated PNG/PDF outputs
 for:
 
 - H1 model-fitness dissociation from
-  `docs/paper/manuscript/source_tables/h1_evidence_effect_summary.csv` and
-  `docs/paper/manuscript/source_tables/h1_model_fitness_correlation_summary.csv`
+  `docs/manuscript/source_tables/h1_evidence_effect_summary.csv` and
+  `docs/manuscript/source_tables/h1_model_fitness_correlation_summary.csv`
 - H3 betrayal boundary from
-  `docs/paper/manuscript/source_tables/h3_evidence_effect_summary.csv`,
-  `docs/paper/manuscript/source_tables/h3_betrayal_reallocation_summary.csv`,
+  `docs/manuscript/source_tables/h3_evidence_effect_summary.csv`,
+  `docs/manuscript/source_tables/h3_betrayal_reallocation_summary.csv`,
   and
-  `docs/paper/manuscript/source_tables/h3_betrayal_misdeployment_summary.csv`
+  `docs/manuscript/source_tables/h3_betrayal_misdeployment_summary.csv`
 
 The script should fail clearly on missing files or columns and print a manifest
 of generated assets. Statistical annotations may use existing source-table
@@ -171,7 +171,7 @@ paper should state the scientific argument directly in prose.
 
 ### Scope
 
-Edit only manuscript text files under `docs/paper/manuscript/` unless a local
+Edit only manuscript text files under `docs/manuscript/` unless a local
 compile or figure reference requires a small adjacent update. Do not change
 code, configs, result source tables, or H6 interpretation.
 
@@ -220,7 +220,7 @@ git diff --check
 ```
 
 For manuscript prose changes, also compile the manuscript using the command
-documented in `docs/paper/manuscript/README.md` or the local manuscript build
+documented in `docs/manuscript/README.md` or the local manuscript build
 file.
 
 ## Deliverables
