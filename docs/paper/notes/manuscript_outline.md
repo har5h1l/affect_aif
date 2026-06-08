@@ -56,19 +56,20 @@ Partner-Specific Affective Precision in Social Active Inference
 
 The manuscript organises results around five claims, not the H-card numbering:
 
-1. **Precision tracks predictability, not partner value** (`sec:model_fitness`).
-   Action surprisal; locality probe correlations (0.943 vs 0.110); global-beta
-   dilution.
+1. **Precision tracks predictability, not partner value** (`sec:model_fitness`;
+   shared-$\beta$ ablation in `sec:shared_beta`). Action surprisal; active-encounter
+   partials; locality load-bearing.
 2. **Behavioural gains through action sharpening** (`sec:deployment`). Tracked-only
    dissociation; metacognitive not epistemic; open graded entropy/payoff numbers.
-3. **Partner engagement reorganises around reliability** (`sec:partner_choice`).
-   Entropy and selection shifts; flat aggregate payoff at current scale.
-4. **Abrupt betrayal reveals temporal structure** (`sec:betrayal`). Lower policy
-   entropy and higher joint accuracy at confirmation scale, with a small and
-   uncertain payoff advantage; temporal dependency, not superior reward seeking.
-5. **Precision dynamics as individual differences** (`sec:phenotypes`). Clinical-style
-   perturbations; $\alpha$ sweep; phenotype quadrants; forgiveness; mixed-volatility
-   discrimination. Exp C separates reengagement from confidence restoration.
+3. **Partner selection also sharpens** (`sec:partner_choice`). Entropy and
+   directional allocation shifts; flat aggregate payoff at current 5-seed scale.
+4. **Abrupt betrayal reveals temporal structure** (`sec:betrayal`). Entropy and
+   joint accuracy reliable at 30-seed scale; payoff positive but uncertain as
+   expected for a calibration mechanism; handoff to revision-speed profiles.
+5. **Precision dynamics as computational profiles** (`sec:phenotypes`). Four-experiment
+   orienting opener; $\alpha$ sweep (non-monotonic payoff first); four gain-prior
+   profiles; forgiveness decoupling (round 121); mixed-volatility tension and
+   trade-off synthesis. Human-data disclaimer in Discussion §4.
 
 ## Discussion (as written)
 
@@ -98,12 +99,12 @@ research.
 | H-card | Manuscript section |
 |---|---|
 | H1 model fitness | §3.1 predictability |
-| H2 deployment | §3.2 action sharpening |
-| H4 social allocation | §3.3 engagement reorganisation |
-| H5 betrayal | §3.4 temporal structure |
-| H3 locality | §3.1 global-beta paragraph; Discussion global-$\beta$ |
-| H6 / Exp A–D | §3.5 perturbations; §3.6 phenotypes |
-| H0 openness | Underpins §3.2 graded open-regime readouts |
+| H3 locality | §3.2 shared-$\beta$ ablation |
+| H2 deployment | §3.3 action sharpening |
+| H4 social allocation | §3.4 partner-selection sharpening |
+| H5 betrayal | §3.5 temporal structure |
+| H6 / Exp A–D | §3.6 phenotypes |
+| H0 openness | Underpins §3.3 graded open-regime readouts |
 
 ## Limitations (paper-facing)
 

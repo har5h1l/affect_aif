@@ -69,8 +69,9 @@ Stable output tables include:
 
 ## Paper Artifacts
 
-Use `docs/paper/figures_tables.md` to map paper figures and tables to analysis
-artifacts. Avoid regenerating figures from partial or legacy result directories.
+Use `docs/paper/notes/figures_tables.md` to map paper figures and tables to
+analysis artifacts. Avoid regenerating figures from partial or legacy result
+directories.
 
 ## Current Verification Snapshot
 

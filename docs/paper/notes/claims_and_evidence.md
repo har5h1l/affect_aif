@@ -9,11 +9,11 @@ experiment spine.
 | Claim (manuscript framing) | Status | Evidence | How to write it |
 |---|---|---|---|
 | Partner-local precision tracks predictability, not partner value. | In manuscript with 30-seed confirmation. | §3.1: active-encounter partials local surprise vs payoff (0.882 vs 0.130); shared beta weaker (0.380 vs 0.049). | "Designed for model fitness"; cite action surprisal; note global-beta dilution and no reward-gain claim. |
-| Behavioural gains arise through action sharpening, not belief quality. | In manuscript (open graded + tracked-only). | §3.2: entropy 7.94 vs 8.80; tracked-only matches no-affect. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
-| Partner engagement reorganises around reliability before payoff separates. | In manuscript at current seed scale. | §3.3: entropy 4.66 vs 4.81; selection shifts; flat payoff. | Allocation reorganisation, not payoff headline. |
-| Abrupt betrayal exposes temporal dependency. | In manuscript with 30-seed confirmation. | §3.4: payoff 1185.9 vs 1172.1, CI crosses zero; entropy 8.36 vs 8.74; joint accuracy 0.372 vs 0.266. | Action sharpening with modest behavioral benefit; not generic reward improvement. |
-| Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed phenotype scale; Exp A-D interpreted. | §3.5–3.6: perturbations, $\alpha$ sweep, quadrants, forgiveness, mixed volatility. | "Computational analogues"; not clinical categories. |
-| Policy openness gates visible affect effects. | Underpins §3.2; not a separate subsection. | Graded open-regime readouts. | Openness necessary, not sufficient. |
+| Behavioural gains arise through action sharpening, not belief quality. | In manuscript (open graded + tracked-only). | §3.3: entropy `8.59` vs `8.79`; tracked-only matches no-affect on entropy and payoff. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
+| Partner engagement reorganises around reliability before payoff separates. | In manuscript at current seed scale. | §3.4: entropy 3.99 vs 4.83; cooperator up (36.6% vs 34.8%), exploiter down (13.8% vs 16.2%); flat payoff (393.6 vs 393.2). | Allocation reorganisation, not payoff headline. |
+| Abrupt betrayal exposes temporal dependency. | In manuscript with 30-seed confirmation. | §3.5: round-31 switch; entropy 8.36 vs 8.74 (CI −0.62 to −0.14); joint accuracy 0.372 vs 0.266 (CI 0.034 to 0.185); payoff 1185.9 vs 1172.1 (CI crosses zero). | Lead with entropy; uncertain payoff is correct for a calibration mechanism; hand off to §3.6 revision-speed profiles. |
+| Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed phenotype scale; Exp A-D interpreted. | §3.6: orienting four-experiment frame, $\alpha$ sweep (non-monotonic payoff), four gain-prior profiles, forgiveness decoupling, mixed-volatility tension/synthesis. | "Computational analogues"; disclaimer in Discussion §4; not clinical categories. |
+| Policy openness gates visible affect effects. | Underpins §3.3; not a separate subsection. | Graded open-regime readouts. | Openness necessary, not sufficient. |
 | Partner-local beta is behaviorally necessary. | Not established. | Local cleaner signal; global beta can win on payoff in probes. | Signal-quality decomposition only. |
 | Focal AIF vs scripted partners. | Stated in Discussion limitation. | Methods opening + Discussion §Limitations. | Parameterized partner policies; reciprocal AIF is future work. |
 
@@ -47,24 +47,32 @@ than reward improvement.
 Tracked-only matches no-affect on entropy and payoff while full precision
 modulation differs—deployment-channel claim is the manuscript anchor here.
 
-### Social reorganisation (H4 / §3.3)
+### Social reorganisation (H4 / §3.4)
 
-Partner-choice entropy and engagement shifts; payoff flat at stated scale.
+Partner-choice entropy drops under precision modulation (3.99 vs 4.83); engagement shifts toward cooperator and away from exploiter; payoff flat at stated scale (393.6 vs 393.2).
 
-### Temporal dependency under betrayal (H5 / §3.4)
+### Temporal dependency under betrayal (H5 / §3.5)
 
 The 30-seed confirmation replaces the earlier smoke-scale payoff--accuracy
-story. Partner-local affect lowers policy entropy and raises joint accuracy,
-while the payoff advantage is small and uncertain. Write this as
-precision-weighted commitment under abrupt change, not as a broad reward gain or
-as evidence that affect simply improves partner-type inference.
+story. Open with accumulated confidence as a liability when a partner changes
+(round-31 P0 switch). Lead with entropy (`8.36` vs `8.74`; CI does not cross
+zero), then joint accuracy (`0.372` vs `0.266`), then uncertain payoff
+(`1185.9` vs `1172.1`; CI crosses zero) as the correct readout for a
+calibration mechanism rather than a power failure. Reallocation diagnostics
+(higher post-switch P0 reencounters under affect) support active portfolio
+management but do not establish a payoff headline. Hand off to §3.6 for revision
+speed via precision gain and prior model fitness.
 
-### Phenotype programme (H6 / Exp A–D / §3.5–3.6)
+### Phenotype programme (H6 / Exp A–D / §3.6)
 
-20-seed descriptive profiles in manuscript. Exp C forgiveness is now
-interpreted as a dissociation between reengagement and restored confidence:
-no-affect and cautious-low-$\alpha$ profiles reengage most, while payoff
-recovery remains near baseline across profiles. Do not infer clinical validity.
+20-seed descriptive profiles in manuscript. §3.6 opens with a four-experiment
+orienting frame, leads the $\alpha$ sweep with non-monotonic payoff, gives
+equal weight to four gain-prior profiles, and closes with trade-off synthesis.
+Exp C forgiveness is interpreted as a dissociation between reengagement and
+restored confidence (no-affect 0.593 / cautious-low 0.630; payoff recovery
+0.996--1.033). Mixed-volatility payoff--discrimination dissociation at high
+gain; softened inertia claim (cautious-low muted $\beta_k$ only). Human-data
+disclaimer in Discussion §4. Do not infer clinical validity.
 
 ## Unsupported Or Overstrong Claims
 

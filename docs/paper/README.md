@@ -3,23 +3,48 @@
 This directory collects the paper-facing narrative for `affect_aif`. It is the
 best entry point when deciding what the manuscript can claim.
 
-## Files
+## Directory Layout
 
-- `notes/manuscript_outline.md`: section-by-section skeleton synced to current
-  manuscript `.tex`.
-- `notes/claims_and_evidence.md`: what the current results support, fail to
-  support, and leave incomplete.
-- `notes/literature_positioning.md`: novelty and related-work positioning.
-- `notes/figures_tables.md`: recommended figures, tables, and source artifacts.
-- `notes/limitations_followups.md`: limitations, reviewer risks, and narrow
-  follow-up experiments.
-- `notes/model_spec.md`: concise computational model description (focal AIF +
-  scripted partners).
-- `notes/experiment_manifest.md`: manuscript-facing experiment/config map.
-- `notes/reproducibility.md`: commands, environment, and provenance rules.
-- `notes/result_provenance.md`: promoted result roots and interpretation notes.
-- `manuscript/`: LNCS manuscript source, rendered PDF, result digest, figure
-  assets, source CSVs, future-work menu, and writing-model handoff.
+```text
+docs/paper/
+├── README.md                 # this index
+├── prompts/
+│   └── writing_model_prompt.md   # agent/human guardrails for .tex revision
+├── notes/                    # narrative, claims, and supporting supplements
+│   ├── manuscript_outline.md
+│   ├── claims_and_evidence.md
+│   ├── literature_positioning.md
+│   ├── figures_tables.md
+│   ├── limitations_and_followups.md
+│   ├── model_spec.md
+│   ├── experiment_manifest.md
+│   ├── reproducibility.md
+│   └── result_provenance.md
+└── manuscript/               # LNCS source, PDF, digest, figures, source CSVs
+    ├── README.md
+    ├── main.tex, sections/, appendix/
+    ├── results_digest.md
+    ├── source_tables/
+    └── figures/
+```
+
+## Where To Start
+
+| Task | Read first |
+|---|---|
+| Revise manuscript prose | `prompts/writing_model_prompt.md`, then `manuscript/sections/*.tex` |
+| Check what we can claim | `notes/claims_and_evidence.md`, `manuscript/results_digest.md` |
+| Section structure / spine | `notes/manuscript_outline.md` |
+| Figure or table plan | `notes/figures_tables.md` |
+| Limitations and reviewer follow-ups | `notes/limitations_and_followups.md` |
+| Model / runtime boundary | `notes/model_spec.md` |
+| Config paths for cited experiments | `notes/experiment_manifest.md` |
+| Run commands and provenance | `notes/reproducibility.md`, `notes/result_provenance.md` |
+| Build PDF | `manuscript/README.md` |
+
+Interpreted hypothesis status outside the paper packet remains in
+`docs/results/current.md`. Do not treat paper notes as a substitute for that
+scorecard.
 
 ## One-Sentence Thesis
 
@@ -31,7 +56,7 @@ open.
 ## Current Read
 
 The manuscript draft has a coherent mechanism-and-boundary story aligned with
-the five linked results claims in `sections/03_results.tex`.
+the five linked results claims in `manuscript/sections/03_results.tex`.
 
 - **Core mechanism:** predictability tracking, metacognitive (not epistemic)
   deployment via tracked-only dissociation, partner-choice reorganisation.

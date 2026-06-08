@@ -76,11 +76,9 @@ python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_2026051
 python scripts/analysis/analyze.py --results results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/results.csv --output-dir results/confirm_h1_h3_split_20260519/h3/betrayal_reallocation_confirm/analysis
 ```
 
-Current H1 confirmation should follow the active ladder in
-`docs/active/progress.md`: corrected active-encounter confirmation first, then
-the balanced graded reliability spine if reward/exposure remains confounded,
-then the reward-matched graded reliability spine, then the strict
-reward-neutral diagnostic before treating H1 as model-level failure.
+H1 reached structural finality on June 6 (30-seed confirmation). The diagnostic
+ladder in `docs/paper/notes/limitations_and_followups.md` is for reviewer-driven
+escalation only, not a current manuscript gate.
 
 ### Historical H5 Precision Sensitivity
 
@@ -102,5 +100,5 @@ python scripts/analysis/analyze.py --results results/h3_precision_sensitivity_20
 | H2 | Deployment active | Post-fix three-seed smoke; lesion/no-affect match, local affect changes entropy but not payoff. |
 | H3 | Decomposition only | Post-fix three-seed smoke; global beta has higher aggregate payoff, local beta remains cleaner as a partner-specific signal. |
 | H4 | Underpowered | Post-fix three-seed smoke; keep supplemental until confirmation. |
-| H5 | Repaired positive anchor | Post-fix three-seed smoke; local affect beats no-affect/lesioned after betrayal, but needs confirmation. |
+| H5 | Confirmed | 30-seed confirmation (`results/log_surprisal_h5_confirm_postfix_20260604/`); use `manuscript/source_tables/h5_evidence_effect_summary.csv`. |
 | H6 | Dynamics only | Post-fix three-seed smoke; beta ranges separate, no clinical validation. |

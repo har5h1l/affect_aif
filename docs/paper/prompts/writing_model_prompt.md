@@ -6,12 +6,13 @@ framing guardrail, not a greenfield drafting brief.
 
 Read these files first:
 
-1. `docs/paper/manuscript/README.md`
-2. `docs/paper/manuscript/sections/*.tex` (current source of truth for framing)
-3. `docs/paper/notes/manuscript_outline.md`
-4. `docs/paper/notes/claims_and_evidence.md`
-5. `docs/paper/manuscript/results_digest.md`
-6. `docs/paper/manuscript/references.bib`
+1. `docs/paper/README.md`
+2. `docs/paper/manuscript/README.md`
+3. `docs/paper/manuscript/sections/*.tex` (current source of truth for framing)
+4. `docs/paper/notes/manuscript_outline.md`
+5. `docs/paper/notes/claims_and_evidence.md`
+6. `docs/paper/manuscript/results_digest.md`
+7. `docs/paper/manuscript/references.bib`
 
 Use these project docs for implementation detail if needed:
 
@@ -48,13 +49,27 @@ Use these project docs for implementation detail if needed:
 - Incoming Methods edits: add explicit POMDP subsection and partner-implementation
   paragraph without contradicting Discussion limitations.
 
+## Results Prose (§3-style revisions)
+
+- Open on findings or live questions, not Methods-style ablation definitions.
+- Use "by construction" for design-guaranteed mechanism claims; not "expected to track."
+- State analytic rationale before numbers; interpret tables and bootstrap CIs explicitly.
+- Own adverse or null payoff results without hedging ("flat-to-slightly lower").
+- Section closers forward-handoff to the next question, not passive "analyses below show."
+- Multi-experiment sections (e.g. profiles): orient with one sentence mapping experiments to questions.
+- Human-behavior disclaimers belong in Discussion limitations, not Results openings.
+- When the user supplies critique plus suggested rewrite: verify numbers against
+  `results_digest.md` and `source_tables/` first; then apply LaTeX-adapted rewrite;
+  sync `claims_and_evidence.md` and `figures_tables.md`.
+
 ## Manuscript Spine (matches current `.tex`)
 
 1. Intro: prediction/commitment → affect → AIF/Hesp → relational extension →
    three questions.
 2. Methods: trust game → per-partner POMDP → partner-local precision → lesions
    → centred logits → simulation scale.
-3. Results: five subsections aligned to claims (not H-card numbering in prose).
+3. Results: six subsections (model fitness, shared-β, deployment, partner choice,
+   betrayal, profiles); five linked claims in prose.
 4. Discussion: social metacognition; phenotypes; deployment lesion; betrayal
    temporal dependency; limitations (external beta, scripted partners,
    predictive phenotypes); future work (human data, global beta, ToM).
