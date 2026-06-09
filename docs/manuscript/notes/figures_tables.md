@@ -39,8 +39,8 @@ Must show:
 - external beta tracker outside the POMDP;
 - tracked-only lesion where beta updates but gamma is decoupled.
 
-Source docs: `docs/model/pomdp.md`, `docs/model/affective_precision.md`, and
-`docs/theory/pomdp_spec.md`.
+Source docs: `docs/overview/pomdp.md` and
+`docs/overview/affective_precision.md`.
 
 ### Figure 2: Model Fitness / Locality
 
@@ -164,7 +164,8 @@ Use `docs/results/current.md` as the source of truth. Columns:
 
 ### Table 2: Experiment Specs
 
-Use `docs/experiments/manifest.md` and config paths. Columns:
+Use `docs/experiments/paper.md`, `docs/experiments/configs.md`, and config
+paths. Columns:
 
 - hypothesis;
 - config path;
