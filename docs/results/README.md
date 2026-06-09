@@ -4,6 +4,10 @@ This directory records interpreted result status and provenance. It is not the
 raw data store.
 
 - `current.md`: current evidence status for the active architecture
+- `paper.md`: paper result cards and where their summaries live
+- `diagnostics.md`: retained non-paper diagnostic result cards
+- `archive.md`: archive policy for historical or incomplete material
+- `cleanup/`: local/server cleanup manifests from the public repo cleanup
 - `../../results/`: tracked compact public result summaries and manifests
 - `runs/`: per-run provenance notes for completed current-architecture runs
 - `../manuscript/`: manuscript source, source tables, figures, and
@@ -55,3 +59,13 @@ Use `current.md` for the interpreted scorecard. Use `results/paper/*` and
 `results/diagnostics/*` for compact tracked summaries and provenance. Use
 `docs/manuscript/results_digest.md` and `docs/manuscript/source_tables/` for
 the exact paper packet.
+
+## Local Vs Server
+
+- Local `results/paper/` should contain the paper-needed raw files plus tracked
+  summaries. It is the folder intended for a Drive handoff.
+- Local `results/diagnostics/` may be compact-summary only when raw diagnostic
+  data is not needed for the paper packet.
+- Server `results/` keeps the fuller diagnostic and archive payloads after
+  cleanup. Do not delete server raw data unless a later cleanup manifest says
+  exactly what was removed and why.
