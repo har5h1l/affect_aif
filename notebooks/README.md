@@ -1,16 +1,36 @@
 # Notebooks
 
-- `demo.ipynb`: Colab/local workflow demo using `configs/demo/`. It runs real
-  demo experiments, runs post-hoc analysis, plots payoff/entropy readouts, and
-  prints demo-scale interpretation snippets.
+- `demo.ipynb`: Colab/local workflow demo using `configs/demo/`. It is split
+  into one section per demo experiment; each section runs the config, analyzes
+  the fresh output, then plots payoff/entropy readouts.
 - `reproduce.ipynb`: Colab/local paper reproduction notebook. It dry-runs all
-  `configs/paper/` specs to show the workload, then runs the full paper configs
-  into `outputs/paper_full/`, materializes those fresh outputs into
-  `results/paper/*/raw/`, regenerates analysis artifacts, plots paper readouts,
-  and can export `results/` to Google Drive.
+  `configs/paper/` specs to show the workload, then walks through H1, H5, and
+  Exp A-D one section at a time. Each section runs the relevant config into
+  `outputs/`, materializes the fresh output into `results/paper/*/raw/`,
+  regenerates analysis artifacts, and plots the local readout before moving on.
 
 Both public notebooks avoid `.venv` and absolute local paths. In Colab they
 clone the repo, install it into the runtime, report CPU/GPU/JAX devices, and
 write scratch runs under `outputs/` before touching canonical `results/`. The
 command-line scripts are the canonical execution surface; notebooks call those
 scripts rather than implementing separate runners.
+
+## Which Notebook To Use
+
+Use `demo.ipynb` when you want a fast, readable proof that the project installs,
+runs experiments, runs analysis, and produces plots. It is the better notebook
+for first-time readers.
+
+Use `reproduce.ipynb` when you want to regenerate the paper suite. It is more
+expensive because each paper experiment is executed before its analysis cells.
+
+## Colab Notes
+
+- Runtime: CPU is enough for the small demo; GPU/JAX devices are reported when
+  present but are not required for correctness.
+- Outputs: scratch runs go under `outputs/`; canonical materialized outputs go
+  under `results/paper/*/raw/`.
+- Data policy: row-level `results.csv` files are ignored by git. The notebook
+  can still write them locally or export them to Drive.
+- Source of truth: if a notebook cell and a CLI doc differ, prefer the CLI doc
+  in `docs/experiments/running.md` and update the notebook.

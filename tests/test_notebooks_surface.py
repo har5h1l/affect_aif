@@ -26,7 +26,7 @@ def test_public_notebooks_load_and_use_current_paths():
         assert "scripts/benchmark" not in text
         assert "/Users/" not in text
         assert "Open In Colab" in text
-        assert 'AFFECT_AIF_BRANCH", "main"' in text
+        assert 'AFFECT_AIF_BRANCH", "master"' in text
 
 
 def test_reproduce_notebook_is_colab_and_results_aware():
@@ -54,3 +54,20 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "configs/demo/alpha_sweep.toml" in text
     assert "scripts/analysis/analyze.py" in text
     assert "outputs/notebook_demo" in text
+    assert "Model-Fitness Demo: Run And Analyze" in text
+    assert "Betrayal-Adaptation Demo: Run And Analyze" in text
+    assert "Alpha-Sweep Demo: Run And Analyze" in text
+
+
+def test_reproduce_notebook_is_split_by_paper_experiment():
+    text = _notebook_text(ROOT / "notebooks" / "reproduce.ipynb")
+
+    for heading in [
+        "H1 Model Fitness: Run And Analyze",
+        "H5 Betrayal Adaptation: Run And Analyze",
+        "Exp A Alpha Sweep: Run And Analyze",
+        "Exp B Prior Factorial: Run And Analyze",
+        "Exp C Forgiveness: Run And Analyze",
+        "Exp D Mixed Volatility: Run And Analyze",
+    ]:
+        assert heading in text
