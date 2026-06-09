@@ -13,9 +13,12 @@ maps that state into policy precision during action selection.
 ## How The Repo Works
 
 - `tasks/trust/`: trust-game environments, POMDP construction, affect update,
-  partner-local runtime state, and payoff helpers.
+  partner-local agent/runtime state, and payoff helpers. This is the core
+  trust model package, even though it contains the agent machinery.
 - `experiments/trust/`: TOML spec loading, variant expansion, batch execution,
-  logging, and configured analysis hooks.
+  logging, and configured analysis hooks for the focal-agent paper experiments.
+- `experiments/multifocal/`: tested reciprocal AIF-vs-AIF extension code. This
+  is future work and is not used by the paper reproduction configs.
 - `configs/`: public runnable TOML specs grouped by intent.
 - `scripts/`: supported command-line entry points for running experiments and
   analyzing existing results.
@@ -86,11 +89,13 @@ python scripts/analysis/make_paper_figures.py --help
 ## Where To Go Next
 
 - `configs/README.md`: choose a config.
-- `docs/model/`: understand the model and hypotheses.
+- `docs/overview/`: understand the model and hypotheses.
 - `docs/experiments/`: run demos, paper configs, and diagnostics.
 - `docs/results/`: inspect compact result summaries and provenance.
 - `docs/manuscript/`: build and inspect the manuscript.
 - `notebooks/`: demo and reproduction notebooks.
+- `docs/future.md`: extension ideas that are implemented or close enough to
+  build on, but not part of the current paper claims.
 
 ## Maintainer State
 

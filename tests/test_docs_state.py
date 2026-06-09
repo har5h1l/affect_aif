@@ -10,16 +10,20 @@ def test_docs_state_steering_wheel_exists():
         "docs/active/state.md",
         "docs/active/progress.md",
         "docs/active/blockers.md",
-        "docs/model/README.md",
-        "docs/model/pomdp.md",
-        "docs/model/affective_precision.md",
-        "docs/model/hypotheses.md",
+        "docs/overview/README.md",
+        "docs/overview/pomdp.md",
+        "docs/overview/affective_precision.md",
+        "docs/overview/hypotheses.md",
         "docs/experiments/README.md",
         "docs/experiments/running.md",
         "docs/experiments/configs.md",
         "docs/experiments/paper.md",
         "docs/experiments/diagnostics.md",
+        "docs/future.md",
         "docs/results/README.md",
+        "docs/results/paper.md",
+        "docs/results/diagnostics.md",
+        "docs/results/archive.md",
         "docs/manuscript/README.md",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]
@@ -30,8 +34,8 @@ def test_current_docs_do_not_use_stale_hypothesis_story():
     paths = [
         ROOT / "README.md",
         ROOT / "AGENTS.md",
-        ROOT / "docs/theory/goals.md",
-        ROOT / "docs/theory/hypotheses.md",
+        ROOT / "docs/overview/hypotheses.md",
+        ROOT / "docs/overview/pomdp.md",
     ]
     forbidden = ["affect compensates for shallow planning", "deep planner as reference"]
     offenders = []

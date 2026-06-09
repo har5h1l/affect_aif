@@ -14,8 +14,7 @@ individual differences in social trust calibration.
 - Keep trust-game model construction, affective precision tracking, experiment
   runners, logging, and analysis in project-owned task and experiment modules.
 - Scripts are the canonical experiment and analysis entry points.
-- Preserve the Hesp-extension behavior-card spine in
-  `docs/theory/hypotheses.md`.
+- Preserve the behavior-card spine in `docs/overview/hypotheses.md`.
 - Treat pre-May-27 bounded-error results as historical/provisional.
 - The post-fix three-seed smoke (`results/diagnostics/spine_smoke/raw/`)
   is the current diagnostic baseline. Do not promote smoke numbers to
