@@ -19,5 +19,4 @@ use `raw_results_policy = "gitignored_retained_locally_and_on_server"`.
 | `results/paper/mixed_volatility/` | `configs/paper/mixed_volatility.toml` | `results/paper/mixed_volatility/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Mixed-volatility boundary condition for payoff/calibration tradeoffs. |
 
 The paper-facing prose and exact manuscript numbers are maintained in
-`docs/manuscript/results_digest.md`, `docs/manuscript/source_tables/`, and
-`docs/results/current.md`.
+`docs/results/current.md` and `docs/manuscript/source_tables/`.

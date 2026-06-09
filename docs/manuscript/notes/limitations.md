@@ -60,7 +60,7 @@ The manuscript has two interpreted evidence layers:
 
 H1, H5, and Exp A–D have reached structural finality for the current draft.
 There is no remaining experiment gate before submission. Headline numbers and
-include/exclude rules live in `docs/manuscript/results_digest.md`.
+include/exclude rules live in `docs/results/current.md`.
 
 ## Reviewer-Driven Follow-Ups
 

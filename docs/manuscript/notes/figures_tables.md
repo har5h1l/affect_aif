@@ -1,5 +1,7 @@
 # Figures And Tables
 
+Headline numbers and include/exclude rules: `docs/results/current.md`.
+
 Recommended paper artifact plan. Use compact figures from reviewed paper source
 tables rather than raw row-level dumps.
 

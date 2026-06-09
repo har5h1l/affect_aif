@@ -3,7 +3,8 @@
 This directory records interpreted result status and provenance. It is not the
 raw data store.
 
-- `current.md`: current evidence status for the active architecture
+- `current.md`: canonical interpreted evidence, headline numbers, and
+  include/exclude rules for the active architecture
 - `paper.md`: paper result cards and where their summaries live
 - `diagnostics.md`: retained non-paper diagnostic result cards
 - `archive.md`: archive policy for historical or incomplete material
@@ -55,10 +56,10 @@ Partial runs are not current evidence.
 
 ## Current Evidence Route
 
-Use `current.md` for the interpreted scorecard. Use `results/paper/*` and
-`results/diagnostics/*` for compact tracked summaries and provenance. Use
-`docs/manuscript/results_digest.md` and `docs/manuscript/source_tables/` for
-the exact paper packet.
+Use `current.md` for the interpreted scorecard, headline numbers, and
+include/exclude rules. Use `results/paper/*` and `results/diagnostics/*` for
+compact tracked summaries and provenance. Use `docs/manuscript/source_tables/`
+for compact CSVs that back manuscript figures.
 
 ## Local Vs Server
 

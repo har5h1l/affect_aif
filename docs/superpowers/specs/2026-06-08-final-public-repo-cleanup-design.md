@@ -144,7 +144,6 @@ docs/
     appendix/
     figures/
     source_tables/
-    results_digest.md
     references.bib
     notes/
       claims_and_evidence.md
@@ -189,7 +188,6 @@ docs/manuscript/
   figures/
   source_tables/
   references.bib
-  results_digest.md
   notes/
     claims_and_evidence.md
     figures_tables.md

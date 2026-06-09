@@ -24,8 +24,6 @@ Output: `main.pdf`.
 - `main.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
 - `macros.tex`: shared LaTeX macros.
-- `results_digest.md`: audited seed counts, promoted result roots, key numbers,
-  and include/exclude decisions.
 - `figures/`: copied PNG/PDF panels from analysis outputs.
 - `source_tables/`: compact CSVs copied from analysis outputs for checking and
   figure regeneration.
@@ -34,7 +32,7 @@ Output: `main.pdf`.
 
 ## Evidence Contract
 
-Use `docs/results/current.md`, `results_digest.md`, and the manuscript notes in
+Use `docs/results/current.md` and the manuscript notes in
 `docs/manuscript/notes/` as the diagnostic evidence surface. H5 and Exp A–D use the
 reviewed source tables in this folder; the post-fix three-seed smoke remains
 diagnostic provenance only. Do not promote old bounded-error numbers or pre-fix

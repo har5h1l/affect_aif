@@ -1,5 +1,7 @@
 # Claims and Evidence
 
+Headline numbers and include/exclude rules: `docs/results/current.md`.
+
 Synced to the current manuscript framing in `docs/manuscript/sections/`.
 The paper organises evidence around five linked claims; H-card IDs remain the
 experiment spine.
