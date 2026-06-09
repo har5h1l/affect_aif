@@ -43,3 +43,34 @@ python scripts/analysis/analyze.py \
   --results results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv \
   --output-dir /tmp/affect_aif_analysis
 ```
+
+## Notebook Route
+
+Use `notebooks/demo.ipynb` for a small run-and-analyze workflow. Use
+`notebooks/reproduce.ipynb` for the full paper suite. Both notebooks are
+Colab-compatible and call the same CLI scripts shown here.
+
+## Choosing An Output Directory
+
+For throwaway local checks, write under `/tmp` or `outputs/`:
+
+```bash
+python scripts/experiment/run.py \
+  --config configs/demo/model_fitness.toml \
+  --output-dir outputs \
+  --batch-name demo_model_fitness
+```
+
+For canonical paper materialization, use the `results/paper/.../raw/` layout
+documented in `docs/results/paper.md`. Those raw files are gitignored, while
+the compact `summary.csv`, `metrics.csv`, `manifest.json`, and README files are
+tracked.
+
+## What The Runner Does Not Run
+
+`scripts/experiment/run.py` intentionally executes only the maintained
+focal-agent trust TOML surface (`family = "trust"`). The
+`experiments/multifocal/` package contains a tested reciprocal AIF-vs-AIF
+prototype with JSON configs under `experiments/multifocal/configs/`, but that
+code is future work. It is not part of the paper reproduction command, demo
+notebooks, or canonical result layout yet.
