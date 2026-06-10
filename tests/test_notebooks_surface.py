@@ -1,3 +1,4 @@
+import ast
 import json
 from pathlib import Path
 
@@ -74,6 +75,29 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "Alpha-Sweep Demo: Run And Analyze" in text
     assert "Optional Prior-Factorial Demo: Run And Analyze" in text
     assert "Optional Forgiveness Demo: Run And Analyze" in text
+
+
+def test_demo_notebook_sanitizes_markdown_repo_urls():
+    payload = json.loads((ROOT / "notebooks" / "demo.ipynb").read_text())
+    bootstrap_source = "".join(payload["cells"][3]["source"])
+    tree = ast.parse(bootstrap_source)
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "sanitize_repo_url"]
+
+    assert functions, "demo bootstrap should sanitize copied Markdown links before git clone"
+    assert '(repo_dir / ".git").exists()' in bootstrap_source
+    assert "shutil.rmtree(repo_dir)" in bootstrap_source
+    module = ast.Module(body=functions, type_ignores=[])
+    ast.fix_missing_locations(module)
+    namespace: dict[str, object] = {}
+    exec(compile(module, "demo-bootstrap-sanitizer", "exec"), namespace)
+    sanitize_repo_url = namespace["sanitize_repo_url"]
+
+    assert sanitize_repo_url("https://github.com/har5h1l/affect_aif.git") == "https://github.com/har5h1l/affect_aif.git"
+    assert sanitize_repo_url("<https://github.com/har5h1l/affect_aif.git>") == "https://github.com/har5h1l/affect_aif.git"
+    assert (
+        sanitize_repo_url("[https://github.com/har5h1l/affect_aif.git](https://github.com/har5h1l/affect_aif.git)")
+        == "https://github.com/har5h1l/affect_aif.git"
+    )
 
 
 def test_reproduce_notebook_is_split_by_paper_experiment():
