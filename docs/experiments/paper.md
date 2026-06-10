@@ -52,3 +52,8 @@ Use `results/paper/manifest.json` and `docs/results/paper.md` for the
 paper-card interpretation boundary. Reviewer-only controls remain under
 `configs/diagnostics/`; the heterogeneous-volatility follow-up remains under
 `configs/future/` and `results/future/`.
+
+The binary H4 partner-choice confirmation is a diagnostics surface under
+`configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml` and
+`results/diagnostics/social_allocation/`. It is not part of the paper suite;
+paper Section 3.3 uses the graded `03_partner_selection` config.

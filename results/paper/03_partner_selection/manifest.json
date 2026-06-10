@@ -13,5 +13,5 @@
     "source_tables/partner_selection_summary.csv"
   ],
   "paper_use": "Section 3.3 partner-selection sharpening readout",
-  "provenance_note": "Paper-facing copy of the partner-choice allocation probe; reviewer controls remain under configs/diagnostics/h4_social_allocation/."
+  "provenance_note": "Paper-facing graded partner-choice allocation probe; binary H4 confirmation remains under results/diagnostics/social_allocation/."
 }

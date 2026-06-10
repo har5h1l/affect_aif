@@ -12,10 +12,10 @@
 - **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
   The manuscript has been softened to deployment/entropy language for H0/H2
   and allocation-reorganisation language for H4 rather than broad payoff
-  advantage claims. Decide whether these diagnostic claims still need
-  confirmation-scale seeds for manuscript support, or whether they can remain
-  as smoke-scale mechanism readouts while H5 and Exp A-C carry the main
-  evidence.
+  advantage claims. The completed 30-seed binary H4 confirmation is
+  diagnostics-only and should not be used as the paper Section 3.3
+  confirmation. If H4 needs confirmation-scale manuscript support, run the
+  graded paper partner-selection config.
 
 - **Mixed-volatility extension boundary**: Exp D is implemented and
   operationally valid, but it is no longer reported as paper evidence. It opens
@@ -29,9 +29,9 @@
 - The user approved interpretation updates on June 6 for Exp C, H5, H1, and
   related paper cleanup; H1 has since been demoted to diagnostics. Resume the
   ask-first rule for future new outputs.
-- The post-fix smoke numbers and binary H1 confirmation remain diagnostic
-  provenance. The current paper uses 30-seed H5 confirmation values and
-  reviewed 20-seed Exp A-C profile source tables.
+- The post-fix smoke numbers, binary H1 confirmation, and binary H4
+  confirmation remain diagnostic provenance. The current paper uses 30-seed H5
+  confirmation values and reviewed 20-seed Exp A-C profile source tables.
 
 ## Technical Follow-Ups
 
@@ -43,6 +43,10 @@
   `results/diagnostics/model_fitness/raw/h1/reliability_vs_reward_confirm/`
   and is retained as appendix/diagnostic provenance. The controlled H1 configs
   are reviewer-driven diagnostic surfaces, not current evidence.
+- H4 binary confirmation reached structural finality under
+  `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/`
+  and is retained as diagnostic provenance. It is not the graded paper
+  partner-selection surface.
 - Exp A-C generic analyses and manuscript figures now exist, including
   `fig_forgiveness.pdf`, and have been reviewed for the current manuscript
   framing. Future changes should preserve the non-monotonic phenotype language.

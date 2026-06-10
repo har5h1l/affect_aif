@@ -1,8 +1,10 @@
 # Notebooks
 
-- `demo.ipynb`: Colab/local workflow demo using `configs/demo/`. It is split
-  into one section per demo experiment; each section runs the config, analyzes
-  the fresh output, then plots payoff/entropy readouts.
+- `demo.ipynb`: Colab/local workflow demo using `configs/demo/`. It defines
+  `run_demo(name)` and is split into one section per demo experiment. By
+  default, top-to-bottom execution runs only the selected quick section in
+  `SELECTED_DEMOS`; add more names or set `SELECTED_DEMOS = "all"` for a fuller
+  sweep.
 - `reproduce.ipynb`: Colab/local paper reproduction notebook. It dry-runs all
   numbered `configs/paper/` specs to show the workload, then walks through
   Sections 3.1--3.5 one paper section at a time. Each section runs the relevant
@@ -27,8 +29,8 @@ expensive because each paper experiment is executed before its analysis cells.
 
 ## Colab Notes
 
-- Runtime: CPU is enough for the small demo; GPU/JAX devices are reported when
-  present but are not required for correctness.
+- Runtime: CPU is enough for the small demo; GPU/JAX devices are detected and
+  reported when present but are not required for correctness.
 - Outputs: scratch runs go under `outputs/`; canonical materialized outputs go
   under `results/paper/*/raw/`.
 - Data policy: row-level `results.csv` files are ignored by git. The notebook

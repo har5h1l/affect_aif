@@ -52,6 +52,10 @@ def test_reproduce_notebook_is_colab_and_results_aware():
 def test_demo_notebook_runs_demo_configs_and_analysis():
     text = _notebook_text(ROOT / "notebooks" / "demo.ipynb")
 
+    assert "Run this notebook from the affect_aif repo root" not in text
+    assert "detect_accelerator" in text
+    assert "SELECTED_DEMOS" in text
+    assert "run_demo(" in text
     assert "configs/demo/01_predictability_value.toml" in text
     assert "configs/demo/02_deployment_ablation.toml" in text
     assert "configs/demo/03_partner_selection.toml" in text
@@ -85,3 +89,15 @@ def test_reproduce_notebook_is_split_by_paper_experiment():
         "Exp C Forgiveness: Run And Analyze",
     ]:
         assert heading in text
+
+
+def test_manuscript_surface_does_not_expose_binary_regime():
+    manuscript_paths = [
+        path
+        for path in (ROOT / "docs" / "manuscript").rglob("*")
+        if path.is_file() and path.suffix.lower() not in {".pdf", ".png", ".aux"}
+    ]
+    assert manuscript_paths
+    for path in manuscript_paths:
+        text = path.read_text(encoding="utf-8", errors="ignore").lower()
+        assert "binary" not in text, str(path.relative_to(ROOT))

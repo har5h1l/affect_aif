@@ -20,6 +20,7 @@ PUBLIC_DIAGNOSTIC_DIRS = [
     REPO_ROOT / "results/diagnostics/deployment",
     REPO_ROOT / "results/diagnostics/locality",
     REPO_ROOT / "results/diagnostics/model_fitness",
+    REPO_ROOT / "results/diagnostics/social_allocation",
 ]
 
 PUBLIC_FUTURE_DIRS = [

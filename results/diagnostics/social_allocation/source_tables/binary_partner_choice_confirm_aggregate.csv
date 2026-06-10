@@ -1,0 +1,4 @@
+variant_id,total_payoff,mean_q_pi_entropy,mean_accuracy,mean_joint_accuracy,seeds,p0_selection_rate,p1_selection_rate,p2_selection_rate,p3_selection_rate
+affect,399.666667,4.837973,0.441167,0.406667,30,0.279667,0.240167,0.257167,0.223000
+global_beta,413.733333,4.868101,0.412000,0.381167,30,0.302667,0.277000,0.137833,0.282500
+no_affect,423.066667,4.727118,0.415333,0.394000,30,0.300000,0.287833,0.129833,0.282333

@@ -56,3 +56,10 @@ python scripts/experiment/run.py \
 `configs/future/mixed_volatility.toml` implements a heterogeneous-volatility
 partner-choice environment. It is a future-facing extension, not part of the
 paper reproduction suite.
+
+## Diagnostic Boundaries
+
+Binary confirmation configs such as
+`configs/diagnostics/h1_model_fitness/reliability_vs_reward_confirm.toml` and
+`configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml` are
+diagnostic provenance only. They do not replace the graded paper configs.

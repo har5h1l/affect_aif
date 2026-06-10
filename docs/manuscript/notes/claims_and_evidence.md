@@ -12,7 +12,7 @@ internal H-card IDs remain provenance only.
 |---|---|---|---|
 | Partner-local precision tracks predictability rather than realized value. | In manuscript as restored locality probe. | Section 3.1: raw correlations `-0.949` vs `-0.748`; active-encounter partial correlations `-0.882` vs `0.130`; shared-$\beta$ partial readout `-0.380` vs `0.049`; analysis-window payoff local `483.5`, shared `517.6`, no-affect `542.1`. | Mechanism calibration, not reward optimization; specify that payoff is over the locality-probe analysis window. |
 | Behavioural gains arise through policy sharpening, not belief quality. | In manuscript (open graded + tracked-only). | Deployment subsection: entropy `8.59` vs `8.79`; tracked-only matches no-affect on entropy and payoff. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
-| Partner engagement reorganises around reliability before payoff separates. | In manuscript at current seed scale. | Partner-choice subsection: entropy 3.99 vs 4.83; cooperator up (36.6% vs 34.8%), exploiter down (13.8% vs 16.2%); flat payoff (393.6 vs 393.2). | Small allocation shift consistent with sharper policy commitment, not payoff headline. |
+| Partner engagement reorganises around reliability before payoff separates. | In manuscript at current graded-paper scale. | Partner-choice subsection: entropy 3.99 vs 4.83; cooperator up (36.6% vs 34.8%), exploiter down (13.8% vs 16.2%); flat payoff (393.6 vs 393.2). | Small allocation shift consistent with sharper policy commitment, not payoff headline. |
 | Abrupt betrayal exposes temporal dependency. | In manuscript with 30-seed confirmation. | Betrayal subsection: round-31 switch; entropy 8.36 vs 8.74 (CI -0.62 to -0.14); joint accuracy 0.372 vs 0.266 (CI 0.034 to 0.185); payoff 1185.9 vs 1172.1 (CI crosses zero). | Lead with entropy; uncertain payoff is correct for a calibration mechanism; hand off to profile revision-speed analyses. |
 | Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed profile scale. | Profile subsection: orienting three-experiment frame, $\alpha$ sweep (non-monotonic payoff), four gain-prior profiles, and forgiveness decoupling. | "Computational analogues"; disclaimer in Discussion; not clinical categories. |
 | Policy openness gates visible affect effects. | Underpins §3.2; not a separate subsection. | Graded open-regime readouts. | Openness necessary, not sufficient. |
@@ -51,7 +51,10 @@ modulation differs—deployment-channel claim is the manuscript anchor here.
 
 ### Social reorganisation (§3.3)
 
-Partner-choice entropy drops under precision modulation (3.99 vs 4.83); engagement shifts toward cooperator and away from exploiter; payoff flat at stated scale (393.6 vs 393.2).
+Partner-choice entropy drops under precision modulation (3.99 vs 4.83);
+engagement shifts toward cooperator and away from exploiter; payoff flat at
+stated scale (393.6 vs 393.2). These are the graded paper readout numbers.
+Reviewer-control provenance remains outside the manuscript source-table set.
 
 ### Temporal dependency under betrayal (§3.4)
 

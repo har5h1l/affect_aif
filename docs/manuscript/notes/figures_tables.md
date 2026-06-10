@@ -57,6 +57,8 @@ Do not claim open-regime payoff improvement from this batch.
 ### Partner-Choice Text Readout
 
 Source table: `docs/manuscript/source_tables/h4_partner_choice_summary.csv`.
+This is the graded paper partner-selection readout. Reviewer-control provenance
+is retained outside the paper source-table set.
 
 Manuscript numbers:
 

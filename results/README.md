@@ -22,6 +22,8 @@ The full suite map is `paper/manifest.json`.
 runnable from public configs.
 
 - `diagnostics/model_fitness/` — binary H1 confirmation retained as supplementary provenance only.
+- `diagnostics/social_allocation/` — binary H4 partner-choice confirmation
+  retained as boundary provenance only; paper partner selection remains graded.
 
 ## Future Extensions
 

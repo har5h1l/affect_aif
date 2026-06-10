@@ -80,6 +80,9 @@ recovery process reaches finality.
 - H1 binary confirmation reached structural finality but has been demoted to
   appendix/diagnostic provenance. It should not carry main-text evidence
   because the saturated binary regime is behaviorally uninformative for the core mechanism.
+- H4 binary partner-choice confirmation reached structural finality on June 9
+  and is likewise diagnostics-only. Paper Section 3.3 remains the graded
+  partner-selection readout under `configs/paper/03_partner_selection.toml`.
 
 ## Current Evidence State per Hypothesis
 
@@ -89,7 +92,7 @@ recovery process reaches finality.
 | H1 Model Fitness | binary confirmation supports surprise-over-reward after active-encounter controls, but the regime is saturated | appendix/diagnostic only; not main-text evidence | reviewer diagnostics only if requested |
 | H2 Deployment | entropy active, payoff flat | deployment interpretation | confirm if needed |
 | H3 Locality | local=cleaner signal, global=higher smoke payoff | decomposition claim, not necessity | reviewer diagnostics only if requested |
-| H4 Social Allocation | underpowered | smoke-scale allocation reorganisation readout | confirm only if this remains a core manuscript claim |
+| H4 Social Allocation | graded paper readout at current scale; binary confirmation diagnostic only | narrow allocation reorganisation readout | confirm the graded paper config only if this remains a core manuscript claim |
 | H5 Betrayal | confirmation complete | primary behavioral confirmation: entropy/accuracy improve; payoff uncertain | interpreted in paper |
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-C supersede this |
 | Exp A α Sweep | complete; compact outputs regenerated | Section 3.6.1 interpreted | no rerun pending |
@@ -98,6 +101,7 @@ recovery process reaches finality.
 | Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | future-facing extension, not reported paper evidence | develop only as future change-detection/volatility work |
 | H5 Betrayal Confirmation | structurally complete: 120/120 groups x 120 rounds; final `results.csv`, checkpoint, and configured analysis artifacts exist | lower entropy/higher joint accuracy; payoff CI crosses zero | interpreted in paper |
 | H1 Confirmation | structurally complete: 90/90 groups x 200 rounds, final `results.csv`, configured analysis artifacts, and source tables exist | moved to diagnostics/appendix only | no rerun pending |
+| H4 Binary Confirmation | structurally complete: 90/90 groups x 200 rounds, compact diagnostic source tables exist | diagnostics only; not paper evidence | no rerun pending |
 
 ## Active Read Order
 
@@ -109,7 +113,7 @@ task-matched.
 
 The next active lane is:
 1. Keep paper/docs aligned to the reviewed H5 and Exp A-C interpretations, with
-   binary H1 retained only as diagnostic appendix provenance.
+   binary H1 and binary H4 retained only as diagnostic appendix provenance.
    Exp A/B compact outputs now include explicit post-betrayal P0 selection and
    high-investment commitment rates so the older `betrayal_recovery_time`
    readout does not need to carry withdrawal-language claims by itself.

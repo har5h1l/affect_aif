@@ -26,6 +26,8 @@ Exp A-C profile artifacts.
 
 - H5 confirmation:
   `results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/`
+- Binary H4 confirmation diagnostic:
+  `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/h4/partner_choice_confirm/`
 - Paper result cards: `results/paper/manifest.json` and `docs/results/paper.md`
 - Paper source tables: `docs/manuscript/source_tables/`
 
@@ -70,7 +72,7 @@ generic recovery, generic reward improvement, or an accuracy cost.
 
 ### R3: Partner-choice sharpening without payoff separation
 
-H4 partner-choice read (`h4_partner_choice_summary.csv`, 5 seeds):
+Graded H4 partner-choice paper read (`h4_partner_choice_summary.csv`, 5 seeds):
 
 - Policy entropy: affect `3.99`, no-affect `4.83`.
 - Cooperator selection: affect `36.6%`, no-affect `34.8%`.
@@ -80,7 +82,8 @@ H4 partner-choice read (`h4_partner_choice_summary.csv`, 5 seeds):
 Interpretation: the $\beta_k \rightarrow \gamma_k$ pathway reaches partner
 selection; allocation shifts directionally toward predictable partners without
 a cumulative-payoff advantage.
-Not yet confirmed at the 30-seed scale stated in Appendix protocols.
+The completed 30-seed binary H4 confirmation is retained as diagnostic
+boundary evidence only and does not replace these graded paper numbers.
 
 ### R4: Phenotype program supports non-monotonic profile effects
 
@@ -107,7 +110,7 @@ trade-off synthesis rather than a monotonic payoff ranking.
 |---|---|---|
 | Graded Openness | Supported narrowly | Open graded policy spaces reveal entropy/deployment effects. Do not use broad payoff language. |
 | Deployment | Supported narrowly | Tracked-only matches no-affect while full affect lowers entropy, localizing the effect to beta-to-gamma deployment rather than extra belief evidence. |
-| H4 Social Choice | Diagnostic support | Partner-choice behavior reorganizes before payoff separates; keep allocation language narrow unless confirmation-scale seeds are added. |
+| H4 Social Choice | Paper readout supported narrowly; binary confirmation diagnostic only | Graded partner-choice behavior reorganizes before payoff separates; keep allocation language narrow. The binary H4 confirmation is not a paper regime. |
 | H5 Betrayal | Confirmation support | Lower entropy and higher joint accuracy under partner-local affect; payoff advantage is small/uncertain. Temporal dependency, not generic reward improvement. |
 | H6 / Exp A-C Profiles | Supported as computational profiles | Alpha and prior shape confidence amplitude, reengagement, commitment errors, and payoff non-monotonically. No clinical-validation claim. |
 

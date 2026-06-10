@@ -1,0 +1,20 @@
+{
+  "name": "social_allocation",
+  "category": "diagnostic",
+  "status": "complete",
+  "config_paths": [
+    "configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml"
+  ],
+  "source_run_paths": [
+    "results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/h4/partner_choice_confirm/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "summary.csv",
+    "source_tables/binary_partner_choice_confirm_aggregate.csv",
+    "source_tables/final_round_summary.csv",
+    "source_tables/partner_choice_confirm_summary.csv"
+  ],
+  "paper_use": "not_paper_evidence",
+  "provenance_note": "Binary H4 confirmation retained as diagnostic boundary evidence only; the paper partner-selection surface is graded."
+}

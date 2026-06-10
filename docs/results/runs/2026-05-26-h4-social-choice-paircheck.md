@@ -6,6 +6,11 @@ This is a completed five-seed rerun of the maintained H4 partner-choice config.
 It is not a 30-seed confirmation, but it provides a clean affect-vs-no-affect
 pair check after the H6 follow-up work.
 
+Current note: the completed June 2026 30-seed binary H4 confirmation is
+retained under `results/diagnostics/social_allocation/` as diagnostic
+provenance only. It does not replace the graded paper Section 3.3
+partner-selection readout.
+
 ## Provenance
 
 - Batch: `results/h4_social_choice_paircheck_20260526/`

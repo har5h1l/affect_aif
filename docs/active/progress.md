@@ -108,6 +108,13 @@ Current recovery status on June 6 09:10 PDT:
   Configured analysis artifacts exist under the same directory, and diagnostic
   source tables are retained under
   `results/diagnostics/model_fitness/source_tables/`.
+- H4 binary partner-choice confirmation completed on June 9 after a server-only
+  launch of `configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml`.
+  Structural audit found 90/90 groups x 200 rounds in
+  `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/h4/partner_choice_confirm/results.csv`.
+  Compact diagnostic source tables are retained under
+  `results/diagnostics/social_allocation/source_tables/`. This is not the
+  paper Section 3.3 graded partner-selection config.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
@@ -128,6 +135,7 @@ Manuscript-critical evidence audit at 14:47 PDT:
 | Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Structural finality reached; final CSV, compact metrics, generic analysis, source table, and forgiveness figure exist | Ready for user-approved review; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Structural finality reached; final CSV, checkpoint, and configured analysis artifacts exist | Ready for user-approved review; top core-mechanism confirmation |
 | H1 binary confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, configured analysis, and diagnostic source tables exist | Appendix/diagnostic only; removed from main paper |
+| H4 binary confirmation | 90 runs in binary diagnostic spec: 3 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, configured analysis, and compact diagnostic source tables exist | Diagnostics only; not the graded paper Section 3.3 readout |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
 
 Seed/round audit: keep Exp A-D at 20 seeds x 200 rounds because these runs are
@@ -135,6 +143,9 @@ already partly complete, cover within-episode transients needed by Section 3.6,
 and provide enough replication for compact CIs without expanding compute. For
 core confirmation, use the existing 30-seed H5 spec first:
 `betrayal_reallocation_confirm.toml` is 4 variants x 30 seeds x 120 rounds.
+The completed H4 binary confirmation is diagnostic provenance; if Section 3.3
+needs confirmation-scale support, run the graded paper `03_partner_selection`
+config rather than reusing the binary H4 diagnostic.
 Do not add more seeds unless reviewer pressure requires it; if H1 needs a
 stronger reward/exposure decomposition, escalate to controlled diagnostics
 before increasing replication.
@@ -513,20 +524,24 @@ Interpretation rule: a pass on reward-neutral H1 with a failure on graded H1 is
 an analysis/task-design confound, not a model-level failure. A failure on both
 would justify reframing H1 before more confirmation-scale seeds.
 
-### Priority 3: H0/H2/H4 Manuscript Support (run if language stays in draft)
+### Priority 3: H0/H2/Graded-H4 Manuscript Support (run if language stays in draft)
 
-Only launch if the manuscript keeps deployment/entropy and partner-choice
-language and needs higher-seed confirmation for those claims.
+Only launch if the manuscript keeps deployment/entropy and graded
+partner-choice language and needs higher-seed confirmation for those claims.
+Do not use the binary H4 diagnostic confirmation for paper Section 3.3.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
   --config configs/diagnostics/h0_policy_openness/graded_choice_confirm.toml \
   --config configs/diagnostics/h2_deployment/lesion_open_regime_confirm.toml \
-  --config configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml \
   --output-dir results \
   --batch-name manuscript_open_social_confirm_YYYYMMDD \
   --workers 1
 ```
+
+If H4 itself needs confirmation-scale paper support, run or promote a
+30-seed graded analogue of `configs/paper/03_partner_selection.toml` instead
+of `configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml`.
 
 ### Priority 4: H3 Global-Beta Ablation
 
@@ -556,7 +571,7 @@ evidence uses reviewed higher-seed artifacts where available:
 H0/H2: deployment path is active in diagnostic smoke; payoff language remains flat/narrow.
 H1: 30-seed confirmation supports surprise-over-reward after active-encounter controls; payoff favors no-affect.
 H3: local beta = cleaner signal than shared beta in the focal-switch probe.
-H4: partner-choice reorganization remains narrow/diagnostic.
+H4: graded partner-choice reorganization remains narrow; binary H4 is diagnostic-only.
 H5: 30-seed confirmation lowers entropy and raises joint accuracy; payoff CI crosses zero.
 Exp A-D: 20-seed phenotype program interpreted as non-monotonic profile effects.
 ```

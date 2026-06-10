@@ -1,0 +1,4 @@
+table,source_path,rows,role
+source_tables/binary_partner_choice_confirm_aggregate.csv,results/diagnostics/social_allocation/source_tables/binary_partner_choice_confirm_aggregate.csv,3,compact per-variant binary diagnostic aggregate
+source_tables/final_round_summary.csv,results/diagnostics/social_allocation/source_tables/final_round_summary.csv,90,per-seed final summary
+source_tables/partner_choice_confirm_summary.csv,results/diagnostics/social_allocation/source_tables/partner_choice_confirm_summary.csv,360,per-seed partner selection summary

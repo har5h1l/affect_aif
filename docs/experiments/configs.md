@@ -34,7 +34,7 @@ forms.
 |---|---|---:|---|
 | `configs/paper/01_predictability_value.toml` | Section 3.1 predictability over value | 3 variants x 30 seeds x 200 rounds | Paper-facing copy of the corrected model-fitness readout; reviewer ladder remains under diagnostics. |
 | `configs/paper/02_deployment_ablation.toml` | Section 3.2 deployment ablation | 4 variants x 3 seeds x 200 rounds | Tests whether tracked-only precision loses behavioral effect when beta cannot modulate gamma. |
-| `configs/paper/03_partner_selection.toml` | Section 3.3 partner selection | 3 variants x 3 seeds x 200 rounds | Tests whether precision modulation reshapes partner choice before payoff separates. |
+| `configs/paper/03_partner_selection.toml` | Section 3.3 partner selection | 3 variants x 3 seeds x 200 rounds | Tests whether precision modulation reshapes graded partner choice before payoff separates. |
 | `configs/paper/04_betrayal_adaptation.toml` | Section 3.4 betrayal adaptation | 4 variants x 30 seeds x 120 rounds | Tests abrupt stance change under graded agent-choice play. Compares partner-local affect, tracked-only lesion, shared beta, and no-affect. |
 | `configs/paper/05a_alpha_sweep.toml` | Section 3.5 profile gain | 2 scenarios x 8 alpha values x 20 seeds x 200 rounds | Sweeps affective gain from `0.05` to `8.0` in open and betrayal settings to show non-monotonic precision dynamics. |
 | `configs/paper/05b_prior_factorial.toml` | Section 3.5 prior x gain profiles | 3 scenarios x 6 variants x 20 seeds x 200 rounds | Crosses naive/cautious beta priors with low/high gain, plus default and no-affect references. |
@@ -74,6 +74,6 @@ probes that are not part of the current manuscript reproduction claim.
 | `configs/diagnostics/h1_model_fitness/` | `reliability_vs_reward.toml`, `reliability_vs_reward_confirm.toml`, `reliability_spine_graded_diagnostic.toml`, `reliability_spine_graded_reward_matched_diagnostic.toml`, `reliability_reward_neutral_diagnostic.toml` | Binary model-fitness diagnostics and reviewer ladder for reward/exposure controls around H1. |
 | `configs/diagnostics/h2_deployment/` | `lesion_open_regime.toml`, `lesion_open_regime_confirm.toml` | Tests tracked-only deployment dissociation. |
 | `configs/diagnostics/h3_locality/` | `global_beta_*.toml`, `lesion_family_probe.toml` | Tests partner-local versus shared precision routing and lesion families. |
-| `configs/diagnostics/h4_social_allocation/` | `partner_choice.toml`, `partner_choice_confirm.toml` | Agent-choice allocation probes. |
+| `configs/diagnostics/h4_social_allocation/` | `partner_choice.toml`, `partner_choice_confirm.toml` | Binary agent-choice allocation probes retained as diagnostics only. |
 | `configs/diagnostics/h5_timescale_volatility/` | `betrayal_choice.toml`, `betrayal_reallocation.toml`, `betrayal_precision_sensitivity*.toml` | Volatility and precision-sensitivity probes beyond the final paper H5 config. |
 | `configs/diagnostics/h6_perturbation/` | `affect_sensitivity.toml`, `perturbation_betrayal.toml`, `perturbation_dynamics.toml` | Earlier profile-style perturbation probes retained as diagnostic provenance. |
