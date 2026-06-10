@@ -2,7 +2,7 @@
 
 Headline numbers and include/exclude rules: `docs/results/current.md`.
 
-Recommended paper artifact plan. Use compact figures from reviewed paper source
+Recommended paper output plan. Use compact figures from reviewed paper source
 tables rather than raw row-level dumps.
 
 Regenerate paper panels with:
@@ -16,53 +16,33 @@ figures to `docs/manuscript/figures/`.
 
 ## Main Figures
 
-### Figure 1: Model Schematic
+### Figure 1: Predictability-Over-Value Locality Probe
 
-Status: create manually for final paper.
+Source tables:
 
-Show the mechanism chain:
+- `docs/manuscript/source_tables/h1_model_fitness_confirm/model_fitness_correlation_summary.csv`
+- `docs/manuscript/source_tables/h1_model_fitness_confirm/final_round_summary.csv`
 
-```text
-partner action prediction error
-  -> partner-specific beta_k / precision_k
-  -> partner-local gamma_k = gamma_base / E[beta_k]
-  -> pymdp policy posterior shift
-  -> action or partner-choice deployment
-  -> payoff, reallocation, or boundary-condition effects
-```
-
-Must show:
-
-- focal agent only runs official `pymdp.Agent`; partners are scripted
-  parameterized policies;
-- one official `pymdp.Agent` per tracked partner;
-- hidden factors `type x stance x own_action`;
-- observations `partner action` and `payoff`;
-- external beta tracker outside the POMDP;
-- tracked-only lesion where beta updates but gamma is decoupled.
-
-Source docs: `docs/overview/pomdp.md` and
-`docs/overview/affective_precision.md`.
-
-### Figure 2: Model Fitness / Locality
-
-Source table: `docs/manuscript/source_tables/h1_model_fitness_confirm/`.
-
-Output asset: `docs/manuscript/figures/fig_model_fitness_beta_reward_divergence.pdf`
+Output asset:
+`docs/manuscript/figures/fig_model_fitness_beta_reward_divergence.pdf`
 
 Manuscript numbers:
 
-- Local beta active-encounter partials: surprise `0.882`, payoff `0.130`.
-- Shared/global beta partials: surprise `0.380`, payoff `0.049`.
-- Payoff: local `483.5`, global `517.6`, no-affect `542.1`.
+- Partner-local raw correlations: precision--surprisal `-0.949`,
+  precision--payoff `-0.748`.
+- Partner-local active-encounter partial correlations: precision--surprisal
+  `-0.882`, precision--payoff `0.130`.
+- Shared-$\beta$ active-encounter partial correlations: precision--surprisal
+  `-0.380`, precision--payoff `0.049`.
+- Payoff panel: local `483.5`, shared `517.6`, no-affect `542.1`.
 
-H1 confirmation has replaced the older focal-switch smoke values for the
-manuscript panel.
+Caption/readout must say the payoff panel reports payoff over the same
+locality-probe analysis window, not full-episode payoff.
 
-### Figure 3: Open-Regime Deployment Dissociation
+### Figure 2: Open-Regime Deployment Contrast
 
 Source table:
-`docs/manuscript/source_tables/h2_deployment_dissociation_summary.csv`.
+`docs/manuscript/source_tables/h2_deployment_contrast_summary.csv`.
 
 Output asset: `docs/manuscript/figures/fig_deployment_social_summary.pdf`
 
@@ -72,13 +52,11 @@ Manuscript numbers:
 - No-affect: payoff `1864.2`, entropy `8.79`.
 - Tracked-only: payoff `1864.2`, entropy `8.79` (matches no-affect).
 
-Do not claim open-regime payoff improvement from this diagnostic batch.
+Do not claim open-regime payoff improvement from this batch.
 
-### Figure 3b: Partner-Choice Sharpening (H4)
+### Partner-Choice Text Readout
 
-Source table:
-`docs/manuscript/source_tables/h4_partner_choice_summary.csv` (5 seeds;
-30-seed confirmation per appendix protocols not yet in manuscript).
+Source table: `docs/manuscript/source_tables/h4_partner_choice_summary.csv`.
 
 Manuscript numbers:
 
@@ -87,13 +65,13 @@ Manuscript numbers:
 - Exploiter selection: affect `13.8%`, no-affect `16.2%`.
 - Total payoff: affect `393.6`, no-affect `393.2` (flat at this scale).
 
-Frame as directional allocation shift toward predictable partners without
-cumulative-payoff separation, consistent with the Section 3.1 dissociation.
+Frame as a small allocation shift consistent with sharper policy commitment,
+not as cumulative-payoff separation.
 
-### Figure 4: Betrayal Boundary Condition
+### Figure 3: Betrayal Boundary Condition
 
 Source table: `docs/manuscript/source_tables/h5_evidence_effect_summary.csv`
-(regenerated from the 30-seed H5 confirmation).
+(regenerated from the 30-seed abrupt-betrayal confirmation).
 
 Output asset: `docs/manuscript/figures/fig_betrayal_boundary_summary.pdf`
 
@@ -105,15 +83,15 @@ Current confirmation numbers (P0 stance switch at round 31):
   the difference is positive (`0.034` to `0.185`).
 - Affect payoff `1185.9`; no-affect payoff `1172.1`; paired bootstrap interval
   crosses zero (`-25.2` to `53.2`).
-- Figure diagnostic panel also plots post-switch P0 reencounters (affect higher
+- Figure support panel also plots post-switch P0 reencounters (affect higher
   than no-affect; CI `0.97` to `8.03`).
 
 Caption claim: partner-local affect sharpens policy deployment under abrupt
-change; joint accuracy improves; payoff is positive but uncertain. Frame
-uncertain payoff as expected for a calibration mechanism, not a power failure.
-Do not describe H5 as a payoff--accuracy tradeoff.
+change; joint accuracy improves; payoff remains uncertain. Frame uncertain
+payoff as expected for a calibration mechanism, not a power failure.
+Do not describe the abrupt-betrayal result as a payoff--accuracy tradeoff.
 
-### Figure 5: Precision-Dynamics Perturbations
+### Figure 4: Precision-Dynamics Perturbations
 
 Source tables:
 
@@ -126,31 +104,28 @@ Use as bounded computational phenotyping evidence only. Caption must say
 "computational profiles" or "computational perturbations", not clinical
 validation.
 
-### Figure 6: Phenotype Program
+### Profile Program Tables/Figures
 
 Source tables:
 
 - `docs/manuscript/source_tables/exp_a_alpha_sweep/metrics.csv`
 - `docs/manuscript/source_tables/exp_b_prior_factorial/metrics.csv`
 - `docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv`
-- `docs/manuscript/source_tables/exp_d_mixed_volatility/metrics.csv`
 
 Output assets:
 
 - `docs/manuscript/figures/fig_alpha_sweep.pdf`
 - `docs/manuscript/figures/fig_phenotype_quadrants.pdf`
 - `docs/manuscript/figures/fig_forgiveness.pdf`
-- `docs/manuscript/figures/fig_mixed_volatility.pdf`
 
-Use the non-monotonic profile interpretation (§3.6 rewrite):
+Use the non-monotonic profile interpretation (§3.5 rewrite):
 
-- open with four experiments / single-axis negative;
+- open with three experiments / single-axis negative;
 - lead $\alpha$ sweep with non-monotonic payoff, then $\beta_k$ amplitude;
 - four gain-prior profiles with equal interpretive weight;
-- Exp C: reengagement vs restored confidence (round 121 reversion);
-- Exp D: payoff--discrimination dissociation at high gain;
-- cite `Figure~\ref{fig:mixed_volatility}` in main text (not hardcoded figure number);
-- human-data disclaimer in Discussion §4, not §3.6 opener.
+- forgiveness profile: reengagement vs restored confidence (round 121 reversion);
+- heterogeneous-volatility analyses stay future-facing, not reported evidence;
+- human-data disclaimer in Discussion §4, not §3.5 opener.
 
 ## Main Tables
 

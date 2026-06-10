@@ -39,7 +39,7 @@ pip install -e ".[dev]"
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/demo/model_fitness.toml \
+  --config configs/demo/01_predictability_value.toml \
   --batch-name demo \
   --workers 1
 ```
@@ -47,7 +47,7 @@ python scripts/experiment/run.py \
 Inspect a config without running it:
 
 ```bash
-python scripts/experiment/inspect.py --config configs/demo/model_fitness.toml
+python scripts/experiment/inspect.py --config configs/demo/01_predictability_value.toml
 ```
 
 ## Reproduce The Paper
@@ -56,12 +56,13 @@ Dry-run the paper suite first:
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml \
-  --config configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml \
-  --config configs/paper/alpha_sweep.toml \
-  --config configs/paper/prior_factorial.toml \
-  --config configs/paper/forgiveness.toml \
-  --config configs/paper/mixed_volatility.toml \
+  --config configs/paper/01_predictability_value.toml \
+  --config configs/paper/02_deployment_ablation.toml \
+  --config configs/paper/03_partner_selection.toml \
+  --config configs/paper/04_betrayal_adaptation.toml \
+  --config configs/paper/05a_alpha_sweep.toml \
+  --config configs/paper/05b_prior_factorial.toml \
+  --config configs/paper/05c_forgiveness.toml \
   --batch-name paper \
   --workers 1 \
   --dry-run
@@ -74,7 +75,7 @@ you intentionally want parallel local execution.
 
 ```bash
 python scripts/analysis/analyze.py \
-  --results results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv \
+  --results results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv \
   --output-dir /tmp/affect_aif_analysis
 ```
 

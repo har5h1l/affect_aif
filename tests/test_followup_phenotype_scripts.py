@@ -163,7 +163,7 @@ def test_exp_c_metrics_include_partner0_beta_recovery_trajectory():
     assert float(summary.loc[0, "beta_recovery_r200"]) == 2.0
 
 
-def test_exp_d_panels_match_manuscript_plan():
+def test_exp_d_panels_match_future_extension_plan():
     assert EXP_D_PANELS == (
         "default_beta_trajectories",
         "high_alpha_beta_trajectories",

@@ -1,4 +1,4 @@
-"""Experiment D mixed-volatility metrics and figure builders."""
+"""Future mixed-volatility extension metrics and figure builders."""
 
 # ruff: noqa: E402
 
@@ -204,4 +204,4 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
             ax.set_title("Concentration toward P0")
             ax.set_xlabel("round")
             ax.legend(frameon=False, fontsize=7)
-    save_figure(fig, figure_dir / "fig_mixed_volatility.pdf")
+    save_figure(fig, figure_dir / "mixed_volatility.pdf")

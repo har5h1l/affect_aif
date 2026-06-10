@@ -4,12 +4,13 @@ Paper configs live under `configs/paper/`.
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml \
-  --config configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml \
-  --config configs/paper/alpha_sweep.toml \
-  --config configs/paper/prior_factorial.toml \
-  --config configs/paper/forgiveness.toml \
-  --config configs/paper/mixed_volatility.toml \
+  --config configs/paper/01_predictability_value.toml \
+  --config configs/paper/02_deployment_ablation.toml \
+  --config configs/paper/03_partner_selection.toml \
+  --config configs/paper/04_betrayal_adaptation.toml \
+  --config configs/paper/05a_alpha_sweep.toml \
+  --config configs/paper/05b_prior_factorial.toml \
+  --config configs/paper/05c_forgiveness.toml \
   --batch-name paper \
   --workers 1 \
   --dry-run
@@ -25,27 +26,29 @@ Raw trajectories are gitignored but retained locally and on `server`.
 
 | Paper section | Config | Result folder | Summary files |
 |---|---|---|---|
-| Model fitness / predictability over reward | `configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml` | `results/paper/model_fitness/` | `summary.csv`, `manifest.json` |
-| Betrayal adaptation | `configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml` | `results/paper/betrayal_adaptation/` | `summary.csv`, `manifest.json` |
-| Precision-gain profiles | `configs/paper/alpha_sweep.toml` | `results/paper/alpha_sweep/` | `metrics.csv`, `manifest.json` |
-| Prior x gain profiles | `configs/paper/prior_factorial.toml` | `results/paper/prior_factorial/` | `metrics.csv`, `manifest.json` |
-| Forgiveness / trust repair | `configs/paper/forgiveness.toml` | `results/paper/forgiveness/` | `metrics.csv`, `manifest.json` |
-| Mixed volatility | `configs/paper/mixed_volatility.toml` | `results/paper/mixed_volatility/` | `metrics.csv`, `manifest.json` |
+| 3.1 predictability over value | `configs/paper/01_predictability_value.toml` | `results/paper/01_predictability_value/` | `source_tables/*.csv`, `manifest.json` |
+| 3.2 deployment ablation | `configs/paper/02_deployment_ablation.toml` | `results/paper/02_deployment_ablation/` | `source_tables/*.csv`, `manifest.json` |
+| 3.3 partner selection | `configs/paper/03_partner_selection.toml` | `results/paper/03_partner_selection/` | `source_tables/*.csv`, `manifest.json` |
+| 3.4 betrayal adaptation | `configs/paper/04_betrayal_adaptation.toml` | `results/paper/04_betrayal_adaptation/` | `summary.csv`, `source_tables/*.csv`, `manifest.json` |
+| 3.5 / Appendix D precision-gain profiles | `configs/paper/05a_alpha_sweep.toml` | `results/paper/05a_alpha_sweep/` | `metrics.csv`, `manifest.json` |
+| 3.5 / Appendix D prior x gain profiles | `configs/paper/05b_prior_factorial.toml` | `results/paper/05b_prior_factorial/` | `metrics.csv`, `manifest.json` |
+| 3.5 / Appendix D forgiveness / trust repair | `configs/paper/05c_forgiveness.toml` | `results/paper/05c_forgiveness/` | `metrics.csv`, `manifest.json` |
 
 The exact manuscript source tables and final paper figures live under
 `docs/manuscript/source_tables/` and `docs/manuscript/figures/`.
 
 ## Analysis Route
 
-For H1 and H5, the config `[analysis]` block names the primary analysis
-contract used by `run.py`. For Exp A-D, raw trajectories are converted into
-compact profile metrics and manuscript figures with:
+For Sections 3.1--3.4, each config `[analysis]` block names the primary
+analysis contract used by `run.py`. For the profile suite, raw trajectories are
+converted into compact profile metrics and manuscript figures with:
 
 ```bash
 python scripts/analysis/phenotype_artifacts.py --help
 python scripts/analysis/make_paper_figures.py --help
 ```
 
-Use `docs/results/paper.md` for the result-card interpretation boundary: these
-folders contain compact tracked summaries; full `raw/results.csv` files are
-ignored by git and retained locally/server-side.
+Use `results/paper/manifest.json` and `docs/results/paper.md` for the
+paper-card interpretation boundary. Reviewer-only controls remain under
+`configs/diagnostics/`; the heterogeneous-volatility follow-up remains under
+`configs/future/` and `results/future/`.

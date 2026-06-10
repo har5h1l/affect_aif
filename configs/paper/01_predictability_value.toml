@@ -1,0 +1,53 @@
+[hypothesis]
+id = "predictability_value"
+name = "predictability_value"
+
+[experiment]
+id = "predictability_value"
+family = "trust"
+rounds = 200
+replications = 30
+seed = 420
+
+# Paper Section 3.1 target:
+# - rerun the graded active-encounter predictability-over-value readout;
+# - judge precision-model-fitness coupling with active-aligned and
+#   partial-correlation analysis columns;
+# - do not treat aggregate payoff as the primary claim gate.
+[scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+initial_types = ["cooperator", "exploiter", "random", "reciprocator"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
+[analysis]
+auto = true
+primary = "h1_model_fitness"
+compare = ["affect", "global_beta", "no_affect"]
+metrics = [
+  "payoff",
+  "precision",
+  "model_fitness_correlation",
+  "evidence_effects",
+]

@@ -76,6 +76,16 @@ Hesp, C., Smith, R., Parr, T., Allen, M., Friston, K.J., Ramstead, M.J.D.:
   Deeply felt affect: The emergence of valence in deep active inference. Neural
   Computation  \textbf{33}(2),  398--446 (2021). \doi{10.1162/neco_a_01341}
 
+\bibitem{joffily2013emotional}
+Joffily, M., Coricelli, G.: Emotional valence and the free-energy principle.
+  PLOS Computational Biology  \textbf{9}(6),  e1003094 (2013).
+  \doi{10.1371/journal.pcbi.1003094}
+
+\bibitem{joiner2017social}
+Joiner, J., Piva, M., Turrin, C., Chang, S.W.C.: Social learning through
+  prediction error in the brain. npj Science of Learning  \textbf{2}, ~8
+  (2017). \doi{10.1038/s41539-017-0009-2}
+
 \bibitem{KingCasas2005Trust}
 King-Casas, B., Tomlin, D., Anen, C., Camerer, C.F., Quartz, S.R., Montague,
   P.R.: Getting to know you: reputation and trust in a two-person economic
@@ -91,6 +101,10 @@ Mathys, C., Daunizeau, J., Friston, K.J., Stephan, K.E.: A {Bayesian}
 Parr, T., Pezzulo, G., Friston, K.J.: Active Inference: The Free Energy
   Principle in Mind, Brain, and Behavior. MIT Press (2022)
 
+\bibitem{pattisapu2024free}
+Pattisapu, C., Verbelen, T., Pitliya, R.J., Kiefer, A.B., Albarracin, M.: Free
+  energy in a circumplex model of emotion (2024)
+
 \bibitem{Pitliya2025ToMActiveInference}
 Pitliya, R.J., {\c C}atal, O., Van~de Maele, T., Pezzato, C., Verbelen, T.:
   Theory of mind using active inference: A framework for multi-agent
@@ -102,5 +116,10 @@ Ruiz-Serra, J., Sweeney, P., Harr{\'e}, M.S.: Factorised active inference for
   Conference on Autonomous Agents and Multiagent Systems. pp. 1793--1802.
   International Foundation for Autonomous Agents and Multiagent Systems (2025).
   \doi{10.5555/3709347.3743815}
+
+\bibitem{smith2019simulating}
+Smith, R., Parr, T., Friston, K.J.: Simulating emotions: An active inference
+  model of emotional state inference and emotion concept learning. Frontiers in
+  Psychology  \textbf{10}, ~2844 (2019). \doi{10.3389/fpsyg.2019.02844}
 
 \end{thebibliography}

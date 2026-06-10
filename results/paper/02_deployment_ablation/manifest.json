@@ -1,0 +1,17 @@
+{
+  "name": "deployment_ablation",
+  "category": "paper",
+  "status": "complete",
+  "config_paths": [
+    "configs/paper/02_deployment_ablation.toml"
+  ],
+  "source_run_paths": [
+    "results/paper/02_deployment_ablation/raw/deployment_ablation/deployment_ablation/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "source_tables/deployment_contrast_summary.csv"
+  ],
+  "paper_use": "Section 3.2 tracked-only deployment ablation",
+  "provenance_note": "Paper-facing copy of the open-regime deployment lesion; reviewer controls remain under configs/diagnostics/h2_deployment/."
+}

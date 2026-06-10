@@ -1,0 +1,16 @@
+{
+  "name": "prior_factorial",
+  "category": "paper",
+  "status": "complete",
+  "config_paths": [
+    "configs/paper/05b_prior_factorial.toml"
+  ],
+  "source_run_paths": [
+    "results/paper/05b_prior_factorial/raw/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "metrics.csv"
+  ],
+  "paper_use": "Section 3.6.2 profile factorial readout"
+}

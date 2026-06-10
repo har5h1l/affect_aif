@@ -12,7 +12,7 @@ import tasks.trust.affect
 import tasks.trust.pomdp
 import tasks.trust.runtime
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.spec import ExperimentSpec
+from experiments.trust.spec import ExperimentSpec, load_experiment_specs
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -144,12 +144,18 @@ def test_experiment_run_dry_run_reports_families(tmp_path):
 
 def test_core_hypothesis_experiments_exist():
     expected = [
-        "configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml",
-        "configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml",
+        "configs/paper/01_predictability_value.toml",
+        "configs/paper/02_deployment_ablation.toml",
+        "configs/paper/03_partner_selection.toml",
+        "configs/paper/04_betrayal_adaptation.toml",
+        "configs/paper/05a_alpha_sweep.toml",
+        "configs/paper/05b_prior_factorial.toml",
+        "configs/paper/05c_forgiveness.toml",
         "configs/diagnostics/h0_policy_openness/shallow_binary.toml",
         "configs/diagnostics/h0_policy_openness/graded_choice.toml",
         "configs/diagnostics/h0_policy_openness/graded_betrayal.toml",
         "configs/diagnostics/h1_model_fitness/reliability_vs_reward.toml",
+        "configs/diagnostics/h1_model_fitness/reliability_vs_reward_confirm.toml",
         "configs/diagnostics/h1_model_fitness/reliability_spine_graded_reward_matched_diagnostic.toml",
         "configs/diagnostics/h2_deployment/lesion_open_regime.toml",
         "configs/diagnostics/h3_locality/global_beta_focal_switch_probe.toml",
@@ -159,15 +165,31 @@ def test_core_hypothesis_experiments_exist():
         "configs/diagnostics/h6_perturbation/perturbation_dynamics.toml",
         "configs/diagnostics/h6_perturbation/affect_sensitivity.toml",
         "configs/diagnostics/smoke/trust_smoke.toml",
-        "configs/demo/model_fitness.toml",
-        "configs/demo/betrayal_adaptation.toml",
-        "configs/demo/alpha_sweep.toml",
+        "configs/demo/01_predictability_value.toml",
+        "configs/demo/02_deployment_ablation.toml",
+        "configs/demo/03_partner_selection.toml",
+        "configs/demo/04_betrayal_adaptation.toml",
+        "configs/demo/05a_alpha_sweep.toml",
+        "configs/demo/05b_prior_factorial.toml",
+        "configs/demo/05c_forgiveness.toml",
     ]
     assert not (REPO_ROOT / "experiments" / "trust" / "hypotheses").exists()
     for raw_path in expected:
         path = REPO_ROOT / raw_path
         assert path.exists(), raw_path
-        ExperimentSpec.from_toml(path)
+        assert load_experiment_specs(path), raw_path
+
+
+def test_public_paper_and_demo_configs_are_graded_only():
+    public_configs = [
+        *sorted((REPO_ROOT / "configs" / "paper").glob("*.toml")),
+        *sorted((REPO_ROOT / "configs" / "demo").glob("*.toml")),
+    ]
+    assert public_configs
+    for path in public_configs:
+        payload = path.read_text(encoding="utf-8")
+        assert 'payoff = "binary"' not in payload, str(path.relative_to(REPO_ROOT))
+        assert 'payoff = "graded"' in payload, str(path.relative_to(REPO_ROOT))
 
 
 def test_removed_script_surface_stays_out_of_supported_cli():

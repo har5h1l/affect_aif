@@ -472,9 +472,9 @@ are reliably cooperative. Current H6 configs instantiate this with
 Predictive model comparison remains useful future work, but it is separate from
 the active H0-H8 evidence spine. A clean comparison should score matched
 observation sequences and avoid mixing reward optimization with predictive
-fitness. Global beta is now the maintained H3 locality ablation; reward-history
-baselines and richer model-selection variants remain future work unless rerun
-and documented under the current architecture.
+fitness. Global beta is now the maintained H3 locality ablation. Non-AIF
+control-policy comparisons and richer model-selection variants remain future
+work unless rerun and documented under the current architecture.
 
 ### 4.12 Task Generalization and Perturbation Tests
 

@@ -1,0 +1,17 @@
+{
+  "name": "betrayal_adaptation",
+  "category": "paper",
+  "status": "complete",
+  "config_paths": [
+    "configs/paper/04_betrayal_adaptation.toml"
+  ],
+  "source_run_paths": [
+    "results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "summary.csv",
+    "source_tables/h5_evidence_effect_summary.csv"
+  ],
+  "paper_use": "Section 3.4 betrayal adaptation confirmation"
+}

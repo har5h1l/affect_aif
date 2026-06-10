@@ -33,6 +33,25 @@ def _write_source_tables(source_dir):
     pd.DataFrame(
         [
             {
+                "variant_id": "affect",
+                "total_payoff": 1851.3,
+                "mean_q_pi_entropy": 8.59,
+            },
+            {
+                "variant_id": "no_affect",
+                "total_payoff": 1864.2,
+                "mean_q_pi_entropy": 8.79,
+            },
+            {
+                "variant_id": "tracked_only",
+                "total_payoff": 1864.2,
+                "mean_q_pi_entropy": 8.79,
+            },
+        ]
+    ).to_csv(source_dir / "h2_deployment_contrast_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
                 "readout": "final",
                 "metric": "total_payoff",
                 "treatment_variant": "affect",
@@ -98,20 +117,24 @@ def test_new_paper_figures_generate_manifest(tmp_path, capsys):
 
     generated = [
         *make_paper_figures.model_fitness_figure(source_dir, output_dir),
+        *make_paper_figures.deployment_social_figure(source_dir, output_dir),
         *make_paper_figures.betrayal_boundary_figure(source_dir, output_dir),
     ]
     make_paper_figures.print_manifest(generated)
 
     assert {path.name for path in generated} == {
-        "fig_model_fitness_beta_reward_divergence.png",
-        "fig_model_fitness_beta_reward_divergence.pdf",
+        "fig_deployment_social_summary.png",
+        "fig_deployment_social_summary.pdf",
         "fig_betrayal_boundary_summary.png",
         "fig_betrayal_boundary_summary.pdf",
+        "fig_model_fitness_beta_reward_divergence.png",
+        "fig_model_fitness_beta_reward_divergence.pdf",
     }
     assert all(path.exists() for path in generated)
     out = capsys.readouterr().out
     assert "Generated paper figure files:" in out
     assert "fig_model_fitness_beta_reward_divergence.png" in out
+    assert "fig_deployment_social_summary.png" in out
     assert "fig_betrayal_boundary_summary.pdf" in out
 
 
@@ -119,10 +142,8 @@ def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
     source_dir = tmp_path / "source_tables"
     output_dir = tmp_path / "figures"
     _write_source_tables(source_dir)
-    broken = pd.read_csv(source_dir / "h3_locality_probe_summary.csv").drop(
-        columns=["abs_corr_precision_payoff"]
-    )
-    broken.to_csv(source_dir / "h3_locality_probe_summary.csv", index=False)
+    broken = pd.read_csv(source_dir / "h2_deployment_contrast_summary.csv").drop(columns=["mean_q_pi_entropy"])
+    broken.to_csv(source_dir / "h2_deployment_contrast_summary.csv", index=False)
 
-    with pytest.raises(ValueError, match="missing required columns.*abs_corr_precision_payoff"):
-        make_paper_figures.model_fitness_figure(source_dir, output_dir)
+    with pytest.raises(ValueError, match="missing required columns.*mean_q_pi_entropy"):
+        make_paper_figures.deployment_social_figure(source_dir, output_dir)

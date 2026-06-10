@@ -18,21 +18,25 @@ organization only; it does not reinterpret results.
 
 - `results/paper/`
 - `results/diagnostics/`
+- `results/future/`
 - `results/archive/`
 
 No top-level historical experiment directories remain on the server.
 
 ## Paper Raw Runs
 
-- `results/paper/model_fitness/raw/`
-- `results/paper/betrayal_adaptation/raw/`
-- `results/paper/alpha_sweep/raw/`
-- `results/paper/prior_factorial/raw/`
-- `results/paper/forgiveness/raw/`
-- `results/paper/mixed_volatility/raw/`
+- `results/paper/04_betrayal_adaptation/raw/`
+- `results/paper/05a_alpha_sweep/raw/`
+- `results/paper/05b_prior_factorial/raw/`
+- `results/paper/05c_forgiveness/raw/`
 
 Compact local README, manifest, summary, metrics, and source-table files were
 rsynced into `results/paper/` next to these ignored full-data raw directories.
+
+The binary model-fitness raw run belongs under `results/diagnostics/model_fitness/raw/`.
+
+The mixed-volatility run belongs under `results/future/mixed_volatility/raw/`
+because it is a future heterogeneous-volatility extension, not paper evidence.
 
 ## Diagnostic Raw Runs
 

@@ -33,7 +33,7 @@ python scripts/experiment/run.py \
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/demo/model_fitness.toml \
+  --config configs/demo/01_predictability_value.toml \
   --batch-name demo_model_fitness \
   --workers 1
 ```
@@ -42,12 +42,13 @@ python scripts/experiment/run.py \
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml \
-  --config configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml \
-  --config configs/paper/alpha_sweep.toml \
-  --config configs/paper/prior_factorial.toml \
-  --config configs/paper/forgiveness.toml \
-  --config configs/paper/mixed_volatility.toml \
+  --config configs/paper/01_predictability_value.toml \
+  --config configs/paper/02_deployment_ablation.toml \
+  --config configs/paper/03_partner_selection.toml \
+  --config configs/paper/04_betrayal_adaptation.toml \
+  --config configs/paper/05a_alpha_sweep.toml \
+  --config configs/paper/05b_prior_factorial.toml \
+  --config configs/paper/05c_forgiveness.toml \
   --batch-name paper \
   --workers 1 \
   --dry-run
@@ -59,7 +60,9 @@ parallel execution.
 
 Full per-round `results.csv` files are gitignored and retained locally/server
 side. Compact public summaries and manifests live under `results/paper/` and
-`results/diagnostics/`.
+`results/diagnostics/`. Reviewer ladders, older H-card probes, and retained
+non-paper controls are available under `configs/diagnostics/`; implemented
+follow-up surfaces that moved out of the paper live under `configs/future/`.
 
 ## Colab Route
 

@@ -4,10 +4,11 @@
   into one section per demo experiment; each section runs the config, analyzes
   the fresh output, then plots payoff/entropy readouts.
 - `reproduce.ipynb`: Colab/local paper reproduction notebook. It dry-runs all
-  `configs/paper/` specs to show the workload, then walks through H1, H5, and
-  Exp A-D one section at a time. Each section runs the relevant config into
-  `outputs/`, materializes the fresh output into `results/paper/*/raw/`,
-  regenerates analysis artifacts, and plots the local readout before moving on.
+  numbered `configs/paper/` specs to show the workload, then walks through
+  Sections 3.1--3.5 one paper section at a time. Each section runs the relevant
+  config into `outputs/`, materializes the fresh output into
+  `results/paper/*/raw/`, regenerates analysis artifacts, and plots the local
+  readout before moving on.
 
 Both public notebooks avoid `.venv` and absolute local paths. In Colab they
 clone the repo, install it into the runtime, report CPU/GPU/JAX devices, and
@@ -34,3 +35,7 @@ expensive because each paper experiment is executed before its analysis cells.
   can still write them locally or export them to Drive.
 - Source of truth: if a notebook cell and a CLI doc differ, prefer the CLI doc
   in `docs/experiments/running.md` and update the notebook.
+- Scope: paper sections use `configs/paper/01_*` through `05c_*`; fast
+  workflow checks stay under `configs/demo/`; reviewer controls and older
+  H-card probes stay under `configs/diagnostics/`; future extensions stay under
+  `configs/future/`.

@@ -31,8 +31,3 @@ def test_tasks_do_not_import_higher_layers():
                 offenders.append(f"{path.relative_to(ROOT)} imports {token}")
     assert offenders == []
 
-
-def test_trust_baselines_live_under_task_evaluation():
-    from tasks.trust.evaluation.baselines import RandomAgent
-
-    assert RandomAgent is not None

@@ -1,4 +1,4 @@
-"""Build phenotype paper artifacts from existing Exp A-D result CSVs."""
+"""Build profile and future-extension artifacts from existing result CSVs."""
 
 # ruff: noqa: E402,I001
 
@@ -41,8 +41,10 @@ ARTIFACTS = {
     "mixed_volatility": {
         "metrics": mixed_volatility.metrics,
         "figure": mixed_volatility.figure,
-        "table_folder": "exp_d_mixed_volatility",
-        "readme": "Experiment D mixed-volatility compact metrics and figure artifacts.",
+        "table_folder": "mixed_volatility",
+        "figure_folder": "future",
+        "readme": "Future mixed-volatility extension metrics and figure artifacts.",
+        "paper_artifact": False,
     },
 }
 
@@ -58,14 +60,15 @@ def _load_results(results_root: Path) -> pd.DataFrame:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build phenotype paper artifacts from existing result CSVs.")
+    parser = argparse.ArgumentParser(description="Build profile or future-extension artifacts from existing result CSVs.")
     parser.add_argument("experiment", choices=sorted(ARTIFACTS), help="Phenotype artifact family to build.")
     parser.add_argument(
         "--results-root",
         required=True,
         help="Directory containing combined or nested results.csv files.",
     )
-    parser.add_argument("--paper-dir", default="docs/manuscript", help="Manuscript artifact root.")
+    parser.add_argument("--paper-dir", default="docs/manuscript", help="Manuscript artifact root for paper artifacts.")
+    parser.add_argument("--future-dir", default="docs/future_artifacts", help="Artifact root for future-only experiments.")
     parser.add_argument("--no-figures", action="store_true", help="Only write metrics/source tables.")
     return parser
 
@@ -74,17 +77,19 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     results_root = Path(args.results_root)
     paper_dir = Path(args.paper_dir)
+    future_dir = Path(args.future_dir)
     artifact = ARTIFACTS[args.experiment]
+    artifact_root = paper_dir if artifact.get("paper_artifact", True) else future_dir
     results = _load_results(results_root)
     metrics = artifact["metrics"](results)
     write_metrics(
         metrics,
         output_dir=results_root,
-        paper_dir=paper_dir,
+        paper_dir=artifact_root,
         table_folder=str(artifact["table_folder"]),
     )
     if not args.no_figures:
-        artifact["figure"](metrics, paper_dir / "figures")
+        artifact["figure"](metrics, artifact_root / str(artifact.get("figure_folder", "figures")))
     write_readme(results_root, str(artifact["readme"]))
     print(f"Wrote phenotype artifacts for {args.experiment} from {results_root}")
     return 0

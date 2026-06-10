@@ -19,14 +19,15 @@ does not yet establish fully reciprocal multi-agent dynamics in which both sides
 update beliefs, confidence, and policies simultaneously. See
 `docs/overview/pomdp.md`.
 
-### Global-Beta Evidence Is Discovery-Scale
+### Shared-Beta Evidence Is Signal-Level
 
 Partner-specific beta is an architectural premise. Current global-beta probes
-support a signal-quality decomposition but do not yet establish that
-partner-local precision is behaviorally necessary. Exp D and a higher-seed H3
-locality probe are the planned tests of cross-partner interference.
+support a signal-quality decomposition: pooling precision evidence weakens the
+partner-local predictability signal. They do not establish that partner-local
+precision is behaviorally necessary in every task context; that would require a
+dedicated behavioral cross-partner-interference comparison.
 
-### H5 Is A Temporal Dependency, Not A Simple Win Or Loss
+### Abrupt Betrayal Is A Temporal Dependency, Not A Simple Win Or Loss
 
 The manuscript treats abrupt betrayal as a structural readout. In the 30-seed
 confirmation, partner-local precision lowers policy entropy (8.36 vs 8.74) and
@@ -35,10 +36,10 @@ uncertain (1185.9 vs 1172.1; paired bootstrap interval crosses zero). The story
 is precision-weighted commitment under temporal change, not better reward
 maximization and not a generic misdeployment failure.
 
-### Phenotypes In Manuscript; Exp C Reviewed
+### Profiles In Manuscript; Forgiveness Reviewed
 
-Section 3.6 includes 20-seed phenotype, $\alpha$-sweep, quadrant, and
-mixed-volatility results. Exp C forgiveness is interpreted as a dissociation:
+Section 3.5 includes 20-seed phenotype, $\alpha$-sweep, quadrant, and
+forgiveness results. The forgiveness profile is interpreted as a separation:
 reengagement after repair and restoration of model-fitness confidence need not
 move together, and payoff recovery remains near baseline across profiles. Do
 not upgrade computational profiles to clinical categories or human validation.
@@ -54,11 +55,14 @@ model-fitness and deployment signal.
 The manuscript has two interpreted evidence layers:
 
 1. **Core mechanism:** partner-local affective precision as social metacognitive
-   deployment (H1, H2, H4, H5 at confirmation scale where stated).
+   calibration and deployment (predictability-over-value, open deployment,
+   partner-choice, and abrupt-betrayal readouts at confirmation scale where
+   stated).
 2. **Individual-differences extension:** gain and prior define computational
-   trust-calibration profiles (Exp A–D at 20 seeds).
+   trust-calibration profiles (profile analyses at 20 seeds).
 
-H1, H5, and Exp A–D have reached structural finality for the current draft.
+The abrupt-betrayal and profile analyses have reached structural finality for
+the current draft.
 There is no remaining experiment gate before submission. Headline numbers and
 include/exclude rules live in `docs/results/current.md`.
 
@@ -68,14 +72,14 @@ Run only if needed for reviewer response:
 
 | Reviewer concern | Best response |
 |---|---|
-| "Is partner-local beta necessary?" | Shared-beta/locality confirmation ablation. |
+| "Is partner-local beta necessary?" | Shared-beta/locality confirmation as signal-level evidence; behavioral necessity remains a future cross-partner-interference test. |
 | "Does this generalize beyond scripted partners?" | Reciprocal AIF descriptive runs or future external evaluation. |
 | "Are clinical labels justified?" | Soften language to computational perturbations; do not add diagnostic claims. |
-| "Is this just reward averaging?" | H1 corrected readout plus controlled diagnostic ladder. |
-| "Why does volatility help or hurt payoff?" | Temporal-dependency framing: precision sharpens action under change; payoff depends on portfolio structure. |
+| "Is this just reward averaging?" | Corrected model-fitness readout plus controlled diagnostic ladder. |
+| "How should volatility be handled?" | Treat heterogeneous-volatility environments as future tests of change detection, not current manuscript evidence. |
 | "Is this ToM?" | No—social metacognition over behavioural model fitness; ToM combination is future work. |
 
-### H1 Diagnostic Escalation
+### Model-Fitness Diagnostic Escalation
 
 If reviewers ask for a stronger reward-control decomposition, use the bounded
 diagnostic ladder:
@@ -94,10 +98,9 @@ Question: is partner-specific affective precision behaviorally necessary, or
 does a shared beta tracker explain the same behavior?
 
 Current stance: local beta gives the cleaner partner-specific reliability
-signal in the H1 confirmation, but universal behavioral necessity is not
-established. Exp D supplies a partial mixed-volatility boundary condition; a
-dedicated behavioral shared-beta confirmation is optional and should be
-motivated by reviewer pressure.
+signal in the model-fitness confirmation, but universal behavioral necessity is not
+established. A dedicated behavioral shared-beta confirmation is optional and
+should be motivated by reviewer pressure.
 
 ## Longer-Term Extensions
 

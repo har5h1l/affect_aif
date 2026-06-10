@@ -6,7 +6,7 @@ This appendix reports extended parameter sweeps, profile analyses, and robustnes
 \subsection{Precision-dynamics parameter variation}
 \label{sec:perturbation_dynamics}
 
-We first vary the amplitude and stability of $\beta_k$ dynamics to test how precision dynamics affect action commitment. These variants are computational controls rather than diagnostic categories.
+We first vary the amplitude and stability of $\beta_k$ dynamics to test how precision dynamics affect policy commitment. These variants are computational controls rather than diagnostic categories.
 
 \begin{table}[H]
 \centering
@@ -14,7 +14,7 @@ We first vary the amplitude and stability of $\beta_k$ dynamics to test how prec
 \label{tab:perturbation_dynamics}
 \begin{tabular}{lccc}
 \toprule
-Variant & $\beta_k$ range & Total payoff & Policy entropy \\
+Variant & Mean $\beta_k$ range & Total payoff & Policy entropy \\
 \midrule
 affect & 1.32 & 1851.3 & 8.59 \\
 low-gain & 0.24 & 1840.5 & 8.9 \\
@@ -67,10 +67,10 @@ $\alpha$ & Mean $\beta_k$ range \\
 \label{fig:alpha_sweep_appendix}
 \end{figure}
 
-\subsection{Profile quadrant profiles}
+\subsection{Gain-prior profile quadrants}
 \label{sec:phenotypes_quadrants}
 
-Crossing prior belief (naive versus cautious) with $\alpha$ (low versus high) defines four behavioral profiles tested in the betrayal environment (20 seeds). Table~\ref{tab:phenotypes} gives key metrics.
+Crossing prior model fitness with precision gain defines the profile variants used in Section~\ref{sec:phenotypes}. ``Naive'' and ``cautious'' refer to the initial prior over $q(\beta_k)$ on support $\{0.5, 0.67, 1.0, 1.5, 2.0\}$: naive uses $[0.40, 0.40, 0.15, 0.04, 0.01]$, while cautious uses $[0.01, 0.04, 0.15, 0.40, 0.40]$. Low and high gain refer to $\alpha=0.1$ and $\alpha=3.0$, respectively, with the default agent using $\alpha=3.0$ and centered initialization at $\beta_k=1.0$. $\beta_k$ range denotes the mean within-episode range of the inverse-precision estimate. Table~\ref{tab:phenotypes} gives key metrics.
 
 \begin{table}[H]
 \centering
@@ -78,7 +78,7 @@ Crossing prior belief (naive versus cautious) with $\alpha$ (low versus high) de
 \label{tab:phenotypes}
 \begin{tabular}{lccccc}
 \toprule
-Profile & Payoff & Recovery & Gini & $\beta$ range & Trust asymmetry \\
+Profile & Payoff & Recovery & Gini & $\beta_k$ range & Trust asymmetry \\
 \midrule
 Anxious-reactive   & 1932 & 26.5 & 0.338 & 1.084 & 0.98 \\
 Hypervigilant      & 1951 & 20.1 & 0.423 & 0.892 & 1.65 \\
@@ -124,7 +124,3 @@ no-affect & 0.593 & 1.033 & 1.7 & -- \\
 \caption{Forgiveness/trust-repair diagnostic from the 20-seed profile analyses. Reengagement and payoff recovery do not collapse into a single monotonic gain effect: no-affect and cautious-low-$\alpha$ profiles reengage most often, while payoff recovery remains near baseline across profiles.}
 \label{fig:forgiveness_appendix}
 \end{figure}
-
-\subsection{Mixed-volatility extended diagnostics}
-
-The primary mixed-volatility table and figure remain in Section~\ref{sec:phenotypes_mixed}. Extended Exp D diagnostics include per-partner $\beta_k$ trajectories, rolling P0 selection concentration, and pairwise stability--precision correlations used to compute the discrimination index and P0 false-positive rate reported in the main text.

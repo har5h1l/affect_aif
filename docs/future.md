@@ -60,6 +60,22 @@ claims.
 - Add richer theory-of-mind partner models while keeping affective precision as
   the confidence/deployment layer rather than the content of partner inference.
 
+## Heterogeneous Volatility Extension
+
+The mixed-volatility config is implemented under
+`configs/future/mixed_volatility.toml`, but it is not part of the current paper
+evidence. The issue is not that the environment is weak. The issue is that once
+it appears in the appendix it stops being merely extra: readers can reasonably
+ask what the discrimination index measures, why higher gain can improve payoff
+while worsening discrimination, what P0 confidence-drop metrics mean, whether
+that contradicts the main calibration claim, and whether the paper has become a
+volatility-learning paper.
+
+Treat this as a real follow-up extension. A future version should define the
+volatility-learning question explicitly, add a change-detection account, and
+decide whether payoff, discrimination, stable-partner confidence retention, or
+adaptation speed is the primary target before reporting the results.
+
 ## Task And Evaluation Extensions
 
 - Add noisy observations, larger action spaces, delayed reward, coalition or

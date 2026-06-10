@@ -20,7 +20,7 @@ git diff --check
 
 The original Exp A-D tmux/Mango process `affect_aif_exp_abcd_20260529`
 stopped without reaching finality: no live `run_exp_*` process, no tmux
-session, no `DONE` marker in `results/paper/alpha_sweep/rawbcd_20260529_logs/run.log`, no
+session, no `DONE` marker in `results/paper/05a_alpha_sweep/rawbcd_20260529_logs/run.log`, no
 Exp C/D outputs, and no top-level final Exp B `results.csv`. Exp B had
 completed `open_graded` and `betrayal`; `partner_choice` had 116/120 complete
 runs, missing only no-affect replications 16--19. Those completed raw
@@ -31,7 +31,7 @@ Recovery is running in tmux/Mango:
 
 ```text
 tmux: affect_aif_exp_recovery_20260603
-log: results/paper/alpha_sweep/rawbcd_recovery_20260603_logs/run.log
+log: results/paper/05a_alpha_sweep/rawbcd_recovery_20260603_logs/run.log
 HEAD: 972f13b
 Mango: affect_aif_exp_recovery_20260603, monitor-only
 ```
@@ -47,9 +47,9 @@ stages:
 1. Full verification gate: `pytest tests/ -q`, `ruff check .`, `mypy`,
    `git diff --check`.
 2. Exp A `--analyze-only`, then generic `scripts/analysis/analyze.py` on
-   `results/paper/alpha_sweep/raw/results.csv`.
+   `results/paper/05a_alpha_sweep/raw/results.csv`.
 3. Exp B resume from checkpoints, then generic analysis on
-   `results/paper/prior_factorial/raw/results.csv`.
+   `results/paper/05b_prior_factorial/raw/results.csv`.
 4. Exp D full run and generic analysis (80 runs: 4 variants x 20 seeds).
 5. Exp C full run and generic analysis (120 runs: 6 variants x 20 seeds).
 6. `RECOVERY_DONE` marks finality for uninterrupted recovery sessions. After
@@ -62,37 +62,30 @@ Current recovery status on June 6 09:10 PDT:
   `324 passed, 7 skipped, 74 warnings in 504.08s`; ruff passed; mypy passed;
   `git diff --check` passed.
 - Exp A analyze-only regeneration and generic analysis completed. Operational
-  artifacts now exist at `results/paper/alpha_sweep/raw/analysis/` and
+  artifacts now exist at `results/paper/05a_alpha_sweep/raw/analysis/` and
   `docs/manuscript/figures/fig_alpha_sweep.pdf`. Do not interpret the
   printed metric values as manuscript results until full Exp A-D finality and
   user-approved review.
 - Exp B resume completed. Structural audit shows all three Exp B environments
   complete: `open_graded`, `betrayal`, and `partner_choice` each have 120
-  run groups x 200 rounds, and top-level `results/paper/prior_factorial/raw/results.csv` has 360
+  run groups x 200 rounds, and top-level `results/paper/05b_prior_factorial/raw/results.csv` has 360
   run groups / 72,000 data rows. Compact outputs exist at
-  `results/paper/prior_factorial/raw/metrics.csv`,
+  `results/paper/05b_prior_factorial/raw/metrics.csv`,
   `docs/manuscript/source_tables/exp_b_prior_factorial/`, and
   `docs/manuscript/figures/fig_phenotype_quadrants.pdf`. Generic
-  analysis completed under `results/paper/prior_factorial/raw/analysis/`.
-- Exp D completed operationally. Structural audit found 80/80 complete seed
-  groups x 200 rounds, with all four variants complete. Final
-  `results/paper/mixed_volatility/raw/results.csv`, `results/paper/mixed_volatility/raw/metrics.csv`,
-  `results/paper/mixed_volatility/raw/manifest.json`, `results/paper/mixed_volatility/raw/README.md`,
-  `results/paper/mixed_volatility/raw/analysis/`, `docs/manuscript/source_tables/exp_d_mixed_volatility/metrics.csv`,
-  and `docs/manuscript/figures/fig_mixed_volatility.pdf` exist. Do not
-  interpret metric values until Exp A-D finality and user-approved review.
-  Preliminary user-requested Exp D review on June 4 found that the current
-  compact readout is not manuscript-ready for the strong planned
-  mixed-volatility claim. Raw outputs are structurally valid, but the
-  whole-episode `discrimination_index` and derived time-resolved beta-drop
-  diagnostic only partially match expectations. Before filling Section 3.6.4,
-  either revise/soften the claim around what Exp D actually supports or add a
-  clearer time-resolved discrimination/tradeoff readout from existing raw
-  trajectories.
+  analysis completed under `results/paper/05b_prior_factorial/raw/analysis/`.
+- Exp D completed operationally and is retained as a future extension, not as
+  paper evidence. Structural audit found 80/80 complete seed groups x 200
+  rounds with all four variants complete. June 9 cleanup moved the tracked
+  compact scaffold to `results/future/mixed_volatility/`, moved the config to
+  `configs/future/mixed_volatility.toml`, and removed manuscript Exp D source
+  tables/figures. Future runs may use `scripts/analysis/phenotype_artifacts.py
+  mixed_volatility`, which now writes future artifacts outside
+  `docs/manuscript/`.
 - Exp C completed structurally after the June 5 resume. Structural audit found
   120/120 seed groups x 200 rounds in both final and checkpoint CSVs. Final
-  `results/paper/forgiveness/raw/results.csv`, `results/paper/forgiveness/raw/metrics.csv`,
-  `results/paper/forgiveness/raw/manifest.json`, `results/paper/forgiveness/raw/README.md`, generic analysis,
+  `results/paper/05c_forgiveness/raw/results.csv`, `results/paper/05c_forgiveness/raw/metrics.csv`,
+  `results/paper/05c_forgiveness/raw/manifest.json`, `results/paper/05c_forgiveness/raw/README.md`, generic analysis,
   `docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv`, and
   `docs/manuscript/figures/fig_forgiveness.pdf` exist. The original
   recovery script did not write a `RECOVERY_DONE` marker after the reboot
@@ -104,17 +97,17 @@ Current recovery status on June 6 09:10 PDT:
   `results/confirm_gate_20260604_logs/run.log`.
 - H5 confirmation completed structurally after the June 5 resume. Structural
   audit found 120/120 groups x 120 rounds in
-  `results/paper/betrayal_adaptation/raw/h5/betrayal_reallocation_confirm/results.csv`
+  `results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv`
   and the matching checkpoint. Configured analysis artifacts exist under the
   same directory. Do not interpret confirmation values until user-approved
   review.
-- H1 confirmation completed on June 6 after server checkout alignment to
+- H1 binary confirmation completed on June 6 after server checkout alignment to
   `162a127`, Mango preflight, and a fresh verification gate. Structural audit
   found 90/90 groups x 200 rounds in
-  `results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv`.
-  Configured analysis artifacts exist under the same directory, and paper
-  source tables were copied to
-  `docs/manuscript/source_tables/h1_model_fitness_confirm/`.
+  `results/diagnostics/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv`.
+  Configured analysis artifacts exist under the same directory, and diagnostic
+  source tables are retained under
+  `results/diagnostics/model_fitness/source_tables/`.
 - Diagnostic Exp A/B audit at 23:41 PDT found complete raw trajectories and
   compact metrics for Exp A/B with expected run counts: Exp A has 320/320
   groups x 200 rounds, and Exp B has 360/360 groups x 200 rounds. No raw
@@ -127,22 +120,21 @@ Current recovery status on June 6 09:10 PDT:
 
 Manuscript-critical evidence audit at 14:47 PDT:
 
-| Evidence surface | Planned size | Current artifact state | Manuscript status |
+| Evidence surface | Planned size | Current output state | Manuscript status |
 |---|---:|---|---|
 | Exp A alpha sweep | 320 runs: 2 environments x 8 alpha values x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_alpha_sweep.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
 | Exp B prior x alpha factorial | 360 runs: 3 environments x phenotype/default arms x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_phenotype_quadrants.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
-| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Final `results.csv`, `metrics.csv`, `manifest.json`, `README.md`, generic `analysis/`, source table, and `fig_mixed_volatility.pdf` exist | Operationally ready, but do not interpret until Exp A-D recovery finality and user-approved review |
+| Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Raw trajectories may exist locally/server-side; public paper scaffold and manuscript Exp D assets removed | Future extension only under `configs/future/mixed_volatility.toml`; not paper evidence |
 | Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Structural finality reached; final CSV, compact metrics, generic analysis, source table, and forgiveness figure exist | Ready for user-approved review; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Structural finality reached; final CSV, checkpoint, and configured analysis artifacts exist | Ready for user-approved review; top core-mechanism confirmation |
-| H1 confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, configured analysis, and paper source tables exist | Interpreted in manuscript as model-fitness tracking, not reward improvement |
+| H1 binary confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, configured analysis, and diagnostic source tables exist | Appendix/diagnostic only; removed from main paper |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
 
 Seed/round audit: keep Exp A-D at 20 seeds x 200 rounds because these runs are
 already partly complete, cover within-episode transients needed by Section 3.6,
 and provide enough replication for compact CIs without expanding compute. For
-core confirmation, use the existing 30-seed specs first: H5
-`betrayal_reallocation_confirm.toml` is 4 variants x 30 seeds x 120 rounds, and
-H1 `reliability_vs_reward_confirm.toml` is 3 variants x 30 seeds x 200 rounds.
+core confirmation, use the existing 30-seed H5 spec first:
+`betrayal_reallocation_confirm.toml` is 4 variants x 30 seeds x 120 rounds.
 Do not add more seeds unless reviewer pressure requires it; if H1 needs a
 stronger reward/exposure decomposition, escalate to controlled diagnostics
 before increasing replication.
@@ -152,7 +144,8 @@ interpretation updates.
 
 As of May 31, 2026, the manuscript has been substantially revised toward the
 full individual-differences / phenotype framing. The canonical affect update
-uses Hesp-style surprisal with neutral baseline `sigma_0_sq = (-log 0.5)^2`.
+uses partner-response likelihood surprisal with neutral baseline
+`sigma_0_sq = (-log 0.5)^2`.
 
 ### June 2 H1 Analysis/Design Checkpoint
 
@@ -179,9 +172,10 @@ tiny scheduled-switch specs; no model math, task runtime, or manuscript
 experiment config changed.
 
 On June 2, the planning/manuscript docs were synchronized with the corrected
-H1 active-encounter analysis status. On June 6, H1 confirmation reached
-structural finality and replaced the smoke-scale values in the manuscript.
-Historical pre-log-surprisal confirmation notes remain as provenance.
+H1 active-encounter analysis status. On June 6, H1 binary confirmation reached
+structural finality; it is now appendix/diagnostic provenance rather than
+main-text evidence. Historical pre-log-surprisal confirmation notes remain as
+provenance.
 
 The pre-reboot Mango registrations `affect_aif_exp_recovery_20260603` and
 `affect_aif_h5_confirm_20260604` are stale/missing after the June 5 reboot.
@@ -210,14 +204,15 @@ Status classification from this monitor check:
 - Exp C: structurally final and operationally analyzed; not interpreted.
 - H5 confirmation: structurally final and operationally analyzed; not
   interpreted.
-- H1 confirmation: completed after Exp C/H5 finality freed server load and the
-  June 6 verification gate passed at `162a127`; interpreted in the manuscript.
+- H1 binary confirmation: completed after Exp C/H5 finality freed server load
+  and the June 6 verification gate passed at `162a127`; retained as
+  diagnostics/appendix provenance.
 
-The H1 manuscript figure/source-table path now uses the partial model-fitness
-readout (`abs_partial_corr_precision_surprise_minus_reward`) alongside the
-active-encounter partial correlation columns. The default paper figure builder
-was verified against the current source-table packet in `/tmp` after refreshing
-the H1 source tables from the post-fix smoke results.
+The H1 diagnostic source-table path now uses the partial model-fitness readout
+(`abs_partial_corr_precision_surprise_minus_reward`) alongside the
+active-encounter partial correlation columns. The binary diagnostic is no
+longer part of the default paper figure builder or main manuscript figure
+sequence.
 
 The H1 diagnostic ladder was dry-run locally on June 2 and rechecked at
 02:31 PDT: the corrected confirmation expands to 90 runs, the balanced graded,
@@ -234,7 +229,7 @@ the dominance diagnostic, and
 the strict reward-neutral diagnostic analyzable as a reliability test rather
 than failing because reward variance was intentionally removed.
 
-On June 2, before Exp C/D had started, Exp D's mixed-volatility high-gain arm
+On June 2, before Exp C/D had started, Exp D's heterogeneous-volatility high-gain arm
 was corrected from `alpha=3.0` to `alpha=8.0`. This keeps the project default
 (`alpha=3.0`) as the calibrated reference while making the high-gain arm a
 distinct reactive comparison. Exp A/B outputs are not obsolete; Exp D had not
@@ -253,7 +248,7 @@ process. Exp C now writes partner-0 beta recovery trajectory columns for the
 planned forgiveness figure and uses the planned three panels: reengagement
 rate, beta recovery trajectory, and payoff recovery. Exp D now writes
 per-partner beta trajectory snapshots and rolling P0-selection snapshots for
-the planned mixed-volatility figure: default and high-alpha beta trajectories,
+the planned heterogeneous-volatility figure: default and high-alpha beta trajectories,
 discrimination index with 95% CI, and concentration toward P0 with switch/drift
 reference lines. Since Exp C/D had no outputs, no rerun or analyze-only
 regeneration is required for those two experiments.
@@ -267,7 +262,7 @@ uses the planned five axes: early exploitation rate, betrayal recovery time,
 selection Gini, trust asymmetry, and mean payoff, with a dashed default-agent
 overlay. The live Exp B raw trajectories remain valid, but the currently
 running Python process loaded the older analysis code; after Exp A-D finality,
-rerun Exp B with `--analyze-only` so `results/paper/prior_factorial/raw/metrics.csv`, source
+rerun Exp B with `--analyze-only` so `results/paper/05b_prior_factorial/raw/metrics.csv`, source
 tables, and `fig_phenotype_quadrants.pdf` use the updated readout.
 
 Also while Exp B was still running, the Exp A compact analysis and figure
@@ -277,7 +272,7 @@ and `fig_alpha_sweep.pdf` now plots the planned early/mid/late entropy
 trajectory with 95% confidence intervals on the sweep panels. Exp A raw
 trajectories remain valid, but the already-written Exp A compact outputs were
 produced by the older analysis code; after Exp A-D finality, rerun Exp A with
-`--analyze-only` so `results/paper/alpha_sweep/raw/metrics.csv`, source tables, and
+`--analyze-only` so `results/paper/05a_alpha_sweep/raw/metrics.csv`, source tables, and
 `fig_alpha_sweep.pdf` use the updated readout.
 
 Decision tree for H1:
@@ -347,14 +342,14 @@ tables and figures are generated afterward with
 ### Exp A — α Sweep
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper/alpha_sweep.toml --batch-name exp_a --workers 1
-.venv/bin/python scripts/analysis/phenotype_artifacts.py alpha_sweep --results-root results/paper/alpha_sweep/raw
+.venv/bin/python scripts/experiment/run.py --config configs/paper/05a_alpha_sweep.toml --batch-name exp_a --workers 1
+.venv/bin/python scripts/analysis/phenotype_artifacts.py alpha_sweep --results-root results/paper/05a_alpha_sweep/raw
 ```
 
 - **α values**: `[0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0]`
 - **Environments**: open graded + betrayal
 - **Seeds**: 20 per condition
-- **Outputs**: `results/paper/alpha_sweep/raw/`, figures → `docs/manuscript/figures/fig_alpha_sweep.pdf`
+- **Outputs**: `results/paper/05a_alpha_sweep/raw/`, figures → `docs/manuscript/figures/fig_alpha_sweep.pdf`
 - **Metrics**: `early_exploitation_rate`, `betrayal_recovery_time`, `selection_gini`,
   `entropy_trajectory` (early/mid/late), `beta_range`
 - **Manuscript target**: Section 3.6.1 placeholders (`\resultp{Exp A: ...}`)
@@ -362,15 +357,15 @@ tables and figures are generated afterward with
 ### Exp B — 2×2 Prior × α Factorial
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper/prior_factorial.toml --batch-name exp_b --workers 1
-.venv/bin/python scripts/analysis/phenotype_artifacts.py prior_factorial --results-root results/paper/prior_factorial/raw
+.venv/bin/python scripts/experiment/run.py --config configs/paper/05b_prior_factorial.toml --batch-name exp_b --workers 1
+.venv/bin/python scripts/analysis/phenotype_artifacts.py prior_factorial --results-root results/paper/05b_prior_factorial/raw
 ```
 
 - **Prior conditions**: naive (low-β weights), cautious (high-β weights), default
 - **α conditions**: `low = 0.1`, `high = 3.0`, default reference
 - **Environments**: open graded, betrayal, partner-choice
 - **Seeds**: 20 per condition
-- **Outputs**: `results/paper/prior_factorial/raw/`, figures → `docs/manuscript/figures/fig_phenotype_quadrants.pdf`
+- **Outputs**: `results/paper/05b_prior_factorial/raw/`, figures → `docs/manuscript/figures/fig_phenotype_quadrants.pdf`
 - **Metrics**: all Exp A metrics + `trust_asymmetry`
 - **Target phenotypes**: anxious-reactive, hypervigilant, naive-stubborn, avoidant-rigid
 - **Manuscript target**: Section 3.6.2 placeholders
@@ -378,23 +373,26 @@ tables and figures are generated afterward with
 ### Exp C — Forgiveness Paradigm
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper/forgiveness.toml --batch-name exp_c --workers 1
-.venv/bin/python scripts/analysis/phenotype_artifacts.py forgiveness --results-root results/paper/forgiveness/raw
+.venv/bin/python scripts/experiment/run.py --config configs/paper/05c_forgiveness.toml --batch-name exp_c --workers 1
+.venv/bin/python scripts/analysis/phenotype_artifacts.py forgiveness --results-root results/paper/05c_forgiveness/raw
 ```
 
 - **Episode structure**: cooperative (1–80), betrayal (81–120), reversion (121–200)
 - **Conditions**: all 4 phenotype conditions + default + no-affect baseline
 - **Seeds**: 20 per condition
-- **Outputs**: `results/paper/forgiveness/raw/`, figures → `docs/manuscript/figures/fig_forgiveness.pdf`
+- **Outputs**: `results/paper/05c_forgiveness/raw/`, figures → `docs/manuscript/figures/fig_forgiveness.pdf`
 - **Metrics**: `reengagement_rate`, `payoff_recovery`, `beta_recovery_trajectory`,
   `reengagement_latency`
 - **Manuscript target**: Section 3.6.3 placeholders
 
-### Exp D — Mixed Volatility Environment
+### Exp D — Mixed Volatility Environment (future extension)
+
+Exp D is no longer part of the paper scaffold or manuscript assets. The config
+lives under `configs/future/mixed_volatility.toml` for future
+change-detection/volatility work only.
 
 ```bash
-.venv/bin/python scripts/experiment/run.py --config configs/paper/mixed_volatility.toml --batch-name exp_d --workers 1
-.venv/bin/python scripts/analysis/phenotype_artifacts.py mixed_volatility --results-root results/paper/mixed_volatility/raw
+.venv/bin/python scripts/experiment/run.py --config configs/future/mixed_volatility.toml --batch-name exp_d --workers 1
 ```
 
 - **Partner setup**: P0 stationary cooperator, P1 stationary exploiter,
@@ -402,17 +400,13 @@ tables and figures are generated afterward with
 - **Regime**: partner-choice
 - **Conditions**: default α (3.0), low α (0.1), high α (8.0), no-affect baseline
 - **Seeds**: 20 per condition
-- **Outputs**: `results/paper/mixed_volatility/raw/`, figures → `docs/manuscript/figures/fig_mixed_volatility.pdf`
-- **Metrics**: `discrimination_index`, `concentration_toward_P0`, per-partner beta
-  trajectories, `false_positive_rate` (rolling rate where stable-P0 engagement
-  drops more than 15% below its early baseline)
-- **Manuscript target**: Section 3.6.4 placeholders
+- **Manuscript target**: none; future artifacts should go under `docs/future_artifacts/`, not `docs/manuscript/`
 
 ### After Exp A-D Recovery Complete
 
 1. Confirm finality before reading metric values: the tmux/Mango process has
-   ended, `results/paper/alpha_sweep/rawbcd_recovery_20260603_logs/run.log` contains
-   `RECOVERY_DONE`, and `results/paper/alpha_sweep/raw/` through `results/paper/mixed_volatility/raw/` each contain
+   ended, `results/paper/05a_alpha_sweep/rawbcd_recovery_20260603_logs/run.log` contains
+   `RECOVERY_DONE`, and `results/paper/05a_alpha_sweep/raw/` through `results/paper/05c_forgiveness/raw/` each contain
    final `results.csv`, `metrics.csv`, `manifest.json`, and `README.md`.
 2. Confirm generic analysis directories exist for Exp A-D where applicable:
    `results/exp_*/analysis/`.
@@ -436,7 +430,7 @@ H5 is the repaired positive behavioral anchor after the selector fix.
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml \
+  --config configs/paper/04_betrayal_adaptation.toml \
   --output-dir results \
   --batch-name log_surprisal_h5_confirm_postfix_20260601 \
   --workers 1
@@ -448,21 +442,22 @@ returned/switched partner.
 
 **Seed target**: 30+ seeds minimum for publication-grade claim.
 
-### Priority 2: H1 Model Fitness Corrected-Readout Confirmation
+### Priority 2: H1 Model Fitness Diagnostic Ladder
 
 The old post-fix H1 smoke read mixed carried per-partner precision/surprise
 state with active-encounter payoff. The corrected active-encounter readout
 restores the surprise-over-reward diagnostic in the smoke, and the stricter
 partial-correlation readout controls active payoff and encounter count. This
-planning note is superseded by the June 6 30-seed confirmation, which reached
-structural finality and supports model-fitness tracking without a reward-gain
-claim. Redesign the task only if reviewer pressure requires stronger
-reward/exposure decomposition.
+planning note is superseded by the June 6 30-seed binary confirmation, which
+reached structural finality but has been demoted to appendix/diagnostic
+provenance because the binary regime is behaviorally uninformative. Redesign
+the task only if reviewer pressure requires stronger reward/exposure
+decomposition.
 
 ```bash
 # diagnostic first — do not add seeds before inspecting design
 .venv/bin/python scripts/experiment/run.py \
-  --config configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml \
+  --config configs/diagnostics/h1_model_fitness/reliability_vs_reward_confirm.toml \
   --output-dir results \
   --batch-name log_surprisal_h1_diagnostic_YYYYMMDD \
   --workers 1

@@ -1,0 +1,19 @@
+{
+  "name": "predictability_value",
+  "category": "paper",
+  "status": "complete",
+  "config_paths": [
+    "configs/paper/01_predictability_value.toml"
+  ],
+  "source_run_paths": [
+    "results/paper/01_predictability_value/raw/predictability_value/predictability_value/results.csv"
+  ],
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "tracked_summary_files": [
+    "source_tables/deployment_dissociation_summary.csv",
+    "source_tables/final_round_summary.csv",
+    "source_tables/model_fitness_correlation_summary.csv"
+  ],
+  "paper_use": "Section 3.1 predictability-over-value readout",
+  "provenance_note": "Paper-facing copy of the corrected model-fitness confirmation analysis contract; reviewer-only variants remain under configs/diagnostics/h1_model_fitness/."
+}

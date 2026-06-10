@@ -5,25 +5,23 @@ This appendix summarizes simulation conditions, replication counts, schedules, a
 
 \subsection{Simulation conditions}
 
-All reported experiments use one focal active-inference agent with four partners ($K=4$), per-partner generative models, and environment-side partner policies (Appendix~\ref{app:pomdp}). Conditions differ by payoff regime, assignment mode, and scheduled partner changes.
+All reported experiments use one focal active-inference agent with four partners ($K=4$), per-partner generative models, graded investment actions, and environment-side partner policies (Appendix~\ref{app:pomdp}). Conditions differ by assignment mode, scheduled partner changes, and precision/profile manipulations within the graded payoff regime.
 
-\textbf{Binary random-assignment baseline.} In the binary trust game (Table~\ref{tab:payoff} in the main text), partners are assigned randomly each round and the agent chooses cooperate or defect. Stochastic partner-type drift uses $p_{\mathrm{switch}}=0.05$ unless disabled for scheduled-switch scenarios.
+\textbf{Open graded decision regime.} The graded regime uses a discretized investment level while keeping the same latent type--stance structure. This is the primary deployment-contrast setting (Section~\ref{sec:deployment}): affect, no-affect, and tracked-only variants are compared on policy entropy and cumulative payoff.
 
-\textbf{Open graded decision regime.} The graded regime replaces the binary action with a discretized investment level while keeping the same latent type--stance structure. This is the primary deployment-dissociation setting (Section~\ref{sec:deployment}): affect, no-affect, and tracked-only variants are compared on policy entropy and cumulative payoff.
+\textbf{Predictability-over-value locality probe.} A 100-round partner-choice graded environment with partner-local, shared-$\beta$, and no-affect variants tests whether $\beta_k$-derived policy precision tracks partner-response likelihood surprisal more strongly than realized payoff (Section~\ref{sec:predictability_value}). The payoff panel reports the same active-encounter analysis window used for the locality-probe correlation readouts.
 
-\textbf{Partner-choice regime.} The agent first selects a partner, then selects an action toward that partner each round. Partner selection is where engagement reorganization and social-allocation readouts are defined (Section~\ref{sec:partner_choice}).
-
-\textbf{Focal-switch locality probe.} A partner-choice graded environment with type volatility disabled ($p_{\mathrm{switch}}=0$) and a single scheduled stance switch on partner P0 tests whether local versus shared $\beta$ tracking preserves the surprise-over-reward dissociation (Section~\ref{sec:model_fitness}).
+\textbf{Partner-choice regime.} The agent first selects a partner, then selects an investment level toward that partner each round. Partner selection is where engagement reorganization and social-allocation readouts are defined (Section~\ref{sec:partner_choice}).
 
 \textbf{Abrupt betrayal.} A partner-choice graded environment with scheduled stance betrayal on a previously cooperative partner tests post-switch reallocation, entropy, payoff, and joint accuracy (Section~\ref{sec:betrayal}).
 
-\textbf{Precision-dynamics parameter variation.} Computational profile variants (low-gain, high-gain, and cautious-prior profiles) vary $\beta_k$ amplitude and stability in the graded decision regime (Appendix~\ref{app:extended_results}).
+\textbf{Precision-dynamics/profile variation.} Computational profile variants vary $\beta_k$ amplitude and stability by manipulating precision gain $\alpha$ and prior model fitness in open graded, betrayal, and partner-choice environments (Section~\ref{sec:phenotypes}; Appendix~\ref{app:extended_results}).
 
-\textbf{Extended profile experiments (Exp A--D).} Parameter sweeps and factorial designs vary precision gain $\alpha$ and prior over model fitness to define computational trust-calibration profiles in open graded, betrayal, partner-choice, forgiveness, and mixed-volatility environments (Section~\ref{sec:phenotypes}).
+\textbf{Forgiveness.} The trust-repair protocol extends abrupt betrayal by allowing the betrayed partner to return to a cooperative/trusting state, testing reengagement and confidence recovery after restored reliability (Section~\ref{sec:phenotypes}).
 
 \subsection{Seed counts and episode lengths}
 
-Unless otherwise stated in the main text, episode length is 200 rounds. The abrupt-betrayal condition uses 120 rounds because post-switch readouts dominate interpretation. Profile-scale and mixed-volatility tables use 20 seeds per condition. Central behavioral comparisons use 30 seeds per condition. Exploratory diagnostic runs used three seeds per variant and were used only for implementation validation; all main-text claims are based on the confirmation-scale or profile-scale runs reported in the relevant sections.
+Unless otherwise stated in the main text, episode length is 200 rounds. The abrupt-betrayal condition uses 120 rounds because post-switch readouts dominate interpretation. Profile-scale tables use 20 seeds per condition. Central behavioral comparisons use 30 seeds per condition. Exploratory diagnostic runs used three seeds per variant and were used only for implementation validation; all main-text claims are based on the confirmation-scale or profile-scale runs reported in the relevant sections.
 
 Representative configured scales:
 
@@ -35,13 +33,12 @@ Representative configured scales:
 \toprule
 Experiment family & Setting & Rounds & Seeds \\
 \midrule
-H0/H2 open graded deployment & graded, random or open choice & 200 & 30 \\
-H1 model fitness & graded / reliability probes & 200 & 30 \\
-H3 focal-switch locality & partner choice, single switch & 100 & 30 \\
-H4 partner choice & partner choice & 200 & 30 \\
-H5 abrupt betrayal & partner choice, scheduled betrayal & 120 & 30 \\
-H6 perturbation dynamics & graded perturbations & 200 & 30 \\
-Exp A--D profiles & sweeps / factorial / forgiveness / mixed volatility & 200 & 20 \\
+Open deployment & graded, random/open choice & 200 & 30 \\
+Predictability-over-value locality probe & graded partner choice & 100 & 30 \\
+Partner allocation & partner choice & 200 & 30 \\
+Abrupt betrayal & scheduled partner-choice betrayal & 120 & 30 \\
+Precision perturbation & graded perturbations & 200 & 30 \\
+Profile program & sweeps, factorial, forgiveness & 200 & 20 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -51,22 +48,9 @@ The supplementary repository contains the simulation environments, affect-runtim
 
 \subsection{Betrayal schedule}
 
-The canonical abrupt-betrayal protocol (H5 \texttt{betrayal\_choice}) uses graded payoffs, agent-chosen partners, four partners with fixed initial types and stances, and no stochastic type switching ($p_{\mathrm{switch}}=0$). Partner P0 begins as a cooperator in a trusting stance. At round 31, P0 undergoes a scheduled stance switch to hostile while other partners retain their initial configurations. Primary readouts are post-switch cumulative payoff, policy entropy, partner reallocation, and joint partner-type accuracy over the remaining episode.
+The canonical abrupt-betrayal protocol (\texttt{betrayal\_choice}) uses graded payoffs, agent-chosen partners, four partners with fixed initial types and stances, and no stochastic type switching ($p_{\mathrm{switch}}=0$). Partner P0 begins as a cooperator in a trusting stance. At round 31, P0 undergoes a scheduled stance switch to hostile while other partners retain their initial configurations. Primary readouts are post-switch cumulative payoff, policy entropy, partner reallocation, and joint partner-type accuracy over the remaining episode.
 
-The profile-scale betrayal environment used in Exp A and Exp B applies the same single-switch structure within 200-round episodes for recovery-time and quadrant metrics. Exp C (forgiveness) extends this schedule: rounds 1--80 cooperative baseline, rounds 81--120 betrayal on P0, rounds 121--200 reversion to cooperative/trusting on P0.
-
-\subsection{Mixed-volatility schedule}
-
-The mixed-volatility environment (Exp D; Section~\ref{sec:phenotypes_mixed}) places four partners with heterogeneous volatility in the same partner-choice episode over 200 rounds:
-
-\begin{itemize}
-\item \textbf{P0:} stationary cooperator (no scheduled change).
-\item \textbf{P1:} stationary exploiter (no scheduled change).
-\item \textbf{P2:} abrupt shift---cooperative/trusting pre-switch, hostile/exploiter from the scheduled switch onward (round 101 in the implemented scenario).
-\item \textbf{P3:} gradual drift---stance and type transitions spread across mid-episode rounds (neutral stance from round 51; hostile/exploiter shift from round 151 in the implemented scenario).
-\end{itemize}
-
-Stochastic type switching is disabled ($p_{\mathrm{switch}}=0$). Conditions compare default, low-$\alpha$, high-$\alpha$, and no-affect variants at 20 seeds each.
+The profile-scale betrayal environments used in the alpha sweep and prior-gain factorial apply the same single-switch structure within 200-round episodes for recovery-time and quadrant metrics. The forgiveness profile extends this schedule: rounds 1--80 cooperative baseline, rounds 81--120 betrayal on P0, rounds 121--200 reversion to cooperative/trusting on P0.
 
 \subsection{Partner-choice allocation metrics}
 
@@ -74,7 +58,7 @@ Partner-choice readouts quantify how precision reshapes \emph{who} the agent eng
 
 \textbf{Selection share.} Per-partner selection rate is the fraction of rounds on which each partner is chosen. Partner-choice reallocation is summarized qualitatively in Section~\ref{sec:partner_choice}.
 
-\textbf{Selection concentration.} The Gini coefficient of the partner-selection distribution summarizes how concentrated engagement is across the social portfolio (used in profile Exp A and Exp B).
+\textbf{Selection concentration.} The Gini coefficient of the partner-selection distribution summarizes how concentrated engagement is across the social context (used in the profile alpha sweep and prior-gain factorial).
 
 \textbf{Post-betrayal allocation.} Post-switch windows report reallocation away from the switched partner and toward alternatives, including post-betrayal P0 selection and high-investment rates in profile analyses.
 
@@ -84,18 +68,14 @@ Partner-choice readouts quantify how precision reshapes \emph{who} the agent eng
 
 \textbf{Total payoff.} Cumulative focal-agent payoff over the episode (or over defined post-switch windows for betrayal analyses).
 
-\textbf{Policy entropy.} Mean $q_\pi$ entropy (`q\_pi\_entropy` in logged outputs) measures action-commitment sharpness; lower entropy indicates sharper policy selection under precision modulation.
+\textbf{Policy entropy.} Mean $q_\pi$ entropy (`q\_pi\_entropy` in logged outputs) measures policy-commitment sharpness; lower entropy indicates sharper policy selection under precision modulation.
 
 \textbf{Joint partner-type accuracy.} Mean joint correctness of inferred partner type (`mean\_joint\_accuracy`) summarizes epistemic state inference; it is reported separately from payoff because precision modulation can change deployment and accuracy independently of cumulative reward.
 
-\textbf{$\beta_k$ range.} Per-partner or episode-aggregated range of $\beta_k$ support summarizes precision-dynamics amplitude in profile and perturbation tables.
+\textbf{$\beta_k$ range.} Unless otherwise specified, $\beta_k$ range denotes the mean within-episode range of the posterior mean $\mathbb{E}_{q}[\beta_k]$, averaged across relevant partners and seeds. It is an observed precision-dynamics amplitude metric, not the fixed support of the categorical $\beta_k$ variable.
 
-\textbf{Model-fitness dissociation.} Partner-local correlations between $\beta_k$-derived precision and action surprisal versus realized payoff test whether the confidence signal tracks predictive reliability rather than partner value (Section~\ref{sec:model_fitness}).
-
-\textbf{Mixed-volatility discrimination metrics.} The discrimination index is the Pearson correlation between per-partner $\beta_k$ trajectory and per-partner behavioral stability (higher indicates better separation of stable versus shifting partners). The P0 false-positive rate is the rolling rate at which engagement with the stationary cooperator P0 falls more than 15\% below its early baseline despite P0 never changing.
-
-\textbf{Betrayal timing metrics.} Recovery time and related latency readouts measure rounds after a switch until selection or payoff returns toward baseline thresholds (profile Exp A/B and betrayal analyses).
+\textbf{Betrayal timing metrics.} Recovery time and related latency readouts measure rounds after a switch until selection or payoff returns toward baseline thresholds (profile alpha-sweep, prior-gain factorial, and betrayal analyses).
 
 \subsection{Replication summary}
 
-Central behavioral comparisons in Section~\ref{sec:results} use 30 seeds per condition. Profile-scale and mixed-volatility analyses use 20 seeds per condition. The model-fitness dissociation (Section~\ref{sec:model_fitness}) uses active-encounter partial correlations to compare precision--surprise against precision--payoff associations, with shared $\beta$ included as the relational-specificity ablation.
+Central behavioral comparisons in Section~\ref{sec:results} use 30 seeds per condition. Profile-scale analyses use 20 seeds per condition.

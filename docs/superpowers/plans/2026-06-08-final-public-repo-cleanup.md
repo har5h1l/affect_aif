@@ -280,7 +280,6 @@ Delete benchmark-only test files:
 
 ```bash
 git rm tests/test_benchmark_analysis.py \
-  tests/test_benchmark_baselines.py \
   tests/test_benchmark_betrayal.py \
   tests/test_benchmark_config.py \
   tests/test_benchmark_metrics.py \

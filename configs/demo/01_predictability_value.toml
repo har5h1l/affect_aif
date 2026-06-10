@@ -1,0 +1,48 @@
+[hypothesis]
+id = "predictability_value_demo"
+name = "predictability_value_demo"
+
+[experiment]
+id = "predictability_value_demo"
+family = "trust"
+rounds = 40
+replications = 2
+seed = 101
+
+[scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+initial_types = ["cooperator", "exploiter", "random", "reciprocator"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
+[analysis]
+auto = true
+primary = "h1_model_fitness"
+compare = ["affect", "global_beta", "no_affect"]
+metrics = [
+  "payoff",
+  "precision",
+  "model_fitness_correlation",
+  "evidence_effects",
+]

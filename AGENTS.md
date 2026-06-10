@@ -107,7 +107,6 @@ affect_aif/
 │       ├── pomdp.py       # Native trust POMDP template and pymdp.Agent construction
 │       ├── runtime.py     # PartnerBank and procedural plan/update helpers
 │       ├── affect.py      # External HESP beta tracking
-│       ├── evaluation/    # Trust-task evaluation arena and baselines
 │       ├── payoffs.py     # Trust-game payoff and action encoding helpers
 │       ├── stance.py      # Stance dynamics
 │       └── types.py       # Partner type metadata
@@ -130,7 +129,7 @@ affect_aif/
 │   ├── hypotheses.py      # Current Hesp-extension hypothesis helpers
 │   ├── plots.py           # Matplotlib figure generation
 │   └── visualization.py   # GIF generation
-└── configs/               # Trust and trust-benchmark TOML configurations
+└── configs/               # Trust TOML configurations
 ```
 
 ### Experiment Variants

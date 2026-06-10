@@ -182,11 +182,11 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[2],
         payoff_rows["plot_variant_id"].tolist(),
         payoff_rows["total_payoff"].tolist(),
-        title="Model-fitness payoff",
-        ylabel="total payoff",
+        title="Locality-probe payoff",
+        ylabel="analysis-window payoff",
     )
 
-    fig.suptitle("Model fitness versus realized reward", y=1.04, fontsize=12)
+    fig.suptitle("Predictability versus realized reward", y=1.04, fontsize=12)
     return _save(fig, output_dir, "fig_model_fitness_beta_reward_divergence")
 
 
@@ -254,7 +254,11 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
 
 
 def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
-    h2 = _read(source_dir, "h2_deployment_dissociation_summary.csv")
+    h2 = _read_required(
+        source_dir,
+        "h2_deployment_contrast_summary.csv",
+        {"variant_id", "total_payoff", "mean_q_pi_entropy"},
+    )
 
     order = ["affect", "no_affect", "tracked_only"]
     h2 = h2.set_index("variant_id").loc[order]
@@ -275,7 +279,7 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ylabel="mean entropy",
     )
 
-    fig.suptitle("Deployment dissociation (open graded regime)", y=1.04, fontsize=12)
+    fig.suptitle("Deployment contrast (open graded regime)", y=1.04, fontsize=12)
     fig.tight_layout()
     return _save(fig, output_dir, "fig_deployment_social_summary")
 
@@ -306,7 +310,7 @@ def phenotype_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[2].bar(x + offset, values["total_payoff"], width=width, label=regime)
     for ax, title, ylabel in zip(
         axes,
-        ["Beta range", "Action churn", "Total payoff"],
+        ["Beta range", "Investment churn", "Total payoff"],
         ["mean range", "flip rate", "payoff"],
         strict=True,
     ):
@@ -356,8 +360,8 @@ def main() -> int:
     )
     generated = [
         *model_fitness_figure(source_dir, output_dir),
-        *betrayal_boundary_figure(source_dir, output_dir),
         *deployment_social_figure(source_dir, output_dir),
+        *betrayal_boundary_figure(source_dir, output_dir),
         *phenotype_figure(source_dir, output_dir),
     ]
     print_manifest(generated)

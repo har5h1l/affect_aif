@@ -36,6 +36,8 @@ results/**
 !results/paper/**/
 !results/diagnostics/
 !results/diagnostics/**/
+!results/future/
+!results/future/**/
 !results/archive/
 !results/**/README.md
 !results/**/manifest.json

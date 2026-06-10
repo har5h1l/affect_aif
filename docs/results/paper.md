@@ -11,12 +11,14 @@ use `raw_results_policy = "gitignored_retained_locally_and_on_server"`.
 
 | Folder | Config | Raw path | Tracked public files | Interpretation boundary |
 |---|---|---|---|---|
-| `results/paper/model_fitness/` | `configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml` | `results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv` | `summary.csv`, `manifest.json`, README | H1 model-fitness tracking; not a reward-improvement claim. |
-| `results/paper/betrayal_adaptation/` | `configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml` | `results/paper/betrayal_adaptation/raw/h5/betrayal_reallocation_confirm/results.csv` | `summary.csv`, `manifest.json`, README | H5 lower entropy and higher joint accuracy; payoff advantage uncertain. |
-| `results/paper/alpha_sweep/` | `configs/paper/alpha_sweep.toml` | `results/paper/alpha_sweep/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Precision-gain profile readout across open and betrayal settings. |
-| `results/paper/prior_factorial/` | `configs/paper/prior_factorial.toml` | `results/paper/prior_factorial/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Beta prior x gain profile readout. |
-| `results/paper/forgiveness/` | `configs/paper/forgiveness.toml` | `results/paper/forgiveness/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Trust-repair profile readout; reengagement and confidence restoration can dissociate. |
-| `results/paper/mixed_volatility/` | `configs/paper/mixed_volatility.toml` | `results/paper/mixed_volatility/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Mixed-volatility boundary condition for payoff/calibration tradeoffs. |
+| `results/paper/01_predictability_value/` | `configs/paper/01_predictability_value.toml` | `results/paper/01_predictability_value/raw/predictability_value/predictability_value/results.csv` | `source_tables/*.csv`, `manifest.json`, README | Precision tracks predictability more than realized value; payoff is not the primary gate. |
+| `results/paper/02_deployment_ablation/` | `configs/paper/02_deployment_ablation.toml` | `results/paper/02_deployment_ablation/raw/deployment_ablation/deployment_ablation/results.csv` | `source_tables/*.csv`, `manifest.json`, README | Tracked-only matches no-affect; behavior changes through beta-to-gamma deployment. |
+| `results/paper/03_partner_selection/` | `configs/paper/03_partner_selection.toml` | `results/paper/03_partner_selection/raw/partner_selection/partner_selection/results.csv` | `source_tables/*.csv`, `manifest.json`, README | Partner selection sharpens directionally without a payoff headline. |
+| `results/paper/04_betrayal_adaptation/` | `configs/paper/04_betrayal_adaptation.toml` | `results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv` | `summary.csv`, `manifest.json`, README | H5 lower entropy and higher joint accuracy; payoff advantage uncertain. |
+| `results/paper/05a_alpha_sweep/` | `configs/paper/05a_alpha_sweep.toml` | `results/paper/05a_alpha_sweep/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Precision-gain profile readout across open and betrayal settings. |
+| `results/paper/05b_prior_factorial/` | `configs/paper/05b_prior_factorial.toml` | `results/paper/05b_prior_factorial/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Beta prior x gain profile readout. |
+| `results/paper/05c_forgiveness/` | `configs/paper/05c_forgiveness.toml` | `results/paper/05c_forgiveness/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Trust-repair profile readout; reengagement and confidence restoration can dissociate. |
 
 The paper-facing prose and exact manuscript numbers are maintained in
-`docs/results/current.md` and `docs/manuscript/source_tables/`.
+`docs/results/current.md` and `docs/manuscript/source_tables/`. The suite-level
+map lives in `results/paper/manifest.json`.

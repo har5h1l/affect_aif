@@ -249,10 +249,11 @@ the manuscript does not depend on this lane.
 
 ## Engineering Objectives
 
-### E1: Trust-Task Evaluation Arena
+### E1: Comparative Evaluation
 
-AIF agents versus scripted baselines are a task evaluation surface, not a
-separate external benchmark.
+Comparative evaluation against non-AIF control policies is future work. It
+should be reintroduced only with a concrete modeling question, current
+architecture documentation, and matched observation/reward controls.
 
 ### E2: Multi-Focal Emergent Dynamics
 

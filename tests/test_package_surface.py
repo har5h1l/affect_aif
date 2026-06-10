@@ -23,7 +23,6 @@ def test_current_runtime_packages_are_discovered_by_pyproject():
     packages = set(find_packages(where=str(ROOT), include=include))
     assert "tasks.trust" in packages
     assert "tasks.trust.envs" in packages
-    assert "tasks.trust.evaluation" in packages
     assert "experiments.trust" in packages
     assert "experiments.multifocal" in packages
     assert "benchmark" not in packages

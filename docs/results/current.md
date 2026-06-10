@@ -1,15 +1,14 @@
 # Current Results
 
 Canonical interpreted evidence for the active architecture. Manuscript prose
-lives in `docs/manuscript/sections/`; compact CSVs for figure regeneration live
-in `docs/manuscript/source_tables/`.
+lives in `docs/manuscript/sections/`; compact CSVs for paper-figure
+regeneration live in `docs/manuscript/source_tables/`.
 
 ## Inclusion Decision
 
-Use the reviewed paper source tables for current manuscript claims. The
-post-fix three-seed log-surprisal smoke remains diagnostic provenance for early
-H-card readouts; old bounded-error, bounded-surprise, and pre-fix smoke outputs
-must not be promoted as current evidence.
+Use the reviewed paper source tables for current manuscript claims. Old
+bounded-error, bounded-surprise, pre-fix smoke, and non-paper outputs must
+not be promoted as current paper evidence.
 
 | Evidence family | Source table | Scale | Manuscript status |
 |---|---|---:|---|
@@ -17,23 +16,17 @@ must not be promoted as current evidence.
 | Exp A alpha sweep | `docs/manuscript/source_tables/exp_a_alpha_sweep/metrics.csv` | 20 seeds | interpreted |
 | Exp B prior factorial | `docs/manuscript/source_tables/exp_b_prior_factorial/metrics.csv` | 20 seeds | interpreted |
 | Exp C forgiveness | `docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv` | 20 seeds | interpreted |
-| Exp D mixed volatility | `docs/manuscript/source_tables/exp_d_mixed_volatility/metrics.csv` | 20 seeds | interpreted narrowly |
-| H1 model fitness | `docs/manuscript/source_tables/h1_model_fitness_confirm/` | 30 seeds | interpreted |
 | H4 partner choice | `docs/manuscript/source_tables/h4_partner_choice_summary.csv` | 5 seeds | interpreted at current scale |
 
 ## Provenance
 
 The current paper-facing read uses the post-fix log-surprisal mechanism, the
 centered agent-choice selector, the completed H5 confirmation, and reviewed
-Exp A-D phenotype artifacts.
+Exp A-C profile artifacts.
 
-- Post-fix smoke baseline:
-  `results/diagnostics/spine_smoke/raw/`
 - H5 confirmation:
-  `results/paper/betrayal_adaptation/raw/h5/betrayal_reallocation_confirm/`
-- H1 confirmation:
-  `results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/`
-- Paper result cards: `docs/results/paper.md`
+  `results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/`
+- Paper result cards: `results/paper/manifest.json` and `docs/results/paper.md`
 - Paper source tables: `docs/manuscript/source_tables/`
 
 ## Central Read
@@ -41,24 +34,14 @@ Exp A-D phenotype artifacts.
 The central result is conditional, not global: affective precision changes
 policy entropy, partner choice, and action deployment when the policy space is
 open, but it is not monotonically payoff-improving. The mechanism is best read
-as partner-specific model-fitness precision that gates how decisively existing
-beliefs are deployed into action.
+as partner-specific confidence calibration that gates how decisively existing
+beliefs are deployed into graded trust-game actions.
 
 ## Evidence Reads
 
-### R1: H1 confirms model-fitness tracking, not reward gain
+### R1: Open-regime deployment changes without stable payoff gain
 
-The 30-seed confirmation reached structural finality at 90/90 groups x 200
-rounds. Partner-local precision tracks action surprisal more strongly than
-realized payoff: absolute active-encounter partial associations are `0.882`
-versus `0.130`. Shared beta preserves the ordering but is weaker (`0.380`
-versus `0.049`). Payoff moves in the opposite direction (`483.5` local,
-`517.6` shared, `542.1` no-affect), so H1 should be written as a
-model-fitness dissociation, not a reward advantage.
-
-### R2: Open-regime deployment changes without stable payoff gain
-
-H0/H2 diagnostic read:
+Open graded read:
 
 - Affect: payoff `1851.3`, entropy `8.59`.
 - No-affect/tracked-only: payoff `1864.2`, entropy `8.79` (identical on both metrics).
@@ -66,19 +49,7 @@ H0/H2 diagnostic read:
 Interpretation: the beta-to-gamma path changes policy entropy, while payoff
 does not support a broad reward-improvement claim in this open graded readout.
 
-### R3: Locality is signal quality, not universal behavioral necessity
-
-H1 confirmation read:
-
-- Local beta partials: surprise `0.882`, reward `0.130`.
-- Shared/global beta partials: surprise `0.380`, reward `0.049`.
-- Payoff: local `483.5`, shared/global `517.6`, no-affect `542.1`.
-
-Interpretation: local beta is the cleaner partner-specific signal in this
-probe, while payoff does not establish a universal behavioral advantage for
-local beta.
-
-### R4: H5 confirmation supports action sharpening, not a payoff headline
+### R2: H5 confirmation supports action sharpening, not a payoff headline
 
 H5 abrupt-betrayal confirmation (P0 stance switch at round 31; 30 seeds):
 
@@ -88,7 +59,7 @@ H5 abrupt-betrayal confirmation (P0 stance switch at round 31; 30 seeds):
   difference is positive (`0.034` to `0.185`).
 - Total payoff: affect `1185.9`, no-affect `1172.1`; paired bootstrap interval
   for the difference crosses zero (`-25.2` to `53.2`).
-- Reallocation diagnostic (not in main-text numbers): post-switch reencounters
+- Reallocation support readout (not in main-text numbers): post-switch reencounters
   with P0 are higher under affect (`5.67` vs `1.33`; CI `0.97` to `8.03`).
 
 Interpretation: open with accumulated confidence as liability under change;
@@ -97,7 +68,7 @@ readout for a calibration mechanism (not a power failure). Hand off to §3.6 on
 revision speed via precision gain and prior model fitness. Do not write H5 as
 generic recovery, generic reward improvement, or an accuracy cost.
 
-### R4b: Partner-choice sharpening without payoff separation
+### R3: Partner-choice sharpening without payoff separation
 
 H4 partner-choice read (`h4_partner_choice_summary.csv`, 5 seeds):
 
@@ -108,15 +79,15 @@ H4 partner-choice read (`h4_partner_choice_summary.csv`, 5 seeds):
 
 Interpretation: the $\beta_k \rightarrow \gamma_k$ pathway reaches partner
 selection; allocation shifts directionally toward predictable partners without
-a cumulative-payoff advantage, consistent with the Section 3.1 dissociation.
+a cumulative-payoff advantage.
 Not yet confirmed at the 30-seed scale stated in Appendix protocols.
 
-### R5: Phenotype program supports non-monotonic profile effects
+### R4: Phenotype program supports non-monotonic profile effects
 
-The 20-seed Exp A-D program is written as computational profile evidence,
-not clinical validation. §3.6 opens with a four-experiment orienting
-frame (gain sweep, gain-prior factorial, forgiveness, mixed volatility) and
-closes with trade-off synthesis rather than a monotonic payoff ranking.
+The 20-seed Exp A-C program is written as computational profile evidence,
+not clinical validation. §3.6 opens with a three-experiment orienting
+frame (gain sweep, gain-prior factorial, forgiveness) and closes with
+trade-off synthesis rather than a monotonic payoff ranking.
 
 - Exp A: $\beta_k$ range scales monotonically with $\alpha$ (0.147--1.218 in
   betrayal) but payoff does not (betrayal 1914.6--1986.2; open graded
@@ -126,31 +97,27 @@ closes with trade-off synthesis rather than a monotonic payoff ranking.
   anxious-reactive, balanced default at 1991).
 - Exp C: reengagement (no-affect 0.593, cautious-low 0.630) dissociates from
   payoff recovery (0.996--1.033); round-121 reversion per appendix protocol.
-- Exp D: high-$\alpha$ raises payoff (2054) while worsening discrimination
-  ($-0.089$) and false positives toward P0 (0.484).
+- Mixed-volatility analyses are future-facing and are not reported as
+  manuscript evidence.
 - Human-behavior disclaimer belongs in Discussion §4 (profile paragraph).
 
 ## Hypothesis Scorecard
 
 | Card | Current status | Evidence read |
 |---|---|---|
-| H0 Openness Gate | Diagnostic support | Shallow/binary regimes leave little room for affect; graded/open policy spaces reveal entropy/deployment effects. Do not use broad payoff language. |
-| H1 Model Fitness | Confirmation support | Partner-local precision tracks surprise more strongly than payoff after active-encounter controls; payoff does not favor affect, so this is model-fitness evidence rather than reward evidence. |
-| H2 Deployment | Supported narrowly | Tracked-only matches no-affect while full affect lowers entropy, localizing the effect to beta-to-gamma deployment rather than extra belief evidence. |
-| H3 Locality | Signal-quality support | Partner-local beta preserves a cleaner surprise-over-payoff readout than shared beta in the focal-switch probe; behavioral necessity is not established. |
+| Graded Openness | Supported narrowly | Open graded policy spaces reveal entropy/deployment effects. Do not use broad payoff language. |
+| Deployment | Supported narrowly | Tracked-only matches no-affect while full affect lowers entropy, localizing the effect to beta-to-gamma deployment rather than extra belief evidence. |
 | H4 Social Choice | Diagnostic support | Partner-choice behavior reorganizes before payoff separates; keep allocation language narrow unless confirmation-scale seeds are added. |
 | H5 Betrayal | Confirmation support | Lower entropy and higher joint accuracy under partner-local affect; payoff advantage is small/uncertain. Temporal dependency, not generic reward improvement. |
-| H6 / Exp A-D Phenotypes | Supported as computational profiles | Alpha and prior shape confidence amplitude, reengagement, false positives, and payoff non-monotonically. No clinical-validation claim. |
+| H6 / Exp A-C Profiles | Supported as computational profiles | Alpha and prior shape confidence amplitude, reengagement, commitment errors, and payoff non-monotonically. No clinical-validation claim. |
 
 ## Claims To Use
 
-- Partner-local affective precision is a model-fitness / reliability signal,
-  not a partner-value signal.
 - Its clearest behavioral channel is metacognitive deployment through
   beta-to-gamma action sharpening.
 - H5 confirms that abrupt change activates the deployment channel, but payoff
   effects remain portfolio- and regime-dependent.
-- Exp A-D define computational trust-calibration profiles from gain and prior
+- Exp A-C define computational trust-calibration profiles from gain and prior
   structure.
 - The corrected agent-choice path uses centered precision logits.
 
@@ -160,12 +127,12 @@ closes with trade-off synthesis rather than a monotonic payoff ranking.
 - Do not claim local affect wins in the open graded regime.
 - Do not claim partner-local beta is behaviorally necessary in all settings.
 - Do not describe H5 confirmation as payoff improvement with lower accuracy.
-- Do not claim H6 or Exp A-D validate clinical phenotypes.
+- Do not claim H6 or Exp A-C validate clinical phenotypes.
 - Do not reuse old bounded-error numbers or pre-fix smoke numbers as current
   manuscript evidence.
 
 ## Interpretation Guard
 
-The user approved interpretation updates for Exp C, H5, and H1 on June 6,
-2026. For future new outputs, ask before rewriting result interpretation docs
-unless the user explicitly requests the update in that turn.
+The user approved interpretation updates for Exp C and H5 on June 6, 2026. For
+future new outputs, ask before rewriting result interpretation docs unless the
+user explicitly requests the update in that turn.

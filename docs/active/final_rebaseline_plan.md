@@ -4,7 +4,7 @@ Date: 2026-05-27
 
 ## Modeling Decision
 
-The canonical affect update now uses Hesp-style partner-action surprisal:
+The canonical affect update now uses partner-response likelihood surprisal:
 
 ```text
 p = P(observed partner action | current partner-local belief)
@@ -112,18 +112,18 @@ Current read:
 ## Confirmation Queue
 
 Do not launch this queue until the verification gate in
-`docs/active/progress.md` passes. Prioritize H5. Keep H1 as a corrected-readout
-confirmation target, and keep H0/H2/H4 only if the manuscript needs
+`docs/active/progress.md` passes. Prioritize H5. Keep H1 as a diagnostic
+corrected-readout target only, and keep H0/H2/H4 only if the manuscript needs
 confirmation of deployment/entropy support:
 
 ```bash
 .venv/bin/python scripts/experiment/run.py \
   --config configs/diagnostics/h0_policy_openness/graded_choice_confirm.toml \
-  --config configs/paper/h1_model_fitness/reliability_vs_reward_confirm.toml \
+  --config configs/diagnostics/h1_model_fitness/reliability_vs_reward_confirm.toml \
   --config configs/diagnostics/h2_deployment/lesion_open_regime_confirm.toml \
   --config configs/diagnostics/h3_locality/global_beta_locality_probe.toml \
   --config configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml \
-  --config configs/paper/h5_betrayal/betrayal_reallocation_confirm.toml \
+  --config configs/paper/04_betrayal_adaptation.toml \
   --output-dir results \
   --batch-name log_surprisal_spine_confirm_20260527 \
   --workers 1

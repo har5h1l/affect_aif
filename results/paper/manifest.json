@@ -1,0 +1,105 @@
+{
+  "name": "paper",
+  "category": "paper_suite",
+  "status": "complete",
+  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "sections": [
+    {
+      "section": "3.1",
+      "slug": "01_predictability_value",
+      "claim": "Partner-local precision tracks predictability rather than realized value.",
+      "config_path": "configs/paper/01_predictability_value.toml",
+      "result_folder": "results/paper/01_predictability_value",
+      "source_tables": [
+        "results/paper/01_predictability_value/source_tables/deployment_dissociation_summary.csv",
+        "results/paper/01_predictability_value/source_tables/final_round_summary.csv",
+        "results/paper/01_predictability_value/source_tables/model_fitness_correlation_summary.csv"
+      ],
+      "figure": "docs/manuscript/figures/fig_model_fitness_beta_reward_divergence.pdf"
+    },
+    {
+      "section": "3.2",
+      "slug": "02_deployment_ablation",
+      "claim": "Tracked-only precision isolates policy commitment.",
+      "config_path": "configs/paper/02_deployment_ablation.toml",
+      "result_folder": "results/paper/02_deployment_ablation",
+      "source_tables": [
+        "results/paper/02_deployment_ablation/source_tables/deployment_contrast_summary.csv"
+      ],
+      "figure": "docs/manuscript/figures/fig_deployment_social_summary.pdf"
+    },
+    {
+      "section": "3.3",
+      "slug": "03_partner_selection",
+      "claim": "Partner selection sharpens under precision modulation.",
+      "config_path": "configs/paper/03_partner_selection.toml",
+      "result_folder": "results/paper/03_partner_selection",
+      "source_tables": [
+        "results/paper/03_partner_selection/source_tables/partner_selection_summary.csv"
+      ],
+      "figure": null
+    },
+    {
+      "section": "3.4",
+      "slug": "04_betrayal_adaptation",
+      "claim": "Abrupt betrayal tests confidence under change.",
+      "config_path": "configs/paper/04_betrayal_adaptation.toml",
+      "result_folder": "results/paper/04_betrayal_adaptation",
+      "source_tables": [
+        "results/paper/04_betrayal_adaptation/source_tables/h5_evidence_effect_summary.csv"
+      ],
+      "figure": "docs/manuscript/figures/fig_betrayal_boundary_summary.pdf"
+    },
+    {
+      "section": "3.5 / Appendix D",
+      "slug": "05a_alpha_sweep",
+      "claim": "Precision gain controls beta amplitude without monotonic payoff ranking.",
+      "config_path": "configs/paper/05a_alpha_sweep.toml",
+      "result_folder": "results/paper/05a_alpha_sweep",
+      "source_tables": [
+        "docs/manuscript/source_tables/exp_a_alpha_sweep/metrics.csv"
+      ],
+      "figure": "docs/manuscript/figures/fig_alpha_sweep.pdf"
+    },
+    {
+      "section": "3.5 / Appendix D",
+      "slug": "05b_prior_factorial",
+      "claim": "Prior model fitness and gain form trust-calibration profiles.",
+      "config_path": "configs/paper/05b_prior_factorial.toml",
+      "result_folder": "results/paper/05b_prior_factorial",
+      "source_tables": [
+        "docs/manuscript/source_tables/exp_b_prior_factorial/metrics.csv"
+      ],
+      "figure": "docs/manuscript/figures/fig_phenotype_quadrants.pdf"
+    },
+    {
+      "section": "3.5 / Appendix D",
+      "slug": "05c_forgiveness",
+      "claim": "Forgiveness separates reengagement from restored confidence.",
+      "config_path": "configs/paper/05c_forgiveness.toml",
+      "result_folder": "results/paper/05c_forgiveness",
+      "source_tables": [
+        "docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv"
+      ],
+      "figure": "docs/manuscript/figures/fig_forgiveness.pdf"
+    }
+  ],
+  "moved_out": {
+    "diagnostics": [
+      "configs/diagnostics/h1_model_fitness/",
+      "configs/diagnostics/h2_deployment/",
+      "configs/diagnostics/h3_locality/",
+      "configs/diagnostics/h4_social_allocation/",
+      "configs/diagnostics/h6_perturbation/"
+    ],
+    "future": [
+      "configs/future/mixed_volatility.toml",
+      "results/future/mixed_volatility/"
+    ],
+    "demo": [
+      "configs/demo/model_fitness.toml",
+      "configs/demo/betrayal_adaptation.toml",
+      "configs/demo/alpha_sweep.toml"
+    ]
+  }
+}

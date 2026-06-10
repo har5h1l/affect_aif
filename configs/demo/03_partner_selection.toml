@@ -1,0 +1,41 @@
+[hypothesis]
+id = "partner_selection_demo"
+name = "partner_selection_demo"
+
+[experiment]
+id = "partner_selection_demo"
+family = "trust"
+rounds = 40
+replications = 1
+seed = 103
+
+[scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.05
+observation_noise = 0.0
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[variants]]
+id = "affect"
+affect = "precision"
+planning_horizon = 4
+
+[[variants]]
+id = "global_beta"
+affect = "global_beta"
+planning_horizon = 4
+
+[analysis]
+auto = true
+primary = "h4_social_allocation"
+compare = ["affect", "global_beta", "no_affect"]
+metrics = ["payoff", "precision", "partner_choice"]

@@ -11,6 +11,11 @@ controls and mechanism probes remain auditable.
 | `results/diagnostics/policy_openness/` | `configs/diagnostics/h0_policy_openness/graded_choice.toml` | `results/diagnostics/spine_smoke/raw/h0/graded_choice/results.csv` | H0 policy-openness provenance: affective precision needs a movable policy posterior. |
 | `results/diagnostics/deployment/` | `configs/diagnostics/h2_deployment/lesion_open_regime.toml` | `results/diagnostics/spine_smoke/raw/h2/lesion_open_regime/results.csv` | H2 tracked-only lesion provenance: tracking and deployment are separable. |
 | `results/diagnostics/locality/` | `configs/diagnostics/h3_locality/global_beta_locality_probe.toml`, `configs/diagnostics/h3_locality/global_beta_focal_switch_probe.toml` | `results/diagnostics/locality/raw/.../results.csv` | H3 locality provenance: partner-local beta gives cleaner signal routing than shared beta in probes. |
+| `results/diagnostics/model_fitness/` | `configs/diagnostics/h1_model_fitness/reliability_vs_reward_confirm.toml` | `results/diagnostics/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv` | Binary model-fitness provenance retained for supplementary checks; omitted from the main paper because the binary policy posterior is not an informative behavioral regime. |
+
+The model-fitness diagnostic uses `payoff = "binary"` and 200-round episodes.
+Its payoff summaries are full-episode binary cumulative totals, not graded-game
+payoffs and not active-encounter windows.
 
 ## Server-Only Diagnostic Raw Buckets
 

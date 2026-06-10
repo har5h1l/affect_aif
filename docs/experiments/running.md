@@ -4,7 +4,7 @@ The canonical runner is `scripts/experiment/run.py`.
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/demo/model_fitness.toml \
+  --config configs/demo/01_predictability_value.toml \
   --batch-name demo \
   --workers 1
 ```
@@ -23,7 +23,7 @@ python scripts/experiment/run.py \
 Inspect expansion without writing outputs:
 
 ```bash
-python scripts/experiment/inspect.py --config configs/paper/alpha_sweep.toml
+python scripts/experiment/inspect.py --config configs/paper/05a_alpha_sweep.toml
 ```
 
 Outputs are written under:
@@ -40,7 +40,7 @@ Post-hoc analysis:
 
 ```bash
 python scripts/analysis/analyze.py \
-  --results results/paper/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv \
+  --results results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv \
   --output-dir /tmp/affect_aif_analysis
 ```
 
@@ -56,13 +56,14 @@ For throwaway local checks, write under `/tmp` or `outputs/`:
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/demo/model_fitness.toml \
+  --config configs/demo/01_predictability_value.toml \
   --output-dir outputs \
   --batch-name demo_model_fitness
 ```
 
 For canonical paper materialization, use the `results/paper/.../raw/` layout
-documented in `docs/results/paper.md`. Those raw files are gitignored, while
+documented in `docs/results/paper.md`. Binary model-fitness probes use
+`results/diagnostics/model_fitness/` instead. Raw files are gitignored, while
 the compact `summary.csv`, `metrics.csv`, `manifest.json`, and README files are
 tracked.
 

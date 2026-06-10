@@ -1,0 +1,73 @@
+[suite]
+id = "forgiveness_demo"
+name = "Forgiveness and reengagement demo"
+
+[defaults.hypothesis]
+id = "exp_c_demo"
+name = "forgiveness_demo"
+
+[defaults.experiment]
+family = "trust"
+rounds = 60
+replications = 1
+seed = 505
+
+[defaults.scenario]
+payoff = "graded"
+assignment = "agent_choice"
+partners = 4
+type_volatility = 0.0
+observation_noise = 0.0
+initial_types = ["cooperator", "reciprocator", "exploiter", "random"]
+initial_stances = ["trusting", "neutral", "neutral", "neutral"]
+investment_levels = 6
+endowment = 10.0
+multiplier = 3.0
+
+[defaults.runtime]
+max_policies = 4096
+
+[defaults.analysis]
+auto = false
+
+[[variants]]
+id = "cautious_low_alpha"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 0.1
+beta_prior = [0.01, 0.04, 0.15, 0.40, 0.40]
+
+[[variants]]
+id = "default_reference"
+affect = "precision"
+planning_horizon = 4
+alpha_charge = 3.0
+
+[[variants]]
+id = "no_affect"
+affect = "none"
+planning_horizon = 4
+
+[[experiments]]
+id = "forgiveness"
+seed_offset = 0
+
+[[experiments.scenario.type_switches]]
+round = 21
+partner = 0
+to = "exploiter"
+
+[[experiments.scenario.type_switches]]
+round = 41
+partner = 0
+to = "cooperator"
+
+[[experiments.scenario.stance_switches]]
+round = 21
+partner = 0
+to = "hostile"
+
+[[experiments.scenario.stance_switches]]
+round = 41
+partner = 0
+to = "trusting"

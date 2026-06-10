@@ -47,11 +47,15 @@ def test_demo_configs_dry_run_through_run_py_writes_manifest(tmp_path):
             sys.executable,
             "scripts/experiment/run.py",
             "--config",
-            "configs/demo/model_fitness.toml",
+            "configs/demo/01_predictability_value.toml",
             "--config",
-            "configs/demo/betrayal_adaptation.toml",
+            "configs/demo/02_deployment_ablation.toml",
             "--config",
-            "configs/demo/alpha_sweep.toml",
+            "configs/demo/03_partner_selection.toml",
+            "--config",
+            "configs/demo/04_betrayal_adaptation.toml",
+            "--config",
+            "configs/demo/05a_alpha_sweep.toml",
             "--output-dir",
             str(out),
             "--batch-name",
@@ -69,9 +73,12 @@ def test_demo_configs_dry_run_through_run_py_writes_manifest(tmp_path):
     manifest = json.loads((out / "demo_dry" / "manifest.json").read_text())
     assert manifest["batch_name"] == "demo_dry"
     assert [entry["experiment_id"] for entry in manifest["configs"]] == [
-        "model_fitness_demo",
+        "predictability_value_demo",
+        "deployment_ablation_demo",
+        "partner_selection_demo",
         "betrayal_adaptation_demo",
-        "alpha_sweep_demo",
+        "open_graded",
+        "betrayal",
     ]
 
 
@@ -81,7 +88,7 @@ def test_experiment_inspect_accepts_suite_config():
             sys.executable,
             "scripts/experiment/inspect.py",
             "--config",
-            "configs/paper/alpha_sweep.toml",
+            "configs/paper/05a_alpha_sweep.toml",
         ],
         check=False,
         text=True,
