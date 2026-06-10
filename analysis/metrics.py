@@ -90,7 +90,10 @@ def _mean_beta(row: pd.Series) -> float:
 
 
 def _stack_beta_rows(series: pd.Series) -> np.ndarray:
-    arrays = [_ensure_array(value) for value in series]
+    arrays = [
+        np.asarray(value, dtype=float) if isinstance(value, np.ndarray) else _ensure_array(value)
+        for value in series
+    ]
     arrays = [array for array in arrays if array.size > 0]
     if not arrays:
         return np.asarray([], dtype=float)
@@ -568,7 +571,11 @@ def partner_choice_summary(results: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     frame["selected_partner"] = frame["selected_partner"].astype(int)
     if "betas" in frame.columns:
-        frame["selected_partner_beta"] = frame.apply(_selected_partner_beta, axis=1)
+        beta_arrays = [_ensure_array(value) for value in frame["betas"]]
+        frame["selected_partner_beta"] = [
+            float(array[partner_idx]) if len(array) > partner_idx else np.nan
+            for array, partner_idx in zip(beta_arrays, frame["selected_partner"], strict=True)
+        ]
     else:
         frame["selected_partner_beta"] = np.nan
     totals = frame.groupby(["variant_id", "seed"], as_index=False).size().rename(columns={"size": "total_choices"})
@@ -593,14 +600,17 @@ def phenotype_validation_summary(results: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     frame = results.copy()
     if "betas" in frame.columns:
-        frame["mean_beta"] = frame.apply(_mean_beta, axis=1)
+        frame["_betas_array"] = [_ensure_array(value) for value in frame["betas"]]
+        frame["mean_beta"] = [_safe_nanmean(array) for array in frame["_betas_array"]]
     else:
         frame["mean_beta"] = np.nan
 
     rows: list[dict] = []
     for (variant_id, seed), group in frame.groupby(["variant_id", "seed"]):
         group = group.sort_values("round")
-        beta_stack = _stack_beta_rows(group["betas"]) if "betas" in group.columns else np.asarray([], dtype=float)
+        beta_stack = (
+            _stack_beta_rows(group["_betas_array"]) if "_betas_array" in group.columns else np.asarray([], dtype=float)
+        )
         partner_ranges = (
             np.asarray([_safe_range(beta_stack[:, idx]) for idx in range(beta_stack.shape[1])], dtype=float)
             if beta_stack.size

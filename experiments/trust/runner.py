@@ -37,6 +37,24 @@ def checkpoint_group_complete(group: pd.DataFrame, expected_rounds: int) -> bool
     return observed_rounds >= set(range(int(expected_rounds)))
 
 
+def checkpoint_rows_for_completed_keys(
+    partial: pd.DataFrame,
+    completed_keys: set[tuple[str, int, int]],
+) -> pd.DataFrame:
+    """Return checkpoint rows whose run key is already structurally complete."""
+
+    if not completed_keys:
+        return partial.iloc[0:0]
+    checkpoint_keys = pd.MultiIndex.from_arrays(
+        [
+            partial["variant_id"].astype(str),
+            pd.to_numeric(partial["seed"]).astype(int),
+            pd.to_numeric(partial["replication"]).astype(int),
+        ]
+    )
+    return partial.loc[checkpoint_keys.isin(completed_keys)]
+
+
 class ExperimentRunner:
     """Run expanded TOML experiment variants."""
 
@@ -370,17 +388,7 @@ class ExperimentRunner:
                         if expected is not None and checkpoint_group_complete(group, expected):
                             completed_keys.add(key)
                     if completed_keys:
-                        resumed = partial[
-                            partial.apply(
-                                lambda row: (
-                                    str(row["variant_id"]),
-                                    int(row["seed"]),
-                                    int(row["replication"]),
-                                )
-                                in completed_keys,
-                                axis=1,
-                            )
-                        ]
+                        resumed = checkpoint_rows_for_completed_keys(partial, completed_keys)
                         records.extend(resumed.to_dict(orient="records"))
         reps_since_checkpoint = 0
         for run in expanded_runs:
@@ -413,4 +421,6 @@ class ExperimentRunner:
 
 __all__ = [
     "ExperimentRunner",
+    "checkpoint_group_complete",
+    "checkpoint_rows_for_completed_keys",
 ]

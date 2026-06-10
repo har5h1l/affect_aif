@@ -233,6 +233,41 @@ def test_partner_choice_summary_reports_selection_rates_and_beta():
     assert partner_0["mean_selected_partner_beta"] == 0.5
 
 
+def test_partner_choice_summary_parses_betas_without_row_apply(monkeypatch):
+    rows = [
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 1,
+            "selected_partner": 0,
+            "partner_idx": 0,
+            "payoff": 3.0,
+            "q_pi_entropy": 0.4,
+            "betas": "[0.5, 2.0]",
+        },
+        {
+            "variant_id": "affect",
+            "seed": 0,
+            "round": 2,
+            "selected_partner": 1,
+            "partner_idx": 1,
+            "payoff": 1.0,
+            "q_pi_entropy": 0.6,
+            "betas": "[0.5, 2.0]",
+        },
+    ]
+
+    def fail_apply(*_args, **_kwargs):
+        raise AssertionError("partner choice should parse beta arrays without DataFrame.apply")
+
+    monkeypatch.setattr(pd.DataFrame, "apply", fail_apply)
+
+    summary = partner_choice_summary(pd.DataFrame(rows))
+
+    partner_1 = summary.loc[summary["selected_partner"] == 1].iloc[0]
+    assert partner_1["mean_selected_partner_beta"] == 2.0
+
+
 def test_partner_model_fitness_summary_separates_surprise_from_reward():
     rows = []
     for round_idx in [1, 2, 3]:
@@ -647,3 +682,31 @@ def test_phenotype_validation_summary_includes_dynamics_and_behavior():
     assert row["beta_range"] == 1.0
     assert row["action_flip_rate"] == 1.0
     assert row["partner_selection_entropy"] > 0
+
+
+def test_phenotype_validation_summary_parses_betas_without_row_apply(monkeypatch):
+    rows = []
+    for round_idx, beta in enumerate([1.0, 0.5, 1.5, 0.5], start=1):
+        rows.append(
+            {
+                "variant_id": "high_gain",
+                "seed": 0,
+                "round": round_idx,
+                "payoff": 1.0,
+                "q_pi_entropy": 0.3,
+                "selected_partner": round_idx % 2,
+                "selected_action": round_idx % 2,
+                "betas": str([beta, 1.0]),
+            }
+        )
+
+    def fail_apply(*_args, **_kwargs):
+        raise AssertionError("phenotype validation should parse beta arrays without DataFrame.apply")
+
+    monkeypatch.setattr(pd.DataFrame, "apply", fail_apply)
+
+    summary = phenotype_validation_summary(pd.DataFrame(rows))
+
+    row = summary.iloc[0]
+    assert row["beta_range"] == 1.0
+    assert row["beta_mean"] == 0.9375

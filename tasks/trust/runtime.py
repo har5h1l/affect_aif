@@ -24,6 +24,7 @@ class PartnerBank:
     agents: list[Any]
     latest_qs: list[Any | None] = field(default_factory=list)
     posterior_qs: list[Any | None] = field(default_factory=list)
+    batched_policy_agent: Any | None = None
     beta: Any | None = None
     latest_surprise: np.ndarray | None = None
     round_log_evidence: float = float("nan")
@@ -105,37 +106,31 @@ def select_decision(
             predictive_log_lik=float("nan"),
         )
 
-    candidates: list[tuple[int, int, np.ndarray, float, float]] = []
-    for partner_idx in range(len(bank.agents)):
-        _q_pi, policy_scores = _infer_partner_policy(
-            bank=bank,
-            template=template,
-            partner_idx=partner_idx,
-            base_gamma=base_gamma,
-            affect_mode=affect_mode,
-        )
-        partner_gamma = gamma_for_partner(
+    _q_pi_by_partner, policy_scores_by_partner = _infer_agent_choice_policies_batched(
+        bank=bank,
+        template=template,
+        base_gamma=base_gamma,
+        affect_mode=affect_mode,
+    )
+    gammas = [
+        gamma_for_partner(
             base_gamma=base_gamma,
             beta=bank.beta,
             partner_idx=partner_idx,
             affect_mode=affect_mode,
         )
-        centered_logits = _precision_centered_logits(policy_scores, float(partner_gamma))
-        for policy_idx, score in enumerate(policy_scores):
-            candidates.append(
-                (
-                    partner_idx,
-                    policy_idx,
-                    np.asarray(template.policies[policy_idx, 0], dtype=int),
-                    float(score),
-                    float(centered_logits[policy_idx]),
-                )
-            )
-    scores = np.asarray([candidate[3] for candidate in candidates], dtype=float)
-    candidate_logits = np.asarray([candidate[4] for candidate in candidates], dtype=float)
+        for partner_idx in range(len(bank.agents))
+    ]
+    partners, policy_indices, first_steps, scores, candidate_logits = _agent_choice_policy_arrays(
+        template=template,
+        policy_scores_by_partner=policy_scores_by_partner,
+        gammas=np.asarray(gammas, dtype=float),
+    )
     candidate_probs = _softmax(candidate_logits)
     candidate_idx = _choose_index(candidate_probs, deterministic=deterministic, rng=rng)
-    selected_partner, policy_idx, first_step, _score, _logit = candidates[candidate_idx]
+    selected_partner = int(partners[candidate_idx])
+    policy_idx = int(policy_indices[candidate_idx])
+    first_step = first_steps[candidate_idx]
     raw_action, stance_action, own_action = _encode_policy_action(
         template=template,
         partner_idx=selected_partner,
@@ -255,6 +250,77 @@ def _infer_partner_policy(
     return _normalize_policy_posterior(q_pi), _as_policy_vector(policy_scores, "policy_scores")
 
 
+def _infer_agent_choice_policies_batched(
+    *,
+    bank: PartnerBank,
+    template: TrustPomdpTemplate,
+    base_gamma: float,
+    affect_mode: str,
+) -> tuple[np.ndarray, np.ndarray]:
+    partner_count = len(bank.agents)
+    if partner_count == 0:
+        raise ValueError("agent-choice policy inference requires at least one partner.")
+    agent = _batched_policy_agent(bank, template)
+    gammas = np.asarray(
+        [
+            gamma_for_partner(
+                base_gamma=base_gamma,
+                beta=bank.beta,
+                partner_idx=partner_idx,
+                affect_mode=affect_mode,
+            )
+            for partner_idx in range(partner_count)
+        ],
+        dtype=float,
+    )
+    object.__setattr__(agent, "gamma", jnp.asarray(gammas))
+    qs = _batched_policy_qs(bank)
+    q_pi, policy_scores = _unpack_policy_result(agent.infer_policies(qs))
+    if q_pi.shape != (partner_count, int(template.policies.shape[0])):
+        expected_shape = (partner_count, template.policies.shape[0])
+        raise ValueError(f"batched q_pi has shape {q_pi.shape}, expected {expected_shape}.")
+    if policy_scores.shape != q_pi.shape:
+        raise ValueError(f"batched policy scores have shape {policy_scores.shape}, expected {q_pi.shape}.")
+    return np.asarray([_normalize(row) for row in q_pi], dtype=float), policy_scores
+
+
+def _batched_policy_agent(bank: PartnerBank, template: TrustPomdpTemplate):
+    if bank.batched_policy_agent is not None:
+        return bank.batched_policy_agent
+    from pymdp.agent import Agent
+
+    reference = bank.agents[0]
+    agent = Agent(
+        A=template.A,
+        B=template.B,
+        C=template.C,
+        D=template.D,
+        E=template.E,
+        policies=template.policies,
+        control_fac_idx=list(template.control_fac_idx),
+        gamma=np.ones((len(bank.agents),), dtype=float),
+        batch_size=len(bank.agents),
+        use_utility=bool(getattr(reference, "use_utility", True)),
+        use_states_info_gain=bool(getattr(reference, "use_states_info_gain", True)),
+        use_param_info_gain=bool(getattr(reference, "use_param_info_gain", False)),
+        use_inductive=bool(getattr(reference, "use_inductive", False)),
+    )
+    bank.batched_policy_agent = agent
+    return agent
+
+
+def _batched_policy_qs(bank: PartnerBank) -> list[jnp.ndarray]:
+    qs_by_partner = [
+        bank.latest_qs[idx] if bank.latest_qs[idx] is not None else _policy_qs_from_agent_D(agent)
+        for idx, agent in enumerate(bank.agents)
+    ]
+    batched_qs = []
+    for factor_idx in range(len(qs_by_partner[0])):
+        rows = [np.asarray(qs[factor_idx], dtype=float).squeeze() for qs in qs_by_partner]
+        batched_qs.append(jnp.asarray(np.asarray(rows, dtype=float)[:, None, :]))
+    return batched_qs
+
+
 def _encode_policy_action(
     *,
     template: TrustPomdpTemplate,
@@ -344,9 +410,7 @@ def _infer_states(agent, obs: list[int]) -> tuple[Any, dict[str, Any]]:
     parameters = inspect.signature(infer_states).parameters
     accepts_kwargs = any(parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in parameters.values())
     kwargs: dict[str, Any] = {}
-    if accepts_kwargs or "return_info" in parameters:
-        kwargs["return_info"] = True
-    if "preprocess_fn" in parameters:
+    if accepts_kwargs or "preprocess_fn" in parameters:
         kwargs["preprocess_fn"] = lambda observations: _batched_categorical_observations(
             observations,
             num_obs=agent.num_obs,
@@ -384,6 +448,44 @@ def _as_policy_vector(values: np.ndarray, name: str) -> np.ndarray:
     if not np.all(np.isfinite(vector)):
         raise ValueError(f"{name} contains non-finite values.")
     return vector
+
+
+def _agent_choice_policy_arrays(
+    *,
+    template: TrustPomdpTemplate,
+    policy_scores_by_partner: list[np.ndarray],
+    gammas: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    policy_count = int(template.policies.shape[0])
+    partner_count = len(policy_scores_by_partner)
+    if partner_count == 0:
+        raise ValueError("agent-choice mode requires at least one partner.")
+    gamma_values = np.asarray(gammas, dtype=float).reshape(-1)
+    if gamma_values.shape != (partner_count,):
+        raise ValueError(f"gammas must have shape {(partner_count,)}, got {gamma_values.shape}.")
+
+    scores_by_partner = np.asarray(
+        [_as_policy_vector(scores, "policy_scores") for scores in policy_scores_by_partner],
+        dtype=float,
+    )
+    if scores_by_partner.shape != (partner_count, policy_count):
+        raise ValueError(
+            f"policy_scores_by_partner must have shape {(partner_count, policy_count)}, "
+            f"got {scores_by_partner.shape}."
+        )
+
+    centers = scores_by_partner.mean(axis=1, keepdims=True)
+    logits_by_partner = centers + gamma_values[:, None] * (scores_by_partner - centers)
+    partners = np.repeat(np.arange(partner_count, dtype=int), policy_count)
+    policy_indices = np.tile(np.arange(policy_count, dtype=int), partner_count)
+    first_steps = np.tile(np.asarray(template.policies[:, 0], dtype=int), (partner_count, 1))
+    return (
+        partners,
+        policy_indices,
+        first_steps,
+        scores_by_partner.reshape(-1),
+        logits_by_partner.reshape(-1),
+    )
 
 
 def _normalize_policy_posterior(q_pi: np.ndarray) -> np.ndarray:

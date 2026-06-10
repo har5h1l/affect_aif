@@ -6,6 +6,8 @@ from experiments.trust.config import ExperimentConfig
 from tasks.trust.pomdp import build_trust_pomdp_template, create_partner_agents
 from tasks.trust.runtime import (
     PartnerBank,
+    _batched_categorical_observations,
+    _infer_states,
     select_decision,
     snapshot_partner_bank,
     update_partner_after_observation,
@@ -60,3 +62,49 @@ def test_update_partner_after_observation_updates_snapshots() -> None:
 
     assert snapshot.partner_joint_beliefs.shape == (1, 4, 3)
     np.testing.assert_allclose(snapshot.partner_joint_beliefs[0].sum(), 1.0)
+
+
+def test_infer_states_without_return_info_matches_return_info() -> None:
+    config = ExperimentConfig(payoff_mode="binary", num_partners=1)
+    template = build_trust_pomdp_template(config, planning_horizon=1)
+    agent_with_info, agent_without_info = create_partner_agents(template, num_partners=2, gamma=1.0)
+    observation = [0, 2]
+
+    qs_with_info, _info = agent_with_info.infer_states(
+        observation,
+        agent_with_info.D,
+        return_info=True,
+        preprocess_fn=lambda observations: _batched_categorical_observations(
+            observations,
+            num_obs=agent_with_info.num_obs,
+            batch_size=agent_with_info.batch_size,
+        ),
+    )
+    qs_without_info, info = _infer_states(agent_without_info, observation)
+
+    assert info == {}
+    for actual, expected in zip(qs_without_info, qs_with_info, strict=True):
+        np.testing.assert_array_equal(actual, expected)
+
+
+def test_infer_states_does_not_request_unused_return_info() -> None:
+    config = ExperimentConfig(payoff_mode="binary", num_partners=1)
+    template = build_trust_pomdp_template(config, planning_horizon=1)
+    agent = create_partner_agents(template, num_partners=1, gamma=1.0)[0]
+    original_infer_states = agent.infer_states
+    observed_kwargs = []
+
+    def wrapped_infer_states(observations, empirical_prior, *, preprocess_fn=None, return_info=False, **kwargs):
+        if preprocess_fn is not None:
+            kwargs["preprocess_fn"] = preprocess_fn
+        if return_info:
+            kwargs["return_info"] = return_info
+        observed_kwargs.append(dict(kwargs))
+        return original_infer_states(observations, empirical_prior, **kwargs)
+
+    object.__setattr__(agent, "infer_states", wrapped_infer_states)
+
+    _infer_states(agent, [0, 2])
+
+    assert observed_kwargs
+    assert "return_info" not in observed_kwargs[0]

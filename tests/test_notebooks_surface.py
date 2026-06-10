@@ -66,7 +66,10 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "configs/demo/05b_prior_factorial.toml" in text
     assert "configs/demo/05c_forgiveness.toml" in text
     assert "RUN_OPTIONAL_DEMOS = True" in text
-    assert 'SELECTED_DEMOS = ["predictability_value", "deployment_ablation", "partner_selection", "betrayal_adaptation", "alpha_sweep", "prior_factorial", "forgiveness"]' in text
+    assert (
+        'SELECTED_DEMOS = ["predictability_value", "deployment_ablation", "partner_selection", '
+        '"betrayal_adaptation", "alpha_sweep", "prior_factorial", "forgiveness"]'
+    ) in text
     assert "scripts/analysis/analyze.py" in text
     assert "outputs/notebook_demo" in text
     assert "Predictability-Value Demo: Run And Analyze" in text

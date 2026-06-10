@@ -5,6 +5,10 @@ from runtime_helpers import build_runtime
 
 from experiments.trust.config import ExperimentConfig
 from tasks.trust.runtime import (
+    _agent_choice_policy_arrays,
+    _infer_agent_choice_policies_batched,
+    _infer_partner_policy,
+    _softmax,
     select_decision,
     snapshot_partner_bank,
     update_beta_after_observation,
@@ -131,6 +135,94 @@ def test_agent_choice_high_precision_partner_is_not_penalized_when_scores_match(
     low_precision_mass = decision.q_pi[policies_per_partner:].sum()
 
     assert high_precision_mass >= low_precision_mass
+
+
+def test_agent_choice_policy_arrays_preserve_candidate_order_and_logits() -> None:
+    runtime = build_runtime(
+        ExperimentConfig(payoff_mode="binary", num_partners=2, assignment_mode="agent_choice"),
+    )
+    policy_scores_by_partner = [
+        np.asarray([1.0, 2.0, 3.0, 4.0], dtype=float),
+        np.asarray([0.5, 1.5, 2.5, 3.5], dtype=float),
+    ]
+
+    partners, policy_indices, first_steps, scores, logits = _agent_choice_policy_arrays(
+        template=runtime.template,
+        policy_scores_by_partner=policy_scores_by_partner,
+        gammas=np.asarray([1.0, 2.0], dtype=float),
+    )
+
+    expected_first_steps = np.tile(np.asarray(runtime.template.policies[:, 0], dtype=int), (2, 1))
+    np.testing.assert_array_equal(partners, np.asarray([0, 0, 0, 0, 1, 1, 1, 1]))
+    np.testing.assert_array_equal(policy_indices, np.asarray([0, 1, 2, 3, 0, 1, 2, 3]))
+    np.testing.assert_array_equal(first_steps, expected_first_steps)
+    np.testing.assert_allclose(scores, np.asarray([1.0, 2.0, 3.0, 4.0, 0.5, 1.5, 2.5, 3.5]))
+    np.testing.assert_allclose(logits, np.asarray([1.0, 2.0, 3.0, 4.0, -1.0, 1.0, 3.0, 5.0]))
+
+
+def test_batched_agent_choice_policy_scores_match_separate_agents() -> None:
+    runtime = build_runtime(
+        ExperimentConfig(payoff_mode="graded", num_partners=3, assignment_mode="agent_choice"),
+        planning_horizon=2,
+    )
+
+    separate_scores = []
+    for partner_idx in range(len(runtime.partner_bank.agents)):
+        _q_pi, policy_scores = _infer_partner_policy(
+            bank=runtime.partner_bank,
+            template=runtime.template,
+            partner_idx=partner_idx,
+            base_gamma=runtime.base_gamma,
+            affect_mode=runtime.affect_mode,
+        )
+        separate_scores.append(policy_scores)
+
+    _batched_q_pi, batched_scores = _infer_agent_choice_policies_batched(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        base_gamma=runtime.base_gamma,
+        affect_mode=runtime.affect_mode,
+    )
+
+    np.testing.assert_array_equal(batched_scores, np.asarray(separate_scores, dtype=float))
+
+
+def test_batched_agent_choice_selector_matches_separate_candidate_reconstruction() -> None:
+    config = ExperimentConfig(payoff_mode="graded", num_partners=3, assignment_mode="agent_choice")
+    separate_runtime = build_runtime(config, planning_horizon=2, seed=0)
+    batched_runtime = build_runtime(config, planning_horizon=2, seed=0)
+    separate_scores = []
+    gammas = []
+    for partner_idx in range(len(separate_runtime.partner_bank.agents)):
+        _q_pi, policy_scores = _infer_partner_policy(
+            bank=separate_runtime.partner_bank,
+            template=separate_runtime.template,
+            partner_idx=partner_idx,
+            base_gamma=separate_runtime.base_gamma,
+            affect_mode=separate_runtime.affect_mode,
+        )
+        separate_scores.append(policy_scores)
+        gammas.append(separate_runtime.base_gamma)
+    _partners, _policy_indices, _first_steps, scores, logits = _agent_choice_policy_arrays(
+        template=separate_runtime.template,
+        policy_scores_by_partner=separate_scores,
+        gammas=np.asarray(gammas, dtype=float),
+    )
+    expected_q_pi = _softmax(logits)
+
+    decision = select_decision(
+        bank=batched_runtime.partner_bank,
+        template=batched_runtime.template,
+        active_partner=None,
+        assignment_mode="agent_choice",
+        base_gamma=batched_runtime.base_gamma,
+        action_selection="sample",
+        rng=np.random.default_rng(0),
+        affect_mode=batched_runtime.affect_mode,
+    )
+
+    np.testing.assert_array_equal(decision.policy_scores, scores)
+    np.testing.assert_array_equal(decision.q_pi, expected_q_pi)
 
 
 def test_agent_choice_selected_fields_match_encoded_raw_action() -> None:

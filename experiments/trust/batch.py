@@ -13,7 +13,7 @@ from typing import Any
 import pandas as pd
 
 from analysis.visualization import build_run_gifs
-from experiments.trust.runner import checkpoint_group_complete
+from experiments.trust.runner import checkpoint_group_complete, checkpoint_rows_for_completed_keys
 from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, load_experiment_specs
 from experiments.trust.tasks import run_variant_replication_task
 
@@ -110,7 +110,7 @@ class BatchExperimentRunner:
         if partial.empty or not required <= set(partial.columns):
             return set()
 
-        expected_rounds = { _run_key(run): int(run.rounds) for run in state.expanded_runs }
+        expected_rounds = {_run_key(run): int(run.rounds) for run in state.expanded_runs}
         completed_keys: set[tuple[str, int, int]] = set()
         for values, group in partial.groupby(["variant_id", "seed", "replication"], dropna=False):
             key = _run_key_from_values(*values)
@@ -122,13 +122,7 @@ class BatchExperimentRunner:
 
         if not completed_keys:
             return set()
-        resumed = partial[
-            partial.apply(
-                lambda row: _run_key_from_values(row["variant_id"], row["seed"], row["replication"])
-                in completed_keys,
-                axis=1,
-            )
-        ]
+        resumed = checkpoint_rows_for_completed_keys(partial, completed_keys)
         state.primary_rows.extend(resumed.to_dict(orient="records"))
         state.completed_primary += len(completed_keys)
         state.resumed_primary += len(completed_keys)
