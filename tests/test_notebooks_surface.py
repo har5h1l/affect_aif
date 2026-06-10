@@ -57,6 +57,7 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "detect_accelerator" in text
     assert "SELECTED_DEMOS" in text
     assert "run_demo(" in text
+    assert "show_demo(" in text
     assert "configs/demo/01_predictability_value.toml" in text
     assert "configs/demo/02_deployment_ablation.toml" in text
     assert "configs/demo/03_partner_selection.toml" in text
@@ -64,8 +65,8 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "configs/demo/05a_alpha_sweep.toml" in text
     assert "configs/demo/05b_prior_factorial.toml" in text
     assert "configs/demo/05c_forgiveness.toml" in text
-    assert "RUN_OPTIONAL_DEMOS = False" in text
-    assert "Set RUN_OPTIONAL_DEMOS = True" in text
+    assert "RUN_OPTIONAL_DEMOS = True" in text
+    assert 'SELECTED_DEMOS = ["predictability_value", "deployment_ablation", "partner_selection", "betrayal_adaptation", "alpha_sweep", "prior_factorial", "forgiveness"]' in text
     assert "scripts/analysis/analyze.py" in text
     assert "outputs/notebook_demo" in text
     assert "Predictability-Value Demo: Run And Analyze" in text
@@ -75,6 +76,8 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "Alpha-Sweep Demo: Run And Analyze" in text
     assert "Optional Prior-Factorial Demo: Run And Analyze" in text
     assert "Optional Forgiveness Demo: Run And Analyze" in text
+    assert text.count("= run_demo(") == 7
+    assert text.count("show_demo(") >= 8
 
 
 def test_demo_notebook_sanitizes_markdown_repo_urls():
@@ -82,10 +85,14 @@ def test_demo_notebook_sanitizes_markdown_repo_urls():
     bootstrap_source = "".join(payload["cells"][3]["source"])
     tree = ast.parse(bootstrap_source)
     functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "sanitize_repo_url"]
+    clone_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "clone_repo"]
 
     assert functions, "demo bootstrap should sanitize copied Markdown links before git clone"
+    assert clone_functions, "demo bootstrap should show git clone diagnostics instead of a bare CalledProcessError"
     assert '(repo_dir / ".git").exists()' in bootstrap_source
     assert "shutil.rmtree(repo_dir)" in bootstrap_source
+    assert "capture_output=True" in bootstrap_source
+    assert "Git clone failed." in bootstrap_source
     module = ast.Module(body=functions, type_ignores=[])
     ast.fix_missing_locations(module)
     namespace: dict[str, object] = {}
@@ -98,6 +105,28 @@ def test_demo_notebook_sanitizes_markdown_repo_urls():
         sanitize_repo_url("[https://github.com/har5h1l/affect_aif.git](https://github.com/har5h1l/affect_aif.git)")
         == "https://github.com/har5h1l/affect_aif.git"
     )
+
+
+def test_demo_notebook_prefers_existing_repo_root_before_clone():
+    payload = json.loads((ROOT / "notebooks" / "demo.ipynb").read_text())
+    bootstrap_source = "".join(payload["cells"][3]["source"])
+    tree = ast.parse(bootstrap_source)
+    functions = {node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)}
+
+    assert "find_repo_root" in functions
+    assert "existing_root = find_repo_root(Path.cwd())" in bootstrap_source
+    assert "if existing_root is not None:" in bootstrap_source
+    assert "os.chdir(existing_root)" in bootstrap_source
+    assert "scripts/experiment/run.py" in bootstrap_source
+
+    module = ast.Module(body=[functions["find_repo_root"]], type_ignores=[])
+    ast.fix_missing_locations(module)
+    namespace = {"Path": Path}
+    exec(compile(module, "demo-bootstrap-root-finder", "exec"), namespace)
+    find_repo_root = namespace["find_repo_root"]
+
+    assert find_repo_root(ROOT) == ROOT
+    assert find_repo_root(ROOT / "notebooks") == ROOT
 
 
 def test_reproduce_notebook_is_split_by_paper_experiment():

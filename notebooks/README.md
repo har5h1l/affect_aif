@@ -1,10 +1,10 @@
 # Notebooks
 
 - `demo.ipynb`: Colab/local workflow demo using `configs/demo/`. It defines
-  `run_demo(name)` and is split into one section per demo experiment. By
-  default, top-to-bottom execution runs only the selected quick section in
-  `SELECTED_DEMOS`; add more names or set `SELECTED_DEMOS = "all"` for a fuller
-  sweep.
+  `run_demo(name)` and `show_demo(name, frame)` and is split into one section
+  per demo experiment. By default, top-to-bottom execution runs the full demo
+  suite listed in `SELECTED_DEMOS`; remove names from that list when you want a
+  shorter local check.
 - `reproduce.ipynb`: Colab/local paper reproduction notebook. It dry-runs all
   numbered `configs/paper/` specs to show the workload, then walks through
   Sections 3.1--3.5 one paper section at a time. Each section runs the relevant

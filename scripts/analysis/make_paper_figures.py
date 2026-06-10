@@ -156,7 +156,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
     _bar(
         axes[0],
-        ["surprise", "payoff"],
+        ["surprisal", "payoff"],
         [
             float(local["plot_abs_surprise"]),
             float(local["plot_abs_reward"]),
@@ -168,7 +168,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
 
     _bar(
         axes[1],
-        ["surprise", "payoff"],
+        ["surprisal", "payoff"],
         [
             float(shared["plot_abs_surprise"]),
             float(shared["plot_abs_reward"]),
