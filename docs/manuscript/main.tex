@@ -9,7 +9,6 @@
 \institute{Anonymous Institution}
 
 \begin{document}
-\raggedbottom
 \maketitle
 
 \input{sections/00_abstract}
@@ -22,12 +21,12 @@
 \bibliography{references}
 
 \appendix
-\clearpage
-{\centering\normalfont\Large\bfseries\appendixname\par\vspace{24pt}}
+\section*{\appendixname}
 \addcontentsline{toc}{part}{\appendixname}
-\input{appendix/appendix_a_pomdp.tex}
-\input{appendix/appendix_b_precision_update.tex}
-\input{appendix/appendix_c_protocols.tex}
-\input{appendix/appendix_d_extended_results.tex}
+\input{appendix/appendix_a_generative_process.tex}
+\input{appendix/appendix_b_pomdp.tex}
+\input{appendix/appendix_c_precision_update.tex}
+\input{appendix/appendix_d_protocols.tex}
+\input{appendix/appendix_e_extended_results.tex}
 
 \end{document}

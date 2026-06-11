@@ -52,6 +52,30 @@ def _write_source_tables(source_dir):
     pd.DataFrame(
         [
             {
+                "variant_id": "affect",
+                "baseline_variant": "lesioned",
+                "total_payoff": 1851.3,
+                "mean_q_pi_entropy": 8.59,
+                "beta_range": 1.32,
+                "delta_entropy_vs_tracked": -0.21,
+                "delta_payoff_vs_tracked": -12.8,
+                "n_seeds": 3,
+            },
+            {
+                "variant_id": "lesioned",
+                "baseline_variant": "lesioned",
+                "total_payoff": 1864.2,
+                "mean_q_pi_entropy": 8.79,
+                "beta_range": 1.34,
+                "delta_entropy_vs_tracked": 0.0,
+                "delta_payoff_vs_tracked": 0.0,
+                "n_seeds": 3,
+            },
+        ]
+    ).to_csv(source_dir / "h2_deployment_pathway_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
                 "readout": "final",
                 "metric": "total_payoff",
                 "treatment_variant": "affect",
@@ -108,6 +132,30 @@ def _write_source_tables(source_dir):
             },
         ]
     ).to_csv(source_dir / "h5_evidence_effect_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "variant_id": variant,
+                "round_bin_start": round_bin,
+                "round_bin_end": round_bin + 9,
+                "n_seeds": 3,
+                "p0_selection_mean": 0.18 if variant == "affect" else 0.10,
+                "p0_selection_ci_low": 0.02,
+                "p0_selection_ci_high": 0.40,
+                "mean_q_pi_entropy_mean": 8.2 if variant == "affect" else 8.7,
+                "mean_q_pi_entropy_ci_low": 7.9,
+                "mean_q_pi_entropy_ci_high": 9.0,
+                "p0_beta_mean": 1.1 if variant != "no_affect" else float("nan"),
+                "p0_beta_ci_low": 0.8 if variant != "no_affect" else float("nan"),
+                "p0_beta_ci_high": 1.4 if variant != "no_affect" else float("nan"),
+                "mean_payoff_mean": 9.8,
+                "mean_payoff_ci_low": 9.2,
+                "mean_payoff_ci_high": 10.4,
+            }
+            for variant in ["affect", "no_affect", "lesioned"]
+            for round_bin in [0, 10, 20, 30]
+        ]
+    ).to_csv(source_dir / "h5_betrayal_timecourse_summary.csv", index=False)
 
 
 def test_new_paper_figures_generate_manifest(tmp_path, capsys):
@@ -142,8 +190,8 @@ def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
     source_dir = tmp_path / "source_tables"
     output_dir = tmp_path / "figures"
     _write_source_tables(source_dir)
-    broken = pd.read_csv(source_dir / "h2_deployment_contrast_summary.csv").drop(columns=["mean_q_pi_entropy"])
-    broken.to_csv(source_dir / "h2_deployment_contrast_summary.csv", index=False)
+    broken = pd.read_csv(source_dir / "h2_deployment_pathway_summary.csv").drop(columns=["beta_range"])
+    broken.to_csv(source_dir / "h2_deployment_pathway_summary.csv", index=False)
 
-    with pytest.raises(ValueError, match="missing required columns.*mean_q_pi_entropy"):
+    with pytest.raises(ValueError, match="missing required columns.*beta_range"):
         make_paper_figures.deployment_social_figure(source_dir, output_dir)

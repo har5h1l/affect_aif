@@ -25,7 +25,7 @@ centered agent-choice selector, the completed H5 confirmation, and reviewed
 Exp A-C profile artifacts.
 
 - H5 confirmation:
-  `results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/`
+  `results/paper/04_betrayal_adaptation/raw/results.csv`
 - Binary H4 confirmation diagnostic:
   `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/h4/partner_choice_confirm/`
 - Paper result cards: `results/paper/manifest.json` and `docs/results/paper.md`
@@ -45,24 +45,27 @@ beliefs are deployed into graded trust-game actions.
 
 Open graded read:
 
-- Affect: payoff `1851.3`, entropy `8.59`.
-- No-affect/tracked-only: payoff `1864.2`, entropy `8.79` (identical on both metrics).
+- Affect: payoff `1851.3`, entropy `8.59`, beta range `1.32`.
+- Tracked-only: payoff `1864.2`, entropy `8.79`, beta range `1.34`.
 
 Interpretation: the beta-to-gamma path changes policy entropy, while payoff
 does not support a broad reward-improvement claim in this open graded readout.
+Tracked-only confirms that beta can update without the deployment effect when
+the beta-to-gamma pathway is cut.
 
 ### R2: H5 confirmation supports action sharpening, not a payoff headline
 
 H5 abrupt-betrayal confirmation (P0 stance switch at round 31; 30 seeds):
 
 - Policy entropy: affect `8.36`, no-affect `8.74`; interval for the difference
-  is negative (`-0.62` to `-0.14`) --- lead result.
+  is negative (`-0.63` to `-0.16`) --- lead result.
 - Joint accuracy: affect `0.372`, no-affect `0.266`; interval for the
-  difference is positive (`0.034` to `0.185`).
+  difference is positive (`0.024` to `0.188`).
 - Total payoff: affect `1185.9`, no-affect `1172.1`; paired bootstrap interval
-  for the difference crosses zero (`-25.2` to `53.2`).
-- Reallocation support readout (not in main-text numbers): post-switch reencounters
-  with P0 are higher under affect (`5.67` vs `1.33`; CI `0.97` to `8.03`).
+  for the difference crosses zero (`-21.6` to `52.0`).
+- Time-course support readout: post-switch P0 engagement remains higher under
+  affect than no-affect while policy entropy stays lower; tracked-only keeps a
+  beta trajectory without the same deployment pathway.
 
 Interpretation: open with accumulated confidence as liability under change;
 lead with entropy, then joint accuracy, then uncertain payoff as the correct
@@ -109,7 +112,7 @@ trade-off synthesis rather than a monotonic payoff ranking.
 | Card | Current status | Evidence read |
 |---|---|---|
 | Graded Openness | Supported narrowly | Open graded policy spaces reveal entropy/deployment effects. Do not use broad payoff language. |
-| Deployment | Supported narrowly | Tracked-only matches no-affect while full affect lowers entropy, localizing the effect to beta-to-gamma deployment rather than extra belief evidence. |
+| Deployment | Supported narrowly | Tracked-only preserves beta movement while full affect lowers entropy, localizing the effect to beta-to-gamma deployment rather than extra belief evidence. |
 | H4 Social Choice | Paper readout supported narrowly; binary confirmation diagnostic only | Graded partner-choice behavior reorganizes before payoff separates; keep allocation language narrow. The binary H4 confirmation is not a paper regime. |
 | H5 Betrayal | Confirmation support | Lower entropy and higher joint accuracy under partner-local affect; payoff advantage is small/uncertain. Temporal dependency, not generic reward improvement. |
 | H6 / Exp A-C Profiles | Supported as computational profiles | Alpha and prior shape confidence amplitude, reengagement, commitment errors, and payoff non-monotonically. No clinical-validation claim. |

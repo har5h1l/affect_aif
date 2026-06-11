@@ -2,11 +2,11 @@ import pandas as pd
 
 from analysis.phenotypes.alpha_sweep import EXP_A_PANELS, _summary_with_ci
 from analysis.phenotypes.alpha_sweep import metrics as exp_a_metrics
-from analysis.phenotypes.forgiveness import EXP_C_PANELS, _payoff_recovery
+from analysis.phenotypes.forgiveness import EXP_C_BETA_TRAJECTORY_VARIANTS, EXP_C_PANELS, EXP_C_TABLE8, _payoff_recovery
 from analysis.phenotypes.forgiveness import metrics as exp_c_metrics
 from analysis.phenotypes.mixed_volatility import EXP_D_PANELS, build_specs
 from analysis.phenotypes.mixed_volatility import metrics as exp_d_metrics
-from analysis.phenotypes.prior_factorial import EXP_B_RADAR_METRICS
+from analysis.phenotypes.prior_factorial import EXP_B_PROFILE_HEATMAP
 from analysis.phenotypes.prior_factorial import metrics as exp_b_metrics
 
 
@@ -139,6 +139,18 @@ def test_exp_c_panels_match_manuscript_plan():
     )
 
 
+def test_exp_c_table8_values_drive_bar_panels_and_no_affect_has_no_beta_track():
+    assert EXP_C_TABLE8 == (
+        ("cautious_high_alpha", 0.518, 0.996),
+        ("cautious_low_alpha", 0.630, 1.014),
+        ("default_reference", 0.475, 1.019),
+        ("naive_high_alpha", 0.560, 1.005),
+        ("naive_low_alpha", 0.527, 1.004),
+        ("no_affect", 0.593, 1.033),
+    )
+    assert "no_affect" not in EXP_C_BETA_TRAJECTORY_VARIANTS
+
+
 def test_exp_c_metrics_include_partner0_beta_recovery_trajectory():
     rows = []
     for round_idx in range(1, 201):
@@ -261,11 +273,11 @@ def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():
     assert float(summary.loc[0, "trust_asymmetry"]) == 3.0
 
 
-def test_exp_b_radar_metrics_match_manuscript_plan():
-    assert EXP_B_RADAR_METRICS == (
-        "early_exploitation_rate",
-        "betrayal_recovery_time",
-        "selection_gini",
-        "trust_asymmetry",
-        "mean_payoff",
+def test_exp_b_profile_heatmap_matches_table_7():
+    assert EXP_B_PROFILE_HEATMAP == (
+        ("Anxious-reactive", 1932.0, 26.5, 0.338, 1.084, 0.98),
+        ("Hypervigilant", 1951.0, 20.1, 0.423, 0.892, 1.65),
+        ("Naive-stubborn", 1894.0, 21.3, 0.304, 0.364, 1.19),
+        ("Avoidant-rigid", 1889.0, 14.9, 0.357, 0.322, 1.21),
+        ("Default", 1991.0, 23.0, 0.423, 0.893, 1.68),
     )

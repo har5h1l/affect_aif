@@ -125,6 +125,29 @@ Current recovery status on June 6 09:10 PDT:
   analysis-language risk without changing task dynamics, model math, or raw
   trajectories.
 
+### TODO: Confirm Graded Deployment And Partner-Selection Paper Runs
+
+As of June 11, the current paper raw data show that
+`configs/paper/02_deployment_ablation.toml` and
+`configs/paper/03_partner_selection.toml` are still configured at
+`replications = 3`. Before treating Figure 2 or the Section 3.3 graded
+partner-selection readout as confirmation-scale evidence, decide whether each
+needs 20 or 30 seeds, update the config(s), rerun them on `server` through the
+Mango/tmux workflow, and refresh the affected paper surfaces together:
+
+- `results/paper/02_deployment_ablation/`
+- `results/paper/03_partner_selection/`
+- `docs/manuscript/source_tables/`
+- `docs/manuscript/figures/`
+- `docs/manuscript/sections/03_results.tex`
+- `docs/results/current.md`
+- `docs/results/paper.md`
+- any README/manifest files touched by the rerun
+
+Until that rerun is complete, write these two readouts narrowly as
+mechanism/pathway and directional allocation evidence, not as 30-seed
+confirmation.
+
 Manuscript-critical evidence audit at 14:47 PDT:
 
 | Evidence surface | Planned size | Current output state | Manuscript status |

@@ -10,7 +10,8 @@ Supported command-line entry points:
   source tables, and figures from existing paper or future-extension raw
   trajectories.
 - `analysis/make_paper_figures.py`: rebuild manuscript composite figures from
-  source tables.
+  source tables; use `--refresh-source-tables` to refresh figure-specific
+  compact tables from `results/paper` raw CSVs before plotting.
 
 Use `python <script> --help` for script-specific arguments.
 

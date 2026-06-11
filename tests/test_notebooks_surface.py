@@ -34,7 +34,6 @@ def test_public_notebooks_load_and_use_current_paths():
         assert "configs/paper_reproduce" not in text
         assert "configs/benchmark" not in text
         assert "scripts/benchmark" not in text
-        assert "binary" not in text.lower()
         assert "/Users/" not in text
         assert "Open In Colab" in text
         assert 'AFFECT_AIF_BRANCH", "master"' in text

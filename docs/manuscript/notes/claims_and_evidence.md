@@ -10,10 +10,10 @@ internal H-card IDs remain provenance only.
 
 | Claim (manuscript framing) | Status | Evidence | How to write it |
 |---|---|---|---|
-| Partner-local precision tracks predictability rather than realized value. | In manuscript as restored locality probe. | Section 3.1: raw correlations `-0.949` vs `-0.748`; active-encounter partial correlations `-0.882` vs `0.130`; shared-$\beta$ partial readout `-0.380` vs `0.049`; analysis-window payoff local `483.5`, shared `517.6`, no-affect `542.1`. | Mechanism calibration, not reward optimization; specify that payoff is over the locality-probe analysis window. |
-| Behavioural gains arise through policy sharpening, not belief quality. | In manuscript (open graded + tracked-only). | Deployment subsection: entropy `8.59` vs `8.79`; tracked-only matches no-affect on entropy and payoff. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
+| Partner-local precision tracks predictability rather than realized value. | In manuscript as restored locality probe. | Section 3.1: raw correlations `-0.945` vs `0.367`; active-encounter partial correlations `-0.940` vs `0.023`; shared-$\beta$ partial readout `-0.496` vs `0.535`; analysis-run payoff local `1977.2`, shared `1973.4`, no-affect `1905.9`. | Mechanism calibration, not reward optimization; specify that similar local/shared payoff does not preserve the partner-local surprisal signal. |
+| Behavioural gains arise through policy sharpening, not belief quality. | In manuscript (open graded + tracked-only). | Deployment subsection: beta range local `1.32` vs tracked-only `1.34`; entropy delta vs tracked-only `-0.205`; payoff delta vs tracked-only `-12.8`. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
 | Partner engagement reorganises around reliability before payoff separates. | In manuscript at current graded-paper scale. | Partner-choice subsection: entropy 3.99 vs 4.83; cooperator up (36.6% vs 34.8%), exploiter down (13.8% vs 16.2%); flat payoff (393.6 vs 393.2). | Small allocation shift consistent with sharper policy commitment, not payoff headline. |
-| Abrupt betrayal exposes temporal dependency. | In manuscript with 30-seed confirmation. | Betrayal subsection: round-31 switch; entropy 8.36 vs 8.74 (CI -0.62 to -0.14); joint accuracy 0.372 vs 0.266 (CI 0.034 to 0.185); payoff 1185.9 vs 1172.1 (CI crosses zero). | Lead with entropy; uncertain payoff is correct for a calibration mechanism; hand off to profile revision-speed analyses. |
+| Abrupt betrayal exposes temporal dependency. | In manuscript with 30-seed confirmation. | Betrayal subsection: round-31 switch; entropy 8.36 vs 8.74 (CI -0.63 to -0.16); joint accuracy 0.372 vs 0.266 (CI 0.024 to 0.188); payoff 1185.9 vs 1172.1 (CI crosses zero). | Lead with entropy; uncertain payoff is correct for a calibration mechanism; hand off to profile revision-speed analyses. |
 | Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed profile scale. | Profile subsection: orienting three-experiment frame, $\alpha$ sweep (non-monotonic payoff), four gain-prior profiles, and forgiveness decoupling. | "Computational analogues"; disclaimer in Discussion; not clinical categories. |
 | Policy openness gates visible affect effects. | Underpins §3.2; not a separate subsection. | Graded open-regime readouts. | Openness necessary, not sufficient. |
 | Partner-local beta is behaviorally necessary. | Not established. | Local cleaner signal; global beta can win on payoff in probes. | Signal-quality decomposition only. |
@@ -46,8 +46,9 @@ not full-episode cumulative payoff.
 
 ### Metacognitive deployment (§3.2)
 
-Tracked-only matches no-affect on entropy and payoff while full precision
-modulation differs—deployment-channel claim is the manuscript anchor here.
+Tracked-only updates beta without deploying it through gamma, while full
+precision modulation lowers entropy relative to tracked-only. The
+deployment-channel claim is the manuscript anchor here.
 
 ### Social reorganisation (§3.3)
 
@@ -61,12 +62,14 @@ Reviewer-control provenance remains outside the manuscript source-table set.
 The 30-seed confirmation replaces the earlier smoke-scale payoff--accuracy
 story. Open with accumulated confidence as a liability when a partner changes
 (round-31 P0 switch). Lead with entropy (`8.36` vs `8.74`; CI does not cross
-zero), then joint accuracy (`0.372` vs `0.266`), then uncertain payoff
+zero, `-0.63` to `-0.16`), then joint accuracy (`0.372` vs `0.266`; CI
+`0.024` to `0.188`), then uncertain payoff
 (`1185.9` vs `1172.1`; CI crosses zero) as the correct readout for a
-calibration mechanism rather than a power failure. Reallocation diagnostics
-(higher post-switch P0 reencounters under affect) support active reallocation
-management but do not establish a payoff headline. Hand off to §3.5 for revision
-speed via precision gain and prior model fitness.
+calibration mechanism rather than a power failure. The figure now shows the
+time course of betrayed-partner engagement, P0 beta, and entropy around the
+switch; it should be read as temporal persistence of deployment rather than a
+simple reallocation-away result. Hand off to §3.5 for revision speed via
+precision gain and prior model fitness.
 
 ### Profile programme (§3.5)
 

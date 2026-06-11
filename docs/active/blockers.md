@@ -17,6 +17,13 @@
   confirmation. If H4 needs confirmation-scale manuscript support, run the
   graded paper partner-selection config.
 
+- **Paper-scale decision for graded H2/H4**: the current paper configs for
+  `02_deployment_ablation` and `03_partner_selection` are still 3-seed
+  readouts. Decide whether each should be rerun at 20 or 30 seeds before using
+  them as confirmation-scale paper evidence. After changing the config(s),
+  rerun on `server`, then refresh `results/paper`, manuscript source tables,
+  figures, results docs, manifests, and manuscript prose together.
+
 - **Mixed-volatility extension boundary**: Exp D is implemented and
   operationally valid, but it is no longer reported as paper evidence. It opens
   a distinct heterogeneous-volatility/change-detection question and should stay

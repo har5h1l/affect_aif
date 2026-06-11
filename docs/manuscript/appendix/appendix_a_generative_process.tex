@@ -1,0 +1,118 @@
+\section{Trust-Game Generative Process}
+\label{app:generative_process}
+
+This appendix specifies the environment-side process used in the repeated trust-game simulations. The generative process consists of scripted partners with hidden type and stance variables, investment-dependent stance transitions, cooperate-or-defect responses, and deterministic payoff delivery. Appendix~\ref{app:pomdp} then specifies the focal agent's POMDP model of this process.
+
+\subsection{Episode structure}
+
+Each episode consists of repeated interactions between one focal active-inference agent and four environment-side partners. In each round, the interaction partner is either assigned by the configured protocol or selected by the focal agent in partner-choice conditions. The focal agent then chooses a graded investment level
+\[
+a \in \mathcal{A} = \{0,1,2,3,4,5\},
+\]
+where \(a=0\) denotes no investment and \(a=5\) denotes maximum investment. The selected partner emits a binary response
+\[
+o^{\mathrm{act}}_k \in \{\mathrm{cooperate},\mathrm{defect}\},
+\]
+sampled from the partner's current type and stance. The environment then delivers payoff according to the deterministic payoff function in Appendix~\ref{app:process_payoff}, and updates the partner's stance according to the investment-dependent transition model in Appendix~\ref{app:process_stance}.
+
+\subsection{Partner state variables}
+
+Each environment-side partner \(k\) has two hidden process variables. The first is behavioral type,
+\[
+s^{\mathrm{type}}_k \in \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\},
+\]
+and the second is stance toward the focal agent,
+\[
+s^{\mathrm{stance}}_k \in \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}.
+\]
+These variables are hidden from the focal agent but define how the environment generates partner responses and stance transitions. Type controls the partner's broad response tendency, while stance modulates how cooperative the partner is toward the focal agent at a given point in the episode.
+
+\subsection{Partner-response probabilities}
+\label{app:process_response}
+
+The partner cooperation likelihood table defines the probability the partner cooperates given type and stance:
+\begin{table}[H]
+\centering
+\caption{Cooperation likelihood $P(\text{cooperate} \mid s^{\text{type}}, s^{\text{stance}})$.}
+\label{tab:coop_likelihood}
+\begin{tabular}{lccc}
+\toprule
+Partner type & Trusting & Neutral & Hostile \\
+\midrule
+Cooperator & 0.95 & 0.80 & 0.55 \\
+Reciprocator & 0.90 & 0.70 & 0.30 \\
+Exploiter & 0.70 & 0.35 & 0.10 \\
+Random & 0.60 & 0.50 & 0.35 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The table defines the environment-side cooperation probability
+\[
+P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k),
+\]
+with
+\[
+P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)
+=
+1-
+P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot).
+\]
+The same response probabilities are used in the focal agent's partner-response likelihood \(A^{\mathrm{act}}_k\) (Appendix~\ref{app:pomdp_likelihoods}), allowing the focal agent to infer type and stance from observed cooperate-or-defect responses. Predictability is not identical to cooperation probability. A strongly cooperative state and a strongly defective state can both be predictable when the focal agent assigns high probability to the response that actually occurs.
+
+\subsection{Payoff function}
+\label{app:process_payoff}
+
+Payoff is delivered by the environment after the partner response is sampled. With endowment \(E=10\) and multiplier \(M=3\), the invested amount is subtracted from the focal agent's endowment. If the partner cooperates, the investment is multiplied by \(M\) and split evenly, so the focal agent receives \(Ma/2\). If the partner defects, the focal agent receives no return from the investment.
+\begin{equation}
+\pi(a,o_k^{\mathrm{act}})=
+\begin{cases}
+E-a+\frac{Ma}{2}, & o_k^{\mathrm{act}}=\mathrm{cooperate},\\
+E-a, & o_k^{\mathrm{act}}=\mathrm{defect}.
+\end{cases}
+\label{eq:graded_payoff_map}
+\end{equation}
+Thus, cooperation yields \(\pi(a,\mathrm{cooperate})=10+0.5a\), whereas defection yields \(\pi(a,\mathrm{defect})=10-a\). The no-investment action \(a=0\) gives a risk-free payoff of \(10\), while higher investment increases both possible gains and exposure to defection.
+
+\subsection{Stance transition dynamics}
+\label{app:process_stance}
+
+Stance transitions depend on the focal agent's graded investment $a$ by interpolating between a high-investment/trust-building endpoint and a low-investment/withholding endpoint:
+\begin{equation}
+\rho(a)=\frac{a}{|\mathcal{A}|-1}=\frac{a}{5},
+\qquad
+B^{\mathrm{stance}}(a)=\rho(a)B^{\mathrm{high}}+(1-\rho(a))B^{\mathrm{low}}.
+\label{eq:b_stance}
+\end{equation}
+High investment shifts dynamics toward trust building; low investment or withholding shifts dynamics toward trust damage; recovery from hostility is slower than collapse.
+
+\begin{table}[H]
+\centering
+\caption{Endpoint stance transition dynamics. The focal agent's graded investment interpolates between $B^{\mathrm{high}}$ and $B^{\mathrm{low}}$ according to Eq.~\eqref{eq:b_stance}.}
+\label{tab:stance_transition}
+\begin{tabular}{lccc}
+\toprule
+\multicolumn{4}{c}{\textbf{High investment / trust-building endpoint }$B^{\mathrm{high}}$} \\
+\midrule
+To $\setminus$ From & Trusting & Neutral & Hostile \\
+\midrule
+Trusting & 0.90 & 0.30 & 0.05 \\
+Neutral & 0.10 & 0.60 & 0.35 \\
+Hostile & 0.00 & 0.10 & 0.60 \\
+\midrule
+\multicolumn{4}{c}{\textbf{Low investment / withholding endpoint }$B^{\mathrm{low}}$} \\
+\midrule
+To $\setminus$ From & Trusting & Neutral & Hostile \\
+\midrule
+Trusting & 0.10 & 0.05 & 0.02 \\
+Neutral & 0.50 & 0.35 & 0.18 \\
+Hostile & 0.40 & 0.60 & 0.80 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+These dynamics instantiate the asymmetry of trust: sustained high investment gradually builds trust, while sustained withholding rapidly damages trust; recovery from hostility is slow. In scheduled betrayal and repair protocols, the environment can additionally intervene on a partner's stance according to the protocol schedule; these interventions are not known transition events in the focal agent's POMDP.
+
+\subsection{Boundary of the current simulation}
+
+All reported simulations use one focal active-inference agent interacting with four scripted partners. Partners maintain hidden type and stance, sample responses from Appendix~\ref{app:process_response}, and update stance according to Appendix~\ref{app:process_stance}; they do not perform variational inference, infer policies, or maintain affective-precision estimates. This boundary isolates the focal agent's partner-local precision mechanism before reciprocal active-inference partners are introduced.

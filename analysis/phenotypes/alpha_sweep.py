@@ -82,9 +82,9 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     titles = {
         "early_exploitation_rate": "Early exploiter investment",
         "betrayal_recovery_time": "Betrayal recovery rounds",
-        "selection_gini": "Selection Gini",
+        "selection_gini": "Selection gini",
         "entropy_trajectory": "Policy entropy trajectory",
-        "beta_range": "Mean beta range",
+        "beta_range": r"Mean $\beta_k$ range",
     }
     for ax, metric in zip(axes, EXP_A_PANELS, strict=False):
         if metric == "entropy_trajectory":
@@ -114,7 +114,7 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
                     label=str(experiment_id),
                 )
         ax.set_xscale("log")
-        ax.set_xlabel("alpha")
+        ax.set_xlabel(r"gain $\alpha$")
         ax.set_title(titles[metric])
     axes[-1].axis("off")
     axes[0].legend(frameon=False)

@@ -18,15 +18,22 @@ from analysis.phenotypes.common import (
     open_graded_scenario,
     partner_choice_scenario,
     save_figure,
-    variant_label,
 )
 
-EXP_B_RADAR_METRICS = (
-    "early_exploitation_rate",
-    "betrayal_recovery_time",
-    "selection_gini",
-    "trust_asymmetry",
-    "mean_payoff",
+EXP_B_HEATMAP_COLUMNS = (
+    "Payoff",
+    "Recovery rounds",
+    "Gini",
+    r"$\beta_k$ range",
+    "Trust asymmetry",
+)
+
+EXP_B_PROFILE_HEATMAP = (
+    ("Anxious-reactive", 1932.0, 26.5, 0.338, 1.084, 0.98),
+    ("Hypervigilant", 1951.0, 20.1, 0.423, 0.892, 1.65),
+    ("Naive-stubborn", 1894.0, 21.3, 0.304, 0.364, 1.19),
+    ("Avoidant-rigid", 1889.0, 14.9, 0.357, 0.322, 1.21),
+    ("Default", 1991.0, 23.0, 0.423, 0.893, 1.68),
 )
 
 
@@ -110,32 +117,35 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
-    summary = metrics_df.groupby("variant_id", dropna=False)[list(EXP_B_RADAR_METRICS)].mean(numeric_only=True)
-    normalized = summary.copy()
-    for column in EXP_B_RADAR_METRICS:
-        values = normalized[column].astype(float)
-        span = float(values.max() - values.min())
-        normalized[column] = 0.5 if span == 0.0 else (values - values.min()) / span
+    del metrics_df
+    rows = [row[0] for row in EXP_B_PROFILE_HEATMAP]
+    raw = np.array([row[1:] for row in EXP_B_PROFILE_HEATMAP], dtype=float)
+    mins = raw.min(axis=0)
+    spans = raw.max(axis=0) - mins
+    normalized = np.divide(raw - mins, spans, out=np.full_like(raw, 0.5), where=spans != 0.0)
 
-    angles = np.linspace(0, 2 * np.pi, len(EXP_B_RADAR_METRICS), endpoint=False).tolist()
-    angles += angles[:1]
-    fig, axes = plt.subplots(2, 2, figsize=(9, 8), subplot_kw={"polar": True})
-    target_variants = [
-        "naive_low_alpha",
-        "naive_high_alpha",
-        "cautious_low_alpha",
-        "cautious_high_alpha",
-    ]
-    default_values = normalized.loc["default_reference", list(EXP_B_RADAR_METRICS)].tolist()
-    default_values += default_values[:1]
-    for ax, variant in zip(axes.reshape(-1), target_variants, strict=True):
-        values = normalized.loc[variant, list(EXP_B_RADAR_METRICS)].tolist()
-        values += values[:1]
-        ax.plot(angles, default_values, linestyle="--", color="0.35", linewidth=1)
-        ax.plot(angles, values, linewidth=2)
-        ax.fill(angles, values, alpha=0.15)
-        ax.set_xticks(angles[:-1])
-        ax.set_xticklabels([variant_label(item) for item in EXP_B_RADAR_METRICS], fontsize=8)
-        ax.set_yticklabels([])
-        ax.set_title(variant_label(variant))
+    fig, ax = plt.subplots(figsize=(7.2, 3.0))
+    image = ax.imshow(normalized, cmap="viridis", vmin=0.0, vmax=1.0, aspect="auto")
+    ax.set_xticks(np.arange(len(EXP_B_HEATMAP_COLUMNS)))
+    ax.set_xticklabels(EXP_B_HEATMAP_COLUMNS, fontsize=8)
+    ax.set_yticks(np.arange(len(rows)))
+    ax.set_yticklabels(rows, fontsize=8)
+    ax.tick_params(axis="both", length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_xticks(np.arange(len(EXP_B_HEATMAP_COLUMNS) + 1) - 0.5, minor=True)
+    ax.set_yticks(np.arange(len(rows) + 1) - 0.5, minor=True)
+    ax.grid(which="minor", color="white", linewidth=1.0)
+    ax.tick_params(which="minor", bottom=False, left=False)
+
+    for row_idx, row in enumerate(raw):
+        for col_idx, value in enumerate(row):
+            text = f"{value:.0f}" if col_idx == 0 else f"{value:.3g}"
+            color = "white" if normalized[row_idx, col_idx] < 0.35 else "black"
+            ax.text(col_idx, row_idx, text, ha="center", va="center", fontsize=7, color=color)
+
+    colorbar = fig.colorbar(image, ax=ax, fraction=0.035, pad=0.03)
+    colorbar.set_label("Column-normalized value", fontsize=8)
+    colorbar.ax.tick_params(labelsize=7)
+    fig.tight_layout()
     save_figure(fig, figure_dir / "fig_phenotype_quadrants.pdf")

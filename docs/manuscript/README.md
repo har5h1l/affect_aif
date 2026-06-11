@@ -23,12 +23,16 @@ Output: `main.pdf`.
 - `appendix/`: appendix section files.
 - `main.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
-- `macros.tex`: shared LaTeX macros.
+- `macros.tex`: shared LaTeX macros. Set `\anonsupprepotrue` and
+  `\renewcommand{\anonsupprepourl}{...}` when an anonymized supplementary repo
+  is live so Methods and Appendix~\ref{app:protocols} switch from
+  upon-acceptance to provided-at-submission wording.
 - `figures/`: copied PNG/PDF panels from analysis outputs.
 - `source_tables/`: compact CSVs copied from paper analysis outputs for
   checking and figure regeneration.
-- `scripts/analysis/make_paper_figures.py`: regenerates composite figures from
-  `source_tables/` (see `docs/manuscript/notes/figures_tables.md`).
+- `scripts/analysis/make_paper_figures.py`: refreshes figure-specific compact
+  tables from `results/paper` when requested and regenerates composite figures
+  from `source_tables/` (see `docs/manuscript/notes/figures_tables.md`).
 
 ## Evidence Contract
 

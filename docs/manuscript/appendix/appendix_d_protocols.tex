@@ -5,13 +5,13 @@ This appendix summarizes simulation conditions, replication counts, schedules, a
 
 \subsection{Simulation conditions}
 
-All reported experiments use one focal active-inference agent with four partners (\(K=4\)), per-partner generative models, graded investment actions, and environment-side partner policies (Appendix~\ref{app:pomdp}). Conditions differ by assignment mode, scheduled partner changes, and precision/profile manipulations within the graded payoff regime. In conditions without explicit partner choice, the interaction partner is assigned according to the configured protocol; in partner-choice conditions, the agent selects the partner before selecting an investment level.
+All reported experiments use one focal active-inference agent with four partners (\(K=4\)), per-partner generative models, graded investment actions, and environment-side partner policies (Appendices~\ref{app:generative_process}--\ref{app:pomdp}). Conditions differ by assignment mode, scheduled partner changes, and precision/profile manipulations within the graded payoff regime. In conditions without explicit partner choice, the interaction partner is assigned according to the configured protocol; in partner-choice conditions, the agent selects the partner before selecting an investment level.
 
 \textbf{Open graded decision regime.} The graded regime uses a discretized investment level while keeping the same hidden type--stance structure. This is the primary deployment-contrast setting (Section~\ref{sec:deployment}): affect, no-affect, and tracked-only variants are compared on policy entropy and cumulative payoff.
 
 \textbf{Predictability-over-payoff locality probe.} A 100-round partner-choice graded environment with partner-local, shared-$\beta$, and no-affect variants tests whether $\beta_k$-derived policy precision tracks partner-response likelihood surprisal more strongly than realized payoff (Section~\ref{sec:predictability_value}). The payoff panel reports the same active-encounter analysis window used for the locality-probe correlation readouts.
 
-\textbf{Partner-choice regime.} The agent first selects a partner, then selects an investment level toward that partner each round. With four partners and six graded investment levels, the one-step partner-choice setting can equivalently be represented as \(4 \times 6 = 24\) partner--investment branches. Partner selection is where engagement reorganization and social-allocation readouts are defined (Section~\ref{sec:partner_choice}).
+\textbf{Partner-choice regime.} The agent first selects a partner, then selects an investment level toward that partner each round (\(4 \times 6 = 24\) one-step branches; policy entropy uses multi-step policies at \(H{=}4\)). Partner selection is where engagement reorganization and social-allocation readouts are defined (Section~\ref{sec:partner_choice}).
 
 \textbf{Abrupt betrayal.} A partner-choice graded environment with scheduled stance betrayal on a previously cooperative partner tests post-switch reallocation, entropy, payoff, and joint accuracy (Section~\ref{sec:betrayal}).
 
@@ -21,7 +21,7 @@ All reported experiments use one focal active-inference agent with four partners
 
 \subsection{Seed counts and episode lengths}
 
-Unless otherwise stated in the main text, episode length is 200 rounds. The abrupt-betrayal condition uses 120 rounds because post-switch readouts dominate interpretation. Profile-scale tables use 20 seeds per condition. Central behavioral comparisons use 30 seeds per condition. Exploratory diagnostic runs used three seeds per variant and were used only for implementation validation; all main-text claims are based on the confirmation-scale or profile-scale runs reported in the relevant sections.
+Unless otherwise stated in the main text, episode length is 200 rounds. The abrupt-betrayal condition uses 120 rounds because post-switch readouts dominate interpretation. Profile tables use 20 seeds per condition. Central behavioral comparisons use 30 seeds per condition. Three-seed implementation checks were used only for implementation validation; all main-text claims are based on the runs reported in the relevant sections.
 
 Representative configured scales:
 
@@ -44,13 +44,17 @@ Profile program & sweeps, factorial, forgiveness & 200 & 20 \\
 \end{table}
 
 \paragraph{Supplementary materials.}
-The supplementary repository contains the simulation environments, precision-runtime variants, experiment configuration files, analysis scripts, and figure-generation code used for the reported experiments.
+\ifanonsupprepo
+\codereleasestatement\ The repository includes \codereleaseartifactlist.
+\else
+\codereleasestatement\ The release will include \codereleaseartifactlist.
+\fi
 
 \subsection{Betrayal schedule}
 
 The canonical abrupt-betrayal protocol (\texttt{betrayal\_choice}) uses graded payoffs, agent-chosen partners, four partners with fixed initial types and stances, and no stochastic type switching ($p_{\mathrm{switch}}=0$). Partner P0 begins as a cooperator in a trusting stance. At round 31, P0 undergoes a scheduled stance switch to hostile while other partners retain their initial configurations. Primary readouts are post-switch cumulative payoff, policy entropy, partner reallocation, and joint partner-type accuracy over the remaining episode.
 
-The profile-scale betrayal environments used in the alpha sweep and prior-gain factorial apply the same single-switch structure within 200-round episodes for recovery-time and quadrant metrics. The forgiveness profile extends this schedule: rounds 1--80 cooperative baseline, rounds 81--120 betrayal on P0, rounds 121--200 reversion to cooperative/trusting on P0.
+The betrayal environments used in the alpha sweep and prior-gain factorial apply the same single-switch structure within 200-round episodes for recovery-time and quadrant metrics. The forgiveness profile extends this schedule: rounds 1--80 cooperative baseline, rounds 81--120 betrayal on P0, rounds 121--200 reversion to cooperative/trusting on P0.
 
 \subsection{Partner-choice allocation metrics}
 
@@ -62,13 +66,11 @@ Partner-choice readouts quantify how precision reshapes \emph{who} the agent eng
 
 \textbf{Post-betrayal allocation.} Post-switch windows report reallocation away from the switched partner and toward alternatives, including post-betrayal P0 selection and high-investment rates in profile analyses.
 
-\textbf{Policy entropy under choice.} Mean $q_\pi$ entropy in partner-choice regimes captures how sharply the agent commits to partner--investment policies (reported comparatively for affect versus no-affect controls).
-
 \subsection{Entropy, payoff, and accuracy readouts}
 
 \textbf{Total payoff.} Cumulative focal-agent payoff over the episode (or over defined post-switch windows for betrayal analyses).
 
-\textbf{Policy entropy.} Mean $q_\pi$ entropy (`q\_pi\_entropy` in logged outputs) measures policy-commitment sharpness; lower entropy indicates sharper policy selection under precision modulation.
+\textbf{Policy entropy.} Natural-log Shannon entropy of $q(\pi)$ over the enumerated candidate set produced by the configured planner at $H{=}4$, averaged over rounds and seeds (\texttt{q\_pi\_entropy}). In partner-choice conditions, candidates tile each partner's multi-step policies across partners before softmax selection. Values are in nats and are not normalized; lower values indicate sharper commitment.
 
 \textbf{Joint partner-type accuracy.} Mean joint correctness of inferred partner type (`mean\_joint\_accuracy`) summarizes epistemic state inference; it is reported separately from payoff because precision modulation can change deployment and accuracy independently of cumulative reward.
 
@@ -92,12 +94,12 @@ For the predictability-over-payoff locality probe (Section~\ref{sec:predictabili
 Variant / association & Raw $r$ & Partial $r$ \\
 \midrule
 \multicolumn{3}{l}{\textit{Partner-local precision}} \\
-\quad Precision--surprisal & $-0.949$ & $-0.882$ \\
-\quad Precision--payoff & $-0.748$ & $0.130$ \\
+\quad Precision--surprisal & $-0.945$ & $-0.940$ \\
+\quad Precision--payoff & $0.367$ & $0.023$ \\
 \addlinespace
 \multicolumn{3}{l}{\textit{Shared-$\beta$ ablation}} \\
-\quad Precision--surprisal & $-0.555$ & $-0.380$ \\
-\quad Precision--payoff & $-0.447$ & $0.049$ \\
+\quad Precision--surprisal & $-0.583$ & $-0.496$ \\
+\quad Precision--payoff & $0.379$ & $0.535$ \\
 \bottomrule
 \end{tabular}
 \end{table}

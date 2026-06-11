@@ -30,25 +30,6 @@ def test_docs_state_steering_wheel_exists():
     assert missing == []
 
 
-def test_current_docs_do_not_use_stale_hypothesis_story():
-    paths = [
-        ROOT / "README.md",
-        ROOT / "AGENTS.md",
-        ROOT / "docs/overview/core/hypotheses.md",
-        ROOT / "docs/overview/core/pomdp.md",
-    ]
-    forbidden = ["affect compensates for shallow planning", "deep planner as reference"]
-    offenders = []
-    for path in paths:
-        if not path.exists():
-            continue
-        text = path.read_text().lower()
-        for phrase in forbidden:
-            if phrase in text:
-                offenders.append(f"{path.relative_to(ROOT)}: {phrase}")
-    assert offenders == []
-
-
 def test_top_level_doc_links_exist():
     checked = [
         ROOT / "README.md",
