@@ -260,7 +260,9 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         {"variant_id", "total_payoff", "mean_q_pi_entropy"},
     )
 
-    order = ["affect", "no_affect", "tracked_only"]
+    index = set(h2["variant_id"].astype(str))
+    tracked_variant = "tracked_only" if "tracked_only" in index else "lesioned"
+    order = ["affect", "no_affect", tracked_variant]
     h2 = h2.set_index("variant_id").loc[order]
 
     fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
