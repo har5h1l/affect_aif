@@ -19,13 +19,8 @@ import pandas as pd
 from scipy import stats
 from scipy.special import digamma, gammaln
 
+from analysis.core.parsing import variant_sort_key
 from analysis.metrics import final_round_summary
-
-
-def _variant_sort_key(value) -> tuple[int, str]:
-    if isinstance(value, (int, np.integer)):
-        return (0, f"{int(value):04d}")
-    return (1, str(value))
 
 
 def _variant_value(value):
@@ -248,7 +243,7 @@ def random_effects_bms(results: pd.DataFrame) -> dict:
     if "total_log_evidence" not in summary.columns:
         raise ValueError("Results do not contain predictive log-score data.")
 
-    variants = sorted(summary["variant_id"].unique(), key=_variant_sort_key)
+    variants = sorted(summary["variant_id"].unique(), key=variant_sort_key)
     seeds = sorted(summary["seed"].unique())
 
     # Build the predictive log-score matrix (n_seeds x n_variants)

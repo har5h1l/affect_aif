@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+from analysis.core.parsing import ensure_array, scheduled_switch_targets, variant_sort_key
 from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
     betrayal_misdeployment_summary,
@@ -97,6 +98,17 @@ def test_load_results_table_preserves_variant_identity(tmp_path):
     lesion = summary.loc[summary["variant_id"] == "lesioned"].iloc[0]
     assert horizon_1["total_payoff"] == 22
     assert lesion["total_payoff"] == 17
+
+
+def test_analysis_parsing_helpers_preserve_csv_vector_contract():
+    parsed = ensure_array("[np.float64(0.5), nan, 2]")
+
+    assert parsed.tolist()[0] == 0.5
+    assert pd.isna(parsed.tolist()[1])
+    assert parsed.tolist()[2] == 2.0
+    assert scheduled_switch_targets("[0, 2]") == [0, 2]
+    assert scheduled_switch_targets(float("nan")) == []
+    assert sorted(["10", 2, "affect"], key=variant_sort_key) == [2, "10", "affect"]
 
 
 def test_betrayal_phase_summary_splits_pre_acute_and_tail_windows():

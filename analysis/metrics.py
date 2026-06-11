@@ -2,33 +2,16 @@
 
 from __future__ import annotations
 
-import ast
-import re
 from collections import defaultdict
 
 import numpy as np
 import pandas as pd
 
+from analysis.core.parsing import ensure_array, scheduled_switch_targets, variant_sort_key
 
-def _variant_sort_key(value) -> tuple[int, str]:
-    if isinstance(value, (int, np.integer)):
-        return (0, f"{int(value):04d}")
-    return (1, str(value))
-
-
-def _ensure_array(value) -> np.ndarray:
-    if isinstance(value, np.ndarray):
-        return value.astype(float)
-    if isinstance(value, list):
-        return np.asarray(value, dtype=float)
-    if isinstance(value, str):
-        cleaned = re.sub(r"np\.(?:float64|int64)\(([^)]+)\)", r"\1", value)
-        cleaned = cleaned.replace("nan", "None")
-        parsed = ast.literal_eval(cleaned)
-        if isinstance(parsed, (list, tuple)):
-            parsed = [np.nan if item is None else item for item in parsed]
-        return np.asarray(parsed, dtype=float)
-    return np.asarray(value, dtype=float)
+_ensure_array = ensure_array
+_scheduled_switch_targets = scheduled_switch_targets
+_variant_sort_key = variant_sort_key
 
 
 def _safe_nanmean(values: np.ndarray) -> float:
@@ -102,21 +85,6 @@ def _stack_beta_rows(series: pd.Series) -> np.ndarray:
     for row_idx, array in enumerate(arrays):
         stacked[row_idx, : len(array)] = array
     return stacked
-
-
-def _scheduled_switch_targets(value) -> list[int]:
-    if value is None:
-        return []
-    if isinstance(value, float) and np.isnan(value):
-        return []
-    if isinstance(value, str) and value.strip() in {"", "[]", "nan", "None"}:
-        return []
-    array = _ensure_array(value)
-    if array.size == 0:
-        return []
-    if array.ndim == 0:
-        return [int(array.item())] if np.isfinite(array.item()) else []
-    return [int(item) for item in array.tolist() if np.isfinite(item)]
 
 
 def _build_scheduled_switch_map(

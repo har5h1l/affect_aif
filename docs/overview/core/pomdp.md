@@ -178,8 +178,11 @@ See `affective_precision.md` for the update law, modes, and lesion table.
 
 ## Implementation Pointers
 
-- POMDP construction: `tasks/trust/pomdp.py`
+- POMDP template assembly and public helper API: `tasks/trust/pomdp.py`
+- POMDP likelihood, transition, preference, prior, and policy matrix builders:
+  `tasks/trust/pomdp_matrices.py`
 - Runtime selection/update loop: `tasks/trust/runtime.py`
+- Runner row diagnostics: `experiments/trust/diagnostics.py`
 - Affective precision tracker: `tasks/trust/affect.py`
 - Config expansion and execution: `experiments/trust/`
 - Public configs: `configs/paper/`, `configs/demo/`, `configs/diagnostics/`

@@ -12,6 +12,7 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from experiments.multifocal.config import MultiFocalConfig
 from experiments.multifocal.runner import MultiFocalRunner
 from experiments.trust.config import ExperimentConfig
+from experiments.trust.diagnostics import build_decision_diagnostics
 from experiments.trust.factory import create_agents_from_multi_focal_config, create_env
 from experiments.trust.logger import MetricLogger
 from experiments.trust.runner import ExperimentRunner
@@ -139,6 +140,48 @@ def test_tiny_trust_runner_debug_profile_logs_diagnostic_internals(tiny_spec):
     assert DEBUG_ONLY_COLUMNS <= set(results.columns)
     assert any(len(value) > 0 for value in results["q_pi"])
     assert any(len(value) > 0 for value in results["partner_joint_beliefs"])
+
+
+def test_decision_diagnostics_module_matches_runner_method(tiny_spec):
+    runner = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=1, replications=1))
+    run = runner.spec.expand_runs()[0]
+    config = run.to_runtime_config()
+    env = create_env(config, seed=run.seed)
+    runtime = build_runtime(config, planning_horizon=run.variant.planning_horizon, seed=run.seed)
+    context = env.reset()
+    decision = select_decision(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        active_partner=context["active_partner"],
+        assignment_mode=config.assignment_mode,
+        base_gamma=runtime.base_gamma,
+        action_selection=runtime.action_selection,
+        rng=runtime.rng,
+        affect_mode=runtime.affect_mode,
+    )
+
+    extracted = build_decision_diagnostics(
+        config=config,
+        runtime=runtime,
+        decision=decision,
+        snapshot=None,
+        include_diagnostics=False,
+    )
+    method = runner._decision_diagnostics(
+        config,
+        runtime,
+        decision,
+        None,
+        None,
+        include_diagnostics=False,
+    )
+
+    assert set(extracted) == set(method)
+    for key in extracted:
+        if isinstance(extracted[key], np.ndarray):
+            np.testing.assert_array_equal(extracted[key], method[key])
+        else:
+            assert extracted[key] == method[key] or (pd.isna(extracted[key]) and pd.isna(method[key]))
 
 
 def test_logger_does_not_fallback_posteriors_to_decision_beliefs():

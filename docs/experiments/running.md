@@ -88,6 +88,13 @@ Result rows and `batch_metadata.json` record config paths as resolved absolute
 paths so provenance does not depend on whether a run used the serial,
 single-worker inline, or multi-worker batch path.
 
+Runner diagnostics are assembled in `experiments/trust/diagnostics.py`, while
+POMDP matrices are assembled in `tasks/trust/pomdp_matrices.py` and wrapped by
+`tasks/trust/pomdp.py`. These modules are structural boundaries only: changing
+them should be verified by comparing fixed-seed data-collection and debug
+`results.csv` hashes against the previous implementation before treating the
+change as experiment-preserving.
+
 The current runtime optimization audit is recorded in
 `docs/results/runtime_optimization_audit_20260611.md`.
 

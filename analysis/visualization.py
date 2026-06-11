@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
+from analysis.core.parsing import variant_sort_key
+
 LIST_LIKE_COLUMNS = (
     "true_types",
     "true_stances",
@@ -76,12 +78,6 @@ def _variant_slug(value) -> str:
         return f"{int(value):02d}"
     text = _slugify(str(value))
     return text or "variant"
-
-
-def _variant_sort_key(value) -> tuple[int, str]:
-    if isinstance(value, (int, np.integer)):
-        return (0, f"{int(value):04d}")
-    return (1, str(value))
 
 
 def _signal_label(run: pd.DataFrame) -> str:
@@ -214,7 +210,7 @@ def build_run_gifs(
         reporter.emit("gif_generation_start", output_dir=str(output))
 
     written: list[Path] = []
-    primary["_variant_sort"] = primary["variant_id"].apply(_variant_sort_key)
+    primary["_variant_sort"] = primary["variant_id"].apply(variant_sort_key)
     grouped = (
         primary.sort_values(["_variant_sort", "seed", "round"])
         .drop(columns="_variant_sort")

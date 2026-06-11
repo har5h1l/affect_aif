@@ -5,12 +5,11 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from analysis.core.parsing import ensure_array, scheduled_switch_targets
 from analysis.metrics import (
-    _ensure_array,
     _safe_entropy,
     _safe_nanmean,
     _safe_range,
-    _scheduled_switch_targets,
     _stack_beta_rows,
 )
 
@@ -23,7 +22,7 @@ def cross_partner_interference_summary(results: pd.DataFrame, *, post_window: in
         return pd.DataFrame()
 
     frame = results.copy()
-    frame["_scheduled_stance_targets"] = frame["scheduled_stance_switch_partner_ids"].apply(_scheduled_switch_targets)
+    frame["_scheduled_stance_targets"] = frame["scheduled_stance_switch_partner_ids"].apply(scheduled_switch_targets)
     switch_rows = frame.loc[frame["_scheduled_stance_targets"].apply(bool)]
     rows: list[dict] = []
     for (variant_id, seed), group in frame.groupby(["variant_id", "seed"], sort=False):
@@ -72,7 +71,7 @@ def partner_phase_delta_summary(results: pd.DataFrame, *, window: int = 10) -> p
         return pd.DataFrame()
 
     frame = results.copy()
-    frame["_scheduled_stance_targets"] = frame["scheduled_stance_switch_partner_ids"].apply(_scheduled_switch_targets)
+    frame["_scheduled_stance_targets"] = frame["scheduled_stance_switch_partner_ids"].apply(scheduled_switch_targets)
     switch_rows = frame.loc[frame["_scheduled_stance_targets"].apply(bool)]
     rows: list[dict] = []
     for (variant_id, seed), group in frame.groupby(["variant_id", "seed"], sort=False):
@@ -142,7 +141,7 @@ def global_vs_local_beta_summary(results: pd.DataFrame) -> pd.DataFrame:
             else None
         )
         if vector_column is not None:
-            beta_stack = _stack_beta_rows(group[vector_column].apply(_ensure_array))
+            beta_stack = _stack_beta_rows(group[vector_column].apply(ensure_array))
             if beta_stack.size:
                 temporal_ranges = np.asarray(
                     [_safe_range(beta_stack[:, idx]) for idx in range(beta_stack.shape[1])],
