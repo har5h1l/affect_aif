@@ -119,6 +119,29 @@ Recommendation: use a persistent cache directory for repeated same-shape local
 checks and paper reruns, for example `--jax-cache-dir /tmp/affect_aif_jax_cache`
 or `AFFECT_AIF_JAX_CACHE_DIR=/tmp/affect_aif_jax_cache`.
 
+### Runner-Side Pymdp Call Profile
+
+Profiling a smoke-derived local run with 2 variants x 2 replications x 20
+rounds = 80 rows showed that nearly all remaining wall time is inside official
+`pymdp.Agent` calls. The profile wrapped project-owned runner boundaries and
+the official agent methods without editing pymdp internals.
+
+| Boundary | Calls | Seconds | Per call | Share of run |
+|---|---:|---:|---:|---:|
+| `runner.select_decision` | 80 | 8.074 | 100.9 ms | 63.2% |
+| `pymdp.Agent.infer_policies` | 80 | 8.030 | 100.4 ms | 62.9% |
+| `runner.update_partner_after_observation` | 80 | 4.407 | 55.1 ms | 34.5% |
+| `pymdp.Agent.infer_states` | 80 | 4.333 | 54.2 ms | 33.9% |
+| `create_native_runtime_from_run` | 4 | 0.245 | 61.4 ms | 1.9% |
+| `create_env` | 4 | 0.026 | 6.5 ms | 0.2% |
+| `snapshot_partner_bank` | 80 | 0.004 | 0.1 ms | 0.0% |
+
+Total measured wall time was 12.772 s. The current agent-choice path already
+uses official pymdp batching across partners for policy scoring; the remaining
+large cost is one policy-inference call and one state-inference call per round.
+This means further large speedups are unlikely from logger, snapshot, or
+construction cleanup alone.
+
 ## B/C Candidate Audit
 
 ### Candidate 1: Checkpoint Write Cadence And Format
@@ -196,6 +219,10 @@ or `AFFECT_AIF_JAX_CACHE_DIR=/tmp/affect_aif_jax_cache`.
 - Validation: explicit user approval, full paper rerun, interpretation-level
   comparison against current manuscript source tables, and documented
   acceptance thresholds for numerical differences.
+- Current read: this is the only remaining candidate with plausible large
+  speedup. It should be scoped as a separate experiment-runner project that
+  uses official `pymdp.Agent` APIs differently, not as a pymdp fork or a
+  replacement policy-inference implementation.
 
 ## Recommendation
 
