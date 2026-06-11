@@ -3,7 +3,7 @@ id = "prior_factorial"
 name = "Prior x alpha factorial"
 
 [defaults.hypothesis]
-id = "exp_b"
+id = "prior_factorial"
 name = "prior_alpha_factorial"
 
 [defaults.experiment]

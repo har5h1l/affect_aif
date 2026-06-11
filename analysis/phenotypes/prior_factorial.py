@@ -1,4 +1,4 @@
-"""Experiment B prior x alpha metrics and figure builders."""
+"""Prior x alpha metrics and figure builders."""
 
 # ruff: noqa: E402
 
@@ -39,7 +39,7 @@ def build_specs(*, rounds: int, seeds: int, seed: int):
     )
     return tuple(
         make_spec(
-            hypothesis_id="exp_b",
+            hypothesis_id="prior_factorial",
             hypothesis_name="prior_alpha_factorial",
             experiment_id=experiment_id,
             scenario=scenario,

@@ -23,20 +23,20 @@ ARTIFACTS = {
     "alpha_sweep": {
         "metrics": alpha_sweep.metrics,
         "figure": alpha_sweep.figure,
-        "table_folder": "exp_a_alpha_sweep",
-        "readme": "Experiment A alpha sweep compact metrics and figure artifacts.",
+        "table_folder": "alpha_sweep",
+        "readme": "Alpha sweep compact metrics and figure artifacts.",
     },
     "prior_factorial": {
         "metrics": prior_factorial.metrics,
         "figure": prior_factorial.figure,
-        "table_folder": "exp_b_prior_factorial",
-        "readme": "Experiment B prior x alpha factorial compact metrics and figure artifacts.",
+        "table_folder": "prior_factorial",
+        "readme": "Prior x alpha factorial compact metrics and figure artifacts.",
     },
     "forgiveness": {
         "metrics": forgiveness.metrics,
         "figure": forgiveness.figure,
-        "table_folder": "exp_c_forgiveness",
-        "readme": "Experiment C forgiveness/reengagement compact metrics and figure artifacts.",
+        "table_folder": "forgiveness",
+        "readme": "Forgiveness/reengagement compact metrics and figure artifacts.",
     },
     "mixed_volatility": {
         "metrics": mixed_volatility.metrics,

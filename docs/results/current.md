@@ -13,9 +13,9 @@ not be promoted as current paper evidence.
 | Evidence family | Source table | Scale | Manuscript status |
 |---|---|---:|---|
 | H5 abrupt betrayal | `docs/manuscript/source_tables/h5_evidence_effect_summary.csv` | 30 seeds | interpreted |
-| Exp A alpha sweep | `docs/manuscript/source_tables/exp_a_alpha_sweep/metrics.csv` | 20 seeds | interpreted |
-| Exp B prior factorial | `docs/manuscript/source_tables/exp_b_prior_factorial/metrics.csv` | 20 seeds | interpreted |
-| Exp C forgiveness | `docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv` | 20 seeds | interpreted |
+| Alpha sweep | `docs/manuscript/source_tables/alpha_sweep/metrics.csv` | 20 seeds | interpreted |
+| Prior factorial | `docs/manuscript/source_tables/prior_factorial/metrics.csv` | 20 seeds | interpreted |
+| Forgiveness | `docs/manuscript/source_tables/forgiveness/metrics.csv` | 20 seeds | interpreted |
 | H4 partner choice | `docs/manuscript/source_tables/h4_partner_choice_summary.csv` | 5 seeds | interpreted at current scale |
 
 ## Provenance

@@ -3,7 +3,7 @@ id = "forgiveness"
 name = "Forgiveness and reengagement"
 
 [defaults.hypothesis]
-id = "exp_c"
+id = "forgiveness"
 name = "forgiveness"
 
 [defaults.experiment]

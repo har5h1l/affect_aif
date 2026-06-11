@@ -1,4 +1,4 @@
-"""Experiment C forgiveness metrics and figure builders."""
+"""Forgiveness metrics and figure builders."""
 
 # ruff: noqa: E402
 
@@ -31,7 +31,7 @@ BETA_RECOVERY_ROUNDS = (80, 100, 120, 140, 160, 180, 200)
 def build_specs(*, rounds: int, seeds: int, seed: int):
     return (
         make_spec(
-            hypothesis_id="exp_c",
+            hypothesis_id="forgiveness",
             hypothesis_name="forgiveness",
             experiment_id="forgiveness",
             scenario=forgiveness_scenario(),

@@ -3,7 +3,7 @@ id = "alpha_sweep"
 name = "Alpha sweep"
 
 [defaults.hypothesis]
-id = "exp_a"
+id = "alpha_sweep"
 name = "alpha_sweep"
 
 [defaults.experiment]

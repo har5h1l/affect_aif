@@ -1,4 +1,4 @@
-"""Experiment A alpha-sweep metrics and figure builders."""
+"""Alpha-sweep metrics and figure builders."""
 
 # ruff: noqa: E402
 
@@ -33,7 +33,7 @@ def build_specs(*, rounds: int, seeds: int, seed: int):
     variants = build_alpha_variants(ALPHAS)
     return (
         make_spec(
-            hypothesis_id="exp_a",
+            hypothesis_id="alpha_sweep",
             hypothesis_name="alpha_sweep",
             experiment_id="open_graded",
             scenario=open_graded_scenario(),
@@ -43,7 +43,7 @@ def build_specs(*, rounds: int, seeds: int, seed: int):
             seed=seed,
         ),
         make_spec(
-            hypothesis_id="exp_a",
+            hypothesis_id="alpha_sweep",
             hypothesis_name="alpha_sweep",
             experiment_id="betrayal",
             scenario=betrayal_scenario(),

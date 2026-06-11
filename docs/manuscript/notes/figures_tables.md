@@ -110,9 +110,9 @@ validation.
 
 Source tables:
 
-- `docs/manuscript/source_tables/exp_a_alpha_sweep/metrics.csv`
-- `docs/manuscript/source_tables/exp_b_prior_factorial/metrics.csv`
-- `docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv`
+- `docs/manuscript/source_tables/alpha_sweep/metrics.csv`
+- `docs/manuscript/source_tables/prior_factorial/metrics.csv`
+- `docs/manuscript/source_tables/forgiveness/metrics.csv`
 
 Output assets:
 
