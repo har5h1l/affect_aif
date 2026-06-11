@@ -10,6 +10,15 @@ def _notebook_text(path: Path) -> str:
     return "\n".join("".join(cell.get("source", "")) for cell in payload.get("cells", []))
 
 
+def _notebook_code_cell(path: Path, needle: str) -> str:
+    payload = json.loads(path.read_text())
+    for cell in payload.get("cells", []):
+        source = "".join(cell.get("source", ""))
+        if cell.get("cell_type") == "code" and needle in source:
+            return source
+    raise AssertionError(f"{path.name} should contain code cell with {needle!r}")
+
+
 def test_public_notebooks_load_and_use_current_paths():
     notebooks = [
         ROOT / "notebooks" / "demo.ipynb",
@@ -84,8 +93,7 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
 
 
 def test_demo_notebook_sanitizes_markdown_repo_urls():
-    payload = json.loads((ROOT / "notebooks" / "demo.ipynb").read_text())
-    bootstrap_source = "".join(payload["cells"][3]["source"])
+    bootstrap_source = _notebook_code_cell(ROOT / "notebooks" / "demo.ipynb", "def sanitize_repo_url")
     tree = ast.parse(bootstrap_source)
     functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "sanitize_repo_url"]
     clone_functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "clone_repo"]
@@ -111,8 +119,7 @@ def test_demo_notebook_sanitizes_markdown_repo_urls():
 
 
 def test_demo_notebook_prefers_existing_repo_root_before_clone():
-    payload = json.loads((ROOT / "notebooks" / "demo.ipynb").read_text())
-    bootstrap_source = "".join(payload["cells"][3]["source"])
+    bootstrap_source = _notebook_code_cell(ROOT / "notebooks" / "demo.ipynb", "def find_repo_root")
     tree = ast.parse(bootstrap_source)
     functions = {node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)}
 

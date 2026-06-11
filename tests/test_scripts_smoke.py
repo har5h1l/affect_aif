@@ -1,6 +1,8 @@
 import json
+import os
 import subprocess
 import sys
+import textwrap
 
 
 def test_experiment_run_help():
@@ -13,6 +15,135 @@ def test_experiment_run_help():
 
     assert result.returncode == 0
     assert "--config" in result.stdout
+
+
+def test_experiment_run_import_stays_light():
+    code = textwrap.dedent(
+        """
+        import importlib.util
+        import json
+        import sys
+        from pathlib import Path
+
+        script_path = Path("scripts/experiment/run.py").resolve()
+        spec = importlib.util.spec_from_file_location("run_experiment_module", script_path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        print(json.dumps({
+            "analysis_configured": "analysis.configured" in sys.modules,
+            "analysis_visualization": "analysis.visualization" in sys.modules,
+            "matplotlib": any(name == "matplotlib" or name.startswith("matplotlib.") for name in sys.modules),
+            "jax": any(name == "jax" or name.startswith("jax.") for name in sys.modules),
+        }))
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    loaded = json.loads(result.stdout)
+    assert loaded == {
+        "analysis_configured": False,
+        "analysis_visualization": False,
+        "matplotlib": False,
+        "jax": False,
+    }
+
+
+def test_experiment_run_import_sets_writable_matplotlib_cache_without_overriding_user_env(tmp_path):
+    code = textwrap.dedent(
+        """
+        import importlib.util
+        import json
+        import os
+        import sys
+        from pathlib import Path
+
+        script_path = Path("scripts/experiment/run.py").resolve()
+        spec = importlib.util.spec_from_file_location("run_experiment_module", script_path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        print(json.dumps({
+            "mplconfigdir": os.environ.get("MPLCONFIGDIR"),
+            "exists": Path(os.environ["MPLCONFIGDIR"]).exists(),
+        }))
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    loaded = json.loads(result.stdout)
+    assert loaded["mplconfigdir"].endswith("affect_aif_matplotlib")
+    assert loaded["exists"] is True
+
+    user_cache = tmp_path / "user_mpl"
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        check=False,
+        text=True,
+        capture_output=True,
+        env={**os.environ, "MPLCONFIGDIR": str(user_cache)},
+    )
+
+    assert result.returncode == 0, result.stderr
+    loaded = json.loads(result.stdout)
+    assert loaded == {"mplconfigdir": str(user_cache), "exists": False}
+
+
+def test_experiment_run_import_configures_explicit_jax_cache_before_jax_import(tmp_path):
+    cache_dir = tmp_path / "jax_cache"
+    code = textwrap.dedent(
+        f"""
+        import importlib.util
+        import json
+        import os
+        import sys
+        from pathlib import Path
+
+        sys.argv = ["scripts/experiment/run.py", "--jax-cache-dir", {str(cache_dir)!r}]
+        script_path = Path("scripts/experiment/run.py").resolve()
+        spec = importlib.util.spec_from_file_location("run_experiment_module", script_path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        print(json.dumps({{
+            "jax_imported": any(name == "jax" or name.startswith("jax.") for name in sys.modules),
+            "enable_cache": os.environ.get("JAX_ENABLE_COMPILATION_CACHE"),
+            "cache_dir": os.environ.get("JAX_COMPILATION_CACHE_DIR"),
+            "min_compile_time": os.environ.get("JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS"),
+            "min_entry_size": os.environ.get("JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES"),
+            "exists": Path(os.environ["JAX_COMPILATION_CACHE_DIR"]).exists(),
+        }}))
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    loaded = json.loads(result.stdout)
+    assert loaded == {
+        "jax_imported": False,
+        "enable_cache": "true",
+        "cache_dir": str(cache_dir),
+        "min_compile_time": "0",
+        "min_entry_size": "0",
+        "exists": True,
+    }
 
 
 def test_experiment_run_dry_run_writes_manifest(tmp_path):

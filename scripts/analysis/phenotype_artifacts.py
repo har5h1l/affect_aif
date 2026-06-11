@@ -60,7 +60,9 @@ def _load_results(results_root: Path) -> pd.DataFrame:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build profile or future-extension artifacts from existing result CSVs.")
+    parser = argparse.ArgumentParser(
+        description="Build profile or future-extension artifacts from existing result CSVs."
+    )
     parser.add_argument("experiment", choices=sorted(ARTIFACTS), help="Phenotype artifact family to build.")
     parser.add_argument(
         "--results-root",
@@ -68,7 +70,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Directory containing combined or nested results.csv files.",
     )
     parser.add_argument("--paper-dir", default="docs/manuscript", help="Manuscript artifact root for paper artifacts.")
-    parser.add_argument("--future-dir", default="docs/future_artifacts", help="Artifact root for future-only experiments.")
+    parser.add_argument(
+        "--future-dir",
+        default="docs/future_artifacts",
+        help="Artifact root for future-only experiments.",
+    )
     parser.add_argument("--no-figures", action="store_true", help="Only write metrics/source tables.")
     return parser
 

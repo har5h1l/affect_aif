@@ -108,6 +108,40 @@ def test_agent_choice_precision_affect_changes_candidate_distribution() -> None:
     assert not np.allclose(affective_decision.q_pi, lesioned_decision.q_pi)
 
 
+def test_agent_choice_reuses_gamma_vector_for_candidate_scoring() -> None:
+    config = ExperimentConfig(
+        payoff_mode="graded",
+        num_partners=2,
+        num_investment_levels=6,
+        assignment_mode="agent_choice",
+    )
+    runtime = build_runtime(config, variant_id="affect", affect="precision", seed=0)
+
+    class CountingBeta:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def expected_beta(self) -> np.ndarray:
+            self.calls += 1
+            return np.asarray([0.5, 2.0], dtype=float)
+
+    beta = CountingBeta()
+    runtime.partner_bank.beta = beta
+
+    select_decision(
+        bank=runtime.partner_bank,
+        template=runtime.template,
+        active_partner=None,
+        assignment_mode="agent_choice",
+        base_gamma=runtime.base_gamma,
+        action_selection="sample",
+        rng=np.random.default_rng(0),
+        affect_mode="normal",
+    )
+
+    assert beta.calls == runtime.template.num_partners
+
+
 def test_agent_choice_high_precision_partner_is_not_penalized_when_scores_match() -> None:
     config = ExperimentConfig(
         payoff_mode="graded",
@@ -177,7 +211,7 @@ def test_batched_agent_choice_policy_scores_match_separate_agents() -> None:
         )
         separate_scores.append(policy_scores)
 
-    _batched_q_pi, batched_scores = _infer_agent_choice_policies_batched(
+    _batched_q_pi, batched_scores, _gammas = _infer_agent_choice_policies_batched(
         bank=runtime.partner_bank,
         template=runtime.template,
         base_gamma=runtime.base_gamma,

@@ -18,6 +18,8 @@ from tasks.trust.pomdp import (
     predict_next_joint_belief,
 )
 
+_INFER_STATES_SIGNATURE_CACHE: dict[Any, bool] = {}
+
 
 @dataclass
 class PartnerBank:
@@ -106,25 +108,16 @@ def select_decision(
             predictive_log_lik=float("nan"),
         )
 
-    _q_pi_by_partner, policy_scores_by_partner = _infer_agent_choice_policies_batched(
+    _q_pi_by_partner, policy_scores_by_partner, gammas = _infer_agent_choice_policies_batched(
         bank=bank,
         template=template,
         base_gamma=base_gamma,
         affect_mode=affect_mode,
     )
-    gammas = [
-        gamma_for_partner(
-            base_gamma=base_gamma,
-            beta=bank.beta,
-            partner_idx=partner_idx,
-            affect_mode=affect_mode,
-        )
-        for partner_idx in range(len(bank.agents))
-    ]
     partners, policy_indices, first_steps, scores, candidate_logits = _agent_choice_policy_arrays(
         template=template,
         policy_scores_by_partner=policy_scores_by_partner,
-        gammas=np.asarray(gammas, dtype=float),
+        gammas=gammas,
     )
     candidate_probs = _softmax(candidate_logits)
     candidate_idx = _choose_index(candidate_probs, deterministic=deterministic, rng=rng)
@@ -281,7 +274,7 @@ def _infer_agent_choice_policies_batched(
         raise ValueError(f"batched q_pi has shape {q_pi.shape}, expected {expected_shape}.")
     if policy_scores.shape != q_pi.shape:
         raise ValueError(f"batched policy scores have shape {policy_scores.shape}, expected {q_pi.shape}.")
-    return np.asarray([_normalize(row) for row in q_pi], dtype=float), policy_scores
+    return np.asarray([_normalize(row) for row in q_pi], dtype=float), policy_scores, gammas
 
 
 def _batched_policy_agent(bank: PartnerBank, template: TrustPomdpTemplate):
@@ -407,10 +400,8 @@ def _set_agent_gamma(agent, gamma: float) -> None:
 
 def _infer_states(agent, obs: list[int]) -> tuple[Any, dict[str, Any]]:
     infer_states = agent.infer_states
-    parameters = inspect.signature(infer_states).parameters
-    accepts_kwargs = any(parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in parameters.values())
     kwargs: dict[str, Any] = {}
-    if accepts_kwargs or "preprocess_fn" in parameters:
+    if _infer_states_accepts_preprocess_fn(infer_states):
         kwargs["preprocess_fn"] = lambda observations: _batched_categorical_observations(
             observations,
             num_obs=agent.num_obs,
@@ -422,6 +413,18 @@ def _infer_states(agent, obs: list[int]) -> tuple[Any, dict[str, Any]]:
     if isinstance(state_result, tuple):
         return state_result[0], {}
     return state_result, {}
+
+
+def _infer_states_accepts_preprocess_fn(infer_states) -> bool:
+    key = getattr(infer_states, "__func__", infer_states)
+    cached = _INFER_STATES_SIGNATURE_CACHE.get(key)
+    if cached is not None:
+        return cached
+    parameters = inspect.signature(infer_states).parameters
+    accepts_kwargs = any(parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in parameters.values())
+    accepts_preprocess = accepts_kwargs or "preprocess_fn" in parameters
+    _INFER_STATES_SIGNATURE_CACHE[key] = accepts_preprocess
+    return accepts_preprocess
 
 
 def _batched_categorical_observations(observations, num_obs, batch_size: int) -> list[np.ndarray]:

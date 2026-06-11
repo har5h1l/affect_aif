@@ -165,6 +165,10 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
             "results",
             "--workers",
             "3",
+            "--checkpoint-interval",
+            "5",
+            "--jax-cache-dir",
+            "/tmp/affect_aif_jax_cache",
         ]
     )
 
@@ -174,6 +178,8 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
     ]
     assert args.output_dir == "results"
     assert args.workers == 3
+    assert args.checkpoint_interval == 5
+    assert args.jax_cache_dir == "/tmp/affect_aif_jax_cache"
 
 
 def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path):

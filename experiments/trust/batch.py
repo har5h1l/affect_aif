@@ -12,7 +12,6 @@ from typing import Any
 
 import pandas as pd
 
-from analysis.visualization import build_run_gifs
 from experiments.trust.runner import checkpoint_group_complete, checkpoint_rows_for_completed_keys
 from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, load_experiment_specs
 from experiments.trust.tasks import run_variant_replication_task
@@ -218,6 +217,8 @@ class BatchExperimentRunner:
         }
         metadata_path.write_text(json.dumps(metadata, indent=2))
         if self.make_gifs and not results.empty:
+            from analysis.visualization import build_run_gifs
+
             build_run_gifs(results, str(state.output_dir / "gifs"))
         if state.spec.analysis.auto:
             from analysis.configured import run_configured_analysis

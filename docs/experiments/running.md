@@ -26,6 +26,20 @@ Inspect expansion without writing outputs:
 python scripts/experiment/inspect.py --config configs/paper/05a_alpha_sweep.toml
 ```
 
+For repeated same-shape local runs, opt into JAX's persistent compilation cache:
+
+```bash
+python scripts/experiment/run.py \
+  --config configs/demo/05c_forgiveness.toml \
+  --output-dir outputs \
+  --batch-name forgiveness_cached \
+  --workers 1 \
+  --jax-cache-dir /tmp/affect_aif_jax_cache
+```
+
+The cache changes compilation reuse only; it must not change seeds, expanded
+variants, model parameters, observations, actions, or result rows.
+
 Outputs are written under:
 
 ```text

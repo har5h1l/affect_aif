@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
+import tasks.trust.runtime as runtime_module
 from experiments.trust.config import ExperimentConfig
 from tasks.trust.pomdp import build_trust_pomdp_template, create_partner_agents
 from tasks.trust.runtime import (
@@ -108,3 +109,30 @@ def test_infer_states_does_not_request_unused_return_info() -> None:
 
     assert observed_kwargs
     assert "return_info" not in observed_kwargs[0]
+
+
+def test_infer_states_caches_signature_capability_check(monkeypatch) -> None:
+    config = ExperimentConfig(payoff_mode="binary", num_partners=1)
+    template = build_trust_pomdp_template(config, planning_horizon=1)
+    agent = create_partner_agents(template, num_partners=1, gamma=1.0)[0]
+    original_infer_states = agent.infer_states
+    original_signature = runtime_module.inspect.signature
+    calls = 0
+
+    def counting_signature(callable_obj):
+        nonlocal calls
+        if getattr(callable_obj, "__func__", callable_obj) is getattr(
+            original_infer_states,
+            "__func__",
+            original_infer_states,
+        ):
+            calls += 1
+        return original_signature(callable_obj)
+
+    monkeypatch.setattr(runtime_module.inspect, "signature", counting_signature)
+    runtime_module._INFER_STATES_SIGNATURE_CACHE.clear()
+
+    _infer_states(agent, [0, 2])
+    _infer_states(agent, [0, 2])
+
+    assert calls == 1
