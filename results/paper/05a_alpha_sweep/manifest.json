@@ -1,5 +1,5 @@
 {
-  "name": "alpha_sweep",
+  "name": "05a_alpha_sweep",
   "category": "paper",
   "status": "complete",
   "config_paths": [
@@ -12,5 +12,6 @@
   "tracked_summary_files": [
     "metrics.csv"
   ],
-  "paper_use": "Section 3.6.1 alpha sweep profile readout"
+  "generated_from_batch": "paper",
+  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e"
 }

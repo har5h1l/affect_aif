@@ -1,17 +1,17 @@
 {
-  "name": "betrayal_adaptation",
+  "name": "04_betrayal_adaptation",
   "category": "paper",
   "status": "complete",
   "config_paths": [
     "configs/paper/04_betrayal_adaptation.toml"
   ],
   "source_run_paths": [
-    "results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv"
+    "results/paper/04_betrayal_adaptation/raw/results.csv"
   ],
   "raw_results_policy": "gitignored_retained_locally_and_on_server",
   "tracked_summary_files": [
-    "summary.csv",
     "source_tables/h5_evidence_effect_summary.csv"
   ],
-  "paper_use": "Section 3.4 betrayal adaptation confirmation"
+  "generated_from_batch": "paper",
+  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e"
 }

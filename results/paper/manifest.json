@@ -2,94 +2,58 @@
   "name": "paper",
   "category": "paper_suite",
   "status": "complete",
+  "batch_name": "paper",
+  "batch_id": "paper",
+  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e",
+  "output_dir": "results/paper",
+  "workers": 1,
+  "dry_run": false,
   "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "archive_previous_results": "results/archive/paper_pre_canonical_20260611_from_regen",
   "sections": [
     {
       "section": "3.1",
       "slug": "01_predictability_value",
-      "claim": "Partner-local precision tracks predictability rather than realized value.",
       "config_path": "configs/paper/01_predictability_value.toml",
-      "result_folder": "results/paper/01_predictability_value",
-      "source_tables": [
-        "results/paper/01_predictability_value/source_tables/deployment_dissociation_summary.csv",
-        "results/paper/01_predictability_value/source_tables/final_round_summary.csv",
-        "results/paper/01_predictability_value/source_tables/model_fitness_correlation_summary.csv"
-      ],
-      "figure": "docs/manuscript/figures/fig_model_fitness_beta_reward_divergence.pdf"
+      "result_folder": "results/paper/01_predictability_value"
     },
     {
       "section": "3.2",
       "slug": "02_deployment_ablation",
-      "claim": "Tracked-only precision isolates policy commitment.",
       "config_path": "configs/paper/02_deployment_ablation.toml",
-      "result_folder": "results/paper/02_deployment_ablation",
-      "source_tables": [
-        "results/paper/02_deployment_ablation/source_tables/deployment_contrast_summary.csv"
-      ],
-      "figure": "docs/manuscript/figures/fig_deployment_social_summary.pdf"
+      "result_folder": "results/paper/02_deployment_ablation"
     },
     {
       "section": "3.3",
       "slug": "03_partner_selection",
-      "claim": "Partner selection sharpens under precision modulation.",
       "config_path": "configs/paper/03_partner_selection.toml",
-      "result_folder": "results/paper/03_partner_selection",
-      "source_tables": [
-        "results/paper/03_partner_selection/source_tables/partner_selection_summary.csv"
-      ],
-      "figure": null
+      "result_folder": "results/paper/03_partner_selection"
     },
     {
       "section": "3.4",
       "slug": "04_betrayal_adaptation",
-      "claim": "Abrupt betrayal tests confidence under change.",
       "config_path": "configs/paper/04_betrayal_adaptation.toml",
-      "result_folder": "results/paper/04_betrayal_adaptation",
-      "source_tables": [
-        "results/paper/04_betrayal_adaptation/source_tables/h5_evidence_effect_summary.csv"
-      ],
-      "figure": "docs/manuscript/figures/fig_betrayal_boundary_summary.pdf"
+      "result_folder": "results/paper/04_betrayal_adaptation"
     },
     {
       "section": "3.5 / Appendix D",
       "slug": "05a_alpha_sweep",
-      "claim": "Precision gain controls beta amplitude without monotonic payoff ranking.",
       "config_path": "configs/paper/05a_alpha_sweep.toml",
-      "result_folder": "results/paper/05a_alpha_sweep",
-      "source_tables": [
-        "docs/manuscript/source_tables/exp_a_alpha_sweep/metrics.csv"
-      ],
-      "figure": "docs/manuscript/figures/fig_alpha_sweep.pdf"
+      "result_folder": "results/paper/05a_alpha_sweep"
     },
     {
       "section": "3.5 / Appendix D",
       "slug": "05b_prior_factorial",
-      "claim": "Prior model fitness and gain form trust-calibration profiles.",
       "config_path": "configs/paper/05b_prior_factorial.toml",
-      "result_folder": "results/paper/05b_prior_factorial",
-      "source_tables": [
-        "docs/manuscript/source_tables/exp_b_prior_factorial/metrics.csv"
-      ],
-      "figure": "docs/manuscript/figures/fig_phenotype_quadrants.pdf"
+      "result_folder": "results/paper/05b_prior_factorial"
     },
     {
       "section": "3.5 / Appendix D",
       "slug": "05c_forgiveness",
-      "claim": "Forgiveness separates reengagement from restored confidence.",
       "config_path": "configs/paper/05c_forgiveness.toml",
-      "result_folder": "results/paper/05c_forgiveness",
-      "source_tables": [
-        "docs/manuscript/source_tables/exp_c_forgiveness/metrics.csv"
-      ],
-      "figure": "docs/manuscript/figures/fig_forgiveness.pdf"
+      "result_folder": "results/paper/05c_forgiveness"
     }
   ],
-  "batch_name": "paper",
-  "batch_id": "paper",
-  "git_commit": "74b28afdff8c152080e734da0378408cb5edede0",
-  "output_dir": "results/paper",
-  "workers": 1,
-  "dry_run": true,
   "configs": [
     {
       "path": "configs/paper/01_predictability_value.toml",
@@ -97,16 +61,6 @@
       "family": "trust",
       "hypothesis_id": "predictability_value",
       "experiment_id": "predictability_value",
-      "rounds": 200,
-      "replications": 30,
-      "variants": [
-        "no_affect",
-        "affect",
-        "global_beta"
-      ],
-      "sweeps": [],
-      "expanded_runs": 90,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
@@ -115,17 +69,6 @@
       "family": "trust",
       "hypothesis_id": "deployment_ablation",
       "experiment_id": "deployment_ablation",
-      "rounds": 200,
-      "replications": 3,
-      "variants": [
-        "affect",
-        "lesioned",
-        "global_beta",
-        "no_epistemic"
-      ],
-      "sweeps": [],
-      "expanded_runs": 12,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
@@ -134,16 +77,6 @@
       "family": "trust",
       "hypothesis_id": "partner_selection",
       "experiment_id": "partner_selection",
-      "rounds": 200,
-      "replications": 3,
-      "variants": [
-        "no_affect",
-        "affect",
-        "global_beta"
-      ],
-      "sweeps": [],
-      "expanded_runs": 9,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
@@ -152,147 +85,54 @@
       "family": "trust",
       "hypothesis_id": "betrayal_adaptation",
       "experiment_id": "betrayal_adaptation",
-      "rounds": 120,
-      "replications": 30,
-      "variants": [
-        "no_affect",
-        "affect",
-        "lesioned",
-        "global_beta"
-      ],
-      "sweeps": [],
-      "expanded_runs": 120,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
       "path": "configs/paper/05a_alpha_sweep.toml",
       "name": "open_graded",
       "family": "trust",
-      "hypothesis_id": "exp_a",
+      "hypothesis_id": "alpha_sweep",
       "experiment_id": "open_graded",
-      "rounds": 200,
-      "replications": 20,
-      "variants": [
-        "alpha_0p05",
-        "alpha_0p1",
-        "alpha_0p3",
-        "alpha_0p5",
-        "alpha_1p0",
-        "alpha_2p0",
-        "alpha_4p0",
-        "alpha_8p0"
-      ],
-      "sweeps": [],
-      "expanded_runs": 160,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
       "path": "configs/paper/05a_alpha_sweep.toml",
       "name": "betrayal",
       "family": "trust",
-      "hypothesis_id": "exp_a",
+      "hypothesis_id": "alpha_sweep",
       "experiment_id": "betrayal",
-      "rounds": 200,
-      "replications": 20,
-      "variants": [
-        "alpha_0p05",
-        "alpha_0p1",
-        "alpha_0p3",
-        "alpha_0p5",
-        "alpha_1p0",
-        "alpha_2p0",
-        "alpha_4p0",
-        "alpha_8p0"
-      ],
-      "sweeps": [],
-      "expanded_runs": 160,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
       "path": "configs/paper/05b_prior_factorial.toml",
       "name": "open_graded",
       "family": "trust",
-      "hypothesis_id": "exp_b",
+      "hypothesis_id": "prior_factorial",
       "experiment_id": "open_graded",
-      "rounds": 200,
-      "replications": 20,
-      "variants": [
-        "naive_low_alpha",
-        "naive_high_alpha",
-        "cautious_low_alpha",
-        "cautious_high_alpha",
-        "default_reference",
-        "no_affect"
-      ],
-      "sweeps": [],
-      "expanded_runs": 120,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
       "path": "configs/paper/05b_prior_factorial.toml",
       "name": "betrayal",
       "family": "trust",
-      "hypothesis_id": "exp_b",
+      "hypothesis_id": "prior_factorial",
       "experiment_id": "betrayal",
-      "rounds": 200,
-      "replications": 20,
-      "variants": [
-        "naive_low_alpha",
-        "naive_high_alpha",
-        "cautious_low_alpha",
-        "cautious_high_alpha",
-        "default_reference",
-        "no_affect"
-      ],
-      "sweeps": [],
-      "expanded_runs": 120,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
       "path": "configs/paper/05b_prior_factorial.toml",
       "name": "partner_choice",
       "family": "trust",
-      "hypothesis_id": "exp_b",
+      "hypothesis_id": "prior_factorial",
       "experiment_id": "partner_choice",
-      "rounds": 200,
-      "replications": 20,
-      "variants": [
-        "naive_low_alpha",
-        "naive_high_alpha",
-        "cautious_low_alpha",
-        "cautious_high_alpha",
-        "default_reference",
-        "no_affect"
-      ],
-      "sweeps": [],
-      "expanded_runs": 120,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     },
     {
       "path": "configs/paper/05c_forgiveness.toml",
       "name": "forgiveness",
       "family": "trust",
-      "hypothesis_id": "exp_c",
+      "hypothesis_id": "forgiveness",
       "experiment_id": "forgiveness",
-      "rounds": 200,
-      "replications": 20,
-      "variants": [
-        "naive_low_alpha",
-        "naive_high_alpha",
-        "cautious_low_alpha",
-        "cautious_high_alpha",
-        "default_reference",
-        "no_affect"
-      ],
-      "sweeps": [],
-      "expanded_runs": 120,
-      "analysis_auto": false,
       "runtime_profile": "data_collection"
     }
   ]

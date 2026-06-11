@@ -1,8 +1,8 @@
 # Current Results
 
 Canonical interpreted evidence for the active architecture. Manuscript prose
-lives in `docs/manuscript/sections/`; compact CSVs for paper-figure
-regeneration live in `docs/manuscript/source_tables/`.
+lives in `docs/manuscript/sections/`; compact CSVs for paper-figure generation
+live in `docs/manuscript/source_tables/`.
 
 ## Inclusion Decision
 

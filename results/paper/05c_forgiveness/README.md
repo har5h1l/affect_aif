@@ -1,7 +1,7 @@
 # Forgiveness
 
 - Category: paper
-- Role: trust-repair and reengagement profile readout.
+- Role: Forgiveness and reengagement profile readout.
 - Config: `configs/paper/05c_forgiveness.toml`
 - Full raw source: `results/paper/05c_forgiveness/raw/results.csv`
 - Tracked summaries: `metrics.csv`

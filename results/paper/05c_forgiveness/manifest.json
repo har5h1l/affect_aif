@@ -1,5 +1,5 @@
 {
-  "name": "forgiveness",
+  "name": "05c_forgiveness",
   "category": "paper",
   "status": "complete",
   "config_paths": [
@@ -12,5 +12,6 @@
   "tracked_summary_files": [
     "metrics.csv"
   ],
-  "paper_use": "Section 3.6.3 forgiveness and repair readout"
+  "generated_from_batch": "paper",
+  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e"
 }

@@ -1,7 +1,7 @@
 # Prior Factorial
 
 - Category: paper
-- Role: prior-model-fitness by precision-gain factorial readout.
+- Role: Prior x gain trust-calibration profile readout.
 - Config: `configs/paper/05b_prior_factorial.toml`
 - Full raw source: `results/paper/05b_prior_factorial/raw/results.csv`
 - Tracked summaries: `metrics.csv`

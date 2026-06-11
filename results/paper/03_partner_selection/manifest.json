@@ -1,17 +1,17 @@
 {
-  "name": "partner_selection",
+  "name": "03_partner_selection",
   "category": "paper",
   "status": "complete",
   "config_paths": [
     "configs/paper/03_partner_selection.toml"
   ],
   "source_run_paths": [
-    "results/paper/03_partner_selection/raw/partner_selection/partner_selection/results.csv"
+    "results/paper/03_partner_selection/raw/results.csv"
   ],
   "raw_results_policy": "gitignored_retained_locally_and_on_server",
   "tracked_summary_files": [
     "source_tables/partner_selection_summary.csv"
   ],
-  "paper_use": "Section 3.3 partner-selection sharpening readout",
-  "provenance_note": "Paper-facing graded partner-choice allocation probe; binary H4 confirmation remains under results/diagnostics/social_allocation/."
+  "generated_from_batch": "paper",
+  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e"
 }

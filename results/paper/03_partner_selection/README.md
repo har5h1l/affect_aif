@@ -3,8 +3,6 @@
 - Category: paper
 - Role: Section 3.3 partner-selection sharpening readout.
 - Config: `configs/paper/03_partner_selection.toml`
-- Full raw source: `results/paper/03_partner_selection/raw/partner_selection/partner_selection/results.csv`
+- Full raw source: `results/paper/03_partner_selection/raw/results.csv`
 - Tracked summaries: `source_tables/partner_selection_summary.csv`
 - Raw policy: full per-round `results.csv` is ignored in git and retained on server/Drive.
-- Regime: graded partner-choice paper readout. Binary H4 confirmation lives in
-  `results/diagnostics/social_allocation/`.
