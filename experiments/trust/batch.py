@@ -12,9 +12,9 @@ from typing import Any
 
 import pandas as pd
 
-from experiments.trust.runner import checkpoint_group_complete, checkpoint_rows_for_completed_keys
+from experiments.trust.runner import ExperimentRunner, checkpoint_group_complete, checkpoint_rows_for_completed_keys
 from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, load_experiment_specs
-from experiments.trust.tasks import run_variant_replication_task
+from experiments.trust.tasks import run_variant_replication_task, variant_replication_payload
 
 
 def default_batch_id(now: datetime | None = None) -> str:
@@ -178,18 +178,18 @@ class BatchExperimentRunner:
 
     def _run_config_inline(self, state: ConfigBatchState):
         completed_keys = self._load_checkpoint(state)
+        runner = ExperimentRunner.from_spec(state.spec)
         for run in state.expanded_runs:
             if _run_key(run) in completed_keys:
                 continue
-            payload = run_variant_replication_task(
-                state.spec_payload,
-                run.to_payload(),
+            rows = runner.run_replication(
+                run=run,
                 config_path=state.config_path,
                 config_name=state.config_name,
                 batch_id=self.batch_id,
             )
             state.submitted_primary += 1
-            self._record_variant_completion(state, payload)
+            self._record_variant_completion(state, variant_replication_payload(run, rows))
 
     def _write_checkpoint_manifest(
         self,

@@ -8,6 +8,19 @@ from experiments.trust.runner import ExperimentRunner
 from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec
 
 
+def variant_replication_payload(run: ExpandedRunSpec, rows: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "task_kind": "variant",
+        "hypothesis_id": run.hypothesis_id,
+        "experiment_id": run.experiment_id,
+        "variant_id": run.variant_id,
+        "replication": int(run.replication),
+        "seed": int(run.seed),
+        "records": rows,
+        "cumulative_payoff": float(sum(float(row["payoff"]) for row in rows)),
+    }
+
+
 def run_variant_replication_task(
     spec_payload: dict[str, Any],
     run_payload: dict[str, Any],
@@ -24,13 +37,4 @@ def run_variant_replication_task(
         config_name=config_name,
         batch_id=batch_id,
     )
-    return {
-        "task_kind": "variant",
-        "hypothesis_id": run.hypothesis_id,
-        "experiment_id": run.experiment_id,
-        "variant_id": run.variant_id,
-        "replication": int(run.replication),
-        "seed": int(run.seed),
-        "records": rows,
-        "cumulative_payoff": float(sum(float(row["payoff"]) for row in rows)),
-    }
+    return variant_replication_payload(run, rows)

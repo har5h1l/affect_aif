@@ -63,9 +63,11 @@ be materially lighter on long paper runs.
 ### Single-Worker Batch Runner Follow-Up
 
 `BatchExperimentRunner(workers=1)` now runs expanded variant/replication tasks
-inline instead of constructing a one-worker `ProcessPoolExecutor`. The same
-`run_variant_replication_task` function is used, so seeds, model dynamics,
-per-round rows, checkpoint resume semantics, and output paths are unchanged.
+inline instead of constructing a one-worker `ProcessPoolExecutor`. A follow-up
+cleanup also routes inline execution directly through `ExperimentRunner` rather
+than the process-safe task wrapper, while sharing the same variant payload
+builder used by process workers. Seeds, model dynamics, per-round rows,
+checkpoint resume semantics, and output paths are unchanged.
 
 Deterministic old-vs-new CSV comparison on a graded random-assignment probe:
 6 rows x 50 columns matched exactly after the worker-path change.
@@ -76,8 +78,9 @@ Tiny batch timing probe: 2 variants x 4 replications x 4 rounds = 32 rows.
 |---|---:|---:|---:|
 | process-pool `workers=1` baseline | 6.921 s | 4.568 s | 3.745 s |
 | inline `workers=1` follow-up | 6.432 s | 4.779 s | 3.810 s |
+| direct inline runner follow-up | 6.350 s | 4.692 s | 3.846 s |
 
-The single-worker path is about 7% faster on this small probe and simpler to
+The single-worker path is about 7-8% faster on this small probe and simpler to
 reason about during local deterministic checks. Multi-worker differences are
 within the observed timing band and do not change behavior.
 

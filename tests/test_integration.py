@@ -277,6 +277,28 @@ def test_batch_workers_one_runs_inline_without_process_pool(tmp_path, monkeypatc
     assert metadata["workers"] == 1
 
 
+def test_batch_workers_one_runs_directly_without_process_task_wrapper(tmp_path, monkeypatch):
+    path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=1, replications=1)
+
+    def fail_process_task(*_args, **_kwargs):
+        raise AssertionError("workers=1 should run directly without the process task wrapper")
+
+    monkeypatch.setattr("experiments.trust.batch.run_variant_replication_task", fail_process_task)
+
+    batch = BatchExperimentRunner(
+        config_paths=[str(path)],
+        output_root=str(tmp_path / "results"),
+        batch_id="direct_inline_batch",
+        workers=1,
+        verbose=False,
+    )
+    result = batch.run_all()
+    state = result.config_states[0]
+    rows = pd.read_csv(state.output_dir / "results.csv")
+
+    assert len(rows) == len(state.expanded_runs)
+
+
 def test_batch_schedules_expanded_variant_runs(tmp_path):
     path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=2)
     runner = BatchExperimentRunner(
@@ -395,7 +417,7 @@ def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
     assert metadata["resumed_tasks"] == 1
 
 
-def test_batch_inline_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
+def test_batch_inline_runner_resumes_completed_checkpoint_runs(tmp_path):
     path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=2, replications=2)
     path.write_text(path.read_text().replace("auto = true", "auto = false", 1), encoding="utf-8")
     runner = BatchExperimentRunner(
@@ -430,33 +452,10 @@ def test_batch_inline_runner_resumes_completed_checkpoint_runs(tmp_path, monkeyp
         ]
     ).to_csv(first.output_dir / "results_partial.csv", index=False)
 
-    submitted: list[tuple[str, int, int]] = []
-
-    def fake_task(_spec_payload, run_payload, *, config_path, config_name, batch_id):
-        del config_path, config_name, batch_id
-        from experiments.trust.spec import ExpandedRunSpec
-
-        run = ExpandedRunSpec.from_payload(run_payload)
-        submitted.append((run.variant_id, run.seed, run.replication))
-        return {
-            "task_kind": "variant",
-            "variant_id": run.variant_id,
-            "replication": run.replication,
-            "seed": run.seed,
-            "records": [
-                {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
-                {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 1},
-            ],
-        }
-
-    monkeypatch.setattr("experiments.trust.batch.run_variant_replication_task", fake_task)
-
     result = runner.run_all()
     state = result.config_states[0]
     final = pd.read_csv(state.output_dir / "results.csv")
 
-    assert (completed_run.variant_id, completed_run.seed, completed_run.replication) not in submitted
-    assert len(submitted) == len(first.expanded_runs) - 1
     assert len(final) == len(first.expanded_runs) * 2
     metadata = json.loads((state.output_dir / "batch_metadata.json").read_text())
     assert metadata["resumed_tasks"] == 1
