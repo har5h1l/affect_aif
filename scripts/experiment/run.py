@@ -18,6 +18,8 @@ import subprocess
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+DEFAULT_JAX_CACHE_DIR = Path("/tmp/affect_aif_jax_cache")
+
 
 def _ensure_writable_matplotlib_cache() -> None:
     if "MPLCONFIGDIR" in os.environ:
@@ -30,13 +32,20 @@ def _ensure_writable_matplotlib_cache() -> None:
 def _early_jax_cache_dir(argv: list[str] | None = None) -> str | None:
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--jax-cache-dir")
+    parser.add_argument("--no-jax-cache", action="store_true")
     parsed, _ = parser.parse_known_args(argv)
-    return parsed.jax_cache_dir or os.environ.get("AFFECT_AIF_JAX_CACHE_DIR")
+    if parsed.no_jax_cache:
+        return None
+    return parsed.jax_cache_dir or os.environ.get("AFFECT_AIF_JAX_CACHE_DIR") or str(DEFAULT_JAX_CACHE_DIR)
 
 
 def _configure_jax_compilation_cache(argv: list[str] | None = None) -> None:
     raw_cache_dir = _early_jax_cache_dir(argv)
     if not raw_cache_dir:
+        os.environ.pop("JAX_ENABLE_COMPILATION_CACHE", None)
+        os.environ.pop("JAX_COMPILATION_CACHE_DIR", None)
+        os.environ.pop("JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS", None)
+        os.environ.pop("JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES", None)
         return
     cache_dir = Path(raw_cache_dir).expanduser()
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -72,7 +81,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--jax-cache-dir",
-        help="Enable JAX persistent compilation caching in this directory for repeated same-shape runs.",
+        default=str(DEFAULT_JAX_CACHE_DIR),
+        help="JAX persistent compilation cache directory for repeated same-shape runs.",
+    )
+    parser.add_argument(
+        "--no-jax-cache",
+        action="store_true",
+        help="Disable the default JAX persistent compilation cache.",
     )
     parser.add_argument(
         "--verbosity-mode",

@@ -22,4 +22,6 @@ CSVs. Use `debug` only for narrow local inspection when full policy traces,
 belief matrices, and posterior tensors are needed. The runner records resolved
 absolute config paths in result provenance and supports
 `--verbose --verbosity-mode stage_stream` for serial and single-worker inline
-inspection.
+inspection. JAX persistent compilation caching is enabled by default at
+`/tmp/affect_aif_jax_cache`; use `--jax-cache-dir` to choose another cache
+directory or `--no-jax-cache` for a one-off uncached check.

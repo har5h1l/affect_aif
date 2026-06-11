@@ -146,6 +146,94 @@ def test_experiment_run_import_configures_explicit_jax_cache_before_jax_import(t
     }
 
 
+def test_experiment_run_import_configures_default_jax_cache_before_jax_import():
+    code = textwrap.dedent(
+        """
+        import importlib.util
+        import json
+        import os
+        import sys
+        from pathlib import Path
+
+        os.environ.pop("AFFECT_AIF_JAX_CACHE_DIR", None)
+        sys.argv = ["scripts/experiment/run.py"]
+        script_path = Path("scripts/experiment/run.py").resolve()
+        spec = importlib.util.spec_from_file_location("run_experiment_module", script_path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        print(json.dumps({
+            "jax_imported": any(name == "jax" or name.startswith("jax.") for name in sys.modules),
+            "enable_cache": os.environ.get("JAX_ENABLE_COMPILATION_CACHE"),
+            "cache_dir": os.environ.get("JAX_COMPILATION_CACHE_DIR"),
+            "min_compile_time": os.environ.get("JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS"),
+            "min_entry_size": os.environ.get("JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES"),
+            "exists": Path(os.environ["JAX_COMPILATION_CACHE_DIR"]).exists(),
+        }))
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    loaded = json.loads(result.stdout)
+    assert loaded == {
+        "jax_imported": False,
+        "enable_cache": "true",
+        "cache_dir": "/tmp/affect_aif_jax_cache",
+        "min_compile_time": "0",
+        "min_entry_size": "0",
+        "exists": True,
+    }
+
+
+def test_experiment_run_import_can_disable_default_jax_cache_before_jax_import():
+    code = textwrap.dedent(
+        """
+        import importlib.util
+        import json
+        import os
+        import sys
+        from pathlib import Path
+
+        os.environ.pop("AFFECT_AIF_JAX_CACHE_DIR", None)
+        sys.argv = ["scripts/experiment/run.py", "--no-jax-cache"]
+        script_path = Path("scripts/experiment/run.py").resolve()
+        spec = importlib.util.spec_from_file_location("run_experiment_module", script_path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        print(json.dumps({
+            "jax_imported": any(name == "jax" or name.startswith("jax.") for name in sys.modules),
+            "enable_cache": os.environ.get("JAX_ENABLE_COMPILATION_CACHE"),
+            "cache_dir": os.environ.get("JAX_COMPILATION_CACHE_DIR"),
+            "min_compile_time": os.environ.get("JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS"),
+            "min_entry_size": os.environ.get("JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES"),
+        }))
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    loaded = json.loads(result.stdout)
+    assert loaded == {
+        "jax_imported": False,
+        "enable_cache": None,
+        "cache_dir": None,
+        "min_compile_time": None,
+        "min_entry_size": None,
+    }
+
+
 def test_experiment_run_dry_run_writes_manifest(tmp_path):
     out = tmp_path / "results"
     result = subprocess.run(

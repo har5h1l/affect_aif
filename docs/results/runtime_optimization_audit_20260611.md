@@ -98,10 +98,12 @@ paths. This cleanup changes runner metadata and console output only; it does
 not alter seeds, task dynamics, `pymdp` calls, observations, actions, beta
 updates, or manuscript-facing scalar values.
 
-### Persistent JAX Compilation Cache
+### Default Persistent JAX Compilation Cache
 
-The runner already supports `--jax-cache-dir`, which enables JAX persistent
-compilation caching before importing the experiment stack. This is
+The runner now enables JAX persistent compilation caching by default before
+importing the experiment stack. The default directory is
+`/tmp/affect_aif_jax_cache`; `--jax-cache-dir` overrides it, and
+`--no-jax-cache` disables it for a one-off uncached check. This is
 exact-preserving: it changes compilation reuse only, not seeds, policies,
 observations, actions, or result rows.
 
@@ -115,9 +117,13 @@ Python process per run.
 | cache directory, cold | 3.618 s |
 | cache directory, warm | 2.446 s |
 
-Recommendation: use a persistent cache directory for repeated same-shape local
-checks and paper reruns, for example `--jax-cache-dir /tmp/affect_aif_jax_cache`
-or `AFFECT_AIF_JAX_CACHE_DIR=/tmp/affect_aif_jax_cache`.
+Recommendation: keep the default persistent cache enabled for local checks and
+paper reruns unless debugging cache behavior itself. Use
+`AFFECT_AIF_JAX_CACHE_DIR=/path/to/cache` or `--jax-cache-dir /path/to/cache`
+when `/tmp/affect_aif_jax_cache` is not the desired location.
+
+Post-change CLI smoke comparison matched default-cache and `--no-jax-cache`
+outputs exactly on the diagnostic smoke config: 4 rows x 50 columns.
 
 ### Runner-Side Pymdp Call Profile
 
@@ -232,8 +238,9 @@ now records what the manuscript analyzes, debug mode keeps internal arrays
 available, and `--workers 1` remains the clean deterministic local execution
 path.
 
-The next low-risk operational target is to use the persistent JAX cache for
-reruns. The next code target with meaningful upside is runner-side pymdp-call
-orchestration, not template construction reuse or a fork of pymdp inference.
-Any batching/vectorization experiment should be a separate approved rerun
-project.
+The remaining exact-preserving optimization surface looks marginal after the
+default JAX cache, lean data-collection logging, and direct inline
+single-worker path. The next code target with meaningful upside is
+runner-side pymdp-call orchestration, not template construction reuse or a
+fork of pymdp inference. Any batching/vectorization experiment should be a
+separate approved rerun project because it is near-equivalent rather than exact.

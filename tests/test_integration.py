@@ -220,6 +220,24 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
     assert args.jax_cache_dir == "/tmp/affect_aif_jax_cache"
 
 
+def test_run_experiment_parser_accepts_jax_cache_opt_out():
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "experiment" / "run.py"
+    spec = spec_from_file_location("run_experiment_module", script_path)
+    module = module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    args = module.build_parser().parse_args(
+        [
+            "--config",
+            "configs/diagnostics/smoke/trust_smoke.toml",
+            "--no-jax-cache",
+        ]
+    )
+
+    assert args.no_jax_cache is True
+
+
 def test_run_experiment_serial_cli_passes_verbose_options(tmp_path, monkeypatch):
     script_path = Path(__file__).resolve().parents[1] / "scripts" / "experiment" / "run.py"
     spec = spec_from_file_location("run_experiment_module", script_path)

@@ -58,7 +58,10 @@ The runner currently has these execution paths:
   only for narrow local configs where immediate summaries matter more than
   throughput.
 
-For repeated same-shape local runs, opt into JAX's persistent compilation cache:
+JAX persistent compilation caching is enabled by default at
+`/tmp/affect_aif_jax_cache` because it is exact-preserving and speeds repeated
+same-shape local checks and paper reruns. Use `--jax-cache-dir` to choose
+another cache directory, or `--no-jax-cache` for a one-off uncached check:
 
 ```bash
 python scripts/experiment/run.py \
