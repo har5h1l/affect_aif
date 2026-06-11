@@ -67,15 +67,17 @@ class BatchExperimentRunner:
         workers: int | None = None,
         make_gifs: bool = False,
         verbose: bool = False,
+        verbosity_mode: str = "stage_stream",
         checkpoint_interval: int = 1,
     ):
-        self.config_paths = [str(Path(path)) for path in config_paths]
+        self.config_paths = [str(Path(path).expanduser().resolve()) for path in config_paths]
         self.output_root = Path(output_root)
         self.batch_id = batch_id or default_batch_id()
         self.batch_dir = self.output_root / self.batch_id
         self.workers = max(1, int(workers or os.cpu_count() or 1))
         self.make_gifs = bool(make_gifs)
         self.verbose = bool(verbose)
+        self.verbosity_mode = str(verbosity_mode)
         self.checkpoint_interval = max(1, int(checkpoint_interval))
         self.completion_log: list[dict[str, Any]] = []
 
@@ -178,7 +180,7 @@ class BatchExperimentRunner:
 
     def _run_config_inline(self, state: ConfigBatchState):
         completed_keys = self._load_checkpoint(state)
-        runner = ExperimentRunner.from_spec(state.spec)
+        runner = ExperimentRunner.from_spec(state.spec, verbose=self.verbose, verbosity_mode=self.verbosity_mode)
         for run in state.expanded_runs:
             if _run_key(run) in completed_keys:
                 continue

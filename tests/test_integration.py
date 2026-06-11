@@ -220,6 +220,49 @@ def test_run_experiment_parser_accepts_repeated_configs_and_workers():
     assert args.jax_cache_dir == "/tmp/affect_aif_jax_cache"
 
 
+def test_run_experiment_serial_cli_passes_verbose_options(tmp_path, monkeypatch):
+    script_path = Path(__file__).resolve().parents[1] / "scripts" / "experiment" / "run.py"
+    spec = spec_from_file_location("run_experiment_module", script_path)
+    module = module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    config_path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=1, replications=1)
+    captured: list[tuple[bool, str]] = []
+
+    class FakeRunner:
+        def run_all(self, **_kwargs):
+            return pd.DataFrame([{"round": 0, "payoff": 1.0}])
+
+        def save_results(self, results, path):
+            results.to_csv(path, index=False)
+
+    def fake_from_spec(_spec, *, verbose=False, verbosity_mode="stage_stream"):
+        captured.append((verbose, verbosity_mode))
+        return FakeRunner()
+
+    monkeypatch.setattr("experiments.trust.runner.ExperimentRunner.from_spec", fake_from_spec)
+
+    args = module.build_parser().parse_args(
+        [
+            "--config",
+            str(config_path),
+            "--output-dir",
+            str(tmp_path / "results"),
+            "--batch-name",
+            "serial_verbose",
+            "--workers",
+            "1",
+            "--verbose",
+            "--verbosity-mode",
+            "stage_stream",
+        ]
+    )
+
+    assert module._serial_single_config_run(args) == 0
+    assert captured == [(True, "stage_stream")]
+
+
 def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path):
     config_a_path = write_example_toml(tmp_path / "config_a.toml", rounds=2, replications=1)
     config_b_path = write_example_toml(tmp_path / "config_b.toml", rounds=2, replications=1)
@@ -253,6 +296,31 @@ def test_batch_runner_writes_per_config_subdirs_and_provenance(tmp_path):
     assert (config_dirs["secondary"] / "batch_metadata.json").exists()
 
 
+def test_batch_runner_normalizes_config_paths_for_provenance(tmp_path, monkeypatch):
+    config_dir = tmp_path / "configs"
+    config_dir.mkdir()
+    config_path = write_example_toml(config_dir / "betrayal_choice.toml", rounds=1, replications=1)
+    raw_path = Path("configs") / ".." / "configs" / "betrayal_choice.toml"
+    monkeypatch.chdir(tmp_path)
+
+    batch = BatchExperimentRunner(
+        config_paths=[str(raw_path)],
+        output_root=str(tmp_path / "results"),
+        batch_id="normalized_batch",
+        workers=1,
+        verbose=False,
+    )
+    result = batch.run_all()
+    state = result.config_states[0]
+    rows = pd.read_csv(state.output_dir / "results.csv")
+    metadata = json.loads((state.output_dir / "batch_metadata.json").read_text())
+    expected_path = str(config_path.resolve())
+
+    assert state.config_path == expected_path
+    assert set(rows["config_path"]) == {expected_path}
+    assert metadata["config_path"] == expected_path
+
+
 def test_batch_workers_one_runs_inline_without_process_pool(tmp_path, monkeypatch):
     path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=1, replications=1)
 
@@ -275,6 +343,44 @@ def test_batch_workers_one_runs_inline_without_process_pool(tmp_path, monkeypatc
 
     assert len(rows) == len(state.expanded_runs)
     assert metadata["workers"] == 1
+
+
+def test_batch_inline_runner_passes_verbose_options_to_experiment_runner(tmp_path, monkeypatch):
+    path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=1, replications=1)
+    captured: list[tuple[bool, str]] = []
+
+    class FakeRunner:
+        def run_replication(self, *, run, config_path=None, config_name=None, batch_id=None):
+            return [
+                {
+                    "variant_id": run.variant_id,
+                    "seed": run.seed,
+                    "replication": run.replication,
+                    "round": 0,
+                    "payoff": 1.0,
+                    "config_path": config_path,
+                    "config_name": config_name,
+                    "batch_id": batch_id,
+                }
+            ]
+
+    def fake_from_spec(_spec, *, verbose=False, verbosity_mode="stage_stream"):
+        captured.append((verbose, verbosity_mode))
+        return FakeRunner()
+
+    monkeypatch.setattr("experiments.trust.batch.ExperimentRunner.from_spec", fake_from_spec)
+
+    batch = BatchExperimentRunner(
+        config_paths=[str(path)],
+        output_root=str(tmp_path / "results"),
+        batch_id="verbose_inline_batch",
+        workers=1,
+        verbose=True,
+        verbosity_mode="stage_stream",
+    )
+    batch.run_all()
+
+    assert captured == [(True, "stage_stream")]
 
 
 def test_batch_workers_one_runs_directly_without_process_task_wrapper(tmp_path, monkeypatch):

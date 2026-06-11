@@ -172,7 +172,7 @@ def _serial_single_config_run(args) -> int:
     results_path = config_dir / "results.csv"
     config_copy_path = config_dir / "config.toml"
     metadata_path = config_dir / "batch_metadata.json"
-    runner = ExperimentRunner.from_spec(spec)
+    runner = ExperimentRunner.from_spec(spec, verbose=bool(args.verbose), verbosity_mode=args.verbosity_mode)
     config_dir.mkdir(parents=True, exist_ok=True)
     results = runner.run_all(
         config_path=config_path,
@@ -210,18 +210,20 @@ def _batch_run(args) -> int:
     from experiments.trust.batch import BatchExperimentRunner, default_batch_id
     from experiments.trust.spec import load_experiment_specs
 
-    for raw_path in args.config:
-        for spec in load_experiment_specs(raw_path):
+    config_paths = [str(Path(raw_path).resolve()) for raw_path in args.config]
+    for config_path in config_paths:
+        for spec in load_experiment_specs(config_path):
             if spec.experiment.family != "trust":
                 raise ValueError("Only trust-family specs are executable through scripts/experiment/run.py.")
     batch_id = args.batch_name or default_batch_id()
     runner = BatchExperimentRunner(
-        config_paths=args.config,
+        config_paths=config_paths,
         output_root=args.output_dir,
         batch_id=batch_id,
         workers=args.workers,
         make_gifs=bool(args.make_gifs),
         verbose=bool(args.verbose),
+        verbosity_mode=args.verbosity_mode,
         checkpoint_interval=args.checkpoint_interval,
     )
     result = runner.run_all()

@@ -84,6 +84,20 @@ The single-worker path is about 7-8% faster on this small probe and simpler to
 reason about during local deterministic checks. Multi-worker differences are
 within the observed timing band and do not change behavior.
 
+### Runner Provenance And Verbosity Cleanup
+
+Serial, single-worker inline, and multi-worker batch runs now record resolved
+absolute config paths in result rows and `batch_metadata.json`. This removes a
+public-facing provenance inconsistency where the same config could be recorded
+as absolute or CLI-relative depending on the execution path.
+
+The serial and single-worker inline paths also pass
+`--verbose --verbosity-mode stage_stream` through to `ExperimentRunner`, so
+local stage-stream inspection works consistently on the deterministic local
+paths. This cleanup changes runner metadata and console output only; it does
+not alter seeds, task dynamics, `pymdp` calls, observations, actions, beta
+updates, or manuscript-facing scalar values.
+
 ### Persistent JAX Compilation Cache
 
 The runner already supports `--jax-cache-dir`, which enables JAX persistent

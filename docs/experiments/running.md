@@ -46,8 +46,9 @@ The runner currently has these execution paths:
   entropy, beta, surprise/log-evidence, inference-correctness, switch, seed,
   variant, and config metadata needed by the paper analyses, while omitting
   bulky diagnostic-only policy and belief tensors.
-- `--verbose --verbosity-mode stage_stream`: emits structured progress for
-  local inspection.
+- `--verbose --verbosity-mode stage_stream`: emits structured per-stage
+  progress for serial and single-worker inline runs, and batch-level progress
+  for multi-worker runs.
 - `profile = "debug"`: enables policy-trace logging and full diagnostic
   internals such as `q_pi`, `G`, policy-step costs, partner belief matrices,
   and posterior tensors. Do not use it for statistical data collection because
@@ -80,6 +81,9 @@ Outputs are written under:
 Each completed run directory may contain `results.csv`, copied config TOML,
 metadata, and configured analysis artifacts. Raw `results.csv` files are
 gitignored in the public repo but retained locally and on `server`.
+Result rows and `batch_metadata.json` record config paths as resolved absolute
+paths so provenance does not depend on whether a run used the serial,
+single-worker inline, or multi-worker batch path.
 
 The current runtime optimization audit is recorded in
 `docs/results/runtime_optimization_audit_20260611.md`.

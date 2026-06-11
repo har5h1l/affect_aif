@@ -19,4 +19,7 @@ Use `python <script> --help` for script-specific arguments.
 `data_collection` for paper/demo/diagnostic trajectory collection: it writes
 the manuscript-facing row contract and keeps diagnostic tensors out of raw
 CSVs. Use `debug` only for narrow local inspection when full policy traces,
-belief matrices, and posterior tensors are needed.
+belief matrices, and posterior tensors are needed. The runner records resolved
+absolute config paths in result provenance and supports
+`--verbose --verbosity-mode stage_stream` for serial and single-worker inline
+inspection.
