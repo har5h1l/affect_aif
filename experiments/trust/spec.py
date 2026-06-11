@@ -196,6 +196,7 @@ class ExpandedRunSpec:
             beta_persistence=self.variant.beta_persistence,
             beta_levels=list(self.variant.beta_levels),
             max_policies=self.runtime.max_policies,
+            runtime_profile=self.runtime.profile,
             debug_mode=self.runtime.debug_mode,
             log_policy_traces=self.runtime.log_policy_traces,
             num_replications=1,

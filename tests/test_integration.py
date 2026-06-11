@@ -12,7 +12,7 @@ from analysis.metrics import post_switch_window_summary
 from analysis.visualization import build_run_gifs, load_results
 from experiments.trust.batch import BatchExperimentRunner
 from experiments.trust.runner import ExperimentRunner
-from experiments.trust.spec import ExperimentSpec, StanceSwitchSpec, VariantSpec
+from experiments.trust.spec import ExperimentSpec, RuntimeSpec, StanceSwitchSpec, VariantSpec
 
 
 def _tiny_stance_switch_spec(tiny_spec, *, rounds: int, switch_round: int = 1, variants=None):
@@ -54,11 +54,49 @@ def test_runner_outputs_variant_identity(tmp_path):
 
 
 def test_runner_logs_joint_posteriors(tiny_spec):
-    runner = ExperimentRunner.from_spec(tiny_spec)
-    records = runner.run_replication(run=tiny_spec.expand_runs()[0])
+    debug_spec = replace(tiny_spec, runtime=RuntimeSpec(profile="debug", debug_mode=True, log_policy_traces=True))
+    runner = ExperimentRunner.from_spec(debug_spec)
+    records = runner.run_replication(run=debug_spec.expand_runs()[0])
 
     assert len(records) == 3
     assert "partner_joint_posteriors" in records[-1]
+
+
+def test_data_collection_and_debug_profiles_match_manuscript_values(tiny_spec):
+    debug_spec = replace(tiny_spec, runtime=RuntimeSpec(profile="debug", debug_mode=True, log_policy_traces=True))
+    manuscript_columns = [
+        "round",
+        "partner_idx",
+        "active_partner",
+        "agent_action",
+        "raw_action",
+        "partner_action",
+        "payoff",
+        "partner_payoff",
+        "inferred_type",
+        "inferred_type_correct",
+        "inferred_stance",
+        "inferred_stance_correct",
+        "inferred_joint_correct",
+        "selected_partner",
+        "selected_action",
+        "best_policy_idx",
+        "q_pi_entropy",
+        "betas",
+        "local_betas",
+        "prediction_errors",
+        "predictive_log_lik",
+        "round_log_evidence",
+        "cumulative_log_evidence",
+        "variant_id",
+        "replication",
+        "seed",
+    ]
+
+    data_rows = ExperimentRunner.from_spec(tiny_spec).run_all()[manuscript_columns]
+    debug_rows = ExperimentRunner.from_spec(debug_spec).run_all()[manuscript_columns]
+
+    pd.testing.assert_frame_equal(data_rows, debug_rows)
 
 
 def test_betrayal_metrics_and_analysis_outputs(tmp_path, tiny_spec):

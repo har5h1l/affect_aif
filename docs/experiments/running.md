@@ -37,13 +37,17 @@ The runner currently has these execution paths:
 - `--dry-run`: validates config expansion and writes a manifest without
   simulating episodes.
 - `profile = "data_collection"`: the default maintained-config profile; writes
-  essential per-round result rows and compact checkpoints as quickly as the
-  configured model allows.
+  manuscript-facing per-round result rows and compact checkpoints as quickly
+  as the configured model allows. This profile keeps payoff, choice,
+  entropy, beta, surprise/log-evidence, inference-correctness, switch, seed,
+  variant, and config metadata needed by the paper analyses, while omitting
+  bulky diagnostic-only policy and belief tensors.
 - `--verbose --verbosity-mode stage_stream`: emits structured progress for
   local inspection.
-- `profile = "debug"`: enables policy-trace logging for debugging. Do not use
-  it for statistical data collection because policy arrays can make checkpoints
-  and CSVs very large.
+- `profile = "debug"`: enables policy-trace logging and full diagnostic
+  internals such as `q_pi`, `G`, policy-step costs, partner belief matrices,
+  and posterior tensors. Do not use it for statistical data collection because
+  these arrays can make checkpoints and CSVs very large.
 - post-hoc analysis: run `scripts/analysis/*` after data collection. Keep
   `[analysis].auto = false` for maintained data-collection configs; enable it
   only for narrow local configs where immediate summaries matter more than
@@ -72,6 +76,9 @@ Outputs are written under:
 Each completed run directory may contain `results.csv`, copied config TOML,
 metadata, and configured analysis artifacts. Raw `results.csv` files are
 gitignored in the public repo but retained locally and on `server`.
+
+The current runtime optimization audit is recorded in
+`docs/results/runtime_optimization_audit_20260611.md`.
 
 Post-hoc analysis:
 

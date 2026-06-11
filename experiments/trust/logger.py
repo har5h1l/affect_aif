@@ -5,14 +5,25 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+DEBUG_RUNTIME_PROFILES = {"debug"}
+
 
 class MetricLogger:
     """Track round-by-round metrics for a single episode."""
 
-    def __init__(self, num_rounds: int, num_partners: int, *, log_policy_traces: bool = False):
+    def __init__(
+        self,
+        num_rounds: int,
+        num_partners: int,
+        *,
+        runtime_profile: str = "data_collection",
+        log_policy_traces: bool = False,
+    ):
         self.num_rounds = int(num_rounds)
         self.num_partners = int(num_partners)
-        self.log_policy_traces = bool(log_policy_traces)
+        self.runtime_profile = str(runtime_profile)
+        self.log_diagnostics = self.runtime_profile in DEBUG_RUNTIME_PROFILES
+        self.log_policy_traces = bool(log_policy_traces or self.log_diagnostics)
         self.records: list[dict] = []
 
     def log_round(
@@ -51,13 +62,6 @@ class MetricLogger:
             return np.asarray(_metric(name, default), dtype=float)
 
         default_partner_vector = np.full((self.num_partners,), np.nan, dtype=float)
-        default_partner_beliefs = np.full((self.num_partners, 0), np.nan, dtype=float)
-        default_posteriors = np.asarray([], dtype=float)
-        partner_beliefs = _array_metric("partner_beliefs", default_partner_beliefs)
-        partner_posteriors = _array_metric("partner_posteriors", default_posteriors)
-        partner_joint_beliefs = _array_metric("partner_joint_beliefs", partner_beliefs)
-        partner_joint_posteriors = _array_metric("partner_joint_posteriors", default_posteriors)
-        partner_stance_beliefs = _array_metric("partner_stance_beliefs", default_partner_beliefs)
         betas = _array_metric("betas", default_partner_vector)
         local_betas = _array_metric("local_betas", betas)
         terminal_signal = _array_metric("terminal_signal", betas)
@@ -113,18 +117,30 @@ class MetricLogger:
             "terminal_signal": _to_float_list(terminal_signal),
             "prediction_errors": _to_float_list(prediction_errors),
             "reward_avgs": _to_float_list(_metric("reward_avgs", default_partner_vector)),
-            "G": _to_float_list(_metric("G", [])) if self.log_policy_traces else [],
-            "q_pi": _to_float_list(_metric("q_pi", [])) if self.log_policy_traces else [],
-            "best_policy_step_costs": _to_float_list(_metric("best_policy_step_costs", [])),
             "predictive_log_lik": float(agent_metrics.get("predictive_log_lik", float("nan"))),
-            "partner_beliefs": partner_beliefs.tolist(),
-            "partner_posteriors": partner_posteriors.tolist(),
-            "partner_joint_beliefs": partner_joint_beliefs.tolist(),
-            "partner_joint_posteriors": partner_joint_posteriors.tolist(),
-            "partner_stance_beliefs": partner_stance_beliefs.tolist(),
             "round_log_evidence": float(agent_metrics.get("round_log_evidence", float("nan"))),
             "cumulative_log_evidence": float(agent_metrics.get("cumulative_log_evidence", 0.0)),
         }
+        if self.log_diagnostics:
+            default_partner_beliefs = np.full((self.num_partners, 0), np.nan, dtype=float)
+            default_posteriors = np.asarray([], dtype=float)
+            partner_beliefs = _array_metric("partner_beliefs", default_partner_beliefs)
+            partner_posteriors = _array_metric("partner_posteriors", default_posteriors)
+            partner_joint_beliefs = _array_metric("partner_joint_beliefs", partner_beliefs)
+            partner_joint_posteriors = _array_metric("partner_joint_posteriors", default_posteriors)
+            partner_stance_beliefs = _array_metric("partner_stance_beliefs", default_partner_beliefs)
+            record.update(
+                {
+                    "G": _to_float_list(_metric("G", [])) if self.log_policy_traces else [],
+                    "q_pi": _to_float_list(_metric("q_pi", [])) if self.log_policy_traces else [],
+                    "best_policy_step_costs": _to_float_list(_metric("best_policy_step_costs", [])),
+                    "partner_beliefs": partner_beliefs.tolist(),
+                    "partner_posteriors": partner_posteriors.tolist(),
+                    "partner_joint_beliefs": partner_joint_beliefs.tolist(),
+                    "partner_joint_posteriors": partner_joint_posteriors.tolist(),
+                    "partner_stance_beliefs": partner_stance_beliefs.tolist(),
+                }
+            )
         self.records.append(record)
 
     def to_dataframe(self) -> pd.DataFrame:

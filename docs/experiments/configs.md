@@ -31,8 +31,8 @@ Runtime profiles organize execution weight without changing the config family:
 
 | Profile | Use | Logging behavior |
 |---|---|---|
-| `data_collection` | Default for paper, demo, diagnostics, and future configs that collect trajectories | Keeps policy traces off and writes essential result/checkpoint rows. |
-| `debug` | Narrow local debugging configs only | Enables `debug_mode` and policy-trace logging; avoid for statistical batches. |
+| `data_collection` | Default for paper, demo, diagnostics, and future configs that collect trajectories | Writes the manuscript-facing row contract: payoff, choices, entropy, beta/precision traces, prediction error, log evidence, inference correctness, switch markers, and provenance metadata. Omits diagnostic-only policy and belief tensors. |
+| `debug` | Narrow local debugging configs only | Enables `debug_mode`, policy traces, full `q_pi`/`G` vectors, policy-step costs, partner belief matrices, and posterior tensors; avoid for statistical batches. |
 
 Post-hoc analysis remains separate under `[analysis]`. For fastest full data
 collection, keep `profile = "data_collection"` and run heavy analysis after

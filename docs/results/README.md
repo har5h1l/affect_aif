@@ -8,6 +8,8 @@ raw data store.
 - `paper.md`: paper result cards and where their summaries live
 - `diagnostics.md`: retained non-paper diagnostic result cards
 - `archive.md`: archive policy for historical or incomplete material
+- `runtime_optimization_audit_20260611.md`: engineering audit of runner
+  logging/runtime optimization candidates; not an interpreted result update
 - `cleanup/`: local/server cleanup manifests from the public repo cleanup
 - `../../results/`: tracked compact public result summaries and manifests
 - `../manuscript/`: manuscript source, source tables, figures, and

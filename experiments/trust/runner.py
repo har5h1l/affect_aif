@@ -90,6 +90,7 @@ class ExperimentRunner:
         logger = MetricLogger(
             num_rounds=config.num_rounds,
             num_partners=config.num_partners,
+            runtime_profile=config.runtime_profile,
             log_policy_traces=config.log_policy_traces,
         )
         context = env.reset()
@@ -122,7 +123,14 @@ class ExperimentRunner:
                 rng=runtime.rng,
                 affect_mode=runtime.affect_mode,
             )
-            planning_metrics = self._decision_diagnostics(config, runtime, decision, None, None)
+            planning_metrics = self._decision_diagnostics(
+                config,
+                runtime,
+                decision,
+                None,
+                None,
+                include_diagnostics=config.runtime_profile == "debug",
+            )
             self.progress.emit(
                 "planning_end",
                 variant_id=variant_id,
@@ -204,7 +212,14 @@ class ExperimentRunner:
                 inferred_type_correct=inferred_correct,
             )
 
-            agent_metrics = self._decision_diagnostics(config, runtime, decision, snapshot, result)
+            agent_metrics = self._decision_diagnostics(
+                config,
+                runtime,
+                decision,
+                snapshot,
+                result,
+                include_diagnostics=config.runtime_profile == "debug",
+            )
             agent_metrics["inferred_type"] = inferred_type
             agent_metrics["inferred_type_correct"] = inferred_correct
             agent_metrics["inferred_stance"] = inferred_stance
@@ -238,6 +253,8 @@ class ExperimentRunner:
         decision: Decision,
         snapshot: PartnerSnapshot | None,
         env_result: dict | None,
+        *,
+        include_diagnostics: bool = False,
     ) -> dict:
         """Expose native pymdp decisions under experiment column names."""
 
@@ -268,9 +285,9 @@ class ExperimentRunner:
             if runtime.partner_bank.latest_surprise is not None
             else default_vector
         )
-        if snapshot is None:
+        if include_diagnostics and snapshot is None:
             snapshot = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template)
-        return {
+        metrics = {
             "q_pi": q_pi,
             "G": np.asarray(decision.policy_scores, dtype=float),
             "best_policy_step_costs": np.asarray([], dtype=float),
@@ -289,16 +306,22 @@ class ExperimentRunner:
             "latest_surprise_by_partner": prediction_errors,
             "terminal_signal": local_betas,
             "reward_avgs": default_vector,
-            "partner_beliefs": snapshot.partner_type_beliefs,
-            "partner_posteriors": snapshot.partner_joint_posteriors.sum(axis=2),
-            "partner_joint_beliefs": snapshot.partner_joint_beliefs,
-            "partner_joint_posteriors": snapshot.partner_joint_posteriors,
-            "partner_stance_beliefs": snapshot.partner_stance_beliefs,
             "planning_cost": planning_cost,
             "planning_cost_ratio": planning_cost_ratio,
             "round_log_evidence": runtime.partner_bank.round_log_evidence,
             "cumulative_log_evidence": runtime.partner_bank.cumulative_log_evidence,
         }
+        if include_diagnostics and snapshot is not None:
+            metrics.update(
+                {
+                    "partner_beliefs": snapshot.partner_type_beliefs,
+                    "partner_posteriors": snapshot.partner_joint_posteriors.sum(axis=2),
+                    "partner_joint_beliefs": snapshot.partner_joint_beliefs,
+                    "partner_joint_posteriors": snapshot.partner_joint_posteriors,
+                    "partner_stance_beliefs": snapshot.partner_stance_beliefs,
+                }
+            )
+        return metrics
 
     def run_replication(
         self,
