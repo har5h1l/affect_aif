@@ -186,7 +186,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ylabel="analysis-window payoff",
     )
 
-    fig.suptitle("Predictability versus realized reward", y=1.04, fontsize=12)
+    fig.suptitle("Predictability versus realized payoff", y=1.04, fontsize=12)
     return _save(fig, output_dir, "fig_model_fitness_beta_reward_divergence")
 
 

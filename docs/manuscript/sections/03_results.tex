@@ -15,7 +15,7 @@ Payoff over the same locality-probe analysis window did not favor the partner-lo
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.pdf}
-\caption{Partner-local precision is more strongly associated with partner-response likelihood surprisal than with realized payoff. The correlation panels plot absolute active-encounter partial correlations; the payoff panel shows payoff over the same locality-probe analysis window. Pooling precision evidence across partners weakens the relationship between precision and partner-response likelihood surprisal, indicating that the signal depends on partner-local evidence rather than reward alone.}
+\caption{Partner-local precision is more strongly associated with partner-response likelihood surprisal than with realized payoff. The correlation panels plot absolute active-encounter partial correlations; the payoff panel shows payoff over the same locality-probe analysis window. Pooling precision evidence across partners weakens the relationship between precision and partner-response likelihood surprisal, indicating that the signal depends on partner-local evidence rather than payoff alone.}
 \label{fig:model_fitness_contrast}
 \end{figure}
 
@@ -24,7 +24,7 @@ Payoff over the same locality-probe analysis window did not favor the partner-lo
 
 To test whether partner-local affective precision changes behavior through policy deployment rather than partner-state inference, we used a tracked-only ablation. This variant updates $q(\beta_k)$ normally while holding $\gamma_k=\gamma_{\text{base}}$, preserving the precision estimate but preventing it from modulating policy selection.
 
-The tracked-only ablation matched the no-affect baseline: both produced the same policy entropy ($8.79$ versus $8.79$) and cumulative payoff ($1864.2$ versus $1864.2$). Full precision modulation was the only variant that lowered entropy ($8.59$), with slightly lower cumulative payoff ($1851.3$). Thus, $\beta_k$ matters behaviorally when it is allowed to modulate $\gamma_k$, producing sharper policy commitment. When that pathway is cut, the behavioral effect disappears. Figure~\ref{fig:deployment_contrast} shows the three-way comparison.
+The tracked-only ablation matched the no-affect baseline: both produced the same policy entropy ($8.79$ versus $8.79$) and cumulative payoff ($1864.2$ versus $1864.2$). Full precision modulation was the only variant that lowered entropy ($8.59$), with slightly lower cumulative payoff ($1851.3$). Thus, $\beta_k$ matters behaviorally when it is allowed to modulate $\gamma_k$, producing sharper policy commitment. When that pathway is cut, the behavioral readouts match the no-affect baseline. Figure~\ref{fig:deployment_contrast} shows the three-way comparison.
 
 This supports the interpretation of affective precision as a calibration layer rather than an inference-improvement mechanism. The tracker does not directly improve partner-state inference; it regulates how strongly the agent commits to policies based on its current partner model. Whether sharper commitment improves payoff depends on the social context, not on precision alone.
 

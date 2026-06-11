@@ -1,10 +1,10 @@
 # Notebooks
 
-- `demo.ipynb`: Colab/local workflow demo using `configs/demo/`. It defines
-  `run_demo(name)` and `show_demo(name, frame)` and is split into one section
-  per demo experiment. By default, top-to-bottom execution runs the full demo
-  suite listed in `SELECTED_DEMOS`; remove names from that list when you want a
-  shorter local check.
+- `demo.ipynb`: guided public walkthrough using `configs/demo/`. It explains
+  the mechanism before each run, executes all seven demo configs by default,
+  and displays mechanism snapshots, timecourses, compact analysis tables, and
+  appendix-level profile readouts. Use this first when the goal is to
+  understand what the model is doing.
 - `reproduce.ipynb`: Colab/local paper reproduction notebook. It dry-runs all
   numbered `configs/paper/` specs to show the workload, then walks through
   Sections 3.1--3.5 one paper section at a time. Each section runs the relevant
@@ -22,7 +22,8 @@ scripts rather than implementing separate runners.
 
 Use `demo.ipynb` when you want a fast, readable proof that the project installs,
 runs experiments, runs analysis, and produces plots. It is the better notebook
-for first-time readers.
+for first-time readers and for appendix-level intuition about gain, priors, and
+forgiveness dynamics.
 
 Use `reproduce.ipynb` when you want to regenerate the paper suite. It is more
 expensive because each paper experiment is executed before its analysis cells.

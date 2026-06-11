@@ -9,7 +9,7 @@ All reported experiments use one focal active-inference agent with four partners
 
 \textbf{Open graded decision regime.} The graded regime uses a discretized investment level while keeping the same hidden type--stance structure. This is the primary deployment-contrast setting (Section~\ref{sec:deployment}): affect, no-affect, and tracked-only variants are compared on policy entropy and cumulative payoff.
 
-\textbf{Predictability-over-value locality probe.} A 100-round partner-choice graded environment with partner-local, shared-$\beta$, and no-affect variants tests whether $\beta_k$-derived policy precision tracks partner-response likelihood surprisal more strongly than realized payoff (Section~\ref{sec:predictability_value}). The payoff panel reports the same active-encounter analysis window used for the locality-probe correlation readouts.
+\textbf{Predictability-over-payoff locality probe.} A 100-round partner-choice graded environment with partner-local, shared-$\beta$, and no-affect variants tests whether $\beta_k$-derived policy precision tracks partner-response likelihood surprisal more strongly than realized payoff (Section~\ref{sec:predictability_value}). The payoff panel reports the same active-encounter analysis window used for the locality-probe correlation readouts.
 
 \textbf{Partner-choice regime.} The agent first selects a partner, then selects an investment level toward that partner each round. With four partners and six graded investment levels, the one-step partner-choice setting can equivalently be represented as \(4 \times 6 = 24\) partner--investment branches. Partner selection is where engagement reorganization and social-allocation readouts are defined (Section~\ref{sec:partner_choice}).
 
@@ -34,7 +34,7 @@ Representative configured scales:
 Experiment family & Setting & Rounds & Seeds \\
 \midrule
 Open deployment & graded, random/open choice & 200 & 30 \\
-Predictability-over-value locality probe & graded partner choice & 100 & 30 \\
+Predictability-over-payoff locality probe & graded partner choice & 100 & 30 \\
 Partner allocation & partner choice & 200 & 30 \\
 Abrupt betrayal & scheduled partner-choice betrayal & 120 & 30 \\
 Precision perturbation & graded perturbations & 200 & 30 \\
@@ -44,7 +44,7 @@ Profile program & sweeps, factorial, forgiveness & 200 & 20 \\
 \end{table}
 
 \paragraph{Supplementary materials.}
-The supplementary repository contains the simulation environments, affect-runtime variants, experiment configuration files, analysis scripts, and figure-generation code used for the reported experiments.
+The supplementary repository contains the simulation environments, precision-runtime variants, experiment configuration files, analysis scripts, and figure-generation code used for the reported experiments.
 
 \subsection{Betrayal schedule}
 
@@ -62,7 +62,7 @@ Partner-choice readouts quantify how precision reshapes \emph{who} the agent eng
 
 \textbf{Post-betrayal allocation.} Post-switch windows report reallocation away from the switched partner and toward alternatives, including post-betrayal P0 selection and high-investment rates in profile analyses.
 
-\textbf{Policy entropy under choice.} Mean $q_\pi$ entropy in partner-choice regimes captures how sharply the agent commits to partner--action policies (reported comparatively for affect versus no-affect controls).
+\textbf{Policy entropy under choice.} Mean $q_\pi$ entropy in partner-choice regimes captures how sharply the agent commits to partner--investment policies (reported comparatively for affect versus no-affect controls).
 
 \subsection{Entropy, payoff, and accuracy readouts}
 
@@ -85,7 +85,7 @@ For the predictability-over-payoff locality probe (Section~\ref{sec:predictabili
 
 \begin{table}[H]
 \centering
-\caption{Locality-probe correlations by affect-runtime variant.}
+\caption{Locality-probe correlations by precision-runtime variant.}
 \label{tab:locality_correlations}
 \begin{tabular}{lcc}
 \toprule

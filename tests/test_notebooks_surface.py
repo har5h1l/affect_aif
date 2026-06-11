@@ -87,16 +87,19 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
         '"betrayal_adaptation", "alpha_sweep", "prior_factorial", "forgiveness"]'
     ) in text
     assert "scripts/analysis/analyze.py" in text
-    assert "outputs/notebook_demo" in text
+    assert 'OUTPUT_ROOT = Path("outputs")' in text
+    assert 'DEMO_BATCH_PREFIX = "notebook_demo"' in text
     assert "Predictability-Value Demo: Run And Analyze" in text
     assert "Deployment-Ablation Demo: Run And Analyze" in text
     assert "Partner-Selection Demo: Run And Analyze" in text
     assert "Betrayal-Adaptation Demo: Run And Analyze" in text
     assert "Alpha-Sweep Demo: Run And Analyze" in text
-    assert "Optional Prior-Factorial Demo: Run And Analyze" in text
-    assert "Optional Forgiveness Demo: Run And Analyze" in text
+    assert "Appendix-Level Extensions" in text
+    assert "Prior-Factorial Demo: Run And Analyze" in text
+    assert "Forgiveness Demo: Run And Analyze" in text
     assert text.count("= run_demo(") == 7
-    assert text.count("show_demo(") >= 8
+    assert text.count("show_demo(") >= 6
+    assert text.count("show_appendix_demo(") >= 4
 
 
 def test_public_notebooks_do_not_store_local_outputs():
