@@ -59,10 +59,13 @@ The signed charge $\phi_{k,t}$ is then used as evidence over the partner-specifi
 
 The agent then sets partner-specific policy precision from the posterior mean:
 \begin{equation}
-\gamma_k = \gamma_{\text{base}} \,/\, \mathbb{E}_{q(\beta_k)}[\beta_k],
+\begin{aligned}
+\bar{\beta}_k &= \sum_{\ell} \beta_\ell \, q(\beta_\ell), \\
+\gamma_k &= \gamma_{\text{base}} / \bar{\beta}_k,
+\end{aligned}
 \label{eq:gamma_update}
 \end{equation}
-where $\gamma_{\text{base}}$ is the baseline policy precision. Because $\beta_k$ is inverse precision, higher expected $\beta_k$ yields more tentative policy commitment, whereas lower expected $\beta_k$ yields higher $\gamma_k$ and sharper policy commitment.
+where $\gamma_{\text{base}}$ is the baseline policy precision and $q(\beta_\ell)$ is the categorical mass on inverse-precision level $\beta_\ell$. Because $\beta_k$ is inverse precision, higher $\bar{\beta}_k$ yields more tentative policy commitment, whereas lower $\bar{\beta}_k$ yields higher $\gamma_k$ and sharper policy commitment.
 
 The $\beta_k$ posterior is maintained as an auxiliary precision tracker rather than as a hidden state inside the focal agent's generative model. This keeps the mechanism lightweight and experimentally isolable, but prevents the agent from forming prior expectations over its own future confidence states; this limitation is discussed in Section~\ref{sec:discussion}.
 
