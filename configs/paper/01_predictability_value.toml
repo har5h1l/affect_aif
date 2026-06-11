@@ -41,8 +41,11 @@ id = "global_beta"
 affect = "global_beta"
 planning_horizon = 4
 
+[runtime]
+profile = "data_collection"
+
 [analysis]
-auto = true
+auto = false
 primary = "h1_model_fitness"
 compare = ["affect", "global_beta", "no_affect"]
 metrics = [

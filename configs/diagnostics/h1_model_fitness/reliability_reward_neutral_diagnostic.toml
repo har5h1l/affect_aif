@@ -44,8 +44,11 @@ id = "no_affect"
 affect = "none"
 planning_horizon = 4
 
+[runtime]
+profile = "data_collection"
+
 [analysis]
-auto = true
+auto = false
 primary = "h1_model_fitness_reward_neutral"
 compare = ["affect", "global_beta", "tracked_only", "no_affect"]
 metrics = [

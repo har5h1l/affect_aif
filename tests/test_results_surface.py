@@ -109,6 +109,15 @@ def test_paper_result_manifests_point_to_current_configs():
         assert manifest["raw_results_policy"] == "gitignored_retained_locally_and_on_server"
 
 
+def test_paper_suite_manifest_uses_public_relative_paths():
+    suite_manifest = json.loads((REPO_ROOT / "results/paper/manifest.json").read_text(encoding="utf-8"))
+
+    assert suite_manifest["output_dir"] == "results/paper"
+    for config in suite_manifest["configs"]:
+        assert config["path"].startswith("configs/paper/")
+        assert not Path(config["path"]).is_absolute()
+
+
 def test_diagnostic_result_manifests_point_to_current_configs():
     for result_dir in PUBLIC_DIAGNOSTIC_DIRS:
         manifest = json.loads((result_dir / "manifest.json").read_text(encoding="utf-8"))

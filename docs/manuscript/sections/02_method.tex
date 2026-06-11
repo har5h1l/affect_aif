@@ -1,14 +1,18 @@
 \section{Methods}
+\label{sec:methods}
 
-A focal active-inference agent plays a repeated trust game with four partners whose behavioral types and stances are hidden and must be inferred from behavioral evidence. The agent is implemented using the \texttt{pymdp} library for discrete active inference \cite{Heins2022Pymdp,DaCosta2020DiscreteSynthesis}, which provides standard components for belief updating and policy selection under the active inference framework \cite{Friston2010FreeEnergy,Friston2017ProcessTheory,Parr2022ActiveInference}. Partner-local affective precision is layered on top of per-partner generative models, allowing evidence and policy precision to remain relationship-specific. Full POMDP specifications, affective precision update rules, and simulation protocols are provided in Appendix~\ref{app:pomdp}, Appendix~\ref{app:precision_update}, and Appendix~\ref{app:protocols}, respectively.
+A focal active-inference agent plays a repeated multi-partner trust/investment game with four partners whose behavioral types and stances are hidden. The agent is implemented using the \texttt{pymdp} library for discrete active inference~\cite{Heins2022Pymdp,DaCosta2020DiscreteSynthesis}, which provides standard components for belief updating and policy selection~\cite{Friston2010FreeEnergy,Friston2017ProcessTheory,Parr2022ActiveInference}. Partner-local affective precision is layered on top of separate per-partner generative models, allowing both evidence and policy precision to remain relationship-specific. Full POMDP specifications, affective-precision updates, and simulation protocols are provided in Appendices~\ref{app:pomdp}--\ref{app:protocols}.
 
 \subsection{Trust game}
+\label{sec:trust_game}
 
-We evaluate the mechanism in a repeated multi-partner trust/investment game~\cite{Berg1995Trust}, where cumulative payoff depends on how much the focal agent invests in different partners over time. Investing more can generate larger rewards if a partner reciprocates, but larger losses if the partner defects. Success therefore depends on learning which partners are cooperative, tracking how they change over time, and calibrating investment to uncertainty.
+We evaluate the mechanism in a repeated multi-partner trust/investment game~\cite{Berg1995Trust}. The task has a Prisoner's-Dilemma-style social-dilemma structure: investing more can yield larger returns when a partner cooperates, but larger losses relative to the risk-free baseline when the partner defects. The task therefore requires the focal agent to solve two coupled problems: predicting how each partner is likely to respond, and deciding how strongly to commit to that prediction through investment.
 
-The focal active-inference agent interacts with four partners across repeated episodes. Each partner has a latent behavioral type---cooperator, reciprocator, exploiter, or random---and a latent stance toward the focal agent---trusting, neutral, or hostile. These states are not directly observed. Instead, the focal agent must infer them from partner responses and the payoff consequences of its own actions.
+Each interaction consists of partner assignment or selection, investment, and response. In partner-choice conditions, the focal agent first selects a partner \(k\); in conditions without explicit partner choice, the interaction partner is assigned according to the configured protocol. The agent then chooses a graded investment level \(a \in \mathcal{A}=\{0,1,2,3,4,5\}\), where \(0\) denotes no investment and \(5\) denotes maximum investment. The selected partner emits a response \(o_k^{\mathrm{act}} \in \{\mathrm{cooperate},\mathrm{defect}\}\), sampled from that partner's hidden behavioral state.
 
-On each interaction, the focal agent chooses a graded investment level \(a \in \mathcal{A}=\{0,1,2,3,4,5\}\), where \(0\) denotes no investment and \(5\) denotes maximum investment. The partner then emits a cooperate-or-defect response, \(o_k^{\mathrm{act}} \in \{\mathrm{cooperate}, \mathrm{defect}\}\), sampled from type- and stance-conditioned cooperation probabilities (Appendix~\ref{app:pomdp}, Table~\ref{tab:coop_likelihood}). With endowment \(E=10\) and return multiplier \(M=3\), focal payoff is
+Each partner has two hidden state factors. The first is behavioral type, \(s_k^{\mathrm{type}} \in \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\}\). The second is stance toward the focal agent, \(s_k^{\mathrm{stance}} \in \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}\). These states are not directly observed; the focal agent infers them from partner responses and payoff observations. Partners themselves are environment-side processes: they sample cooperate-or-defect responses from type- and stance-conditioned probabilities and undergo investment-dependent stance transitions, but do not perform variational inference or maintain affective precision estimates. This isolates the focal agent's precision mechanism before extending to reciprocal active-inference partners.
+
+With endowment \(E=10\) and return multiplier \(M=3\), focal payoff is
 \[
 \pi(a,o_k^{\mathrm{act}})=
 \begin{cases}
@@ -16,27 +20,23 @@ E-a+\frac{Ma}{2}, & o_k^{\mathrm{act}}=\mathrm{cooperate},\\
 E-a, & o_k^{\mathrm{act}}=\mathrm{defect}.
 \end{cases}
 \]
-Under the default parameterization, cooperation yields \(\pi(a,\mathrm{cooperate})=10+0.5a\), whereas defection yields \(\pi(a,\mathrm{defect})=10-a\). At \(a=0\), payoff is always \(10\), providing a risk-free baseline. Higher investment increases both potential gains from cooperation and losses from defection. The task therefore requires the agent to separate partner prediction from policy commitment: it must infer what each partner is likely to do and decide how strongly to act on that inference.
+Thus, cooperation yields \(\pi(a,\mathrm{cooperate})=10+0.5a\), whereas defection yields \(\pi(a,\mathrm{defect})=10-a\). The no-investment action \(a=0\) gives a risk-free payoff of \(10\), while higher investment increases both potential gains and exposure to defection.
 
-Partner responses depend jointly on latent type and stance. Cooperators and reciprocators cooperate with high probability when trusting and lower probability when hostile, whereas exploiters and random partners are less reliable overall (Appendix~\ref{app:pomdp}, Table~\ref{tab:coop_likelihood}). Partner stance also evolves as a function of the focal agent's investment. Cooperative evidence strength is defined as \(\rho(a)=a/(|\mathcal{A}|-1)=a/5\), and stance transitions interpolate between low-investment/withholding and high-investment/trust-building transition dynamics (Appendix~\ref{app:pomdp}, Table~\ref{tab:stance_transition}). Graded investment therefore affects both immediate payoff and the future social state of the interaction by continuously modulating trust-building versus trust-damaging signals.
-
-Reported experiments use one focal active-inference agent interacting with four environment-side partners. Partners sample actions from type-by-stance cooperation probabilities and undergo action-dependent stance transitions, but do not perform variational inference or maintain affective precision estimates. This isolates the focal agent's precision mechanism before extending to reciprocal active-inference partners.
-
-Episodes comprise 200 rounds by default and 120 rounds in abrupt-betrayal protocols, with four partners available throughout. Unless otherwise specified, partner types may drift with switching probability \(p_{\mathrm{switch}}=0.05\).
-
-The primary reported setting is an open graded decision regime in which the agent selects investment levels within the repeated trust game. In configurations with agent-controlled allocation, the agent chooses both a partner and an investment level, yielding a joint action space of \(4 \times 6 = 24\) partner--investment combinations. In partner-choice conditions, partner selection is made explicit before investment selection, allowing approach, avoidance, and reallocation behavior to be measured directly. Graded actions are used as the primary evaluation regime because they preserve variation in policy precision, allowing partner-specific precision modulation to affect the strength of investment rather than only the direction of choice.
+Investment also affects future partner stance. Higher investment provides stronger cooperative evidence and shifts stance dynamics toward trust-building transitions; lower investment or withholding shifts dynamics toward trust-damaging transitions. Formally, the transition model interpolates between high-investment and low-investment endpoint matrices according to \(\rho(a)=a/5\), with full transition matrices given in Appendix~\ref{app:pomdp}. Graded actions are used as the primary evaluation regime because they allow partner-specific precision to modulate the strength of commitment, not merely the direction of a binary cooperate/defect choice.
 
 \subsection{Per-partner generative models}
+\label{sec:partner_models}
 
-Rather than maintaining a single pooled social model, the focal agent maintains a separate discrete generative model $\mathcal{M}_k$ for each partner $k$. This factorization keeps evidence about each partner independent and allows policy precision to vary across relationships. Each model encodes observation likelihoods, transition dynamics, preferences, priors, and policy priors using the standard $A/B/C/D/E$ structure of discrete active inference \cite{DaCosta2020DiscreteSynthesis}. Full matrix specifications are provided in Appendix~\ref{app:pomdp}.
+Rather than maintaining a single pooled social model, the focal agent maintains a separate discrete generative model $\mathcal{M}_k$ for each partner $k$. This factorization keeps observations, beliefs, and confidence evidence local to the relationship that generated them. Each $\mathcal{M}_k$ uses the standard $A$/$B$/$C$/$D$/$E$ components of discrete active inference~\cite{DaCosta2020DiscreteSynthesis}: observation likelihoods, transition dynamics, preferences, initial priors, and policy priors. Full matrix specifications are provided in Appendix~\ref{app:pomdp}.
 
-Each partner model contains three latent factors: partner type, partner stance, and a deterministic own-action bookkeeping factor that stores the executed graded investment level for the payoff likelihood. Observations are partner response and focal payoff. The partner-response likelihood is defined by type- and stance-conditioned cooperation probabilities, operationalizing predictive reliability: both a reliably cooperative and a reliably defecting partner can be predictable, even though their payoff consequences differ. Payoff enters as a second observation modality whose likelihood depends on investment level and partner response, with partner response marginalized through the cooperation likelihood. Stance transitions are graded-investment dependent: higher investment shifts stance dynamics toward trust-building transitions, while lower investment or withholding shifts them toward trust-damaging transitions.
+Each partner model contains three hidden factors: partner type, partner stance, and own investment. Type and stance are inferred from evidence; own investment is deterministic bookkeeping that makes the executed investment level available to the payoff likelihood. Observations are the partner's cooperate-or-defect response and the focal agent's realized payoff. The partner-response likelihood depends on type and stance, so predictive reliability is defined by response model fit rather than payoff: a reliably cooperative and a reliably defecting partner can both be predictable. The payoff likelihood depends on investment level and marginalizes over partner response, keeping instrumental payoff preferences inside the generative model. Transition dynamics are specified in Section~\ref{sec:trust_game} and Appendix~\ref{app:pomdp}. This model supplies ordinary partner-state inference; the affective-precision layer in Section~\ref{sec:affective_precision} estimates how confidently each partner model should be deployed in policy inference.
 
 \subsection{Partner-local affective precision}
+\label{sec:affective_precision}
 
-Partner-local affective precision maps partner-response model fit onto policy precision. Each partner model $\mathcal{M}_k$ predicts how likely partner $k$ is to cooperate or defect under the agent's current beliefs about that partner's type and stance. After an interaction, the observed response provides evidence about how well that partner model currently predicts the relationship. Because this update is computed separately for each partner, confidence can diverge across relationships even when the focal agent's task and preferences remain fixed.
+Partner-local affective precision maps relationship-specific model fit onto policy precision. After each interaction with partner \(k\), the focal agent evaluates how surprising the observed partner response was under its current posterior over that partner's type and stance. Unlike prior affective-precision accounts centered on policy-inference quantities~\cite{Hesp2021DeeplyFeltAffect}, the evidence source here is perceptual partner-response model fit. Because this update is computed separately for each partner, confidence can diverge across relationships even when the focal agent's task and preferences remain fixed.
 
-After interacting with partner $k$, the agent computes
+Let \(\hat{o}_k^{\text{act}}\) denote the observed response from partner \(k\). The agent computes
 \begin{equation}
 \epsilon_k = -\log P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \;\middle|\; q(s_k^{\text{type}}, s_k^{\text{stance}})\right).
 \label{eq:epsilon}
@@ -49,13 +49,13 @@ P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \mid q_k\right)
 P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \mid s^{\text{type}},s^{\text{stance}}\right)
 q_k(s^{\text{type}},s^{\text{stance}}).
 \]
-Partner response directly tests the type-by-stance model: a reliably defecting partner can produce low partner-response likelihood surprisal despite poor payoff, while an erratic cooperative partner can produce high partner-response likelihood surprisal despite favorable outcomes. The signal therefore tracks partner-response model fit rather than partner value.
+Partner response directly tests the type-by-stance model: a reliably defecting partner can produce low surprisal despite poor payoff, while an erratic cooperative partner can produce high surprisal despite favorable outcomes. The signal therefore tracks partner-response model fit rather than partner value.
 
 The neutral baseline is the squared surprisal of a chance-level two-outcome partner-response prediction,
 \[
 \sigma_0^2 = (-\log 0.5)^2.
 \]
-Because the partner response has two possible outcomes, a probability of $0.5$ corresponds to a model that predicts neither cooperation nor defection better than chance. Squaring places surprisal on a nonnegative error scale before signed affective charge is computed:
+Because the response modality is binary, probability $0.5$ corresponds to predicting neither cooperation nor defection better than chance. Squaring places surprisal on a nonnegative error scale before signed affective charge is computed:
 \begin{equation}
 \phi_k = \alpha\!\left(\sigma_0^2 - \epsilon_k^2\right),
 \label{eq:charge}
@@ -69,15 +69,16 @@ The agent then sets partner-specific policy precision from the posterior mean:
 \gamma_k = \gamma_{\text{base}} \,/\, \mathbb{E}_{q(\beta_k)}[\beta_k],
 \label{eq:gamma_update}
 \end{equation}
-where $\gamma_{\text{base}}$ is the baseline policy precision applied in the absence of affective modulation. Because $\beta_k$ represents inverse precision, higher values indicate that the partner model has been less reliable, producing a broader, less committed policy distribution. Lower values indicate stronger model fit, yielding higher $\gamma_k$ and sharper policy commitment.
+where $\gamma_{\text{base}}$ is the baseline policy precision. Because $\beta_k$ is inverse precision, higher expected $\beta_k$ yields broader, less committed policy inference, whereas lower expected $\beta_k$ yields higher $\gamma_k$ and sharper policy commitment.
 
-The $\beta_k$ posterior is maintained as an auxiliary precision tracker rather than as a hidden state inside the focal agent's generative model. This keeps the mechanism lightweight and easy to isolate experimentally, but it also means the agent does not form prior expectations over its own future confidence states; this limitation is discussed in Section~\ref{sec:discussion}.
+The $\beta_k$ posterior is maintained as an auxiliary precision tracker rather than as a hidden state inside the focal agent's generative model. This keeps the mechanism lightweight and experimentally isolable, but prevents the agent from forming prior expectations over its own future confidence states; this limitation is discussed in Section~\ref{sec:discussion}.
 
 \subsection{Cross-partner policy selection}
+\label{sec:cross_partner_policy}
 
-In partner-choice regimes, the policy set is partitioned by partner. For each partner \(k\), the set \(\Pi_k\) contains candidate policies involving that partner, such as different investment levels or action sequences directed toward \(k\). The corresponding partner model \(\mathcal{M}_k\) assigns each candidate policy an unnormalized policy-evidence score \(u_{k,\pi}\). Partner-specific precision \(\gamma_k\) is then used to regulate how strongly the agent commits among policies involving that partner.
+In partner-choice regimes, policy inference compares candidate partner--investment policies across relationships. For each partner \(k\), the set \(\Pi_k\) contains policies involving that partner, such as different investment levels or action sequences directed toward \(k\). The corresponding partner model \(\mathcal{M}_k\) assigns each candidate policy an unnormalized policy-evidence score \(u_{k,\pi}\), where larger values indicate stronger posterior support under the sign convention used for softmax policy inference. Partner-specific precision \(\gamma_k\) should sharpen or flatten commitment among policies involving partner \(k\), without by itself changing the average evidence for selecting that partner.
 
-To apply \(\gamma_k\) locally, we separate each partner's average policy evidence from the relative differences among that partner's policies. Let
+To apply \(\gamma_k\) locally, we separate each partner's mean policy evidence from the relative differences among that partner's policies. Let
 \[
 \bar{u}_k = \frac{1}{|\Pi_k|}\sum_{\pi\in\Pi_k} u_{k,\pi}
 \]
@@ -86,10 +87,11 @@ be the mean policy evidence for partner $k$. The precision-adjusted score is the
 \tilde{u}_{k,\pi} = \bar{u}_k + \gamma_k\left(u_{k,\pi} - \bar{u}_k\right),
 \label{eq:centered_policy_scores}
 \end{equation}
-where $\gamma_k$ is the partner-specific policy precision from Eq.~\eqref{eq:gamma_update}. This preserves the mean evidence associated with partner \(k\), while sharpening or flattening the differences among policies directed toward that partner. Higher \(\gamma_k\) amplifies those within-partner differences, producing more decisive policy commitment; lower \(\gamma_k\) compresses them, producing more tentative commitment.
+where $\gamma_k$ is the partner-specific policy precision from Eq.~\eqref{eq:gamma_update}. The transformation preserves the mean evidence for partner \(k\), while sharpening or flattening relative preferences among policies directed toward that partner. Higher \(\gamma_k\) amplifies within-partner differences, producing more decisive policy commitment; lower \(\gamma_k\) compresses them, producing more tentative commitment.
 
-The final policy posterior is computed by applying a softmax over the transformed scores \(\tilde{u}_{k,\pi}\) across all partners and candidate policies.
+The final policy posterior is computed by applying a softmax over the transformed scores \(\tilde{u}_{k,\pi}\) across all partners and candidate policies. This procedure does not change the per-partner generative models; it only determines how partner-local precision enters cross-partner policy comparison.
 
 \subsection{Simulation setup}
+\label{sec:simulation_setup}
 
-Simulations compare four affect-runtime variants: full partner-local precision, a shared-$\beta$ ablation that pools evidence across partners while keeping per-partner POMDP beliefs intact, a tracked-only ablation that updates $q(\beta_k)$ but fixes $\gamma_k = \gamma_{\text{base}}$, and a no-affect control that disables the $\beta$ tracker entirely. Reported conditions span the open graded decision regime, partner-choice regime, abrupt betrayal, precision-dynamics/profile variation, and forgiveness. Central comparisons use 30 seeds per condition; profile-scale experiments use 20 (Appendix~\ref{app:protocols}). Full condition definitions, episode lengths, and metrics are provided in Appendix~\ref{app:protocols}. Simulation code, analysis scripts, and experiment configurations will be released in a public repository upon acceptance.
+Simulations compare four affect-runtime variants: full partner-local precision, a shared-$\beta$ ablation that pools evidence across partners while keeping per-partner POMDP beliefs intact, a tracked-only ablation that updates $q(\beta_k)$ but fixes $\gamma_k = \gamma_{\text{base}}$, and a no-affect control that disables the $\beta$ tracker entirely. Conditions include open graded investment, partner choice, abrupt betrayal, and precision-dynamics/profile diagnostics. Full condition definitions, episode lengths, and metrics are provided in Appendix~\ref{app:protocols}. Simulation code, analysis scripts, and experiment configurations will be released in a public repository upon acceptance.

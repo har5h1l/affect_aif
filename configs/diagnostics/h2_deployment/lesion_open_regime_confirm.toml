@@ -40,8 +40,11 @@ affect = "precision"
 planning_horizon = 4
 epistemic_value = false
 
+[runtime]
+profile = "data_collection"
+
 [analysis]
-auto = true
+auto = false
 primary = "h2_deployment"
 compare = ["affect", "global_beta", "lesioned", "no_epistemic"]
 metrics = ["payoff", "precision", "stance_accuracy", "deployment", "evidence_effects"]

@@ -10,7 +10,6 @@ raw data store.
 - `archive.md`: archive policy for historical or incomplete material
 - `cleanup/`: local/server cleanup manifests from the public repo cleanup
 - `../../results/`: tracked compact public result summaries and manifests
-- `runs/`: per-run provenance notes for completed current-architecture runs
 - `../manuscript/`: manuscript source, source tables, figures, and
   paper-facing notes
 
@@ -26,6 +25,11 @@ directory, tracked summaries under `results/paper/` or `results/diagnostics/`,
 and reproducible config paths. If a local or remote results mirror is pruned,
 keep the documentation trail intact and rerun experiments before refreshing
 interpreted numbers.
+
+Historical per-run notes should stay outside the public docs route unless they
+name present-day configs under `configs/paper/`, `configs/diagnostics/`, or
+`configs/future/`. Old-run prose with removed config paths belongs in local or
+server archives, not in tracked current documentation.
 
 The public result scaffold is:
 

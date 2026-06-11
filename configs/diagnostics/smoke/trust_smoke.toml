@@ -26,6 +26,9 @@ id = "affect"
 affect = "precision"
 planning_horizon = 1
 
+[runtime]
+profile = "data_collection"
+
 [analysis]
 auto = false
 primary = "h0_policy_openness"

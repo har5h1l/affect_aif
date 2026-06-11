@@ -61,6 +61,12 @@ def _spec_summary(spec: ExperimentSpec) -> dict[str, object]:
         "variants": [variant.id for variant in spec.variants],
         "sweeps": [sweep.parameter for sweep in spec.sweeps],
         "expanded_runs": len(spec.expand_runs()),
+        "runtime": {
+            "profile": spec.runtime.profile,
+            "max_policies": spec.runtime.max_policies,
+            "debug_mode": spec.runtime.debug_mode,
+            "log_policy_traces": spec.runtime.log_policy_traces,
+        },
         "analysis": {"auto": spec.analysis.auto, "primary": spec.analysis.primary},
     }
 

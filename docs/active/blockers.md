@@ -36,6 +36,19 @@
 ## Technical Follow-Ups
 
 - No live affect_aif experiment is currently blocking the manuscript packet.
+- Before making the repository public, remove or consolidate internal-only
+  Markdown routing files that are not useful to external readers. The subtree
+  `AGENTS.md` files are helpful during cleanup, but they should be reviewed
+  against the public README/docs surface before release.
+- Before making the repository public, remove or archive internal planning
+  transcripts such as `docs/superpowers/plans/` and `docs/superpowers/specs/`.
+  They mention old paths, local/server cleanup details, and stale public-surface
+  designs; keep only current docs that name present-day configs and result
+  cards.
+- Keep old-run provenance out of the tracked public docs surface unless it has
+  been rewritten to point at current `configs/paper/`, `configs/diagnostics/`,
+  or `configs/future/` paths. Historical run notes with removed config paths
+  should live in local or server archives instead.
 - H5 confirmation reached structural finality under
   `results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/`
   and has been interpreted in the paper packet.

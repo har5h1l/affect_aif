@@ -52,4 +52,5 @@ Seed scales as stated in Methods:
 - **20 seeds:** profile descriptive figures (§3.6).
 - **30 seeds:** central behavioural confirmations, currently abrupt betrayal.
 
-For model and experiment background, use `docs/model/` and `docs/experiments/`.
+For model and experiment background, use `docs/overview/` and
+`docs/experiments/`.

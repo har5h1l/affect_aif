@@ -5,22 +5,22 @@ This appendix specifies the POMDP components used by the focal agent.
 
 \subsection{Hidden state factors and observations}
 
-As described in Section~2.2, the focal agent's generative model for each partner $k$ maintains three latent factors:
+As described in Section~\ref{sec:partner_models}, the focal agent's generative model for each partner $k$ maintains three hidden factors:
 \begin{align}
 s_k^{\text{type}} &\in \{\text{cooperator, reciprocator,} \nonumber\\
-  &\phantom{s_k^{\text{type}} \in \{}\;\text{exploiter, random}\} && \text{(latent behavioral type)} \label{eq:s_type}\\
-s_k^{\text{stance}} &\in \{\text{trusting, neutral, hostile}\} && \text{(latent stance)} \label{eq:s_stance}\\
+  &\phantom{s_k^{\text{type}} \in \{}\;\text{exploiter, random}\} && \text{(hidden behavioral type)} \label{eq:s_type}\\
+s_k^{\text{stance}} &\in \{\text{trusting, neutral, hostile}\} && \text{(hidden stance)} \label{eq:s_stance}\\
 s^{\mathrm{own}} &\in \mathcal{A}=\{0,1,2,3,4,5\} && \text{(executed investment level)}
 \end{align}
 The own-action state is \emph{deterministic bookkeeping}: the agent always knows its own action, and this factor makes that knowledge available to the observation model. It is not a psychological hidden variable. The joint hidden state per partner spans \(4 \times 3 \times 6 = 72\) configurations.
 
-Observations are partner action and payoff:
+Observations are partner response and payoff:
 \begin{align}
 o_k^{\text{act}} &\in \{\text{cooperate, defect}\} & &\text{(partner response)}\\
 o_k^{\text{pay}} &\in \{5,6,7,8,9,10,10.5,11,11.5,12,12.5\} & &\text{(focal agent's realized payoff)}
 \end{align}
 
-\subsection{Partner-action likelihood}
+\subsection{Partner-response likelihood}
 
 The core of the generative model is the \emph{partner cooperation likelihood table}, which defines the probability the partner cooperates given type and stance:
 \begin{table}[H]
@@ -44,7 +44,7 @@ This table is the foundation of the likelihood modality $A^{\text{act}}_k$. Entr
 P\!\left(o_k^{\mathrm{act}}=\mathrm{cooperate}\mid s_k^{\mathrm{type}}, s_k^{\mathrm{stance}}\right),
 \label{eq:a_act_coop}
 \end{equation}
-with $P(o_k^{\mathrm{act}}=\mathrm{defect}\mid\cdot)=1-P(o_k^{\mathrm{act}}=\mathrm{cooperate}\mid\cdot)$. The modality is uniform over $s^{\mathrm{own}}$: partner action depends only on inferred type and stance. This operationalizes what the agent considers a predictable partner---a cooperative reciprocator in a trusting stance has high predicted cooperation; an exploiter in a hostile stance has low predicted cooperation.
+with $P(o_k^{\mathrm{act}}=\mathrm{defect}\mid\cdot)=1-P(o_k^{\mathrm{act}}=\mathrm{cooperate}\mid\cdot)$. The modality is uniform over $s^{\mathrm{own}}$: partner response depends only on inferred type and stance. This operationalizes what the agent considers a predictable partner---a cooperative reciprocator in a trusting stance has high predicted cooperation; an exploiter in a hostile stance has low predicted cooperation.
 
 \subsection{Payoff likelihood}
 
@@ -130,7 +130,7 @@ This factor is not a psychological hidden variable; it makes the agent's execute
 \subsection{Preferences, priors, and policy priors}
 
 \paragraph{Observation preferences ($C_k$).}
-There is no direct preference over partner actions:
+There is no direct preference over partner responses:
 \begin{equation}
 C_k^{\mathrm{act}} = [0,\,0] \quad \text{over } \{\mathrm{cooperate},\mathrm{defect}\}.
 \label{eq:c_act}
@@ -155,4 +155,4 @@ Policy priors are uniform over admissible graded investment sequences at the con
 
 \subsection{Partner implementation}
 
-Partner implementation follows Section~2.1. Four environment-side partners maintain latent type and stance and sample actions from the cooperation likelihood in Table~\ref{tab:coop_likelihood}, undergoing investment-dependent stance transitions per Table~\ref{tab:stance_transition}. Partners do not perform variational inference or maintain affective precision estimates, isolating the focal agent's precision mechanism before extending to reciprocal active-inference partners.
+Partner implementation follows Section~\ref{sec:trust_game}. Four environment-side partners maintain hidden type and stance and sample cooperate-or-defect responses from the cooperation likelihood in Table~\ref{tab:coop_likelihood}, undergoing investment-dependent stance transitions per Table~\ref{tab:stance_transition}. Partners do not perform variational inference or maintain affective precision estimates, isolating the focal agent's precision mechanism before extending to reciprocal active-inference partners.

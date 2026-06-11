@@ -91,9 +91,9 @@ Primary smoke readouts:
 
 The reduced H0-H6 post-fix smoke completed at
 `results/diagnostics/spine_smoke/raw/`. It is current smoke
-evidence, not confirmation-scale evidence. The earlier
-`results/log_surprisal_spine_smoke_20260527/` run is pre-fix diagnostic
-provenance only.
+evidence, not confirmation-scale evidence. Earlier pre-fix smoke outputs are
+historical provenance only and should stay out of the public docs route unless
+rewritten against current result cards.
 
 Current read:
 

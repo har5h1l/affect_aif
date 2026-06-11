@@ -36,8 +36,11 @@ parameter = "planning_horizon"
 values = [1, 2, 3, 4, 8]
 applies_to = ["no_affect", "affect", "global_beta"]
 
+[runtime]
+profile = "data_collection"
+
 [analysis]
-auto = true
+auto = false
 primary = "h0_policy_openness"
 compare = ["affect", "global_beta", "no_affect"]
 metrics = ["payoff", "precision", "q_pi_entropy"]

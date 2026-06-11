@@ -84,22 +84,216 @@
       "figure": "docs/manuscript/figures/fig_forgiveness.pdf"
     }
   ],
-  "moved_out": {
-    "diagnostics": [
-      "configs/diagnostics/h1_model_fitness/",
-      "configs/diagnostics/h2_deployment/",
-      "configs/diagnostics/h3_locality/",
-      "configs/diagnostics/h4_social_allocation/",
-      "configs/diagnostics/h6_perturbation/"
-    ],
-    "future": [
-      "configs/future/mixed_volatility.toml",
-      "results/future/mixed_volatility/"
-    ],
-    "demo": [
-      "configs/demo/model_fitness.toml",
-      "configs/demo/betrayal_adaptation.toml",
-      "configs/demo/alpha_sweep.toml"
-    ]
-  }
+  "batch_name": "paper",
+  "batch_id": "paper",
+  "git_commit": "74b28afdff8c152080e734da0378408cb5edede0",
+  "output_dir": "results/paper",
+  "workers": 1,
+  "dry_run": true,
+  "configs": [
+    {
+      "path": "configs/paper/01_predictability_value.toml",
+      "name": "predictability_value",
+      "family": "trust",
+      "hypothesis_id": "predictability_value",
+      "experiment_id": "predictability_value",
+      "rounds": 200,
+      "replications": 30,
+      "variants": [
+        "no_affect",
+        "affect",
+        "global_beta"
+      ],
+      "sweeps": [],
+      "expanded_runs": 90,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/02_deployment_ablation.toml",
+      "name": "deployment_ablation",
+      "family": "trust",
+      "hypothesis_id": "deployment_ablation",
+      "experiment_id": "deployment_ablation",
+      "rounds": 200,
+      "replications": 3,
+      "variants": [
+        "affect",
+        "lesioned",
+        "global_beta",
+        "no_epistemic"
+      ],
+      "sweeps": [],
+      "expanded_runs": 12,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/03_partner_selection.toml",
+      "name": "partner_selection",
+      "family": "trust",
+      "hypothesis_id": "partner_selection",
+      "experiment_id": "partner_selection",
+      "rounds": 200,
+      "replications": 3,
+      "variants": [
+        "no_affect",
+        "affect",
+        "global_beta"
+      ],
+      "sweeps": [],
+      "expanded_runs": 9,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/04_betrayal_adaptation.toml",
+      "name": "betrayal_adaptation",
+      "family": "trust",
+      "hypothesis_id": "betrayal_adaptation",
+      "experiment_id": "betrayal_adaptation",
+      "rounds": 120,
+      "replications": 30,
+      "variants": [
+        "no_affect",
+        "affect",
+        "lesioned",
+        "global_beta"
+      ],
+      "sweeps": [],
+      "expanded_runs": 120,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/05a_alpha_sweep.toml",
+      "name": "open_graded",
+      "family": "trust",
+      "hypothesis_id": "exp_a",
+      "experiment_id": "open_graded",
+      "rounds": 200,
+      "replications": 20,
+      "variants": [
+        "alpha_0p05",
+        "alpha_0p1",
+        "alpha_0p3",
+        "alpha_0p5",
+        "alpha_1p0",
+        "alpha_2p0",
+        "alpha_4p0",
+        "alpha_8p0"
+      ],
+      "sweeps": [],
+      "expanded_runs": 160,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/05a_alpha_sweep.toml",
+      "name": "betrayal",
+      "family": "trust",
+      "hypothesis_id": "exp_a",
+      "experiment_id": "betrayal",
+      "rounds": 200,
+      "replications": 20,
+      "variants": [
+        "alpha_0p05",
+        "alpha_0p1",
+        "alpha_0p3",
+        "alpha_0p5",
+        "alpha_1p0",
+        "alpha_2p0",
+        "alpha_4p0",
+        "alpha_8p0"
+      ],
+      "sweeps": [],
+      "expanded_runs": 160,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/05b_prior_factorial.toml",
+      "name": "open_graded",
+      "family": "trust",
+      "hypothesis_id": "exp_b",
+      "experiment_id": "open_graded",
+      "rounds": 200,
+      "replications": 20,
+      "variants": [
+        "naive_low_alpha",
+        "naive_high_alpha",
+        "cautious_low_alpha",
+        "cautious_high_alpha",
+        "default_reference",
+        "no_affect"
+      ],
+      "sweeps": [],
+      "expanded_runs": 120,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/05b_prior_factorial.toml",
+      "name": "betrayal",
+      "family": "trust",
+      "hypothesis_id": "exp_b",
+      "experiment_id": "betrayal",
+      "rounds": 200,
+      "replications": 20,
+      "variants": [
+        "naive_low_alpha",
+        "naive_high_alpha",
+        "cautious_low_alpha",
+        "cautious_high_alpha",
+        "default_reference",
+        "no_affect"
+      ],
+      "sweeps": [],
+      "expanded_runs": 120,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/05b_prior_factorial.toml",
+      "name": "partner_choice",
+      "family": "trust",
+      "hypothesis_id": "exp_b",
+      "experiment_id": "partner_choice",
+      "rounds": 200,
+      "replications": 20,
+      "variants": [
+        "naive_low_alpha",
+        "naive_high_alpha",
+        "cautious_low_alpha",
+        "cautious_high_alpha",
+        "default_reference",
+        "no_affect"
+      ],
+      "sweeps": [],
+      "expanded_runs": 120,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    },
+    {
+      "path": "configs/paper/05c_forgiveness.toml",
+      "name": "forgiveness",
+      "family": "trust",
+      "hypothesis_id": "exp_c",
+      "experiment_id": "forgiveness",
+      "rounds": 200,
+      "replications": 20,
+      "variants": [
+        "naive_low_alpha",
+        "naive_high_alpha",
+        "cautious_low_alpha",
+        "cautious_high_alpha",
+        "default_reference",
+        "no_affect"
+      ],
+      "sweeps": [],
+      "expanded_runs": 120,
+      "analysis_auto": false,
+      "runtime_profile": "data_collection"
+    }
+  ]
 }

@@ -129,6 +129,7 @@ def _write_dry_run_manifest(args) -> int:
                     "variants": [variant.id for variant in spec.variants],
                     "sweeps": [sweep.parameter for sweep in spec.sweeps],
                     "expanded_runs": len(runs),
+                    "runtime_profile": spec.runtime.profile,
                     "analysis_auto": spec.analysis.auto,
                 }
             )
@@ -191,6 +192,7 @@ def _serial_single_config_run(args) -> int:
                 "hypothesis_id": spec.hypothesis.id,
                 "experiment_id": spec.experiment.id,
                 "results_path": str(results_path),
+                "runtime_profile": spec.runtime.profile,
                 "workers": 1,
             },
             indent=2,

@@ -49,8 +49,11 @@ affect = "precision"
 planning_horizon = 4
 initial_beta = 2.0
 
+[runtime]
+profile = "data_collection"
+
 [analysis]
-auto = true
+auto = false
 primary = "h6_perturbation"
 compare = ["affect", "low_gain", "high_gain", "cautious_prior"]
 switch_window = [1, 10]

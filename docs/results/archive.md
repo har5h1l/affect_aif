@@ -8,6 +8,11 @@ Archive material can be useful for provenance, but it is not current evidence.
 Current paper evidence must live under `results/paper/`; retained non-paper
 diagnostics must live under `results/diagnostics/`.
 
+Historical per-run notes that refer to removed config paths are intentionally
+kept out of the public docs route. Preserve them only in local or server
+archives unless they are rewritten against present-day configs and result
+cards.
+
 ## Archive Buckets
 
 The server cleanup organized archive material into:

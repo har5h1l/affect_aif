@@ -169,6 +169,7 @@ def test_experiment_run_dry_run_writes_manifest(tmp_path):
     manifest = json.loads((out / "dry_run" / "manifest.json").read_text())
     assert manifest["batch_name"] == "dry_run"
     assert "git_commit" in manifest
+    assert manifest["configs"][0]["runtime_profile"] == "data_collection"
 
 
 def test_demo_configs_dry_run_through_run_py_writes_manifest(tmp_path):
@@ -211,6 +212,7 @@ def test_demo_configs_dry_run_through_run_py_writes_manifest(tmp_path):
         "open_graded",
         "betrayal",
     ]
+    assert {entry["runtime_profile"] for entry in manifest["configs"]} == {"data_collection"}
 
 
 def test_experiment_inspect_accepts_suite_config():
@@ -233,4 +235,5 @@ def test_experiment_inspect_accepts_suite_config():
         "open_graded",
         "betrayal",
     ]
+    assert {spec["runtime"]["profile"] for spec in payload["specs"]} == {"data_collection"}
     assert payload["expanded_runs"] == 320

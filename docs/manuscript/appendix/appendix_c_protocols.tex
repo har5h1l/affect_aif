@@ -5,13 +5,13 @@ This appendix summarizes simulation conditions, replication counts, schedules, a
 
 \subsection{Simulation conditions}
 
-All reported experiments use one focal active-inference agent with four partners ($K=4$), per-partner generative models, graded investment actions, and environment-side partner policies (Appendix~\ref{app:pomdp}). Conditions differ by assignment mode, scheduled partner changes, and precision/profile manipulations within the graded payoff regime.
+All reported experiments use one focal active-inference agent with four partners (\(K=4\)), per-partner generative models, graded investment actions, and environment-side partner policies (Appendix~\ref{app:pomdp}). Conditions differ by assignment mode, scheduled partner changes, and precision/profile manipulations within the graded payoff regime. In conditions without explicit partner choice, the interaction partner is assigned according to the configured protocol; in partner-choice conditions, the agent selects the partner before selecting an investment level.
 
-\textbf{Open graded decision regime.} The graded regime uses a discretized investment level while keeping the same latent type--stance structure. This is the primary deployment-contrast setting (Section~\ref{sec:deployment}): affect, no-affect, and tracked-only variants are compared on policy entropy and cumulative payoff.
+\textbf{Open graded decision regime.} The graded regime uses a discretized investment level while keeping the same hidden type--stance structure. This is the primary deployment-contrast setting (Section~\ref{sec:deployment}): affect, no-affect, and tracked-only variants are compared on policy entropy and cumulative payoff.
 
 \textbf{Predictability-over-value locality probe.} A 100-round partner-choice graded environment with partner-local, shared-$\beta$, and no-affect variants tests whether $\beta_k$-derived policy precision tracks partner-response likelihood surprisal more strongly than realized payoff (Section~\ref{sec:predictability_value}). The payoff panel reports the same active-encounter analysis window used for the locality-probe correlation readouts.
 
-\textbf{Partner-choice regime.} The agent first selects a partner, then selects an investment level toward that partner each round. Partner selection is where engagement reorganization and social-allocation readouts are defined (Section~\ref{sec:partner_choice}).
+\textbf{Partner-choice regime.} The agent first selects a partner, then selects an investment level toward that partner each round. With four partners and six graded investment levels, the one-step partner-choice setting can equivalently be represented as \(4 \times 6 = 24\) partner--investment branches. Partner selection is where engagement reorganization and social-allocation readouts are defined (Section~\ref{sec:partner_choice}).
 
 \textbf{Abrupt betrayal.} A partner-choice graded environment with scheduled stance betrayal on a previously cooperative partner tests post-switch reallocation, entropy, payoff, and joint accuracy (Section~\ref{sec:betrayal}).
 
@@ -74,7 +74,35 @@ Partner-choice readouts quantify how precision reshapes \emph{who} the agent eng
 
 \textbf{$\beta_k$ range.} Unless otherwise specified, $\beta_k$ range denotes the mean within-episode range of the posterior mean $\mathbb{E}_{q}[\beta_k]$, averaged across relevant partners and seeds. It is an observed precision-dynamics amplitude metric, not the fixed support of the categorical $\beta_k$ variable.
 
-\textbf{Betrayal timing metrics.} Recovery time and related latency readouts measure rounds after a switch until selection or payoff returns toward baseline thresholds (profile alpha-sweep, prior-gain factorial, and betrayal analyses).
+\textbf{Profile diagnostics.} Investment churn is the fraction of adjacent rounds in which the selected investment level changes. Early exploiter investment is the fraction of rounds 1--30 in which the selected partner is an exploiter and the investment level is at least half of the available action range. Trust asymmetry is the ratio of withdrawal latency after the first defection to initial high-investment approach latency.
+
+\textbf{Betrayal timing metrics.} Recovery rounds and related latency readouts measure rounds after a switch until selection or payoff returns toward baseline thresholds (profile alpha-sweep, prior-gain factorial, and betrayal analyses).
+
+\subsection{Locality-probe correlation readouts}
+\label{sec:locality_correlations}
+
+For the predictability-over-payoff locality probe (Section~\ref{sec:predictability_value}), correlations are computed at the partner--seed unit level ($n=120$ units across 30 seeds). Main-text claims use active-encounter partial correlations that control for encounter count, because partner-choice episodes couple payoff, surprisal, and exposure. Uncontrolled Pearson correlations are reported here for completeness.
+
+\begin{table}[H]
+\centering
+\caption{Locality-probe correlations by affect-runtime variant.}
+\label{tab:locality_correlations}
+\begin{tabular}{lcc}
+\toprule
+Variant / association & Raw $r$ & Partial $r$ \\
+\midrule
+\multicolumn{3}{l}{\textit{Partner-local precision}} \\
+\quad Precision--surprisal & $-0.949$ & $-0.882$ \\
+\quad Precision--payoff & $-0.748$ & $0.130$ \\
+\addlinespace
+\multicolumn{3}{l}{\textit{Shared-$\beta$ ablation}} \\
+\quad Precision--surprisal & $-0.555$ & $-0.380$ \\
+\quad Precision--payoff & $-0.447$ & $0.049$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Negative precision--surprisal associations indicate that higher partner-response likelihood surprisal corresponds to lower $\beta_k$-derived policy precision. Figure~\ref{fig:model_fitness_contrast} plots absolute partial-correlation magnitudes for the partner-local and shared-$\beta$ variants.
 
 \subsection{Replication summary}
 

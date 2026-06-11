@@ -83,6 +83,7 @@ planning_horizon = 2
 epistemic_value = false
 
 [runtime]
+profile = "data_collection"
 max_policies = 4096
 log_policy_traces = false
 

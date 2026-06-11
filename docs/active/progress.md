@@ -420,7 +420,8 @@ change-detection/volatility work only.
    `RECOVERY_DONE`, and `results/paper/05a_alpha_sweep/raw/` through `results/paper/05c_forgiveness/raw/` each contain
    final `results.csv`, `metrics.csv`, `manifest.json`, and `README.md`.
 2. Confirm generic analysis directories exist for Exp A-D where applicable:
-   `results/exp_*/analysis/`.
+   current paper and future raw result roots should each carry their matching
+   configured analysis artifacts when analysis is part of the readout.
 3. Fill `\resultp{...}` placeholders in `sections/03_results.tex` Section 3.6
    only after finality is established and the metric directions are checked
    against the planned readouts.

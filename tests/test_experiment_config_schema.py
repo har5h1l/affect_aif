@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 from experiment_spec_helpers import write_example_toml
 
 from experiments.trust.factory import create_native_runtime_from_run
-from experiments.trust.spec import ExperimentSpec, load_experiment_specs
+from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, load_experiment_specs
 
 
 @pytest.fixture
@@ -265,7 +266,7 @@ def test_runtime_debug_mode_enables_policy_trace_logging(tmp_path):
         + """
 
 [runtime]
-debug_mode = true
+profile = "debug"
 """,
         encoding="utf-8",
     )
@@ -273,8 +274,57 @@ debug_mode = true
 
     cfg = spec.expand_runs()[0].to_runtime_config()
 
+    assert spec.runtime.profile == "debug"
     assert cfg.debug_mode
     assert cfg.log_policy_traces
+
+
+def test_runtime_data_collection_profile_keeps_policy_traces_compact(tmp_path):
+    path = write_example_toml(tmp_path / "data_collection.toml")
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        + """
+
+[runtime]
+profile = "data_collection"
+""",
+        encoding="utf-8",
+    )
+    spec = ExperimentSpec.from_toml(path)
+
+    cfg = spec.expand_runs()[0].to_runtime_config()
+
+    assert spec.runtime.profile == "data_collection"
+    assert not cfg.debug_mode
+    assert not cfg.log_policy_traces
+
+
+def test_runtime_data_collection_profile_rejects_policy_trace_logging(tmp_path):
+    path = write_example_toml(tmp_path / "bad_data_collection.toml")
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        + """
+
+[runtime]
+profile = "data_collection"
+log_policy_traces = true
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="data_collection"):
+        ExperimentSpec.from_toml(path)
+
+
+def test_maintained_configs_declare_runtime_profile():
+    config_root = Path(__file__).resolve().parents[1] / "configs"
+    for path in sorted(config_root.glob("*/*.toml")) + sorted(config_root.glob("*/*/*.toml")):
+        config_text = path.read_text(encoding="utf-8")
+        assert 'profile = "data_collection"' in config_text or 'profile = "debug"' in config_text, path
+        for spec in load_experiment_specs(path):
+            assert spec.runtime.profile in {"data_collection", "debug"}, path
+            if spec.runtime.profile == "data_collection":
+                assert not spec.analysis.auto, path
 
 
 def test_analysis_primary_default_is_slugified(tmp_path):
@@ -320,6 +370,17 @@ def test_spec_payload_roundtrip_preserves_expand_runs(example_spec):
     assert len(restored_runs) == len(original_runs)
     assert [run.variant_id for run in restored_runs] == [run.variant_id for run in original_runs]
     assert restored_runs[0].to_runtime_config().payoff_mode == original_runs[0].to_runtime_config().payoff_mode
+
+
+def test_expanded_run_payload_normalizes_legacy_debug_runtime(example_spec):
+    payload = example_spec.expand_runs()[0].to_payload()
+    payload["runtime"] = {"debug_mode": True}
+
+    restored = ExpandedRunSpec.from_payload(payload)
+
+    assert restored.runtime.profile == "debug"
+    assert restored.runtime.debug_mode
+    assert restored.runtime.log_policy_traces
 
 
 def test_stance_switch_spec_exports_runtime_dict():

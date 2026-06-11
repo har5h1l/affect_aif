@@ -67,6 +67,13 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "SELECTED_DEMOS" in text
     assert "run_demo(" in text
     assert "show_demo(" in text
+    assert "guided public walkthrough" in text
+    assert "What To Look For" in text
+    assert "Appendix-Level Extensions" in text
+    assert "mechanism_snapshot" in text
+    assert "plot_profile_metrics" in text
+    assert "plot_timecourse" in text
+    assert "interpretation_card" in text
     assert "configs/demo/01_predictability_value.toml" in text
     assert "configs/demo/02_deployment_ablation.toml" in text
     assert "configs/demo/03_partner_selection.toml" in text
@@ -90,6 +97,16 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "Optional Forgiveness Demo: Run And Analyze" in text
     assert text.count("= run_demo(") == 7
     assert text.count("show_demo(") >= 8
+
+
+def test_public_notebooks_do_not_store_local_outputs():
+    for path in [ROOT / "notebooks" / "demo.ipynb", ROOT / "notebooks" / "reproduce.ipynb"]:
+        payload = json.loads(path.read_text())
+        for index, cell in enumerate(payload.get("cells", [])):
+            if cell.get("cell_type") != "code":
+                continue
+            assert cell.get("outputs", []) == [], f"{path.name} cell {index} stores execution output"
+            assert cell.get("execution_count") is None, f"{path.name} cell {index} stores execution count"
 
 
 def test_demo_notebook_sanitizes_markdown_repo_urls():

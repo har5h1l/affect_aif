@@ -26,6 +26,29 @@ Inspect expansion without writing outputs:
 python scripts/experiment/inspect.py --config configs/paper/05a_alpha_sweep.toml
 ```
 
+## Execution Modes
+
+Config folders and runtime profiles answer different questions. Folders such
+as `paper/`, `demo/`, `diagnostics/`, and `future/` define evidence role.
+`[runtime].profile` defines how heavy the execution should be.
+
+The runner currently has these execution paths:
+
+- `--dry-run`: validates config expansion and writes a manifest without
+  simulating episodes.
+- `profile = "data_collection"`: the default maintained-config profile; writes
+  essential per-round result rows and compact checkpoints as quickly as the
+  configured model allows.
+- `--verbose --verbosity-mode stage_stream`: emits structured progress for
+  local inspection.
+- `profile = "debug"`: enables policy-trace logging for debugging. Do not use
+  it for statistical data collection because policy arrays can make checkpoints
+  and CSVs very large.
+- post-hoc analysis: run `scripts/analysis/*` after data collection. Keep
+  `[analysis].auto = false` for maintained data-collection configs; enable it
+  only for narrow local configs where immediate summaries matter more than
+  throughput.
+
 For repeated same-shape local runs, opt into JAX's persistent compilation cache:
 
 ```bash

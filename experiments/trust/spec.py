@@ -44,6 +44,7 @@ PAYOFF_VALUES = {"binary", "graded"}
 ASSIGNMENT_VALUES = {"random", "agent_choice"}
 AFFECT_VALUES = {"none", "precision", "tracked_only", "global_beta"}
 FAMILY_VALUES = {"trust", "multifocal"}
+RUNTIME_PROFILE_VALUES = {"data_collection", "debug"}
 
 
 @dataclass(frozen=True)
@@ -130,6 +131,7 @@ class SweepSpec:
 
 @dataclass(frozen=True)
 class RuntimeSpec:
+    profile: str = "data_collection"
     max_policies: int = 4096
     debug_mode: bool = False
     log_policy_traces: bool = False
@@ -235,7 +237,7 @@ class ExpandedRunSpec:
             scenario=ScenarioSpec(**scenario_data),
             variant=VariantSpec(**variant_data),
             analysis=AnalysisSpec(**payload.get("analysis", {})),
-            runtime=RuntimeSpec(**payload.get("runtime", {})),
+            runtime=_parse_runtime(payload.get("runtime", {})),
         )
 
 
@@ -264,7 +266,7 @@ class ExperimentSpec:
         if not variants:
             raise ValueError("experiment spec requires at least one [[variants]] entry")
         sweeps = tuple(_parse_sweep(item) for item in data.get("sweeps", ()))
-        runtime = RuntimeSpec(**data.get("runtime", {}))
+        runtime = _parse_runtime(data.get("runtime", {}))
         analysis = _parse_analysis(data.get("analysis", {}), hypothesis)
         return cls(
             hypothesis=hypothesis,
@@ -360,7 +362,7 @@ class ExperimentSpec:
             SweepSpec(**{**item, "values": tuple(item["values"]), "applies_to": tuple(item["applies_to"])})
             for item in data.get("sweeps", ())
         )
-        data["runtime"] = RuntimeSpec(**data.get("runtime", {}))
+        data["runtime"] = _parse_runtime(data.get("runtime", {}))
         analysis = dict(data.get("analysis", {}))
         for key in ("compare", "switch_window", "metrics"):
             analysis[key] = tuple(analysis.get(key, ()))
@@ -424,7 +426,7 @@ def _parse_suite(data: dict[str, Any], path: Path) -> list[ExperimentSpec]:
             if variant_entries is not None
             else shared_variants
         )
-        runtime = RuntimeSpec(**_merge_table(default_runtime, runtime_entry))
+        runtime = _parse_runtime(_merge_table(default_runtime, runtime_entry))
         analysis = _parse_analysis(_merge_table(default_analysis, analysis_entry), hypothesis)
         specs.append(
             ExperimentSpec(
@@ -477,6 +479,22 @@ def _parse_scenario(data: dict[str, Any]) -> ScenarioSpec:
     scenario["stance_switches"] = tuple(StanceSwitchSpec(**item) for item in scenario.get("stance_switches", ()))
     scenario["type_switches"] = tuple(TypeSwitchSpec(**item) for item in scenario.get("type_switches", ()))
     return ScenarioSpec(**scenario)
+
+
+def _parse_runtime(data: dict[str, Any]) -> RuntimeSpec:
+    runtime = dict(data)
+    profile = str(runtime.get("profile", "debug" if runtime.get("debug_mode") else "data_collection"))
+    if profile not in RUNTIME_PROFILE_VALUES:
+        raise ValueError(f"runtime.profile must be one of {sorted(RUNTIME_PROFILE_VALUES)}")
+    if profile == "data_collection" and (runtime.get("debug_mode") or runtime.get("log_policy_traces")):
+        raise ValueError("runtime.profile='data_collection' cannot enable debug_mode or log_policy_traces")
+    if profile == "debug":
+        if runtime.get("debug_mode") is False or runtime.get("log_policy_traces") is False:
+            raise ValueError("runtime.profile='debug' requires debug_mode and log_policy_traces")
+        runtime["debug_mode"] = True
+        runtime["log_policy_traces"] = True
+    runtime["profile"] = profile
+    return RuntimeSpec(**runtime)
 
 
 def _validate_family_sections(experiment: ExperimentMeta, benchmark: object | None) -> None:

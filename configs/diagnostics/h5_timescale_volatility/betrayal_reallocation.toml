@@ -47,10 +47,11 @@ affect = "global_beta"
 planning_horizon = 4
 
 [runtime]
+profile = "data_collection"
 max_policies = 4096
 
 [analysis]
-auto = true
+auto = false
 primary = "h5_timescale_volatility"
 compare = ["affect", "global_beta", "no_affect", "lesioned"]
 switch_window = [1, 10]

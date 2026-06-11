@@ -79,10 +79,11 @@ initial_beta = 2.0
 beta_levels = [0.67, 1.0, 1.5, 2.0, 3.0]
 
 [runtime]
+profile = "data_collection"
 max_policies = 4096
 
 [analysis]
-auto = true
+auto = false
 primary = "h5_timescale_volatility"
 compare = [
   "affect_default",

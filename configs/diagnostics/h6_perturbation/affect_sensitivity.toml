@@ -36,8 +36,11 @@ parameter = "alpha_charge"
 values = [0.5, 1.0, 2.0, 3.0, 5.0, 8.0]
 applies_to = ["affect"]
 
+[runtime]
+profile = "data_collection"
+
 [analysis]
-auto = true
+auto = false
 primary = "h6_perturbation"
 compare = ["affect"]
 switch_window = [1, 10]

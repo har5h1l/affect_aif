@@ -8,7 +8,7 @@ directly matched to the task. Do not sweep all handoffs by default.
 
 Create handoffs as `YYYY-MM-DD-lowercase-kebab-slug.md`. Preserve durable
 project state in `docs/active/`, stable model/experiment references in
-`docs/model/` and `docs/experiments/`, interpreted evidence in
+`docs/overview/` and `docs/experiments/`, interpreted evidence in
 `docs/results/`, and implementation plans in `docs/superpowers/plans/`.
 
 For server work, include tmux session, Mango process name, working directory,

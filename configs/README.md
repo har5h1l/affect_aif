@@ -4,6 +4,12 @@ TOML configs are the public experiment surface. All maintained configs use the
 same `ExperimentSpec` envelope and expand explicit `[[variants]]` into
 seeded runs.
 
+Config folders describe evidence role. `[runtime].profile` describes execution
+weight. Maintained public configs use `profile = "data_collection"` so full
+batches collect essential rows/checkpoints without policy-trace payloads.
+Use `profile = "debug"` only for focused debugging configs that intentionally
+need policy traces.
+
 ## Choose A Config
 
 - `paper/`: paper evidence reproduction, numbered in manuscript-results order.

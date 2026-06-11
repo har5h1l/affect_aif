@@ -25,6 +25,7 @@ endowment = 10.0
 multiplier = 3.0
 
 [defaults.runtime]
+profile = "data_collection"
 max_policies = 4096
 
 [defaults.analysis]

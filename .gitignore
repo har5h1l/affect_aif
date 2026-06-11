@@ -31,6 +31,7 @@ dist/
 results/**
 !results/
 !results/.gitkeep
+!results/AGENTS.md
 !results/README.md
 !results/paper/
 !results/paper/**/
@@ -58,6 +59,7 @@ results/**/*checkpoint*
 results/**/*.log
 outputs/
 artifacts/
+tmp/
 
 # LaTeX build artifacts
 docs/manuscript/*.aux
