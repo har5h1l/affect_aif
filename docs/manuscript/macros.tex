@@ -27,6 +27,13 @@
 \newcommand{\appendixfigure}[1]{%
     \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}%
 }
+% remove extra float padding between appendix floats and following blocks
+\newcommand{\appendixfloatend}{\par\vskip-\intextsep}
+\newcommand{\appendixfloattosection}{%
+    \appendixfloatend
+    \vskip-\baselineskip
+    \vskip-\intextsep
+}
 
 % visible placeholder for any late manuscript note
 \newcommand{\resultp}[1]{\textcolor{blue}{\textbf{[}\textit{#1}\textbf{]}}}

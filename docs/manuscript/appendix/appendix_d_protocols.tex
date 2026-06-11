@@ -41,7 +41,7 @@ Behavioral comparisons use 30 seeds per condition and profile sweeps use 20 seed
 Experiment family & Setting & Rounds & Seeds \\
 \midrule
 Open deployment & graded, random/open choice & 200 & 30 \\
-Predictability-over-payoff locality probe & graded partner choice & 100 & 30 \\
+Locality probe & graded partner choice & 100 & 30 \\
 Partner allocation & partner choice & 200 & 30 \\
 Abrupt betrayal & scheduled partner-choice betrayal & 120 & 30 \\
 Precision perturbation & graded perturbations & 200 & 30 \\
@@ -64,7 +64,7 @@ Table~\ref{tab:metrics_glossary} defines reported metrics.
 \small
 \caption{Metric glossary.}
 \label{tab:metrics_glossary}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.26\linewidth}X@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
 Metric & Definition \\
 \midrule
@@ -78,6 +78,7 @@ Investment churn & Fraction of adjacent rounds with changed investment \\
 Early exploiter investment & Rounds 1--30 choosing exploiter with investment $\geq$ half range \\
 Trust asymmetry & Withdrawal latency / initial high-investment approach latency \\
 Recovery rounds & Rounds after switch until selection/payoff returns to threshold \\
+Locality-probe partial (\(r\)) & Partner--seed correlation between $\beta$-derived precision and surprisal/payoff, controlling for encounter count \\
 \bottomrule
 \end{tabularx}
 \end{table}

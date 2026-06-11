@@ -101,5 +101,6 @@ D^{\mathrm{own}} &= \mathrm{Unif}(\{0,1,2,3,4,5\}). \label{eq:d_own}
 Policy priors are uniform over admissible graded investment sequences at the configured planning horizon. In partner-choice settings, partner selection is handled outside the per-partner POMDP by evaluating partner--investment policy candidates with precision-adjusted scores before executing the chosen investment. This cross-partner comparison is specified in Appendix~\ref{app:affective_update}.
 
 \subsection{Runtime and precision boundary}
+\label{app:pomdp_beta_auxiliary}
 
 The partner-local POMDPs supply ordinary active-inference belief updating and policy evidence for each partner. They do not contain \(\beta_k\) as a hidden state. Instead, \(\beta_k\) is maintained as an auxiliary partner-local precision tracker, updated from partner-response likelihood surprisal and then mapped to policy precision \(\gamma_k\). This design keeps the POMDP state space compact and makes the precision pathway experimentally isolable. The cost is that the focal agent cannot form prior expectations over its own future confidence states. Appendix~\ref{app:affective_update} specifies the auxiliary update and the cross-partner policy-selection procedure.
