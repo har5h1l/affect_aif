@@ -60,6 +60,27 @@ about 87.3% less CSV output. Full experiment wall-clock speedup will be smaller
 when `pymdp` inference dominates, but checkpoint and final-result writes should
 be materially lighter on long paper runs.
 
+### Single-Worker Batch Runner Follow-Up
+
+`BatchExperimentRunner(workers=1)` now runs expanded variant/replication tasks
+inline instead of constructing a one-worker `ProcessPoolExecutor`. The same
+`run_variant_replication_task` function is used, so seeds, model dynamics,
+per-round rows, checkpoint resume semantics, and output paths are unchanged.
+
+Deterministic old-vs-new CSV comparison on a graded random-assignment probe:
+6 rows x 50 columns matched exactly after the worker-path change.
+
+Tiny batch timing probe: 2 variants x 4 replications x 4 rounds = 32 rows.
+
+| Checkout | `workers=1` | `workers=2` | `workers=4` |
+|---|---:|---:|---:|
+| process-pool `workers=1` baseline | 6.921 s | 4.568 s | 3.745 s |
+| inline `workers=1` follow-up | 6.432 s | 4.779 s | 3.810 s |
+
+The single-worker path is about 7% faster on this small probe and simpler to
+reason about during local deterministic checks. Multi-worker differences are
+within the observed timing band and do not change behavior.
+
 ## B/C Candidate Audit
 
 ### Candidate 1: Checkpoint Write Cadence And Format
@@ -100,14 +121,20 @@ be materially lighter on long paper runs.
 ### Candidate 4: Process-Pool Scheduling Granularity
 
 - Tier: `exact`
-- Potential benefit: workload dependent. It may help when many tiny expanded
-  runs pay more process scheduling overhead than inference work.
+- Potential benefit: low to moderate, workload dependent. It may help when many
+  tiny expanded runs pay more process scheduling overhead than inference work.
 - Why: each expanded run is one process-pool task. Larger per-worker chunks
   could reduce serialization and scheduling cost.
-- Risk: low to medium. Result ordering and checkpoint resume semantics must
-  remain stable.
+- Measurement: a throwaway chunked prototype on 16 expanded runs x 4 rounds
+  matched sorted rows exactly. One-task-per-replication took 6.77 s; chunks of
+  2 took 6.27 s; chunks of 4 measured about 6.35-6.55 s.
+- Risk: medium for the current runner. Result ordering can be normalized, but
+  checkpoint cadence and failure recovery become less immediate if several
+  replications are bundled into one future.
 - Validation: multi-config batch tests, checkpoint resume tests, and final
   row-set equality independent of completion order.
+- Recommendation: do not ship yet. The observed gain is too small and uneven to
+  justify complicating checkpoint semantics.
 
 ### Candidate 5: Deeper JAX/Vectorized Runtime Rewrite
 
@@ -124,9 +151,11 @@ be materially lighter on long paper runs.
 
 ## Recommendation
 
-Keep the shipped `data_collection` logging contract. It is exact-preserving and
-public-facing: fast mode now records what the manuscript analyzes, while debug
-mode keeps internal arrays available.
+Keep the shipped `data_collection` logging contract and the inline
+single-worker batch path. Both are exact-preserving and public-facing: fast mode
+now records what the manuscript analyzes, debug mode keeps internal arrays
+available, and `--workers 1` remains the clean deterministic local execution
+path.
 
 The next low-risk target is checkpoint cadence/format. The next high-upside
 target is template/agent construction reuse, but it should be treated as

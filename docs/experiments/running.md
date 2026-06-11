@@ -36,6 +36,10 @@ The runner currently has these execution paths:
 
 - `--dry-run`: validates config expansion and writes a manifest without
   simulating episodes.
+- `--workers 1`: runs inline in the current process, which is the simplest
+  deterministic local path and avoids process-pool startup overhead.
+- `--workers N` for `N > 1`: runs expanded variant/replication tasks through a
+  process pool and keeps the same per-config output and checkpoint layout.
 - `profile = "data_collection"`: the default maintained-config profile; writes
   manuscript-facing per-round result rows and compact checkpoints as quickly
   as the configured model allows. This profile keeps payoff, choice,

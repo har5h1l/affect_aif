@@ -157,6 +157,40 @@ class BatchExperimentRunner:
                 {"variant_id": run.variant_id, "replication": run.replication, "seed": run.seed},
             )
 
+    def _record_variant_completion(self, state: ConfigBatchState, payload: dict[str, Any]):
+        state.completed_primary += 1
+        state.primary_rows.extend(payload["records"])
+        self.completion_log.append(
+            {
+                "task_kind": "variant",
+                "config_name": state.config_name,
+                "variant_id": payload["variant_id"],
+                "replication": int(payload["replication"]),
+            }
+        )
+        self._emit(
+            f"[batch={self.batch_id}] variant complete config={state.config_name} "
+            f"variant={payload['variant_id']} replication={int(payload['replication']) + 1}/"
+            f"{state.spec.experiment.replications}"
+        )
+        if state.completed_primary % self.checkpoint_interval == 0:
+            self._write_checkpoint(state)
+
+    def _run_config_inline(self, state: ConfigBatchState):
+        completed_keys = self._load_checkpoint(state)
+        for run in state.expanded_runs:
+            if _run_key(run) in completed_keys:
+                continue
+            payload = run_variant_replication_task(
+                state.spec_payload,
+                run.to_payload(),
+                config_path=state.config_path,
+                config_name=state.config_name,
+                batch_id=self.batch_id,
+            )
+            state.submitted_primary += 1
+            self._record_variant_completion(state, payload)
+
     def _write_checkpoint_manifest(
         self,
         state: ConfigBatchState,
@@ -230,33 +264,21 @@ class BatchExperimentRunner:
         self.batch_dir.mkdir(parents=True, exist_ok=True)
         future_map: dict[Any, tuple[str, ConfigBatchState, dict[str, Any]]] = {}
 
-        with ProcessPoolExecutor(max_workers=self.workers) as executor:
+        if self.workers == 1:
             for state in states:
-                self._schedule_config_work(executor, state, future_map)
+                self._run_config_inline(state)
+        else:
+            with ProcessPoolExecutor(max_workers=self.workers) as executor:
+                for state in states:
+                    self._schedule_config_work(executor, state, future_map)
 
-            while future_map:
-                done, _ = wait(list(future_map.keys()), return_when=FIRST_COMPLETED)
-                for future in done:
-                    task_kind, state, metadata = future_map.pop(future)
-                    payload = future.result()
-                    if task_kind == "variant":
-                        state.completed_primary += 1
-                        state.primary_rows.extend(payload["records"])
-                        self.completion_log.append(
-                            {
-                                "task_kind": "variant",
-                                "config_name": state.config_name,
-                                "variant_id": payload["variant_id"],
-                                "replication": int(payload["replication"]),
-                            }
-                        )
-                        self._emit(
-                            f"[batch={self.batch_id}] variant complete config={state.config_name} "
-                            f"variant={payload['variant_id']} replication={int(payload['replication']) + 1}/"
-                            f"{state.spec.experiment.replications}"
-                        )
-                        if state.completed_primary % self.checkpoint_interval == 0:
-                            self._write_checkpoint(state)
+                while future_map:
+                    done, _ = wait(list(future_map.keys()), return_when=FIRST_COMPLETED)
+                    for future in done:
+                        task_kind, state, _metadata = future_map.pop(future)
+                        payload = future.result()
+                        if task_kind == "variant":
+                            self._record_variant_completion(state, payload)
 
         for state in states:
             self._write_config_outputs(state)
