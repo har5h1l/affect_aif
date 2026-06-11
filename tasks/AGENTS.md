@@ -2,7 +2,7 @@
 
 This subtree owns task mechanics for the trust game.
 
-- Read `docs/overview/pomdp.md` and `docs/overview/affective_precision.md`
+- Read `docs/overview/core/pomdp.md` and `docs/overview/core/affective_precision.md`
   before changing generative-model matrices, payoffs, partner dynamics,
   beta/gamma handling, or runtime update order.
 - Keep policy and state inference inside official `pymdp.Agent` objects.

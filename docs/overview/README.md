@@ -1,8 +1,8 @@
 # Model Overview
 
 This project extends Hesp et al.'s affect-as-expected-action-precision account
-into multi-partner social active inference. See `hypotheses.md` for the project
-goal, mechanism chain, and H0–H6 behavior cards.
+into multi-partner social active inference. See `core/hypotheses.md` for the
+project goal, mechanism chain, and H0–H8 behavior cards.
 
 ## Three Layers
 
@@ -21,17 +21,34 @@ dissociations, not a literal neural model.
 
 - **Focal AIF, scripted partners:** one focal agent against environment-side
   parameterized partners; partners do not run pymdp or affective precision.
-- **Reciprocal AIF:** future work in `experiments/multifocal/`.
+- **Reciprocal AIF:** future work in `experiments/multifocal/`; see
+  `extensions/future.md`.
 - **Clinical-like variants:** perturbations of precision parameters — computational
   profiles, not validated diagnoses.
 
-## Docs In This Folder
+## Subfolders
+
+### `core/` — canonical spine
+
+Read these first. They are the supported public model surface.
 
 | File | Contents |
 |---|---|
-| `hypotheses.md` | Project goal, mechanism chain, H0–H6 cards |
+| `hypotheses.md` | Project goal, mechanism chain, H0–H8 behavior cards |
 | `pomdp.md` | Generative model (A/B/C/D/E), partner env, runtime cycle |
 | `affective_precision.md` | Surprisal update, beta posterior, gamma deployment, modes |
-| `literature_review.md` | Optional long-form background (Damasio, Hesp, multi-agent AIF) |
+
+### `background/` — optional deep reading
+
+| File | Contents |
+|---|---|
+| `literature_review.md` | Long-form background (Damasio, Hesp, multi-agent AIF) |
+| `pomdp_spec.md` | Detailed POMDP specification (v4, external precision tracking) |
+
+### `extensions/` — not current paper evidence
+
+| File | Contents |
+|---|---|
+| `future.md` | Implemented or near-term extensions outside the manuscript |
 
 Implementation: `tasks/trust/` (model + runtime), `experiments/trust/` (runs).

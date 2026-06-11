@@ -5,11 +5,10 @@
 ## Current Trust-Game Status
 
 The supported trust-family experiments now use the action-dependent stance
-redesign described in `docs/theory/pomdp_spec.md` and
-`docs/model/pomdp.md`.
+redesign described in `../core/pomdp.md`.
 
 For the current canonical hypothesis surface, use
-`docs/theory/hypotheses.md`. That file organizes the project around H0-H8
+`../core/hypotheses.md`. That file organizes the project around H0-H8
 behavior cards.
 
 - The hidden social state is `partner type × partner stance`, not partner type plus exploiter phase.
@@ -168,7 +167,7 @@ Where:
 - $\pi$ — policy (sequence of actions the agent takes)
 
 For the current experiments, each partner-local POMDP uses the factorization
-specified in `docs/theory/pomdp_spec.md`:
+specified in `../core/pomdp.md`:
 
 $$s_t = (s_{\mathrm{type}}, s_{\mathrm{stance}}, s_{\mathrm{own}})$$
 
@@ -181,7 +180,7 @@ $$s_t = (s_{\mathrm{type}}, s_{\mathrm{stance}}, s_{\mathrm{own}})$$
 that sample from the same type-by-stance cooperation tables and update stance
 reactively from the focal agent's actions; they do not run reciprocal active
 inference or partner-local affective precision. Reciprocal multi-agent AIF is
-planned future work (`pomdp_spec.md` §13).
+planned future work (`pomdp_spec.md` §13 in this folder).
 
 Partner identity / interaction context is directly observed, and the affective
 state $\beta_k$ is tracked as an auxiliary per-partner summary that influences

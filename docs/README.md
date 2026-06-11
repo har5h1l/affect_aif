@@ -7,7 +7,8 @@ the same state into several places.
 
 - `active/`: live project state for humans and agents. Read this first before
   research, restructure, docs, experiment, result, or manuscript work.
-- `overview/`: stable model, POMDP, affective precision, and hypothesis spine.
+- `overview/`: stable model surface (`core/`), optional background (`background/`),
+  and extensions not in current paper evidence (`extensions/`).
 - `experiments/`: config schema, runnable suites, diagnostics, and run
   procedures.
 - `results/`: interpreted evidence status, provenance, and result-card policy.
@@ -15,8 +16,6 @@ the same state into several places.
   paper-facing notes.
 - `handoffs/`: task-specific transfer packets; read only when named, linked,
   newly created, or directly matched to the task.
-- `future.md`: implemented or near-term extensions that are not current paper
-  evidence.
 
 ## Update Rules
 

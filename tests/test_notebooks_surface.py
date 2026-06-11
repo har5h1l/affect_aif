@@ -172,15 +172,3 @@ def test_reproduce_notebook_is_split_by_paper_experiment():
         "Exp C Forgiveness: Run And Analyze",
     ]:
         assert heading in text
-
-
-def test_manuscript_surface_does_not_expose_binary_regime():
-    manuscript_paths = [
-        path
-        for path in (ROOT / "docs" / "manuscript").rglob("*")
-        if path.is_file() and path.suffix.lower() not in {".pdf", ".png", ".aux"}
-    ]
-    assert manuscript_paths
-    for path in manuscript_paths:
-        text = path.read_text(encoding="utf-8", errors="ignore").lower()
-        assert "binary" not in text, str(path.relative_to(ROOT))

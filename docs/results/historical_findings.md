@@ -28,7 +28,7 @@ retain as hypotheses or motivation:
   precision.
 
 These claims should now be tested through the current H0-H5 behavior-card surface in
-`docs/theory/hypotheses.md`.
+`docs/overview/core/hypotheses.md`.
 
 ## Salvaged Conductor State
 
