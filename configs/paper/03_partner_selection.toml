@@ -6,7 +6,7 @@ name = "partner_selection"
 id = "partner_selection"
 family = "trust"
 rounds = 200
-replications = 3
+replications = 30
 seed = 42
 
 [scenario]

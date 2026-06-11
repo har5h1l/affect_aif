@@ -6,7 +6,7 @@ name = "deployment_ablation"
 id = "deployment_ablation"
 family = "trust"
 rounds = 200
-replications = 3
+replications = 30
 seed = 42
 
 [scenario]
