@@ -167,14 +167,17 @@ or `AFFECT_AIF_JAX_CACHE_DIR=/tmp/affect_aif_jax_cache`.
 - Recommendation: do not ship yet. The observed gain is too small and uneven to
   justify complicating checkpoint semantics.
 
-### Candidate 5: Deeper JAX/Vectorized Runtime Rewrite
+### Candidate 5: Runner-Side Pymdp Call/Batching Audit
 
 - Tier: `near-equivalent`
-- Potential benefit: possibly high, especially if policy inference or
-  partner-choice scoring can be vectorized across partners/runs.
-- Why: the actual tiny runner check shows `pymdp` inference dominates total
-  runtime after logging is trimmed.
-- Risk: high for current manuscript evidence. Vectorization can change dtypes,
+- Potential benefit: possibly high if project-owned orchestration can reduce
+  redundant setup or batch independent calls while still using official
+  `inferactively-pymdp` APIs.
+- Why: the tiny runner checks show official `pymdp` policy inference dominates
+  total runtime after logging is trimmed. The target is how often and how
+  efficiently our runner calls `pymdp.Agent`, not replacing or editing pymdp's
+  policy-inference implementation.
+- Risk: high for current manuscript evidence if batching changes dtypes,
   numerical order, sampling order, or pseudorandom streams.
 - Validation: explicit user approval, full paper rerun, interpretation-level
   comparison against current manuscript source tables, and documented
@@ -189,6 +192,7 @@ available, and `--workers 1` remains the clean deterministic local execution
 path.
 
 The next low-risk operational target is to use the persistent JAX cache for
-reruns. The next code target with meaningful upside is deeper policy-inference
-work, not template construction reuse. A deeper JAX/vectorization rewrite should
-be a separate approved rerun project.
+reruns. The next code target with meaningful upside is runner-side pymdp-call
+orchestration, not template construction reuse or a fork of pymdp inference.
+Any batching/vectorization experiment should be a separate approved rerun
+project.
