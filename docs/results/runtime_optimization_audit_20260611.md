@@ -84,6 +84,27 @@ The single-worker path is about 7-8% faster on this small probe and simpler to
 reason about during local deterministic checks. Multi-worker differences are
 within the observed timing band and do not change behavior.
 
+### Persistent JAX Compilation Cache
+
+The runner already supports `--jax-cache-dir`, which enables JAX persistent
+compilation caching before importing the experiment stack. This is
+exact-preserving: it changes compilation reuse only, not seeds, policies,
+observations, actions, or result rows.
+
+CLI timing probe: 2 variants x 2 replications x 4 rounds = 16 rows, separate
+Python process per run.
+
+| Mode | Wall time |
+|---|---:|
+| no cache, first run | 5.375 s |
+| no cache, second run | 5.242 s |
+| cache directory, cold | 3.618 s |
+| cache directory, warm | 2.446 s |
+
+Recommendation: use a persistent cache directory for repeated same-shape local
+checks and paper reruns, for example `--jax-cache-dir /tmp/affect_aif_jax_cache`
+or `AFFECT_AIF_JAX_CACHE_DIR=/tmp/affect_aif_jax_cache`.
+
 ## B/C Candidate Audit
 
 ### Candidate 1: Checkpoint Write Cadence And Format
@@ -100,14 +121,21 @@ within the observed timing band and do not change behavior.
 ### Candidate 2: Static Template/Agent Construction Reuse
 
 - Tier: `analysis-equivalent`
-- Potential benefit: moderate to high if repeated runs share the same static
-  POMDP template shape.
+- Potential benefit: low to moderate on current tiny probes; possibly higher
+  only if many runs share expensive static policy templates.
 - Why: each expanded run builds templates and partner agents even when only the
   seed or beta prior differs.
+- Measurement: an agent-choice construction probe spent 0.040 s constructing
+  environments and 0.654 s constructing native runtime/templates/agents across
+  8 replications, versus 11.735 s total replication time. Construction was
+  about 5.9% of total replication time.
 - Risk: medium. Shared mutable agent state or RNG coupling could silently alter
-  trajectories.
+  trajectories. Exact template caching must include all static config,
+  variant, policy, and seed inputs; ignoring seed can change sampled/truncated
+  policy sets when `max_policies` is active.
 - Validation: strict deterministic row equality for several tiny specs, plus a
   paper-config dry-run/materialization comparison before adoption.
+- Recommendation: do not prioritize before policy-inference/JAX work.
 
 ### Candidate 3: Snapshot Conversion Caching
 
@@ -160,7 +188,7 @@ now records what the manuscript analyzes, debug mode keeps internal arrays
 available, and `--workers 1` remains the clean deterministic local execution
 path.
 
-The next low-risk target is checkpoint cadence/format. The next high-upside
-target is template/agent construction reuse, but it should be treated as
-analysis-equivalent until deterministic equality checks prove otherwise. A
-deeper JAX/vectorization rewrite should be a separate approved rerun project.
+The next low-risk operational target is to use the persistent JAX cache for
+reruns. The next code target with meaningful upside is deeper policy-inference
+work, not template construction reuse. A deeper JAX/vectorization rewrite should
+be a separate approved rerun project.
