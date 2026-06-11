@@ -9,9 +9,7 @@ Each episode consists of repeated interactions between one focal active-inferenc
 
 \subsection{Partner state variables}
 
-Each environment-side partner \(k\) has two hidden process variables. The first is behavioral type, \(s^{\mathrm{type}}_k \in \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\}\). The second is stance toward the focal agent, \(s^{\mathrm{stance}}_k \in \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}\).
-
-These variables are hidden from the focal agent but define how the environment generates partner responses and stance transitions. Type controls the partner's broad response tendency, while stance modulates how cooperative the partner is toward the focal agent at a given point in the episode.
+Each environment-side partner \(k\) has two process variables hidden from the focal agent: behavioral type \(s^{\mathrm{type}}_k \in \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\}\) and stance toward the focal agent \(s^{\mathrm{stance}}_k \in \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}\). These govern how the environment samples partner responses and updates stance over the episode; type sets the partner's broad response tendency, and stance modulates how cooperative those responses are toward the focal agent at the current interaction.
 
 \subsection{Partner-response probabilities}
 \label{app:process_response}
@@ -36,7 +34,7 @@ Random & 0.60 & 0.50 & 0.35 \\
 \end{table}
 
 The table defines the environment-side cooperation probability \(P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k)\), with \(P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)=1-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot)\).
-The same response probabilities are used in the focal agent's partner-response likelihood \(A^{\mathrm{act}}_k\) (Appendix~\ref{app:pomdp_likelihoods}), allowing the focal agent to infer type and stance from observed cooperate-or-defect responses. Predictability is not identical to cooperation probability. A strongly cooperative state and a strongly defective state can both be predictable when the focal agent assigns high probability to the response that actually occurs.
+The same response probabilities are used in the focal agent's partner-response likelihood \(A^{\mathrm{act}}_k\) (Appendix~\ref{app:pomdp_likelihoods}), allowing the focal agent to infer type and stance from observed cooperate-or-defect responses.
 
 \subsection{Payoff function}
 \label{app:process_payoff}
@@ -94,4 +92,4 @@ These dynamics instantiate the asymmetry of trust: sustained high investment gra
 
 \subsection{Boundary of the current simulation}
 
-All reported simulations use one focal active-inference agent interacting with four scripted partners. Partners maintain hidden type and stance, sample responses from Appendix~\ref{app:process_response}, and update stance according to Appendix~\ref{app:process_stance}; they do not perform variational inference, infer policies, or maintain affective-precision estimates. This boundary isolates the focal agent's partner-local precision mechanism before reciprocal active-inference partners are introduced.
+All reported simulations use one focal active-inference agent interacting with four scripted partners that maintain hidden type and stance, sample responses by Appendix~\ref{app:process_response}, and update stance by Appendix~\ref{app:process_stance}; they do not infer policies or maintain affective precision.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fitz
 import pandas as pd
 import pytest
 
@@ -184,6 +185,17 @@ def test_new_paper_figures_generate_manifest(tmp_path, capsys):
     assert "fig_model_fitness_beta_reward_divergence.png" in out
     assert "fig_deployment_social_summary.png" in out
     assert "fig_betrayal_boundary_summary.pdf" in out
+
+
+def test_paper_figure_pdfs_embed_beta_labels(tmp_path):
+    source_dir = tmp_path / "source_tables"
+    output_dir = tmp_path / "figures"
+    _write_source_tables(source_dir)
+
+    make_paper_figures.deployment_social_figure(source_dir, output_dir)
+    pdf_text = fitz.open(output_dir / "fig_deployment_social_summary.pdf")[0].get_text().replace("\n", " ")
+    assert "βk tracker movement" in pdf_text
+    assert "mean βk range" in pdf_text
 
 
 def test_new_paper_figures_fail_on_missing_required_column(tmp_path):

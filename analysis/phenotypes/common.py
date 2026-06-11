@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from analysis.figure_style import apply_manuscript_figure_style
 from experiments.trust.spec import (
     ExperimentMeta,
     ExperimentSpec,
@@ -300,9 +301,10 @@ def common_group_metrics(results: pd.DataFrame) -> list[dict[str, Any]]:
 
 
 def save_figure(fig: plt.Figure, path: Path) -> None:
+    apply_manuscript_figure_style()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
-    fig.savefig(path)
+    fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
 

@@ -1,7 +1,7 @@
 \section{Focal-Agent POMDP Specification}
 \label{app:pomdp}
 
-This appendix specifies the focal agent's partner-local generative model in standard discrete active-inference form. For each partner \(k\), the agent maintains a POMDP \(\mathcal{M}_k\) with hidden factors for partner type, partner stance, and own-investment bookkeeping. The model is fit to the generative process in Appendix~\ref{app:generative_process}, but it is not identical to the environment: payoff is represented as an observation modality whose likelihood marginalizes over partner response, scheduled betrayal and repair are environment-side interventions, and affective precision is maintained outside the POMDP.
+This appendix specifies the focal agent's partner-local generative model in standard discrete active-inference form. Each partner \(k\) has a POMDP \(\mathcal{M}_k\) with hidden type, stance, and own-investment bookkeeping. The model follows Appendix~\ref{app:generative_process} but is not identical to the environment: payoff is an observation modality marginalizing over partner response; scheduled betrayal and repair are environment-side; affective precision is external to the POMDP.
 
 \subsection{Partner-local factorization}
 
@@ -17,12 +17,11 @@ s^{\mathrm{own}} &\in \mathcal{A},
 \end{align}
 where
 \begin{align*}
-\mathcal{S}^{\text{type}} &= \{\text{cooperator, reciprocator,} \\
-  &\quad \text{exploiter, random}\}, \\
-\mathcal{S}^{\text{stance}} &= \{\text{trusting, neutral, hostile}\}, \\
+\mathcal{S}^{\text{type}} &= \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\}, \\
+\mathcal{S}^{\text{stance}} &= \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}, \\
 \mathcal{A} &= \{0,1,2,3,4,5\}.
 \end{align*}
-Executed investment levels index \(s^{\mathrm{own}}\). The own-investment factor is deterministic bookkeeping: the agent always knows its executed investment level, and this factor makes that knowledge available to the observation model. It is not a psychological hidden variable. The joint hidden state per partner spans \(4\times3\times6=72\) configurations.
+\(s^{\mathrm{own}}\) indexes executed investment and is fully observable: deterministic bookkeeping that supplies the focal agent's own investment level to the payoff likelihood, not an inferred hidden variable. The joint hidden state per partner spans \(4\times3\times6=72\) configurations.
 
 Observations are partner response and focal payoff:
 \begin{align}

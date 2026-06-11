@@ -1,15 +1,25 @@
 """Build manuscript figures from copied paper source tables."""
 
+# ruff: noqa: E402,I001
+
 from __future__ import annotations
 
 import argparse
 import ast
 import math
+import sys
 from pathlib import Path
+
+SCRIPT_DIR = str(Path(__file__).resolve().parent)
+if sys.path and str(Path(sys.path[0]).resolve()) == SCRIPT_DIR:
+    sys.path.pop(0)
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+from analysis.figure_style import apply_manuscript_figure_style
 
 VARIANT_LABELS = {
     "affect": "local beta",
@@ -44,6 +54,7 @@ def _read_required(source_dir: Path, filename: str, columns: set[str]) -> pd.Dat
 
 
 def _save(fig: plt.Figure, output_dir: Path, stem: str) -> list[Path]:
+    apply_manuscript_figure_style()
     output_dir.mkdir(parents=True, exist_ok=True)
     paths = []
     for suffix in (".png", ".pdf"):
@@ -535,16 +546,7 @@ def main() -> int:
         refreshed = refresh_figure_source_tables(Path(args.results_root), source_dir)
         for path in refreshed:
             print(f"Refreshed source table: {path}")
-    plt.rcParams.update(
-        {
-            "font.size": 9,
-            "axes.titlesize": 9,
-            "axes.labelsize": 8,
-            "xtick.labelsize": 7,
-            "ytick.labelsize": 7,
-            "legend.fontsize": 8,
-        }
-    )
+    apply_manuscript_figure_style()
     generated = [
         *model_fitness_figure(source_dir, output_dir),
         *deployment_social_figure(source_dir, output_dir),
