@@ -399,8 +399,8 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].set_title("Betrayed-partner selection", pad=8)
     axes[0].set_ylabel("P0 selection rate")
-    axes[1].set_title(r"Betrayed-partner inverse precision", pad=8)
-    axes[1].set_ylabel(r"mean P0 $E_q[\beta]$")
+    axes[1].set_title(r"Betrayed-partner $E_q[\beta_k]$", pad=8)
+    axes[1].set_ylabel(r"mean P0 $E_q[\beta_k]$")
     axes[2].set_title("Policy entropy", pad=8)
     axes[2].set_ylabel("mean entropy")
     axes[0].legend(frameon=False, fontsize=8)
@@ -430,8 +430,8 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[0],
         order,
         h2["beta_range"].tolist(),
-        title=r"$\beta$ tracker movement",
-        ylabel=r"mean $\beta$ range",
+        title=r"$\beta_k$ tracker movement",
+        ylabel=r"mean $\beta_k$ range",
     )
     _bar(
         axes[1],
@@ -452,7 +452,7 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     axes[2].axhline(0, color="#555555", linewidth=0.8)
     axes[2].set_ylim(min(-14.5, float(h2["delta_payoff_vs_tracked"].min()) - 1.0), 2.0)
 
-    fig.suptitle(r"$\beta$ tracking requires $\gamma$ deployment", y=1.04, fontsize=12)
+    fig.suptitle("Tracking requires deployment", y=1.04, fontsize=12)
     fig.tight_layout()
     return _save(fig, output_dir, "fig_deployment_social_summary")
 

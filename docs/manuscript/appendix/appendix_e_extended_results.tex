@@ -8,7 +8,7 @@ This appendix reports extended parameter sweeps, profile analyses, and robustnes
 
 The following auxiliary perturbation controls vary the amplitude and stability of $\beta_k$ dynamics in the graded decision regime. They support interpretation of the main-text deployment results but are not themselves core empirical claims.
 
-\begin{table}[tbp]
+\begin{table}[H]
 \centering
 \caption{Precision-dynamics parameter variation in the graded decision regime.}
 \label{tab:perturbation_dynamics}
@@ -28,7 +28,7 @@ cautious-prior & 1.48 & 1877.7 & 8.4 \\
 Flattening the precision signal produces the clearest behavioral change. The low-gain variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. The parameter sweeps below therefore vary gain and prior structure directly.
 \end{sloppypar}
 
-\begin{figure}[tbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_phenotype_dynamics_summary.pdf}
 \caption{Precision-dynamics perturbation controls in the graded decision regime. Low gain compresses $\beta_k$ dynamics and raises policy entropy toward the no-affect/tracked-only baselines reported in Table~\ref{tab:perturbation_dynamics}. Wider $\beta_k$ movement under high-gain and cautious-prior variants does not map monotonically to payoff, separating confidence dynamics from reward.}
@@ -118,7 +118,7 @@ no-affect & 0.593 & 1.033 & 1.7 & -- \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[tbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_forgiveness.pdf}
 \caption{Forgiveness/trust-repair diagnostic from the 20-seed profile analyses. Vertical markers indicate the transition from cooperative baseline to betrayal and then to repair/reversion. Reengagement and payoff recovery are shown alongside the reverted-partner $\beta_k$ trajectory. Because $\beta_k$ is inverse precision, lower $\beta_k$ indicates higher confidence / higher policy precision; no-affect is omitted from the $\beta_k$ trajectory panel because it has no $\beta$ tracker. The figure shows that agents can reengage a repaired partner before rebuilding the same confidence dynamics.}

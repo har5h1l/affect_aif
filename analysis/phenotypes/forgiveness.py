@@ -113,7 +113,7 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
-    fig, axes = plt.subplots(1, 3, figsize=(12.6, 4.6), gridspec_kw={"width_ratios": [1.1, 2.4, 0.9]})
+    fig, axes = plt.subplots(1, 3, figsize=(12.8, 4.8), gridspec_kw={"width_ratios": [0.9, 3.2, 0.75]})
     table = pd.DataFrame(EXP_C_TABLE8, columns=["variant_id", "reengagement_rate", "payoff_recovery"])
     labels = [variant_label(item) for item in table["variant_id"]]
 
