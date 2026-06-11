@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pandas as pd
 from runtime_helpers import build_runtime
@@ -13,11 +15,68 @@ from experiments.trust.config import ExperimentConfig
 from experiments.trust.factory import create_agents_from_multi_focal_config, create_env
 from experiments.trust.logger import MetricLogger
 from experiments.trust.runner import ExperimentRunner
+from experiments.trust.spec import RuntimeSpec
 from tasks.trust.runtime import (
     select_decision,
     update_beta_after_observation,
     update_partner_after_observation,
 )
+
+MANUSCRIPT_DATA_COLLECTION_COLUMNS = {
+    "seed",
+    "round",
+    "partner_idx",
+    "active_partner",
+    "true_partner_type",
+    "true_partner_stance",
+    "agent_action",
+    "raw_action",
+    "partner_action",
+    "payoff",
+    "partner_payoff",
+    "type_switched",
+    "stance_switched",
+    "switch_kind",
+    "active_partner_next",
+    "true_types",
+    "true_stances",
+    "inferred_type",
+    "inferred_type_correct",
+    "inferred_stance",
+    "inferred_stance_correct",
+    "inferred_joint_correct",
+    "selected_partner",
+    "selected_action",
+    "best_policy_idx",
+    "q_pi_entropy",
+    "mean_abs_step_efe",
+    "planning_cost",
+    "planning_cost_ratio",
+    "betas",
+    "local_betas",
+    "global_beta",
+    "terminal_signal",
+    "prediction_errors",
+    "predictive_log_lik",
+    "round_log_evidence",
+    "cumulative_log_evidence",
+    "hypothesis_id",
+    "experiment_id",
+    "variant_id",
+    "replication",
+    "config_name",
+}
+
+DEBUG_ONLY_COLUMNS = {
+    "G",
+    "q_pi",
+    "best_policy_step_costs",
+    "partner_beliefs",
+    "partner_posteriors",
+    "partner_joint_beliefs",
+    "partner_joint_posteriors",
+    "partner_stance_beliefs",
+}
 
 
 def test_tiny_trust_config_constructs_and_runs_one_round():
@@ -61,13 +120,25 @@ def test_tiny_trust_config_constructs_and_runs_one_round():
     assert {"agent_payoff", "partner_idx", "observation"}.issubset(result)
 
 
-def test_tiny_trust_runner_logs_pymdp_diagnostics(tiny_spec):
+def test_tiny_trust_runner_logs_data_collection_manuscript_contract(tiny_spec):
     results = ExperimentRunner.from_spec(tiny_spec.with_overrides(rounds=1, replications=1)).run_all()
 
-    assert "q_pi_entropy" in results.columns
-    assert "partner_beliefs" in results.columns
-    assert "selected_action" in results.columns
-    assert "selected_partner" in results.columns
+    assert MANUSCRIPT_DATA_COLLECTION_COLUMNS <= set(results.columns)
+    assert DEBUG_ONLY_COLUMNS.isdisjoint(results.columns)
+
+
+def test_tiny_trust_runner_debug_profile_logs_diagnostic_internals(tiny_spec):
+    debug_spec = replace(
+        tiny_spec.with_overrides(rounds=1, replications=1),
+        runtime=RuntimeSpec(profile="debug", debug_mode=True, log_policy_traces=True),
+    )
+
+    results = ExperimentRunner.from_spec(debug_spec).run_all()
+
+    assert MANUSCRIPT_DATA_COLLECTION_COLUMNS <= set(results.columns)
+    assert DEBUG_ONLY_COLUMNS <= set(results.columns)
+    assert any(len(value) > 0 for value in results["q_pi"])
+    assert any(len(value) > 0 for value in results["partner_joint_beliefs"])
 
 
 def test_logger_does_not_fallback_posteriors_to_decision_beliefs():

@@ -17,7 +17,7 @@ agent's actions; only the focal agent runs full `pymdp.Agent` inference plus
 partner-local affective precision. That isolates the focal mechanism, but it
 does not yet establish fully reciprocal multi-agent dynamics in which both sides
 update beliefs, confidence, and policies simultaneously. See
-`docs/overview/pomdp.md`.
+`docs/overview/core/pomdp.md`.
 
 ### Shared-Beta Evidence Is Signal-Level
 

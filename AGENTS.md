@@ -25,14 +25,15 @@ task-specific docs it points to.
   `requirements.txt`, `scripts/README.md`, and `configs/README.md`.
 - Computational claims, affect dynamics, terminal values, or result
   interpretation: `docs/overview/README.md`,
-  `docs/overview/hypotheses.md`, `docs/overview/pomdp.md`, and
-  `docs/overview/affective_precision.md`.
+  `docs/overview/core/hypotheses.md`, `docs/overview/core/pomdp.md`, and
+  `docs/overview/core/affective_precision.md`.
 - Experiment design, config schema, variants, metrics, sweeps, or run
   procedures: `docs/experiments/README.md`,
   `docs/experiments/configs.md`, `docs/experiments/running.md`, and
   `docs/experiments/paper.md`.
 - Diagnostic or future-only probes: `docs/experiments/diagnostics.md`,
-  `docs/future.md`, `configs/diagnostics/`, and `configs/future/`.
+  `docs/overview/extensions/future.md`, `configs/diagnostics/`, and
+  `configs/future/`.
 - Interpreted results, evidence boundaries, or provenance:
   `docs/results/README.md`, `docs/results/current.md`,
   `docs/results/paper.md`, and `docs/results/diagnostics.md`.

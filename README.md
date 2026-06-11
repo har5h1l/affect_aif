@@ -96,7 +96,7 @@ python scripts/analysis/make_paper_figures.py --help
 - `docs/results/`: inspect compact result summaries and provenance.
 - `docs/manuscript/`: build and inspect the manuscript.
 - `notebooks/`: demo and reproduction notebooks.
-- `docs/future.md`: extension ideas that are implemented or close enough to
+- `docs/overview/extensions/future.md`: extension ideas that are implemented or close enough to
   build on, but not part of the current paper claims.
 
 ## Maintainer State

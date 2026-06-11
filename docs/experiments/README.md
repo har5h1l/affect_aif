@@ -11,11 +11,11 @@ Use these files by task:
 - `paper.md`: paper reproduction suite and how each config maps to the paper.
 - `diagnostics.md`: smoke checks, reviewer controls, and informative non-paper probes.
 
-Conceptual claims live in `docs/overview/hypotheses.md`. This folder maps those
+Conceptual claims live in `docs/overview/core/hypotheses.md`. This folder maps those
 claims to concrete TOML files and result folders.
 
 The current paper and notebook route uses `experiments/trust/`: one focal
 active-inference agent interacting with scripted environment-side partners.
 `experiments/multifocal/` is a tested reciprocal AIF-vs-AIF extension, but it
 is not wired into `scripts/experiment/run.py`, not listed under `configs/`, and
-not used for paper evidence. See `../future.md` for how to treat it.
+not used for paper evidence. See `../overview/extensions/future.md` for how to treat it.

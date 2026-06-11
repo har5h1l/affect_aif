@@ -115,4 +115,4 @@ TOML `affect` values map to runtime behavior as follows.
 - Beta tracker: `tasks/trust/affect.py`
 - Surprise input, gamma mapping, deployment: `tasks/trust/runtime.py`
 - Variant wiring: `experiments/trust/factory.py`
-- Generative-model boundary and action-perception cycle: `docs/overview/pomdp.md`
+- Generative-model boundary and action-perception cycle: `pomdp.md`
