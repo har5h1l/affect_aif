@@ -145,9 +145,9 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
             markersize=4,
             label=variant_label(str(row["variant_id"])),
         )
-    axes[1].set_title(r"B. Reverted-partner $E_q[\beta_k]$")
+    axes[1].set_title(r"B. Reverted-partner posterior mean $\beta_k$")
     axes[1].set_xlabel("round")
-    axes[1].set_ylabel(r"P0 $E_q[\beta_k]$")
+    axes[1].set_ylabel(r"P0 posterior mean $\beta_k$")
     axes[1].set_xlim(78, 200)
     axes[1].set_xticks(BETA_RECOVERY_ROUNDS)
     axes[1].text(

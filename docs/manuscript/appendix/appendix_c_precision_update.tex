@@ -1,7 +1,7 @@
 \section{Affective-Precision Update and Policy Selection}
 \label{app:affective_update}
 
-This appendix specifies the auxiliary affective-precision update layered on top of the focal agent's partner-local POMDPs. The update maps partner-response model fit into a categorical posterior over inverse precision \(\beta_k\), then maps the posterior mean to partner-specific policy precision \(\gamma_k\). The same appendix also specifies how \(\gamma_k\) enters partner-choice policy comparison.
+This appendix specifies the auxiliary affective-precision update layered on top of the focal agent's partner-local POMDPs. The update maps partner-response model fit into a categorical posterior over inverse precision \(\beta_k\), then maps the posterior mean to partner-specific policy precision \(\gamma_k\). The same appendix also specifies how \(\gamma_k\) enters partner-choice policy comparison. At each round \(t\), affective charge is computed from Eq.~\eqref{eq:epsilon} using the pre-update predictive posterior \(q_{k,t}^-\) before the partner-state posterior is updated on \(\hat{o}_{k,t}^{\text{act}}\) (Section~\ref{sec:affective_precision}).
 
 \subsection{Categorical beta support}
 

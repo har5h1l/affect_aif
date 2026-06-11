@@ -29,44 +29,40 @@ Investment also affects future partner stance. Higher investment provides strong
 
 Rather than maintaining a single pooled social model, the focal agent maintains a separate discrete generative model $\mathcal{M}_k$ for each partner $k$. This factorization keeps observations, beliefs, and confidence evidence local to the relationship that generated them. Each $\mathcal{M}_k$ uses the standard $A$/$B$/$C$/$D$/$E$ components of discrete active inference~\cite{DaCosta2020DiscreteSynthesis}: observation likelihoods, transition dynamics, preferences, initial priors, and policy priors. The focal agent's partner-local POMDP specification is provided in Appendix~\ref{app:pomdp}.
 
-Each partner model contains three hidden factors: partner type, partner stance, and own investment. Type and stance are inferred from evidence; own investment is deterministic bookkeeping that makes the executed investment level available to the payoff likelihood. Observations are the partner's cooperate-or-defect response and the focal agent's realized payoff. The partner-response likelihood depends on type and stance, so predictive reliability is defined by response model fit rather than payoff: a reliably cooperative and a reliably defecting partner can both be predictable. The payoff likelihood depends on investment level and marginalizes over partner response, keeping instrumental payoff preferences inside the generative model. The agent's transition model mirrors the process dynamics in Appendix~\ref{app:generative_process}, while scheduled betrayal and repair manipulations are environment-side interventions defined in Appendix~\ref{app:protocols}. This model supplies ordinary partner-state inference; the affective-precision layer in Section~\ref{sec:affective_precision} estimates how confidently each partner model should be deployed in policy inference.
+Each partner model contains three hidden factors: partner type, partner stance, and own investment. Type and stance are inferred from evidence; own investment is deterministic bookkeeping that makes the executed investment level available to the payoff likelihood. Observations are the partner's cooperate-or-defect response and the focal agent's realized payoff. The partner-response likelihood depends on type and stance, so predictive reliability is defined by response model fit rather than payoff: a reliably cooperative and a reliably defecting partner can both be predictable. The payoff likelihood depends on investment level and marginalizes over partner response, keeping instrumental payoff preferences inside the generative model. The agent's transition model mirrors the process dynamics in Appendix~\ref{app:generative_process}, while scheduled betrayal and repair manipulations are environment-side interventions defined in Appendix~\ref{app:protocols}. This model supplies ordinary partner-state inference; the affective-precision layer in Section~\ref{sec:affective_precision} estimates how confidently each partner model should be deployed during policy selection.
 
 \subsection{Partner-local affective precision}
 \label{sec:affective_precision}
 
-Partner-local affective precision maps relationship-specific model fit onto policy precision. Before assimilating the observed partner response, the focal agent evaluates how surprising that response would be under its predictive type--stance posterior for partner \(k\). After this precision update, the partner-state posterior is updated on the same observation. Unlike prior affective-precision accounts centered on policy-inference quantities~\cite{Hesp2021DeeplyFeltAffect}, the evidence source here is perceptual partner-response model fit. Because this update is computed separately for each partner, confidence can diverge across relationships even when the focal agent's task and preferences remain fixed.
+Partner-local affective precision maps relationship-specific model fit onto policy precision. At each round \(t\), before assimilating the observed partner response, the focal agent evaluates how surprising that response would be under its predictive type--stance posterior for partner \(k\). After this precision update, the partner-state posterior is updated on the same observation. Unlike prior affective-precision accounts centered on policy-inference quantities~\cite{Hesp2021DeeplyFeltAffect}, the evidence source here is perceptual partner-response model fit. Because this update is computed separately for each partner, confidence can diverge across relationships even when the focal agent's task and preferences remain fixed.
 
-Let \(\hat{o}_k^{\text{act}}\) denote the observed response from partner \(k\) and \(q_k^-\) the type--stance posterior before updating on \(\hat{o}_k^{\text{act}}\). The agent computes
+Let \(\hat{o}_{k,t}^{\text{act}}\) denote the observed response from partner \(k\) at round \(t\) and \(q_{k,t}^-\) the type--stance posterior before updating on \(\hat{o}_{k,t}^{\text{act}}\). The agent computes partner-response likelihood surprisal as the negative log posterior predictive probability assigned to that response:
 \begin{equation}
-\epsilon_k = -\log P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \;\middle|\; q_k^-(s_k^{\text{type}}, s_k^{\text{stance}})\right).
+\epsilon_{k,t} = -\log \sum_{s^{\text{type}},s^{\text{stance}}}
+P\!\left(\hat{o}_{k,t}^{\text{act}} \mid s^{\text{type}},s^{\text{stance}}\right)
+q_{k,t}^-(s^{\text{type}},s^{\text{stance}}).
 \label{eq:epsilon}
 \end{equation}
-Equation~\eqref{eq:epsilon} is the negative log posterior predictive likelihood assigned to the observed partner response under \(q_k^-\). Equivalently, the predictive probability marginalizes over the agent's pre-update beliefs about partner type and stance:
-\[
-P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \mid q_k^-\right)
-=
-\sum_{s^{\text{type}},s^{\text{stance}}}
-P\!\left(o_k^{\text{act}} = \hat{o}_k^{\text{act}} \mid s^{\text{type}},s^{\text{stance}}\right)
-q_k^-(s^{\text{type}},s^{\text{stance}}).
-\]
-Partner response directly tests the type-by-stance model: a reliably defecting partner can produce low surprisal despite poor payoff, while an erratic cooperative partner can produce high surprisal despite favorable outcomes. The signal therefore tracks partner-response model fit rather than partner value.
+Equation~\eqref{eq:epsilon} is the negative log posterior predictive likelihood assigned to the observed partner response under \(q_{k,t}^-\), marginalizing over the agent's pre-update beliefs about partner type and stance. Partner response directly tests the type-by-stance model: a reliably defecting partner can produce low surprisal despite poor payoff, while an erratic cooperative partner can produce high surprisal despite favorable outcomes. The signal therefore tracks partner-response model fit rather than partner value.
+
+Per-round update order is: (i) plan from \(q_{k,t}^-\); (ii) observe \(\hat{o}_{k,t}^{\text{act}}\); (iii) compute \(\epsilon_{k,t}\) and update \(\beta_k\); (iv) assimilate \(\hat{o}_{k,t}^{\text{act}}\) into the partner-state posterior.
 
 The neutral baseline is the squared surprisal of a chance-level two-outcome partner-response prediction, \(\sigma_0^2 = (-\log 0.5)^2\).
 Because the response modality is binary, probability $0.5$ corresponds to predicting neither cooperation nor defection better than chance. Squaring places surprisal on a nonnegative error scale before signed affective charge is computed:
 \begin{equation}
-\phi_k = \alpha\!\left(\sigma_0^2 - \epsilon_k^2\right),
+\phi_{k,t} = \alpha\!\left(\sigma_0^2 - \epsilon_{k,t}^2\right),
 \label{eq:charge}
 \end{equation}
-where $\alpha \geq 0$ is a gain parameter. Positive $\phi_k$ means partner $k$'s response was predicted better than chance; negative $\phi_k$ means it was predicted worse than chance.
+where $\alpha \geq 0$ is a gain parameter. Positive $\phi_{k,t}$ means partner $k$'s response was predicted better than chance; negative $\phi_{k,t}$ means it was predicted worse than chance.
 
-The signed charge $\phi_k$ is then used as evidence over the partner-specific inverse-precision estimate $\beta_k$. Positive charge shifts posterior mass toward lower $\beta_k$, corresponding to higher policy precision; negative charge shifts posterior mass toward higher $\beta_k$, corresponding to lower policy precision. A persistence prior smooths this update across rounds so that confidence changes gradually rather than resetting after each interaction. The full categorical update is given in Appendix~\ref{app:affective_update}.
+The signed charge $\phi_{k,t}$ is then used as evidence over the partner-specific inverse-precision estimate $\beta_k$. Positive charge shifts posterior mass toward lower $\beta_k$, corresponding to higher policy precision; negative charge shifts posterior mass toward higher $\beta_k$, corresponding to lower policy precision. A persistence prior smooths this update across rounds so that confidence changes gradually rather than resetting after each interaction. The full categorical update is given in Appendix~\ref{app:affective_update}.
 
 The agent then sets partner-specific policy precision from the posterior mean:
 \begin{equation}
 \gamma_k = \gamma_{\text{base}} \,/\, \mathbb{E}_{q(\beta_k)}[\beta_k],
 \label{eq:gamma_update}
 \end{equation}
-where $\gamma_{\text{base}}$ is the baseline policy precision. Because $\beta_k$ is inverse precision, higher expected $\beta_k$ yields broader, less committed policy inference, whereas lower expected $\beta_k$ yields higher $\gamma_k$ and sharper policy commitment.
+where $\gamma_{\text{base}}$ is the baseline policy precision. Because $\beta_k$ is inverse precision, higher expected $\beta_k$ yields more tentative policy commitment, whereas lower expected $\beta_k$ yields higher $\gamma_k$ and sharper policy commitment.
 
 The $\beta_k$ posterior is maintained as an auxiliary precision tracker rather than as a hidden state inside the focal agent's generative model. This keeps the mechanism lightweight and experimentally isolable, but prevents the agent from forming prior expectations over its own future confidence states; this limitation is discussed in Section~\ref{sec:discussion}.
 
@@ -87,4 +83,4 @@ The final policy posterior is computed by applying a softmax over the transforme
 \subsection{Simulation setup}
 \label{sec:simulation_setup}
 
-Simulations compare four precision-runtime variants: full partner-local precision, a shared-$\beta$ ablation that pools evidence across partners while keeping per-partner POMDP beliefs intact, a tracked-only ablation that updates $q(\beta_k)$ but fixes $\gamma_k = \gamma_{\text{base}}$, and a no-affect control that disables the $\beta$ tracker entirely. Conditions include open graded investment, partner choice, abrupt betrayal, and precision-dynamics/profile diagnostics. Full condition definitions, episode lengths, and metrics are provided in Appendix~\ref{app:protocols}. Code and experiment configurations are provided in the supplementary repository listed at the start of the Appendix.
+Simulations compare four precision-runtime variants: full partner-local precision, a shared-$\beta$ ablation that pools evidence across partners while keeping per-partner POMDP beliefs intact, a tracked-only ablation that updates $q(\beta_k)$ but fixes $\gamma_k = \gamma_{\text{base}}$, and a no-affect control that disables the $\beta$ tracker entirely. Conditions include open graded investment, partner choice, abrupt betrayal, and precision-dynamics/profile diagnostics. Full condition definitions, episode lengths, and metrics are provided in Appendix~\ref{app:protocols}. Code and experiment configurations are provided in the anonymized supplementary repository.
