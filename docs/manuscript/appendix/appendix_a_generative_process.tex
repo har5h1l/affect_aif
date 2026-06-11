@@ -1,11 +1,11 @@
 \section{Trust-Game Generative Process}
 \label{app:generative_process}
 
-This appendix specifies the environment-side process used in the repeated trust-game simulations. The generative process consists of scripted partners with hidden type and stance variables, investment-dependent stance transitions, cooperate-or-defect responses, and deterministic payoff delivery. Appendix~\ref{app:pomdp} then specifies the focal agent's POMDP model of this process.
+This appendix specifies the environment-side trust-game process: scripted partners with hidden type and stance, investment-dependent stance transitions, binary responses, and deterministic payoff delivery. Appendix~\ref{app:pomdp} specifies the focal agent's POMDP model.
 
 \subsection{Episode structure}
 
-Each episode consists of repeated interactions between one focal active-inference agent and four environment-side partners. In each round, the interaction partner is either assigned by the configured protocol or selected by the focal agent in partner-choice conditions. The focal agent then chooses a graded investment level \(a \in \mathcal{A} = \{0,1,2,3,4,5\}\), where \(a=0\) denotes no investment and \(a=5\) denotes maximum investment. The selected partner emits a binary response \(o^{\mathrm{act}}_k \in \{\mathrm{cooperate},\mathrm{defect}\}\), sampled from the partner's current type and stance. The environment then delivers payoff according to the deterministic payoff function in Appendix~\ref{app:process_payoff}, and updates the partner's stance according to the investment-dependent transition model in Appendix~\ref{app:process_stance}.
+Each episode consists of repeated interactions between the focal agent and four environment-side partners. On each round, the partner is assigned or selected, the focal agent chooses \(a\in\{0,1,2,3,4,5\}\), the partner emits \(o^{act}_k\in\{\mathrm{cooperate},\mathrm{defect}\}\), payoff is delivered by Eq.~\eqref{eq:graded_payoff_map}, and stance updates by Eq.~\eqref{eq:b_stance}.
 
 \subsection{Partner state variables}
 

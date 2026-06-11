@@ -5,7 +5,7 @@ This appendix specifies the focal agent's partner-local generative model in stan
 
 \subsection{Partner-local factorization}
 
-The focal agent maintains a separate model \(\mathcal{M}_k\) for each partner \(k\), rather than one pooled social model. Each \(\mathcal{M}_k\) contains its own observation likelihoods, transition dynamics, preferences, initial priors, and policy priors. This factorization keeps partner-specific evidence local to the relationship that generated it. Partner choice is handled outside the individual partner-local POMDPs by comparing candidate partner--investment policies after each partner model has produced policy evidence.
+The focal agent maintains a separate model \(M_k\) for each partner, with partner-specific likelihoods, transitions, preferences, priors, and policy priors. Partner choice is handled outside the individual POMDPs by comparing partner--investment policies after each \(M_k\) has produced policy evidence.
 
 \subsection{Hidden state factors and observations}
 

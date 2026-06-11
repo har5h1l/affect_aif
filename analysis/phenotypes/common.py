@@ -304,7 +304,7 @@ def save_figure(fig: plt.Figure, path: Path) -> None:
     apply_manuscript_figure_style()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    fig.savefig(path, bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
 
 

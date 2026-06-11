@@ -59,7 +59,7 @@ def _save(fig: plt.Figure, output_dir: Path, stem: str) -> list[Path]:
     paths = []
     for suffix in (".png", ".pdf"):
         path = output_dir / f"{stem}{suffix}"
-        fig.savefig(path, bbox_inches="tight", dpi=300)
+        fig.savefig(path, bbox_inches="tight", pad_inches=0.02, dpi=300)
         paths.append(path)
     plt.close(fig)
     return paths
