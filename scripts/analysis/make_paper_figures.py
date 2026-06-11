@@ -261,8 +261,9 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     )
 
     index = set(h2["variant_id"].astype(str))
+    control_variant = "no_affect" if "no_affect" in index else "no_epistemic"
     tracked_variant = "tracked_only" if "tracked_only" in index else "lesioned"
-    order = ["affect", "no_affect", tracked_variant]
+    order = ["affect", control_variant, tracked_variant]
     h2 = h2.set_index("variant_id").loc[order]
 
     fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
