@@ -40,4 +40,22 @@ In partner-choice regimes, partner-specific precision sharpens or flattens polic
 
 \subsection{Ablation variants}
 
-The four precision-runtime variants are defined in Section~\ref{sec:simulation_setup}. For completeness: the no-affect control disables the $\beta$ tracker entirely and fixes $\gamma_k = \gamma_{\text{base}}$; the tracked-only ablation updates $q(\beta_k)$ normally but fixes $\gamma_k = \gamma_{\text{base}}$, allowing the precision estimate to be analyzed without influencing policy selection; the default partner-local variant applies the full update pipeline described in this appendix and sets $\gamma_k$ from each partner's posterior mean; and the shared-$\beta$ ablation maintains a single pooled $\beta$ state updated from all partner evidence while keeping per-partner POMDP beliefs intact, with all partner branches inheriting precision from the shared expected $\beta$.
+Runtime variants are summarized in Table~\ref{tab:precision_variants} (see also Section~\ref{sec:simulation_setup}).
+
+\Needspace{10\baselineskip}
+\begin{table}[H]
+\centering
+\small
+\caption{Precision-runtime ablation variants.}
+\label{tab:precision_variants}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.18\linewidth}X>{\raggedright\arraybackslash}p{0.24\linewidth}@{}}
+\toprule
+Variant & $\beta$ tracker and $\gamma_k$ & Precision scope \\
+\midrule
+No-affect & off; $\gamma_k = \gamma_{\text{base}}$ fixed & --- \\
+Tracked-only & $q(\beta_k)$ updated; $\gamma_k = \gamma_{\text{base}}$ fixed & per-partner \\
+Partner-local & $q(\beta_k)$ updated; $\gamma_k$ from $q(\beta_k)$ & per-partner \\
+Shared-$\beta$ & pooled $q(\beta)$ updated; $\gamma_k$ from shared $\beta$ & pooled $\beta$; separate POMDP beliefs \\
+\bottomrule
+\end{tabularx}
+\end{table}

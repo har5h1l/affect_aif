@@ -23,10 +23,10 @@ Output: `main.pdf`.
 - `appendix/`: appendix section files.
 - `main.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
-- `macros.tex`: shared LaTeX macros. Set `\anonsupprepotrue` and
-  `\renewcommand{\anonsupprepourl}{...}` when an anonymized supplementary repo
-  is live so Methods and Appendix~\ref{app:protocols} switch from
-  upon-acceptance to provided-at-submission wording.
+- `macros.tex`: shared LaTeX macros. Set `\renewcommand{\githubrepourl}{https://github.com/...}`
+  before building when the public repository is live; or set `\anonsupprepotrue` and
+  `\renewcommand{\anonsupprepourl}{...}` for anonymized review. The supplementary
+  statement appears once at the start of the appendix (`appendix/appendix_00_supplementary.tex`).
 - `figures/`: copied PNG/PDF panels from analysis outputs.
 - `source_tables/`: compact CSVs copied from paper analysis outputs for
   checking and figure regeneration.

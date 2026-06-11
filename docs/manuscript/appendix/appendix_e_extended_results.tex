@@ -1,12 +1,12 @@
 \section{Extended Profile and Robustness Results}
 \label{app:extended_results}
 
-This appendix reports extended parameter sweeps, profile analyses, and robustness diagnostics that support the main-text results.
+This appendix reports extended parameter sweeps, profile analyses, and robustness diagnostics.
 
 \subsection{Precision-dynamics parameter variation}
 \label{sec:perturbation_dynamics}
 
-The following auxiliary perturbation controls vary the amplitude and stability of $\beta_k$ dynamics in the graded decision regime. They support interpretation of the main-text deployment results but are not themselves core empirical claims. Flattening the precision signal produces the clearest behavioral change. The low-gain variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. The parameter sweeps below therefore vary gain and prior structure directly.
+The following controls vary the amplitude and stability of $\beta_k$ dynamics in the graded decision regime. They are reported as auxiliary perturbation controls. Low gain compresses $\beta_k$ range and raises entropy; high-gain and cautious-prior variants widen $\beta_k$ movement without monotonic payoff change.
 
 \Needspace{14\baselineskip}
 \begin{table}[H]
@@ -28,7 +28,7 @@ cautious-prior & 1.48 & 1877.7 & 8.4 \\
 \begin{figure}[H]
 \centering
 \appendixfigure{fig_phenotype_dynamics_summary.pdf}
-\caption{Precision-dynamics perturbation controls in the graded decision regime. Low gain compresses $\beta_k$ dynamics and raises policy entropy toward the no-affect/tracked-only baselines reported in Table~\ref{tab:perturbation_dynamics}. Wider $\beta_k$ movement under high-gain and cautious-prior variants does not map monotonically to payoff, separating confidence dynamics from reward.}
+\caption{Perturbation controls in the graded decision regime (Table~\ref{tab:perturbation_dynamics}).}
 \label{fig:phenotype_dynamics_appendix}
 \end{figure}
 

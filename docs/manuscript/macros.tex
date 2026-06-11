@@ -32,15 +32,22 @@
 \newcommand{\resultp}[1]{\textcolor{blue}{\textbf{[}\textit{#1}\textbf{]}}}
 \newcommand{\todo}[1]{\textcolor{blue}{\textbf{[TODO: #1]}}}
 
-% flip to true and set \anonsupprepourl once an anonymized supplementary repo is live
+% supplementary repository url: set \githubrepourl before building for submission
+\newcommand{\githubrepourl}{}
+% anonymized review branch: set \anonsupprepotrue and \anonsupprepourl instead
 \newif\ifanonsupprepo
 \anonsupprepofalse
 \newcommand{\anonsupprepourl}{}
-\newcommand{\codereleasestatement}{%
-  \ifanonsupprepo
-    Simulation code, analysis scripts, and experiment configurations are provided in an anonymized supplementary repository: \url{\anonsupprepourl}.
-  \else
-    Simulation code, analysis scripts, and experiment configurations will be released in a public repository upon acceptance.
-  \fi
-}
 \newcommand{\codereleaseartifactlist}{the simulation environments, precision-runtime variants, experiment configuration files, analysis scripts, and figure-generation code used for the reported experiments}
+\newcommand{\appendixsupplementarystatement}{%
+  \ifanonsupprepo
+    Simulation code, analysis scripts, and experiment configurations are provided in an anonymized repository: \url{\anonsupprepourl}.
+  \else
+    \ifx\githubrepourl\empty
+      Simulation code, analysis scripts, and experiment configurations will be released in a public GitHub repository upon acceptance.
+    \else
+      Simulation code, analysis scripts, and experiment configurations are available at \url{\githubrepourl}.
+    \fi
+  \fi
+  The repository includes \codereleaseartifactlist.%
+}

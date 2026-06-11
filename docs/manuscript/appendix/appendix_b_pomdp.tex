@@ -13,7 +13,7 @@ As described in Section~\ref{sec:partner_models}, the focal agent's generative m
 \begin{align}
 s_k^{\text{type}} &\in \mathcal{S}^{\text{type}}, \label{eq:s_type} \\
 s_k^{\text{stance}} &\in \mathcal{S}^{\text{stance}}, \label{eq:s_stance} \\
-s^{\mathrm{own}} &\in \mathcal{A},
+s^{\mathrm{own}} &\in \mathcal{A}, \nonumber
 \end{align}
 where
 \begin{align*}
@@ -21,12 +21,12 @@ where
 \mathcal{S}^{\text{stance}} &= \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}, \\
 \mathcal{A} &= \{0,1,2,3,4,5\}.
 \end{align*}
-\(s^{\mathrm{own}}\) indexes executed investment and is fully observable: deterministic bookkeeping that supplies the focal agent's own investment level to the payoff likelihood, not an inferred hidden variable. The joint hidden state per partner spans \(4\times3\times6=72\) configurations.
+\(s^{\mathrm{own}}\) indexes executed investment and is fully observable. The joint hidden state per partner spans \(4\times3\times6=72\) configurations.
 
 Observations are partner response and focal payoff:
 \begin{align}
-o_k^{\text{act}} &\in \mathcal{O}^{\text{act}}, \\
-o_k^{\text{pay}} &\in \mathcal{O}^{\text{pay}},
+o_k^{\text{act}} &\in \mathcal{O}^{\text{act}}, \nonumber \\
+o_k^{\text{pay}} &\in \mathcal{O}^{\text{pay}}, \nonumber
 \end{align}
 where $\mathcal{O}^{\text{act}}=\{\text{cooperate, defect}\}$ and $\mathcal{O}^{\text{pay}}$ comprises eleven discrete payoff levels (Eq.~\eqref{eq:graded_payoff_map}).
 
@@ -34,19 +34,19 @@ where $\mathcal{O}^{\text{act}}=\{\text{cooperate, defect}\}$ and $\mathcal{O}^{
 \label{app:pomdp_likelihoods}
 
 \paragraph{Partner-response likelihood \(A^{\mathrm{act}}_k\).}
-The partner-response modality represents the focal agent's likelihood model for observed cooperate-or-defect responses. It uses the cooperation probabilities in Appendix~\ref{app:process_response}: \(P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k)\), with \(P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)=1-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot)\).
-The modality is uniform over \(s^{\mathrm{own}}\): partner response depends on inferred partner type and stance, not on the bookkeeping factor itself. Investment affects future response probabilities indirectly through stance transitions.
+\(A^{\mathrm{act}}_k\) uses the cooperation probabilities in Table~\ref{tab:coop_likelihood} and is uniform over \(s^{\mathrm{own}}\); investment affects future responses indirectly through stance transitions.
 
 \paragraph{Payoff likelihood \(A^{\mathrm{pay}}_k\).}
 In the environment, payoff is deterministic given investment and partner response (Appendix~\ref{app:process_payoff}). In the focal agent's POMDP, payoff is represented as a likelihood over payoff observations conditional on own investment and latent partner state, marginalizing over partner response:
-\begin{align}
-&P(o^{\mathrm{pay}}_k=v \mid s^{\mathrm{own}},s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k) \nonumber\\
-&\quad =
-\sum_{o^{\mathrm{act}}\in\{\mathrm{cooperate},\mathrm{defect}\}}
+\begin{equation}
+\begin{split}
+&P(o^{\mathrm{pay}}_k=v \mid s^{\mathrm{own}},s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k) \\
+&\quad= \sum_{o^{\mathrm{act}}\in\{\mathrm{cooperate},\mathrm{defect}\}}
 \mathbb{I}\!\left[\pi(s^{\mathrm{own}},o^{\mathrm{act}})=v\right]
-P(o^{\mathrm{act}}_k=o^{\mathrm{act}} \mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k).
+P(o^{\mathrm{act}}_k=o^{\mathrm{act}} \mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k)
+\end{split}
 \label{eq:a_pay_marginal}
-\end{align}
+\end{equation}
 This makes higher investment beneficial when cooperation is likely and costly when defection is likely, while keeping payoff preferences inside the generative model.
 
 \subsection{Transition dynamics}
@@ -64,13 +64,10 @@ p_{\mathrm{switch}}/(K_{\mathrm{type}}-1) & j\neq i,
 with $K_{\mathrm{type}}=4$ and default $p_{\mathrm{switch}}=0.05$. Scheduled betrayal scenarios set $p_{\mathrm{switch}}=0$.
 
 \paragraph{Stance dynamics \(B_k^{\mathrm{stance}}\).}
-The focal agent's stance-transition model uses the same investment-dependent interpolation form as the environment-side process in Appendix~\ref{app:process_stance}: \(\rho(a)=a/(|\mathcal{A}|-1)=a/5\) and \(B^{\mathrm{stance}}(a)=\rho(a)B^{\mathrm{high}}+(1-\rho(a))B^{\mathrm{low}}\).
-The endpoint matrices \(B^{\mathrm{high}}\) and \(B^{\mathrm{low}}\) are given in Appendix~\ref{app:process_stance}. This transition model encodes the agent's prior belief that higher investment tends to build trust, lower investment or withholding tends to damage trust, and recovery from hostility is slower than collapse.
-
-Scheduled betrayal and repair protocols intervene on the environment-side stance process. The focal agent is not given explicit prior knowledge of these intervention times; it must adapt from subsequent partner responses and payoff observations.
+\(B_k^{\mathrm{stance}}(a)\) mirrors the interpolation in Eq.~\eqref{eq:b_stance}, using the endpoint matrices in Table~\ref{tab:stance_transition}. Scheduled betrayal and repair intervene on the environment-side process only; the focal agent is not given the intervention times.
 
 \paragraph{Own-investment bookkeeping \(B^{\mathrm{own}}\).}
-Identity transition on the executed investment level (not an inferred belief):
+\(B^{\mathrm{own}}\) deterministically records the executed investment:
 \begin{equation}
 P(s^{\mathrm{own}\prime}=a^\prime \mid s^{\mathrm{own}}, a)=\mathbb{I}[a^\prime=a].
 \label{eq:b_own}
@@ -86,7 +83,8 @@ C_k^{\mathrm{act}} = [0,\,0] \quad \text{over } \{\mathrm{cooperate},\mathrm{def
 \end{equation}
 Payoff preferences ascend over the graded payoff support generated by Eq.~\eqref{eq:graded_payoff_map}:
 \begin{equation}
-C_k^{\mathrm{pay}} = \mathrm{log\_softmax}\!\left(\frac{[5,6,7,8,9,10,10.5,11,11.5,12,12.5]}{\tau}\right),
+C_k^{\mathrm{pay}} = \log \operatorname{softmax}\!\left(\mathbf{u}/\tau\right),
+\quad \mathbf{u}=(5,6,7,8,9,10,10.5,11,11.5,12,12.5),
 \label{eq:c_pay}
 \end{equation}
 where $\tau$ is a temperature parameter controlling preference sharpness. Instrumental motivation therefore enters through payoff observations and multi-step planning rather than direct preferences over partner responses.
