@@ -35,17 +35,7 @@ where $\mathcal{O}^{\text{act}}=\{\text{cooperate, defect}\}$ and $\mathcal{O}^{
 \label{app:pomdp_likelihoods}
 
 \paragraph{Partner-response likelihood \(A^{\mathrm{act}}_k\).}
-The partner-response modality represents the focal agent's likelihood model for observed cooperate-or-defect responses. It uses the cooperation probabilities in Appendix~\ref{app:process_response}:
-\[
-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k),
-\]
-with
-\[
-P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)
-=
-1-
-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot).
-\]
+The partner-response modality represents the focal agent's likelihood model for observed cooperate-or-defect responses. It uses the cooperation probabilities in Appendix~\ref{app:process_response}: \(P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k)\), with \(P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)=1-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot)\).
 The modality is uniform over \(s^{\mathrm{own}}\): partner response depends on inferred partner type and stance, not on the bookkeeping factor itself. Investment affects future response probabilities indirectly through stance transitions.
 
 \paragraph{Payoff likelihood \(A^{\mathrm{pay}}_k\).}
@@ -75,12 +65,7 @@ p_{\mathrm{switch}}/(K_{\mathrm{type}}-1) & j\neq i,
 with $K_{\mathrm{type}}=4$ and default $p_{\mathrm{switch}}=0.05$. Scheduled betrayal scenarios set $p_{\mathrm{switch}}=0$.
 
 \paragraph{Stance dynamics \(B_k^{\mathrm{stance}}\).}
-The focal agent's stance-transition model uses the same investment-dependent interpolation form as the environment-side process in Appendix~\ref{app:process_stance}:
-\[
-\rho(a)=\frac{a}{|\mathcal{A}|-1}=\frac{a}{5},
-\qquad
-B^{\mathrm{stance}}(a)=\rho(a)B^{\mathrm{high}}+(1-\rho(a))B^{\mathrm{low}}.
-\]
+The focal agent's stance-transition model uses the same investment-dependent interpolation form as the environment-side process in Appendix~\ref{app:process_stance}: \(\rho(a)=a/(|\mathcal{A}|-1)=a/5\) and \(B^{\mathrm{stance}}(a)=\rho(a)B^{\mathrm{high}}+(1-\rho(a))B^{\mathrm{low}}\).
 The endpoint matrices \(B^{\mathrm{high}}\) and \(B^{\mathrm{low}}\) are given in Appendix~\ref{app:process_stance}. This transition model encodes the agent's prior belief that higher investment tends to build trust, lower investment or withholding tends to damage trust, and recovery from hostility is slower than collapse.
 
 Scheduled betrayal and repair protocols intervene on the environment-side stance process. The focal agent is not given explicit prior knowledge of these intervention times; it must adapt from subsequent partner responses and payoff observations.

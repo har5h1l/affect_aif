@@ -6,12 +6,10 @@
 \usepackage{subcaption}
 \usepackage{float}
 \usepackage{placeins}
-\usepackage{needspace}
 \usepackage{microtype}
 \usepackage{url}
 
 \graphicspath{{figures/}}
-
 \emergencystretch=1em
 \setcounter{topnumber}{3}
 \setcounter{bottomnumber}{2}
@@ -22,11 +20,6 @@
 \renewcommand{\floatpagefraction}{0.75}
 
 \newcommand{\precision}{\mathrm{precision}}
-
-% appendix figures: cap height so table + figure can share a page cleanly
-\newcommand{\appendixfigure}[1]{%
-    \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}%
-}
 
 % visible placeholder for any late manuscript note
 \newcommand{\resultp}[1]{\textcolor{blue}{\textbf{[}\textit{#1}\textbf{]}}}

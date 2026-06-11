@@ -112,6 +112,7 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
 
 - Prefer minimal targeted manuscript edits with exact proposed diffs; compress prose rather than add filler.
 - When manuscript layout work is in scope, visually inspect the compiled PDF for float gaps and page breaks before declaring it done.
+- Preserve default LLNCS section/subsection spacing; do not over-compact headings with titlesec or custom titlespacing.
 - Use "payoff" not "value" for measured outcome quantities in manuscript prose.
 - Avoid over-prescriptive manuscript unit tests that ban ordinary wording (e.g. word deny lists).
 - In affective-precision manuscript prose, distinguish the present mechanism from Hesp et al.; frame the signal as partner-response likelihood surprisal, not a policy-inference quantity or reward tracking.
@@ -121,4 +122,6 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
 
 - Rebuild the manuscript PDF with `pdflatex` → `bibtex` → `pdflatex` → `pdflatex` in `docs/manuscript/`.
 - Manuscript appendix layout: A = environment generative process, B = focal-agent POMDP, C = affective-precision update and policy selection, D = simulation protocols and metrics, E = extended profile and robustness results.
-- Policy entropy documentation must match actual planner enumeration; do not cite max-entropy formulas without verifying the policy-count math in code.
+- Policy entropy documentation must match planner enumeration in `tasks/trust/pomdp.py`: graded runs use `num_controls=[1,6,6]` (36^4 factorized policies, capped at `max_policies=4096`); partner-choice conditions tile per-partner policies across partners. Do not cite max-entropy parentheticals without verifying this math.
+- Manuscript float layout: Results figures use `[H]` with `\FloatBarrier`; put `\clearpage` only once before `\appendix` in `main.tex`, not before each appendix section.
+- Appendix formatting in `macros.tex`: `\appendixfigure` height cap, `\Needspace` before dense tables, and inline `\(...\)` for short mid-sentence set definitions in appendices A/B (avoid mid-sentence `\[...\]` display math).

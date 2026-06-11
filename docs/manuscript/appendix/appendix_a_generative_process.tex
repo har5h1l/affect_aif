@@ -5,32 +5,20 @@ This appendix specifies the environment-side process used in the repeated trust-
 
 \subsection{Episode structure}
 
-Each episode consists of repeated interactions between one focal active-inference agent and four environment-side partners. In each round, the interaction partner is either assigned by the configured protocol or selected by the focal agent in partner-choice conditions. The focal agent then chooses a graded investment level
-\[
-a \in \mathcal{A} = \{0,1,2,3,4,5\},
-\]
-where \(a=0\) denotes no investment and \(a=5\) denotes maximum investment. The selected partner emits a binary response
-\[
-o^{\mathrm{act}}_k \in \{\mathrm{cooperate},\mathrm{defect}\},
-\]
-sampled from the partner's current type and stance. The environment then delivers payoff according to the deterministic payoff function in Appendix~\ref{app:process_payoff}, and updates the partner's stance according to the investment-dependent transition model in Appendix~\ref{app:process_stance}.
+Each episode consists of repeated interactions between one focal active-inference agent and four environment-side partners. In each round, the interaction partner is either assigned by the configured protocol or selected by the focal agent in partner-choice conditions. The focal agent then chooses a graded investment level \(a \in \mathcal{A} = \{0,1,2,3,4,5\}\), where \(a=0\) denotes no investment and \(a=5\) denotes maximum investment. The selected partner emits a binary response \(o^{\mathrm{act}}_k \in \{\mathrm{cooperate},\mathrm{defect}\}\), sampled from the partner's current type and stance. The environment then delivers payoff according to the deterministic payoff function in Appendix~\ref{app:process_payoff}, and updates the partner's stance according to the investment-dependent transition model in Appendix~\ref{app:process_stance}.
 
 \subsection{Partner state variables}
 
-Each environment-side partner \(k\) has two hidden process variables. The first is behavioral type,
-\[
-s^{\mathrm{type}}_k \in \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\},
-\]
-and the second is stance toward the focal agent,
-\[
-s^{\mathrm{stance}}_k \in \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}.
-\]
+Each environment-side partner \(k\) has two hidden process variables. The first is behavioral type, \(s^{\mathrm{type}}_k \in \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\}\). The second is stance toward the focal agent, \(s^{\mathrm{stance}}_k \in \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}\).
+
 These variables are hidden from the focal agent but define how the environment generates partner responses and stance transitions. Type controls the partner's broad response tendency, while stance modulates how cooperative the partner is toward the focal agent at a given point in the episode.
 
 \subsection{Partner-response probabilities}
 \label{app:process_response}
 
 The partner cooperation likelihood table defines the probability the partner cooperates given type and stance:
+
+\Needspace{14\baselineskip}
 \begin{table}[H]
 \centering
 \caption{Cooperation likelihood $P(\text{cooperate} \mid s^{\text{type}}, s^{\text{stance}})$.}
@@ -47,17 +35,7 @@ Random & 0.60 & 0.50 & 0.35 \\
 \end{tabular}
 \end{table}
 
-The table defines the environment-side cooperation probability
-\[
-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k),
-\]
-with
-\[
-P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)
-=
-1-
-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot).
-\]
+The table defines the environment-side cooperation probability \(P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k)\), with \(P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)=1-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot)\).
 The same response probabilities are used in the focal agent's partner-response likelihood \(A^{\mathrm{act}}_k\) (Appendix~\ref{app:pomdp_likelihoods}), allowing the focal agent to infer type and stance from observed cooperate-or-defect responses. Predictability is not identical to cooperation probability. A strongly cooperative state and a strongly defective state can both be predictable when the focal agent assigns high probability to the response that actually occurs.
 
 \subsection{Payoff function}
@@ -86,6 +64,7 @@ B^{\mathrm{stance}}(a)=\rho(a)B^{\mathrm{high}}+(1-\rho(a))B^{\mathrm{low}}.
 \end{equation}
 High investment shifts dynamics toward trust building; low investment or withholding shifts dynamics toward trust damage; recovery from hostility is slower than collapse.
 
+\Needspace{16\baselineskip}
 \begin{table}[H]
 \centering
 \caption{Endpoint stance transition dynamics. The focal agent's graded investment interpolates between $B^{\mathrm{high}}$ and $B^{\mathrm{low}}$ according to Eq.~\eqref{eq:b_stance}.}

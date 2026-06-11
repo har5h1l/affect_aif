@@ -6,8 +6,9 @@ This appendix reports extended parameter sweeps, profile analyses, and robustnes
 \subsection{Precision-dynamics parameter variation}
 \label{sec:perturbation_dynamics}
 
-The following auxiliary perturbation controls vary the amplitude and stability of $\beta_k$ dynamics in the graded decision regime. They support interpretation of the main-text deployment results but are not themselves core empirical claims.
+The following auxiliary perturbation controls vary the amplitude and stability of $\beta_k$ dynamics in the graded decision regime. They support interpretation of the main-text deployment results but are not themselves core empirical claims. Flattening the precision signal produces the clearest behavioral change. The low-gain variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. The parameter sweeps below therefore vary gain and prior structure directly.
 
+\Needspace{14\baselineskip}
 \begin{table}[H]
 \centering
 \caption{Precision-dynamics parameter variation in the graded decision regime.}
@@ -24,13 +25,9 @@ cautious-prior & 1.48 & 1877.7 & 8.4 \\
 \end{tabular}
 \end{table}
 
-\begin{sloppypar}
-Flattening the precision signal produces the clearest behavioral change. The low-gain variant compresses $\beta_k$ range to $0.24$ and raises entropy to $8.9$, near the no-affect and tracked-only baselines. Expanded-dynamics variants produce wider $\beta_k$ movement, but payoff does not follow range monotonically. The parameter sweeps below therefore vary gain and prior structure directly.
-\end{sloppypar}
-
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{fig_phenotype_dynamics_summary.pdf}
+\appendixfigure{fig_phenotype_dynamics_summary.pdf}
 \caption{Precision-dynamics perturbation controls in the graded decision regime. Low gain compresses $\beta_k$ dynamics and raises policy entropy toward the no-affect/tracked-only baselines reported in Table~\ref{tab:perturbation_dynamics}. Wider $\beta_k$ movement under high-gain and cautious-prior variants does not map monotonically to payoff, separating confidence dynamics from reward.}
 \label{fig:phenotype_dynamics_appendix}
 \end{figure}
@@ -40,6 +37,7 @@ Flattening the precision signal produces the clearest behavioral change. The low
 
 Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whether precision gain controls reactive social confidence across metrics. $\beta_k$ movement range increases monotonically with $\alpha$ in the betrayal regime:
 
+\Needspace{12\baselineskip}
 \begin{table}[H]
 \centering
 \caption{$\beta_k$ range by precision-gain $\alpha$ (betrayal regime, 20 seeds).}
@@ -62,7 +60,7 @@ $\alpha$ & Mean $\beta_k$ range \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{fig_alpha_sweep.pdf}
+\appendixfigure{fig_alpha_sweep.pdf}
 \caption{Precision-gain sweep across open graded and betrayal environments (20 seeds). Higher $\alpha$ expands $\beta_k$ range, while engagement, recovery, entropy, and payoff readouts vary non-monotonically. Precision gain therefore controls confidence-reactivity amplitude rather than mapping directly to reward.}
 \label{fig:alpha_sweep_appendix}
 \end{figure}
@@ -72,6 +70,7 @@ $\alpha$ & Mean $\beta_k$ range \\
 
 Crossing prior model fitness with precision gain defines the profile variants used in Section~\ref{sec:phenotypes}. ``Naive'' and ``cautious'' refer to the initial prior over $q(\beta_k)$ on support $\{0.5, 0.67, 1.0, 1.5, 2.0\}$: naive uses $[0.40, 0.40, 0.15, 0.04, 0.01]$, while cautious uses $[0.01, 0.04, 0.15, 0.40, 0.40]$. Low and high gain refer to $\alpha=0.1$ and $\alpha=3.0$, respectively, with the default agent using $\alpha=3.0$ and centered initialization at $\beta_k=1.0$. $\beta_k$ range denotes the mean within-episode range of the inverse-precision estimate. Table~\ref{tab:phenotypes} gives key metrics.
 
+\Needspace{14\baselineskip}
 \begin{table}[H]
 \centering
 \caption{Behavioral metrics by profile (betrayal environment, 20 seeds). Default agent shown for reference.}
@@ -91,8 +90,8 @@ Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{fig_phenotype_quadrants.pdf}
-\caption{Gain-prior profile signatures from the prior-by-$\alpha$ factorial (betrayal environment, 20 seeds). Cells are column-normalized across profiles for visual comparison; raw metric values are reported in Table 7. The heatmap shows that gain and prior model fitness produce distinct calibration signatures rather than a single reward-aligned ordering.}
+\appendixfigure{fig_phenotype_quadrants.pdf}
+\caption{Gain-prior profile signatures from the prior-by-$\alpha$ factorial (betrayal environment, 20 seeds). Cells are column-normalized across profiles for visual comparison; raw metric values are reported in Table~\ref{tab:phenotypes}. The heatmap shows that gain and prior model fitness produce distinct calibration signatures rather than a single reward-aligned ordering.}
 \label{fig:phenotype_quadrants_appendix}
 \end{figure}
 
@@ -100,6 +99,7 @@ Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
 
 The forgiveness paradigm uses a 200-round partner-choice episode: cooperative baseline (rounds 1--80), betrayal on P0 (rounds 81--120), then reversion to cooperative/trusting behavior (rounds 121--200). Readouts include reengagement latency, post-return selection, payoff recovery, and $\beta_k$ recovery trajectories for the reverted partner.
 
+\Needspace{14\baselineskip}
 \begin{table}[H]
 \centering
 \caption{Forgiveness and trust-repair metrics by precision profile (20 seeds). Reengagement is the post-repair P0 selection rate; payoff recovery compares late post-repair payoff with the late pre-betrayal baseline.}
@@ -120,7 +120,7 @@ no-affect & 0.593 & 1.033 & 1.7 & -- \\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\linewidth]{fig_forgiveness.pdf}
+\appendixfigure{fig_forgiveness.pdf}
 \caption{Forgiveness/trust-repair diagnostic from the 20-seed profile analyses. Vertical markers indicate the transition from cooperative baseline to betrayal and then to repair/reversion. Reengagement and payoff recovery are shown alongside the reverted-partner $\beta_k$ trajectory. Because $\beta_k$ is inverse precision, lower $\beta_k$ indicates higher confidence / higher policy precision; no-affect is omitted from the $\beta_k$ trajectory panel because it has no $\beta$ tracker. The figure shows that agents can reengage a repaired partner before rebuilding the same confidence dynamics.}
 \label{fig:forgiveness_appendix}
 \end{figure}

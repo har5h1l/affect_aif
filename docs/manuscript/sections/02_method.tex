@@ -51,10 +51,7 @@ q_k^-(s^{\text{type}},s^{\text{stance}}).
 \]
 Partner response directly tests the type-by-stance model: a reliably defecting partner can produce low surprisal despite poor payoff, while an erratic cooperative partner can produce high surprisal despite favorable outcomes. The signal therefore tracks partner-response model fit rather than partner value.
 
-The neutral baseline is the squared surprisal of a chance-level two-outcome partner-response prediction,
-\[
-\sigma_0^2 = (-\log 0.5)^2.
-\]
+The neutral baseline is the squared surprisal of a chance-level two-outcome partner-response prediction, \(\sigma_0^2 = (-\log 0.5)^2\).
 Because the response modality is binary, probability $0.5$ corresponds to predicting neither cooperation nor defection better than chance. Squaring places surprisal on a nonnegative error scale before signed affective charge is computed:
 \begin{equation}
 \phi_k = \alpha\!\left(\sigma_0^2 - \epsilon_k^2\right),
@@ -78,11 +75,7 @@ The $\beta_k$ posterior is maintained as an auxiliary precision tracker rather t
 
 In partner-choice regimes, policy inference compares candidate partner--investment policies across relationships. For each partner \(k\), the set \(\Pi_k\) contains policies involving that partner, such as different investment levels or action sequences directed toward \(k\). The corresponding partner model \(\mathcal{M}_k\) assigns each candidate policy an unnormalized policy-evidence score \(u_{k,\pi}\), where larger values indicate stronger posterior support under the sign convention used for softmax policy inference. Partner-specific precision \(\gamma_k\) should sharpen or flatten commitment among policies involving partner \(k\), without by itself changing the average evidence for selecting that partner.
 
-To apply \(\gamma_k\) locally, we separate each partner's mean policy evidence from the relative differences among that partner's policies. Let
-\[
-\bar{u}_k = \frac{1}{|\Pi_k|}\sum_{\pi\in\Pi_k} u_{k,\pi}
-\]
-be the mean policy evidence for partner $k$. The precision-adjusted score is then
+To apply \(\gamma_k\) locally, we separate each partner's mean policy evidence from the relative differences among that partner's policies. Let \(\bar{u}_k = \frac{1}{|\Pi_k|}\sum_{\pi\in\Pi_k} u_{k,\pi}\) be the mean policy evidence for partner $k$. The precision-adjusted score is then
 \begin{equation}
 \tilde{u}_{k,\pi} = \bar{u}_k + \gamma_k\left(u_{k,\pi} - \bar{u}_k\right),
 \label{eq:centered_policy_scores}
