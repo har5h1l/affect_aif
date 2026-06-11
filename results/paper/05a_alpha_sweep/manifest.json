@@ -13,5 +13,6 @@
     "metrics.csv"
   ],
   "generated_from_batch": "paper",
-  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e"
+  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e",
+  "paper_use": "paper_evidence"
 }
