@@ -45,14 +45,10 @@ Diaconescu, A.O., Mathys, C., Weber, L.A.E., Kasper, L., Mauer, J., Stephan,
   learning. Social Cognitive and Affective Neuroscience  \textbf{12}(4),
   618--634 (2017). \doi{10.1093/scan/nsw171}
 
-\bibitem{Friston2010FreeEnergy}
-Friston, K.: The free-energy principle: a unified brain theory? Nature Reviews
-  Neuroscience  \textbf{11},  127--138 (2010). \doi{10.1038/nrn2787}
-
-\bibitem{Friston2017ProcessTheory}
-Friston, K., FitzGerald, T., Rigoli, F., Schwartenbeck, P., Pezzulo, G.: Active
-  inference: A process theory. Neural Computation  \textbf{29}(1),  1--49
-  (2017). \doi{10.1162/NECO_a_00912}
+\bibitem{Espin2016HeterogeneousMotivesTrust}
+Esp{\'i}n, A.M., Exadaktylos, F., Herrmann, B., Bra{\~n}as-Garza, P.:
+  Heterogeneous motives in the trust game: A tale of two roles. Frontiers in
+  Psychology  \textbf{7}, ~728 (2016). \doi{10.3389/fpsyg.2016.00728}
 
 \bibitem{FrithFrith2012}
 Frith, C.D., Frith, U.: Mechanisms of social cognition. Annual Review of
@@ -120,9 +116,23 @@ Ruiz-Serra, J., Sweeney, P., Harr{\'e}, M.S.: Factorised active inference for
   International Foundation for Autonomous Agents and Multiagent Systems (2025).
   \doi{10.5555/3709347.3743815}
 
+\bibitem{Schoeller2021TrustExtendedControl}
+Schoeller, F., Miller, M., Salomon, R., Friston, K.J.: Trust as extended
+  control: Human-machine interactions as active inference. Frontiers in Systems
+  Neuroscience  \textbf{15},  669810 (2021). \doi{10.3389/fnsys.2021.669810}
+
+\bibitem{Smith2013ReciprocityTrustGame}
+Smith, A.: Reciprocity effects in the trust game. Games  \textbf{4}(3),
+  367--374 (2013). \doi{10.3390/g4030367}
+
 \bibitem{smith2019simulating}
 Smith, R., Parr, T., Friston, K.J.: Simulating emotions: An active inference
   model of emotional state inference and emotion concept learning. Frontiers in
   Psychology  \textbf{10}, ~2844 (2019). \doi{10.3389/fpsyg.2019.02844}
+
+\bibitem{Yuan2017ApologyTrustRepair}
+Yuan, B., Dong, Y., Li, W.: The trust repair effect of apology: A systematic
+  review and meta-analysis. Advances in Psychological Science  \textbf{25}(7),
+  1103--1113 (2017). \doi{10.3724/SP.J.1042.2017.01103}
 
 \end{thebibliography}

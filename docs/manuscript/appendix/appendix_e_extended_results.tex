@@ -40,7 +40,7 @@ Flattening the precision signal produces the clearest behavioral change. The low
 
 Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whether precision gain controls reactive social confidence across metrics. $\beta_k$ movement range increases monotonically with $\alpha$ in the betrayal regime:
 
-\begin{table}[tbp]
+\begin{table}[H]
 \centering
 \caption{$\beta_k$ range by precision-gain $\alpha$ (betrayal regime, 20 seeds).}
 \label{tab:alpha_sweep}
@@ -60,7 +60,7 @@ $\alpha$ & Mean $\beta_k$ range \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[tbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_alpha_sweep.pdf}
 \caption{Precision-gain sweep across open graded and betrayal environments (20 seeds). Higher $\alpha$ expands $\beta_k$ range, while engagement, recovery, entropy, and payoff readouts vary non-monotonically. Precision gain therefore controls confidence-reactivity amplitude rather than mapping directly to reward.}
@@ -72,7 +72,7 @@ $\alpha$ & Mean $\beta_k$ range \\
 
 Crossing prior model fitness with precision gain defines the profile variants used in Section~\ref{sec:phenotypes}. ``Naive'' and ``cautious'' refer to the initial prior over $q(\beta_k)$ on support $\{0.5, 0.67, 1.0, 1.5, 2.0\}$: naive uses $[0.40, 0.40, 0.15, 0.04, 0.01]$, while cautious uses $[0.01, 0.04, 0.15, 0.40, 0.40]$. Low and high gain refer to $\alpha=0.1$ and $\alpha=3.0$, respectively, with the default agent using $\alpha=3.0$ and centered initialization at $\beta_k=1.0$. $\beta_k$ range denotes the mean within-episode range of the inverse-precision estimate. Table~\ref{tab:phenotypes} gives key metrics.
 
-\begin{table}[tbp]
+\begin{table}[H]
 \centering
 \caption{Behavioral metrics by profile (betrayal environment, 20 seeds). Default agent shown for reference.}
 \label{tab:phenotypes}
@@ -89,7 +89,7 @@ Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[tbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_phenotype_quadrants.pdf}
 \caption{Gain-prior profile signatures from the prior-by-$\alpha$ factorial (betrayal environment, 20 seeds). Cells are column-normalized across profiles for visual comparison; raw metric values are reported in Table 7. The heatmap shows that gain and prior model fitness produce distinct calibration signatures rather than a single reward-aligned ordering.}
@@ -100,7 +100,7 @@ Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
 
 The forgiveness paradigm uses a 200-round partner-choice episode: cooperative baseline (rounds 1--80), betrayal on P0 (rounds 81--120), then reversion to cooperative/trusting behavior (rounds 121--200). Readouts include reengagement latency, post-return selection, payoff recovery, and $\beta_k$ recovery trajectories for the reverted partner.
 
-\begin{table}[tbp]
+\begin{table}[H]
 \centering
 \caption{Forgiveness and trust-repair metrics by precision profile (20 seeds). Reengagement is the post-repair P0 selection rate; payoff recovery compares late post-repair payoff with the late pre-betrayal baseline.}
 \label{tab:forgiveness}

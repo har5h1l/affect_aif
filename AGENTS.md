@@ -107,3 +107,18 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
   `docs/active/progress.md`.
 - For docs-only routing changes, at minimum run `git diff --check` and the
   focused docs/link tests when available.
+
+## Learned User Preferences
+
+- Prefer minimal targeted manuscript edits with exact proposed diffs; compress prose rather than add filler.
+- When manuscript layout work is in scope, visually inspect the compiled PDF for float gaps and page breaks before declaring it done.
+- Use "payoff" not "value" for measured outcome quantities in manuscript prose.
+- Avoid over-prescriptive manuscript unit tests that ban ordinary wording (e.g. word deny lists).
+- In affective-precision manuscript prose, distinguish the present mechanism from Hesp et al.; frame the signal as partner-response likelihood surprisal, not a policy-inference quantity or reward tracking.
+- Prefer minimal equation or setup clarifications over full rewrites when reviewer feedback allows.
+
+## Learned Workspace Facts
+
+- Rebuild the manuscript PDF with `pdflatex` → `bibtex` → `pdflatex` → `pdflatex` in `docs/manuscript/`.
+- Manuscript appendix layout: A = environment generative process, B = focal-agent POMDP, C = affective-precision update and policy selection, D = simulation protocols and metrics, E = extended profile and robustness results.
+- Policy entropy documentation must match actual planner enumeration; do not cite max-entropy formulas without verifying the policy-count math in code.

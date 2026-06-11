@@ -510,12 +510,6 @@ def _softmax(values: np.ndarray) -> np.ndarray:
     return _normalize(exp)
 
 
-def _precision_centered_logits(policy_scores: np.ndarray, gamma: float) -> np.ndarray:
-    scores = _as_policy_vector(policy_scores, "policy_scores")
-    center = float(np.mean(scores))
-    return center + float(gamma) * (scores - center)
-
-
 def _normalize(values: np.ndarray) -> np.ndarray:
     array = np.asarray(values, dtype=float)
     total = float(array.sum())

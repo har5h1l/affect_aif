@@ -12,12 +12,13 @@ Pooling precision evidence across partners weakened this relationship-specific s
 
 Payoff in the same predictability-value analysis run did not identify the mechanism. Mean cumulative payoff was similar for partner-local precision ($1977.2$) and shared-$\beta$ ($1973.4$), while both exceeded no-affect ($1905.9$). The payoff panel therefore complements the correlation panels: payoff can vary across runtime variants, but the clearest relationship-specific precision signal is the partner-local precision--surprisal association, not a precision--payoff association. This is consistent with affective precision serving as a confidence-calibration signal rather than a direct reward-maximization signal.
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.pdf}
 \caption{Partner-local precision is more strongly associated with partner-response likelihood surprisal than with realized payoff. The correlation panels plot absolute active-encounter partial correlations; the payoff panel shows payoff in the same predictability-value analysis run. Pooling precision evidence across partners attenuates the partner-local predictability signature and makes the pooled precision signal less diagnostically specific, with payoff and surprisal associations becoming comparable under shared $\beta$.}
 \label{fig:model_fitness_contrast}
 \end{figure}
+\FloatBarrier
 
 \subsection{Tracked-only ablation isolates policy commitment}
 \label{sec:deployment}
@@ -28,12 +29,13 @@ The tracked-only ablation confirmed that the tracker can move without producing 
 
 This supports the interpretation of affective precision as a calibration layer rather than an inference-improvement mechanism. The tracker does not directly improve partner-state inference; it regulates how strongly the agent commits to policies based on its current partner model. Whether sharper commitment improves payoff depends on the social context, not on precision alone.
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_deployment_social_summary.pdf}
 \caption{Open graded regime: tracked-only and partner-local precision both move the $\beta_k$ tracker, but only partner-local precision deploys that tracker through $\gamma_k$. Relative to tracked-only, partner-local precision lowers policy entropy without improving payoff, isolating the entropy effect to the $\beta_k \rightarrow \gamma_k$ policy-precision pathway.}
 \label{fig:deployment_contrast}
 \end{figure}
+\FloatBarrier
 
 \subsection{Partner choice extends policy commitment to social allocation}
 \label{sec:partner_choice}
@@ -51,14 +53,14 @@ Accumulated confidence helps when it remains attached to a valid partner model, 
 
 Precision modulation continued to affect deployment after the switch. Mean policy entropy was lower under partner-local precision than under the no-affect control ($8.36$ versus $8.74$), with a bootstrap interval that did not cross zero ($-0.63$ to $-0.16$). Joint partner-type accuracy was also higher under precision modulation ($0.372$ versus $0.266$; bootstrap interval $0.024$ to $0.188$), consistent with engagement being redirected rather than simply disrupted. Because the tracked-only ablation in Section~\ref{sec:deployment} isolated the $\beta_k \rightarrow \gamma_k$ pathway, this accuracy difference is best interpreted as a downstream effect of changed engagement and sampling, not as direct improvement to the partner-state update.
 
-Payoff showed a weaker and more variable pattern. The payoff difference was positive but uncertain ($1185.9$ versus $1172.1$; bootstrap interval $-21.6$ to $52.0$). This pattern is consistent with a calibration mechanism: confidence can keep policies decisive after a relationship changes, but reward depends on whether the agent redirects engagement quickly enough and toward useful alternatives. Figure~\ref{fig:betrayal_boundary} shows the time course around the round-31 betrayal: partner-local precision maintains lower policy entropy after the switch, while tracked-only separates the $\beta_k$ trajectory from policy deployment. Betrayed-partner selection illustrates the reallocation problem: confidence remains behaviorally relevant after the relationship changes, but payoff depends on how engagement is redistributed.
-
-\begin{figure}[tbp]
+\begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_betrayal_boundary_summary.pdf}
 \caption{Abrupt betrayal in the partner-choice regime. The dashed line marks the round-31 stance switch for partner~0. Shaded bands show 95\% intervals across seeds. Partner-local precision maintains lower policy entropy after the switch, while the tracked-only condition shows that $\beta_k$ dynamics can persist without the same deployment effect. Betrayed-partner selection illustrates the reallocation problem: confidence remains behaviorally relevant after the relationship changes, but payoff depends on how engagement is redistributed.}
 \label{fig:betrayal_boundary}
 \end{figure}
+
+Payoff showed a weaker and more variable pattern. The payoff difference was positive but uncertain ($1185.9$ versus $1172.1$; bootstrap interval $-21.6$ to $52.0$). This pattern is consistent with a calibration mechanism: confidence can keep policies decisive after a relationship changes, but reward depends on whether the agent redirects engagement quickly enough and toward useful alternatives. Figure~\ref{fig:betrayal_boundary} shows the time course around the round-31 betrayal: partner-local precision maintains lower policy entropy after the switch, while tracked-only separates the $\beta_k$ trajectory from policy deployment. Betrayed-partner selection illustrates the reallocation problem: confidence remains behaviorally relevant after the relationship changes, but payoff depends on how engagement is redistributed.
 
 The betrayal result exposes a timing problem in social confidence: confidence built from reliable past evidence can remain behaviorally active after the relationship changes. We next vary precision gain and prior model fitness to examine how confidence-revision dynamics differ across agents.
 
