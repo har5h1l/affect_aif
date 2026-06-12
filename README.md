@@ -98,3 +98,33 @@ python scripts/analysis/make_paper_figures.py --help
 - `docs/results/`: inspect compact result summaries and provenance.
 - `docs/manuscript/`: build and inspect the manuscript.
 - `notebooks/`: demo and reproduction notebooks.
+
+## Citation
+
+**Partner-Specific Affective Precision in Social Active Inference** models
+relationship-specific confidence in social active inference: each partner has a
+local precision estimate, updated from that partner's evidence and mapped into
+policy selection during the trust game. This repository is the reference
+implementation—the task, POMDP, affective-precision update, experiments, and
+analysis—built on [`inferactively-pymdp`](https://github.com/infer-actively/pymdp)
+for belief updating and policy selection.
+
+The manuscript is under peer review on OpenReview. Until publication, reference
+this repository and pin a commit for reproducibility. After publication, cite
+the paper for the model and findings.
+
+```bibtex
+@software{shah2026affect_aif,
+  title  = {affect\_aif: Partner-Specific Affective Precision in Social Active Inference},
+  author = {Shah, Harshil and Pashea, Andrew},
+  year   = {2026},
+  url    = {https://github.com/har5h1l/affect_aif},
+  version = {0.1.0},
+  license = {MIT},
+  note   = {Reference implementation on inferactively-pymdp}
+}
+```
+
+## License
+
+Released under the [MIT License](LICENSE).

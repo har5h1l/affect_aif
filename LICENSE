@@ -1,12 +1,21 @@
-PROVISIONAL PEER-REVIEW LICENSE
+MIT License
 
-This is not an open-source license. This license applies while the work is
-under anonymous peer review. After review is complete, the authors may replace
-this notice with a permanent open-source license. Until then, the terms below
-govern use of this repository.
+Copyright (c) 2026 Harshil Shah and Andrew Pashea
 
-Copyright (c) 2026 Anonymous Authors.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-All rights reserved. This repository is provided for anonymous peer review and
-reproducibility evaluation only. Redistribution, sublicensing, public reuse, or
-derivative use outside the review process requires permission from the authors.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
