@@ -117,16 +117,16 @@ implementation—the task, POMDP, affective-precision update, experiments, and
 analysis—built on [`inferactively-pymdp`](https://github.com/infer-actively/pymdp)
 for belief updating and policy selection.
 
-The manuscript is under anonymous peer review. Until publication, reference the
-anonymous review repository and pin a commit for reproducibility. After
-publication, cite the paper for the model and findings.
+The manuscript is under anonymous peer review. Until publication, reference
+this repository and pin a commit for reproducibility. After publication, cite
+the paper for the model and findings.
 
 ```bibtex
-@software{anonymous2026affect_aif,
+@software{shah2026affect_aif,
   title  = {affect\_aif: Partner-Specific Affective Precision in Social Active Inference},
-  author = {Anonymous Author(s)},
+  author = {Shah, Harshil and Pashea, Andrew},
   year   = {2026},
-  url    = {https://anonymous.4open.science/r/affect_aif},
+  url    = {https://github.com/har5h1l/affect_aif},
   version = {0.1.0},
   license = {MIT},
   note   = {Reference implementation on inferactively-pymdp}

@@ -1,7 +1,7 @@
 \section{Methods}
 \label{sec:methods}
 
-A focal active-inference agent plays a repeated multi-partner trust/investment game with four partners whose behavioral types and stances are hidden. The agent is implemented using the \texttt{pymdp} library for discrete active inference~\cite{Heins2022Pymdp,DaCosta2020DiscreteSynthesis}, which provides standard components for belief updating and policy selection. Partner-local affective precision is layered on top of separate per-partner generative models, allowing both evidence and policy precision to remain relationship-specific. The task generative process, focal-agent POMDP, affective-precision update, and simulation protocols are specified in Appendices~\ref{app:generative_process}--\ref{app:protocols}.
+A focal active-inference agent plays a repeated multi-partner trust/investment game with four partners whose behavioral types and stances are hidden. The agent is implemented using the \texttt{pymdp} library for discrete active inference~\cite{DaCosta2020DiscreteSynthesis,Heins2022Pymdp}, which provides standard components for belief updating and policy selection. Partner-local affective precision is layered on top of separate per-partner generative models, allowing both evidence and policy precision to remain relationship-specific. The task generative process, focal-agent POMDP, affective-precision update, and simulation protocols are specified in Appendices~\ref{app:generative_process}--\ref{app:protocols}.
 
 \subsection{Trust game}
 \label{sec:trust_game}
@@ -43,7 +43,7 @@ P\!\left(\hat{o}_{k,t}^{\text{act}} \mid s^{\text{type}},s^{\text{stance}}\right
 q_{k,t}^-(s^{\text{type}},s^{\text{stance}}).
 \label{eq:epsilon}
 \end{equation}
-Equation~\eqref{eq:epsilon} is the negative log posterior predictive likelihood assigned to the observed partner response under \(q_{k,t}^-\), marginalizing over the agent's pre-update beliefs about partner type and stance. Partner response directly tests the type-by-stance model: a reliably defecting partner can produce low surprisal despite poor payoff, while an erratic cooperative partner can produce high surprisal despite favorable outcomes. The signal therefore tracks partner-response model fit rather than partner value.
+Equation~\eqref{eq:epsilon} is the negative log posterior predictive likelihood assigned to the observed partner response under \(q_{k,t}^-\), marginalizing over the agent's pre-update beliefs about partner type and stance. Partner response directly tests the type-by-stance model: a reliably defecting partner can produce low surprisal despite poor payoff, while an erratic cooperative partner can produce high surprisal despite favorable outcomes. The signal therefore tracks partner-response model fit rather than partner payoff.
 
 Per-round update order is: (i) plan from \(q_{k,t}^-\); (ii) observe \(\hat{o}_{k,t}^{\text{act}}\); (iii) compute \(\epsilon_{k,t}\) and update \(\beta_k\); (iv) assimilate \(\hat{o}_{k,t}^{\text{act}}\) into the partner-state posterior.
 

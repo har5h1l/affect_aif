@@ -15,7 +15,7 @@ Barrett, L.F.: Solving the emotion paradox: Categorization and the experience
 
 \bibitem{Behrens2008SocialLearning}
 Behrens, T.E.J., Hunt, L.T., Woolrich, M.W., Rushworth, M.F.S.: Associative
-  learning of social value. Nature  \textbf{456},  245--249 (2008).
+  learning of social value. Nature  \textbf{456}(7219),  245--249 (2008).
   \doi{10.1038/nature07538}
 
 \bibitem{Berg1995Trust}
@@ -46,9 +46,9 @@ Diaconescu, A.O., Mathys, C., Weber, L.A.E., Kasper, L., Mauer, J., Stephan,
   618--634 (2017). \doi{10.1093/scan/nsw171}
 
 \bibitem{Espin2016HeterogeneousMotivesTrust}
-Esp{\'i}n, A.M., Exadaktylos, F., Herrmann, B., Bra{\~n}as-Garza, P.:
-  Heterogeneous motives in the trust game: A tale of two roles. Frontiers in
-  Psychology  \textbf{7}, ~728 (2016). \doi{10.3389/fpsyg.2016.00728}
+Esp{\'i}n, A.M., Exadaktylos, F., Neyse, L.: Heterogeneous motives in the trust
+  game: A tale of two roles. Frontiers in Psychology  \textbf{7}, ~728 (2016).
+  \doi{10.3389/fpsyg.2016.00728}
 
 \bibitem{FrithFrith2012}
 Frith, C.D., Frith, U.: Mechanisms of social cognition. Annual Review of
@@ -95,7 +95,8 @@ Mathys, C., Daunizeau, J., Friston, K.J., Stephan, K.E.: A {Bayesian}
 
 \bibitem{Parr2022ActiveInference}
 Parr, T., Pezzulo, G., Friston, K.J.: Active Inference: The Free Energy
-  Principle in Mind, Brain, and Behavior. MIT Press (2022)
+  Principle in Mind, Brain, and Behavior. MIT Press (2022).
+  \doi{10.7551/mitpress/12441.001.0001}
 
 \bibitem{pattisapu2024free}
 Pattisapu, C., Verbelen, T., Pitliya, R.J., Kiefer, A.B., Albarracin, M.: Free
@@ -107,7 +108,8 @@ Pattisapu, C., Verbelen, T., Pitliya, R.J., Kiefer, A.B., Albarracin, M.: Free
 \bibitem{Pitliya2025ToMActiveInference}
 Pitliya, R.J., {\c C}atal, O., Van~de Maele, T., Pezzato, C., Verbelen, T.:
   Theory of mind using active inference: A framework for multi-agent
-  cooperation (2025). \doi{10.48550/arXiv.2508.00401}
+  cooperation. arXiv preprint arXiv:2508.00401  (2025).
+  \doi{10.48550/arXiv.2508.00401}
 
 \bibitem{RuizSerra2025Factorised}
 Ruiz-Serra, J., Sweeney, P., Harr{\'e}, M.S.: Factorised active inference for

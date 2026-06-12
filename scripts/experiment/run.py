@@ -175,7 +175,7 @@ def _write_dry_run_manifest(args) -> int:
             )
 
     if use_canonical and len(config_entries) == 1:
-        manifest_path = Path(config_entries[0]["resolved_output_dir"]) / "dry_run_manifest.json"
+        manifest_path = Path(str(config_entries[0]["resolved_output_dir"])) / "dry_run_manifest.json"
     elif use_canonical:
         manifest_path = Path("results") / ".dry_run" / f"{batch_id}_manifest.json"
     else:

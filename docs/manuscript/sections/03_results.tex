@@ -10,12 +10,12 @@ Partner-local precision was more strongly associated with partner-response likel
 
 Pooling precision evidence across partners weakened this relationship-specific signal. In the shared-$\beta$ ablation, per-partner beliefs remained separate but the precision tracker was updated from pooled partner evidence. The precision--surprisal association fell to $r=-0.496$ after controlling for encounter count, while the precision--payoff association was comparable in magnitude ($r=0.535$). Thus, the update rule alone is not sufficient: when precision evidence is pooled, $\beta_k$ no longer cleanly indexes relationship-local model fit and becomes more entangled with global exposure/payoff structure.
 
-Payoff in the same predictability-value analysis run did not identify the mechanism. Although both precision variants had higher analysis-window payoff than no-affect in this run, payoff did not isolate the mechanism: partner-local and shared-$\beta$ were nearly tied in payoff while differing sharply in their precision--surprisal signatures. The payoff panel therefore complements the correlation panels: payoff can vary across runtime variants, but the clearest relationship-specific precision signal is the partner-local precision--surprisal association, not a precision--payoff association. This is consistent with affective precision serving as a confidence-calibration signal rather than a direct reward-maximization signal.
+Payoff in the same predictability--payoff analysis run did not identify the mechanism. Although both precision variants had higher analysis-window payoff than no-affect in this run, payoff did not isolate the mechanism: partner-local and shared-$\beta$ were nearly tied in payoff while differing sharply in their precision--surprisal signatures. The payoff panel therefore complements the correlation panels: payoff can vary across runtime variants, but the clearest relationship-specific precision signal is the partner-local precision--surprisal association, not a precision--payoff association. This is consistent with affective precision serving as a confidence-calibration signal rather than a direct payoff-maximization signal.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.pdf}
-\caption{Partner-local precision is more strongly associated with partner-response likelihood surprisal than with realized payoff. The correlation panels plot absolute active-encounter partial correlations; the payoff panel shows payoff in the same predictability-value analysis run. Pooling precision evidence across partners attenuates the partner-local predictability signature and makes the pooled precision signal less diagnostically specific, with payoff and surprisal associations becoming comparable under shared $\beta$.}
+\caption{Partner-local precision is more strongly associated with partner-response likelihood surprisal than with realized payoff. The correlation panels plot absolute active-encounter partial correlations; the payoff panel shows payoff in the same predictability--payoff analysis run. Pooling precision evidence across partners attenuates the partner-local predictability signature and makes the pooled precision signal less diagnostically specific, with payoff and surprisal associations becoming comparable under shared $\beta$.}
 \label{fig:model_fitness_contrast}
 \end{figure}
 \FloatBarrier
@@ -42,9 +42,9 @@ This supports the interpretation of affective precision as a calibration layer r
 
 Partner-local precision also affected policy commitment when the agent could choose whom to engage. In the partner-choice regime, each candidate pairs a partner with a multi-step investment plan, of which only the first step is executed each round. Precision modulation lowered policy entropy relative to the no-affect control ($8.60$ versus $8.83$), indicating that the $\beta_k \rightarrow \gamma_k$ pathway shapes partner--investment policies, not only investment levels within a fixed interaction.
 
-The allocation shift was small and condition-specific rather than a simple cooperator-seeking effect. Across selected partner types, partner-local precision produced a more balanced allocation than the no-affect control (cooperator $25.3\%$ versus $29.2\%$; exploiter $25.5\%$ versus $21.3\%$; reciprocator $23.7\%$ versus $22.5\%$; random $25.5\%$ versus $27.1\%$). This should not be read as a general preference for any one partner type. The main effect is sharper commitment under current partner models, not direct value tracking; aggregate payoff was nearly unchanged ($1868.3$ versus $1866.2$).
+The allocation shift was small and condition-specific rather than a simple cooperator-seeking effect. Across selected partner types, partner-local precision produced a more balanced allocation than the no-affect control (cooperator $25.3\%$ versus $29.2\%$; exploiter $25.5\%$ versus $21.3\%$; reciprocator $23.7\%$ versus $22.5\%$; random $25.5\%$ versus $27.1\%$). This should not be read as a general preference for any one partner type. The main effect is sharper commitment under current partner models, not direct payoff tracking; aggregate payoff was nearly unchanged ($1868.3$ versus $1866.2$).
 
-Together, these results show that partner-local precision can reshape engagement without guaranteeing reward improvement. Whether sharper commitment helps or hurts depends on whether the social environment remains stable. The abrupt-betrayal condition tests this boundary directly.
+Together, these results show that partner-local precision can reshape engagement without guaranteeing payoff improvement. Whether sharper commitment helps or hurts depends on whether the social environment remains stable. The abrupt-betrayal condition tests this boundary directly.
 
 \subsection{Abrupt betrayal tests confidence under change}
 \label{sec:betrayal}
@@ -61,7 +61,7 @@ Precision modulation continued to affect deployment after the switch. Mean polic
 \end{figure}
 \FloatBarrier
 
-Payoff showed a weaker and more variable pattern. The payoff difference was positive but uncertain ($1185.9$ versus $1172.1$; bootstrap interval $-21.6$ to $52.0$). This pattern is consistent with a calibration mechanism: confidence can keep policies decisive after a relationship changes, but reward depends on whether the agent redirects engagement quickly enough and toward useful alternatives (Figure~\ref{fig:betrayal_boundary}).
+Payoff showed a weaker and more variable pattern. The payoff difference was positive but uncertain ($1185.9$ versus $1172.1$; bootstrap interval $-21.6$ to $52.0$). This pattern is consistent with a calibration mechanism: confidence can keep policies decisive after a relationship changes, but payoff depends on whether the agent redirects engagement quickly enough and toward useful alternatives (Figure~\ref{fig:betrayal_boundary}).
 
 The betrayal result exposes a timing problem in social confidence: confidence built from reliable past evidence can remain behaviorally active after the relationship changes. We next vary precision gain and prior model fitness to examine how confidence-revision dynamics differ across agents.
 

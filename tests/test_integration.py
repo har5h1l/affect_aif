@@ -333,10 +333,11 @@ def test_batch_runner_normalizes_config_paths_for_provenance(tmp_path, monkeypat
     rows = pd.read_csv(state.output_dir / "results.csv")
     metadata = json.loads((state.output_dir / "batch_metadata.json").read_text())
     expected_path = str(config_path.resolve())
+    expected_public_path = "configs/betrayal_choice.toml"
 
     assert state.config_path == expected_path
-    assert set(rows["config_path"]) == {expected_path}
-    assert metadata["config_path"] == expected_path
+    assert set(rows["config_path"]) == {expected_public_path}
+    assert metadata["config_path"] == expected_public_path
 
 
 def test_batch_workers_one_runs_inline_without_process_pool(tmp_path, monkeypatch):
