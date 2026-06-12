@@ -80,6 +80,10 @@ graphify-out/
 docs/archive/
 docs/active/
 docs/superpowers/
+docs/handoffs/
+docs/manuscript/notes/
+docs/results/cleanup/
+docs/results/notes/
 AGENTS.md
 
 # Hook state files

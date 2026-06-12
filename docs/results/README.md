@@ -7,7 +7,6 @@ raw data store.
   include/exclude rules for the active architecture
 - `paper.md`: paper result cards and where their summaries live
 - `diagnostics.md`: retained non-paper diagnostic result cards
-- `archive.md`: archive policy for historical or incomplete material
 - `../../results/`: tracked compact public result summaries and manifests
 - `../manuscript/`: manuscript source, source tables, figures, and
   paper-facing notes

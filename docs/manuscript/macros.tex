@@ -35,20 +35,19 @@
     \vskip-\intextsep
 }
 
-% visible placeholder for any late manuscript note
+% visible marker for any late manuscript result note
 \newcommand{\resultp}[1]{\textcolor{blue}{\textbf{[}\textit{#1}\textbf{]}}}
-\newcommand{\todo}[1]{\textcolor{blue}{\textbf{[TODO: #1]}}}
 
-% supplementary repository url: set \githubrepourl before building for submission
-\newcommand{\githubrepourl}{\url{[placeholder]}}
-% anonymized review branch: set \anonsupprepotrue and \anonsupprepourl instead
+% supplementary repository url
+\newcommand{\githubrepourl}{\url{https://github.com/har5h1l/affect_aif}}
+% anonymized review branch: keep true for anonymous review builds
 \newif\ifanonsupprepo
-\anonsupprepofalse
-\newcommand{\anonsupprepourl}{}
+\anonsupprepotrue
+\newcommand{\anonsupprepourl}{\url{https://drive.google.com/drive/folders/1KIz2unW--qx643vBqvwD1FTOS3TgYhpS?usp=drive_link}}
 \newcommand{\codereleaseartifactlist}{the simulation environments, precision-runtime variants, experiment configuration files, analysis scripts, and figure-generation code used for the reported experiments}
 \newcommand{\appendixsupplementarystatement}{%
   \ifanonsupprepo
-    Simulation code, experiment configurations, analysis scripts, and figure-generation code are available in the anonymous supplementary repository.
+    Simulation code, experiment configurations, analysis scripts, figure-generation code, and row-level result files are available in the anonymous supplementary repository.
   \else
     Simulation code, experiment configurations, analysis scripts, and figure-generation code are available at~\githubrepourl.
   \fi

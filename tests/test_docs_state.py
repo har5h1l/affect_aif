@@ -18,7 +18,6 @@ def test_public_docs_route_exists():
         "docs/results/README.md",
         "docs/results/paper.md",
         "docs/results/diagnostics.md",
-        "docs/results/archive.md",
         "docs/manuscript/README.md",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]

@@ -95,9 +95,6 @@ them should be verified by comparing fixed-seed data-collection and debug
 `results.csv` hashes against the previous implementation before treating the
 change as experiment-preserving.
 
-The current runtime optimization audit is recorded in
-`docs/results/runtime_optimization_audit_20260611.md`.
-
 Post-hoc analysis:
 
 ```bash

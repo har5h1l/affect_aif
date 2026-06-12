@@ -23,21 +23,21 @@ Output: `main.pdf`.
 - `appendix/`: appendix section files.
 - `main.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
-- `macros.tex`: shared LaTeX macros. Set `\renewcommand{\githubrepourl}{https://github.com/...}`
-  before building when the public repository is live; or set `\anonsupprepotrue` and
-  `\renewcommand{\anonsupprepourl}{...}` for anonymized review. The supplementary
-  statement appears once at the start of the appendix (`appendix/appendix_00_supplementary.tex`).
+- `macros.tex`: shared LaTeX macros. The default build uses the anonymous
+  supplementary Drive packet for review. After de-anonymization, set
+  `\anonsupprepofalse` to print the public GitHub repository URL instead. The
+  supplementary statement appears once at the start of the appendix
+  (`appendix/appendix_00_supplementary.tex`).
 - `figures/`: copied PNG/PDF panels from analysis outputs.
 - `source_tables/`: compact CSVs copied from paper analysis outputs for
   checking and figure regeneration.
 - `scripts/analysis/make_paper_figures.py`: refreshes figure-specific compact
   tables from `results/paper` when requested and regenerates composite figures
-  from `source_tables/` (see `docs/manuscript/notes/figures_tables.md`).
+  from `source_tables/`.
 
 ## Evidence Contract
 
-Use `docs/results/current.md` and the manuscript notes in
-`docs/manuscript/notes/` as the paper evidence surface. Abrupt-betrayal and
+Use `docs/results/current.md` as the paper evidence surface. Abrupt-betrayal and
 profile results use the reviewed source tables in this folder. Do not promote
 old bounded-error numbers or pre-fix smoke numbers as current main-text
 evidence.
