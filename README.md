@@ -3,6 +3,9 @@
 Active-inference trust-game simulations for studying partner-local affective
 precision as a relationship-specific confidence signal.
 
+**Anonymous review:** the public code mirror for double-blind review is
+<https://anonymous.4open.science/r/affect_aif>.
+
 ## What This Is
 
 `affect_aif` contains a pymdp-backed trust-game model, paper reproduction
