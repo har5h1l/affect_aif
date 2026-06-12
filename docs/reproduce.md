@@ -66,13 +66,11 @@ follow-up surfaces that moved out of the paper live under `configs/future/`.
 
 ## Result Data Packet
 
-The full paper result packet is available in the anonymous Drive folder:
+The full paper result packet is available at `ANONYMOUS_DATA_PACKET_URL`.
 
-<https://drive.google.com/drive/folders/1KIz2unW--qx643vBqvwD1FTOS3TgYhpS?usp=drive_link>
-
-Use the tracked compact summaries for quick inspection and the Drive packet
-when you need row-level `results.csv` files that are intentionally omitted
-from git.
+Use the tracked compact summaries for quick inspection and the anonymous data
+packet when you need row-level `results.csv` files that are intentionally
+omitted from git.
 
 ## Colab Route
 

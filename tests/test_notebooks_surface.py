@@ -131,12 +131,10 @@ def test_demo_notebook_sanitizes_markdown_repo_urls():
     exec(compile(module, "demo-bootstrap-sanitizer", "exec"), namespace)
     sanitize_repo_url = namespace["sanitize_repo_url"]
 
-    assert sanitize_repo_url("https://github.com/har5h1l/affect_aif.git") == "https://github.com/har5h1l/affect_aif.git"
-    assert sanitize_repo_url("<https://github.com/har5h1l/affect_aif.git>") == "https://github.com/har5h1l/affect_aif.git"
-    assert (
-        sanitize_repo_url("[https://github.com/har5h1l/affect_aif.git](https://github.com/har5h1l/affect_aif.git)")
-        == "https://github.com/har5h1l/affect_aif.git"
-    )
+    placeholder = "ANONYMOUS_REPOSITORY_URL"
+    assert sanitize_repo_url(placeholder) == placeholder
+    assert sanitize_repo_url(f"<{placeholder}>") == placeholder
+    assert sanitize_repo_url(f"[{placeholder}]({placeholder})") == placeholder
 
 
 def test_demo_notebook_prefers_existing_repo_root_before_clone():

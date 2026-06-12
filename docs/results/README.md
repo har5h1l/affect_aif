@@ -37,9 +37,9 @@ are gitignored. The user-facing Drive packet can include the full `results/`
 tree because tracked summaries and ignored raw files share the same canonical
 folder layout.
 
-The anonymous public Drive packet is:
+The anonymous public data packet is:
 
-<https://drive.google.com/drive/folders/1KIz2unW--qx643vBqvwD1FTOS3TgYhpS?usp=drive_link>
+`ANONYMOUS_DATA_PACKET_URL`
 
 ## Evidence Contract
 
