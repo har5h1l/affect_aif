@@ -8,7 +8,7 @@
   "source_run_paths": [
     "results/paper/05a_alpha_sweep/raw/results.csv"
   ],
-  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "raw_results_policy": "gitignored_retained_outside_git_and_in_drive",
   "tracked_summary_files": [
     "metrics.csv"
   ],

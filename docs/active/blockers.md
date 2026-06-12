@@ -9,20 +9,13 @@
   balanced-exposure graded reliability spine -> reward-matched graded spine ->
   strict reward-neutral H1.
 
-- **H0/H2/H4 language**: payoff remains flat in smoke for these hypotheses.
-  The manuscript has been softened to deployment/entropy language for H0/H2
-  and allocation-reorganisation language for H4 rather than broad payoff
-  advantage claims. The completed 30-seed binary H4 confirmation is
+- **H0/H2/H4 language**: payoff is not a stable headline for these hypotheses.
+  The manuscript uses deployment/entropy language for H0/H2 and
+  allocation-reorganisation language for H4 rather than broad payoff advantage
+  claims. The completed 30-seed graded H2/H4 paper runs are now the current
+  paper evidence; the completed 30-seed binary H4 confirmation remains
   diagnostics-only and should not be used as the paper Section 3.3
-  confirmation. If H4 needs confirmation-scale manuscript support, run the
-  graded paper partner-selection config.
-
-- **Paper-scale decision for graded H2/H4**: the current paper configs for
-  `02_deployment_ablation` and `03_partner_selection` are still 3-seed
-  readouts. Decide whether each should be rerun at 20 or 30 seeds before using
-  them as confirmation-scale paper evidence. After changing the config(s),
-  rerun on `server`, then refresh `results/paper`, manuscript source tables,
-  figures, results docs, manifests, and manuscript prose together.
+  confirmation.
 
 - **Mixed-volatility extension boundary**: Exp D is implemented and
   operationally valid, but it is no longer reported as paper evidence. It opens
@@ -69,6 +62,10 @@
   `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/`
   and is retained as diagnostic provenance. It is not the graded paper
   partner-selection surface.
+- Graded H2 deployment and H4 partner-selection paper runs were promoted to
+  30-seed readouts under `results/paper/02_deployment_ablation/` and
+  `results/paper/03_partner_selection/`. Manuscript source tables, figures,
+  result docs, and prose now use those outputs.
 - Exp A-C generic analyses and manuscript figures now exist, including
   `fig_forgiveness.pdf`, and have been reviewed for the current manuscript
   framing. Future changes should preserve the non-monotonic phenotype language.

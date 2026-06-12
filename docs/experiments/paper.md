@@ -20,7 +20,8 @@ Remove `--dry-run` to run the full suite. These runs are intentionally larger
 than the demos; keep `--workers 1` unless parallel local execution is intended.
 
 Compact public summaries and manifests are tracked under `results/paper/`.
-Raw trajectories are gitignored but retained locally and on `server`.
+Raw trajectories are gitignored but retained outside git and in the Drive
+packet.
 
 ## Paper Suite Map
 

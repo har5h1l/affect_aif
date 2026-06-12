@@ -22,9 +22,9 @@ The social-allocation diagnostic also uses `payoff = "binary"` and 200-round
 agent-choice episodes. It should not be used to update Section 3.3 paper
 numbers, which come from `configs/paper/03_partner_selection.toml`.
 
-## Server-Only Diagnostic Raw Buckets
+## Additional Diagnostic Raw Buckets
 
-The server cleanup retained additional diagnostic raw buckets under
+Additional diagnostic raw buckets may exist outside git under
 `results/diagnostics/`, including precision-sensitivity, candidate-fix, and
 HESP-surprise probes. They are not tracked in git and should not be treated as
 paper evidence unless a future manuscript revision explicitly promotes them.

@@ -33,5 +33,5 @@ hypothesis id under `configs/diagnostics/`.
 - H6 perturbation configs: older profile-style dynamics retained for context.
 
 Compact diagnostic summaries tracked in git live under `results/diagnostics/`.
-Full diagnostic raw runs are retained on `server` when they are not needed in
-the local paper handoff packet.
+Full diagnostic raw runs are retained outside git when they are not needed in
+the local paper packet.

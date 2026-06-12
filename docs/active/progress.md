@@ -125,15 +125,13 @@ Current recovery status on June 6 09:10 PDT:
   analysis-language risk without changing task dynamics, model math, or raw
   trajectories.
 
-### TODO: Confirm Graded Deployment And Partner-Selection Paper Runs
+### Graded Deployment And Partner-Selection Paper Runs
 
-As of June 11, the current paper raw data show that
+The June 11 graded paper rerun promoted
 `configs/paper/02_deployment_ablation.toml` and
-`configs/paper/03_partner_selection.toml` are still configured at
-`replications = 3`. Before treating Figure 2 or the Section 3.3 graded
-partner-selection readout as confirmation-scale evidence, decide whether each
-needs 20 or 30 seeds, update the config(s), rerun them on `server` through the
-Mango/tmux workflow, and refresh the affected paper surfaces together:
+`configs/paper/03_partner_selection.toml` to `replications = 30` and completed
+on `server` through the Mango/tmux workflow. The affected paper surfaces were
+refreshed together:
 
 - `results/paper/02_deployment_ablation/`
 - `results/paper/03_partner_selection/`
@@ -142,11 +140,11 @@ Mango/tmux workflow, and refresh the affected paper surfaces together:
 - `docs/manuscript/sections/03_results.tex`
 - `docs/results/current.md`
 - `docs/results/paper.md`
-- any README/manifest files touched by the rerun
 
-Until that rerun is complete, write these two readouts narrowly as
-mechanism/pathway and directional allocation evidence, not as 30-seed
-confirmation.
+Write these two readouts as 30-seed mechanism evidence: H2 isolates the
+beta-to-gamma deployment pathway through lower entropy with nearly matched
+payoff, and H4 shows graded partner-choice reorganisation without a one-type
+preference or payoff headline.
 
 Manuscript-critical evidence audit at 14:47 PDT:
 
@@ -157,18 +155,19 @@ Manuscript-critical evidence audit at 14:47 PDT:
 | Exp D mixed volatility | 80 runs: 4 variants x 20 seeds, 200 rounds | Raw trajectories may exist locally/server-side; public paper scaffold and manuscript Exp D assets removed | Future extension only under `configs/future/mixed_volatility.toml`; not paper evidence |
 | Exp C forgiveness | 120 runs: 6 variants x 20 seeds, 200 rounds | Structural finality reached; final CSV, compact metrics, generic analysis, source table, and forgiveness figure exist | Ready for user-approved review; critical for forgiveness/trust-repair readout |
 | H5 confirmation | 120 runs in current confirm spec: 4 variants x 30 seeds, 120 rounds | Structural finality reached; final CSV, checkpoint, and configured analysis artifacts exist | Ready for user-approved review; top core-mechanism confirmation |
+| H2 deployment ablation | 120 runs in paper spec: 4 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, source tables, and figure assets refreshed | Ready for manuscript use as 30-seed mechanism evidence |
+| H4 graded partner selection | 90 runs in paper spec: 3 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, source table, and figure/source docs refreshed | Ready for manuscript use as 30-seed allocation-reorganisation evidence |
 | H1 binary confirmation | 90 runs in corrected confirm spec: 3 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, configured analysis, and diagnostic source tables exist | Appendix/diagnostic only; removed from main paper |
 | H4 binary confirmation | 90 runs in binary diagnostic spec: 3 variants x 30 seeds, 200 rounds | Structural finality reached; final CSV, configured analysis, and compact diagnostic source tables exist | Diagnostics only; not the graded paper Section 3.3 readout |
 | H1 controlled diagnostics | 20 runs each for balanced graded, reward-matched graded, and reward-neutral diagnostics | Dry-run/smoke-checked only | Escalate only if corrected H1 confirmation remains reward/exposure-confounded |
 
 Seed/round audit: keep Exp A-D at 20 seeds x 200 rounds because these runs are
-already partly complete, cover within-episode transients needed by Section 3.6,
-and provide enough replication for compact CIs without expanding compute. For
-core confirmation, use the existing 30-seed H5 spec first:
-`betrayal_reallocation_confirm.toml` is 4 variants x 30 seeds x 120 rounds.
-The completed H4 binary confirmation is diagnostic provenance; if Section 3.3
-needs confirmation-scale support, run the graded paper `03_partner_selection`
-config rather than reusing the binary H4 diagnostic.
+already complete, cover within-episode transients needed by Section 3.6, and
+provide enough replication for compact CIs without expanding compute. Core
+confirmation now includes the 30-seed H2 deployment ablation, 30-seed H4 graded
+partner-selection readout, and 30-seed H5 betrayal-adaptation readout. The
+completed H4 binary confirmation is diagnostic provenance and does not replace
+the graded paper `03_partner_selection` config.
 Do not add more seeds unless reviewer pressure requires it; if H1 needs a
 stronger reward/exposure decomposition, escalate to controlled diagnostics
 before increasing replication.

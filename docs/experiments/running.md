@@ -83,7 +83,7 @@ Outputs are written under:
 
 Each completed run directory may contain `results.csv`, copied config TOML,
 metadata, and configured analysis artifacts. Raw `results.csv` files are
-gitignored in the public repo but retained locally and on `server`.
+gitignored in the public repo but retained outside git.
 Result rows and `batch_metadata.json` record config paths as resolved absolute
 paths so provenance does not depend on whether a run used the serial,
 single-worker inline, or multi-worker batch path.

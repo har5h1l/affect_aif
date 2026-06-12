@@ -5,4 +5,4 @@
 - Config: `configs/paper/04_betrayal_adaptation.toml`
 - Full raw source: `results/paper/04_betrayal_adaptation/raw/results.csv`
 - Tracked summaries: `source_tables/h5_evidence_effect_summary.csv`
-- Raw policy: full per-round `results.csv` is ignored in git and retained on server/Drive.
+- Raw policy: full per-round `results.csv` is ignored in git and retained outside git and in Drive.

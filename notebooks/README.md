@@ -36,6 +36,8 @@ expensive because each paper experiment is executed before its analysis cells.
   under `results/paper/*/raw/`.
 - Data policy: row-level `results.csv` files are ignored by git. The notebook
   can still write them locally or export them to Drive.
+- Public data packet: the anonymous Drive folder is
+  <https://drive.google.com/drive/folders/1KIz2unW--qx643vBqvwD1FTOS3TgYhpS?usp=drive_link>.
 - Source of truth: if a notebook cell and a CLI doc differ, prefer the CLI doc
   in `docs/experiments/running.md` and update the notebook.
 - Scope: paper sections use `configs/paper/01_*` through `05c_*`; fast

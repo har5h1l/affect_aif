@@ -21,8 +21,8 @@ dissociations, not a literal neural model.
 
 - **Focal AIF, scripted partners:** one focal agent against environment-side
   parameterized partners; partners do not run pymdp or affective precision.
-- **Reciprocal AIF:** future work in `experiments/multifocal/`; see
-  `extensions/future.md`.
+- **Reciprocal AIF:** future work in `experiments/multifocal/`; not part of
+  the current paper evidence.
 - **Clinical-like variants:** perturbations of precision parameters — computational
   profiles, not validated diagnoses.
 
@@ -44,11 +44,5 @@ Read these first. They are the supported public model surface.
 |---|---|
 | `literature_review.md` | Long-form background (Damasio, Hesp, multi-agent AIF) |
 | `pomdp_spec.md` | Detailed POMDP specification (v4, external precision tracking) |
-
-### `extensions/` — not current paper evidence
-
-| File | Contents |
-|---|---|
-| `future.md` | Implemented or near-term extensions outside the manuscript |
 
 Implementation: `tasks/trust/` (model + runtime), `experiments/trust/` (runs).

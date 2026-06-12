@@ -384,7 +384,7 @@ policies simultaneously.
 
 This section records a **future** reciprocal multi-agent design. It is **not**
 part of the supported trust-game runtime and is **not** used in the reported
-experiments. See `../extensions/future.md` (reciprocal AIF partners).
+experiments.
 
 In the planned extension, all agents (including partners) would run active
 inference with the same model structure. Behavioral differences would arise from

@@ -18,4 +18,4 @@ The current paper and notebook route uses `experiments/trust/`: one focal
 active-inference agent interacting with scripted environment-side partners.
 `experiments/multifocal/` is a tested reciprocal AIF-vs-AIF extension, but it
 is not wired into `scripts/experiment/run.py`, not listed under `configs/`, and
-not used for paper evidence. See `../overview/extensions/future.md` for how to treat it.
+not used for paper evidence.

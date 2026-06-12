@@ -47,8 +47,8 @@ forms.
 | Config | Claim role | Workload | What it does |
 |---|---|---:|---|
 | `configs/paper/01_predictability_value.toml` | Section 3.1 predictability over value | 3 variants x 30 seeds x 200 rounds | Paper-facing copy of the corrected model-fitness readout; reviewer ladder remains under diagnostics. |
-| `configs/paper/02_deployment_ablation.toml` | Section 3.2 deployment ablation | 4 variants x 3 seeds x 200 rounds | Tests whether tracked-only precision loses behavioral effect when beta cannot modulate gamma. |
-| `configs/paper/03_partner_selection.toml` | Section 3.3 partner selection | 3 variants x 3 seeds x 200 rounds | Tests whether precision modulation reshapes graded partner choice before payoff separates. |
+| `configs/paper/02_deployment_ablation.toml` | Section 3.2 deployment ablation | 4 variants x 30 seeds x 200 rounds | Tests whether tracked-only precision loses behavioral effect when beta cannot modulate gamma. |
+| `configs/paper/03_partner_selection.toml` | Section 3.3 partner selection | 3 variants x 30 seeds x 200 rounds | Tests whether precision modulation reshapes graded partner choice before payoff separates. |
 | `configs/paper/04_betrayal_adaptation.toml` | Section 3.4 betrayal adaptation | 4 variants x 30 seeds x 120 rounds | Tests abrupt stance change under graded agent-choice play. Compares partner-local affect, tracked-only lesion, shared beta, and no-affect. |
 | `configs/paper/05a_alpha_sweep.toml` | Section 3.5 profile gain | 2 scenarios x 8 alpha values x 20 seeds x 200 rounds | Sweeps affective gain from `0.05` to `8.0` in open and betrayal settings to show non-monotonic precision dynamics. |
 | `configs/paper/05b_prior_factorial.toml` | Section 3.5 prior x gain profiles | 3 scenarios x 6 variants x 20 seeds x 200 rounds | Crosses naive/cautious beta priors with low/high gain, plus default and no-affect references. |

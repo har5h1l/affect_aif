@@ -55,8 +55,8 @@ Output asset: `docs/manuscript/figures/fig_deployment_social_summary.pdf`
 
 Manuscript numbers:
 
-- Affect: beta range `1.32`, entropy delta vs tracked-only `-0.205`,
-  payoff delta vs tracked-only `-12.8`.
+- Affect: beta range `1.34`, entropy delta vs tracked-only `-0.238`,
+  payoff delta vs tracked-only `+2.1`.
 - Tracked-only: beta range `1.34`, entropy delta `0.0`, payoff delta `0.0`.
 
 Do not claim open-regime payoff improvement from this batch. The figure should
@@ -71,13 +71,14 @@ is retained outside the paper source-table set.
 
 Manuscript numbers:
 
-- Policy entropy: affect `3.99`, no-affect `4.83`.
-- Cooperator selection: affect `36.6%`, no-affect `34.8%`.
-- Exploiter selection: affect `13.8%`, no-affect `16.2%`.
-- Total payoff: affect `393.6`, no-affect `393.2` (flat at this scale).
+- Policy entropy: affect `8.60`, no-affect `8.83`.
+- Selected-type allocation, affect vs no-affect: cooperator `25.3%` vs
+  `29.2%`, exploiter `25.5%` vs `21.3%`, reciprocator `23.7%` vs `22.5%`,
+  random `25.5%` vs `27.1%`.
+- Total payoff: affect `1868.3`, no-affect `1866.2` (nearly matched at this scale).
 
-Frame as a small allocation shift consistent with sharper policy commitment,
-not as cumulative-payoff separation.
+Frame as a small allocation reorganisation consistent with sharper policy
+commitment, not as a one-type preference or cumulative-payoff separation.
 
 ### Figure 3: Betrayal Boundary Condition
 

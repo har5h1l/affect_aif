@@ -25,7 +25,7 @@ maps that state into policy precision during action selection.
 - `analysis/`: post-hoc metrics, figures, and compact artifact builders.
 - `docs/`: model, experiment, result, and manuscript documentation.
 - `results/`: tracked compact summaries and manifests; raw CSVs are retained
-  locally/server-side and gitignored.
+  outside git and in the Drive packet.
 
 ## Setup
 
@@ -89,22 +89,9 @@ python scripts/analysis/make_paper_figures.py --help
 
 ## Where To Go Next
 
-- `docs/active/`: current maintainer/agent state for ongoing work.
 - `configs/README.md`: choose a config.
 - `docs/overview/`: understand the model and hypotheses.
 - `docs/experiments/`: run demos, paper configs, and diagnostics.
 - `docs/results/`: inspect compact result summaries and provenance.
 - `docs/manuscript/`: build and inspect the manuscript.
 - `notebooks/`: demo and reproduction notebooks.
-- `docs/overview/extensions/future.md`: extension ideas that are implemented or close enough to
-  build on, but not part of the current paper claims.
-
-## Maintainer State
-
-`docs/active/` and `docs/handoffs/` are maintainer/agent state surfaces. They
-are useful for ongoing work, but public readers should start with the routes
-above.
-
-Full experiments and large data-producing runs should run on `server` via
-Mango/tmux. Local development, dry-runs, demos, and focused verification are
-fine in any checkout.

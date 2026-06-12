@@ -8,16 +8,12 @@ raw data store.
 - `paper.md`: paper result cards and where their summaries live
 - `diagnostics.md`: retained non-paper diagnostic result cards
 - `archive.md`: archive policy for historical or incomplete material
-- `runtime_optimization_audit_20260611.md`: engineering audit of runner
-  logging/runtime optimization candidates; not an interpreted result update
-- `cleanup/`: local/server cleanup manifests from the public repo cleanup
 - `../../results/`: tracked compact public result summaries and manifests
 - `../manuscript/`: manuscript source, source tables, figures, and
   paper-facing notes
 
 Do not refresh interpreted result prose from new outputs without explicit user
-approval. Active run status and finality gates belong in `docs/active/`;
-task-specific transfer notes belong in `docs/handoffs/` when needed.
+approval.
 
 ## Artifact Hygiene
 
@@ -30,8 +26,8 @@ interpreted numbers.
 
 Historical per-run notes should stay outside the public docs route unless they
 name present-day configs under `configs/paper/`, `configs/diagnostics/`, or
-`configs/future/`. Old-run prose with removed config paths belongs in local or
-server archives, not in tracked current documentation.
+`configs/future/`. Old-run prose with removed config paths belongs outside
+tracked current documentation.
 
 The public result scaffold is:
 
@@ -42,10 +38,14 @@ results/
   archive/        ignored historical or incomplete material
 ```
 
-Full per-round CSVs live under `raw/` subdirectories when present locally or on
-`server`; those files are gitignored. The user-facing Drive packet can include
-the full local `results/` tree because tracked summaries and ignored raw files
-share the same canonical folder layout.
+Full per-round CSVs live under `raw/` subdirectories when present; those files
+are gitignored. The user-facing Drive packet can include the full `results/`
+tree because tracked summaries and ignored raw files share the same canonical
+folder layout.
+
+The anonymous public Drive packet is:
+
+<https://drive.google.com/drive/folders/1KIz2unW--qx643vBqvwD1FTOS3TgYhpS?usp=drive_link>
 
 ## Evidence Contract
 
@@ -67,12 +67,11 @@ include/exclude rules. Use `results/paper/*` and `results/diagnostics/*` for
 compact tracked summaries and provenance. Use `docs/manuscript/source_tables/`
 for compact CSVs that back manuscript figures.
 
-## Local Vs Server
+## Public Data Routes
 
-- Local `results/paper/` should contain the paper-needed raw files plus tracked
-  summaries. It is the folder intended for a Drive handoff.
-- Local `results/diagnostics/` may be compact-summary only when raw diagnostic
-  data is not needed for the paper packet.
-- Server `results/` keeps the fuller diagnostic and archive payloads after
-  cleanup. Do not delete server raw data unless a later cleanup manifest says
-  exactly what was removed and why.
+- `results/paper/` contains paper summaries and, when materialized locally,
+  paper-needed raw files under gitignored `raw/` paths.
+- `results/diagnostics/` may be compact-summary only when raw diagnostic data
+  is not needed for the paper packet.
+- The Drive packet is the public row-level data route; git remains the compact
+  summary and provenance route.

@@ -8,7 +8,7 @@
   "output_dir": "results/paper",
   "workers": 1,
   "dry_run": false,
-  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "raw_results_policy": "gitignored_retained_outside_git_and_in_drive",
   "archive_previous_results": "results/archive/paper_pre_canonical_20260611_from_regen",
   "sections": [
     {

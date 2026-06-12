@@ -5,4 +5,4 @@
 - Config: `configs/paper/03_partner_selection.toml`
 - Full raw source: `results/paper/03_partner_selection/raw/results.csv`
 - Tracked summaries: `source_tables/partner_selection_summary.csv`
-- Raw policy: full per-round `results.csv` is ignored in git and retained on server/Drive.
+- Raw policy: full per-round `results.csv` is ignored in git and retained outside git and in Drive.

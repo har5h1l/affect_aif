@@ -2,10 +2,10 @@
 
 Tracked paper result folders under `results/paper/` contain compact summaries,
 manifests, and source-table style metrics. Full raw trajectories are preserved
-outside git under matching `raw/` paths locally and on `server`.
+outside git under matching `raw/` paths and in the Drive packet.
 
 Every paper manifest should point to current `configs/paper/` TOML files and
-use `raw_results_policy = "gitignored_retained_locally_and_on_server"`.
+use `raw_results_policy = "gitignored_retained_outside_git_and_in_drive"`.
 
 ## Paper Result Cards
 

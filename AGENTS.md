@@ -22,7 +22,7 @@ task-specific docs it points to.
 ## Context By Task
 
 - Setup, package surface, or repo layout: `README.md`, `pyproject.toml`,
-  `requirements.txt`, `scripts/README.md`, and `configs/README.md`.
+  `scripts/README.md`, and `configs/README.md`.
 - Computational claims, affect dynamics, terminal values, or result
   interpretation: `docs/overview/README.md`,
   `docs/overview/core/hypotheses.md`, `docs/overview/core/pomdp.md`, and

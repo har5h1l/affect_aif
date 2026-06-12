@@ -10,7 +10,7 @@
     "results/diagnostics/locality/raw/global_beta_locality_probe_20260526/h6/global_beta_locality_probe/results.csv",
     "results/diagnostics/locality/raw/global_beta_focal_switch_probe_20260526/h6/global_beta_focal_switch_probe/results.csv"
   ],
-  "raw_results_policy": "gitignored_retained_locally_and_on_server",
+  "raw_results_policy": "gitignored_retained_outside_git_and_in_drive",
   "tracked_summary_files": [
     "summary.csv"
   ],

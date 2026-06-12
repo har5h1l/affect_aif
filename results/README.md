@@ -2,7 +2,7 @@
 
 This directory is the public result scaffold. Git tracks compact summaries,
 manifests, and README files. Full per-round trajectories named `results.csv`
-are intentionally ignored and live on the server or Drive packet.
+are intentionally ignored and live in the Drive packet or can be regenerated.
 
 ## Paper Results
 

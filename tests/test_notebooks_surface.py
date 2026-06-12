@@ -45,8 +45,10 @@ def test_reproduce_notebook_is_colab_and_results_aware():
     assert "Path(\"/content\").exists()" in text
     assert "configs/paper/01_predictability_value.toml" in text
     assert "configs/paper/05a_alpha_sweep.toml" in text
-    assert "results/paper/01_predictability_value/raw/predictability_value/predictability_value/results.csv" in text
+    assert "results/paper/01_predictability_value/raw/results.csv" in text
     assert "results/paper/05a_alpha_sweep/raw/results.csv" in text
+    assert "docs/manuscript/source_tables/h2_deployment_contrast_summary.csv" in text
+    assert "docs/manuscript/source_tables/h4_partner_choice_summary.csv" in text
     assert "scripts/analysis/phenotype_artifacts.py" in text
     assert "google.colab" in text
     assert "drive.mount" in text

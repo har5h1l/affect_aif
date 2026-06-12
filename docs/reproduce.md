@@ -58,11 +58,21 @@ Remove `--dry-run` for the full paper execution. The paper suite is larger
 than the demo notebooks; use `--workers 1` unless you intentionally want local
 parallel execution.
 
-Full per-round `results.csv` files are gitignored and retained locally/server
-side. Compact public summaries and manifests live under `results/paper/` and
+Full per-round `results.csv` files are gitignored and retained outside git.
+Compact public summaries and manifests live under `results/paper/` and
 `results/diagnostics/`. Reviewer ladders, older H-card probes, and retained
 non-paper controls are available under `configs/diagnostics/`; implemented
 follow-up surfaces that moved out of the paper live under `configs/future/`.
+
+## Result Data Packet
+
+The full paper result packet is available in the anonymous Drive folder:
+
+<https://drive.google.com/drive/folders/1KIz2unW--qx643vBqvwD1FTOS3TgYhpS?usp=drive_link>
+
+Use the tracked compact summaries for quick inspection and the Drive packet
+when you need row-level `results.csv` files that are intentionally omitted
+from git.
 
 ## Colab Route
 

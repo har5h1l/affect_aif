@@ -106,7 +106,7 @@ def test_paper_result_manifests_point_to_current_configs():
         assert "configs/paper_reproduce" not in payload
         assert "results/exp_" not in payload
         assert "results/log_surprisal_" not in payload
-        assert manifest["raw_results_policy"] == "gitignored_retained_locally_and_on_server"
+        assert manifest["raw_results_policy"] == "gitignored_retained_outside_git_and_in_drive"
 
 
 def test_paper_suite_manifest_uses_public_relative_paths():

@@ -77,6 +77,11 @@ recovery process reaches finality.
 - H5 confirmation reached structural finality and has been interpreted for the
   manuscript. The 30-seed read is lower entropy and higher joint accuracy under
   partner-local affect, with a small/uncertain payoff advantage.
+- H2 deployment ablation and H4 graded partner selection reached structural
+  finality at 30 seeds on June 11 and have been interpreted for the manuscript.
+  H2 supports the beta-to-gamma deployment pathway through lower entropy with
+  nearly matched payoff; H4 supports allocation reorganisation without a
+  one-type preference or payoff headline.
 - H1 binary confirmation reached structural finality but has been demoted to
   appendix/diagnostic provenance. It should not carry main-text evidence
   because the saturated binary regime is behaviorally uninformative for the core mechanism.
@@ -90,9 +95,9 @@ recovery process reaches finality.
 |---|---|---|---|
 | H0 Policy Openness | flat payoff, active deployment | diagnostic deployment-channel readout | confirm only if stronger payoff/general-performance language returns |
 | H1 Model Fitness | binary confirmation supports surprise-over-reward after active-encounter controls, but the regime is saturated | appendix/diagnostic only; not main-text evidence | reviewer diagnostics only if requested |
-| H2 Deployment | entropy active, payoff flat | deployment interpretation | confirm if needed |
+| H2 Deployment | 30-seed graded paper run: entropy active, payoff nearly matched | deployment interpretation | no rerun pending |
 | H3 Locality | local=cleaner signal, global=higher smoke payoff | decomposition claim, not necessity | reviewer diagnostics only if requested |
-| H4 Social Allocation | graded paper readout at current scale; binary confirmation diagnostic only | narrow allocation reorganisation readout | confirm the graded paper config only if this remains a core manuscript claim |
+| H4 Social Allocation | 30-seed graded paper readout; binary confirmation diagnostic only | narrow allocation reorganisation readout | no rerun pending |
 | H5 Betrayal | confirmation complete | primary behavioral confirmation: entropy/accuracy improve; payoff uncertain | interpreted in paper |
 | H6 Perturbation | phenotype dynamics separate | supplemental perturbation section | Exp A-C supersede this |
 | Exp A α Sweep | complete; compact outputs regenerated | Section 3.6.1 interpreted | no rerun pending |
@@ -100,6 +105,8 @@ recovery process reaches finality.
 | Exp C Forgiveness | structurally complete: 120/120 groups x 200 rounds; final `results.csv`, compact `metrics.csv`, analysis, source table, and `fig_forgiveness.pdf` exist | Section 3.6.3 interpreted as reengagement/confidence dissociation | no rerun pending |
 | Exp D Mixed Volatility | complete: 80/80 runs, compact outputs, and generic analysis | future-facing extension, not reported paper evidence | develop only as future change-detection/volatility work |
 | H5 Betrayal Confirmation | structurally complete: 120/120 groups x 120 rounds; final `results.csv`, checkpoint, and configured analysis artifacts exist | lower entropy/higher joint accuracy; payoff CI crosses zero | interpreted in paper |
+| H2 Deployment Confirmation | structurally complete: 120/120 groups x 200 rounds; final `results.csv`, compact source tables, and figure assets refreshed | lower entropy under full precision deployment with nearly matched payoff | interpreted in paper |
+| H4 Graded Partner Selection | structurally complete: 90/90 groups x 200 rounds; final `results.csv` and compact source table refreshed | partner-choice entropy lower; allocation reorganised without one-type preference or payoff headline | interpreted in paper |
 | H1 Confirmation | structurally complete: 90/90 groups x 200 rounds, final `results.csv`, configured analysis artifacts, and source tables exist | moved to diagnostics/appendix only | no rerun pending |
 | H4 Binary Confirmation | structurally complete: 90/90 groups x 200 rounds, compact diagnostic source tables exist | diagnostics only; not paper evidence | no rerun pending |
 
@@ -112,8 +119,9 @@ Paper-facing evidence in `docs/manuscript/`. Interpreted results in
 task-matched.
 
 The next active lane is:
-1. Keep paper/docs aligned to the reviewed H5 and Exp A-C interpretations, with
-   binary H1 and binary H4 retained only as diagnostic appendix provenance.
+1. Keep paper/docs aligned to the reviewed H2, H4, H5, and Exp A-C
+   interpretations, with binary H1 and binary H4 retained only as diagnostic
+   appendix provenance.
    Exp A/B compact outputs now include explicit post-betrayal P0 selection and
    high-investment commitment rates so the older `betrayal_recovery_time`
    readout does not need to carry withdrawal-language claims by itself.
@@ -125,6 +133,20 @@ The next active lane is:
 Do not create a task-specific handoff document unless a current task needs one.
 When a handoff is needed, create it under `docs/handoffs/` and keep durable
 project state in this `docs/active/` state/progress/blockers surface.
+
+## Public Repo Hygiene
+
+Target end state: a public-facing reproduction repo strangers can install and
+use freely. Strip internal active-dev surfaces before release, including this
+`docs/active/` folder, agent routing in `AGENTS.md`, and Mango/server workflow
+notes from public docs.
+
+Environment pinning (incremental):
+- Done: removed stale `requirements.txt`; `pyproject.toml` is the sole
+  hand-maintained dependency spec. Public install path remains
+  `pip install -e ".[dev]"` in `README.md` and `docs/reproduce.md`.
+- Next: add a lockfile for paper reproduction; document locked vs flexible
+  install paths in public docs only.
 
 ## Stop Conditions
 

@@ -11,8 +11,8 @@ internal H-card IDs remain provenance only.
 | Claim (manuscript framing) | Status | Evidence | How to write it |
 |---|---|---|---|
 | Partner-local precision tracks predictability rather than realized value. | In manuscript as restored locality probe. | Section 3.1: raw correlations `-0.945` vs `0.367`; active-encounter partial correlations `-0.940` vs `0.023`; shared-$\beta$ partial readout `-0.496` vs `0.535`; analysis-run payoff local `1977.2`, shared `1973.4`, no-affect `1905.9`. | Mechanism calibration, not reward optimization; specify that similar local/shared payoff does not preserve the partner-local surprisal signal. |
-| Behavioural gains arise through policy sharpening, not belief quality. | In manuscript (open graded + tracked-only). | Deployment subsection: beta range local `1.32` vs tracked-only `1.34`; entropy delta vs tracked-only `-0.205`; payoff delta vs tracked-only `-12.8`. | "Metacognitive not epistemic deployment"; use tracked-only as lesion. |
-| Partner engagement reorganises around reliability before payoff separates. | In manuscript at current graded-paper scale. | Partner-choice subsection: entropy 3.99 vs 4.83; cooperator up (36.6% vs 34.8%), exploiter down (13.8% vs 16.2%); flat payoff (393.6 vs 393.2). | Small allocation shift consistent with sharper policy commitment, not payoff headline. |
+| Behavioural gains arise through policy sharpening, not belief quality. | In manuscript (open graded + tracked-only). | Deployment subsection: beta range local `1.34` vs tracked-only `1.34`; entropy delta vs tracked-only `-0.238`; payoff delta vs tracked-only `+2.1`. | "Metacognitive not epistemic deployment"; use tracked-only as lesion and avoid reward-improvement language. |
+| Partner engagement reorganises before payoff separates. | In manuscript at 30-seed graded-paper scale. | Partner-choice subsection: entropy `8.60` vs `8.83`; selected-type allocation affect vs no-affect: cooperator `25.3%` vs `29.2%`, exploiter `25.5%` vs `21.3%`, reciprocator `23.7%` vs `22.5%`, random `25.5%` vs `27.1%`; payoff nearly matched (`1868.3` vs `1866.2`). | Small allocation reorganisation consistent with sharper policy commitment, not a one-type preference or payoff headline. |
 | Abrupt betrayal exposes temporal dependency. | In manuscript with 30-seed confirmation. | Betrayal subsection: round-31 switch; entropy 8.36 vs 8.74 (CI -0.63 to -0.16); joint accuracy 0.372 vs 0.266 (CI 0.024 to 0.188); payoff 1185.9 vs 1172.1 (CI crosses zero). | Lead with entropy; uncertain payoff is correct for a calibration mechanism; hand off to profile revision-speed analyses. |
 | Gain $\alpha$ and prior define computational trust-calibration profiles. | In manuscript at 20-seed profile scale. | Profile subsection: orienting three-experiment frame, $\alpha$ sweep (non-monotonic payoff), four gain-prior profiles, and forgiveness decoupling. | "Computational analogues"; disclaimer in Discussion; not clinical categories. |
 | Policy openness gates visible affect effects. | Underpins §3.2; not a separate subsection. | Graded open-regime readouts. | Openness necessary, not sufficient. |
@@ -52,10 +52,11 @@ deployment-channel claim is the manuscript anchor here.
 
 ### Social reorganisation (§3.3)
 
-Partner-choice entropy drops under precision modulation (3.99 vs 4.83);
-engagement shifts toward cooperator and away from exploiter; payoff flat at
-stated scale (393.6 vs 393.2). These are the graded paper readout numbers.
-Reviewer-control provenance remains outside the manuscript source-table set.
+Partner-choice entropy drops under precision modulation (8.60 vs 8.83);
+selected-type allocation is reorganised without a simple cooperator-seeking
+direction; payoff remains nearly matched at stated scale (1868.3 vs 1866.2).
+These are the 30-seed graded paper readout numbers. Reviewer-control provenance
+remains outside the manuscript source-table set.
 
 ### Temporal dependency under betrayal (§3.4)
 

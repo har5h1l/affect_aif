@@ -31,7 +31,6 @@ dist/
 results/**
 !results/
 !results/.gitkeep
-!results/AGENTS.md
 !results/README.md
 !results/paper/
 !results/paper/**/
@@ -67,9 +66,6 @@ docs/manuscript/*.blg
 docs/manuscript/*.log
 docs/manuscript/*.out
 
-# Claude Code local settings (not shared)
-.claude/settings.local.json
-
 # direnv
 .direnv/
 
@@ -85,7 +81,6 @@ docs/archive/
 
 # Hook state files
 .pytest_last_run
-# Mango orchestration (lives in mango repo, not here)
 cloud/
 conductor/conductor.sh
 conductor/conductor.service
