@@ -80,6 +80,7 @@ graphify-out/
 docs/archive/
 docs/active/
 docs/superpowers/
+AGENTS.md
 
 # Hook state files
 .pytest_last_run
