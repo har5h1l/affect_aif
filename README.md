@@ -1,4 +1,4 @@
-# affect_aif
+# Partner-Specific Affective Precision in Social Active Inference
 
 Active-inference trust-game simulations for studying partner-local affective
 precision as a relationship-specific confidence signal.

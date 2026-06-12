@@ -20,8 +20,9 @@ use `raw_results_policy = "gitignored_retained_outside_git_and_in_drive"`.
 | `results/paper/05c_forgiveness/` | `configs/paper/05c_forgiveness.toml` | `results/paper/05c_forgiveness/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Trust-repair profile readout; reengagement and confidence restoration can dissociate. |
 
 The paper-facing prose and exact manuscript numbers are maintained in
-`docs/results/current.md` and `docs/manuscript/source_tables/`. The suite-level
-map lives in `results/paper/manifest.json`.
+`docs/results/current.md` and `docs/manuscript/source_tables/`. The figure and
+source-table map lives in `docs/results/provenance.md`. The suite-level map
+lives in `results/paper/manifest.json`.
 
 The binary H4 partner-choice confirmation belongs to
 `results/diagnostics/social_allocation/` and is not a paper result card.

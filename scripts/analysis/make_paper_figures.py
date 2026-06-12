@@ -260,51 +260,32 @@ def refresh_figure_source_tables(results_root: Path, source_dir: Path) -> list[P
 
 
 def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
-    confirm_path = source_dir / "h1_model_fitness_confirm" / "model_fitness_correlation_summary.csv"
-    if confirm_path.exists():
-        locality = _read_required(
-            source_dir,
-            "h1_model_fitness_confirm/model_fitness_correlation_summary.csv",
-            {
-                "variant_id",
-                "abs_partial_corr_precision_surprise",
-                "abs_partial_corr_precision_reward",
-                "abs_corr_precision_surprise",
-                "abs_corr_precision_reward",
-            },
-        )
-        payoff = _read_required(
-            source_dir,
-            "h1_model_fitness_confirm/final_round_summary.csv",
-            {"variant_id", "total_payoff"},
-        )
-        locality = locality.copy()
-        locality["plot_variant_id"] = locality["variant_id"]
-        locality["plot_abs_surprise"] = locality["abs_partial_corr_precision_surprise"]
-        locality["plot_abs_reward"] = locality["abs_partial_corr_precision_reward"]
-        payoff_rows = (
-            payoff.groupby("variant_id", as_index=False)["total_payoff"]
-            .mean()
-            .rename(columns={"variant_id": "plot_variant_id"})
-        )
-        local_id = "affect"
-    else:
-        locality = _read_required(
-            source_dir,
-            "h3_locality_probe_summary.csv",
-            {
-                "variant_id",
-                "abs_corr_precision_surprise",
-                "abs_corr_precision_payoff",
-                "total_payoff",
-            },
-        )
-        locality = locality.copy()
-        locality["plot_variant_id"] = locality["variant_id"]
-        locality["plot_abs_surprise"] = locality["abs_corr_precision_surprise"]
-        locality["plot_abs_reward"] = locality["abs_corr_precision_payoff"]
-        payoff_rows = locality.dropna(subset=["total_payoff"])
-        local_id = "local_beta"
+    locality = _read_required(
+        source_dir,
+        "h1_model_fitness_confirm/model_fitness_correlation_summary.csv",
+        {
+            "variant_id",
+            "abs_partial_corr_precision_surprise",
+            "abs_partial_corr_precision_reward",
+            "abs_corr_precision_surprise",
+            "abs_corr_precision_reward",
+        },
+    )
+    payoff = _read_required(
+        source_dir,
+        "h1_model_fitness_confirm/final_round_summary.csv",
+        {"variant_id", "total_payoff"},
+    )
+    locality = locality.copy()
+    locality["plot_variant_id"] = locality["variant_id"]
+    locality["plot_abs_surprise"] = locality["abs_partial_corr_precision_surprise"]
+    locality["plot_abs_reward"] = locality["abs_partial_corr_precision_reward"]
+    payoff_rows = (
+        payoff.groupby("variant_id", as_index=False)["total_payoff"]
+        .mean()
+        .rename(columns={"variant_id": "plot_variant_id"})
+    )
+    local_id = "affect"
 
     local = locality.loc[locality["plot_variant_id"] == local_id].iloc[0]
     shared = locality.loc[locality["plot_variant_id"] == "global_beta"].iloc[0]
@@ -442,7 +423,7 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         order,
         h2["beta_range"].tolist(),
         title=r"$\beta_k$ tracker movement",
-        ylabel=r"mean $\beta_k$ range",
+        ylabel=r"mean within-episode $\bar{\beta}_k$ range",
     )
     _bar(
         axes[1],
@@ -457,7 +438,7 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[2],
         order,
         h2["delta_payoff_vs_tracked"].tolist(),
-        title="Payoff not improved",
+        title="Payoff nearly matched",
         ylabel=r"$\Delta$ payoff vs tracked-only",
     )
     axes[2].axhline(0, color="#555555", linewidth=0.8)
@@ -494,8 +475,8 @@ def phenotype_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[2].bar(x + offset, values["total_payoff"], width=width, label=regime)
     for ax, title, ylabel in zip(
         axes,
-        [r"$\beta_k$ range", "Investment churn", "Payoff"],
-        [r"mean $\beta_k$ range", "investment churn", "payoff"],
+        [r"Within-episode $\bar{\beta}_k$ range", "Investment churn", "Payoff"],
+        [r"mean within-episode $\bar{\beta}_k$ range", "investment churn", "payoff"],
         strict=True,
     ):
         ax.set_xticks(x, _label(order), rotation=20, ha="right")

@@ -41,7 +41,7 @@ Behavioral comparisons use 30 seeds per condition and profile sweeps use 20 seed
 Experiment family & Setting & Rounds & Seeds \\
 \midrule
 Open deployment & graded, random/open choice & 200 & 30 \\
-Locality probe & graded partner choice & 100 & 30 \\
+Locality probe & graded partner choice & 200 & 30 \\
 Partner allocation & partner choice & 200 & 30 \\
 Abrupt betrayal & scheduled partner-choice betrayal & 120 & 30 \\
 Precision perturbation & graded perturbations & 200 & 30 \\
@@ -73,7 +73,7 @@ Policy entropy & Natural-log Shannon entropy of $q(\pi)$, averaged over rounds/s
 Joint partner-type accuracy & Mean correctness of inferred partner type \\
 Selection share & Fraction of rounds each partner is chosen \\
 Selection concentration & Gini coefficient over partner-selection distribution \\
-$\beta_k$ range & Within-episode range of posterior mean $\beta_k$, averaged as specified \\
+Mean within-episode $\bar{\beta}_k$ range & Average within-episode max--min range of posterior mean $\bar{\beta}_k$, averaged across seeds and episodes \\
 Investment churn & Fraction of adjacent rounds with changed investment \\
 Early exploiter investment & Rounds 1--30 choosing exploiter with investment $\geq$ half range \\
 Trust asymmetry & Withdrawal latency / initial high-investment approach latency \\

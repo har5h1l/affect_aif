@@ -17,6 +17,7 @@ def test_public_docs_route_exists():
         "docs/experiments/diagnostics.md",
         "docs/results/README.md",
         "docs/results/paper.md",
+        "docs/results/provenance.md",
         "docs/results/diagnostics.md",
         "docs/manuscript/README.md",
     ]

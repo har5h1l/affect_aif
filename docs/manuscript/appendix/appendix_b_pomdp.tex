@@ -1,7 +1,7 @@
 \section{Focal-Agent POMDP Specification}
 \label{app:pomdp}
 
-This appendix specifies the focal agent's partner-local generative model in standard discrete active-inference form. Each partner \(k\) has a POMDP \(\mathcal{M}_k\) with hidden type, stance, and own-investment bookkeeping. The model follows Appendix~\ref{app:generative_process} but is not identical to the environment: payoff is an observation modality marginalizing over partner response; scheduled betrayal and repair are environment-side; affective precision is external to the POMDP.
+This appendix specifies the focal agent's partner-local generative model in standard discrete active-inference form. Each partner \(k\) has a POMDP \(\mathcal{M}_k\) with hidden type, stance, and own-investment state factors. The model follows Appendix~\ref{app:generative_process} but is not identical to the environment: payoff is an observation modality marginalizing over partner response; scheduled betrayal and repair are environment-side; affective precision is external to the POMDP.
 
 \subsection{Partner-local factorization}
 
@@ -21,7 +21,7 @@ where
 \mathcal{S}^{\text{stance}} &= \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}, \\
 \mathcal{A} &= \{0,1,2,3,4,5\}.
 \end{align*}
-\(s^{\mathrm{own}}\) indexes executed investment and is fully observable. The joint hidden state per partner spans \(4\times3\times6=72\) configurations.
+\(s^{\mathrm{own}}\) indexes executed investment, is deterministically set by the agent's action, and is treated as fully observed. The joint hidden state per partner spans \(4\times3\times6=72\) configurations.
 
 Observations are partner response and focal payoff:
 \begin{align}
@@ -66,8 +66,8 @@ with $K_{\mathrm{type}}=4$ and default $p_{\mathrm{switch}}=0.05$. Scheduled bet
 \paragraph{Stance dynamics \(B_k^{\mathrm{stance}}\).}
 \(B_k^{\mathrm{stance}}(a)\) mirrors the interpolation in Eq.~\eqref{eq:b_stance}, using the endpoint matrices in Table~\ref{tab:stance_transition}. Scheduled betrayal and repair intervene on the environment-side process only; the focal agent is not given the intervention times.
 
-\paragraph{Own-investment bookkeeping \(B^{\mathrm{own}}\).}
-\(B^{\mathrm{own}}\) deterministically records the executed investment:
+\paragraph{Own-investment state factor \(B^{\mathrm{own}}\).}
+\(B^{\mathrm{own}}\) deterministically sets own investment to the executed action:
 \begin{equation}
 P(s^{\mathrm{own}\prime}=a^\prime \mid s^{\mathrm{own}}, a)=\mathbb{I}[a^\prime=a].
 \label{eq:b_own}

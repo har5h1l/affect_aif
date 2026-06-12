@@ -22,10 +22,10 @@ from analysis.phenotypes.common import (
 
 EXP_B_HEATMAP_COLUMNS = (
     "Payoff",
-    "Recovery rounds",
+    "Recovery",
     "Gini",
-    r"$\beta_k$ range",
-    "Trust asymmetry",
+    r"$\beta$ range",
+    "Trust asym.",
 )
 
 EXP_B_PROFILE_HEATMAP = (

@@ -12,6 +12,7 @@ not be promoted as current paper evidence.
 
 | Evidence family | Source table | Scale | Manuscript status |
 |---|---|---:|---|
+| Predictability over payoff | `docs/manuscript/source_tables/h1_model_fitness_confirm/model_fitness_correlation_summary.csv` | 30 seeds | interpreted |
 | H5 abrupt betrayal | `docs/manuscript/source_tables/h5_evidence_effect_summary.csv` | 30 seeds | interpreted |
 | Alpha sweep | `docs/manuscript/source_tables/alpha_sweep/metrics.csv` | 20 seeds | interpreted |
 | Prior factorial | `docs/manuscript/source_tables/prior_factorial/metrics.csv` | 20 seeds | interpreted |
@@ -34,7 +35,7 @@ Exp A-C profile artifacts.
 - Binary H4 confirmation diagnostic:
   `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/h4/partner_choice_confirm/`
 - Paper result cards: `results/paper/manifest.json` and `docs/results/paper.md`
-- Paper source tables: `docs/manuscript/source_tables/`
+- Manuscript source-table and figure map: `docs/results/provenance.md`
 
 ## Central Read
 
@@ -80,7 +81,9 @@ generic recovery, generic reward improvement, or an accuracy cost.
 
 ### R3: Partner-choice sharpening without payoff separation
 
-Graded H4 partner-choice paper read (`h4_partner_choice_summary.csv`, 30 seeds):
+Graded H4 partner-choice paper read (`h4_partner_choice_summary.csv`, 30 seeds;
+selected-type percentages pooled from
+`results/paper/03_partner_selection/raw/results.csv` by `true_partner_type`):
 
 - Policy entropy: affect `8.60`, no-affect `8.83`.
 - Selected-type allocation, affect vs no-affect: cooperator `25.3%` vs
@@ -121,7 +124,7 @@ trade-off synthesis rather than a monotonic payoff ranking.
 | Deployment | Supported narrowly | Tracked-only preserves beta movement while full affect lowers entropy, localizing the effect to beta-to-gamma deployment rather than extra belief evidence. |
 | H4 Social Choice | Paper readout supported narrowly; binary confirmation diagnostic only | Graded partner-choice behavior reorganizes before payoff separates; keep allocation language narrow and avoid a one-type preference headline. The binary H4 confirmation is not a paper regime. |
 | H5 Betrayal | Confirmation support | Lower entropy and higher joint accuracy under partner-local affect; payoff advantage is small/uncertain. Temporal dependency, not generic reward improvement. |
-| H6 / Exp A-C Profiles | Supported as computational profiles | Alpha and prior shape confidence amplitude, reengagement, commitment errors, and payoff non-monotonically. No clinical-validation claim. |
+| Exp A-C Profiles | Supported as computational profiles | Alpha and prior shape confidence amplitude, reengagement, commitment errors, and payoff non-monotonically. No clinical-validation claim. |
 
 ## Claims To Use
 
@@ -139,7 +142,7 @@ trade-off synthesis rather than a monotonic payoff ranking.
 - Do not claim local affect wins in the open graded regime.
 - Do not claim partner-local beta is behaviorally necessary in all settings.
 - Do not describe H5 confirmation as payoff improvement with lower accuracy.
-- Do not claim H6 or Exp A-C validate clinical phenotypes.
+- Do not claim Exp A-C validate clinical phenotypes.
 - Do not reuse old bounded-error numbers or pre-fix smoke numbers as current
   manuscript evidence.
 

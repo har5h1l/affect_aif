@@ -1,7 +1,7 @@
 \section{Results}
 \label{sec:results}
 
-The experiments are organized around three claims about partner-local affective precision, followed by profile analyses of trust-calibration dynamics. Section~\ref{sec:predictability_value} tests whether partner-local precision tracks partner-response predictability more strongly than realized payoff, and whether this relationship weakens when precision evidence is pooled across partners. Section~\ref{sec:deployment} tests whether behavioral effects arise through the \(\beta_k \rightarrow \gamma_k\) policy-precision pathway rather than improved partner-state inference. Sections~\ref{sec:partner_choice} and~\ref{sec:betrayal} examine how this policy-commitment effect appears in partner choice and under abrupt social change. Section~\ref{sec:phenotypes} then varies precision gain and prior model fitness to characterize temporal profiles of confidence revision.
+Results test whether partner-local precision tracks predictability over payoff, acts through the \(\beta_k \rightarrow \gamma_k\) deployment pathway, and remains behaviorally consequential under partner choice, betrayal, and profile variation.
 
 \subsection{Partner-local precision tracks predictability rather than realized payoff}
 \label{sec:predictability_value}
@@ -25,14 +25,14 @@ Payoff in the same predictability-value analysis run did not identify the mechan
 
 To test whether partner-local affective precision changes behavior through policy deployment rather than partner-state inference, we used a tracked-only ablation. This variant updates $q(\beta_k)$ normally while holding $\gamma_k=\gamma_{\text{base}}$, preserving the precision estimate but preventing it from modulating policy selection.
 
-The tracked-only ablation confirmed that the tracker can move without producing the deployment effect. In the open graded deployment run, tracked-only produced a mean $\beta_k$ range comparable to full partner-local precision ($1.34$ versus $1.34$), but holding $\gamma_k=\gamma_{\text{base}}$ kept policy entropy at the tracked-only reference level. Full precision modulation lowered entropy by $0.238$ relative to tracked-only, with nearly matched cumulative payoff ($1868.3$ versus $1866.2$). Thus, $\beta_k$ matters behaviorally when it is allowed to modulate $\gamma_k$, producing sharper policy commitment. When that pathway is cut, the tracker remains active but the entropy effect is lost. Figure~\ref{fig:deployment_contrast} shows the pathway-isolation comparison.
+The tracked-only ablation confirmed that the tracker can move without producing the deployment effect. In the open graded deployment run, tracked-only produced a comparable average within-episode max--min range of posterior mean $\bar{\beta}_k$ ($1.34$ in both variants). The key difference was deployment: full precision modulation lowered policy entropy by $0.238$ relative to tracked-only, while cumulative payoff remained nearly matched ($1868.3$ versus $1866.2$). Thus, $\beta_k$ matters behaviorally when it is allowed to modulate $\gamma_k$, producing sharper policy commitment. When that pathway is cut, the tracker remains active but the entropy effect is lost. Figure~\ref{fig:deployment_contrast} shows the pathway-isolation comparison.
 
 This supports the interpretation of affective precision as a calibration layer rather than an inference-improvement mechanism. The tracker does not directly improve partner-state inference; it regulates how strongly the agent commits to policies based on its current partner model. Whether sharper commitment improves payoff depends on the social context, not on precision alone.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig_deployment_social_summary.pdf}
-\caption{Open graded regime: tracked-only and partner-local precision both move the $\beta_k$ tracker, but only partner-local precision deploys that tracker through $\gamma_k$. Relative to tracked-only, partner-local precision lowers policy entropy without improving payoff, isolating the entropy effect to the $\beta_k \rightarrow \gamma_k$ policy-precision pathway.}
+\caption{Open graded regime: tracked-only and partner-local precision show a comparable average within-episode max--min range of posterior mean $\bar{\beta}_k$, but only partner-local precision deploys that tracker through $\gamma_k$. Relative to tracked-only, partner-local precision lowers policy entropy without improving payoff, isolating the entropy effect to the $\beta_k \rightarrow \gamma_k$ policy-precision pathway.}
 \label{fig:deployment_contrast}
 \end{figure}
 \FloatBarrier
@@ -69,7 +69,7 @@ The betrayal result exposes a timing problem in social confidence: confidence bu
 \subsection{Precision dynamics as computational profiles of social trust calibration}
 \label{sec:phenotypes}
 
-The betrayal result shows that confidence revision has temporal structure: confidence can be too weak, too slow, or too reactive. Varying precision gain $\alpha$ confirmed that gain controls the amplitude of $\beta_k$ dynamics: in the betrayal regime, mean within-episode $\beta_k$ range increased from $0.147$ at $\alpha=0.05$ to $1.218$ at $\alpha=8.0$. Payoff did not follow this monotonic pattern, indicating that faster confidence revision is not automatically better revision.
+The betrayal result shows that confidence revision has temporal structure: confidence can be too weak, too slow, or too reactive. Varying precision gain $\alpha$ confirmed that gain controls the amplitude of $\beta_k$ dynamics: in the betrayal regime, the average within-episode max--min range of posterior mean $\bar{\beta}_k$ increased from $0.147$ at $\alpha=0.05$ to $1.218$ at $\alpha=8.0$. Payoff did not follow this monotonic pattern, indicating that faster confidence revision is not automatically better revision.
 
 Crossing prior model fitness with gain produced distinct trust-calibration profiles. Low gain muted confidence dynamics and weakened policy commitment; high gain amplified revision but increased vulnerability to overcommitment after change; cautious priors suppressed premature confidence but also reduced exploitation of reliable partners. In the tested betrayal profiles, the default configuration achieved the highest payoff, while naive-stubborn, avoidant-rigid, and anxious-reactive variants expressed different failure modes: diffuse commitment, suppressed exploitation, and post-change overcommitment. Exact priors, gain values, and profile metrics are reported in Appendix~\ref{app:extended_results}.
 

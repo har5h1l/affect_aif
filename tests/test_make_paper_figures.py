@@ -9,28 +9,33 @@ from scripts.analysis import make_paper_figures
 
 def _write_source_tables(source_dir):
     source_dir.mkdir()
+    confirm_dir = source_dir / "h1_model_fitness_confirm"
+    confirm_dir.mkdir()
     pd.DataFrame(
         [
             {
-                "variant_id": "local_beta",
-                "abs_corr_precision_surprise": 0.943,
-                "abs_corr_precision_payoff": 0.110,
-                "total_payoff": 946.8,
+                "variant_id": "affect",
+                "abs_partial_corr_precision_surprise": 0.940,
+                "abs_partial_corr_precision_reward": 0.023,
+                "abs_corr_precision_surprise": 0.945,
+                "abs_corr_precision_reward": 0.367,
             },
             {
                 "variant_id": "global_beta",
-                "abs_corr_precision_surprise": 0.149,
-                "abs_corr_precision_payoff": 0.043,
-                "total_payoff": 976.2,
-            },
-            {
-                "variant_id": "no_affect",
-                "abs_corr_precision_surprise": float("nan"),
-                "abs_corr_precision_payoff": float("nan"),
-                "total_payoff": 950.7,
+                "abs_partial_corr_precision_surprise": 0.496,
+                "abs_partial_corr_precision_reward": 0.535,
+                "abs_corr_precision_surprise": 0.583,
+                "abs_corr_precision_reward": 0.379,
             },
         ]
-    ).to_csv(source_dir / "h3_locality_probe_summary.csv", index=False)
+    ).to_csv(confirm_dir / "model_fitness_correlation_summary.csv", index=False)
+    pd.DataFrame(
+        [
+            {"variant_id": "affect", "seed": 1, "total_payoff": 1977.2},
+            {"variant_id": "global_beta", "seed": 1, "total_payoff": 1973.4},
+            {"variant_id": "no_affect", "seed": 1, "total_payoff": 1905.9},
+        ]
+    ).to_csv(confirm_dir / "final_round_summary.csv", index=False)
     pd.DataFrame(
         [
             {
@@ -195,7 +200,8 @@ def test_paper_figure_pdfs_embed_beta_labels(tmp_path):
     make_paper_figures.deployment_social_figure(source_dir, output_dir)
     pdf_text = fitz.open(output_dir / "fig_deployment_social_summary.pdf")[0].get_text().replace("\n", " ")
     assert "βk tracker movement" in pdf_text
-    assert "mean βk range" in pdf_text
+    assert "mean within-episode" in pdf_text
+    assert "βk range" in pdf_text
 
 
 def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
@@ -207,3 +213,13 @@ def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
 
     with pytest.raises(ValueError, match="missing required columns.*beta_range"):
         make_paper_figures.deployment_social_figure(source_dir, output_dir)
+
+
+def test_model_fitness_figure_requires_current_confirm_tables(tmp_path):
+    source_dir = tmp_path / "source_tables"
+    output_dir = tmp_path / "figures"
+    _write_source_tables(source_dir)
+    (source_dir / "h1_model_fitness_confirm" / "model_fitness_correlation_summary.csv").unlink()
+
+    with pytest.raises(FileNotFoundError, match="h1_model_fitness_confirm/model_fitness_correlation_summary.csv"):
+        make_paper_figures.model_fitness_figure(source_dir, output_dir)

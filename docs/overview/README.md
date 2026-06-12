@@ -37,6 +37,7 @@ Read these first. They are the supported public model surface.
 | `hypotheses.md` | Project goal, mechanism chain, H0–H8 behavior cards |
 | `pomdp.md` | Generative model (A/B/C/D/E), partner env, runtime cycle |
 | `affective_precision.md` | Surprisal update, beta posterior, gamma deployment, modes |
+| `equation_traceability.md` | Main-text Eq. 1–4 mapped to implementation functions and tests |
 
 ### `background/` — optional deep reading
 
@@ -44,5 +45,11 @@ Read these first. They are the supported public model surface.
 |---|---|
 | `literature_review.md` | Long-form background (Damasio, Hesp, multi-agent AIF) |
 | `pomdp_spec.md` | Detailed POMDP specification (v4, external precision tracking) |
+
+### `extensions/` — future-facing work
+
+| File | Contents |
+|---|---|
+| `future.md` | Analysis roadmap, architectural extensions, empirical targets, non-goals |
 
 Implementation: `tasks/trust/` (model + runtime), `experiments/trust/` (runs).

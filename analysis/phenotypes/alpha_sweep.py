@@ -84,7 +84,7 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
         "betrayal_recovery_time": "Betrayal recovery rounds",
         "selection_gini": "Selection gini",
         "entropy_trajectory": "Policy entropy trajectory",
-        "beta_range": r"Mean $\beta_k$ range",
+        "beta_range": r"Mean within-episode $\bar{\beta}_k$ range",
     }
     for ax, metric in zip(axes, EXP_A_PANELS, strict=False):
         if metric == "entropy_trajectory":

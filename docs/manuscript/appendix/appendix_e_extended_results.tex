@@ -1,17 +1,17 @@
 \section{Extended Profile and Robustness Results}
 \label{app:extended_results}
 
-This appendix reports extended parameter sweeps, profile analyses, and robustness diagnostics.
+This appendix reports extended sweeps, profiles, and robustness diagnostics.
 
 \subsection{Precision-dynamics parameter variation}
 \label{sec:perturbation_dynamics}
 
-These auxiliary controls vary the amplitude and stability of $\beta_k$ dynamics. Low gain compresses $\beta_k$ range; wider movement does not map monotonically to payoff.
+These auxiliary controls vary the amplitude and stability of $\beta_k$ dynamics.
 
 \begin{figure}[H]
 \centering
 \appendixfigure{fig_phenotype_dynamics_summary.pdf}
-\caption{Perturbation controls in the graded decision regime. Low gain compresses $\beta_k$ dynamics, while wider $\beta_k$ movement does not map monotonically to payoff.}
+\caption{Perturbation controls in the graded decision regime. Low gain compresses the average within-episode max--min range of posterior mean $\bar{\beta}_k$, while a wider average within-episode max--min range of posterior mean $\bar{\beta}_k$ does not map monotonically to payoff.}
 \label{fig:phenotype_dynamics_appendix}
 \end{figure}
 \appendixfloatend
@@ -22,7 +22,7 @@ These auxiliary controls vary the amplitude and stability of $\beta_k$ dynamics.
 \label{tab:perturbation_dynamics}
 \begin{tabular}{lccc}
 \toprule
-Variant & Mean $\beta_k$ range & Total payoff & Policy entropy \\
+Variant & Mean within-episode $\bar{\beta}_k$ range & Total payoff & Policy entropy \\
 \midrule
 affect & 0.95 & 1884.6 & 7.94 \\
 low-gain & 0.15 & 1840.7 & 8.84 \\
@@ -36,15 +36,15 @@ cautious-prior & 1.44 & 1834.1 & 8.28 \\
 \subsection{Alpha sweep}
 \label{sec:phenotypes_alpha}
 
-Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whether precision gain controls reactive social confidence across metrics. $\beta_k$ movement range increases monotonically with $\alpha$ in the betrayal regime:
+Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whether precision gain controls reactive social confidence across metrics. The average within-episode max--min range of posterior mean $\bar{\beta}_k$ increases monotonically with $\alpha$ in the betrayal regime:
 
 \begin{table}[H]
 \centering
-\caption{$\beta_k$ range by precision-gain $\alpha$ (betrayal regime).}
+\caption{Mean within-episode $\bar{\beta}_k$ range by precision-gain $\alpha$ (betrayal regime).}
 \label{tab:alpha_sweep}
 \begin{tabular}{cc}
 \toprule
-$\alpha$ & Mean $\beta_k$ range \\
+$\alpha$ & Mean within-episode $\bar{\beta}_k$ range \\
 \midrule
 0.05 & 0.147 \\
 0.1  & 0.182 \\
@@ -61,7 +61,7 @@ $\alpha$ & Mean $\beta_k$ range \\
 \begin{figure}[H]
 \centering
 \appendixfigure{fig_alpha_sweep.pdf}
-\caption{Precision-gain sweep across open graded and betrayal environments. Higher $\alpha$ expands $\beta_k$ range, while engagement, recovery, entropy, and payoff readouts vary non-monotonically. Precision gain therefore controls confidence-reactivity amplitude rather than mapping directly to reward.}
+\caption{Precision-gain sweep across open graded and betrayal environments. Higher $\alpha$ expands the average within-episode max--min range of posterior mean $\bar{\beta}_k$, while engagement, recovery, entropy, and payoff readouts vary non-monotonically. Precision gain therefore controls confidence-reactivity amplitude rather than mapping directly to reward.}
 \label{fig:alpha_sweep_appendix}
 \end{figure}
 \appendixfloattosection
@@ -77,7 +77,7 @@ $\alpha$ & Mean $\beta_k$ range \\
 \label{tab:phenotypes}
 \begin{tabular}{lccccc}
 \toprule
-Profile & Payoff & Recovery rounds & Gini & $\beta_k$ range & Trust asymmetry \\
+Profile & Payoff & Recovery rounds & Gini & Mean within-episode $\bar{\beta}_k$ range & Trust asymmetry \\
 \midrule
 Anxious-reactive   & 1932 & 26.5 & 0.338 & 1.084 & 0.98 \\
 Hypervigilant      & 1951 & 20.1 & 0.423 & 0.892 & 1.65 \\
@@ -98,7 +98,7 @@ Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
 
 \subsection{Forgiveness and trust repair}
 
-The forgiveness protocol uses baseline rounds 1--80, betrayal rounds 81--120, and repair/reversion rounds 121--200. Table~\ref{tab:forgiveness} reports reengagement, payoff recovery, latency, and $\beta_k$ range; Figure~\ref{fig:forgiveness_appendix} shows reengagement, $\beta_k$ recovery, and payoff recovery.
+The forgiveness protocol uses baseline rounds 1--80, betrayal rounds 81--120, and repair/reversion rounds 121--200. Table~\ref{tab:forgiveness} reports reengagement, payoff recovery, latency, and mean within-episode $\bar{\beta}_k$ range; Figure~\ref{fig:forgiveness_appendix} shows reengagement, $\beta_k$ recovery, and payoff recovery.
 
 \Needspace{10\baselineskip}
 \begin{table}[H]
@@ -107,7 +107,7 @@ The forgiveness protocol uses baseline rounds 1--80, betrayal rounds 81--120, an
 \label{tab:forgiveness}
 \begin{tabular}{lcccc}
 \toprule
-Variant & Reengagement & Payoff recovery & Latency & $\beta_k$ range \\
+Variant & Reengagement & Payoff recovery & Latency & Mean within-episode $\bar{\beta}_k$ range \\
 \midrule
 cautious-high-$\alpha$ & 0.518 & 0.996 & 5.5 & 0.971 \\
 cautious-low-$\alpha$ & 0.630 & 1.014 & 1.5 & 0.287 \\
