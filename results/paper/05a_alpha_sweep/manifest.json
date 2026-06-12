@@ -6,7 +6,8 @@
     "configs/paper/05a_alpha_sweep.toml"
   ],
   "source_run_paths": [
-    "results/paper/05a_alpha_sweep/raw/results.csv"
+    "results/paper/05a_alpha_sweep/raw/open_graded/results.csv",
+    "results/paper/05a_alpha_sweep/raw/betrayal/results.csv"
   ],
   "raw_results_policy": "gitignored_retained_outside_git_and_in_drive",
   "tracked_summary_files": [

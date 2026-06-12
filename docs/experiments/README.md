@@ -10,6 +10,8 @@ Use these files by task:
 - `configs.md`: TOML schema, config families, and the maintained config list.
 - `paper.md`: paper reproduction suite and how each config maps to the paper.
 - `diagnostics.md`: smoke checks, reviewer controls, and informative non-paper probes.
+- `../results/config_map.md`: full config-to-result routing for paper, demo,
+  diagnostic, and future configs.
 
 Conceptual claims live in `docs/overview/core/hypotheses.md`. This folder maps those
 claims to concrete TOML files and result folders.

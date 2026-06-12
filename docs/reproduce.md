@@ -25,7 +25,6 @@ pip install -e ".[dev]"
 ```bash
 python scripts/experiment/run.py \
   --config configs/diagnostics/smoke/trust_smoke.toml \
-  --batch-name smoke_dry_check \
   --dry-run
 ```
 
@@ -34,7 +33,6 @@ python scripts/experiment/run.py \
 ```bash
 python scripts/experiment/run.py \
   --config configs/demo/01_predictability_value.toml \
-  --batch-name demo_model_fitness \
   --workers 1
 ```
 
@@ -49,7 +47,6 @@ python scripts/experiment/run.py \
   --config configs/paper/05a_alpha_sweep.toml \
   --config configs/paper/05b_prior_factorial.toml \
   --config configs/paper/05c_forgiveness.toml \
-  --batch-name paper \
   --workers 1 \
   --dry-run
 ```
@@ -66,11 +63,11 @@ follow-up surfaces that moved out of the paper live under `configs/future/`.
 
 ## Result Data Packet
 
-The full paper result packet is available at `ANONYMOUS_DATA_PACKET_URL`.
+The full paper result packet link lives in root `README.md` under **Paper
+Result Data**.
 
-Use the tracked compact summaries for quick inspection and the anonymous data
-packet when you need row-level `results.csv` files that are intentionally
-omitted from git.
+Use the tracked compact summaries for quick inspection and that packet when you
+need row-level `results.csv` files that are intentionally omitted from git.
 
 ## Colab Route
 

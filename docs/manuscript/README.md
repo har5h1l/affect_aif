@@ -23,8 +23,8 @@ Output: `main.pdf`.
 - `appendix/`: appendix section files.
 - `main.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
-- `macros.tex`: shared LaTeX macros. The default build uses the anonymous
-  supplementary Drive packet for review. After de-anonymization, set
+- `macros.tex`: shared LaTeX macros. The default build points reviewers to the
+  public data packet in root `README.md`. After de-anonymization, set
   `\anonsupprepofalse` to print the public GitHub repository URL instead. The
   supplementary statement appears once at the start of the appendix
   (`appendix/appendix_00_supplementary.tex`).

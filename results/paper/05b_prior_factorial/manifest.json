@@ -6,7 +6,9 @@
     "configs/paper/05b_prior_factorial.toml"
   ],
   "source_run_paths": [
-    "results/paper/05b_prior_factorial/raw/results.csv"
+    "results/paper/05b_prior_factorial/raw/open_graded/results.csv",
+    "results/paper/05b_prior_factorial/raw/betrayal/results.csv",
+    "results/paper/05b_prior_factorial/raw/partner_choice/results.csv"
   ],
   "raw_results_policy": "gitignored_retained_outside_git_and_in_drive",
   "tracked_summary_files": [

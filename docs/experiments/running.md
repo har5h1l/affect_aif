@@ -5,7 +5,6 @@ The canonical runner is `scripts/experiment/run.py`.
 ```bash
 python scripts/experiment/run.py \
   --config configs/demo/01_predictability_value.toml \
-  --batch-name demo \
   --workers 1
 ```
 
@@ -75,7 +74,15 @@ python scripts/experiment/run.py \
 The cache changes compilation reuse only; it must not change seeds, expanded
 variants, model parameters, observations, actions, or result rows.
 
-Outputs are written under:
+By default, `run.py` omits legacy batch folders and writes to the canonical
+family layout documented in `docs/results/config_map.md`:
+
+- paper configs -> `results/paper/<section>/raw/`
+- diagnostic configs -> `results/diagnostics/...`
+- future configs -> `results/future/<name>/raw/`
+- demo configs -> `outputs/demo/...`
+
+Pass `--output-dir` and/or `--batch-name` only when you want the legacy layout:
 
 ```text
 <output-dir>/<batch-name>/<hypothesis-id>/<experiment-id>/
@@ -111,19 +118,19 @@ Colab-compatible and call the same CLI scripts shown here.
 
 ## Choosing An Output Directory
 
-For throwaway local checks, write under `/tmp` or `outputs/`:
+Demo configs already default to `outputs/demo/...`. For other throwaway checks,
+pass an explicit legacy root such as `/tmp` or `outputs/`:
 
 ```bash
 python scripts/experiment/run.py \
-  --config configs/demo/01_predictability_value.toml \
-  --output-dir outputs \
-  --batch-name demo_model_fitness
+  --config configs/diagnostics/smoke/trust_smoke.toml \
+  --output-dir /tmp/affect_aif_smoke_check \
+  --batch-name smoke_dry
 ```
 
-For canonical paper materialization, use the `results/paper/.../raw/` layout
-documented in `docs/results/paper.md`. Binary model-fitness probes use
-`results/diagnostics/model_fitness/` instead. Raw files are gitignored, while
-the compact `summary.csv`, `metrics.csv`, `manifest.json`, and README files are
+Diagnostic and paper configs materialize under `results/diagnostics/...` and
+`results/paper/.../raw/` by default. Raw files are gitignored, while the
+compact `summary.csv`, `metrics.csv`, `manifest.json`, and README files are
 tracked.
 
 ## What The Runner Does Not Run

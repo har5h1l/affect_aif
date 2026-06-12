@@ -6,7 +6,7 @@
     "configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml"
   ],
   "source_run_paths": [
-    "results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/h4/partner_choice_confirm/results.csv"
+    "results/diagnostics/social_allocation/raw/h4/partner_choice_confirm/results.csv"
   ],
   "raw_results_policy": "gitignored_retained_outside_git_and_in_drive",
   "tracked_summary_files": [

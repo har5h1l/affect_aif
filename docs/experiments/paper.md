@@ -11,7 +11,6 @@ python scripts/experiment/run.py \
   --config configs/paper/05a_alpha_sweep.toml \
   --config configs/paper/05b_prior_factorial.toml \
   --config configs/paper/05c_forgiveness.toml \
-  --batch-name paper \
   --workers 1 \
   --dry-run
 ```
@@ -20,8 +19,8 @@ Remove `--dry-run` to run the full suite. These runs are intentionally larger
 than the demos; keep `--workers 1` unless parallel local execution is intended.
 
 Compact public summaries and manifests are tracked under `results/paper/`.
-Raw trajectories are gitignored but retained outside git and in the Drive
-packet.
+Raw trajectories are gitignored but retained outside git; see root `README.md`
+for the public data packet.
 
 ## Paper Suite Map
 

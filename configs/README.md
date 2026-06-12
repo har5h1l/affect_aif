@@ -10,6 +10,9 @@ batches collect essential rows/checkpoints without policy-trace payloads.
 Use `profile = "debug"` only for focused debugging configs that intentionally
 need policy traces.
 
+Every maintained config maps to a result card or canonical raw path in
+`docs/results/config_map.md`.
+
 ## Choose A Config
 
 - `paper/`: paper evidence reproduction, numbered in manuscript-results order.
@@ -52,7 +55,6 @@ python scripts/experiment/run.py \
   --config configs/paper/05a_alpha_sweep.toml \
   --config configs/paper/05b_prior_factorial.toml \
   --config configs/paper/05c_forgiveness.toml \
-  --batch-name paper \
   --workers 1 \
   --dry-run
 ```

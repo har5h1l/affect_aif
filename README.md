@@ -28,7 +28,7 @@ maps that state into policy precision during action selection.
 - `analysis/`: post-hoc metrics, figures, and compact artifact builders.
 - `docs/`: model, experiment, result, and manuscript documentation.
 - `results/`: tracked compact summaries and manifests; raw CSVs are retained
-  outside git and in the Drive packet.
+  outside git (see [Paper Result Data](#paper-result-data) below).
 
 ## Setup
 
@@ -43,7 +43,6 @@ pip install -e ".[dev]"
 ```bash
 python scripts/experiment/run.py \
   --config configs/demo/01_predictability_value.toml \
-  --batch-name demo \
   --workers 1
 ```
 
@@ -66,7 +65,6 @@ python scripts/experiment/run.py \
   --config configs/paper/05a_alpha_sweep.toml \
   --config configs/paper/05b_prior_factorial.toml \
   --config configs/paper/05c_forgiveness.toml \
-  --batch-name paper \
   --workers 1 \
   --dry-run
 ```
@@ -90,6 +88,16 @@ python scripts/analysis/phenotype_artifacts.py --help
 python scripts/analysis/make_paper_figures.py --help
 ```
 
+## Paper Result Data
+
+Full per-round `results.csv` files for the paper suite are gitignored. The
+review packet with row-level paper results is here:
+
+<https://www.dropbox.com/scl/fo/a59fvgzuzs86vop3u65lb/AGe5yY6xnCM_gupSk6OKlDk?rlkey=qng4y57jxhhpcuixk6g5hdytv&st=34wle6r6&dl=0>
+
+Compact summaries and manifests remain under `results/paper/`. Regenerate raw
+trajectories from `configs/paper/` when needed.
+
 ## Where To Go Next
 
 - `configs/README.md`: choose a config.
@@ -109,16 +117,16 @@ implementation—the task, POMDP, affective-precision update, experiments, and
 analysis—built on [`inferactively-pymdp`](https://github.com/infer-actively/pymdp)
 for belief updating and policy selection.
 
-The manuscript is under peer review on OpenReview. Until publication, reference
-this repository and pin a commit for reproducibility. After publication, cite
-the paper for the model and findings.
+The manuscript is under anonymous peer review. Until publication, reference the
+anonymous review repository and pin a commit for reproducibility. After
+publication, cite the paper for the model and findings.
 
 ```bibtex
-@software{shah2026affect_aif,
+@software{anonymous2026affect_aif,
   title  = {affect\_aif: Partner-Specific Affective Precision in Social Active Inference},
-  author = {Shah, Harshil and Pashea, Andrew},
+  author = {Anonymous Author(s)},
   year   = {2026},
-  url    = {https://github.com/har5h1l/affect_aif},
+  url    = {https://anonymous.4open.science/r/affect_aif},
   version = {0.1.0},
   license = {MIT},
   note   = {Reference implementation on inferactively-pymdp}

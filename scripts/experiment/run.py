@@ -67,8 +67,16 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Path to a TOML experiment spec. Repeat to queue multiple specs.",
     )
-    parser.add_argument("--output-dir", default="results", help="Root directory for batch output folders.")
-    parser.add_argument("--batch-name", help="Stable card-root or batch output subdirectory.")
+    parser.add_argument(
+        "--output-dir",
+        default=None,
+        help="Legacy batch root. Omit to use the canonical family layout from docs/results/config_map.md.",
+    )
+    parser.add_argument(
+        "--batch-name",
+        default=None,
+        help="Legacy batch subdirectory. Omit to use the canonical family layout from docs/results/config_map.md.",
+    )
     parser.add_argument(
         "--workers", type=int, default=os.cpu_count() or 1, help="Shared worker count across the whole batch."
     )
@@ -121,24 +129,41 @@ def _git_commit() -> str:
 
 def _write_dry_run_manifest(args) -> int:
     from experiments.trust.batch import default_batch_id
+    from experiments.trust.output_layout import (
+        public_config_path,
+        resolve_state_output_dir,
+        uses_canonical_output_layout,
+    )
     from experiments.trust.spec import load_experiment_specs
 
+    use_canonical = uses_canonical_output_layout(output_root=args.output_dir, batch_name=args.batch_name)
     batch_id = args.batch_name or default_batch_id()
-    batch_dir = Path(args.output_dir) / batch_id
+    batch_dir = Path(args.output_dir or "results") / batch_id
     batch_dir.mkdir(parents=True, exist_ok=True)
 
     config_entries = []
     for raw_path in args.config:
         config_path = Path(raw_path).resolve()
-        for spec in load_experiment_specs(config_path):
+        specs = load_experiment_specs(config_path)
+        for spec in specs:
             runs = spec.expand_runs()
+            resolved_output_dir = resolve_state_output_dir(
+                config_path,
+                hypothesis_id=spec.hypothesis.id,
+                experiment_id=spec.experiment.id,
+                suite_experiment_count=len(specs),
+                output_root=args.output_dir,
+                batch_name=args.batch_name,
+            )
             config_entries.append(
                 {
-                    "path": str(config_path),
+                    "path": public_config_path(config_path),
                     "name": spec.experiment.id,
                     "family": spec.experiment.family,
                     "hypothesis_id": spec.hypothesis.id,
                     "experiment_id": spec.experiment.id,
+                    "resolved_output_dir": str(resolved_output_dir),
+                    "resolved_results_path": str(resolved_output_dir / "results.csv"),
                     "rounds": spec.experiment.rounds,
                     "replications": spec.experiment.replications,
                     "variants": [variant.id for variant in spec.variants],
@@ -149,14 +174,21 @@ def _write_dry_run_manifest(args) -> int:
                 }
             )
 
-    manifest_path = batch_dir / "manifest.json"
+    if use_canonical and len(config_entries) == 1:
+        manifest_path = Path(config_entries[0]["resolved_output_dir"]) / "dry_run_manifest.json"
+    elif use_canonical:
+        manifest_path = Path("results") / ".dry_run" / f"{batch_id}_manifest.json"
+    else:
+        manifest_path = batch_dir / "manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(
         json.dumps(
             {
                 "batch_name": batch_id,
                 "batch_id": batch_id,
                 "git_commit": _git_commit(),
-                "output_dir": str(batch_dir.resolve()),
+                "output_dir": str(batch_dir),
+                "canonical_output_layout": use_canonical,
                 "workers": int(args.workers),
                 "dry_run": True,
                 "configs": config_entries,
@@ -170,6 +202,7 @@ def _write_dry_run_manifest(args) -> int:
 
 def _serial_single_config_run(args) -> int:
     from experiments.trust.batch import default_batch_id
+    from experiments.trust.output_layout import public_config_path, resolve_state_output_dir
     from experiments.trust.runner import ExperimentRunner
     from experiments.trust.spec import load_experiment_specs
 
@@ -178,19 +211,25 @@ def _serial_single_config_run(args) -> int:
     loaded_specs = load_experiment_specs(config_path)
     if len(loaded_specs) != 1:
         return _batch_run(args)
-    batch_dir = Path(args.output_dir) / batch_id
     spec = loaded_specs[0]
     if spec.experiment.family != "trust":
         raise ValueError("Only trust-family specs are executable through scripts/experiment/run.py.")
     config_name = spec.experiment.id
-    config_dir = batch_dir / spec.hypothesis.id / spec.experiment.id
+    config_dir = resolve_state_output_dir(
+        config_path,
+        hypothesis_id=spec.hypothesis.id,
+        experiment_id=spec.experiment.id,
+        suite_experiment_count=len(loaded_specs),
+        output_root=args.output_dir,
+        batch_name=args.batch_name,
+    )
     results_path = config_dir / "results.csv"
     config_copy_path = config_dir / "config.toml"
     metadata_path = config_dir / "batch_metadata.json"
     runner = ExperimentRunner.from_spec(spec, verbose=bool(args.verbose), verbosity_mode=args.verbosity_mode)
     config_dir.mkdir(parents=True, exist_ok=True)
     results = runner.run_all(
-        config_path=config_path,
+        config_path=public_config_path(config_path),
         config_name=config_name,
         batch_id=batch_id,
         checkpoint_path=str(config_dir / "results_partial.csv"),
@@ -202,7 +241,7 @@ def _serial_single_config_run(args) -> int:
         json.dumps(
             {
                 "batch_id": batch_id,
-                "config_path": config_path,
+                "config_path": public_config_path(config_path),
                 "config_name": config_name,
                 "hypothesis_id": spec.hypothesis.id,
                 "experiment_id": spec.experiment.id,
@@ -222,7 +261,7 @@ def _serial_single_config_run(args) -> int:
 
 
 def _batch_run(args) -> int:
-    from experiments.trust.batch import BatchExperimentRunner, default_batch_id
+    from experiments.trust.batch import BatchExperimentRunner
     from experiments.trust.spec import load_experiment_specs
 
     config_paths = [str(Path(raw_path).resolve()) for raw_path in args.config]
@@ -230,11 +269,10 @@ def _batch_run(args) -> int:
         for spec in load_experiment_specs(config_path):
             if spec.experiment.family != "trust":
                 raise ValueError("Only trust-family specs are executable through scripts/experiment/run.py.")
-    batch_id = args.batch_name or default_batch_id()
     runner = BatchExperimentRunner(
         config_paths=config_paths,
         output_root=args.output_dir,
-        batch_id=batch_id,
+        batch_id=args.batch_name,
         workers=args.workers,
         make_gifs=bool(args.make_gifs),
         verbose=bool(args.verbose),

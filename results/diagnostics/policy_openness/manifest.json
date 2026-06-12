@@ -6,7 +6,7 @@
     "configs/diagnostics/h0_policy_openness/graded_choice.toml"
   ],
   "source_run_paths": [
-    "results/diagnostics/spine_smoke/raw/h0/graded_choice/results.csv"
+    "results/diagnostics/policy_openness/raw/h0/graded_choice/results.csv"
   ],
   "raw_results_policy": "gitignored_retained_outside_git_and_in_drive",
   "tracked_summary_files": [

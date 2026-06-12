@@ -2,7 +2,8 @@
 
 This directory is the public result scaffold. Git tracks compact summaries,
 manifests, and README files. Full per-round trajectories named `results.csv`
-are intentionally ignored and live in the Drive packet or can be regenerated.
+are intentionally ignored and live in the public data packet (see root
+`README.md`) or can be regenerated.
 
 ## Paper Results
 
@@ -14,7 +15,8 @@ are intentionally ignored and live in the Drive packet or can be regenerated.
 - `paper/05b_prior_factorial/`
 - `paper/05c_forgiveness/`
 
-The full suite map is `paper/manifest.json`.
+The full suite map is `paper/manifest.json`. Every config-to-result route is
+documented in `docs/results/config_map.md`.
 
 ## Diagnostics
 

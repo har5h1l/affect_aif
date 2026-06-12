@@ -1,6 +1,7 @@
 # Configs
 
-Experiment configs are TOML files under `configs/`.
+Experiment configs are TOML files under `configs/`. Every maintained config
+maps to a result card or canonical raw path in `docs/results/config_map.md`.
 
 ## Families
 

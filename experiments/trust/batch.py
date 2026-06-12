@@ -12,6 +12,7 @@ from typing import Any
 
 import pandas as pd
 
+from experiments.trust.output_layout import public_config_path, resolve_state_output_dir, uses_canonical_output_layout
 from experiments.trust.runner import ExperimentRunner, checkpoint_group_complete, checkpoint_rows_for_completed_keys
 from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, load_experiment_specs
 from experiments.trust.tasks import run_variant_replication_task, variant_replication_payload
@@ -62,7 +63,7 @@ class BatchExperimentRunner:
         self,
         *,
         config_paths: list[str],
-        output_root: str,
+        output_root: str | None = None,
         batch_id: str | None = None,
         workers: int | None = None,
         make_gifs: bool = False,
@@ -71,7 +72,11 @@ class BatchExperimentRunner:
         checkpoint_interval: int = 1,
     ):
         self.config_paths = [str(Path(path).expanduser().resolve()) for path in config_paths]
-        self.output_root = Path(output_root)
+        self.use_canonical_layout = uses_canonical_output_layout(
+            output_root=output_root,
+            batch_name=batch_id,
+        )
+        self.output_root = Path(output_root or "results")
         self.batch_id = batch_id or default_batch_id()
         self.batch_dir = self.output_root / self.batch_id
         self.workers = max(1, int(workers or os.cpu_count() or 1))
@@ -89,12 +94,20 @@ class BatchExperimentRunner:
         states: list[ConfigBatchState] = []
         for config_path in self.config_paths:
             path = Path(config_path)
-            for spec in load_experiment_specs(path):
+            specs = load_experiment_specs(path)
+            for spec in specs:
                 states.append(
                     ConfigBatchState(
                         config_path=config_path,
                         config_name=spec.experiment.id,
-                        output_dir=self.batch_dir / spec.hypothesis.id / spec.experiment.id,
+                        output_dir=resolve_state_output_dir(
+                            config_path,
+                            hypothesis_id=spec.hypothesis.id,
+                            experiment_id=spec.experiment.id,
+                            suite_experiment_count=len(specs),
+                            output_root=None if self.use_canonical_layout else str(self.output_root),
+                            batch_name=None if self.use_canonical_layout else self.batch_id,
+                        ),
                         spec=spec,
                         spec_payload=spec.to_payload(),
                         expanded_runs=spec.expand_runs(),
@@ -148,7 +161,7 @@ class BatchExperimentRunner:
                 run_variant_replication_task,
                 state.spec_payload,
                 run.to_payload(),
-                config_path=state.config_path,
+                config_path=public_config_path(state.config_path),
                 config_name=state.config_name,
                 batch_id=self.batch_id,
             )
@@ -186,7 +199,7 @@ class BatchExperimentRunner:
                 continue
             rows = runner.run_replication(
                 run=run,
-                config_path=state.config_path,
+                config_path=public_config_path(state.config_path),
                 config_name=state.config_name,
                 batch_id=self.batch_id,
             )
@@ -240,7 +253,7 @@ class BatchExperimentRunner:
         config_copy_path.write_text(Path(state.config_path).read_text(encoding="utf-8"), encoding="utf-8")
         metadata = {
             "batch_id": self.batch_id,
-            "config_path": state.config_path,
+            "config_path": public_config_path(state.config_path),
             "config_name": state.config_name,
             "results_path": str(results_path),
             "workers": self.workers,

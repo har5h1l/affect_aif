@@ -2,7 +2,8 @@
 
 Tracked paper result folders under `results/paper/` contain compact summaries,
 manifests, and source-table style metrics. Full raw trajectories are preserved
-outside git under matching `raw/` paths and in the Drive packet.
+outside git under matching `raw/` paths and in the public data packet (see root
+`README.md`).
 
 Every paper manifest should point to current `configs/paper/` TOML files and
 use `raw_results_policy = "gitignored_retained_outside_git_and_in_drive"`.
@@ -15,8 +16,8 @@ use `raw_results_policy = "gitignored_retained_outside_git_and_in_drive"`.
 | `results/paper/02_deployment_ablation/` | `configs/paper/02_deployment_ablation.toml` | `results/paper/02_deployment_ablation/raw/results.csv` | `source_tables/*.csv`, `manifest.json`, README | Tracked-only preserves beta movement while full affect lowers entropy; behavior changes through beta-to-gamma deployment. |
 | `results/paper/03_partner_selection/` | `configs/paper/03_partner_selection.toml` | `results/paper/03_partner_selection/raw/results.csv` | `source_tables/*.csv`, `manifest.json`, README | Graded partner selection sharpens directionally without a payoff headline. |
 | `results/paper/04_betrayal_adaptation/` | `configs/paper/04_betrayal_adaptation.toml` | `results/paper/04_betrayal_adaptation/raw/results.csv` | `source_tables/*.csv`, `manifest.json`, README | H5 lower entropy and higher joint accuracy; payoff advantage uncertain. |
-| `results/paper/05a_alpha_sweep/` | `configs/paper/05a_alpha_sweep.toml` | `results/paper/05a_alpha_sweep/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Precision-gain profile readout across open and betrayal settings. |
-| `results/paper/05b_prior_factorial/` | `configs/paper/05b_prior_factorial.toml` | `results/paper/05b_prior_factorial/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Beta prior x gain profile readout. |
+| `results/paper/05a_alpha_sweep/` | `configs/paper/05a_alpha_sweep.toml` | `results/paper/05a_alpha_sweep/raw/open_graded/results.csv`; `raw/betrayal/results.csv` | `metrics.csv`, `manifest.json`, README | Precision-gain profile readout across open and betrayal settings. |
+| `results/paper/05b_prior_factorial/` | `configs/paper/05b_prior_factorial.toml` | `results/paper/05b_prior_factorial/raw/open_graded/results.csv`; `raw/betrayal/results.csv`; `raw/partner_choice/results.csv` | `metrics.csv`, `manifest.json`, README | Beta prior x gain profile readout. |
 | `results/paper/05c_forgiveness/` | `configs/paper/05c_forgiveness.toml` | `results/paper/05c_forgiveness/raw/results.csv` | `metrics.csv`, `manifest.json`, README | Trust-repair profile readout; reengagement and confidence restoration can dissociate. |
 
 The paper-facing prose and exact manuscript numbers are maintained in

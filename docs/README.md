@@ -34,7 +34,8 @@ copying the same state into several places.
 ## Data
 
 Raw per-round results are gitignored and can be regenerated from
-`configs/paper/` or obtained from the public Drive packet. Tracked docs point
+`configs/paper/` or obtained from the public data packet (see root
+`README.md`). Tracked docs point
 to compact summaries, manifests, configs, and source tables.
 
 Older planning material has been folded into these routes where it is still
