@@ -117,6 +117,8 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
 - Avoid over-prescriptive manuscript unit tests that ban ordinary wording (e.g. word deny lists).
 - In affective-precision manuscript prose, distinguish the present mechanism from Hesp et al.; frame the signal as partner-response likelihood surprisal, not a policy-inference quantity or reward tracking.
 - Prefer minimal equation or setup clarifications over full rewrites when reviewer feedback allows.
+- For manuscript behavioral claims, use "policy selection" for the process, "policy precision" for the γ_k mechanism, and "policy commitment" for interpretation; avoid "policy inference" where the claim is about selection or commitment.
+- Avoid defensive replication-validation language in the manuscript; state seed counts once in appendix protocol text rather than repeating them in captions.
 
 ## Learned Workspace Facts
 
@@ -124,4 +126,5 @@ $(cat graphify-out/.graphify_python 2>/dev/null || printf python3) -c "from grap
 - Manuscript appendix layout: A = environment generative process, B = focal-agent POMDP, C = affective-precision update and policy selection, D = simulation protocols and metrics, E = extended profile and robustness results.
 - Policy entropy documentation must match planner enumeration in `tasks/trust/pomdp.py`: graded runs use `num_controls=[1,6,6]` (36^4 factorized policies, capped at `max_policies=4096`); partner-choice conditions tile per-partner policies across partners. Do not cite max-entropy parentheticals without verifying this math.
 - Manuscript float layout: Results figures use `[H]` with `\FloatBarrier`; put `\clearpage` only once before `\appendix` in `main.tex`, not before each appendix section.
-- Appendix formatting in `macros.tex`: `\appendixfigure` height cap, `\Needspace` before dense tables, and inline `\(...\)` for short mid-sentence set definitions in appendices A/B (avoid mid-sentence `\[...\]` display math).
+- Appendix formatting in `macros.tex`: `\appendixfigure` height cap, `\Needspace` before dense tables, inline `\(...\)` for short mid-sentence set definitions in appendices A/B (avoid mid-sentence `\[...\]` display math), plus `\appendixfloatend` / `\appendixfloattosection` to tame float→subsection gaps; use `\raggedbottom` in the appendix block to avoid `\flushbottom` stretch.
+- Public release target: `pyproject.toml` is the sole hand-maintained dependency spec; internal dev routing (`docs/active/`, Mango) will be stripped before the public reproduction package.
