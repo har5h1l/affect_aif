@@ -141,3 +141,16 @@ def test_raw_and_archive_are_gitignored():
     ]
     for path in paths:
         subprocess.run(["git", "check-ignore", "-q", path], cwd=REPO_ROOT, check=True)
+
+
+def test_manuscript_source_tables_use_promoted_h4_partner_selection_copy():
+    manuscript_table = REPO_ROOT / "docs/manuscript/source_tables/h4_partner_choice_summary.csv"
+    promoted_table = REPO_ROOT / "results/paper/03_partner_selection/source_tables/partner_selection_summary.csv"
+
+    assert manuscript_table.read_bytes() == promoted_table.read_bytes()
+
+
+def test_manuscript_source_tables_do_not_include_superseded_locality_probe():
+    stale_table = REPO_ROOT / "docs/manuscript/source_tables/h3_locality_probe_summary.csv"
+
+    assert not stale_table.exists()

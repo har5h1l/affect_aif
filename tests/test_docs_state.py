@@ -44,3 +44,10 @@ def test_top_level_doc_links_exist():
             if not resolved.exists():
                 missing.append(f"{path.relative_to(ROOT)} -> {target}")
     assert missing == []
+
+
+def test_appendix_protocol_round_counts_match_current_paper_configs():
+    appendix = (ROOT / "docs/manuscript/appendix/appendix_d_protocols.tex").read_text()
+
+    assert "Locality probe & graded partner choice & 200 & 30" in appendix
+    assert "Locality probe & graded partner choice & 100 & 30" not in appendix

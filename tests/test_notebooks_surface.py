@@ -51,8 +51,9 @@ def test_reproduce_notebook_is_colab_and_results_aware():
     assert "docs/manuscript/source_tables/h2_deployment_contrast_summary.csv" in text
     assert "docs/manuscript/source_tables/h4_partner_choice_summary.csv" in text
     assert "scripts/analysis/phenotype_artifacts.py" in text
-    assert "google.colab" in text
-    assert "drive.mount" in text
+    assert "google.colab" not in text
+    assert "drive.mount" not in text
+    assert "Google Drive" not in text
     assert "PAPER_READOUTS" in text
     assert "paper_run_scaffold" in text
     assert text.count("paper_run_scaffold(") == 8
@@ -116,7 +117,10 @@ def test_demo_notebook_default_route_is_core_and_profiles_are_opt_in():
     assert "The default route runs the four core demos only (21 expanded runs)" in text
     assert "Opt-in appendix/profile route (adds 21 expanded runs)" in text
     assert 'DEMO_ROUTE = "core"  # "core", "profiles", "all", or "custom"' in text
-    assert 'CORE_DEMOS = ["predictability_value", "deployment_ablation", "partner_selection", "betrayal_adaptation"]' in text
+    assert (
+        'CORE_DEMOS = ["predictability_value", "deployment_ablation", "partner_selection", "betrayal_adaptation"]'
+        in text
+    )
     assert 'PROFILE_DEMOS = ["alpha_sweep", "prior_factorial", "forgiveness"]' in text
     assert "Full demo route is 42 expanded runs; full paper route is 1220 expanded runs." in text
     assert '"alpha_sweep": {' in text
@@ -132,7 +136,7 @@ def test_reproduce_notebook_has_final_scaffold_and_unique_late_headings():
     assert "table-derived orientation aid" in text
     assert "## 12. Verify Result Packet Cleanliness" in text
     assert "## 13. Final Interpretation Scaffold" in text
-    assert "## 14. Export Clean Results To Google Drive" in text
+    assert "## 14. Export Clean Results To Google Drive" not in text
     assert "## 11. Verify Result Packet Cleanliness" not in text
 
 
@@ -149,8 +153,8 @@ def test_reproduce_final_scaffold_uses_current_source_table_columns():
     assert '("beta_recovery", True)' not in text
 
 
-def test_public_notebooks_do_not_store_local_outputs():
-    for path in [ROOT / "notebooks" / "demo.ipynb", ROOT / "notebooks" / "reproduce.ipynb"]:
+def test_reproduce_notebook_does_not_store_local_outputs():
+    for path in [ROOT / "notebooks" / "reproduce.ipynb"]:
         payload = json.loads(path.read_text())
         for index, cell in enumerate(payload.get("cells", [])):
             if cell.get("cell_type") != "code":
