@@ -1,10 +1,12 @@
 # Notebooks
 
 - `demo.ipynb`: guided public walkthrough using `configs/demo/`. It explains
-  the mechanism before each run, executes all seven demo configs by default,
+  the mechanism before each run, executes the four core demo configs by default,
   and displays mechanism snapshots, timecourses, compact analysis tables, and
-  appendix-level profile readouts. Use this first when the goal is to
-  understand what the model is doing.
+  reviewer readout scaffolds. Use this first when the goal is to understand
+  what the model is doing. The default core route is 21 expanded runs; the
+  opt-in appendix/profile route brings the full demo notebook to 42 expanded
+  runs.
 - `reproduce.ipynb`: Colab/local paper reproduction notebook. It dry-runs all
   numbered `configs/paper/` specs to show the workload, then walks through
   Sections 3.1--3.5 one paper section at a time. Each section runs the relevant
@@ -22,11 +24,13 @@ scripts rather than implementing separate runners.
 
 Use `demo.ipynb` when you want a fast, readable proof that the project installs,
 runs experiments, runs analysis, and produces plots. It is the better notebook
-for first-time readers and for appendix-level intuition about gain, priors, and
-forgiveness dynamics.
+for first-time readers. Set `DEMO_ROUTE = "profiles"` in the route-control cell
+when you also want appendix-level intuition about gain, priors, and forgiveness
+dynamics.
 
 Use `reproduce.ipynb` when you want to regenerate the paper suite. It is more
-expensive because each paper experiment is executed before its analysis cells.
+expensive because each paper experiment is executed before its analysis cells;
+the full paper route is 1220 expanded runs.
 
 ## Colab Notes
 

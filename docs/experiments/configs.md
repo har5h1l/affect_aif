@@ -72,7 +72,7 @@ paper evidence.
 | `configs/demo/02_deployment_ablation.toml` | 4 variants x 1 seed x 40 rounds | Fast analogue of paper Section 3.2. |
 | `configs/demo/03_partner_selection.toml` | 3 variants x 1 seed x 40 rounds | Fast analogue of paper Section 3.3. |
 | `configs/demo/04_betrayal_adaptation.toml` | 4 variants x 2 seeds x 50 rounds | Fast analogue of paper Section 3.4 with an earlier switch. |
-| `configs/demo/05a_alpha_sweep.toml` | 2 scenarios x 3 alpha values x 1 seed x 60 rounds | Fast analogue of paper Exp A. |
+| `configs/demo/05a_alpha_sweep.toml` | opt-in: 2 scenarios x 3 alpha values x 1 seed x 60 rounds | Fast analogue of paper Exp A. |
 | `configs/demo/05b_prior_factorial.toml` | optional: 3 scenarios x 4 variants x 1 seed x 60 rounds | Reduced analogue of paper Exp B. |
 | `configs/demo/05c_forgiveness.toml` | optional: 3 variants x 1 seed x 60 rounds | Reduced analogue of paper Exp C. |
 

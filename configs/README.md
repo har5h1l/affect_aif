@@ -33,8 +33,9 @@ python scripts/experiment/run.py \
 
 The demo folder mirrors the numbered paper suite at reduced scale:
 `01_predictability_value.toml` through `05c_forgiveness.toml`. The notebook
-runs the main spine by default and marks the profile-factorial and forgiveness
-demos as optional.
+runs the four core mechanism demos by default (21 expanded runs) and keeps the
+appendix/profile demos (`05a`--`05c`) as opt-ins. Running every demo config is
+42 expanded runs.
 
 ```bash
 python scripts/experiment/run.py \

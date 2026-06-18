@@ -73,7 +73,7 @@ tracked result cards; default outputs are ephemeral under `outputs/demo/`.
 | `configs/diagnostics/h3_locality/global_beta_locality_probe.toml` | `results/diagnostics/locality/` | `results/diagnostics/locality/raw/h3/global_beta_locality_probe/results.csv` |
 | `configs/diagnostics/h3_locality/global_beta_focal_switch_probe.toml` | `results/diagnostics/locality/` | `results/diagnostics/locality/raw/h3/global_beta_focal_switch_probe/results.csv` |
 | `configs/diagnostics/h1_model_fitness/reliability_vs_reward_confirm.toml` | `results/diagnostics/model_fitness/` | `results/diagnostics/model_fitness/raw/h1/reliability_vs_reward_confirm/results.csv` |
-| `configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml` | `results/diagnostics/social_allocation/` | `results/diagnostics/social_allocation/raw/h4/partner_choice_confirm/results.csv` |
+| `configs/diagnostics/h4_social_allocation/partner_choice_confirm.toml` | `results/diagnostics/social_allocation/` | `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/h4/partner_choice_confirm/results.csv` |
 
 Interpretation for promoted diagnostic cards lives in `docs/results/diagnostics.md`.
 

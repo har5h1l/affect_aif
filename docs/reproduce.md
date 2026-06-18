@@ -36,6 +36,10 @@ python scripts/experiment/run.py \
   --workers 1
 ```
 
+The demo notebook defaults to the four core demos: 21 expanded runs total. Its
+route-control cell can opt into the appendix/profile demos, bringing the full
+demo route to 42 expanded runs.
+
 ## Paper Dry-Run
 
 ```bash
@@ -51,9 +55,9 @@ python scripts/experiment/run.py \
   --dry-run
 ```
 
-Remove `--dry-run` for the full paper execution. The paper suite is larger
-than the demo notebooks; use `--workers 1` unless you intentionally want local
-parallel execution.
+Remove `--dry-run` for the full paper execution. The full paper suite is 1220
+expanded runs, so it is much larger than the demo notebook route; use
+`--workers 1` unless you intentionally want local parallel execution.
 
 Full per-round `results.csv` files are gitignored and retained outside git.
 Compact public summaries and manifests live under `results/paper/` and
@@ -73,5 +77,6 @@ need row-level `results.csv` files that are intentionally omitted from git.
 
 Open `notebooks/demo.ipynb` or `notebooks/reproduce.ipynb` in Google Colab,
 clone the repo in the first setup cell, and run cells top to bottom. The
-notebooks write scratch outputs under `outputs/` before materializing canonical
-paper paths.
+demo notebook starts with the 21-run core route and keeps appendix/profile
+demos opt-in. The notebooks write scratch outputs under `outputs/` before
+materializing canonical paper paths.

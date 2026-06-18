@@ -53,6 +53,9 @@ def test_reproduce_notebook_is_colab_and_results_aware():
     assert "scripts/analysis/phenotype_artifacts.py" in text
     assert "google.colab" in text
     assert "drive.mount" in text
+    assert "PAPER_READOUTS" in text
+    assert "paper_run_scaffold" in text
+    assert text.count("paper_run_scaffold(") == 8
     assert "RUN_EXPERIMENTS = True" in text
     assert "MATERIALIZE_RESULTS = True" in text
     assert "RUN_FULL" not in text
@@ -83,11 +86,14 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert "configs/demo/05a_alpha_sweep.toml" in text
     assert "configs/demo/05b_prior_factorial.toml" in text
     assert "configs/demo/05c_forgiveness.toml" in text
-    assert "RUN_OPTIONAL_DEMOS = True" in text
-    assert (
-        'SELECTED_DEMOS = ["predictability_value", "deployment_ablation", "partner_selection", '
-        '"betrayal_adaptation", "alpha_sweep", "prior_factorial", "forgiveness"]'
-    ) in text
+    assert 'DEMO_ROUTE = "core"' in text
+    assert "CORE_DEMOS" in text
+    assert "PROFILE_DEMOS" in text
+    assert "RUN_OPTIONAL_DEMOS = False" in text
+    assert "Appendix/profile demos are opt-in" in text
+    assert "selected_route = route_summary()" in text
+    assert "reviewer_scaffold" in text
+    assert "Do not overclaim" in text
     assert "scripts/analysis/analyze.py" in text
     assert 'OUTPUT_ROOT = Path("outputs")' in text
     assert 'DEMO_BATCH_PREFIX = "notebook_demo"' in text
@@ -102,6 +108,45 @@ def test_demo_notebook_runs_demo_configs_and_analysis():
     assert text.count("= run_demo(") == 7
     assert text.count("show_demo(") >= 6
     assert text.count("show_appendix_demo(") >= 4
+
+
+def test_demo_notebook_default_route_is_core_and_profiles_are_opt_in():
+    text = _notebook_text(ROOT / "notebooks" / "demo.ipynb")
+
+    assert "The default route runs the four core demos only (21 expanded runs)" in text
+    assert "Opt-in appendix/profile route (adds 21 expanded runs)" in text
+    assert 'DEMO_ROUTE = "core"  # "core", "profiles", "all", or "custom"' in text
+    assert 'CORE_DEMOS = ["predictability_value", "deployment_ablation", "partner_selection", "betrayal_adaptation"]' in text
+    assert 'PROFILE_DEMOS = ["alpha_sweep", "prior_factorial", "forgiveness"]' in text
+    assert "Full demo route is 42 expanded runs; full paper route is 1220 expanded runs." in text
+    assert '"alpha_sweep": {' in text
+    assert '"optional": True' in text
+
+
+def test_reproduce_notebook_has_final_scaffold_and_unique_late_headings():
+    text = _notebook_text(ROOT / "notebooks" / "reproduce.ipynb")
+
+    assert "this full paper route is 1220 expanded runs" in text
+    assert "compact_table_readout" in text
+    assert "final_scaffold_specs" in text
+    assert "table-derived orientation aid" in text
+    assert "## 12. Verify Result Packet Cleanliness" in text
+    assert "## 13. Final Interpretation Scaffold" in text
+    assert "## 14. Export Clean Results To Google Drive" in text
+    assert "## 11. Verify Result Packet Cleanliness" not in text
+
+
+def test_reproduce_final_scaffold_uses_current_source_table_columns():
+    text = _notebook_text(ROOT / "notebooks" / "reproduce.ipynb")
+
+    assert '("mean_q_pi_entropy", False)' in text
+    assert '("selection_rate", True)' in text
+    assert '("mean_payoff", True)' in text
+    assert '("beta_recovery_r200", True)' in text
+    assert '("selection_share", True)' not in text
+    assert '("q_pi_entropy", False), ("total_payoff", True)' not in text
+    assert '("payoff_late", True)' not in text
+    assert '("beta_recovery", True)' not in text
 
 
 def test_public_notebooks_do_not_store_local_outputs():
