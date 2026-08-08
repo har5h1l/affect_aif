@@ -15,7 +15,6 @@ from tasks.trust.payoffs import (
     decode_instantaneous_index,
     encode_instantaneous_index,
     expected_agent_payoff,
-    factorized_num_controls,
     infer_payoff_levels,
     payoff_distribution,
 )
@@ -56,7 +55,7 @@ class TrustPomdpTemplate:
     D: list[jnp.ndarray]
     E: jnp.ndarray
     policies: jnp.ndarray
-    control_fac_idx: tuple[int, ...]
+    B_action_dependencies: tuple[tuple[int, ...], ...]
     labels: TrustPomdpLabels
     payoff_values: tuple[float, ...]
     num_obs: tuple[int, ...]
@@ -94,10 +93,6 @@ class TrustPomdpTemplate:
     def payoff_levels(self) -> tuple[float, ...]:
         return self.payoff_values
 
-    @property
-    def uses_factorized_controls(self) -> bool:
-        return len(self.num_controls) > 1
-
     def get_matrices(self) -> tuple[list[jnp.ndarray], list[jnp.ndarray], list[jnp.ndarray], list[jnp.ndarray]]:
         return self.A, self.B, self.C, self.D
 
@@ -106,8 +101,6 @@ def build_trust_pomdp_template(
     config: Any | Mapping[str, Any],
     *,
     planning_horizon: int,
-    max_policies: int | None = None,
-    rng: np.random.Generator | None = None,
 ) -> TrustPomdpTemplate:
     """Build static trust-task matrices and policy templates for ``pymdp.Agent``."""
 
@@ -145,8 +138,7 @@ def build_trust_pomdp_template(
             temptation=tuple(cfg.get("temptation", (5.0, -1.0))),
             mutual_defect=tuple(cfg.get("mutual_defect", (1.0, 1.0))),
         )
-        num_controls = tuple(factorized_num_controls(1, "random", num_social_actions))
-        control_fac_idx = (1, 2)
+        num_controls = (num_social_actions,)
     elif payoff_mode == "graded":
         if not is_dataclass(config):
             stray = _BINARY_KEYS & cfg.keys()
@@ -158,8 +150,7 @@ def build_trust_pomdp_template(
             endowment=float(cfg.get("endowment", 10.0)),
             multiplier=float(cfg.get("multiplier", 3.0)),
         )
-        num_controls = tuple(factorized_num_controls(1, "random", num_social_actions))
-        control_fac_idx = (1, 2)
+        num_controls = (num_social_actions,)
     else:
         raise ValueError(f"unknown payoff_mode={payoff_mode!r}, expected 'binary' or 'graded'")
 
@@ -192,18 +183,17 @@ def build_trust_pomdp_template(
         num_types=num_types,
         num_stances=num_stances,
         num_social_actions=num_social_actions,
-        num_controls=num_controls,
         p_switch=p_switch,
     )
     C = build_preference_vectors(payoff_values=payoff_values, preference_temperature=preference_temperature)
     D = build_initial_beliefs(num_types=num_types, num_stances=num_stances, num_social_actions=num_social_actions)
-    policies = build_policies(num_controls, planning_horizon=planning_horizon, max_policies=max_policies, rng=rng)
+    policies = build_policies(num_controls, planning_horizon=planning_horizon)
     E = jnp.full((policies.shape[0],), 1.0 / max(policies.shape[0], 1), dtype=float)
 
     labels = TrustPomdpLabels(
         observation_modalities=("partner_action", "payoff"),
         hidden_factors=("partner_type", "partner_stance", "own_action"),
-        control_factors=("partner", "stance", "own_action") if len(num_controls) > 1 else ("social_action",),
+        control_factors=("social_action",),
         partner_types=partner_type_names,
         stances=stance_names,
         own_actions=tuple(f"action_{idx}" for idx in range(num_social_actions)),
@@ -218,7 +208,7 @@ def build_trust_pomdp_template(
         D=[jnp.asarray(D_f) for D_f in D],
         E=E,
         policies=jnp.asarray(policies),
-        control_fac_idx=control_fac_idx,
+        B_action_dependencies=((), (0,), (0,)),
         labels=labels,
         payoff_values=tuple(float(value) for value in payoff_values),
         num_obs=(2, len(payoff_values)),
@@ -249,8 +239,9 @@ def create_pymdp_agent(template: TrustPomdpTemplate, *, gamma: float):
         C=template.C,
         D=template.D,
         E=template.E,
-        policies=template.policies,
-        control_fac_idx=list(template.control_fac_idx),
+        B_action_dependencies=[list(dependencies) for dependencies in template.B_action_dependencies],
+        num_controls=list(template.num_controls),
+        policy_len=int(template.policies.shape[1]),
         gamma=gamma,
     )
 
@@ -324,7 +315,7 @@ def infer_joint_posterior(
 
 
 def type_transition(template: TrustPomdpTemplate) -> np.ndarray:
-    return np.asarray(template.B[0][:, :, 0], dtype=float)
+    return np.asarray(template.B[0], dtype=float)
 
 
 def stance_transition_for_executed_own_action(template: TrustPomdpTemplate, own_action: int) -> np.ndarray:

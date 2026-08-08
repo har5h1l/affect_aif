@@ -22,8 +22,7 @@ Most trust configs use this envelope:
   parameters.
 - `[[variants]]`: explicit affect/planning/precision variants.
 - optional `[[sweeps]]`: parameter expansion over selected variants.
-- optional `[runtime]`: execution profile and runtime limits such as
-  `max_policies`.
+- optional `[runtime]`: execution profile and diagnostic logging controls.
 - optional `[analysis]`: configured analysis contract.
 
 ## Runtime Profiles
@@ -38,6 +37,10 @@ Runtime profiles organize execution weight without changing the config family:
 Post-hoc analysis remains separate under `[analysis]`. For fastest full data
 collection, keep `profile = "data_collection"` and run heavy analysis after
 the trajectories are written.
+
+Policy enumeration is exhaustive. Runtime configs do not expose a policy cap
+or subsampling option; the policy count is determined exactly by the social
+action count and planning horizon.
 
 The Exp A-C paper configs use a suite form with `[suite]`, `[defaults.*]`,
 `[[variants]]`, and one or more `[[experiments]]`. `run.py` supports both

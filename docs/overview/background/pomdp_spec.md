@@ -68,7 +68,7 @@ Joint state space per partner: 4 types x 3 stances x 2 own_action = 24 states.
 
 ## 4. Control Factors
 
-The current trust-game implementation uses factorized controls
+The current trust-game implementation uses one shared social-action control
 inside each partner-local `pymdp.Agent`. Partner choice is handled outside the
 partner-local POMDP by evaluating candidate policies for each partner in
 `tasks.trust.runtime.select_decision(...)`.
@@ -76,25 +76,19 @@ partner-local POMDP by evaluating candidate policies for each partner in
 | Factor | Symbol | Actions | Controls |
 |--------|--------|---------|----------|
 | Partner choice | external selector | current partner in random mode; N partners in agent-choice mode | which partner receives the executed interaction |
-| Stance control | `pi_stance` | action/investment levels | `s_stance` transitions via action-dependent B |
-| Own action | `pi_own` | action/investment levels | `s_own` deterministic update and realized payoff |
+| Social action | `u_t` | action/investment levels | jointly controls action-dependent `s_stance` transitions, deterministic `s_own`, and realized payoff |
 
 For both random and agent-choice runs, the partner-local instantaneous control
-shape is `[1, num_social_actions, num_social_actions]`. Binary games have
-`num_social_actions = 2`; graded games use the configured number of investment
-levels. In agent-choice mode, the runtime loops over partners and compares
-partner-local policy branches with centered `gamma_k`-scaled logits before
-encoding the executed environment action as `(partner, stance_action,
-own_action)`.
+shape is `[num_social_actions]`. Binary games have `num_social_actions = 2`;
+graded games use six investment levels. `B_action_dependencies` makes both
+controlled hidden-state transitions depend on that same action. `pymdp` lowers
+the shared action internally to `[0, u_t, u_t]` for factor-aligned inference,
+without adding off-diagonal action combinations.
 
-Payoff and outcome updates use the executed `own` action. Rollout uses the
-stance-control column for generative stance transitions during planning, while
-partner-observed stance dynamics use the executed own action. This keeps the
-POMDP matrices compatible with the reference notebook while using official
-`pymdp` as the runtime dependency.
-
-The older single-flat-action graded control path is no longer the supported
-trust-game semantics.
+Policies enumerate all action sequences. For graded `H=4` runs this gives
+`6^4 = 1296` policies per partner; four-partner choice compares `5184`
+partner-policy candidates. Policy truncation is not part of the supported
+semantics.
 
 ---
 

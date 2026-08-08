@@ -36,7 +36,6 @@ class ExperimentConfig:
 
     gamma: float = 1.0
     action_sampling: str = "marginal"
-    max_policies: int = 4096
     runtime_profile: str = "data_collection"
     debug_mode: bool = False
     log_policy_traces: bool = False

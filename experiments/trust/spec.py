@@ -132,7 +132,6 @@ class SweepSpec:
 @dataclass(frozen=True)
 class RuntimeSpec:
     profile: str = "data_collection"
-    max_policies: int = 4096
     debug_mode: bool = False
     log_policy_traces: bool = False
 
@@ -195,7 +194,6 @@ class ExpandedRunSpec:
             initial_beta_prior=None if self.variant.beta_prior is None else list(self.variant.beta_prior),
             beta_persistence=self.variant.beta_persistence,
             beta_levels=list(self.variant.beta_levels),
-            max_policies=self.runtime.max_policies,
             runtime_profile=self.runtime.profile,
             debug_mode=self.runtime.debug_mode,
             log_policy_traces=self.runtime.log_policy_traces,

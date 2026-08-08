@@ -58,32 +58,18 @@ def build_transition_matrices(
     num_types: int,
     num_stances: int,
     num_social_actions: int,
-    num_controls: tuple[int, ...],
     p_switch: float,
 ) -> list[np.ndarray]:
     type_base = np.full((num_types, num_types), p_switch / max(num_types - 1, 1), dtype=float)
     np.fill_diagonal(type_base, 1.0 - p_switch)
 
-    if len(num_controls) > 1:
-        type_transition_array = type_base[:, :, None]
-        stance_transition = np.zeros((num_stances, num_stances, int(num_controls[1])), dtype=float)
-        own_transition = np.zeros((num_social_actions, num_social_actions, int(num_controls[2])), dtype=float)
-        for stance_action in range(int(num_controls[1])):
-            evidence = cooperation_evidence_strength(stance_action, num_social_actions=num_social_actions)
-            stance_transition[:, :, stance_action] = interpolate_stance_transition(evidence)
-        for own_action in range(int(num_controls[2])):
-            own_transition[own_action, :, own_action] = 1.0
-        return [type_transition_array, stance_transition, own_transition]
-
-    num_flat_controls = int(num_controls[0])
-    type_transition_array = np.repeat(type_base[:, :, None], num_flat_controls, axis=2)
-    stance_transition = np.zeros((num_stances, num_stances, num_flat_controls), dtype=float)
-    own_transition = np.zeros((num_social_actions, num_social_actions, num_flat_controls), dtype=float)
-    for action in range(num_flat_controls):
+    stance_transition = np.zeros((num_stances, num_stances, num_social_actions), dtype=float)
+    own_transition = np.zeros((num_social_actions, num_social_actions, num_social_actions), dtype=float)
+    for action in range(num_social_actions):
         evidence = cooperation_evidence_strength(action, num_social_actions=num_social_actions)
         stance_transition[:, :, action] = interpolate_stance_transition(evidence)
         own_transition[action, :, action] = 1.0
-    return [type_transition_array, stance_transition, own_transition]
+    return [type_base, stance_transition, own_transition]
 
 
 def build_preference_vectors(
@@ -110,28 +96,16 @@ def build_policies(
     num_controls: tuple[int, ...],
     *,
     planning_horizon: int,
-    max_policies: int | None,
-    rng: np.random.Generator | None,
 ) -> np.ndarray:
     horizon = int(planning_horizon)
     if horizon < 1:
         raise ValueError("planning_horizon must be >= 1.")
-    if max_policies is not None and int(max_policies) < 1:
-        raise ValueError("max_policies must be >= 1 when provided.")
-
     instantaneous_controls = np.asarray(list(product(*(range(int(size)) for size in num_controls))), dtype=int)
     num_step_controls = int(instantaneous_controls.shape[0])
     total_policies = num_step_controls**horizon
-    requested = total_policies if max_policies is None else min(int(max_policies), total_policies)
-    if requested == total_policies:
-        policy_indices = range(total_policies)
-    elif rng is None:
-        policy_indices = range(requested)
-    else:
-        policy_indices = rng.choice(total_policies, size=requested, replace=False)
 
-    policies = np.zeros((requested, horizon, len(num_controls)), dtype=int)
-    for policy_row, policy_idx in enumerate(policy_indices):
+    policies = np.zeros((total_policies, horizon, len(num_controls)), dtype=int)
+    for policy_row, policy_idx in enumerate(range(total_policies)):
         idx = int(policy_idx)
         for timestep in range(horizon - 1, -1, -1):
             policies[policy_row, timestep] = instantaneous_controls[idx % num_step_controls]

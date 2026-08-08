@@ -24,10 +24,11 @@ def test_template_exports_jax_arrays_and_expected_shapes() -> None:
     assert len(template.B) == 3
     assert template.A[0].shape == (2, 4, 3, 2)
     assert template.A[1].shape == (4, 4, 3, 2)
-    assert template.B[0].shape == (4, 4, 1)
+    assert template.B[0].shape == (4, 4)
     assert template.B[1].shape == (3, 3, 2)
     assert template.B[2].shape == (2, 2, 2)
-    assert template.control_fac_idx == (1, 2)
+    assert template.num_controls == (2,)
+    assert template.B_action_dependencies == ((), (0,), (0,))
     assert all(isinstance(array, jnp.ndarray) for array in template.A)
     assert all(isinstance(array, jnp.ndarray) for array in template.B)
     assert all(isinstance(array, jnp.ndarray) for array in template.C)
@@ -59,6 +60,10 @@ def test_template_can_create_official_pymdp_agents() -> None:
     partner_agents = create_partner_agents(template, num_partners=3, gamma=1.0)
 
     assert agent.__class__.__module__.startswith("pymdp.")
+    assert agent.num_controls_multi == [2]
+    assert agent.num_controls == [1, 2, 2]
+    lowered_policies = np.asarray(agent.policies.policy_arr)
+    assert np.all(lowered_policies[:, :, 1] == lowered_policies[:, :, 2])
     assert len(partner_agents) == 3
     assert all(partner.__class__.__module__.startswith("pymdp.") for partner in partner_agents)
 
@@ -67,7 +72,6 @@ def test_pomdp_matrix_helpers_match_template_contract() -> None:
     template = build_trust_pomdp_template(
         ExperimentConfig(payoff_mode="graded", num_partners=4, assignment_mode="agent_choice"),
         planning_horizon=2,
-        max_policies=128,
     )
 
     task_A = build_task_likelihoods(
@@ -83,7 +87,6 @@ def test_pomdp_matrix_helpers_match_template_contract() -> None:
         num_types=template.num_types,
         num_stances=template.num_stances,
         num_social_actions=template.num_social_actions,
-        num_controls=template.num_controls,
         p_switch=template.p_switch,
     )
     C = build_preference_vectors(
@@ -98,8 +101,6 @@ def test_pomdp_matrix_helpers_match_template_contract() -> None:
     policies = build_policies(
         template.num_controls,
         planning_horizon=2,
-        max_policies=128,
-        rng=None,
     )
 
     np.testing.assert_allclose(task_A[0], np.asarray(template.A[0])[..., 0])

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 
-from tasks.trust.payoffs import encode_instantaneous_index
-
 
 def gamma_per_policy(gamma_base: float, first_partners: np.ndarray, precision_signal: np.ndarray) -> np.ndarray:
     """Map partner beta expectations to policy precision using the HESP inverse-beta convention."""
@@ -16,22 +14,11 @@ def gamma_per_policy(gamma_base: float, first_partners: np.ndarray, precision_si
     return float(gamma_base) / partner_beta
 
 
-def build_transition_views(B, num_controls, factorized_policies):
+def build_transition_views(B):
     """Return ``(B_type, B_stance_by_action)`` for one partner's transition tensors."""
 
-    B_type = np.asarray(B[0][:, :, 0], dtype=float)
-    if factorized_policies:
-        idx_st0 = encode_instantaneous_index((0, 0, 0), num_controls)
-        idx_st1 = encode_instantaneous_index((0, 1, 0), num_controls)
-        B_stance_by_action = np.stack(
-            [
-                np.asarray(B[1][:, :, idx_st0], dtype=float),
-                np.asarray(B[1][:, :, idx_st1], dtype=float),
-            ],
-            axis=0,
-        )
-    else:
-        B_stance_by_action = np.asarray(np.moveaxis(B[1], 2, 0), dtype=float)
+    B_type = np.asarray(B[0], dtype=float)
+    B_stance_by_action = np.asarray(np.moveaxis(B[1], 2, 0), dtype=float)
     return B_type, B_stance_by_action
 
 
@@ -50,39 +37,25 @@ def _decode_policy_timestep(
     """Return ``(partner_idx, stance_action, own_action)`` for one policy timestep."""
 
     row = np.asarray(policy_row, dtype=int).ravel()
-    if row.size == 1:
-        partner_idx, social_action = _decode_action(
-            int(row[0]),
-            active_partner=active_partner,
-            assignment_mode_code=assignment_mode_code,
-            num_social_actions=num_social_actions,
-        )
-        return partner_idx, int(social_action), int(social_action)
-    if int(assignment_mode_code) == 1:
-        return int(row[0]), int(row[1]), int(row[2])
-    return int(active_partner), int(row[1]), int(row[2])
+    partner_idx, social_action = _decode_action(
+        int(row[0]),
+        active_partner=active_partner,
+        assignment_mode_code=assignment_mode_code,
+        num_social_actions=num_social_actions,
+    )
+    return partner_idx, int(social_action), int(social_action)
 
 
 def decode_raw_action_to_partner_and_social(
     raw_action: int,
     active_partner: int,
     assignment_mode_code: int,
-    factorized_policies: bool,
     num_social_actions: int,
     num_partners: int,
 ) -> tuple[int, int]:
     """Decompose a raw env action into ``(partner_idx, social_action)``."""
 
     del num_partners
-    if factorized_policies:
-        if int(assignment_mode_code) == 1:
-            if int(num_social_actions) == 2:
-                partner_idx = int(raw_action) // 4
-                rem = int(raw_action) % 4
-                social_action = rem % 2
-                return partner_idx, social_action
-            return int(raw_action) // int(num_social_actions), int(raw_action) % int(num_social_actions)
-        return int(active_partner), int(raw_action)
     return _decode_action(
         int(raw_action),
         active_partner=active_partner,

@@ -95,12 +95,24 @@ Result rows and `batch_metadata.json` record config paths as resolved absolute
 paths so provenance does not depend on whether a run used the serial,
 single-worker inline, or multi-worker batch path.
 
+Every result row records the policy space actually evaluated:
+`per_partner_policy_count`, `candidate_policy_count`, `max_q_pi_entropy`,
+`normalized_q_pi_entropy`, `effective_policy_count`, and
+`policies_fully_enumerated`. For a four-partner graded run at horizon four,
+these diagnostics must report 1,296 policies per partner, 5,184 candidates,
+and a maximum entropy of approximately 8.553332 nats. The runtime does not
+report a synthetic planning-cost proxy; candidate count and configured horizon
+are recorded directly, while actual compute should be measured with timings or
+profiling when needed.
+
 Runner diagnostics are assembled in `experiments/trust/diagnostics.py`, while
 POMDP matrices are assembled in `tasks/trust/pomdp_matrices.py` and wrapped by
 `tasks/trust/pomdp.py`. These modules are structural boundaries only: changing
-them should be verified by comparing fixed-seed data-collection and debug
-`results.csv` hashes against the previous implementation before treating the
-change as experiment-preserving.
+them should be verified with fixed-seed data-collection and debug checks. Exact
+`results.csv` hash comparison is appropriate only for changes intended to
+preserve runtime behavior. The exhaustive shared-action correction establishes
+a new baseline: policy construction no longer consumes the action RNG, so its
+rows are not expected to hash-match runs from the former subsampled planner.
 
 Post-hoc analysis:
 

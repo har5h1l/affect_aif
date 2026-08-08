@@ -13,6 +13,9 @@ need policy traces.
 Every maintained config maps to a result card or canonical raw path in
 `docs/results/config_map.md`.
 
+Policies are enumerated exhaustively from each variant's social-action count
+and planning horizon. Configs do not cap or sample the policy space.
+
 ## Choose A Config
 
 - `paper/`: paper evidence reproduction, numbered in manuscript-results order.

@@ -11,10 +11,8 @@ from tasks.trust.payoffs import (
     decode_env_agent_action,
     decode_instantaneous_index,
     encode_action,
-    encode_env_action_factorized,
     encode_instantaneous_index,
     expected_agent_payoff,
-    factorized_num_controls,
     infer_payoff_levels,
     num_actions,
     payoff_distribution,
@@ -84,29 +82,16 @@ def test_agent_choice_encode_decode_roundtrip():
     assert social_action == 1
 
 
-def test_factorized_num_controls_matches_assignment_mode():
-    assert factorized_num_controls(4, "agent_choice", 2) == [4, 2, 2]
-    assert factorized_num_controls(4, "random", 2) == [1, 2, 2]
-
-
 def test_instantaneous_index_roundtrip():
-    num_controls = [4, 2, 2]
-    controls = (2, 1, 0)
+    num_controls = [6]
+    controls = (4,)
 
     flat = encode_instantaneous_index(controls, num_controls)
     assert decode_instantaneous_index(flat, num_controls) == controls
 
 
-def test_encode_env_action_factorized_agent_choice_binary():
-    num_controls = factorized_num_controls(4, "agent_choice", 2)
-    encoded = encode_env_action_factorized(
-        partner_idx=2,
-        stance_action=1,
-        own_action=0,
-        assignment_mode="agent_choice",
-        num_partners=4,
-        num_controls=num_controls,
-    )
+def test_decode_env_agent_action_uses_shared_social_action():
+    encoded = encode_action(2, 1, num_partners=4, assignment_mode="agent_choice")
 
     partner_idx, own_action = decode_env_agent_action(
         encoded,
@@ -114,8 +99,7 @@ def test_encode_env_action_factorized_agent_choice_binary():
         assignment_mode="agent_choice",
         active_partner=None,
         num_social_actions=2,
-        factorized=True,
     )
 
     assert partner_idx == 2
-    assert own_action == 0
+    assert own_action == 1

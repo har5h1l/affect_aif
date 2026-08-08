@@ -8,6 +8,7 @@ import numpy as np
 
 from experiments.multifocal.config import MultiFocalConfig
 from experiments.multifocal.joint_resolution import joint_resolve
+from experiments.trust.diagnostics import summarize_policy_space
 from experiments.trust.factory import NativeTrustRuntime
 from tasks.trust.runtime import (
     Decision,
@@ -200,10 +201,21 @@ class MultiFocalRunner:
         is_focal: bool,
     ) -> dict:
         q_pi = np.asarray(decision.q_pi, dtype=float)
-        entropy = float(-(q_pi * np.log(q_pi + 1e-16)).sum()) if q_pi.size else np.nan
-        step_controls = int(np.prod(runtime.template.num_controls))
-        planning_cost = float((step_controls**runtime.planning_horizon) * runtime.planning_horizon)
-        planning_cost_ratio = float((step_controls**8) / max(step_controls**runtime.planning_horizon, 1))
+        selection_mode = (
+            "agent_choice"
+            if is_focal and self.config.assignment_mode == "agent_choice"
+            else "random"
+        )
+        expected_per_partner_policy_count = int(np.prod(runtime.template.num_controls)) ** int(
+            runtime.planning_horizon
+        )
+        policy_metrics = summarize_policy_space(
+            q_pi=q_pi,
+            per_partner_policy_count=int(runtime.template.policies.shape[0]),
+            num_partners=len(runtime.partner_bank.agents),
+            assignment_mode=selection_mode,
+            expected_per_partner_policy_count=expected_per_partner_policy_count,
+        )
         betas = (
             np.asarray(runtime.partner_bank.beta.expected_beta(), dtype=float)
             if runtime.partner_bank.beta is not None
@@ -227,9 +239,7 @@ class MultiFocalRunner:
             "selected_partner": int(decision.selected_partner),
             "selected_action": int(decision.selected_action),
             "raw_action": int(decision.raw_action),
-            "q_pi_entropy": entropy,
-            "planning_cost": planning_cost,
-            "planning_cost_ratio": planning_cost_ratio,
+            **policy_metrics,
             "round_log_evidence": float(runtime.partner_bank.round_log_evidence),
             "cumulative_log_evidence": float(runtime.partner_bank.cumulative_log_evidence),
             "mean_abs_step_efe": (

@@ -48,7 +48,6 @@ planning_horizon = 4
 
 [runtime]
 profile = "data_collection"
-max_policies = 4096
 
 [analysis]
 auto = false

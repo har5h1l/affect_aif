@@ -23,7 +23,6 @@ multiplier = 3.0
 
 [defaults.runtime]
 profile = "data_collection"
-max_policies = 4096
 
 [defaults.analysis]
 auto = false

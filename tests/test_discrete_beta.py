@@ -156,7 +156,6 @@ class TestDiscreteAffectiveRuntime:
             "temptation": (5.0, -1.0),
             "mutual_defect": (1.0, 1.0),
             "initial_beta": 0.5,
-            "max_policies": 64,
         })
         runtime = build_runtime(config, variant_id="affect", affect="precision", planning_horizon=2, seed=0)
         decision = select_decision(

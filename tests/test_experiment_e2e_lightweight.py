@@ -12,7 +12,7 @@ from analysis.hypotheses import run_all_hypothesis_tests
 from experiments.multifocal.config import MultiFocalConfig
 from experiments.multifocal.runner import MultiFocalRunner
 from experiments.trust.config import ExperimentConfig
-from experiments.trust.diagnostics import build_decision_diagnostics
+from experiments.trust.diagnostics import build_decision_diagnostics, summarize_policy_space
 from experiments.trust.factory import create_agents_from_multi_focal_config, create_env
 from experiments.trust.logger import MetricLogger
 from experiments.trust.runner import ExperimentRunner
@@ -50,9 +50,13 @@ MANUSCRIPT_DATA_COLLECTION_COLUMNS = {
     "selected_action",
     "best_policy_idx",
     "q_pi_entropy",
+    "per_partner_policy_count",
+    "candidate_policy_count",
+    "max_q_pi_entropy",
+    "normalized_q_pi_entropy",
+    "effective_policy_count",
+    "policies_fully_enumerated",
     "mean_abs_step_efe",
-    "planning_cost",
-    "planning_cost_ratio",
     "betas",
     "local_betas",
     "global_beta",
@@ -80,13 +84,55 @@ DEBUG_ONLY_COLUMNS = {
 }
 
 
+def test_runtime_construction_does_not_advance_action_sampling_rng():
+    seed = 12345
+    runtime = build_runtime(
+        ExperimentConfig(payoff_mode="graded", assignment_mode="agent_choice"),
+        planning_horizon=2,
+        seed=seed,
+    )
+    expected_rng = np.random.default_rng(seed)
+
+    assert runtime.rng.random() == expected_rng.random()
+
+
+def test_partner_choice_policy_diagnostics_use_actual_candidate_space():
+    per_partner_policy_count = 6**4
+    candidate_policy_count = 4 * per_partner_policy_count
+    metrics = summarize_policy_space(
+        q_pi=np.full(candidate_policy_count, 1.0 / candidate_policy_count),
+        per_partner_policy_count=per_partner_policy_count,
+        num_partners=4,
+        assignment_mode="agent_choice",
+        expected_per_partner_policy_count=per_partner_policy_count,
+    )
+
+    assert metrics["per_partner_policy_count"] == 1296
+    assert metrics["candidate_policy_count"] == 5184
+    assert np.isclose(metrics["max_q_pi_entropy"], 8.55333223803211)
+    assert np.isclose(metrics["q_pi_entropy"], metrics["max_q_pi_entropy"])
+    assert np.isclose(metrics["normalized_q_pi_entropy"], 1.0)
+    assert np.isclose(metrics["effective_policy_count"], 5184.0)
+    assert metrics["policies_fully_enumerated"] is True
+
+
+def test_policy_diagnostics_reject_posterior_candidate_mismatch():
+    with np.testing.assert_raises_regex(AssertionError, "candidate count"):
+        summarize_policy_space(
+            q_pi=np.full(4, 0.25),
+            per_partner_policy_count=4,
+            num_partners=2,
+            assignment_mode="agent_choice",
+            expected_per_partner_policy_count=4,
+        )
+
+
 def test_tiny_trust_config_constructs_and_runs_one_round():
     config = ExperimentConfig(
         num_partners=2,
         num_rounds=1,
         num_replications=1,
         random_seed=0,
-        max_policies=64,
     )
     env = create_env(config, seed=0)
     runtime = build_runtime(config, planning_horizon=1, seed=0)
@@ -197,9 +243,13 @@ def test_logger_does_not_fallback_posteriors_to_decision_beliefs():
             "selected_action": 0,
             "best_policy_idx": 0,
             "q_pi_entropy": 0.0,
+            "per_partner_policy_count": 1,
+            "candidate_policy_count": 1,
+            "max_q_pi_entropy": 0.0,
+            "normalized_q_pi_entropy": 0.0,
+            "effective_policy_count": 1.0,
+            "policies_fully_enumerated": True,
             "mean_abs_step_efe": np.nan,
-            "planning_cost": 1.0,
-            "planning_cost_ratio": 1.0,
             "betas": [np.nan],
             "prediction_errors": [np.nan],
             "reward_avgs": [np.nan],
@@ -253,7 +303,12 @@ def test_tiny_multifocal_round_loop_schema():
 
     assert len(rows) == 2
     assert {"round", "agent_global_idx", "focal_idx", "engaged_partner_global_idx"}.issubset(rows[0])
-    assert {"selected_action", "planning_cost", "round_log_evidence"}.issubset(rows[0])
+    assert {
+        "selected_action",
+        "candidate_policy_count",
+        "max_q_pi_entropy",
+        "round_log_evidence",
+    }.issubset(rows[0])
 
 
 def test_analysis_runs_on_tiny_results():

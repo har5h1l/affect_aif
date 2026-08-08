@@ -22,8 +22,6 @@ class TrustGameEnv:
         self.template = build_trust_pomdp_template(
             config,
             planning_horizon=1,
-            max_policies=cfg.get("max_policies"),
-            rng=np.random.default_rng(self.seed),
         )
         self.model = self.template
         self.num_partners = int(cfg.get("num_partners", 4))
@@ -149,7 +147,6 @@ class TrustGameEnv:
             assignment_mode=self.assignment_mode,
             active_partner=self.active_partner,
             num_social_actions=nsa,
-            factorized=self.model.uses_factorized_controls,
         )
 
         scheduled_type_switched = self._apply_scheduled_type_switches(self.round_idx + 1)

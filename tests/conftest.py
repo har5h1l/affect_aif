@@ -33,7 +33,7 @@ from tasks.trust.pomdp import build_trust_pomdp_template
 
 
 def _build_model(config):
-    return build_trust_pomdp_template(config, planning_horizon=1, max_policies=64)
+    return build_trust_pomdp_template(config, planning_horizon=1)
 
 
 @pytest.fixture

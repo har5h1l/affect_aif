@@ -4,7 +4,7 @@ import importlib.metadata as metadata
 
 
 def test_official_inferactively_pymdp_is_pinned() -> None:
-    assert metadata.version("inferactively-pymdp") == "1.0.0"
+    assert metadata.version("inferactively-pymdp") == "1.0.3"
 
 
 def test_pymdp_agent_api_is_available() -> None:

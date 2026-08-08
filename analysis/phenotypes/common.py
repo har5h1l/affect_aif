@@ -77,7 +77,7 @@ def make_spec(
         ),
         scenario=scenario,
         variants=tuple(variants),
-        runtime=RuntimeSpec(max_policies=4096, debug_mode=False, log_policy_traces=False),
+        runtime=RuntimeSpec(debug_mode=False, log_policy_traces=False),
     )
 
 

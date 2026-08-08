@@ -14,7 +14,5 @@ class GradedTrustGameEnv(TrustGameEnv):
         self.template = build_trust_pomdp_template(
             config,
             planning_horizon=1,
-            max_policies=self.config.get("max_policies"),
-            rng=self.rng,
         )
         self.model = self.template

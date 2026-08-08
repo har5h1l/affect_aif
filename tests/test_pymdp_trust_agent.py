@@ -176,8 +176,8 @@ def test_agent_choice_policy_arrays_preserve_candidate_order_and_logits() -> Non
         ExperimentConfig(payoff_mode="binary", num_partners=2, assignment_mode="agent_choice"),
     )
     policy_scores_by_partner = [
-        np.asarray([1.0, 2.0, 3.0, 4.0], dtype=float),
-        np.asarray([0.5, 1.5, 2.5, 3.5], dtype=float),
+        np.asarray([1.0, 2.0], dtype=float),
+        np.asarray([0.5, 1.5], dtype=float),
     ]
 
     partners, policy_indices, first_steps, scores, logits = _agent_choice_policy_arrays(
@@ -187,11 +187,11 @@ def test_agent_choice_policy_arrays_preserve_candidate_order_and_logits() -> Non
     )
 
     expected_first_steps = np.tile(np.asarray(runtime.template.policies[:, 0], dtype=int), (2, 1))
-    np.testing.assert_array_equal(partners, np.asarray([0, 0, 0, 0, 1, 1, 1, 1]))
-    np.testing.assert_array_equal(policy_indices, np.asarray([0, 1, 2, 3, 0, 1, 2, 3]))
+    np.testing.assert_array_equal(partners, np.asarray([0, 0, 1, 1]))
+    np.testing.assert_array_equal(policy_indices, np.asarray([0, 1, 0, 1]))
     np.testing.assert_array_equal(first_steps, expected_first_steps)
-    np.testing.assert_allclose(scores, np.asarray([1.0, 2.0, 3.0, 4.0, 0.5, 1.5, 2.5, 3.5]))
-    np.testing.assert_allclose(logits, np.asarray([1.0, 2.0, 3.0, 4.0, -1.0, 1.0, 3.0, 5.0]))
+    np.testing.assert_allclose(scores, np.asarray([1.0, 2.0, 0.5, 1.5]))
+    np.testing.assert_allclose(logits, np.asarray([1.0, 2.0, 0.0, 2.0]))
 
 
 def test_batched_agent_choice_policy_scores_match_separate_agents() -> None:
@@ -274,7 +274,7 @@ def test_agent_choice_selected_fields_match_encoded_raw_action() -> None:
         rng=runtime.rng,
     )
 
-    assert decision.selected_partner == decision.raw_action // 4
+    assert decision.selected_partner == decision.raw_action // 2
     assert decision.selected_action == decision.raw_action % 2
 
 

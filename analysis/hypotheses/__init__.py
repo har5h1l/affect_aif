@@ -39,8 +39,6 @@ REQUIRED_SUMMARY_COLUMNS = {
     "inferred_joint_correct",
     "q_pi_entropy",
     "mean_abs_step_efe",
-    "planning_cost",
-    "planning_cost_ratio",
 }
 
 
@@ -149,8 +147,6 @@ def _summary_by_variant(results: pd.DataFrame) -> pd.DataFrame:
         "inferred_joint_correct": "mean_joint_accuracy",
         "q_pi_entropy": "mean_q_pi_entropy",
         "mean_abs_step_efe": "mean_abs_step_efe",
-        "planning_cost": "planning_cost",
-        "planning_cost_ratio": "planning_cost_ratio",
     }
     for column, output in optional_columns.items():
         if column in frame.columns:

@@ -41,8 +41,6 @@ def create_model(config: ExperimentConfig) -> TrustPomdpTemplate:
     return build_trust_pomdp_template(
         config,
         planning_horizon=1,
-        max_policies=config.max_policies,
-        rng=np.random.default_rng(config.random_seed),
     )
 
 
@@ -93,7 +91,6 @@ def create_agents_from_multi_focal_config(
         "gamma",
         "action_sampling",
         "use_information_gain",
-        "max_policies",
         "alpha_charge",
         "sigma_0_sq",
         "initial_beta",
@@ -129,7 +126,6 @@ def create_agents_from_multi_focal_config(
             assignment_mode=config.assignment_mode,
             num_rounds=config.num_rounds,
             random_seed=seed + i,
-            max_policies=int(spec.get("max_policies", 4096)),
             gamma=float(spec.get("gamma", 1.0)),
             action_sampling=str(spec.get("action_sampling", "marginal")),
             alpha_charge=float(spec.get("alpha_charge", 3.0)),
@@ -190,8 +186,6 @@ def _create_runtime_from_config_and_variant(
     template = build_trust_pomdp_template(
         config,
         planning_horizon=planning_horizon,
-        max_policies=config.max_policies,
-        rng=rng,
     )
     agents = create_partner_agents(template, num_partners=config.num_partners, gamma=config.gamma)
     for agent in agents:

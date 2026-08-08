@@ -14,10 +14,11 @@ def test_binary_model_exports_pymdp_bundle_shapes() -> None:
     assert len(bundle.B) == 3
     assert bundle.A[0].shape == (2, 4, 3, 2)
     assert bundle.A[1].shape == (4, 4, 3, 2)
-    assert bundle.B[0].shape == (4, 4, 1)
+    assert bundle.B[0].shape == (4, 4)
     assert bundle.B[1].shape == (3, 3, 2)
     assert bundle.B[2].shape == (2, 2, 2)
-    assert bundle.control_fac_idx == (1, 2)
+    assert bundle.num_controls == (2,)
+    assert bundle.B_action_dependencies == ((), (0,), (0,))
 
 
 def test_binary_model_pymdp_bundle_is_normalized() -> None:
@@ -34,7 +35,7 @@ def test_policies_have_pymdp_shape() -> None:
 
     assert bundle.policies.ndim == 3
     assert bundle.policies.shape[1] == 2
-    assert bundle.policies.shape[2] == 3
+    assert bundle.policies.shape[2] == 1
 
 
 def test_graded_policies_match_transition_factor_count_for_pymdp() -> None:
@@ -45,32 +46,24 @@ def test_graded_policies_match_transition_factor_count_for_pymdp() -> None:
     agent = create_pymdp_agent(bundle, gamma=1.0)
 
     assert len(bundle.B) == 3
-    assert bundle.policies.shape[2] == len(bundle.B)
+    assert bundle.policies.shape == (36, 2, 1)
     qs = [jnp.asarray(np.asarray(factor).squeeze()[None, None, :]) for factor in agent.D]
-    agent.infer_policies(qs)
+    q_pi, _scores = agent.infer_policies(qs)
+    assert np.asarray(q_pi).shape == (1, 36)
+    lowered = np.asarray(agent.policies.policy_arr)
+    assert lowered.shape == (36, 2, 3)
+    assert np.all(lowered[:, :, 1] == lowered[:, :, 2])
 
 
-def test_truncated_pymdp_policies_without_rng_are_deterministic() -> None:
-    first = build_trust_pomdp_template(ExperimentConfig(payoff_mode="binary"), planning_horizon=3, max_policies=5)
-    second = build_trust_pomdp_template(ExperimentConfig(payoff_mode="binary"), planning_horizon=3, max_policies=5)
-
-    np.testing.assert_array_equal(first.policies, second.policies)
-
-
-def test_truncated_pymdp_policies_with_seeded_rng_are_reproducible() -> None:
-    seed = 123
-
-    first = build_trust_pomdp_template(
-        ExperimentConfig(payoff_mode="binary"),
-        planning_horizon=3,
-        max_policies=5,
-        rng=np.random.default_rng(seed),
-    )
-    second = build_trust_pomdp_template(
-        ExperimentConfig(payoff_mode="binary"),
-        planning_horizon=3,
-        max_policies=5,
-        rng=np.random.default_rng(seed),
+def test_graded_horizon_four_has_the_manuscript_policy_count() -> None:
+    bundle = build_trust_pomdp_template(
+        ExperimentConfig(payoff_mode="graded", assignment_mode="agent_choice"),
+        planning_horizon=4,
     )
 
-    np.testing.assert_array_equal(first.policies, second.policies)
+    assert bundle.num_controls == (6,)
+    assert bundle.policies.shape == (6**4, 4, 1)
+    combined_candidates = bundle.num_partners * len(bundle.policies)
+    assert combined_candidates == 4 * 6**4
+    assert np.isclose(np.log(len(bundle.policies)), 7.16703787691222)
+    assert np.isclose(np.log(combined_candidates), 8.55333223803211)

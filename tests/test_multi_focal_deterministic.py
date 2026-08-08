@@ -86,6 +86,8 @@ def test_round49_payoff_in_legal_set(baseline_rows):
     assert row.get("round_log_evidence") is not None
 
 
-def test_focal_selected_action_consistent_across_sample_rounds(baseline_rows):
-    for t in (5, 10, 15, 20):
-        assert baseline_rows[(t, t % 4, True)]["selected_action"] == 1
+def test_repeated_seed_reproduces_focal_actions(baseline_rows):
+    repeated_rows = _run_and_index(_build(num_rounds=21))
+    for t in range(21):
+        key = (t, t % 4, True)
+        assert repeated_rows[key]["selected_action"] == baseline_rows[key]["selected_action"]

@@ -184,15 +184,6 @@ def save_all_figures(results: pd.DataFrame, output_dir: str):
     fig.savefig(out / "figure_3_partner_type_payoff.png", dpi=180)
     plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(data=summary, x="variant_id", y="planning_cost_ratio", ax=ax)
-    ax.set_title("Deterministic Planning Cost Ratio")
-    ax.set_xlabel("")
-    ax.tick_params(axis="x", rotation=45)
-    fig.tight_layout()
-    fig.savefig(out / "figure_4_planning_cost.png", dpi=180)
-    plt.close(fig)
-
     divergence = beta_reward_divergence(results)
     divergence = _mean_sd_frame(divergence, ["variant_id", "round"], "divergence")
     fig, ax = plt.subplots(figsize=(8, 5))

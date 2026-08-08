@@ -58,6 +58,10 @@ class MetricLogger:
             except (TypeError, ValueError):
                 return int(default)
 
+        def _bool_metric(name: str, default: bool = False) -> bool:
+            value = _metric(name, default)
+            return bool(value)
+
         def _array_metric(name: str, default):
             return np.asarray(_metric(name, default), dtype=float)
 
@@ -108,9 +112,13 @@ class MetricLogger:
             "selected_action": _int_metric("selected_action"),
             "best_policy_idx": _int_metric("best_policy_idx"),
             "q_pi_entropy": _float_metric("q_pi_entropy"),
+            "per_partner_policy_count": _int_metric("per_partner_policy_count"),
+            "candidate_policy_count": _int_metric("candidate_policy_count"),
+            "max_q_pi_entropy": _float_metric("max_q_pi_entropy"),
+            "normalized_q_pi_entropy": _float_metric("normalized_q_pi_entropy"),
+            "effective_policy_count": _float_metric("effective_policy_count"),
+            "policies_fully_enumerated": _bool_metric("policies_fully_enumerated"),
             "mean_abs_step_efe": _float_metric("mean_abs_step_efe"),
-            "planning_cost": _float_metric("planning_cost"),
-            "planning_cost_ratio": _float_metric("planning_cost_ratio"),
             "betas": _to_float_list(betas),
             "local_betas": _to_float_list(local_betas),
             "global_beta": _float_metric("global_beta"),

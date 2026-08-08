@@ -13,7 +13,7 @@ def test_trust_model_exposes_stance_factor_and_joint_likelihood():
 
     assert model.num_stances == 3
     assert model.A[0].shape == (2, model.num_types, model.num_stances, model.num_social_actions)
-    assert model.B[0].shape == (model.num_types, model.num_types, 1)
+    assert model.B[0].shape == (model.num_types, model.num_types)
     assert model.B[1].shape == (model.num_stances, model.num_stances, 2)
     np.testing.assert_allclose(np.asarray(model.D[1], dtype=float), np.asarray([0.2, 0.6, 0.2], dtype=float))
 

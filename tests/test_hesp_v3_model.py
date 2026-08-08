@@ -16,7 +16,7 @@ def test_model_exposes_two_modalities_and_three_factors():
     assert model.A[1].shape == (4, 4, 3, 2)
 
     assert len(model.B) == 3
-    assert model.B[0].shape == (4, 4, 1)
+    assert model.B[0].shape == (4, 4)
     assert model.B[1].shape == (3, 3, 2)
     assert model.B[2].shape == (2, 2, 2)
 

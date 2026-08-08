@@ -1,7 +1,7 @@
 # Trust POMDP
 
 Public specification for the trust-game generative model and runtime. The
-implementation uses official `inferactively-pymdp==1.0.0` `pymdp.Agent`
+implementation uses official `inferactively-pymdp==1.0.3` `pymdp.Agent`
 instances. Project code constructs matrices, manages partner-local runtime
 state, and logs diagnostics.
 
@@ -83,21 +83,32 @@ and map the resulting payoff to the discrete payoff modality.
 
 Partner choice is external to each partner-local POMDP. The runtime evaluates
 candidate policies per partner in `select_decision(...)`, then executes the chosen
-`(partner, stance_action, own_action)`.
+partner and social action.
 
 | Control | Role |
 |---|---|
 | Partner choice (external) | which partner is engaged |
-| Stance control | action-dependent `B[1]` transitions |
-| Own action | deterministic `B[2]` update and payoff branch |
+| Social action | shared investment action driving action-dependent `B[1]`, deterministic `B[2]`, and the payoff branch |
 
-Binary control shape per partner-local agent:
-`[1, num_social_actions, num_social_actions]`. Agent-choice mode compares
-partner-local policy branches with centered `gamma_k`-scaled logits before
-encoding the environment action.
+The declared control shape per partner-local agent is `[num_social_actions]`:
+two actions for binary games and six investment levels for graded games. The
+shared action dependency makes the same action index drive both controlled
+hidden-state transitions. `pymdp` lowers this internally to factor-aligned
+rows `[0, action, action]`; the lowering does not introduce additional policy
+candidates.
 
-Rollout uses the stance-control column for generative stance transitions during
-planning; the environment updates observed stance from the executed own action.
+Policies are exhaustive action sequences. At the manuscript horizon `H=4`, a
+graded partner-local model has `6^4 = 1296` policies. Four-partner choice
+combines `4 * 1296 = 5184` partner-policy candidates. No policy subsampling or
+runtime policy cap is supported.
+
+The runtime reports both counts on every result row. Policy entropy is computed
+over the candidates actually compared, with `max_q_pi_entropy = log(N)`,
+`normalized_q_pi_entropy = q_pi_entropy / log(N)`, and
+`effective_policy_count = exp(q_pi_entropy)`. Here `N=1296` when a partner is
+fixed and `N=5184` for four-partner choice, giving maximum entropies of about
+`7.167038` and `8.553332` nats, respectively. A runtime invariant rejects any
+entropy above the corresponding maximum.
 
 ## B Matrices
 
@@ -158,6 +169,11 @@ Each round:
 4. Step the trust-game environment (`tasks/trust/envs/`).
 5. Update partner-local beliefs with `infer_states(...)`.
 6. Update external beta from prediction error and log diagnostics.
+
+Policy enumeration does not receive or consume the runtime action-sampling
+generator. Constructing the exhaustive policy array therefore leaves the
+seeded action stream at its initial state; only stochastic runtime choices
+advance that generator.
 
 Policy posterior openness (`q_pi_entropy`, EFE spread) determines whether
 affective precision can change behavior — the posterior must have room to move.

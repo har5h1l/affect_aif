@@ -1,5 +1,13 @@
 # Current Results
 
+> **Shared-action rebaseline pending.** The values below preserve the last
+> reviewed result packet, but they were generated before the partner-local
+> planner was corrected from independent stance/executed-action controls to
+> one shared social action. They are historical provenance, not current
+> claim-bearing evidence, until the paper configurations are regenerated and
+> reviewed. No values in this file have yet been replaced from the corrected
+> runtime.
+
 Canonical interpreted evidence for the active architecture. Manuscript prose
 lives in `docs/manuscript/sections/`; compact CSVs for paper-figure generation
 live in `docs/manuscript/source_tables/`.

@@ -8,6 +8,61 @@ from experiments.trust.config import ExperimentConfig
 from experiments.trust.factory import NativeTrustRuntime
 from tasks.trust.runtime import Decision, PartnerSnapshot, snapshot_partner_bank
 
+ENTROPY_TOLERANCE = 1e-10
+
+
+def summarize_policy_space(
+    *,
+    q_pi: np.ndarray,
+    per_partner_policy_count: int,
+    num_partners: int,
+    assignment_mode: str,
+    expected_per_partner_policy_count: int,
+) -> dict:
+    """Return diagnostics for the policy candidates actually evaluated."""
+
+    q_pi = np.asarray(q_pi, dtype=float)
+    per_partner_policy_count = int(per_partner_policy_count)
+    candidate_policy_count = (
+        int(num_partners) * per_partner_policy_count
+        if assignment_mode == "agent_choice"
+        else per_partner_policy_count
+    )
+    if q_pi.size != candidate_policy_count:
+        raise AssertionError(
+            "policy posterior length does not match evaluated candidate count: "
+            f"len(q_pi)={q_pi.size}, candidate_policy_count={candidate_policy_count}"
+        )
+    if not np.all(np.isfinite(q_pi)) or np.any(q_pi < -ENTROPY_TOLERANCE):
+        raise AssertionError("q_pi must contain finite, non-negative probabilities")
+    if not np.isclose(float(q_pi.sum()), 1.0, rtol=0.0, atol=ENTROPY_TOLERANCE):
+        raise AssertionError(f"q_pi must sum to one; got {float(q_pi.sum())}")
+
+    positive_mass = q_pi[q_pi > 0.0]
+    q_pi_entropy = float(-(positive_mass * np.log(positive_mass)).sum())
+    max_q_pi_entropy = float(np.log(candidate_policy_count))
+    if q_pi_entropy > max_q_pi_entropy + ENTROPY_TOLERANCE:
+        raise AssertionError(
+            "policy entropy exceeds its candidate-space maximum: "
+            f"q_pi_entropy={q_pi_entropy}, max_q_pi_entropy={max_q_pi_entropy}, "
+            f"candidate_policy_count={candidate_policy_count}"
+        )
+
+    normalized_q_pi_entropy = (
+        float(q_pi_entropy / max_q_pi_entropy) if max_q_pi_entropy > 0.0 else 0.0
+    )
+    return {
+        "q_pi_entropy": q_pi_entropy,
+        "per_partner_policy_count": per_partner_policy_count,
+        "candidate_policy_count": candidate_policy_count,
+        "max_q_pi_entropy": max_q_pi_entropy,
+        "normalized_q_pi_entropy": normalized_q_pi_entropy,
+        "effective_policy_count": float(np.exp(q_pi_entropy)),
+        "policies_fully_enumerated": bool(
+            per_partner_policy_count == int(expected_per_partner_policy_count)
+        ),
+    }
+
 
 def build_decision_diagnostics(
     *,
@@ -20,10 +75,17 @@ def build_decision_diagnostics(
     """Expose native pymdp decisions under experiment column names."""
 
     q_pi = np.asarray(decision.q_pi, dtype=float)
-    entropy = float(-(q_pi * np.log(q_pi + 1e-16)).sum()) if q_pi.size else np.nan
-    num_step_controls = int(np.prod(runtime.template.num_controls))
-    planning_cost = float((num_step_controls**runtime.planning_horizon) * runtime.planning_horizon)
-    planning_cost_ratio = 1.0
+    per_partner_policy_count = int(runtime.template.policies.shape[0])
+    expected_per_partner_policy_count = int(np.prod(runtime.template.num_controls)) ** int(
+        runtime.planning_horizon
+    )
+    policy_metrics = summarize_policy_space(
+        q_pi=q_pi,
+        per_partner_policy_count=per_partner_policy_count,
+        num_partners=config.num_partners,
+        assignment_mode=config.assignment_mode,
+        expected_per_partner_policy_count=expected_per_partner_policy_count,
+    )
     default_vector = np.full((config.num_partners,), np.nan, dtype=float)
     betas = (
         np.asarray(runtime.partner_bank.beta.expected_beta(), dtype=float)
@@ -58,7 +120,7 @@ def build_decision_diagnostics(
         "selected_partner": int(decision.selected_partner),
         "selected_action": int(decision.selected_action),
         "raw_action": int(decision.raw_action),
-        "q_pi_entropy": entropy,
+        **policy_metrics,
         "betas": local_betas,
         "global_beta": global_beta,
         "local_betas": local_betas,
@@ -66,8 +128,6 @@ def build_decision_diagnostics(
         "latest_surprise_by_partner": prediction_errors,
         "terminal_signal": local_betas,
         "reward_avgs": default_vector,
-        "planning_cost": planning_cost,
-        "planning_cost_ratio": planning_cost_ratio,
         "round_log_evidence": runtime.partner_bank.round_log_evidence,
         "cumulative_log_evidence": runtime.partner_bank.cumulative_log_evidence,
     }

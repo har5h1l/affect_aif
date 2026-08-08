@@ -154,13 +154,22 @@ def final_round_summary(results: pd.DataFrame) -> pd.DataFrame:
         "mean_joint_accuracy": ("inferred_joint_correct", "mean"),
         "mean_q_pi_entropy": ("q_pi_entropy", "mean"),
         "mean_abs_step_efe": ("mean_abs_step_efe", "mean"),
-        "planning_cost": ("planning_cost", "first"),
-        "planning_cost_ratio": ("planning_cost_ratio", "first"),
     }
     if "cumulative_log_evidence" in frame.columns:
         agg_dict["total_log_evidence"] = ("cumulative_log_evidence", "last")
     if "round_log_evidence" in frame.columns:
         agg_dict["mean_round_log_evidence"] = ("round_log_evidence", "mean")
+    optional_policy_diagnostics = {
+        "per_partner_policy_count": ("per_partner_policy_count", "first"),
+        "candidate_policy_count": ("candidate_policy_count", "first"),
+        "max_q_pi_entropy": ("max_q_pi_entropy", "first"),
+        "mean_normalized_q_pi_entropy": ("normalized_q_pi_entropy", "mean"),
+        "mean_effective_policy_count": ("effective_policy_count", "mean"),
+        "policies_fully_enumerated": ("policies_fully_enumerated", "all"),
+    }
+    for output_column, aggregation in optional_policy_diagnostics.items():
+        if aggregation[0] in frame.columns:
+            agg_dict[output_column] = aggregation
     grouped = frame.groupby(["variant_id", "seed"], as_index=False).agg(**agg_dict)
     return grouped
 

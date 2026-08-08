@@ -10,7 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from tasks.trust.affect import surprise_from_probability
-from tasks.trust.payoffs import encode_action, encode_env_action_factorized
+from tasks.trust.payoffs import encode_action
 from tasks.trust.pomdp import (
     TrustPomdpTemplate,
     as_joint_belief,
@@ -289,8 +289,9 @@ def _batched_policy_agent(bank: PartnerBank, template: TrustPomdpTemplate):
         C=template.C,
         D=template.D,
         E=template.E,
-        policies=template.policies,
-        control_fac_idx=list(template.control_fac_idx),
+        B_action_dependencies=[list(dependencies) for dependencies in template.B_action_dependencies],
+        num_controls=list(template.num_controls),
+        policy_len=int(template.policies.shape[1]),
         gamma=np.ones((len(bank.agents),), dtype=float),
         batch_size=len(bank.agents),
         use_utility=bool(getattr(reference, "use_utility", True)),
@@ -322,18 +323,6 @@ def _encode_policy_action(
     assignment_mode: str,
 ) -> tuple[int, int, int]:
     controls = np.asarray(first_step, dtype=int).ravel()
-    if template.uses_factorized_controls:
-        stance_action = int(controls[-2])
-        own_action = int(controls[-1])
-        raw_action = encode_env_action_factorized(
-            int(partner_idx),
-            stance_action,
-            own_action,
-            assignment_mode,
-            template.num_partners,
-            list(template.num_controls),
-        )
-        return int(raw_action), stance_action, own_action
     social_action = int(controls[0])
     if assignment_mode == "agent_choice":
         return (

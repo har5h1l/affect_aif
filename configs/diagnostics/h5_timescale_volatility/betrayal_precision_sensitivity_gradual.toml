@@ -80,7 +80,6 @@ beta_levels = [0.67, 1.0, 1.5, 2.0, 3.0]
 
 [runtime]
 profile = "data_collection"
-max_policies = 4096
 
 [analysis]
 auto = false
