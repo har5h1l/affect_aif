@@ -3,7 +3,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from tasks.trust.affect import LOG_SURPRISE_BASELINE_SQ, DiscreteBetaState, surprise_from_probability
+from tasks.trust.affect import (
+    LOG_SURPRISE_BASELINE,
+    LOG_SURPRISE_BASELINE_SQ,
+    DiscreteBetaState,
+    affective_charge_variants,
+    surprise_from_probability,
+)
 from tasks.trust.rollout import gamma_per_policy
 
 
@@ -43,6 +49,28 @@ def test_log_surprise_baseline_matches_fifty_fifty_prediction() -> None:
     surprise = surprise_from_probability(0.5)
 
     assert np.isclose(surprise**2, LOG_SURPRISE_BASELINE_SQ)
+
+
+def test_linear_shadow_charge_has_the_same_neutral_surprise_as_equation_two() -> None:
+    squared_charge, linear_charge = affective_charge_variants(
+        LOG_SURPRISE_BASELINE,
+        alpha=3.0,
+        sigma_0_sq=LOG_SURPRISE_BASELINE_SQ,
+    )
+
+    assert np.isclose(squared_charge, 0.0)
+    assert np.isclose(linear_charge, 0.0)
+
+
+def test_linear_charge_updates_beta_from_the_linear_formula() -> None:
+    linear_state = DiscreteBetaState(num_entities=1, initial_beta=1.0, charge_transform="linear")
+    squared_state = DiscreteBetaState(num_entities=1, initial_beta=1.0, charge_transform="squared")
+
+    linear_state.update(entity=0, surprise=-np.log(0.1))
+    squared_state.update(entity=0, surprise=-np.log(0.1))
+
+    assert linear_state.expected_beta()[0] > 1.0
+    assert not np.isclose(linear_state.expected_beta()[0], squared_state.expected_beta()[0])
 
 
 def test_discrete_beta_state_rejects_invalid_initialization() -> None:

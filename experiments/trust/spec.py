@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, cast
 
-from tasks.trust.affect import LOG_SURPRISE_BASELINE_SQ
+from tasks.trust.affect import CHARGE_TRANSFORMS, LOG_SURPRISE_BASELINE_SQ
 from tasks.trust.types import PARTNER_TYPE_ORDER
 
 try:  # pragma: no cover - exercised only on Python < 3.11
@@ -115,6 +115,7 @@ class VariantSpec:
     epistemic_value: bool = True
     alpha_charge: float = 3.0
     sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ
+    charge_transform: str = "squared"
     initial_beta: float = 1.0
     beta_prior: tuple[float, ...] | None = None
     beta_persistence: float = 0.8
@@ -190,6 +191,7 @@ class ExpandedRunSpec:
             action_sampling=self.variant.action_selection,
             alpha_charge=self.variant.alpha_charge,
             sigma_0_sq=self.variant.sigma_0_sq,
+            charge_transform=self.variant.charge_transform,
             initial_beta=self.variant.initial_beta,
             initial_beta_prior=None if self.variant.beta_prior is None else list(self.variant.beta_prior),
             beta_persistence=self.variant.beta_persistence,
@@ -322,6 +324,17 @@ class ExperimentSpec:
                 rounds=self.experiment.rounds if rounds is None else int(rounds),
                 replications=self.experiment.replications if replications is None else int(replications),
             ),
+        )
+
+    def with_charge_transform(self, charge_transform: str) -> ExperimentSpec:
+        """Return an otherwise identical spec with one charge transform."""
+
+        transform = str(charge_transform)
+        if transform not in CHARGE_TRANSFORMS:
+            raise ValueError(f"charge_transform must be one of {sorted(CHARGE_TRANSFORMS)}")
+        return replace(
+            self,
+            variants=tuple(replace(variant, charge_transform=transform) for variant in self.variants),
         )
 
     def to_payload(self) -> dict[str, Any]:
@@ -507,6 +520,10 @@ def _parse_variant(data: dict[str, Any]) -> VariantSpec:
     variant = dict(data)
     if variant.get("affect") not in AFFECT_VALUES:
         raise ValueError(f"variant.affect must be one of {sorted(AFFECT_VALUES)}")
+    charge_transform = str(variant.get("charge_transform", "squared"))
+    if charge_transform not in CHARGE_TRANSFORMS:
+        raise ValueError(f"variant.charge_transform must be one of {sorted(CHARGE_TRANSFORMS)}")
+    variant["charge_transform"] = charge_transform
     variant["beta_levels"] = tuple(float(value) for value in variant.get("beta_levels", (0.5, 0.67, 1.0, 1.5, 2.0)))
     if variant.get("beta_prior") is not None:
         variant["beta_prior"] = tuple(float(value) for value in variant["beta_prior"])

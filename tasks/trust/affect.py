@@ -13,7 +13,9 @@ from collections.abc import Sequence
 import numpy as np
 
 DEFAULT_BETA_LEVELS = np.asarray([0.5, 0.67, 1.0, 1.5, 2.0], dtype=np.float64)
+LOG_SURPRISE_BASELINE = float(np.log(2.0))
 LOG_SURPRISE_BASELINE_SQ = float(np.log(2.0) ** 2)
+CHARGE_TRANSFORMS = frozenset({"squared", "linear"})
 
 
 def surprise_from_probability(probability: float) -> float:
@@ -26,11 +28,44 @@ def surprise_from_probability(probability: float) -> float:
     return float(-np.log(clipped))
 
 
-def _affective_charge(surprise: float, *, alpha: float, sigma_0_sq: float) -> float:
-    """Convert surprise magnitude into a signed HESP-style charge."""
+def _affective_charge(
+    surprise: float,
+    *,
+    alpha: float,
+    sigma_0_sq: float,
+    charge_transform: str = "squared",
+) -> float:
+    """Convert surprisal into the configured signed affective charge."""
 
     error = float(surprise)
-    return float(alpha) * (float(sigma_0_sq) - error**2)
+    transform = str(charge_transform)
+    if transform == "squared":
+        return float(alpha) * (float(sigma_0_sq) - error**2)
+    if transform == "linear":
+        sigma_0 = float(np.sqrt(sigma_0_sq))
+        return float(alpha) * (sigma_0 - error)
+    raise ValueError(f"charge_transform must be one of {sorted(CHARGE_TRANSFORMS)}")
+
+
+def affective_charge_variants(surprise: float, *, alpha: float, sigma_0_sq: float) -> tuple[float, float]:
+    """Return the active squared charge and a shadow-only linear counterpart.
+
+    The runtime still receives the legacy squared baseline, ``sigma_0_sq``.
+    For the linear formula we recover ``sigma_0`` once, so its comparison is
+    ``alpha * (sigma_0 - surprise)``. It is diagnostic only: callers must
+    continue to use the squared value for state updates.
+    """
+
+    error = float(surprise)
+    squared_charge = _affective_charge(
+        error,
+        alpha=alpha,
+        sigma_0_sq=sigma_0_sq,
+        charge_transform="squared",
+    )
+    sigma_0 = float(np.sqrt(sigma_0_sq))
+    linear_charge = float(alpha) * (sigma_0 - error)
+    return squared_charge, linear_charge
 
 
 def _build_transition_matrix(num_levels: int, persistence: float) -> np.ndarray:
@@ -62,12 +97,14 @@ class DiscreteBetaState:
         beta_levels: Sequence[float] | None = None,
         alpha_charge: float = 3.0,
         sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ,
+        charge_transform: str = "squared",
         persistence: float = 0.8,
         initial_prior: Sequence[float] | None = None,
     ) -> None:
         self.num_entities = int(num_entities)
         self.alpha_charge = float(alpha_charge)
         self.sigma_0_sq = float(sigma_0_sq)
+        self.charge_transform = str(charge_transform)
         self.persistence = float(persistence)
         self.initial_beta = float(initial_beta)
 
@@ -77,6 +114,8 @@ class DiscreteBetaState:
             raise ValueError("alpha_charge must be finite and positive")
         if not np.isfinite(self.sigma_0_sq) or self.sigma_0_sq <= 0.0:
             raise ValueError("sigma_0_sq must be finite and positive")
+        if self.charge_transform not in CHARGE_TRANSFORMS:
+            raise ValueError(f"charge_transform must be one of {sorted(CHARGE_TRANSFORMS)}")
         if not np.isfinite(self.initial_beta) or self.initial_beta <= 0.0:
             raise ValueError("initial_beta must be finite and positive")
         if not np.isfinite(self.persistence) or not 0.0 <= self.persistence <= 1.0:
@@ -134,6 +173,7 @@ class DiscreteBetaState:
             surprise_value,
             alpha=self.alpha_charge,
             sigma_0_sq=self.sigma_0_sq,
+            charge_transform=self.charge_transform,
         )
 
         prior = self._transition @ self.posteriors[entity_idx]

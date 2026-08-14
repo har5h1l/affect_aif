@@ -93,3 +93,5 @@ def test_beta_update_logs_surprisal_signal() -> None:
     )
 
     assert np.isclose(bank.latest_surprise[0], -np.log(0.1))
+    assert np.isclose(bank.latest_charge_squared[0], 3.0 * (np.log(2.0) ** 2 - np.log(0.1) ** 2))
+    assert np.isclose(bank.latest_charge_linear[0], 3.0 * (np.log(2.0) - (-np.log(0.1))))

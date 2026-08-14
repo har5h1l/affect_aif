@@ -73,6 +73,9 @@ class MetricLogger:
             "latest_surprise_by_partner",
             _metric("prediction_errors", default_partner_vector),
         )
+        affective_charge_squared = _array_metric("affective_charge_squared", default_partner_vector)
+        affective_charge_linear_shadow = _array_metric("affective_charge_linear_shadow", default_partner_vector)
+        affective_charge_active = _array_metric("affective_charge_active", default_partner_vector)
 
         record = {
             "seed": int(seed),
@@ -124,6 +127,10 @@ class MetricLogger:
             "global_beta": _float_metric("global_beta"),
             "terminal_signal": _to_float_list(terminal_signal),
             "prediction_errors": _to_float_list(prediction_errors),
+            "affective_charge_squared": _to_float_list(affective_charge_squared),
+            "affective_charge_linear_shadow": _to_float_list(affective_charge_linear_shadow),
+            "affective_charge_active": _to_float_list(affective_charge_active),
+            "charge_transform": str(_metric("charge_transform", "none")),
             "reward_avgs": _to_float_list(_metric("reward_avgs", default_partner_vector)),
             "predictive_log_lik": float(agent_metrics.get("predictive_log_lik", float("nan"))),
             "round_log_evidence": float(agent_metrics.get("round_log_evidence", float("nan"))),

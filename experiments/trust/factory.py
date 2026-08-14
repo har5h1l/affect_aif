@@ -130,6 +130,7 @@ def create_agents_from_multi_focal_config(
             action_sampling=str(spec.get("action_sampling", "marginal")),
             alpha_charge=float(spec.get("alpha_charge", 3.0)),
             sigma_0_sq=float(spec.get("sigma_0_sq", LOG_SURPRISE_BASELINE_SQ)),
+            charge_transform=str(spec.get("charge_transform", "squared")),
             initial_beta=float(spec.get("initial_beta", 1.0)),
             initial_beta_prior=(
                 None
@@ -152,6 +153,7 @@ def create_agents_from_multi_focal_config(
             epistemic_value=bool(spec.get("use_information_gain", True)),
             alpha_charge=runtime_config.alpha_charge,
             sigma_0_sq=runtime_config.sigma_0_sq,
+            charge_transform=runtime_config.charge_transform,
             initial_beta=runtime_config.initial_beta,
             beta_prior=None if runtime_config.initial_beta_prior is None else tuple(runtime_config.initial_beta_prior),
             beta_persistence=runtime_config.beta_persistence,
@@ -216,6 +218,7 @@ def _create_runtime_from_config_and_variant(
             persistence=config.beta_persistence,
             alpha_charge=config.alpha_charge,
             sigma_0_sq=config.sigma_0_sq,
+            charge_transform=config.charge_transform,
             initial_beta=config.initial_beta,
             initial_prior=config.initial_beta_prior,
         )

@@ -107,6 +107,21 @@ def build_decision_diagnostics(
         if runtime.partner_bank.latest_surprise is not None
         else default_vector
     )
+    affective_charge_squared = (
+        np.asarray(runtime.partner_bank.latest_charge_squared, dtype=float)
+        if runtime.partner_bank.latest_charge_squared is not None
+        else default_vector
+    )
+    affective_charge_linear = (
+        np.asarray(runtime.partner_bank.latest_charge_linear, dtype=float)
+        if runtime.partner_bank.latest_charge_linear is not None
+        else default_vector
+    )
+    affective_charge_active = (
+        np.asarray(runtime.partner_bank.latest_charge_active, dtype=float)
+        if runtime.partner_bank.latest_charge_active is not None
+        else default_vector
+    )
     if include_diagnostics and snapshot is None:
         snapshot = snapshot_partner_bank(bank=runtime.partner_bank, template=runtime.template)
     metrics = {
@@ -126,6 +141,12 @@ def build_decision_diagnostics(
         "local_betas": local_betas,
         "prediction_errors": prediction_errors,
         "latest_surprise_by_partner": prediction_errors,
+        "affective_charge_squared": affective_charge_squared,
+        "affective_charge_linear_shadow": affective_charge_linear,
+        "affective_charge_active": affective_charge_active,
+        "charge_transform": (
+            runtime.partner_bank.beta.charge_transform if runtime.partner_bank.beta is not None else "none"
+        ),
         "terminal_signal": local_betas,
         "reward_avgs": default_vector,
         "round_log_evidence": runtime.partner_bank.round_log_evidence,

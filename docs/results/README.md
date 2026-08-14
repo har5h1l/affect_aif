@@ -10,6 +10,8 @@ raw data store.
 - `paper.md`: paper result cards and where their summaries live
 - `provenance.md`: source-table and figure provenance for manuscript results
 - `diagnostics.md`: retained non-paper diagnostic result cards
+- `pub-ready/`: reviewer-facing comparison of the historical manuscript,
+  shared-action, and linear-charge packets; not yet promoted paper evidence
 - `../../results/`: tracked compact public result summaries and manifests
 - `../manuscript/`: manuscript source, source tables, figures, and
   paper-facing notes

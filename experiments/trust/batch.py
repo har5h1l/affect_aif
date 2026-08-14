@@ -70,6 +70,7 @@ class BatchExperimentRunner:
         verbose: bool = False,
         verbosity_mode: str = "stage_stream",
         checkpoint_interval: int = 1,
+        charge_transform: str | None = None,
     ):
         self.config_paths = [str(Path(path).expanduser().resolve()) for path in config_paths]
         self.use_canonical_layout = uses_canonical_output_layout(
@@ -84,6 +85,7 @@ class BatchExperimentRunner:
         self.verbose = bool(verbose)
         self.verbosity_mode = str(verbosity_mode)
         self.checkpoint_interval = max(1, int(checkpoint_interval))
+        self.charge_transform = None if charge_transform is None else str(charge_transform)
         self.completion_log: list[dict[str, Any]] = []
 
     def _emit(self, message: str):
@@ -96,6 +98,8 @@ class BatchExperimentRunner:
             path = Path(config_path)
             specs = load_experiment_specs(path)
             for spec in specs:
+                if self.charge_transform is not None:
+                    spec = spec.with_charge_transform(self.charge_transform)
                 states.append(
                     ConfigBatchState(
                         config_path=config_path,
@@ -263,6 +267,8 @@ class BatchExperimentRunner:
             "experiment_id": state.spec.experiment.id,
             "expanded_runs": len(state.expanded_runs),
             "resumed_tasks": state.resumed_primary,
+            "charge_transform_override": self.charge_transform,
+            "charge_transforms": sorted({run.variant.charge_transform for run in state.expanded_runs}),
         }
         metadata_path.write_text(json.dumps(metadata, indent=2))
         if self.make_gifs and not results.empty:

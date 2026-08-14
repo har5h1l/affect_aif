@@ -42,6 +42,7 @@ class ExperimentConfig:
 
     alpha_charge: float = 3.0
     sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ
+    charge_transform: str = "squared"
     initial_beta: float = 1.0
     initial_beta_prior: list[float] | None = None
     beta_num_levels: int = 5

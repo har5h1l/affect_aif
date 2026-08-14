@@ -9,7 +9,7 @@ from typing import Any
 import jax.numpy as jnp
 import numpy as np
 
-from tasks.trust.affect import surprise_from_probability
+from tasks.trust.affect import affective_charge_variants, surprise_from_probability
 from tasks.trust.payoffs import encode_action
 from tasks.trust.pomdp import (
     TrustPomdpTemplate,
@@ -29,6 +29,9 @@ class PartnerBank:
     batched_policy_agent: Any | None = None
     beta: Any | None = None
     latest_surprise: np.ndarray | None = None
+    latest_charge_active: np.ndarray | None = None
+    latest_charge_squared: np.ndarray | None = None
+    latest_charge_linear: np.ndarray | None = None
     round_log_evidence: float = float("nan")
     cumulative_log_evidence: float = 0.0
 
@@ -211,10 +214,24 @@ def update_beta_after_observation(
     probability = float(np.asarray(predicted_partner_action_probs, dtype=float)[int(observed_partner_action)])
     surprise = surprise_from_probability(probability)
     beta_idx = 0 if affect_mode == "global" else int(partner_idx)
+    squared_charge, linear_charge = affective_charge_variants(
+        surprise,
+        alpha=bank.beta.alpha_charge,
+        sigma_0_sq=bank.beta.sigma_0_sq,
+    )
+    active_charge = squared_charge if bank.beta.charge_transform == "squared" else linear_charge
     bank.beta.update(entity=beta_idx, surprise=surprise)
     if bank.latest_surprise is None:
         bank.latest_surprise = np.full((len(bank.agents),), np.nan, dtype=float)
+        bank.latest_charge_active = np.full((len(bank.agents),), np.nan, dtype=float)
+        bank.latest_charge_squared = np.full((len(bank.agents),), np.nan, dtype=float)
+        bank.latest_charge_linear = np.full((len(bank.agents),), np.nan, dtype=float)
     bank.latest_surprise[int(partner_idx)] = surprise
+    bank.latest_charge_active[int(partner_idx)] = active_charge
+    # These are shadow diagnostics only.  Eq. 2's squared charge above remains
+    # the sole input to DiscreteBetaState.update and therefore to gamma/action selection.
+    bank.latest_charge_squared[int(partner_idx)] = squared_charge
+    bank.latest_charge_linear[int(partner_idx)] = linear_charge
     return surprise
 
 

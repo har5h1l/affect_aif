@@ -80,6 +80,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--workers", type=int, default=os.cpu_count() or 1, help="Shared worker count across the whole batch."
     )
+    parser.add_argument(
+        "--charge-transform",
+        choices=["squared", "linear"],
+        default=None,
+        help="Override the Eq. 2 charge transform for every variant in this batch.",
+    )
     parser.add_argument("--verbose", action="store_true", help="Print experiment progress.")
     parser.add_argument(
         "--checkpoint-interval",
@@ -146,6 +152,8 @@ def _write_dry_run_manifest(args) -> int:
         config_path = Path(raw_path).resolve()
         specs = load_experiment_specs(config_path)
         for spec in specs:
+            if args.charge_transform is not None:
+                spec = spec.with_charge_transform(args.charge_transform)
             runs = spec.expand_runs()
             resolved_output_dir = resolve_state_output_dir(
                 config_path,
@@ -167,6 +175,7 @@ def _write_dry_run_manifest(args) -> int:
                     "rounds": spec.experiment.rounds,
                     "replications": spec.experiment.replications,
                     "variants": [variant.id for variant in spec.variants],
+                    "charge_transforms": sorted({variant.charge_transform for variant in spec.variants}),
                     "sweeps": [sweep.parameter for sweep in spec.sweeps],
                     "expanded_runs": len(runs),
                     "runtime_profile": spec.runtime.profile,
@@ -212,6 +221,8 @@ def _serial_single_config_run(args) -> int:
     if len(loaded_specs) != 1:
         return _batch_run(args)
     spec = loaded_specs[0]
+    if args.charge_transform is not None:
+        spec = spec.with_charge_transform(args.charge_transform)
     if spec.experiment.family != "trust":
         raise ValueError("Only trust-family specs are executable through scripts/experiment/run.py.")
     config_name = spec.experiment.id
@@ -248,6 +259,8 @@ def _serial_single_config_run(args) -> int:
                 "results_path": str(results_path),
                 "runtime_profile": spec.runtime.profile,
                 "workers": 1,
+                "charge_transform_override": args.charge_transform,
+                "charge_transforms": sorted({run.variant.charge_transform for run in spec.expand_runs()}),
             },
             indent=2,
         )
@@ -278,6 +291,7 @@ def _batch_run(args) -> int:
         verbose=bool(args.verbose),
         verbosity_mode=args.verbosity_mode,
         checkpoint_interval=args.checkpoint_interval,
+        charge_transform=args.charge_transform,
     )
     result = runner.run_all()
     print(f"Saved batch outputs to {result.batch_dir}")
