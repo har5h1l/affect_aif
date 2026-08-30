@@ -1,7 +1,7 @@
-\section{Extended Profile and Robustness Results}
+\section{Extended Profile and Trust-Repair Results}
 \label{app:extended_results}
 
-This appendix reports extended final-linear sweeps and computational profile diagnostics.
+This appendix reports final-linear gain sweeps, computational profile diagnostics, and trust-repair analyses.
 
 \subsection{Alpha sweep}
 \label{sec:phenotypes_alpha}
@@ -39,7 +39,7 @@ $\alpha$ & Mean within-episode $\bar{\beta}_k$ range \\
 \subsection{Gain-prior profile signatures}
 \label{sec:phenotypes_quadrants}
 
-``Naive'' and ``cautious'' refer to priors over $q(\beta_k)$: naive $[0.40, 0.40, 0.15, 0.04, 0.01]$, cautious $[0.01, 0.04, 0.15, 0.40, 0.40]$. Low/high gain use $\alpha=0.1/3.0$. Profile labels correspond to these combinations: naive-stubborn uses naive prior/low gain, anxious-reactive uses naive prior/high gain, avoidant-rigid uses cautious prior/low gain, and hypervigilant uses cautious prior/high gain. The default uses $\alpha=3.0$ with centered initialization at $\beta_k=1.0$. Table~\ref{tab:phenotypes} reports raw metrics and Figure~\ref{fig:phenotype_quadrants_appendix} shows column-normalized profile signatures.
+``Naive'' and ``cautious'' refer to priors over $q(\beta_k)$: naive $[0.40, 0.40, 0.15, 0.04, 0.01]$, cautious $[0.01, 0.04, 0.15, 0.40, 0.40]$. Low/high gain use $\alpha=0.1/3.0$. Profile labels correspond to these combinations: naive-stubborn uses naive prior/low gain, anxious-reactive uses naive prior/high gain, avoidant-rigid uses cautious prior/low gain, and hypervigilant uses cautious prior/high gain. The default uses $\alpha=3.0$ with centered initialization at $\beta_k=1.0$. These labels denote computational parameter combinations rather than clinical classifications or validated human phenotypes. Table~\ref{tab:phenotypes} reports raw metrics and Figure~\ref{fig:phenotype_quadrants_appendix} shows column-normalized profile signatures.
 
 \begin{table}[H]
 \centering

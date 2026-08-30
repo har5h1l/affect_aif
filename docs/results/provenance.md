@@ -5,6 +5,20 @@ Use it with `docs/results/current.md` for interpreted numbers. Do not replace a
 manuscript number from raw output unless the corresponding source table and
 interpreted result note are refreshed together.
 
+## Run Code Provenance
+
+The canonical linear batch (`linear_charge_20260812`) was launched from base
+commit `6b7d88946c4e7a2a55ebe8b200d3154fa09aebe6` with a modified worktree that
+added the selectable linear charge transform. The server archive preserves the
+run log, resolved configurations, batch metadata, checkpoints, and row-level
+results, but not a separate snapshot of that uncommitted worktree. Commit
+`fbf92ed659f1eb9582c0d59650503b27f8855c03`, created after the run, is the
+first commit containing that selectable linear runtime. Commit
+`f91fadb2a33b65cbf8cf11e39e032de0b2830d4b` makes the same linear contract the
+default and is the canonical reproduction implementation. Result manifests
+record these roles separately rather than attributing the linear batch to the
+unchanged base commit.
+
 ## Figure Source Map
 
 | Manuscript figure | Figure asset | Manuscript source table(s) | Canonical result source | Builder |

@@ -25,6 +25,8 @@ Second, a charge-based pseudo-likelihood maps positive charge toward high policy
 \end{equation}
 where $\beta_\ell$ ranges over the five support points. This auxiliary update satisfies the intended monotonicity: positive charge reinforces lower $\beta$, negative charge reinforces higher $\beta$, and the effect scales with effective precision at each support point.
 
+The fixed chance-level baseline, discrete $\beta_k$ support, persistence transition, and charge-based pseudo-likelihood are modeling choices that keep the auxiliary tracker bounded and interpretable; learned baselines and volatility-sensitive updates are natural alternatives.
+
 \subsection{Posterior update and policy precision}
 
 Third, the posterior is normalized:

@@ -746,45 +746,6 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     return _save(fig, output_dir, "fig_deployment_social_summary")
 
 
-def phenotype_figure(source_dir: Path, output_dir: Path) -> list[Path]:
-    dynamics = _read(source_dir, "h6_perturbation_dynamics_summary.csv")
-    betrayal = _read(source_dir, "h6_perturbation_betrayal_summary.csv")
-    order = ["affect", "low_gain", "high_gain", "cautious_prior"]
-    frames = []
-    for label, frame in (("open", dynamics), ("betrayal", betrayal)):
-        summary = frame.groupby("variant_id", as_index=False).agg(
-            beta_range=("beta_range", "mean"),
-            beta_std=("beta_std", "mean"),
-            action_flip_rate=("action_flip_rate", "mean"),
-            total_payoff=("total_payoff", "mean"),
-        )
-        summary["regime"] = label
-        frames.append(summary)
-    data = pd.concat(frames, ignore_index=True)
-
-    fig, axes = plt.subplots(1, 3, figsize=(11.5, 3.0))
-    width = 0.36
-    x = np.arange(len(order))
-    for offset, regime in ((-width / 2, "open"), (width / 2, "betrayal")):
-        values = data[data["regime"] == regime].set_index("variant_id").loc[order]
-        axes[0].bar(x + offset, values["beta_range"], width=width, label=regime)
-        axes[1].bar(x + offset, values["action_flip_rate"], width=width, label=regime)
-        axes[2].bar(x + offset, values["total_payoff"], width=width, label=regime)
-    for ax, title, ylabel in zip(
-        axes,
-        [r"Within-episode $\bar{\beta}_k$ range", "Investment churn", "Payoff"],
-        [r"mean within-episode $\bar{\beta}_k$ range", "investment churn", "payoff"],
-        strict=True,
-    ):
-        ax.set_xticks(x, _label(order), rotation=20, ha="right")
-        ax.set_title(title, pad=8)
-        ax.set_ylabel(ylabel)
-        ax.spines[["top", "right"]].set_visible(False)
-    axes[0].legend(frameon=False, fontsize=8)
-    fig.suptitle("Precision-dynamics perturbation controls", y=1.04, fontsize=12)
-    return _save(fig, output_dir, "fig_phenotype_dynamics_summary")
-
-
 def print_manifest(paths: list[Path]) -> None:
     print("Generated paper figure files:")
     for path in paths:
@@ -829,7 +790,6 @@ def main() -> int:
         *model_fitness_figure(source_dir, output_dir),
         *deployment_social_figure(source_dir, output_dir),
         *betrayal_boundary_figure(source_dir, output_dir),
-        *phenotype_figure(source_dir, output_dir),
     ]
     print_manifest(generated)
     return 0

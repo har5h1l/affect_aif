@@ -17,9 +17,8 @@ All reported experiments use one focal active-inference agent with four partners
 \toprule
 Condition & Purpose \\
 \midrule
-Open graded & Deployment contrast among affect, no-affect, and tracked-only \\
+Open partner choice & Tracked-only deployment contrast and descriptive partner-type allocation readout from the same trajectories \\
 Locality probe & Precision--surprisal vs.\ precision--payoff correlations under local/shared $\beta$ \\
-Partner choice & Social allocation and partner--investment policy entropy \\
 Abrupt betrayal & Post-switch entropy, payoff, reallocation, and joint type--stance accuracy \\
 Profile variation & $\alpha$/prior manipulations for trust-calibration profiles \\
 Forgiveness & Reengagement and $\beta$ recovery after repair \\
@@ -40,11 +39,9 @@ Behavioral comparisons use 30 seeds per condition and profile sweeps use 20 seed
 \toprule
 Experiment family & Setting & Rounds & Seeds \\
 \midrule
-Open deployment & graded, random/open choice & 200 & 30 \\
+Open deployment / allocation & graded partner choice; shared trajectories for Sections~3.2--3.3 & 200 & 30 \\
 Locality probe & graded partner choice & 200 & 30 \\
-Partner allocation & partner choice & 200 & 30 \\
 Abrupt betrayal & scheduled partner-choice betrayal & 120 & 30 \\
-Precision perturbation & graded perturbations & 200 & 30 \\
 Profile program & sweeps, factorial, forgiveness & 200 & 20 \\
 \bottomrule
 \end{tabularx}
@@ -52,7 +49,7 @@ Profile program & sweeps, factorial, forgiveness & 200 & 20 \\
 
 \subsection{Betrayal schedule}
 
-In the abrupt-betrayal protocol, P0 begins as an exploiter in a trusting stance and switches to hostile at round 31; other partners retain their initial configurations and $p_{\mathrm{switch}}=0$. Primary readouts are post-switch payoff, entropy, reallocation, and joint type--stance accuracy. The forgiveness protocol extends this schedule with baseline rounds 1--80, betrayal rounds 81--120, and repair/reversion rounds 121--200.
+In the abrupt-betrayal protocol, P0 begins as an exploiter in a trusting stance and switches to hostile at round 31; other partners retain their initial configurations and $p_{\mathrm{switch}}=0$. Headline readouts are episode-level payoff, policy entropy, and joint type--stance accuracy; post-switch behavior is additionally summarized through binned partner-selection, posterior-$\beta_k$, and entropy trajectories. The forgiveness protocol extends this schedule with baseline rounds 1--80, betrayal rounds 81--120, and repair/reversion rounds 121--200.
 
 \subsection{Metrics}
 
@@ -78,7 +75,11 @@ Investment churn & Fraction of adjacent rounds with changed investment \\
 Early exploiter investment & Rounds 1--30 choosing exploiter with investment $\geq$ half range \\
 Trust asymmetry & Withdrawal latency / initial high-investment approach latency \\
 Recovery rounds & Rounds after switch until selection/payoff returns to threshold \\
-Locality-probe partial (\(r\)) & Partner--seed correlation between $\beta$-derived precision and surprisal/payoff, controlling for encounter count \\
+Locality-probe partial (\(r\)) & Partner--seed partial correlation between $\beta$-derived precision and surprisal/payoff. The precision--surprisal correlation controls for payoff and encounter count; the precision--payoff correlation controls for surprisal and encounter count. \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\subsection{Uncertainty estimates}
+
+All reported confidence intervals are two-sided 95\% percentile bootstrap intervals based on 10,000 resamples with bootstrap seed 0. Matched variants are compared by resampling seed-level paired differences. Partial-correlation intervals resample complete simulation-seed clusters, and time-course intervals resample seed-level means within each round bin.

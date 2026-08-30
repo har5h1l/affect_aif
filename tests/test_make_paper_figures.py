@@ -244,6 +244,33 @@ def test_new_paper_figures_generate_manifest(tmp_path, capsys):
     assert "fig_betrayal_boundary_summary.pdf" in out
 
 
+def test_main_generates_only_current_main_figures(tmp_path, capsys, monkeypatch):
+    source_dir = tmp_path / "source_tables"
+    output_dir = tmp_path / "figures"
+    _write_source_tables(source_dir)
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "make_paper_figures.py",
+            "--source-dir",
+            str(source_dir),
+            "--output-dir",
+            str(output_dir),
+        ],
+    )
+
+    assert make_paper_figures.main() == 0
+    assert {path.name for path in output_dir.iterdir()} == {
+        "fig_deployment_social_summary.png",
+        "fig_deployment_social_summary.pdf",
+        "fig_betrayal_boundary_summary.png",
+        "fig_betrayal_boundary_summary.pdf",
+        "fig_model_fitness_beta_reward_divergence.png",
+        "fig_model_fitness_beta_reward_divergence.pdf",
+    }
+    assert "fig_phenotype_dynamics_summary" not in capsys.readouterr().out
+
+
 def test_paper_figure_pdfs_embed_beta_labels(tmp_path):
     source_dir = tmp_path / "source_tables"
     output_dir = tmp_path / "figures"
