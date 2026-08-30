@@ -36,9 +36,9 @@ Each partner model contains partner type, partner stance, and an own-investment 
 
 Partner-local affective precision maps relationship-specific model fit onto policy precision. At each round \(t\), before assimilating the observed partner response, the focal agent evaluates how surprising that response would be under its predictive type--stance posterior for partner \(k\). After this precision update, the partner-state posterior is updated on the same observation. Unlike prior affective-precision accounts centered on policy-inference quantities~\cite{Hesp2021DeeplyFeltAffect}, the evidence source here is perceptual partner-response model fit. Because this update is computed separately for each partner, confidence can diverge across relationships even when the focal agent's task and preferences remain fixed.
 
-Let \(\hat{o}_{k,t}^{\text{act}}\) denote the observed response from partner \(k\) at round \(t\) and \(q_{k,t}^-\) the type--stance posterior before updating on \(\hat{o}_{k,t}^{\text{act}}\). The agent computes partner-response likelihood surprisal as the negative log posterior predictive probability assigned to that response:
+Let \(\hat{o}_{k,t}^{\text{act}}\) denote the observed response from partner \(k\) at round \(t\), \(q_{k,t}^-\) the type--stance posterior before updating on \(\hat{o}_{k,t}^{\text{act}}\), and \(p_{k,t}\) the posterior-predictive probability assigned to that response. The agent computes partner-response likelihood surprisal as
 \begin{equation}
-\epsilon_{k,t} = -\log \sum_{s^{\text{type}},s^{\text{stance}}}
+\epsilon_{k,t} = -\log p_{k,t} = -\log \sum_{s^{\text{type}},s^{\text{stance}}}
 P\!\left(\hat{o}_{k,t}^{\text{act}} \mid s^{\text{type}},s^{\text{stance}}\right)
 q_{k,t}^-(s^{\text{type}},s^{\text{stance}}).
 \label{eq:epsilon}
@@ -47,13 +47,14 @@ Equation~\eqref{eq:epsilon} is the negative log posterior predictive likelihood 
 
 Per-round update order is: (i) plan from \(q_{k,t}^-\); (ii) observe \(\hat{o}_{k,t}^{\text{act}}\); (iii) compute \(\epsilon_{k,t}\) and update \(\beta_k\); (iv) assimilate \(\hat{o}_{k,t}^{\text{act}}\) into the partner-state posterior.
 
-The neutral baseline is the squared surprisal of a chance-level two-outcome partner-response prediction, \(\sigma_0^2 = (-\log 0.5)^2\).
-Because the response modality is binary, probability $0.5$ corresponds to predicting neither cooperation nor defection better than chance. Squaring places surprisal on a nonnegative error scale before signed affective charge is computed:
+The neutral baseline is the surprisal of a uniform binary prediction, \(\sigma_0=-\log 0.5=\log 2\). We define affective charge as
 \begin{equation}
-\phi_{k,t} = \alpha\!\left(\sigma_0^2 - \epsilon_{k,t}^2\right),
+\phi_{k,t}
+= \alpha\!\left(\sigma_0 - \epsilon_{k,t}\right)
+= \alpha \log\frac{p_{k,t}}{0.5},
 \label{eq:charge}
 \end{equation}
-where $\alpha \geq 0$ is a gain parameter. Positive $\phi_{k,t}$ means partner $k$'s response was predicted better than chance; negative $\phi_{k,t}$ means it was predicted worse than chance.
+where \(\alpha>0\) controls the gain on this evidence. Thus, \(\phi_{k,t}\) is the scaled log evidence of the focal agent's response prediction relative to a uniform chance-level predictor: it is positive when \(p_{k,t}>0.5\), negative when \(p_{k,t}<0.5\), and zero at \(p_{k,t}=0.5\).
 
 The signed charge $\phi_{k,t}$ is then used as evidence over the partner-specific inverse-precision estimate $\beta_k$. Positive charge shifts posterior mass toward lower $\beta_k$, corresponding to higher policy precision; negative charge shifts posterior mass toward higher $\beta_k$, corresponding to lower policy precision. A persistence prior smooths this update across rounds so that confidence changes gradually rather than resetting after each interaction. The full categorical update is given in Appendix~\ref{app:affective_update}.
 
@@ -72,7 +73,7 @@ The $\beta_k$ posterior is maintained as an auxiliary precision tracker rather t
 \subsection{Cross-partner policy selection}
 \label{sec:cross_partner_policy}
 
-In partner-choice regimes, the agent must decide which partner-specific policy candidate to execute. Each per-partner model \(\mathcal{M}_k\) first evaluates policies \(\pi \in \Pi_k\) directed toward partner \(k\), producing an unnormalized policy-evidence score \(u_{k,\pi}\) for each candidate. The cross-partner step then combines these partner-indexed candidates into a single choice set. This step does not add a new state-inference model; it specifies how partner-local precision \(\gamma_k\) enters the final comparison among partner--investment candidates.
+In partner-choice regimes, the agent must decide which partner-specific policy candidate to execute. Each per-partner model \(\mathcal{M}_k\) first evaluates policies \(\pi \in \Pi_k\) directed toward partner \(k\). Let \(u_{k,\pi}\) denote the policy score for candidate \(\pi\) under partner model \(\mathcal{M}_k\) prior to the cross-partner precision transformation; under the uniform policy prior used here, this is the negative expected-free-energy score returned by policy inference, with larger values indicating greater policy support~\cite{Friston2017ProcessTheory,Heins2022Pymdp}. The cross-partner step then combines these partner-indexed candidates into a single choice set. This step does not add a new state-inference model; it specifies how partner-local precision \(\gamma_k\) enters the final comparison among partner--investment candidates.
 
 To apply \(\gamma_k\) locally, we separate each partner's mean policy evidence from the relative differences among that partner's policies. Let \(\bar{u}_k = \frac{1}{|\Pi_k|}\sum_{\pi\in\Pi_k} u_{k,\pi}\) be the mean policy evidence for partner $k$. The precision-adjusted score is then
 \begin{equation}
@@ -81,7 +82,7 @@ To apply \(\gamma_k\) locally, we separate each partner's mean policy evidence f
 \end{equation}
 where $\gamma_k$ is the partner-specific policy precision from Eq.~\eqref{eq:gamma_update}. Partner-specific precision \(\gamma_k\) sharpens or flattens commitment among policies involving partner \(k\), without by itself changing the average evidence for selecting that partner. Higher \(\gamma_k\) amplifies within-partner differences, producing more decisive policy commitment; lower \(\gamma_k\) compresses them, producing more tentative commitment.
 
-The final policy posterior is computed by applying a softmax over the transformed scores \(\tilde{u}_{k,\pi}\) across all partners and candidate policies. This procedure does not change the per-partner generative models; it only determines how partner-local precision enters cross-partner policy comparison. Reported policy entropy is the natural-log Shannon entropy of $q(\pi)$ over all partner--policy candidates at planning horizon $H{=}4$, averaged over rounds and seeds; values are in nats and are not normalized by maximum entropy.
+The final policy posterior is computed by applying a softmax over the transformed scores \(\tilde{u}_{k,\pi}\) across all partners and candidate policies. This procedure does not change the per-partner generative models; it only determines how partner-local precision enters cross-partner policy comparison. With six investment actions and planning horizon \(H=4\), each partner model evaluates all \(6^4=1{,}296\) candidate policies. In partner-choice conditions with four partners, the combined posterior therefore spans \(5{,}184\) partner--policy candidates. Reported policy entropy is the natural-log Shannon entropy of this posterior, whose maximum is \(\log(5{,}184)\approx8.55\) nats.
 
 \subsection{Simulation setup}
 \label{sec:simulation_setup}

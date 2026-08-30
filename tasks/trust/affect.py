@@ -33,7 +33,7 @@ def _affective_charge(
     *,
     alpha: float,
     sigma_0_sq: float,
-    charge_transform: str = "squared",
+    charge_transform: str = "linear",
 ) -> float:
     """Convert surprisal into the configured signed affective charge."""
 
@@ -48,13 +48,7 @@ def _affective_charge(
 
 
 def affective_charge_variants(surprise: float, *, alpha: float, sigma_0_sq: float) -> tuple[float, float]:
-    """Return the active squared charge and a shadow-only linear counterpart.
-
-    The runtime still receives the legacy squared baseline, ``sigma_0_sq``.
-    For the linear formula we recover ``sigma_0`` once, so its comparison is
-    ``alpha * (sigma_0 - surprise)``. It is diagnostic only: callers must
-    continue to use the squared value for state updates.
-    """
+    """Return squared and linear charge diagnostics from the shared baseline."""
 
     error = float(surprise)
     squared_charge = _affective_charge(
@@ -97,7 +91,7 @@ class DiscreteBetaState:
         beta_levels: Sequence[float] | None = None,
         alpha_charge: float = 3.0,
         sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ,
-        charge_transform: str = "squared",
+        charge_transform: str = "linear",
         persistence: float = 0.8,
         initial_prior: Sequence[float] | None = None,
     ) -> None:

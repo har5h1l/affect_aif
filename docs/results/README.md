@@ -10,8 +10,6 @@ raw data store.
 - `paper.md`: paper result cards and where their summaries live
 - `provenance.md`: source-table and figure provenance for manuscript results
 - `diagnostics.md`: retained non-paper diagnostic result cards
-- `pub-ready/`: reviewer-facing comparison of the historical manuscript,
-  shared-action, and linear-charge packets; not yet promoted paper evidence
 - `../../results/`: tracked compact public result summaries and manifests
 - `../manuscript/`: manuscript source, source tables, figures, and
   paper-facing notes
@@ -43,8 +41,8 @@ layout. The packet link lives in root `README.md` under **Paper Result Data**.
 
 ## Evidence Contract
 
-A result is current only when it comes from a completed run on the current
-factorized-control architecture and records enough provenance
+A result is current only when it comes from a completed run on the corrected
+shared-action architecture and records enough provenance
 to reproduce or audit it: config, command, seed count, date, branch or commit,
 and analysis entry point.
 

@@ -105,6 +105,11 @@ report a synthetic planning-cost proxy; candidate count and configured horizon
 are recorded directly, while actual compute should be measured with timings or
 profiling when needed.
 
+For affect-enabled runs, rows record `charge_transform`,
+`affective_charge_active`, `affective_charge_linear`, and
+`affective_charge_squared`. Linear charge is the canonical default; squared
+charge is an explicit diagnostic override.
+
 Runner diagnostics are assembled in `experiments/trust/diagnostics.py`, while
 POMDP matrices are assembled in `tasks/trust/pomdp_matrices.py` and wrapped by
 `tasks/trust/pomdp.py`. These modules are structural boundaries only: changing

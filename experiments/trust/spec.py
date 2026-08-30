@@ -115,7 +115,7 @@ class VariantSpec:
     epistemic_value: bool = True
     alpha_charge: float = 3.0
     sigma_0_sq: float = LOG_SURPRISE_BASELINE_SQ
-    charge_transform: str = "squared"
+    charge_transform: str = "linear"
     initial_beta: float = 1.0
     beta_prior: tuple[float, ...] | None = None
     beta_persistence: float = 0.8
@@ -520,7 +520,9 @@ def _parse_variant(data: dict[str, Any]) -> VariantSpec:
     variant = dict(data)
     if variant.get("affect") not in AFFECT_VALUES:
         raise ValueError(f"variant.affect must be one of {sorted(AFFECT_VALUES)}")
-    charge_transform = str(variant.get("charge_transform", "squared"))
+    if variant["affect"] == "none" and "charge_transform" in variant:
+        raise ValueError("variant.charge_transform is only valid when affect is enabled")
+    charge_transform = str(variant.get("charge_transform", "linear"))
     if charge_transform not in CHARGE_TRANSFORMS:
         raise ValueError(f"variant.charge_transform must be one of {sorted(CHARGE_TRANSFORMS)}")
     variant["charge_transform"] = charge_transform

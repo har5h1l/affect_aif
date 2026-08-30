@@ -31,6 +31,10 @@ each config.
 
 ## Paper Configs
 
+Every precision-enabled variant in the paper configs explicitly sets
+`charge_transform = "linear"`; no paper result relies on a global transform
+default. The no-affect controls do not instantiate a precision update.
+
 | Config | Result card | Canonical raw path |
 |---|---|---|
 | `configs/paper/01_predictability_value.toml` | `results/paper/01_predictability_value/` | `results/paper/01_predictability_value/raw/results.csv` |

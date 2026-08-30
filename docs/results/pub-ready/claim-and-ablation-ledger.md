@@ -6,10 +6,11 @@ status of every substantive claim in manuscript Results Sections 3.1--3.5.
 
 ## Contract and interpretation rules
 
-- **Historical manuscript packet** means `results/paper/`; it is the submitted
-  result packet, not the corrected baseline.
-- **Shared action, squared charge** is the main correction baseline.
-- **Shared action, linear charge** is a matched charge-rule sensitivity run.
+- **Historical manuscript packet** is submitted provenance retained on the
+  server; it is not current `results/paper/` evidence.
+- **Shared action, squared charge** is intermediate correction provenance.
+- **Shared action, linear charge** is the promoted camera-ready model and the
+  sole canonical local paper packet.
 - A **retain** claim has the same qualitative read in both corrected packets.
 - A **strengthen** claim has the same read with a larger or clearer effect.
 - A **revise** claim has lost a necessary pattern, changed rank/order, or needs
@@ -107,11 +108,13 @@ intervals are used only for contrasts *within* a packet.
 5. Gain controls beta-dynamic amplitude, but detailed profile labels, ranks,
    and forgiveness examples are not ready to carry forward unchanged.
 
-## Promotion gate
+## Final camera-ready decision
 
-Do not replace the manuscript source tables or `docs/results/current.md` from
-this ledger alone. Promotion requires an author decision on the action
-correction, a canonical inference contract for the betrayal readout, refreshed
-source tables/figures for each retained claim, and separate treatment of the
-linear charge as either sensitivity analysis or a new model equation.
-
+- Section 3.1 is retained with final-linear values and confidence intervals.
+- Section 3.2 is retained and strengthened around beta-to-gamma deployment.
+- Section 3.3 is retained descriptively; stable type-preference and balanced-
+  allocation interpretations are removed.
+- Section 3.4 is retained and strengthened, with accuracy and payoff explicitly
+  scoped to the tested regime.
+- Section 3.5 retains the gain mechanism and uses the corrected profile ranking.
+- Linear charge is the manuscript model; squared charge remains provenance.

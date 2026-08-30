@@ -4,9 +4,9 @@
 
 | Review name | Raw result root | Action contract | Charge transform | Rows | Role |
 |---|---|---|---|---:|---|
-| Historical manuscript packet | `results/paper/` | Earlier factorized stance/executed-action controls | Squared | 234,400 | Cross-reference for the submitted manuscript |
-| Shared action, squared charge | `results/rebaseline_shared_action_policy_fix_6b7d889_local/squared_charge_20260811/` | One shared six-valued behavioral action | Squared | 234,400 | Main corrected rebaseline |
-| Shared action, linear charge | `results/rebaseline_shared_action_policy_fix_6b7d889_local/linear_charge_20260812/` | Same shared action | Linear | 234,400 | Matched sensitivity analysis |
+| Historical manuscript packet | Server `camera_ready_archive/00_submitted_factorized_squared/` | Earlier factorized stance/executed-action controls | Squared | 234,400 | Submitted provenance only |
+| Shared action, squared charge | Server `camera_ready_archive/01_shared_action_squared/` | One shared six-valued behavioral action | Squared | 234,400 | Intermediate correction provenance |
+| Shared action, linear charge | `results/paper/` and server `camera_ready_archive/02_shared_action_linear/` | Same shared action | Linear | 234,400 | Canonical camera-ready evidence |
 
 All tables have the expected row counts and no duplicate
 `experiment_id, variant_id, seed, round` keys. The two corrected packets have
@@ -24,12 +24,11 @@ and can change trajectories; the corrected outcomes must therefore be compared
 with the manuscript packet descriptively, rather than presented as a simple
 replication.
 
-## Why the directories were not physically renamed
+## Preserved batch identities
 
-`squared_charge_20260811` and `linear_charge_20260812` are the batch IDs
-written into each run's logs, metadata, and checkpoint manifests. Moving them
-would make that provenance stale. The review names above are the stable
-human-facing labels; the raw run IDs remain intact for auditability.
+The archive retains the original internal batch IDs written into run logs,
+metadata, and checkpoint manifests beneath stable human-facing generation
+roots. See the server archive `INDEX.md` and per-generation manifests.
 
 ## Config-to-table map
 
@@ -40,4 +39,3 @@ human-facing labels; the raw run IDs remain intact for auditability.
 | 3.3 Partner selection | `configs/paper/03_partner_selection.toml` | `03_partner_selection/raw/results.csv` | `partner_selection/partner_selection/results.csv` |
 | 3.4 Abrupt betrayal | `configs/paper/04_betrayal_adaptation.toml` | `04_betrayal_adaptation/raw/results.csv` | `betrayal_adaptation/betrayal_adaptation/results.csv` |
 | 3.5 Gain/profile suite | `configs/paper/05a`--`05c` | `05a`--`05c` raw tables | `alpha_sweep/`, `prior_factorial/`, and `forgiveness/` final tables |
-

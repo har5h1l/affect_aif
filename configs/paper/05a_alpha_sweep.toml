@@ -31,48 +31,56 @@ auto = false
 [[variants]]
 id = "alpha_0p05"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 0.05
 
 [[variants]]
 id = "alpha_0p1"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 0.1
 
 [[variants]]
 id = "alpha_0p3"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 0.3
 
 [[variants]]
 id = "alpha_0p5"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 0.5
 
 [[variants]]
 id = "alpha_1p0"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 1.0
 
 [[variants]]
 id = "alpha_2p0"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 2.0
 
 [[variants]]
 id = "alpha_4p0"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 4.0
 
 [[variants]]
 id = "alpha_8p0"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 8.0
 

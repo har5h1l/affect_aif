@@ -1,37 +1,7 @@
 \section{Extended Profile and Robustness Results}
 \label{app:extended_results}
 
-This appendix reports extended sweeps, profiles, and robustness diagnostics.
-
-\subsection{Precision-dynamics parameter variation}
-\label{sec:perturbation_dynamics}
-
-These auxiliary controls vary the amplitude and stability of $\beta_k$ dynamics.
-
-\begin{figure}[H]
-\centering
-\appendixfigure{fig_phenotype_dynamics_summary.pdf}
-\caption{Perturbation controls in the graded decision regime. Low gain compresses the average within-episode max--min range of posterior mean $\bar{\beta}_k$, while a wider average within-episode max--min range of posterior mean $\bar{\beta}_k$ does not map monotonically to payoff.}
-\label{fig:phenotype_dynamics_appendix}
-\end{figure}
-\appendixfloatend
-
-\begin{table}[H]
-\centering
-\caption{Precision-dynamics parameter variation in the graded decision regime.}
-\label{tab:perturbation_dynamics}
-\begin{tabular}{lccc}
-\toprule
-Variant & Mean within-episode $\bar{\beta}_k$ range & Total payoff & Policy entropy \\
-\midrule
-affect & 0.95 & 1884.6 & 7.94 \\
-low-gain & 0.15 & 1840.7 & 8.84 \\
-high-gain & 1.32 & 1871.1 & 7.63 \\
-cautious-prior & 1.44 & 1834.1 & 8.28 \\
-\bottomrule
-\end{tabular}
-\end{table}
-\appendixfloattosection
+This appendix reports extended final-linear sweeps and computational profile diagnostics.
 
 \subsection{Alpha sweep}
 \label{sec:phenotypes_alpha}
@@ -46,14 +16,14 @@ Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whe
 \toprule
 $\alpha$ & Mean within-episode $\bar{\beta}_k$ range \\
 \midrule
-0.05 & 0.147 \\
-0.1  & 0.182 \\
-0.3  & 0.326 \\
-0.5  & 0.416 \\
-1.0  & 0.580 \\
-2.0  & 0.862 \\
-4.0  & 1.051 \\
-8.0  & 1.218 \\
+0.05 & 0.097 \\
+0.1  & 0.126 \\
+0.3  & 0.195 \\
+0.5  & 0.219 \\
+1.0  & 0.277 \\
+2.0  & 0.402 \\
+4.0  & 0.495 \\
+8.0  & 0.675 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -75,17 +45,19 @@ $\alpha$ & Mean within-episode $\bar{\beta}_k$ range \\
 \centering
 \caption{Behavioral metrics by profile (betrayal environment). Default agent shown for reference.}
 \label{tab:phenotypes}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccccc}
 \toprule
 Profile & Payoff & Recovery rounds & Gini & Mean within-episode $\bar{\beta}_k$ range & Trust asymmetry \\
 \midrule
-Anxious-reactive   & 1932 & 26.5 & 0.338 & 1.084 & 0.98 \\
-Hypervigilant      & 1951 & 20.1 & 0.423 & 0.892 & 1.65 \\
-Naive-stubborn     & 1894 & 21.3 & 0.304 & 0.364 & 1.19 \\
-Avoidant-rigid     & 1889 & 14.9 & 0.357 & 0.322 & 1.21 \\
-Default            & 1991 & 23.0 & 0.423 & 0.893 & 1.68 \\
+Anxious-reactive   & 2285.8 & 25.1 & 0.626 & 0.459 & 17.72 \\
+Hypervigilant      & 2230.7 & 21.5 & 0.609 & 0.556 & 7.25 \\
+Naive-stubborn     & 2218.0 & 17.8 & 0.567 & 0.173 & 5.46 \\
+Avoidant-rigid     & 2166.0 & 15.7 & 0.567 & 0.302 & 1.75 \\
+Default            & 2244.2 & 32.9 & 0.643 & 0.427 & 8.11 \\
 \bottomrule
 \end{tabular}
+}
 \end{table}
 
 \begin{figure}[H]
@@ -105,18 +77,20 @@ The forgiveness protocol uses baseline rounds 1--80, betrayal rounds 81--120, an
 \centering
 \caption{Forgiveness and trust-repair metrics by precision profile. Reengagement is the post-repair P0 selection rate; payoff recovery compares late post-repair payoff with the late pre-betrayal baseline.}
 \label{tab:forgiveness}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
 Variant & Reengagement & Payoff recovery & Latency & Mean within-episode $\bar{\beta}_k$ range \\
 \midrule
-cautious-high-$\alpha$ & 0.518 & 0.996 & 5.5 & 0.971 \\
-cautious-low-$\alpha$ & 0.630 & 1.014 & 1.5 & 0.287 \\
-default & 0.475 & 1.019 & 3.0 & 1.012 \\
-naive-high-$\alpha$ & 0.560 & 1.005 & 2.2 & 1.100 \\
-naive-low-$\alpha$ & 0.527 & 1.004 & 4.6 & 0.325 \\
-no-affect & 0.593 & 1.033 & 1.7 & -- \\
+cautious-high-$\alpha$ & 0.530 & 1.047 & 14.6 & 0.607 \\
+cautious-low-$\alpha$ & 0.686 & 1.068 & 6.5 & 0.301 \\
+default & 0.586 & 1.030 & 10.4 & 0.485 \\
+naive-high-$\alpha$ & 0.579 & 1.000 & 3.6 & 0.604 \\
+naive-low-$\alpha$ & 0.615 & 1.022 & 7.4 & 0.190 \\
+no-affect & 0.587 & 1.049 & 12.0 & -- \\
 \bottomrule
 \end{tabular}
+}
 \end{table}
 
 \begin{figure}[H]

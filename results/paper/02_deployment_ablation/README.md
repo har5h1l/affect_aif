@@ -5,4 +5,5 @@
 - Config: `configs/paper/02_deployment_ablation.toml`
 - Full raw source: `results/paper/02_deployment_ablation/raw/results.csv`
 - Tracked summaries: `source_tables/deployment_contrast_summary.csv`
+- Evidence model: corrected shared action with linear affective charge and paired-seed contrasts.
 - Raw policy: full per-round `results.csv` is ignored in git and retained outside git; see root `README.md` for the public data packet.

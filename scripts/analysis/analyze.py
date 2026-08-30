@@ -32,6 +32,7 @@ from analysis.metrics import (
     model_fitness_correlation_summary,
     partner_choice_summary,
     partner_model_fitness_summary,
+    partner_type_selection_effect_summary,
     phenotype_validation_summary,
     post_switch_variant_comparison,
     post_switch_window_summary,
@@ -105,6 +106,7 @@ def main(argv: list[str] | None = None) -> int:
     partner_model_fitness = partner_model_fitness_summary(results)
     model_fitness_corr = model_fitness_correlation_summary(results)
     partner_choice = partner_choice_summary(results)
+    partner_type_effects = partner_type_selection_effect_summary(results)
     phenotypes = phenotype_validation_summary(results)
     evidence_effects = evidence_effect_summary(results)
 
@@ -118,6 +120,7 @@ def main(argv: list[str] | None = None) -> int:
     partner_model_fitness.to_csv(output_dir / "partner_model_fitness_summary.csv", index=False)
     model_fitness_corr.to_csv(output_dir / "model_fitness_correlation_summary.csv", index=False)
     partner_choice.to_csv(output_dir / "partner_choice_summary.csv", index=False)
+    partner_type_effects.to_csv(output_dir / "partner_type_selection_effect_summary.csv", index=False)
     phenotypes.to_csv(output_dir / "phenotype_validation_summary.csv", index=False)
     evidence_effects.to_csv(output_dir / "evidence_effect_summary.csv", index=False)
 

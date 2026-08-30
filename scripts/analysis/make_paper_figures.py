@@ -20,6 +20,16 @@ import numpy as np
 import pandas as pd
 
 from analysis.figure_style import apply_manuscript_figure_style
+from analysis.metrics import (
+    affective_movement_summary,
+    BOOTSTRAP_ITERATIONS,
+    BOOTSTRAP_SEED,
+    evidence_effect_summary,
+    model_fitness_correlation_summary,
+    paired_seed_contrast,
+    seed_bootstrap_mean_ci,
+)
+from cli.common import load_results_table
 
 VARIANT_LABELS = {
     "affect": "local beta",
@@ -36,6 +46,9 @@ VARIANT_LABELS = {
     "high_gain": "high gain",
     "cautious_prior": "cautious prior",
 }
+EXPECTED_POLICIES_PER_PARTNER = 1_296
+EXPECTED_COMBINED_CANDIDATES = 5_184
+EXPECTED_MAX_ENTROPY = math.log(EXPECTED_COMBINED_CANDIDATES)
 
 
 def _read(source_dir: Path, filename: str) -> pd.DataFrame:
@@ -69,9 +82,36 @@ def _label(values: list[str]) -> list[str]:
     return [VARIANT_LABELS.get(value, value.replace("_", " ")) for value in values]
 
 
-def _bar(ax: plt.Axes, labels: list[str], values: list[float], *, title: str, ylabel: str) -> None:
+def _bar(
+    ax: plt.Axes,
+    labels: list[str],
+    values: list[float],
+    *,
+    title: str,
+    ylabel: str,
+    ci_bounds: list[tuple[float, float]] | None = None,
+) -> None:
     colors = ["#2f6f9f", "#c47f2c", "#5f8f5f", "#7a6aa8", "#8c8c8c"]
-    bars = ax.bar(range(len(values)), values, color=colors[: len(values)], width=0.68)
+    yerr = None
+    if ci_bounds is not None:
+        if len(ci_bounds) != len(values):
+            raise ValueError("ci_bounds must have one interval per bar")
+        lows, highs = zip(*ci_bounds, strict=True)
+        yerr = np.asarray(
+            [
+                np.maximum(np.asarray(values, dtype=float) - np.asarray(lows, dtype=float), 0.0),
+                np.maximum(np.asarray(highs, dtype=float) - np.asarray(values, dtype=float), 0.0),
+            ]
+        )
+    bars = ax.bar(
+        range(len(values)),
+        values,
+        color=colors[: len(values)],
+        width=0.68,
+        yerr=yerr,
+        capsize=3 if yerr is not None else 0,
+        error_kw={"elinewidth": 1.0, "capthick": 1.0},
+    )
     ax.set_xticks(range(len(values)), _label(labels), rotation=20, ha="right")
     ax.set_ylabel(ylabel)
     ax.set_title(title, pad=8)
@@ -117,14 +157,15 @@ def _p0_beta(value: object) -> float:
 
 
 def _mean_ci(values: pd.Series) -> pd.Series:
+    """Return a 10,000-resample seed-bootstrap interval for a seed mean."""
     finite = values.dropna().astype(float)
     if finite.empty:
         return pd.Series({"mean": np.nan, "ci_low": np.nan, "ci_high": np.nan})
     return pd.Series(
         {
             "mean": float(finite.mean()),
-            "ci_low": float(finite.quantile(0.025)),
-            "ci_high": float(finite.quantile(0.975)),
+            "ci_low": seed_bootstrap_mean_ci(finite, BOOTSTRAP_ITERATIONS, BOOTSTRAP_SEED)[0],
+            "ci_high": seed_bootstrap_mean_ci(finite, BOOTSTRAP_ITERATIONS, BOOTSTRAP_SEED)[1],
         }
     )
 
@@ -149,12 +190,60 @@ def _line_with_band(
         ax.fill_between(x, low, high, color=color, alpha=0.14, linewidth=0)
 
 
-def build_deployment_pathway_source(results_path: Path, output_path: Path) -> Path:
-    results = pd.read_csv(
-        results_path,
-        usecols=["variant_id", "seed", "round", "payoff", "q_pi_entropy", "betas"],
-        low_memory=False,
+def _annotate_paired_contrast(
+    ax: plt.Axes,
+    *,
+    difference: float,
+    ci_low: float,
+    ci_high: float,
+) -> None:
+    ax.text(
+        0.5,
+        0.04,
+        rf"paired $\Delta$ = {difference:.2f}; 95% CI [{ci_low:.2f}, {ci_high:.2f}]",
+        transform=ax.transAxes,
+        ha="center",
+        va="bottom",
+        fontsize=7.5,
     )
+
+
+def _validate_canonical_linear_results(results_path: Path) -> None:
+    """Reject historical, squared-charge, incomplete, or entropy-invalid paper data."""
+
+    required = {
+        "variant_id",
+        "seed",
+        "charge_transform",
+        "per_partner_policy_count",
+        "candidate_policy_count",
+        "max_q_pi_entropy",
+        "q_pi_entropy",
+    }
+    frame = pd.read_csv(results_path, usecols=lambda column: column in required, low_memory=False)
+    missing = sorted(required.difference(frame.columns))
+    if missing:
+        raise ValueError(f"{results_path} missing canonical provenance columns: {', '.join(missing)}")
+    transforms = set(frame["charge_transform"].dropna().astype(str))
+    if not transforms <= {"linear", "none"} or "linear" not in transforms:
+        raise ValueError(f"{results_path} is not a corrected-linear result table: {sorted(transforms)}")
+    if set(frame["per_partner_policy_count"].dropna().astype(int)) != {EXPECTED_POLICIES_PER_PARTNER}:
+        raise ValueError(f"{results_path} does not use 1,296 policies per partner")
+    if set(frame["candidate_policy_count"].dropna().astype(int)) != {EXPECTED_COMBINED_CANDIDATES}:
+        raise ValueError(f"{results_path} does not use 5,184 combined policy candidates")
+    entropy_ceiling = frame["max_q_pi_entropy"].astype(float)
+    if not np.allclose(entropy_ceiling, EXPECTED_MAX_ENTROPY, atol=1e-10, rtol=0.0):
+        raise ValueError(f"{results_path} has an unexpected policy-entropy ceiling")
+    if (frame["q_pi_entropy"].astype(float) > entropy_ceiling + 1e-10).any():
+        raise ValueError(f"{results_path} contains policy entropy above its recorded maximum")
+    seed_counts = frame.groupby("variant_id")["seed"].nunique()
+    if seed_counts.empty or not (seed_counts == 30).all():
+        raise ValueError(f"{results_path} does not contain 30 complete seeds per variant: {seed_counts.to_dict()}")
+
+
+def _seed_variant_summary(results: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate canonical figure metrics to one value per variant and simulation seed."""
+
     seed_rows = []
     for (variant_id, seed), group in results.groupby(["variant_id", "seed"], sort=True):
         beta_values = [value for row in group["betas"] for value in _numeric_array(row)]
@@ -167,37 +256,167 @@ def build_deployment_pathway_source(results_path: Path, output_path: Path) -> Pa
                 "beta_range": float(max(beta_values) - min(beta_values)) if beta_values else np.nan,
             }
         )
-    seed_summary = pd.DataFrame(seed_rows)
+    return pd.DataFrame(seed_rows)
+
+
+def _with_seed_mean_intervals(seed_summary: pd.DataFrame, metrics: list[str]) -> pd.DataFrame:
+    rows = []
+    for variant_id, group in seed_summary.groupby("variant_id", sort=True):
+        row: dict[str, float | int | str] = {"variant_id": str(variant_id), "n_seeds": int(len(group))}
+        for metric in metrics:
+            low, high = seed_bootstrap_mean_ci(group[metric], BOOTSTRAP_ITERATIONS, BOOTSTRAP_SEED)
+            row[metric] = float(group[metric].mean())
+            row[f"{metric}_ci_low"] = low
+            row[f"{metric}_ci_high"] = high
+            row[f"{metric}_bootstrap_iterations"] = BOOTSTRAP_ITERATIONS
+            row[f"{metric}_bootstrap_seed"] = BOOTSTRAP_SEED
+            row[f"{metric}_bootstrap_method"] = "seed_mean_percentile"
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def build_deployment_pathway_source(results_path: Path, output_path: Path) -> Path:
+    results = pd.read_csv(
+        results_path,
+        usecols=["variant_id", "seed", "round", "payoff", "q_pi_entropy", "betas"],
+        low_memory=False,
+    )
+    seed_summary = _seed_variant_summary(results)
+    movement = affective_movement_summary(results)[["variant_id", "seed", "beta_range"]]
+    seed_summary = seed_summary.drop(columns="beta_range").merge(
+        movement,
+        on=["variant_id", "seed"],
+        how="left",
+        validate="one_to_one",
+    )
     tracked_variant = "tracked_only" if "tracked_only" in set(seed_summary["variant_id"]) else "lesioned"
-    tracked = seed_summary[seed_summary["variant_id"] == tracked_variant][
-        ["seed", "total_payoff", "mean_q_pi_entropy"]
-    ].rename(
-        columns={
-            "total_payoff": "tracked_total_payoff",
-            "mean_q_pi_entropy": "tracked_mean_q_pi_entropy",
-        }
+    summary = _with_seed_mean_intervals(
+        seed_summary,
+        ["total_payoff", "mean_q_pi_entropy", "beta_range"],
     )
-    seed_summary = seed_summary.merge(tracked, on="seed", how="left")
-    seed_summary["delta_entropy_vs_tracked"] = (
-        seed_summary["mean_q_pi_entropy"] - seed_summary["tracked_mean_q_pi_entropy"]
-    )
-    seed_summary["delta_payoff_vs_tracked"] = seed_summary["total_payoff"] - seed_summary["tracked_total_payoff"]
-    summary = (
-        seed_summary.groupby("variant_id", as_index=False)
-        .agg(
-            total_payoff=("total_payoff", "mean"),
-            mean_q_pi_entropy=("mean_q_pi_entropy", "mean"),
-            beta_range=("beta_range", "mean"),
-            delta_entropy_vs_tracked=("delta_entropy_vs_tracked", "mean"),
-            delta_payoff_vs_tracked=("delta_payoff_vs_tracked", "mean"),
-            n_seeds=("seed", "nunique"),
+    treatment = seed_summary.loc[seed_summary["variant_id"] == "affect"]
+    reference = seed_summary.loc[seed_summary["variant_id"] == tracked_variant]
+    for metric, output_name in (
+        ("mean_q_pi_entropy", "delta_entropy_vs_tracked"),
+        ("beta_range", "delta_beta_range_vs_tracked"),
+        ("total_payoff", "delta_payoff_vs_tracked"),
+    ):
+        contrast = paired_seed_contrast(
+            treatment,
+            reference,
+            value_column=metric,
+            iterations=BOOTSTRAP_ITERATIONS,
+            random_seed=BOOTSTRAP_SEED,
         )
-        .sort_values("variant_id")
-    )
+        for key, value in contrast.items():
+            summary.loc[summary["variant_id"] == "affect", f"{output_name}_{key}"] = value
     summary.insert(1, "baseline_variant", tracked_variant)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     summary.to_csv(output_path, index=False)
+    effect_rows = []
+    for metric, prefix in (
+        ("policy_entropy", "delta_entropy_vs_tracked"),
+        ("beta_range", "delta_beta_range_vs_tracked"),
+        ("cumulative_payoff", "delta_payoff_vs_tracked"),
+    ):
+        affect_row = summary.loc[summary["variant_id"] == "affect"].iloc[0]
+        effect_rows.append(
+            {
+                "metric": metric,
+                "treatment_variant": "affect",
+                "reference_variant": tracked_variant,
+                "treatment_mean": affect_row[f"{prefix}_treatment_mean"],
+                "reference_mean": affect_row[f"{prefix}_reference_mean"],
+                "paired_difference": affect_row[f"{prefix}_difference"],
+                "paired_ci_low": affect_row[f"{prefix}_bootstrap_ci_low"],
+                "paired_ci_high": affect_row[f"{prefix}_bootstrap_ci_high"],
+                "n_pairs": int(affect_row[f"{prefix}_n_pairs"]),
+                "bootstrap_method": affect_row[f"{prefix}_bootstrap_method"],
+            }
+        )
+    pd.DataFrame(effect_rows).to_csv(output_path.with_name("h2_deployment_contrast_summary.csv"), index=False)
     return output_path
+
+
+def build_partner_selection_source(results_path: Path, output_path: Path) -> Path:
+    """Build paired entropy, payoff, and selected-type summaries for Section 3.3."""
+
+    results = pd.read_csv(
+        results_path,
+        usecols=["variant_id", "seed", "payoff", "q_pi_entropy", "true_partner_type"],
+        low_memory=False,
+    )
+    variants = set(results["variant_id"].astype(str))
+    if not {"affect", "no_affect"} <= variants:
+        raise ValueError("partner-selection source requires affect and no_affect variants")
+    rows = []
+    seed_rows = []
+    partner_types = ["cooperator", "exploiter", "reciprocator", "random"]
+    for (variant_id, seed), group in results.groupby(["variant_id", "seed"], sort=True):
+        row = {
+            "variant_id": str(variant_id),
+            "seed": int(seed),
+            "policy_entropy": float(group["q_pi_entropy"].mean()),
+            "cumulative_payoff": float(group["payoff"].sum()),
+        }
+        normalized_types = group["true_partner_type"].astype(str).str.lower()
+        for partner_type in partner_types:
+            row[f"selection_share_{partner_type}"] = float((normalized_types == partner_type).mean())
+        seed_rows.append(row)
+    seed_summary = pd.DataFrame(seed_rows)
+    treatment = seed_summary.loc[seed_summary["variant_id"] == "affect"]
+    reference = seed_summary.loc[seed_summary["variant_id"] == "no_affect"]
+    metrics = ["policy_entropy", "cumulative_payoff", *[f"selection_share_{kind}" for kind in partner_types]]
+    for metric in metrics:
+        contrast = paired_seed_contrast(
+            treatment,
+            reference,
+            value_column=metric,
+            iterations=BOOTSTRAP_ITERATIONS,
+            random_seed=BOOTSTRAP_SEED,
+        )
+        rows.append(
+            {
+                "metric": metric,
+                "true_partner_type": (
+                    metric.removeprefix("selection_share_") if metric.startswith("selection_share_") else ""
+                ),
+                "treatment_variant": "affect",
+                "reference_variant": "no_affect",
+                "treatment_mean": contrast["treatment_mean"],
+                "reference_mean": contrast["reference_mean"],
+                "difference": contrast["difference"],
+                "bootstrap_ci_low": contrast["bootstrap_ci_low"],
+                "bootstrap_ci_high": contrast["bootstrap_ci_high"],
+                "paired_dz": contrast["paired_dz"],
+                "n_pairs": contrast["n_pairs"],
+                "bootstrap_iterations": contrast["bootstrap_iterations"],
+                "bootstrap_seed": contrast["bootstrap_seed"],
+                "bootstrap_method": contrast["bootstrap_method"],
+            }
+        )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_csv(output_path, index=False)
+    return output_path
+
+
+def build_model_fitness_source(results_path: Path, output_dir: Path) -> list[Path]:
+    """Build Figure 1's correlation and payoff tables from corrected-linear results."""
+
+    results = load_results_table(results_path)
+    correlation = model_fitness_correlation_summary(
+        results,
+        bootstrap_iterations=BOOTSTRAP_ITERATIONS,
+        random_seed=BOOTSTRAP_SEED,
+    )
+    seed_summary = _seed_variant_summary(results)
+    payoff = _with_seed_mean_intervals(seed_summary, ["total_payoff"])
+    output_dir.mkdir(parents=True, exist_ok=True)
+    correlation_path = output_dir / "model_fitness_correlation_summary.csv"
+    payoff_path = output_dir / "final_round_summary.csv"
+    correlation.to_csv(correlation_path, index=False)
+    payoff.to_csv(payoff_path, index=False)
+    return [correlation_path, payoff_path]
 
 
 def build_betrayal_timecourse_source(results_path: Path, output_path: Path, *, bin_width: int = 10) -> Path:
@@ -234,6 +453,9 @@ def build_betrayal_timecourse_source(results_path: Path, output_path: Path, *, b
             "round_bin_start": int(round_bin_start),
             "round_bin_end": int(round_bin_start + bin_width - 1),
             "n_seeds": int(group["seed"].nunique()),
+            "bootstrap_iterations": BOOTSTRAP_ITERATIONS,
+            "bootstrap_seed": BOOTSTRAP_SEED,
+            "bootstrap_method": "seed_mean_percentile",
         }
         for metric in ["p0_selection", "mean_q_pi_entropy", "p0_beta", "mean_payoff"]:
             stats = _mean_ci(group[metric])
@@ -246,15 +468,44 @@ def build_betrayal_timecourse_source(results_path: Path, output_path: Path, *, b
     return output_path
 
 
+def build_betrayal_effect_source(results_path: Path, output_path: Path) -> Path:
+    results = load_results_table(results_path)
+    summary = evidence_effect_summary(
+        results,
+        bootstrap_iterations=BOOTSTRAP_ITERATIONS,
+        random_seed=BOOTSTRAP_SEED,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    summary.to_csv(output_path, index=False)
+    return output_path
+
+
 def refresh_figure_source_tables(results_root: Path, source_dir: Path) -> list[Path]:
+    h1 = results_root / "01_predictability_value/raw/results.csv"
+    h2 = results_root / "02_deployment_ablation/raw/results.csv"
+    h4 = results_root / "03_partner_selection/raw/results.csv"
+    h5 = results_root / "04_betrayal_adaptation/raw/results.csv"
+    for path in (h1, h2, h4, h5):
+        if not path.exists():
+            raise FileNotFoundError(f"Required canonical paper result not found: {path}")
+        _validate_canonical_linear_results(path)
     return [
+        *build_model_fitness_source(h1, source_dir / "h1_model_fitness_confirm"),
         build_deployment_pathway_source(
-            results_root / "02_deployment_ablation/raw/results.csv",
+            h2,
             source_dir / "h2_deployment_pathway_summary.csv",
         ),
+        build_partner_selection_source(
+            h4,
+            source_dir / "h4_partner_choice_summary.csv",
+        ),
         build_betrayal_timecourse_source(
-            results_root / "04_betrayal_adaptation/raw/results.csv",
+            h5,
             source_dir / "h5_betrayal_timecourse_summary.csv",
+        ),
+        build_betrayal_effect_source(
+            h5,
+            source_dir / "h5_evidence_effect_summary.csv",
         ),
     ]
 
@@ -267,24 +518,23 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
             "variant_id",
             "abs_partial_corr_precision_surprise",
             "abs_partial_corr_precision_reward",
-            "abs_corr_precision_surprise",
-            "abs_corr_precision_reward",
+            "abs_partial_corr_precision_surprise_ci_low",
+            "abs_partial_corr_precision_surprise_ci_high",
+            "abs_partial_corr_precision_reward_ci_low",
+            "abs_partial_corr_precision_reward_ci_high",
         },
     )
     payoff = _read_required(
         source_dir,
         "h1_model_fitness_confirm/final_round_summary.csv",
-        {"variant_id", "total_payoff"},
+        {"variant_id", "total_payoff", "total_payoff_ci_low", "total_payoff_ci_high"},
     )
     locality = locality.copy()
     locality["plot_variant_id"] = locality["variant_id"]
     locality["plot_abs_surprise"] = locality["abs_partial_corr_precision_surprise"]
     locality["plot_abs_reward"] = locality["abs_partial_corr_precision_reward"]
-    payoff_rows = (
-        payoff.groupby("variant_id", as_index=False)["total_payoff"]
-        .mean()
-        .rename(columns={"variant_id": "plot_variant_id"})
-    )
+    payoff_rows = payoff[["variant_id", "total_payoff", "total_payoff_ci_low", "total_payoff_ci_high"]].copy()
+    payoff_rows = payoff_rows.rename(columns={"variant_id": "plot_variant_id"})
     local_id = "affect"
 
     local = locality.loc[locality["plot_variant_id"] == local_id].iloc[0]
@@ -300,6 +550,16 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ],
         title=r"partner-local $\beta$",
         ylabel="absolute partial correlation",
+        ci_bounds=[
+            (
+                float(local["abs_partial_corr_precision_surprise_ci_low"]),
+                float(local["abs_partial_corr_precision_surprise_ci_high"]),
+            ),
+            (
+                float(local["abs_partial_corr_precision_reward_ci_low"]),
+                float(local["abs_partial_corr_precision_reward_ci_high"]),
+            ),
+        ],
     )
     axes[0].set_ylim(0, 1.05)
 
@@ -312,6 +572,16 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ],
         title=r"shared $\beta$",
         ylabel="absolute partial correlation",
+        ci_bounds=[
+            (
+                float(shared["abs_partial_corr_precision_surprise_ci_low"]),
+                float(shared["abs_partial_corr_precision_surprise_ci_high"]),
+            ),
+            (
+                float(shared["abs_partial_corr_precision_reward_ci_low"]),
+                float(shared["abs_partial_corr_precision_reward_ci_high"]),
+            ),
+        ],
     )
     axes[1].set_ylim(0, 1.05)
 
@@ -321,6 +591,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         payoff_rows["total_payoff"].tolist(),
         title="Analysis-window payoff",
         ylabel="analysis-window payoff",
+        ci_bounds=list(zip(payoff_rows["total_payoff_ci_low"], payoff_rows["total_payoff_ci_high"], strict=True)),
     )
 
     fig.suptitle("Predictability versus realized payoff", y=1.04, fontsize=12)
@@ -408,9 +679,21 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         {
             "variant_id",
             "baseline_variant",
+            "total_payoff",
+            "total_payoff_ci_low",
+            "total_payoff_ci_high",
+            "mean_q_pi_entropy",
+            "mean_q_pi_entropy_ci_low",
+            "mean_q_pi_entropy_ci_high",
             "beta_range",
-            "delta_entropy_vs_tracked",
-            "delta_payoff_vs_tracked",
+            "beta_range_ci_low",
+            "beta_range_ci_high",
+            "delta_entropy_vs_tracked_difference",
+            "delta_entropy_vs_tracked_bootstrap_ci_low",
+            "delta_entropy_vs_tracked_bootstrap_ci_high",
+            "delta_payoff_vs_tracked_difference",
+            "delta_payoff_vs_tracked_bootstrap_ci_low",
+            "delta_payoff_vs_tracked_bootstrap_ci_high",
         },
     )
     tracked_variant = str(h2["baseline_variant"].dropna().iloc[0])
@@ -424,25 +707,39 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         h2["beta_range"].tolist(),
         title=r"$\beta_k$ tracker movement",
         ylabel=r"mean within-episode $\bar{\beta}_k$ range",
+        ci_bounds=list(zip(h2["beta_range_ci_low"], h2["beta_range_ci_high"], strict=True)),
     )
+    affect = h2.loc["affect"]
     _bar(
         axes[1],
         order,
-        h2["delta_entropy_vs_tracked"].tolist(),
-        title="Deployment changes entropy",
-        ylabel=r"$\Delta$ entropy vs tracked-only",
+        h2["mean_q_pi_entropy"].tolist(),
+        title="Policy entropy",
+        ylabel="mean policy entropy",
+        ci_bounds=list(
+            zip(h2["mean_q_pi_entropy_ci_low"], h2["mean_q_pi_entropy_ci_high"], strict=True)
+        ),
     )
-    axes[1].axhline(0, color="#555555", linewidth=0.8)
-    axes[1].set_ylim(min(-0.24, float(h2["delta_entropy_vs_tracked"].min()) - 0.03), 0.05)
+    _annotate_paired_contrast(
+        axes[1],
+        difference=float(affect["delta_entropy_vs_tracked_difference"]),
+        ci_low=float(affect["delta_entropy_vs_tracked_bootstrap_ci_low"]),
+        ci_high=float(affect["delta_entropy_vs_tracked_bootstrap_ci_high"]),
+    )
     _bar(
         axes[2],
         order,
-        h2["delta_payoff_vs_tracked"].tolist(),
-        title="Payoff nearly matched",
-        ylabel=r"$\Delta$ payoff vs tracked-only",
+        h2["total_payoff"].tolist(),
+        title="Cumulative payoff",
+        ylabel="mean cumulative payoff",
+        ci_bounds=list(zip(h2["total_payoff_ci_low"], h2["total_payoff_ci_high"], strict=True)),
     )
-    axes[2].axhline(0, color="#555555", linewidth=0.8)
-    axes[2].set_ylim(min(-14.5, float(h2["delta_payoff_vs_tracked"].min()) - 1.0), 2.0)
+    _annotate_paired_contrast(
+        axes[2],
+        difference=float(affect["delta_payoff_vs_tracked_difference"]),
+        ci_low=float(affect["delta_payoff_vs_tracked_bootstrap_ci_low"]),
+        ci_high=float(affect["delta_payoff_vs_tracked_bootstrap_ci_high"]),
+    )
 
     fig.suptitle("Tracking requires deployment", y=1.04, fontsize=12)
     fig.tight_layout()

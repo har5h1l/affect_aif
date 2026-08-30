@@ -8,6 +8,11 @@ Adams, R.A., Stephan, K.E., Brown, H.R., Frith, C.D., Friston, K.J.: The
   computational anatomy of psychosis. Frontiers in Psychiatry  \textbf{4}, ~47
   (2013). \doi{10.3389/fpsyt.2013.00047}
 
+\bibitem{AlbrechtStone2018ModellingAgents}
+Albrecht, S.V., Stone, P.: Autonomous agents modelling other agents: A
+  comprehensive survey and open problems. Artificial Intelligence
+  \textbf{258},  66--95 (2018). \doi{10.1016/j.artint.2018.01.002}
+
 \bibitem{Barrett2006EmotionParadox}
 Barrett, L.F.: Solving the emotion paradox: Categorization and the experience
   of emotion. Personality and Social Psychology Review  \textbf{10}(1),  20--46
@@ -49,6 +54,11 @@ Diaconescu, A.O., Mathys, C., Weber, L.A.E., Kasper, L., Mauer, J., Stephan,
 Esp{\'i}n, A.M., Exadaktylos, F., Neyse, L.: Heterogeneous motives in the trust
   game: A tale of two roles. Frontiers in Psychology  \textbf{7}, ~728 (2016).
   \doi{10.3389/fpsyg.2016.00728}
+
+\bibitem{Friston2017ProcessTheory}
+Friston, K.J., FitzGerald, T., Rigoli, F., Schwartenbeck, P., Pezzulo, G.:
+  Active inference: A process theory. Neural Computation  \textbf{29}(1),
+  1--49 (2017). \doi{10.1162/NECO_a_00912}
 
 \bibitem{FrithFrith2012}
 Frith, C.D., Frith, U.: Mechanisms of social cognition. Annual Review of
@@ -93,6 +103,11 @@ Mathys, C., Daunizeau, J., Friston, K.J., Stephan, K.E.: A {Bayesian}
   foundation for individual learning under uncertainty. Frontiers in Human
   Neuroscience  \textbf{5}, ~39 (2011). \doi{10.3389/fnhum.2011.00039}
 
+\bibitem{Moutoussis2014InterpersonalInference}
+Moutoussis, M., Trujillo-Barreto, N.J., El-Deredy, W., Dolan, R.J., Friston,
+  K.J.: A formal model of interpersonal inference. Frontiers in Human
+  Neuroscience  \textbf{8}, ~160 (2014). \doi{10.3389/fnhum.2014.00160}
+
 \bibitem{Parr2022ActiveInference}
 Parr, T., Pezzulo, G., Friston, K.J.: Active Inference: The Free Energy
   Principle in Mind, Brain, and Behavior. MIT Press (2022).
@@ -117,6 +132,13 @@ Ruiz-Serra, J., Sweeney, P., Harr{\'e}, M.S.: Factorised active inference for
   Conference on Autonomous Agents and Multiagent Systems. pp. 1793--1802.
   International Foundation for Autonomous Agents and Multiagent Systems (2025).
   \doi{10.5555/3709347.3743815}
+
+\bibitem{SandvedSmith2021MentalAction}
+Sandved-Smith, L., Hesp, C., Mattout, J., Friston, K.J., Lutz, A., Ramstead,
+  M.J.D.: Towards a computational phenomenology of mental action: Modelling
+  meta-awareness and attentional control with deep parametric active inference.
+  Neuroscience of Consciousness  \textbf{2021}(1),  niab018 (2021).
+  \doi{10.1093/nc/niab018}
 
 \bibitem{Schoeller2021TrustExtendedControl}
 Schoeller, F., Miller, M., Salomon, R., Friston, K.J.: Trust as extended

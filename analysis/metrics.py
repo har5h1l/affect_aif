@@ -13,6 +13,9 @@ _ensure_array = ensure_array
 _scheduled_switch_targets = scheduled_switch_targets
 _variant_sort_key = variant_sort_key
 
+BOOTSTRAP_ITERATIONS = 10_000
+BOOTSTRAP_SEED = 0
+
 
 def _safe_nanmean(values: np.ndarray) -> float:
     values = np.asarray(values, dtype=float)
@@ -570,6 +573,69 @@ def partner_choice_summary(results: pd.DataFrame) -> pd.DataFrame:
     return grouped
 
 
+def partner_type_selection_effect_summary(
+    results: pd.DataFrame,
+    *,
+    treatment_variant: str = "affect",
+    reference_variant: str = "no_affect",
+    bootstrap_iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
+) -> pd.DataFrame:
+    """Report seed-paired treatment-control differences in partner-type selection share."""
+
+    required = {"variant_id", "seed", "true_partner_type"}
+    missing = required.difference(results.columns)
+    if missing:
+        raise ValueError(f"partner-type selection summary missing columns: {', '.join(sorted(missing))}")
+    frame = results.loc[
+        results["variant_id"].isin([treatment_variant, reference_variant]),
+        ["variant_id", "seed", "true_partner_type"],
+    ].dropna(subset=["true_partner_type"])
+    if frame.empty:
+        return pd.DataFrame()
+    variants = [treatment_variant, reference_variant]
+    if not set(variants) <= set(frame["variant_id"]):
+        return pd.DataFrame()
+    seeds = sorted(frame["seed"].unique().tolist())
+    partner_types = sorted(frame["true_partner_type"].astype(str).unique().tolist())
+    counts = (
+        frame.assign(true_partner_type=frame["true_partner_type"].astype(str))
+        .groupby(["variant_id", "seed", "true_partner_type"], as_index=False)
+        .size()
+        .rename(columns={"size": "selection_count"})
+    )
+    totals = frame.groupby(["variant_id", "seed"], as_index=False).size().rename(columns={"size": "total_choices"})
+    complete_index = pd.MultiIndex.from_product(
+        [variants, seeds, partner_types],
+        names=["variant_id", "seed", "true_partner_type"],
+    )
+    shares = (
+        counts.set_index(["variant_id", "seed", "true_partner_type"])
+        .reindex(complete_index, fill_value=0)
+        .reset_index()
+        .merge(totals, on=["variant_id", "seed"], how="left", validate="many_to_one")
+    )
+    shares["selection_share"] = shares["selection_count"] / shares["total_choices"]
+    rows = []
+    for partner_type, group in shares.groupby("true_partner_type", sort=True):
+        contrast = paired_seed_contrast(
+            group.loc[group["variant_id"] == treatment_variant, ["seed", "selection_share"]],
+            group.loc[group["variant_id"] == reference_variant, ["seed", "selection_share"]],
+            value_column="selection_share",
+            iterations=bootstrap_iterations,
+            random_seed=random_seed,
+        )
+        rows.append(
+            {
+                "true_partner_type": str(partner_type),
+                "treatment_variant": treatment_variant,
+                "reference_variant": reference_variant,
+                **contrast,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def phenotype_validation_summary(results: pd.DataFrame) -> pd.DataFrame:
     """Summarize beta dynamics and visible behavior for H5 perturbation variants."""
 
@@ -775,11 +841,12 @@ def _cohen_d(left: pd.Series, right: pd.Series) -> float:
     return float((left_values.mean() - right_values.mean()) / np.sqrt(pooled_var))
 
 
-def _bootstrap_mean_ci(
+def seed_bootstrap_mean_ci(
     values: pd.Series,
-    iterations: int = 1000,
-    random_seed: int = 0,
+    iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
 ) -> tuple[float, float]:
+    """Return a percentile bootstrap interval for an independent seed mean."""
     clean = pd.Series(values, dtype=float).replace([np.inf, -np.inf], np.nan).dropna().to_numpy(dtype=float)
     if clean.size == 0 or iterations <= 0:
         return (np.nan, np.nan)
@@ -789,12 +856,13 @@ def _bootstrap_mean_ci(
     return (float(np.quantile(means, 0.025)), float(np.quantile(means, 0.975)))
 
 
-def _bootstrap_difference_ci(
+def _bootstrap_unpaired_difference_ci(
     left: pd.Series,
     right: pd.Series,
-    iterations: int = 1000,
-    random_seed: int = 0,
+    iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
 ) -> tuple[float, float]:
+    """Diagnostic-only interval for independent groups, not paper contrasts."""
     left_values = pd.Series(left, dtype=float).replace([np.inf, -np.inf], np.nan).dropna().to_numpy(dtype=float)
     right_values = pd.Series(right, dtype=float).replace([np.inf, -np.inf], np.nan).dropna().to_numpy(dtype=float)
     if left_values.size == 0 or right_values.size == 0 or iterations <= 0:
@@ -806,6 +874,138 @@ def _bootstrap_difference_ci(
     return (float(np.quantile(diffs, 0.025)), float(np.quantile(diffs, 0.975)))
 
 
+def paired_seed_contrast(
+    treatment: pd.DataFrame,
+    reference: pd.DataFrame,
+    *,
+    value_column: str,
+    seed_column: str = "seed",
+    iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
+) -> dict[str, float | int | str]:
+    """Summarize a one-to-one, seed-paired treatment-reference contrast.
+
+    The inputs must contain exactly one finite summary value per seed. Missing
+    or duplicate replication units are errors because a paired paper contrast
+    cannot silently degrade into an independent-groups comparison.
+    """
+
+    required = {seed_column, value_column}
+    for name, frame in (("treatment", treatment), ("reference", reference)):
+        missing = required.difference(frame.columns)
+        if missing:
+            raise ValueError(f"{name} missing required columns: {', '.join(sorted(missing))}")
+        if frame[seed_column].duplicated().any():
+            duplicates = sorted(frame.loc[frame[seed_column].duplicated(), seed_column].unique().tolist())
+            raise ValueError(f"{name} has duplicate seed units: {duplicates}")
+        if frame[value_column].isna().any() or not np.isfinite(frame[value_column].astype(float)).all():
+            raise ValueError(f"{name} has non-finite seed values for {value_column}")
+
+    treatment_seeds = set(treatment[seed_column].tolist())
+    reference_seeds = set(reference[seed_column].tolist())
+    if treatment_seeds != reference_seeds:
+        missing_treatment = sorted(reference_seeds - treatment_seeds)
+        missing_reference = sorted(treatment_seeds - reference_seeds)
+        raise ValueError(
+            "paired contrast requires identical seed units; "
+            f"missing treatment={missing_treatment}, missing reference={missing_reference}"
+        )
+    if not treatment_seeds:
+        raise ValueError("paired contrast requires at least one seed unit")
+    if int(iterations) <= 0:
+        raise ValueError("paired contrast requires a positive bootstrap iteration count")
+
+    paired = treatment[[seed_column, value_column]].merge(
+        reference[[seed_column, value_column]],
+        on=seed_column,
+        how="inner",
+        validate="one_to_one",
+        suffixes=("_treatment", "_reference"),
+    ).sort_values(seed_column, kind="stable")
+    differences = (
+        paired[f"{value_column}_treatment"].astype(float)
+        - paired[f"{value_column}_reference"].astype(float)
+    ).to_numpy(dtype=float)
+    rng = np.random.default_rng(int(random_seed))
+    samples = rng.choice(differences, size=(int(iterations), differences.size), replace=True)
+    bootstrap_means = samples.mean(axis=1)
+    difference = float(differences.mean())
+    difference_std = float(differences.std(ddof=1)) if differences.size > 1 else 0.0
+    return {
+        "treatment_mean": float(paired[f"{value_column}_treatment"].mean()),
+        "reference_mean": float(paired[f"{value_column}_reference"].mean()),
+        "difference": difference,
+        "bootstrap_ci_low": float(np.quantile(bootstrap_means, 0.025)),
+        "bootstrap_ci_high": float(np.quantile(bootstrap_means, 0.975)),
+        "paired_dz": difference / difference_std if difference_std > 0.0 else np.nan,
+        "n_pairs": int(differences.size),
+        "bootstrap_iterations": int(iterations),
+        "bootstrap_seed": int(random_seed),
+        "bootstrap_method": "paired_seed_percentile",
+    }
+
+
+def _seed_cluster_partial_corr_ci(
+    frame: pd.DataFrame,
+    *,
+    left_column: str,
+    right_column: str,
+    controls: tuple[str, ...],
+    iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
+) -> dict[str, float | int | str]:
+    """Bootstrap a pooled partial correlation by resampling complete seed clusters."""
+
+    columns = ["seed", left_column, right_column, *controls]
+    complete = frame[columns].replace([np.inf, -np.inf], np.nan).dropna().copy()
+    original_seed_ids = np.sort(frame["seed"].drop_duplicates().to_numpy())
+    if int(iterations) <= 0:
+        raise ValueError("seed-cluster bootstrap requires a positive bootstrap iteration count")
+    if original_seed_ids.size == 0:
+        raise ValueError("seed-cluster bootstrap requires seed units")
+    if complete.empty:
+        return {
+            "estimate": np.nan,
+            "ci_low": np.nan,
+            "ci_high": np.nan,
+            "abs_estimate": np.nan,
+            "abs_ci_low": np.nan,
+            "abs_ci_high": np.nan,
+            "n_seed_clusters": int(original_seed_ids.size),
+            "n_complete_units": 0,
+            "bootstrap_iterations": int(iterations),
+            "bootstrap_seed": int(random_seed),
+            "bootstrap_method": "seed_cluster_percentile",
+        }
+    seed_ids = np.sort(complete["seed"].drop_duplicates().to_numpy())
+
+    def correlation(sample: pd.DataFrame) -> float:
+        return _partial_corr(sample[left_column], sample[right_column], {key: sample[key] for key in controls})
+
+    estimate = correlation(complete)
+    by_seed = {seed: group for seed, group in complete.groupby("seed", sort=False)}
+    rng = np.random.default_rng(int(random_seed))
+    draws = []
+    for sampled_seeds in rng.choice(seed_ids, size=(int(iterations), seed_ids.size), replace=True):
+        sampled = pd.concat([by_seed[seed] for seed in sampled_seeds], ignore_index=True)
+        draws.append(correlation(sampled))
+    values = np.asarray(draws, dtype=float)
+    finite = values[np.isfinite(values)]
+    return {
+        "estimate": estimate,
+        "ci_low": float(np.quantile(finite, 0.025)) if finite.size else np.nan,
+        "ci_high": float(np.quantile(finite, 0.975)) if finite.size else np.nan,
+        "abs_estimate": abs(estimate) if np.isfinite(estimate) else np.nan,
+        "abs_ci_low": float(np.quantile(np.abs(finite), 0.025)) if finite.size else np.nan,
+        "abs_ci_high": float(np.quantile(np.abs(finite), 0.975)) if finite.size else np.nan,
+        "n_seed_clusters": int(seed_ids.size),
+        "n_complete_units": int(len(complete)),
+        "bootstrap_iterations": int(iterations),
+        "bootstrap_seed": int(random_seed),
+        "bootstrap_method": "seed_cluster_percentile",
+    }
+
+
 def _effect_row(
     *,
     readout: str,
@@ -814,8 +1014,8 @@ def _effect_row(
     treatment_values: pd.Series,
     reference_variant: str | None = None,
     reference_values: pd.Series | None = None,
-    bootstrap_iterations: int = 1000,
-    random_seed: int = 0,
+    bootstrap_iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
 ) -> dict:
     treatment_clean = pd.Series(treatment_values, dtype=float).replace([np.inf, -np.inf], np.nan).dropna()
     reference_clean = (
@@ -827,12 +1027,13 @@ def _effect_row(
     reference_mean = float(reference_clean.mean()) if not reference_clean.empty else np.nan
     if reference_values is None:
         difference = treatment_mean
-        ci_low, ci_high = _bootstrap_mean_ci(treatment_clean, bootstrap_iterations, random_seed)
+        ci_low, ci_high = seed_bootstrap_mean_ci(treatment_clean, bootstrap_iterations, random_seed)
         cohen_d = np.nan
         n_reference = 0
+        bootstrap_method = "seed_mean_percentile"
     else:
         difference = treatment_mean - reference_mean
-        ci_low, ci_high = _bootstrap_difference_ci(
+        ci_low, ci_high = _bootstrap_unpaired_difference_ci(
             treatment_clean,
             reference_clean,
             bootstrap_iterations,
@@ -840,6 +1041,7 @@ def _effect_row(
         )
         cohen_d = _cohen_d(treatment_clean, reference_clean)
         n_reference = int(len(reference_clean))
+        bootstrap_method = "unpaired_diagnostic_percentile"
     return {
         "readout": readout,
         "metric": metric,
@@ -853,6 +1055,59 @@ def _effect_row(
         "bootstrap_ci_high": ci_high,
         "n_treatment": int(len(treatment_clean)),
         "n_reference": n_reference,
+        "bootstrap_iterations": int(bootstrap_iterations),
+        "bootstrap_seed": int(random_seed),
+        "bootstrap_method": bootstrap_method,
+    }
+
+
+def _paired_effect_row(
+    *,
+    readout: str,
+    metric: str,
+    treatment_variant: str,
+    reference_variant: str,
+    summary: pd.DataFrame,
+    bootstrap_iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
+) -> dict:
+    """Build one paper-facing paired effect from seed-level summary units."""
+
+    required = {"variant_id", "seed", metric}
+    missing = required.difference(summary.columns)
+    if missing:
+        raise ValueError(f"paired effect summary missing required columns: {', '.join(sorted(missing))}")
+    per_seed = (
+        summary.loc[summary["variant_id"].isin([treatment_variant, reference_variant]), ["variant_id", "seed", metric]]
+        .replace([np.inf, -np.inf], np.nan)
+        .dropna(subset=[metric])
+        .groupby(["variant_id", "seed"], as_index=False, sort=True)[metric]
+        .mean()
+    )
+    treatment = per_seed.loc[per_seed["variant_id"] == treatment_variant, ["seed", metric]]
+    reference = per_seed.loc[per_seed["variant_id"] == reference_variant, ["seed", metric]]
+    contrast = paired_seed_contrast(
+        treatment,
+        reference,
+        value_column=metric,
+        iterations=bootstrap_iterations,
+        random_seed=random_seed,
+    )
+    return {
+        "readout": readout,
+        "metric": metric,
+        "treatment_variant": treatment_variant,
+        "reference_variant": reference_variant,
+        "treatment_mean": contrast["treatment_mean"],
+        "reference_mean": contrast["reference_mean"],
+        "difference": contrast["difference"],
+        "paired_dz": contrast["paired_dz"],
+        "bootstrap_ci_low": contrast["bootstrap_ci_low"],
+        "bootstrap_ci_high": contrast["bootstrap_ci_high"],
+        "n_pairs": contrast["n_pairs"],
+        "bootstrap_iterations": contrast["bootstrap_iterations"],
+        "bootstrap_seed": contrast["bootstrap_seed"],
+        "bootstrap_method": contrast["bootstrap_method"],
     }
 
 
@@ -860,8 +1115,8 @@ def evidence_effect_summary(
     results: pd.DataFrame,
     treatment_variant: str = "affect",
     reference_variant: str = "no_affect",
-    bootstrap_iterations: int = 1000,
-    random_seed: int = 0,
+    bootstrap_iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
 ) -> pd.DataFrame:
     """Summarize key write-up effect sizes and bootstrap intervals."""
 
@@ -878,18 +1133,15 @@ def evidence_effect_summary(
     for metric in final_metrics:
         if metric not in final.columns:
             continue
-        treatment = final.loc[final["variant_id"] == treatment_variant, metric]
-        reference = final.loc[final["variant_id"] == reference_variant, metric]
-        if treatment.empty or reference.empty:
+        if not {treatment_variant, reference_variant} <= set(final["variant_id"]):
             continue
         rows.append(
-            _effect_row(
+            _paired_effect_row(
                 readout="final",
                 metric=metric,
                 treatment_variant=treatment_variant,
                 reference_variant=reference_variant,
-                treatment_values=treatment,
-                reference_values=reference,
+                summary=final,
                 bootstrap_iterations=bootstrap_iterations,
                 random_seed=random_seed,
             )
@@ -1060,8 +1312,13 @@ def evidence_effect_summary(
     return pd.DataFrame(rows)
 
 
-def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
-    """Correlate partner precision with surprise and reward for H1."""
+def model_fitness_correlation_summary(
+    results: pd.DataFrame,
+    *,
+    bootstrap_iterations: int = BOOTSTRAP_ITERATIONS,
+    random_seed: int = BOOTSTRAP_SEED,
+) -> pd.DataFrame:
+    """Correlate partner precision with surprise and reward for H1 with seed-cluster CIs."""
 
     partner_summary = partner_model_fitness_summary(results)
     if partner_summary.empty:
@@ -1093,10 +1350,45 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
             corr_reward_encounters = 0.0
             if np.isfinite(partial_corr_surprise):
                 partial_corr_reward = 0.0
+        cluster_frame = pd.DataFrame(
+            {
+                "seed": group["seed"],
+                "precision": precision,
+                "surprise": surprise,
+                "reward": reward_proxy,
+                "active_encounters": group["active_encounters"],
+            }
+        )
+        surprise_ci = _seed_cluster_partial_corr_ci(
+            cluster_frame,
+            left_column="precision",
+            right_column="surprise",
+            controls=("reward", "active_encounters"),
+            iterations=bootstrap_iterations,
+            random_seed=random_seed,
+        )
+        reward_ci = _seed_cluster_partial_corr_ci(
+            cluster_frame,
+            left_column="precision",
+            right_column="reward",
+            controls=("surprise", "active_encounters"),
+            iterations=bootstrap_iterations,
+            random_seed=random_seed,
+        )
+        if reward_proxy_constant and np.isfinite(surprise_ci["estimate"]):
+            reward_ci.update(
+                estimate=0.0,
+                ci_low=0.0,
+                ci_high=0.0,
+                abs_estimate=0.0,
+                abs_ci_low=0.0,
+                abs_ci_high=0.0,
+            )
         rows.append(
             {
                 "variant_id": str(variant_id),
                 "n_partner_seed_units": int(len(group)),
+                "n_total_partner_seed_units": int(len(group)),
                 "reward_proxy": reward_source,
                 "reward_proxy_constant": bool(reward_proxy_constant),
                 "alignment": alignment,
@@ -1128,12 +1420,26 @@ def model_fitness_correlation_summary(results: pd.DataFrame) -> pd.DataFrame:
                 ),
                 "partial_corr_precision_surprise": partial_corr_surprise,
                 "partial_corr_precision_reward": partial_corr_reward,
+                "partial_corr_precision_surprise_ci_low": surprise_ci["ci_low"],
+                "partial_corr_precision_surprise_ci_high": surprise_ci["ci_high"],
+                "partial_corr_precision_reward_ci_low": reward_ci["ci_low"],
+                "partial_corr_precision_reward_ci_high": reward_ci["ci_high"],
                 "abs_partial_corr_precision_surprise": (
                     abs(partial_corr_surprise) if np.isfinite(partial_corr_surprise) else np.nan
                 ),
                 "abs_partial_corr_precision_reward": (
                     abs(partial_corr_reward) if np.isfinite(partial_corr_reward) else np.nan
                 ),
+                "abs_partial_corr_precision_surprise_ci_low": surprise_ci["abs_ci_low"],
+                "abs_partial_corr_precision_surprise_ci_high": surprise_ci["abs_ci_high"],
+                "abs_partial_corr_precision_reward_ci_low": reward_ci["abs_ci_low"],
+                "abs_partial_corr_precision_reward_ci_high": reward_ci["abs_ci_high"],
+                "n_seed_clusters": surprise_ci["n_seed_clusters"],
+                "n_complete_units_precision_surprise": surprise_ci["n_complete_units"],
+                "n_complete_units_precision_reward": reward_ci["n_complete_units"],
+                "bootstrap_iterations": surprise_ci["bootstrap_iterations"],
+                "bootstrap_seed": surprise_ci["bootstrap_seed"],
+                "bootstrap_method": surprise_ci["bootstrap_method"],
                 "partial_surprise_dominates_reward": (
                     bool(abs(partial_corr_surprise) > abs(partial_corr_reward))
                     if np.isfinite(partial_corr_surprise) and np.isfinite(partial_corr_reward)

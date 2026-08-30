@@ -25,6 +25,11 @@ Most trust configs use this envelope:
 - optional `[runtime]`: execution profile and diagnostic logging controls.
 - optional `[analysis]`: configured analysis contract.
 
+For affect-enabled variants, `charge_transform = "linear"` explicitly selects
+the canonical Eq. 2 charge, `alpha * (log(2) - surprise)`. The runtime default
+is also linear; `"squared"` is retained only as an explicit diagnostic
+override. Variants with `affect = "none"` must not declare a charge transform.
+
 ## Runtime Profiles
 
 Runtime profiles organize execution weight without changing the config family:

@@ -1,4 +1,4 @@
-# Pub-ready results review packet
+# Camera-ready revision audit and provenance packet
 
 This packet lets a reviewer compare the current manuscript result packet with
 the two completed reruns without hunting through raw CSVs.
@@ -14,26 +14,21 @@ the two completed reruns without hunting through raw CSVs.
    decision surface: each manuscript claim, its exact contrast, current
    status, and permitted wording.
 
-## Review boundary
+## Final author decision
 
-`results/paper/` remains the historical manuscript packet. The shared-action
-correction is behavior-changing, so it is not a numerical reproduction of that
-packet. The linear-charge run is a matched follow-up sensitivity analysis, not
-an independently promoted manuscript result.
+The historical manuscript packet is submitted provenance only. The
+shared-action/squared-charge run is intermediate correction and robustness
+provenance. The shared-action/linear-charge run has been promoted as the sole
+canonical camera-ready model under `results/paper/`.
 
-No manuscript prose, source tables, or canonical result cards have been
-replaced by this review packet. It exists to support an informed decision about
-what should be revised and what should remain a follow-up analysis.
+This directory is retained as a revision audit, not a promotion gate. Its
+cross-generation comparisons explain why current values and claim boundaries
+changed; current claim-bearing evidence lives in `results/paper/` and
+`docs/manuscript/source_tables/`.
 
-## Compact figures
+## Historical comparison artifacts
 
 The comparison is primarily tabular because the section-level effects are more
-useful than a large figure deck. Two locally generated figures are retained at
-the linear-run analysis root for review:
-
-- [Core effects across the three packets](../../../results/rebaseline_shared_action_policy_fix_6b7d889_local/linear_charge_20260812/analysis/three_way_comparison_20260813/fig_01_core_effects.png)
-- [Partner-allocation shifts](../../../results/rebaseline_shared_action_policy_fix_6b7d889_local/linear_charge_20260812/analysis/three_way_comparison_20260813/fig_02_partner_allocation.png)
-
-The underlying calculation tables and paired/independent bootstrap summaries
-are in the same analysis directory. They are local review artifacts, not paper
-figures.
+useful than a large figure deck. Historical comparison figures and calculation
+tables remain with the verified linear generation in the server archive; they
+are revision provenance, not current paper source tables.

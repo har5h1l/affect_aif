@@ -27,11 +27,13 @@ planning_horizon = 4
 [[variants]]
 id = "affect"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 
 [[variants]]
 id = "global_beta"
 affect = "global_beta"
+charge_transform = "linear"
 planning_horizon = 4
 
 [runtime]

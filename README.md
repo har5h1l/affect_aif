@@ -3,8 +3,8 @@
 Active-inference trust-game simulations for studying partner-local affective
 precision as a relationship-specific confidence signal.
 
-**Anonymous review:** the public code mirror for double-blind review is
-<https://anonymous.4open.science/r/affect_aif>.
+Accepted for the IWAI 2026 proceedings. This repository contains the
+camera-ready reference implementation and reproducibility surface.
 
 ## What This Is
 
@@ -12,6 +12,10 @@ precision as a relationship-specific confidence signal.
 configs, compact result summaries, and the manuscript source. The central
 mechanism tracks partner-local prediction error in an external beta state and
 maps that state into policy precision during action selection.
+
+The canonical model uses one shared six-valued social action, exhaustive
+horizon-four planning with 1,296 policies per partner, and linear affective
+charge. Squared charge is retained only as an explicit diagnostic override.
 
 ## How The Repo Works
 
@@ -76,7 +80,7 @@ you intentionally want parallel local execution.
 
 ```bash
 python scripts/analysis/analyze.py \
-  --results results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv \
+  --results results/paper/04_betrayal_adaptation/raw/results.csv \
   --output-dir /tmp/affect_aif_analysis
 ```
 
@@ -90,13 +94,11 @@ python scripts/analysis/make_paper_figures.py --help
 
 ## Paper Result Data
 
-Full per-round `results.csv` files for the paper suite are gitignored. The
-review packet with row-level paper results is here:
-
-<https://www.dropbox.com/scl/fo/a59fvgzuzs86vop3u65lb/AGe5yY6xnCM_gupSk6OKlDk?rlkey=qng4y57jxhhpcuixk6g5hdytv&st=34wle6r6&dl=0>
-
-Compact summaries and manifests remain under `results/paper/`. Regenerate raw
-trajectories from `configs/paper/` when needed.
+Full corrected-linear per-round `results.csv` files for the paper suite are
+gitignored and retained outside git. Compact summaries and manifests remain
+under `results/paper/`; regenerate the raw trajectories from `configs/paper/`
+when needed. The superseded submitted-result packet is not part of the public
+camera-ready evidence route.
 
 ## Where To Go Next
 
@@ -117,9 +119,9 @@ implementation—the task, POMDP, affective-precision update, experiments, and
 analysis—built on [`inferactively-pymdp`](https://github.com/infer-actively/pymdp)
 for belief updating and policy selection.
 
-The manuscript is under anonymous peer review. Until publication, reference
-this repository and pin a commit for reproducibility. After publication, cite
-the paper for the model and findings.
+The manuscript has been accepted for IWAI 2026. Use the final proceedings
+citation once its bibliographic metadata is available; pin a repository commit
+when citing implementation details.
 
 ```bibtex
 @software{shah2026affect_aif,

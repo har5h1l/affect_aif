@@ -130,7 +130,7 @@ def create_agents_from_multi_focal_config(
             action_sampling=str(spec.get("action_sampling", "marginal")),
             alpha_charge=float(spec.get("alpha_charge", 3.0)),
             sigma_0_sq=float(spec.get("sigma_0_sq", LOG_SURPRISE_BASELINE_SQ)),
-            charge_transform=str(spec.get("charge_transform", "squared")),
+            charge_transform=str(spec.get("charge_transform", "linear")),
             initial_beta=float(spec.get("initial_beta", 1.0)),
             initial_beta_prior=(
                 None

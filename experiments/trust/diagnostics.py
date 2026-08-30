@@ -142,7 +142,7 @@ def build_decision_diagnostics(
         "prediction_errors": prediction_errors,
         "latest_surprise_by_partner": prediction_errors,
         "affective_charge_squared": affective_charge_squared,
-        "affective_charge_linear_shadow": affective_charge_linear,
+        "affective_charge_linear": affective_charge_linear,
         "affective_charge_active": affective_charge_active,
         "charge_transform": (
             runtime.partner_bank.beta.charge_transform if runtime.partner_bank.beta is not None else "none"

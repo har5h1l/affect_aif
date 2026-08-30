@@ -25,15 +25,15 @@ EXP_C_PANELS = (
     "payoff_recovery",
 )
 BETA_RECOVERY_ROUNDS = (80, 100, 120, 140, 160, 180, 200)
-EXP_C_TABLE8 = (
-    ("cautious_high_alpha", 0.518, 0.996),
-    ("cautious_low_alpha", 0.630, 1.014),
-    ("default_reference", 0.475, 1.019),
-    ("naive_high_alpha", 0.560, 1.005),
-    ("naive_low_alpha", 0.527, 1.004),
-    ("no_affect", 0.593, 1.033),
+EXP_C_PROFILE_ORDER = (
+    "cautious_high_alpha",
+    "cautious_low_alpha",
+    "default_reference",
+    "naive_high_alpha",
+    "naive_low_alpha",
+    "no_affect",
 )
-EXP_C_BETA_TRAJECTORY_VARIANTS = tuple(row[0] for row in EXP_C_TABLE8 if row[0] != "no_affect")
+EXP_C_BETA_TRAJECTORY_VARIANTS = tuple(item for item in EXP_C_PROFILE_ORDER if item != "no_affect")
 
 
 def build_specs(*, rounds: int, seeds: int, seed: int):
@@ -114,7 +114,11 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     fig, axes = plt.subplots(1, 3, figsize=(13.4, 4.8), gridspec_kw={"width_ratios": [0.75, 4.0, 0.65]})
-    table = pd.DataFrame(EXP_C_TABLE8, columns=["variant_id", "reengagement_rate", "payoff_recovery"])
+    table = metrics_df.groupby("variant_id", dropna=False)[["reengagement_rate", "payoff_recovery"]].mean()
+    missing = sorted(item for item in EXP_C_PROFILE_ORDER if item not in table.index)
+    if missing:
+        raise ValueError(f"forgiveness figure missing profiles: {', '.join(missing)}")
+    table = table.loc[list(EXP_C_PROFILE_ORDER)].reset_index()
     labels = [variant_label(item) for item in table["variant_id"]]
 
     y_positions = range(len(table))
@@ -169,7 +173,7 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     axes[2].invert_yaxis()
     axes[2].set_title("C. Payoff recovery")
     axes[2].set_xlabel("late repair / pre-betrayal payoff")
-    axes[2].set_xlim(0.94, 1.06)
+    axes[2].set_xlim(0.94, 1.08)
     for ax in axes:
         ax.spines[["top", "right"]].set_visible(False)
     save_figure(fig, figure_dir / "fig_forgiveness.pdf")

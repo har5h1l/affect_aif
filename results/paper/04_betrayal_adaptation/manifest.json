@@ -12,7 +12,9 @@
   "tracked_summary_files": [
     "source_tables/h5_evidence_effect_summary.csv"
   ],
-  "generated_from_batch": "paper",
-  "git_commit": "7c0234409acd13413d6ddd4925d47ff254391d5e",
+  "generated_from_batch": "linear_charge_20260812",
+  "git_commit": "6b7d88946c4e7a2a55ebe8b200d3154fa09aebe6",
+  "charge_transform": "linear",
+  "policy_action_contract": "shared_six_valued_action",
   "paper_use": "paper_evidence"
 }

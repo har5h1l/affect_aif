@@ -17,6 +17,10 @@ def _write_source_tables(source_dir):
                 "variant_id": "affect",
                 "abs_partial_corr_precision_surprise": 0.940,
                 "abs_partial_corr_precision_reward": 0.023,
+                "abs_partial_corr_precision_surprise_ci_low": 0.81,
+                "abs_partial_corr_precision_surprise_ci_high": 0.99,
+                "abs_partial_corr_precision_reward_ci_low": 0.00,
+                "abs_partial_corr_precision_reward_ci_high": 0.12,
                 "abs_corr_precision_surprise": 0.945,
                 "abs_corr_precision_reward": 0.367,
             },
@@ -24,6 +28,10 @@ def _write_source_tables(source_dir):
                 "variant_id": "global_beta",
                 "abs_partial_corr_precision_surprise": 0.496,
                 "abs_partial_corr_precision_reward": 0.535,
+                "abs_partial_corr_precision_surprise_ci_low": 0.32,
+                "abs_partial_corr_precision_surprise_ci_high": 0.66,
+                "abs_partial_corr_precision_reward_ci_low": 0.35,
+                "abs_partial_corr_precision_reward_ci_high": 0.70,
                 "abs_corr_precision_surprise": 0.583,
                 "abs_corr_precision_reward": 0.379,
             },
@@ -31,9 +39,27 @@ def _write_source_tables(source_dir):
     ).to_csv(confirm_dir / "model_fitness_correlation_summary.csv", index=False)
     pd.DataFrame(
         [
-            {"variant_id": "affect", "seed": 1, "total_payoff": 1977.2},
-            {"variant_id": "global_beta", "seed": 1, "total_payoff": 1973.4},
-            {"variant_id": "no_affect", "seed": 1, "total_payoff": 1905.9},
+            {
+                "variant_id": "affect",
+                "seed": 1,
+                "total_payoff": 1977.2,
+                "total_payoff_ci_low": 1900.0,
+                "total_payoff_ci_high": 2050.0,
+            },
+            {
+                "variant_id": "global_beta",
+                "seed": 1,
+                "total_payoff": 1973.4,
+                "total_payoff_ci_low": 1900.0,
+                "total_payoff_ci_high": 2050.0,
+            },
+            {
+                "variant_id": "no_affect",
+                "seed": 1,
+                "total_payoff": 1905.9,
+                "total_payoff_ci_low": 1850.0,
+                "total_payoff_ci_high": 1960.0,
+            },
         ]
     ).to_csv(confirm_dir / "final_round_summary.csv", index=False)
     pd.DataFrame(
@@ -41,12 +67,20 @@ def _write_source_tables(source_dir):
             {
                 "variant_id": "affect",
                 "total_payoff": 1851.3,
+                "total_payoff_ci_low": 1800.0,
+                "total_payoff_ci_high": 1905.0,
                 "mean_q_pi_entropy": 8.59,
+                "mean_q_pi_entropy_ci_low": 8.45,
+                "mean_q_pi_entropy_ci_high": 8.70,
             },
             {
                 "variant_id": "no_affect",
                 "total_payoff": 1864.2,
+                "total_payoff_ci_low": 1810.0,
+                "total_payoff_ci_high": 1910.0,
                 "mean_q_pi_entropy": 8.79,
+                "mean_q_pi_entropy_ci_low": 8.65,
+                "mean_q_pi_entropy_ci_high": 8.92,
             },
             {
                 "variant_id": "tracked_only",
@@ -61,18 +95,36 @@ def _write_source_tables(source_dir):
                 "variant_id": "affect",
                 "baseline_variant": "lesioned",
                 "total_payoff": 1851.3,
+                "total_payoff_ci_low": 1800.0,
+                "total_payoff_ci_high": 1905.0,
                 "mean_q_pi_entropy": 8.59,
+                "mean_q_pi_entropy_ci_low": 8.45,
+                "mean_q_pi_entropy_ci_high": 8.70,
                 "beta_range": 1.32,
+                "beta_range_ci_low": 1.20,
+                "beta_range_ci_high": 1.44,
                 "delta_entropy_vs_tracked": -0.21,
                 "delta_payoff_vs_tracked": -12.8,
+                "delta_entropy_vs_tracked_difference": -0.21,
+                "delta_entropy_vs_tracked_bootstrap_ci_low": -0.32,
+                "delta_entropy_vs_tracked_bootstrap_ci_high": -0.10,
+                "delta_payoff_vs_tracked_difference": -12.8,
+                "delta_payoff_vs_tracked_bootstrap_ci_low": -27.0,
+                "delta_payoff_vs_tracked_bootstrap_ci_high": 2.0,
                 "n_seeds": 3,
             },
             {
                 "variant_id": "lesioned",
                 "baseline_variant": "lesioned",
                 "total_payoff": 1864.2,
+                "total_payoff_ci_low": 1810.0,
+                "total_payoff_ci_high": 1910.0,
                 "mean_q_pi_entropy": 8.79,
+                "mean_q_pi_entropy_ci_low": 8.65,
+                "mean_q_pi_entropy_ci_high": 8.92,
                 "beta_range": 1.34,
+                "beta_range_ci_low": 1.22,
+                "beta_range_ci_high": 1.46,
                 "delta_entropy_vs_tracked": 0.0,
                 "delta_payoff_vs_tracked": 0.0,
                 "n_seeds": 3,
@@ -202,6 +254,10 @@ def test_paper_figure_pdfs_embed_beta_labels(tmp_path):
     assert "βk tracker movement" in pdf_text
     assert "mean within-episode" in pdf_text
     assert "βk range" in pdf_text
+    assert "Policy entropy" in pdf_text
+    assert "Cumulative payoff" in pdf_text
+    assert "paired Δ" in pdf_text
+    assert "Payoff nearly matched" not in pdf_text
 
 
 def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
@@ -215,6 +271,20 @@ def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
         make_paper_figures.deployment_social_figure(source_dir, output_dir)
 
 
+def test_paper_figures_reject_missing_confidence_interval_columns(tmp_path):
+    source_dir = tmp_path / "source_tables"
+    output_dir = tmp_path / "figures"
+    _write_source_tables(source_dir)
+    correlation_path = source_dir / "h1_model_fitness_confirm" / "model_fitness_correlation_summary.csv"
+    pd.read_csv(correlation_path).drop(columns=["abs_partial_corr_precision_surprise_ci_low"]).to_csv(
+        correlation_path,
+        index=False,
+    )
+
+    with pytest.raises(ValueError, match="missing required columns.*abs_partial_corr_precision_surprise_ci_low"):
+        make_paper_figures.model_fitness_figure(source_dir, output_dir)
+
+
 def test_model_fitness_figure_requires_current_confirm_tables(tmp_path):
     source_dir = tmp_path / "source_tables"
     output_dir = tmp_path / "figures"
@@ -223,3 +293,26 @@ def test_model_fitness_figure_requires_current_confirm_tables(tmp_path):
 
     with pytest.raises(FileNotFoundError, match="h1_model_fitness_confirm/model_fitness_correlation_summary.csv"):
         make_paper_figures.model_fitness_figure(source_dir, output_dir)
+
+
+def test_canonical_result_validation_rejects_entropy_above_policy_ceiling(tmp_path):
+    ceiling = make_paper_figures.EXPECTED_MAX_ENTROPY
+    path = tmp_path / "results.csv"
+    pd.DataFrame(
+        [
+            {
+                "variant_id": variant,
+                "seed": seed,
+                "charge_transform": "none" if variant == "no_affect" else "linear",
+                "per_partner_policy_count": 1296,
+                "candidate_policy_count": 5184,
+                "max_q_pi_entropy": ceiling,
+                "q_pi_entropy": ceiling + (1e-4 if variant == "affect" and seed == 0 else 0.0),
+            }
+            for variant in ["affect", "no_affect"]
+            for seed in range(30)
+        ]
+    ).to_csv(path, index=False)
+
+    with pytest.raises(ValueError, match="policy entropy above"):
+        make_paper_figures._validate_canonical_linear_results(path)

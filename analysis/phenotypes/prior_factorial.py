@@ -28,12 +28,12 @@ EXP_B_HEATMAP_COLUMNS = (
     "Trust asym.",
 )
 
-EXP_B_PROFILE_HEATMAP = (
-    ("Anxious-reactive", 1932.0, 26.5, 0.338, 1.084, 0.98),
-    ("Hypervigilant", 1951.0, 20.1, 0.423, 0.892, 1.65),
-    ("Naive-stubborn", 1894.0, 21.3, 0.304, 0.364, 1.19),
-    ("Avoidant-rigid", 1889.0, 14.9, 0.357, 0.322, 1.21),
-    ("Default", 1991.0, 23.0, 0.423, 0.893, 1.68),
+EXP_B_PROFILE_ORDER = (
+    ("Anxious-reactive", "naive_high_alpha"),
+    ("Hypervigilant", "cautious_high_alpha"),
+    ("Naive-stubborn", "naive_low_alpha"),
+    ("Avoidant-rigid", "cautious_low_alpha"),
+    ("Default", "default_reference"),
 )
 
 
@@ -117,9 +117,15 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
-    del metrics_df
-    rows = [row[0] for row in EXP_B_PROFILE_HEATMAP]
-    raw = np.array([row[1:] for row in EXP_B_PROFILE_HEATMAP], dtype=float)
+    betrayal = metrics_df.loc[metrics_df["experiment_id"] == "betrayal"]
+    means = betrayal.groupby("variant_id", sort=False)[
+        ["cumulative_payoff", "betrayal_recovery_time", "selection_gini", "beta_range", "trust_asymmetry"]
+    ].mean()
+    missing = sorted(variant_id for _, variant_id in EXP_B_PROFILE_ORDER if variant_id not in means.index)
+    if missing:
+        raise ValueError(f"prior-factorial figure missing betrayal profiles: {', '.join(missing)}")
+    rows = [label for label, _ in EXP_B_PROFILE_ORDER]
+    raw = np.asarray([means.loc[variant_id].to_numpy(dtype=float) for _, variant_id in EXP_B_PROFILE_ORDER])
     mins = raw.min(axis=0)
     spans = raw.max(axis=0) - mins
     normalized = np.divide(raw - mins, spans, out=np.full_like(raw, 0.5), where=spans != 0.0)

@@ -87,12 +87,10 @@ naive-high-alpha historically and with squared charge, but cautious-high-alpha
 with linear charge. Do not retain named profile rankings or failure-mode prose
 until the profile and forgiveness tables are refreshed together.
 
-## Recommendation for a paper-facing decision
+## Final paper-facing decision
 
-The defensible core is the predictability-over-payoff read, beta-to-gamma
-deployment, and lower policy entropy under betrayal. The allocation claim
-needs to be removed or substantially narrowed. Accuracy and payoff should be
-reported with the paired/independent inferential distinction rather than as a
-general advantage. The linear result is a useful sensitivity analysis, but it
-should remain separate from an action-correction manuscript decision unless
-the authors choose to revise the equation and rerun/publish that model.
+Shared action plus linear charge is the promoted camera-ready model. Sections
+3.1, 3.2, and 3.4 retain their core interpretations with refreshed values and
+seed-level uncertainty. Section 3.3 remains in the paper as a descriptive
+partner-choice readout, but the stable allocation-preference story is removed.
+Section 3.5 retains the gain mechanism and reports the corrected profile order.

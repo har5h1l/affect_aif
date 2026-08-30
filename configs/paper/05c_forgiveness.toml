@@ -33,6 +33,7 @@ auto = false
 [[variants]]
 id = "naive_low_alpha"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 0.1
 beta_prior = [0.40, 0.40, 0.15, 0.04, 0.01]
@@ -40,6 +41,7 @@ beta_prior = [0.40, 0.40, 0.15, 0.04, 0.01]
 [[variants]]
 id = "naive_high_alpha"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 3.0
 beta_prior = [0.40, 0.40, 0.15, 0.04, 0.01]
@@ -47,6 +49,7 @@ beta_prior = [0.40, 0.40, 0.15, 0.04, 0.01]
 [[variants]]
 id = "cautious_low_alpha"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 0.1
 beta_prior = [0.01, 0.04, 0.15, 0.40, 0.40]
@@ -54,6 +57,7 @@ beta_prior = [0.01, 0.04, 0.15, 0.40, 0.40]
 [[variants]]
 id = "cautious_high_alpha"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 3.0
 beta_prior = [0.01, 0.04, 0.15, 0.40, 0.40]
@@ -61,6 +65,7 @@ beta_prior = [0.01, 0.04, 0.15, 0.40, 0.40]
 [[variants]]
 id = "default_reference"
 affect = "precision"
+charge_transform = "linear"
 planning_horizon = 4
 alpha_charge = 3.0
 

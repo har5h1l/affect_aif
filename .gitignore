@@ -56,6 +56,7 @@ results/**/results_partial.csv
 results/**/checkpoint_manifest.json
 results/**/*checkpoint*
 results/**/*.log
+results/results_packet/
 outputs/
 artifacts/
 tmp/
@@ -75,8 +76,6 @@ docs/manuscript/*.out
 # Conductor session logs
 conductor/log/
 
-# graphify knowledge graph outputs (local only)
-graphify-out/
 docs/archive/
 docs/active/
 docs/superpowers/

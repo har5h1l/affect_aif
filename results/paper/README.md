@@ -1,14 +1,13 @@
 # Paper Result Suite
 
-Compact summaries and manifests for the seven paper configs under
-`configs/paper/`. Full per-round trajectories live under each section's
-gitignored `raw/` subtree when materialized locally.
+Compact summaries and manifests for the seven canonical corrected-linear paper
+configs under `configs/paper/`. These results use the shared six-valued action,
+1,296 policies per partner, 5,184 combined candidates, and linear affective
+charge. Full per-round trajectories live under each section's gitignored
+`raw/` subtree when materialized locally.
 
 Row-level paper results are also available in the public data packet; see root
 `README.md`.
-
-Anonymous review repository:
-<https://anonymous.4open.science/r/affect_aif>.
 
 | Section | Folder | Config |
 |---|---|---|
@@ -22,3 +21,6 @@ Anonymous review repository:
 
 Suite index: `manifest.json`. Full config-to-result routing:
 `docs/results/config_map.md`.
+
+The submitted historical packet is not publication evidence and is retained
+only in ignored local archival storage.

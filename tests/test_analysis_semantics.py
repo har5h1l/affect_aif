@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import pandas as pd
+import pytest
 
 from analysis.core.parsing import ensure_array, scheduled_switch_targets, variant_sort_key
 from analysis.hypotheses import run_all_hypothesis_tests
 from analysis.metrics import (
+    _seed_cluster_partial_corr_ci,
     betrayal_misdeployment_summary,
     betrayal_phase_summary,
     betrayal_reallocation_summary,
@@ -14,9 +16,11 @@ from analysis.metrics import (
     evidence_effect_summary,
     final_round_summary,
     model_fitness_correlation_summary,
+    paired_seed_contrast,
     partner_choice_summary,
     partner_model_fitness_summary,
     phenotype_validation_summary,
+    seed_bootstrap_mean_ci,
 )
 from analysis.model_comparison import model_comparison_report
 from cli.common import load_results_table
@@ -385,6 +389,11 @@ def test_model_fitness_correlation_reports_partial_signal_dominance():
 
     assert corr["abs_partial_corr_precision_surprise"] > corr["abs_partial_corr_precision_reward"]
     assert corr["partial_surprise_dominates_reward"]
+    assert corr["n_seed_clusters"] == 6
+    assert corr["bootstrap_iterations"] == 10_000
+    assert corr["bootstrap_method"] == "seed_cluster_percentile"
+    assert pd.notna(corr["partial_corr_precision_surprise_ci_low"])
+    assert pd.notna(corr["partial_corr_precision_surprise_ci_high"])
 
 
 def test_model_fitness_correlation_handles_reward_neutral_constant_payoff():
@@ -609,7 +618,9 @@ def test_evidence_effect_summary_reports_h1_and_h3_split_readouts():
     assert final_entropy["reference_variant"] == "no_affect"
     assert final_entropy["difference"] < 0
     assert pd.notna(final_entropy["bootstrap_ci_low"])
-    assert pd.notna(final_entropy["cohen_d"])
+    assert pd.notna(final_entropy["paired_dz"])
+    assert final_entropy["n_pairs"] == 3
+    assert final_entropy["bootstrap_method"] == "paired_seed_percentile"
 
     h1 = summary.loc[summary["readout"] == "model_fitness"].iloc[0]
     assert h1["metric"] == "abs_corr_precision_surprise_minus_reward"
@@ -722,3 +733,78 @@ def test_phenotype_validation_summary_parses_betas_without_row_apply(monkeypatch
     row = summary.iloc[0]
     assert row["beta_range"] == 1.0
     assert row["beta_mean"] == 0.9375
+
+
+def test_seed_bootstrap_interval_is_deterministic_and_order_invariant():
+    values = pd.Series([1.0, 2.0, 5.0, 9.0])
+
+    assert seed_bootstrap_mean_ci(values) == seed_bootstrap_mean_ci(values.sample(frac=1.0, random_state=7))
+
+
+def test_paired_seed_contrast_rejects_missing_and_duplicate_seed_units():
+    treatment = pd.DataFrame({"seed": [1, 2], "metric": [3.0, 4.0]})
+    reference = pd.DataFrame({"seed": [1, 3], "metric": [1.0, 2.0]})
+
+    with pytest.raises(ValueError, match="identical seed units"):
+        paired_seed_contrast(treatment, reference, value_column="metric")
+    with pytest.raises(ValueError, match="duplicate seed units"):
+        paired_seed_contrast(
+            pd.DataFrame({"seed": [1, 1], "metric": [3.0, 4.0]}),
+            pd.DataFrame({"seed": [1, 2], "metric": [1.0, 2.0]}),
+            value_column="metric",
+        )
+
+
+def test_paired_seed_contrast_has_zero_width_interval_for_zero_difference():
+    treatment = pd.DataFrame({"seed": [1, 2, 3], "metric": [3.0, 4.0, 5.0]})
+    reference = pd.DataFrame({"seed": [1, 2, 3], "metric": [3.0, 4.0, 5.0]})
+
+    summary = paired_seed_contrast(treatment, reference, value_column="metric")
+
+    assert summary["difference"] == 0.0
+    assert summary["bootstrap_ci_low"] == 0.0
+    assert summary["bootstrap_ci_high"] == 0.0
+    assert summary["n_pairs"] == 3
+
+
+def test_paired_seed_contrast_is_exactly_invariant_to_input_row_order():
+    treatment = pd.DataFrame({"seed": [1, 2, 3, 4], "metric": [2.0, 5.0, 9.0, 15.0]})
+    reference = pd.DataFrame({"seed": [1, 2, 3, 4], "metric": [1.0, 2.0, 4.0, 8.0]})
+
+    expected = paired_seed_contrast(treatment, reference, value_column="metric")
+    shuffled = paired_seed_contrast(
+        treatment.sample(frac=1.0, random_state=7),
+        reference.sample(frac=1.0, random_state=11),
+        value_column="metric",
+    )
+
+    assert shuffled == expected
+
+
+def test_paired_seed_contrast_rejects_nonpositive_iterations():
+    treatment = pd.DataFrame({"seed": [1], "metric": [2.0]})
+    reference = pd.DataFrame({"seed": [1], "metric": [1.0]})
+
+    with pytest.raises(ValueError, match="positive bootstrap iteration count"):
+        paired_seed_contrast(treatment, reference, value_column="metric", iterations=0)
+
+
+def test_seed_cluster_partial_correlation_resamples_whole_seed_clusters():
+    frame = pd.DataFrame(
+        [
+            {"seed": seed, "precision": value, "surprise": -value, "reward": value * 0.1, "active": partner}
+            for seed in range(3)
+            for partner, value in enumerate((seed + 1.0, seed + 1.5))
+        ]
+    )
+    summary = _seed_cluster_partial_corr_ci(
+        frame,
+        left_column="precision",
+        right_column="surprise",
+        controls=("reward", "active"),
+        iterations=100,
+    )
+
+    assert summary["n_seed_clusters"] == 3
+    assert summary["n_complete_units"] == 6
+    assert summary["bootstrap_method"] == "seed_cluster_percentile"

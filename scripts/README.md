@@ -11,7 +11,9 @@ Supported command-line entry points:
   trajectories.
 - `analysis/make_paper_figures.py`: rebuild manuscript composite figures from
   source tables; use `--refresh-source-tables` to refresh figure-specific
-  compact tables from `results/paper` raw CSVs before plotting.
+  compact tables from validated corrected-linear `results/paper` raw CSVs
+  before plotting. Refresh rejects historical/squared provenance and invalid
+  policy-entropy ceilings.
 
 Use `python <script> --help` for script-specific arguments.
 
