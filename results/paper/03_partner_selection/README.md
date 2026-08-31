@@ -5,5 +5,5 @@
 - Config: `configs/paper/03_partner_selection.toml`
 - Full raw source: `results/paper/03_partner_selection/raw/results.csv`
 - Tracked summaries: `source_tables/partner_selection_summary.csv`
-- Evidence model: corrected shared action with linear affective charge and paired type-share intervals.
+- Evidence model: shared action with linear affective charge and paired type-share intervals.
 - Raw policy: full per-round `results.csv` is ignored in git and retained outside git; see root `README.md` for the public data packet.

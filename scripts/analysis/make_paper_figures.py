@@ -209,7 +209,7 @@ def _annotate_paired_contrast(
 
 
 def _validate_canonical_linear_results(results_path: Path) -> None:
-    """Reject historical, squared-charge, incomplete, or entropy-invalid paper data."""
+    """Reject noncanonical, squared-charge, incomplete, or entropy-invalid paper data."""
 
     required = {
         "variant_id",
@@ -475,6 +475,15 @@ def build_betrayal_effect_source(results_path: Path, output_path: Path) -> Path:
         bootstrap_iterations=BOOTSTRAP_ITERATIONS,
         random_seed=BOOTSTRAP_SEED,
     )
+    headline_metrics = {
+        "total_payoff",
+        "mean_q_pi_entropy",
+        "mean_joint_accuracy",
+        "mean_stance_accuracy",
+    }
+    summary = summary.loc[
+        (summary["readout"] == "final") & summary["metric"].isin(headline_metrics)
+    ].copy()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     summary.to_csv(output_path, index=False)
     return output_path

@@ -5,8 +5,8 @@ manifests, and source-table style metrics. Full raw trajectories are preserved
 outside git under matching `raw/` paths and in the public data packet (see root
 `README.md`).
 
-All current cards use the corrected shared-action architecture and linear
-affective charge. The submitted historical packet is excluded from this route.
+All current cards use the shared-action architecture and linear affective
+charge.
 
 Every paper manifest should point to current `configs/paper/` TOML files and
 use `raw_results_policy = "gitignored_retained_outside_git_and_in_drive"`.

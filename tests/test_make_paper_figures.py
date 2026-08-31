@@ -15,25 +15,25 @@ def _write_source_tables(source_dir):
         [
             {
                 "variant_id": "affect",
-                "abs_partial_corr_precision_surprise": 0.940,
-                "abs_partial_corr_precision_reward": 0.023,
-                "abs_partial_corr_precision_surprise_ci_low": 0.81,
-                "abs_partial_corr_precision_surprise_ci_high": 0.99,
-                "abs_partial_corr_precision_reward_ci_low": 0.00,
-                "abs_partial_corr_precision_reward_ci_high": 0.12,
-                "abs_corr_precision_surprise": 0.945,
-                "abs_corr_precision_reward": 0.367,
+                "abs_partial_corr_precision_surprise": 0.660,
+                "abs_partial_corr_precision_reward": 0.094,
+                "abs_partial_corr_precision_surprise_ci_low": 0.492,
+                "abs_partial_corr_precision_surprise_ci_high": 0.766,
+                "abs_partial_corr_precision_reward_ci_low": 0.000,
+                "abs_partial_corr_precision_reward_ci_high": 0.291,
+                "abs_corr_precision_surprise": 0.660,
+                "abs_corr_precision_reward": 0.094,
             },
             {
                 "variant_id": "global_beta",
-                "abs_partial_corr_precision_surprise": 0.496,
-                "abs_partial_corr_precision_reward": 0.535,
-                "abs_partial_corr_precision_surprise_ci_low": 0.32,
-                "abs_partial_corr_precision_surprise_ci_high": 0.66,
-                "abs_partial_corr_precision_reward_ci_low": 0.35,
-                "abs_partial_corr_precision_reward_ci_high": 0.70,
-                "abs_corr_precision_surprise": 0.583,
-                "abs_corr_precision_reward": 0.379,
+                "abs_partial_corr_precision_surprise": 0.454,
+                "abs_partial_corr_precision_reward": 0.072,
+                "abs_partial_corr_precision_surprise_ci_low": 0.275,
+                "abs_partial_corr_precision_surprise_ci_high": 0.619,
+                "abs_partial_corr_precision_reward_ci_low": 0.000,
+                "abs_partial_corr_precision_reward_ci_high": 0.390,
+                "abs_corr_precision_surprise": 0.454,
+                "abs_corr_precision_reward": 0.072,
             },
         ]
     ).to_csv(confirm_dir / "model_fitness_correlation_summary.csv", index=False)
@@ -69,23 +69,23 @@ def _write_source_tables(source_dir):
                 "total_payoff": 1851.3,
                 "total_payoff_ci_low": 1800.0,
                 "total_payoff_ci_high": 1905.0,
-                "mean_q_pi_entropy": 8.59,
-                "mean_q_pi_entropy_ci_low": 8.45,
-                "mean_q_pi_entropy_ci_high": 8.70,
+                "mean_q_pi_entropy": 6.887,
+                "mean_q_pi_entropy_ci_low": 6.70,
+                "mean_q_pi_entropy_ci_high": 7.08,
             },
             {
                 "variant_id": "no_affect",
                 "total_payoff": 1864.2,
                 "total_payoff_ci_low": 1810.0,
                 "total_payoff_ci_high": 1910.0,
-                "mean_q_pi_entropy": 8.79,
-                "mean_q_pi_entropy_ci_low": 8.65,
-                "mean_q_pi_entropy_ci_high": 8.92,
+                "mean_q_pi_entropy": 7.657,
+                "mean_q_pi_entropy_ci_low": 7.45,
+                "mean_q_pi_entropy_ci_high": 7.86,
             },
             {
                 "variant_id": "tracked_only",
                 "total_payoff": 1864.2,
-                "mean_q_pi_entropy": 8.79,
+                "mean_q_pi_entropy": 7.657,
             },
         ]
     ).to_csv(source_dir / "h2_deployment_contrast_summary.csv", index=False)
@@ -97,9 +97,9 @@ def _write_source_tables(source_dir):
                 "total_payoff": 1851.3,
                 "total_payoff_ci_low": 1800.0,
                 "total_payoff_ci_high": 1905.0,
-                "mean_q_pi_entropy": 8.59,
-                "mean_q_pi_entropy_ci_low": 8.45,
-                "mean_q_pi_entropy_ci_high": 8.70,
+                "mean_q_pi_entropy": 6.887,
+                "mean_q_pi_entropy_ci_low": 6.70,
+                "mean_q_pi_entropy_ci_high": 7.08,
                 "beta_range": 1.32,
                 "beta_range_ci_low": 1.20,
                 "beta_range_ci_high": 1.44,
@@ -119,9 +119,9 @@ def _write_source_tables(source_dir):
                 "total_payoff": 1864.2,
                 "total_payoff_ci_low": 1810.0,
                 "total_payoff_ci_high": 1910.0,
-                "mean_q_pi_entropy": 8.79,
-                "mean_q_pi_entropy_ci_low": 8.65,
-                "mean_q_pi_entropy_ci_high": 8.92,
+                "mean_q_pi_entropy": 7.657,
+                "mean_q_pi_entropy_ci_low": 7.45,
+                "mean_q_pi_entropy_ci_high": 7.86,
                 "beta_range": 1.34,
                 "beta_range_ci_low": 1.22,
                 "beta_range_ci_high": 1.46,
@@ -149,11 +149,11 @@ def _write_source_tables(source_dir):
                 "metric": "mean_q_pi_entropy",
                 "treatment_variant": "affect",
                 "reference_variant": "no_affect",
-                "treatment_mean": 8.36,
-                "reference_mean": 8.74,
-                "difference": -0.38,
-                "bootstrap_ci_low": -0.62,
-                "bootstrap_ci_high": -0.14,
+                "treatment_mean": 4.886,
+                "reference_mean": 7.034,
+                "difference": -2.149,
+                "bootstrap_ci_low": -2.379,
+                "bootstrap_ci_high": -1.895,
             },
             {
                 "readout": "final",
@@ -165,28 +165,6 @@ def _write_source_tables(source_dir):
                 "difference": 0.106,
                 "bootstrap_ci_low": 0.034,
                 "bootstrap_ci_high": 0.185,
-            },
-            {
-                "readout": "betrayal_reallocation",
-                "metric": "reencounters",
-                "treatment_variant": "affect",
-                "reference_variant": "no_affect",
-                "treatment_mean": 4.4,
-                "reference_mean": 6.1,
-                "difference": -1.7,
-                "bootstrap_ci_low": -4.5,
-                "bootstrap_ci_high": 1.0,
-            },
-            {
-                "readout": "betrayal_misdeployment",
-                "metric": "wrong_type_rate",
-                "treatment_variant": "affect",
-                "reference_variant": "no_affect",
-                "treatment_mean": 0.24,
-                "reference_mean": 0.17,
-                "difference": 0.07,
-                "bootstrap_ci_low": -0.11,
-                "bootstrap_ci_high": 0.26,
             },
         ]
     ).to_csv(source_dir / "h5_evidence_effect_summary.csv", index=False)
@@ -200,9 +178,9 @@ def _write_source_tables(source_dir):
                 "p0_selection_mean": 0.18 if variant == "affect" else 0.10,
                 "p0_selection_ci_low": 0.02,
                 "p0_selection_ci_high": 0.40,
-                "mean_q_pi_entropy_mean": 8.2 if variant == "affect" else 8.7,
-                "mean_q_pi_entropy_ci_low": 7.9,
-                "mean_q_pi_entropy_ci_high": 9.0,
+                "mean_q_pi_entropy_mean": 4.886 if variant == "affect" else 7.034,
+                "mean_q_pi_entropy_ci_low": 4.55 if variant == "affect" else 6.75,
+                "mean_q_pi_entropy_ci_high": 5.20 if variant == "affect" else 7.35,
                 "p0_beta_mean": 1.1 if variant != "no_affect" else float("nan"),
                 "p0_beta_ci_low": 0.8 if variant != "no_affect" else float("nan"),
                 "p0_beta_ci_high": 1.4 if variant != "no_affect" else float("nan"),
@@ -214,6 +192,33 @@ def _write_source_tables(source_dir):
             for round_bin in [0, 10, 20, 30]
         ]
     ).to_csv(source_dir / "h5_betrayal_timecourse_summary.csv", index=False)
+
+
+def test_betrayal_effect_source_contains_only_headline_final_rows(tmp_path, monkeypatch):
+    summary = pd.DataFrame(
+        [
+            {"readout": "final", "metric": "total_payoff", "difference": 58.15},
+            {"readout": "final", "metric": "mean_q_pi_entropy", "difference": -2.149},
+            {"readout": "final", "metric": "mean_joint_accuracy", "difference": 0.158},
+            {"readout": "final", "metric": "mean_stance_accuracy", "difference": 0.166},
+            {"readout": "model_fitness", "metric": "generic_diagnostic", "difference": 0.5},
+            {"readout": "betrayal_reallocation", "metric": "reencounters", "difference": 0.3},
+        ]
+    )
+    monkeypatch.setattr(make_paper_figures, "load_results_table", lambda _: pd.DataFrame({"x": [1]}))
+    monkeypatch.setattr(make_paper_figures, "evidence_effect_summary", lambda *args, **kwargs: summary)
+
+    output_path = tmp_path / "h5_evidence_effect_summary.csv"
+    make_paper_figures.build_betrayal_effect_source(tmp_path / "results.csv", output_path)
+    generated = pd.read_csv(output_path)
+
+    assert set(generated["readout"]) == {"final"}
+    assert set(generated["metric"]) == {
+        "total_payoff",
+        "mean_q_pi_entropy",
+        "mean_joint_accuracy",
+        "mean_stance_accuracy",
+    }
 
 
 def test_new_paper_figures_generate_manifest(tmp_path, capsys):

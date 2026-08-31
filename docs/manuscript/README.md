@@ -30,7 +30,7 @@ Output: `main.pdf`.
   (`appendix/appendix_00_supplementary.tex`).
 - `figures/`: copied PNG/PDF panels from analysis outputs.
 - `source_tables/`: compact CSVs copied from paper analysis outputs for
-  checking and figure regeneration.
+checking and figure regeneration.
 - `scripts/analysis/make_paper_figures.py`: refreshes figure-specific compact
   tables from `results/paper` when requested and regenerates composite figures
   from `source_tables/`.
@@ -38,9 +38,8 @@ Output: `main.pdf`.
 ## Evidence Contract
 
 Use `docs/results/current.md` as the paper evidence surface. Abrupt-betrayal and
-profile results use the reviewed source tables in this folder. Do not promote
-old bounded-error numbers or pre-fix smoke numbers as current main-text
-evidence.
+profile results use the reviewed source tables in this folder. Only the
+canonical result cards and source tables support main-text numbers.
 
 Do not write a broad "affect improves reward" claim. The supported thesis matches
 the current manuscript abstract and Discussion:

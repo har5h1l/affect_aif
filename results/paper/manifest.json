@@ -21,7 +21,6 @@
   "policies_per_partner": 1296,
   "combined_policy_candidates": 5184,
   "maximum_policy_entropy_nats": 8.55333223803211,
-  "archive_previous_results": "server results/camera_ready_archive/00_submitted_factorized_squared",
   "sections": [
     {
       "section": "3.1",

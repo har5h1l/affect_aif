@@ -70,12 +70,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output-dir",
         default=None,
-        help="Legacy batch root. Omit to use the canonical family layout from docs/results/config_map.md.",
+        help="Custom batch root. Omit to use the canonical family layout from docs/results/config_map.md.",
     )
     parser.add_argument(
         "--batch-name",
         default=None,
-        help="Legacy batch subdirectory. Omit to use the canonical family layout from docs/results/config_map.md.",
+        help="Custom batch subdirectory. Omit to use the canonical family layout from docs/results/config_map.md.",
     )
     parser.add_argument(
         "--workers", type=int, default=os.cpu_count() or 1, help="Shared worker count across the whole batch."

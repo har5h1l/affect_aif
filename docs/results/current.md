@@ -1,10 +1,7 @@
 # Current Results
 
-> **Camera-ready canonical evidence.** The values in this file are generated
-> from the corrected shared-action policy space with the linear affective-charge
-> update. The earlier submitted factorized-action/squared-charge results and the
-> intermediate shared-action/squared-charge rebaseline are retained as revision
-> provenance on the server but are not current claim-bearing evidence.
+> **Canonical paper evidence.** The values in this file are generated from the
+> shared-action policy space with the linear affective-charge update.
 
 Canonical interpreted evidence for the active architecture is stored under
 `results/paper/`. Manuscript prose lives in `docs/manuscript/sections/`;
@@ -12,10 +9,10 @@ paper-facing compact CSVs live in `docs/manuscript/source_tables/`.
 
 ## Inclusion Decision
 
-Use only the corrected-linear tables under `docs/manuscript/source_tables/`
-and the matching compact cards under `results/paper/` for camera-ready numbers.
-Squared charge is a diagnostic robustness condition. Historical, pre-fix,
-incomplete, smoke, and binary-confirmation outputs are not paper evidence.
+Use only the canonical tables under `docs/manuscript/source_tables/`
+and the matching compact cards under `results/paper/` for paper numbers.
+Squared charge is a diagnostic robustness condition. Incomplete, smoke, and
+binary-confirmation outputs are not paper evidence.
 
 | Evidence family | Source table | Scale | Status |
 |---|---|---:|---|
@@ -101,23 +98,22 @@ In the betrayal alpha sweep, mean beta range rises monotonically from `0.097`
 at `alpha=0.05` to `0.675` at `alpha=8.0` (Spearman `rho=1.0`), while payoff
 is not monotonic. In the prior-factorial betrayal results,
 `naive_high_alpha` / anxious-reactive has the highest mean payoff (`2285.8`),
-ahead of the default reference (`2244.2`). The detailed ranking changed under
-the corrected model. Forgiveness results continue to separate reengagement,
-confidence recovery, and payoff recovery. These labels describe computational
-calibration profiles, not validated human or clinical phenotypes.
+ahead of the default reference (`2244.2`). Forgiveness results separate
+reengagement, confidence recovery, and payoff recovery. These labels describe
+computational calibration profiles, not validated human or clinical phenotypes.
 
 ## Claim Boundary
 
 Use:
 
 - partner-local beta as an auxiliary confidence tracker deployed through gamma;
-- corrected shared-action policy accounting;
+- shared-action policy accounting;
 - linear charge as the canonical model and squared charge as diagnostic;
 - seed-level uncertainty and conditional simulation language.
 
 Avoid:
 
-- historical entropy, correlation, allocation, betrayal, or profile values;
+- values outside the canonical source tables and result cards;
 - a stable partner-type preference claim;
 - a general payoff-improvement claim;
 - clinical validation or human-behavior generalization;

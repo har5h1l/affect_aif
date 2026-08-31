@@ -3,8 +3,8 @@
 Active-inference trust-game simulations for studying partner-local affective
 precision as a relationship-specific confidence signal.
 
-Accepted for the IWAI 2026 proceedings. This repository contains the
-camera-ready reference implementation and reproducibility surface.
+Accepted for the IWAI 2026 proceedings. This repository contains the canonical
+reference implementation and reproducibility surface.
 
 ## What This Is
 
@@ -94,11 +94,10 @@ python scripts/analysis/make_paper_figures.py --help
 
 ## Paper Result Data
 
-Full corrected-linear per-round `results.csv` files for the paper suite are
+Full canonical per-round `results.csv` files for the paper suite are
 gitignored and retained outside git. Compact summaries and manifests remain
 under `results/paper/`; regenerate the raw trajectories from `configs/paper/`
-when needed. The superseded submitted-result packet is not part of the public
-camera-ready evidence route.
+when needed.
 
 ## Where To Go Next
 

@@ -19,7 +19,7 @@ implemented in `experiments/trust/output_layout.py`:
 Paper suite configs with multiple `[[experiments]]` blocks write under
 `results/paper/<config-stem>/raw/<experiment_id>/`.
 
-Legacy batch layout is still available when you pass explicit paths:
+An explicit custom batch layout is available when you pass output paths:
 
 ```text
 --output-dir <root> --batch-name <batch>
@@ -119,8 +119,7 @@ H6 perturbation outputs also feed appendix figure builders documented in
 ## Hygiene Rules
 
 - Do not keep local result trees whose experiment ids do not match a maintained
-  config. Legacy probes such as `clinical_dynamics` and `log_surprise_*_smoke`
-  were removed with their configs.
+  config.
 - Do not add a suite-level rollup such as `results/paper/metrics.csv`; profile
   metrics belong under `results/paper/05a_alpha_sweep/`,
   `results/paper/05b_prior_factorial/`, and `results/paper/05c_forgiveness/`.
