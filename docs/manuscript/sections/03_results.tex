@@ -1,23 +1,23 @@
 \section{Results}
 \label{sec:results}
 
-Results test whether partner-local precision tracks predictability over payoff, acts through the \(\beta_k \rightarrow \gamma_k\) deployment pathway, and remains behaviorally consequential under partner choice, betrayal, and profile variation. Unless otherwise noted, uncertainty is reported as a two-sided 95\% percentile bootstrap confidence interval over simulation seeds; matched conditions are resampled as paired seed differences, and correlations use a seed-cluster bootstrap.
+Results test whether partner-local precision tracks predictability over payoff, acts through the \(\beta_k \rightarrow \gamma_k\) deployment pathway, and remains behaviorally consequential under partner choice, betrayal, and profile variation.
 
 \subsection{Partner-local precision tracks predictability rather than realized payoff}
 \label{sec:predictability_value}
 
 Partner-local precision was more strongly associated with partner-response likelihood surprisal than with realized payoff. Because the affective-precision update is itself driven by partner-response surprisal rather than payoff, we expected this relationship and use the full multi-partner simulation here to verify that the intended selectivity is preserved once confidence updating, partner choice, and policy selection interact. Because partner-choice episodes couple payoff, surprisal, and exposure, we computed active-encounter partial correlations controlling for encounter count and the alternative signal. The precision--surprisal association remained substantially stronger ($r=-0.660$, 95\% CI [$-0.766$, $-0.492$]) than the precision--payoff association ($r=0.094$, 95\% CI [$-0.112$, $0.291$]). Negative precision--surprisal association indicates that less surprising partner responses are associated with greater $\beta_k$-derived policy precision; Figure~\ref{fig:model_fitness_contrast} plots absolute magnitudes for readability.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.pdf}
-\caption{Partner-local precision is more strongly associated with partner-response likelihood surprisal than with realized payoff. Correlation panels plot absolute active-encounter partial correlations with 95\% seed-cluster bootstrap confidence intervals; the payoff panel shows mean payoff with 95\% bootstrap confidence intervals in the same predictability--payoff analysis run. Because partner-response surprisal is the designated evidence source for the precision update, this comparison verifies that the intended selectivity remains present in the full multi-partner simulation. Pooling precision evidence across partners attenuates the relationship-local predictability signature.}
-\label{fig:model_fitness_contrast}
-\end{figure}
-
 Pooling precision evidence across partners weakened this relationship-specific signal. In the shared-$\beta$ ablation, per-partner beliefs remained separate but the precision tracker was updated from pooled partner evidence. The precision--surprisal association was weaker ($r=-0.454$, 95\% CI [$-0.619$, $-0.275$]), while the precision--payoff association remained small ($r=0.072$, 95\% CI [$-0.163$, $0.390$]). Thus, pooling preserves separate partner beliefs but weakens the alignment between confidence and the relationship-specific predictive history from which that confidence is derived.
 
 Payoff in the same predictability--payoff analysis run provides behavioral context rather than an independent definition of the mechanism. Although payoff varies across runtime variants, the partner-local precision signal remains much more strongly associated with partner-response predictability than with realized payoff. The payoff panel therefore complements the correlation panels without changing the central interpretation: partner-local affective precision tracks confidence in the current partner model rather than directly tracking reward.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.pdf}
+\caption{Absolute active-encounter partial correlations between policy precision and surprisal/payoff, plus analysis-window payoff. Whiskers show 95\% seed-cluster bootstrap intervals for correlations and seed-bootstrap intervals for payoff. Predictability is more strongly associated with partner-local than shared $\beta$; because surprisal supplies the precision update, this is an intended-selectivity check.}
+\label{fig:model_fitness_contrast}
+\end{figure}
 
 \subsection{Tracked-only ablation isolates policy commitment}
 \label{sec:deployment}
@@ -26,14 +26,14 @@ To test whether partner-local affective precision changes behavior through polic
 
 The tracked-only ablation confirmed that the tracker can move without producing the same deployment effect. In the open graded deployment run, partner-local and tracked-only conditions showed comparable within-episode variation in posterior mean $\bar{\beta}_k$, differing by only $0.043$ in mean range. The key difference was deployment: full precision modulation lowered policy entropy by $0.770$ nats relative to tracked-only (95\% CI [$-0.966$, $-0.577$]). Cumulative payoff was also somewhat higher under partner-local precision ($2003.3$ versus $1966.8$; difference $=36.5$, 95\% CI [$-8.6$, $84.1$]). Thus, $\beta_k$ matters behaviorally when it is allowed to modulate $\gamma_k$, producing sharper policy commitment. When that pathway is cut, the tracker remains active but the same entropy reduction is lost.
 
-\begin{figure}[H]
+This supports the interpretation of affective precision as a calibration layer rather than an inference-improvement mechanism. The tracker does not directly change the partner-state update; it regulates how strongly the agent commits to policies based on its current partner model. Whether sharper commitment improves payoff depends on the social context, not on precision alone.
+
+\begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig_deployment_social_summary.pdf}
-\caption{Open graded regime: tracked-only and partner-local precision show comparable movement in posterior mean $\bar{\beta}_k$, but only partner-local precision deploys that tracker through $\gamma_k$. Relative to tracked-only, partner-local precision lowers policy entropy, isolating the sharpening effect to the $\beta_k \rightarrow \gamma_k$ policy-precision pathway. Bars and whiskers show seed means or matched-seed differences with 95\% bootstrap confidence intervals; payoff is included as a secondary behavioral outcome.}
+\caption{Open graded regime: tracked-only and partner-local precision show comparable posterior $\bar{\beta}_k$ movement, but only partner-local precision deploys the tracker through $\gamma_k$ and lowers policy entropy. Bars and whiskers show seed means with 95\% bootstrap intervals; paired contrasts are reported in the text, and payoff is secondary.}
 \label{fig:deployment_contrast}
 \end{figure}
-
-This supports the interpretation of affective precision as a calibration layer rather than an inference-improvement mechanism. The tracker does not directly change the partner-state update; it regulates how strongly the agent commits to policies based on its current partner model. Whether sharper commitment improves payoff depends on the social context, not on precision alone.
 
 \subsection{Partner choice extends policy commitment across social options}
 \label{sec:partner_choice}
@@ -51,18 +51,17 @@ Accumulated confidence helps when it remains attached to a valid partner model, 
 
 Precision modulation continued to affect deployment after the switch. Mean policy entropy was lower under partner-local precision than under the no-affect control, with a mean difference of $-2.149$ nats (95\% CI [$-2.379$, $-1.895$]). Joint type--stance accuracy was also higher by $0.158$ (95\% CI [$0.084$, $0.226$]), consistent with altered engagement changing the evidence available to the agent. Because the tracked-only ablation in Section~\ref{sec:deployment} isolated the $\beta_k \rightarrow \gamma_k$ pathway, this accuracy difference is best interpreted as a downstream effect of changed engagement and sampling, not as a direct improvement to the partner-state update.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\linewidth]{fig_betrayal_boundary_summary.pdf}
-\caption{Abrupt betrayal in the partner-choice regime. The dashed line marks the round-31 stance switch for partner~0. Shaded bands show 95\% seed-bootstrap confidence intervals. Partner-local precision maintains lower policy entropy after the switch, while the tracked-only condition shows that $\beta_k$ dynamics can persist without the same deployment effect. Betrayed-partner selection illustrates the reallocation problem: confidence remains behaviorally relevant after the relationship changes, but downstream outcomes depend on how engagement is redistributed.}
-\label{fig:betrayal_boundary}
-\end{figure}
-
 Payoff was also higher in this regime, with a cumulative difference of $58.2$ (95\% CI [$37.5$, $82.3$]). This is consistent with a calibration mechanism: confidence can keep policies decisive after a relationship changes, but whether that commitment improves payoff depends on how subsequent engagement is redistributed. The payoff result is therefore specific to the tested social environment rather than evidence that greater precision generally maximizes reward.
 
 The betrayal result exposes a timing problem in social confidence: confidence built from reliable past evidence can remain behaviorally active after the relationship changes. We next vary precision gain and prior model fitness to examine how confidence-revision dynamics differ across agents.
 
-\FloatBarrier
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_betrayal_boundary_summary.pdf}
+\caption{Abrupt betrayal in the partner-choice regime. The dashed line marks partner~0's round-31 stance switch; bands show 95\% seed-bootstrap intervals. Partner-local precision maintains lower policy entropy after the switch, while tracked-only $\beta_k$ dynamics persist without the same deployment effect; selection shows redistributed engagement.}
+\label{fig:betrayal_boundary}
+\end{figure}
+
 \subsection{Precision dynamics as computational profiles of social trust calibration}
 \label{sec:phenotypes}
 

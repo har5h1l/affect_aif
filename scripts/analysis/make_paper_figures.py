@@ -49,6 +49,11 @@ VARIANT_LABELS = {
 EXPECTED_POLICIES_PER_PARTNER = 1_296
 EXPECTED_COMBINED_CANDIDATES = 5_184
 EXPECTED_MAX_ENTROPY = math.log(EXPECTED_COMBINED_CANDIDATES)
+# LNCS uses a 12.2 cm text block. Generate at final publication width so
+# embedded lettering is not reduced below its configured point size.
+LNCS_TEXT_WIDTH_IN = 12.2 / 2.54
+MAIN_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.30)
+BETRAYAL_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.25)
 
 
 def _read(source_dir: Path, filename: str) -> pd.DataFrame:
@@ -90,6 +95,8 @@ def _bar(
     title: str,
     ylabel: str,
     ci_bounds: list[tuple[float, float]] | None = None,
+    show_values: bool = True,
+    headroom: float = 1.18,
 ) -> None:
     colors = ["#2f6f9f", "#c47f2c", "#5f8f5f", "#7a6aa8", "#8c8c8c"]
     yerr = None
@@ -109,22 +116,30 @@ def _bar(
         color=colors[: len(values)],
         width=0.68,
         yerr=yerr,
-        capsize=3 if yerr is not None else 0,
-        error_kw={"elinewidth": 1.0, "capthick": 1.0},
+        capsize=2 if yerr is not None else 0,
+        error_kw={"elinewidth": 0.8, "capthick": 0.8},
     )
-    ax.set_xticks(range(len(values)), _label(labels), rotation=20, ha="right")
+    ax.set_xticks(range(len(values)), _label(labels), rotation=22, ha="right")
     ax.set_ylabel(ylabel)
-    ax.set_title(title, pad=8)
+    ax.set_title(title, pad=2)
+    ax.tick_params(axis="both", pad=1)
     ax.spines[["top", "right"]].set_visible(False)
     span = max(values) - min(values) if values else 0
     offset = 0.03 * span if span else 0.02
-    for bar, value in zip(bars, values, strict=True):
+    if values and min(values) >= 0:
+        interval_highs = [high for _, high in ci_bounds] if ci_bounds is not None else []
+        upper = max([*values, *interval_highs])
+        ax.set_ylim(0, upper * headroom if upper else 1.0)
+    if not show_values:
+        return
+    for index, (bar, value) in enumerate(zip(bars, values, strict=True)):
         va = "bottom" if value >= 0 else "top"
-        text_y = bar.get_height() + offset if value >= 0 else bar.get_height() - offset
+        interval_edge = ci_bounds[index][1 if value >= 0 else 0] if ci_bounds is not None else value
+        text_y = interval_edge + offset if value >= 0 else interval_edge - offset
         ax.text(
             bar.get_x() + bar.get_width() / 2,
             text_y,
-            f"{value:.2f}" if abs(value) < 20 else f"{value:.1f}",
+            f"{value:.2f}" if abs(value) < 20 else f"{value:.0f}",
             ha="center",
             va=va,
             fontsize=8,
@@ -185,27 +200,9 @@ def _line_with_band(
     mean = frame[mean_col].astype(float).to_numpy()
     low = frame[low_col].astype(float).to_numpy()
     high = frame[high_col].astype(float).to_numpy()
-    ax.plot(x, mean, label=label, color=color, linewidth=1.8)
+    ax.plot(x, mean, label=label, color=color, linewidth=1.3)
     if np.isfinite(low).any() and np.isfinite(high).any():
         ax.fill_between(x, low, high, color=color, alpha=0.14, linewidth=0)
-
-
-def _annotate_paired_contrast(
-    ax: plt.Axes,
-    *,
-    difference: float,
-    ci_low: float,
-    ci_high: float,
-) -> None:
-    ax.text(
-        0.5,
-        0.04,
-        rf"paired $\Delta$ = {difference:.2f}; 95% CI [{ci_low:.2f}, {ci_high:.2f}]",
-        transform=ax.transAxes,
-        ha="center",
-        va="bottom",
-        fontsize=7.5,
-    )
 
 
 def _validate_canonical_linear_results(results_path: Path) -> None:
@@ -549,7 +546,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     local = locality.loc[locality["plot_variant_id"] == local_id].iloc[0]
     shared = locality.loc[locality["plot_variant_id"] == "global_beta"].iloc[0]
 
-    fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
+    fig, axes = plt.subplots(1, 3, figsize=MAIN_FIGURE_SIZE)
     _bar(
         axes[0],
         ["surprisal", "payoff"],
@@ -558,7 +555,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
             float(local["plot_abs_reward"]),
         ],
         title=r"partner-local $\beta$",
-        ylabel="absolute partial correlation",
+        ylabel=r"$|r_{\mathrm{partial}}|$",
         ci_bounds=[
             (
                 float(local["abs_partial_corr_precision_surprise_ci_low"]),
@@ -580,7 +577,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
             float(shared["plot_abs_reward"]),
         ],
         title=r"shared $\beta$",
-        ylabel="absolute partial correlation",
+        ylabel="",
         ci_bounds=[
             (
                 float(shared["abs_partial_corr_precision_surprise_ci_low"]),
@@ -598,12 +595,12 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         axes[2],
         payoff_rows["plot_variant_id"].tolist(),
         payoff_rows["total_payoff"].tolist(),
-        title="Analysis-window payoff",
-        ylabel="analysis-window payoff",
+        title="Payoff",
+        ylabel="payoff",
         ci_bounds=list(zip(payoff_rows["total_payoff_ci_low"], payoff_rows["total_payoff_ci_high"], strict=True)),
     )
 
-    fig.suptitle("Predictability versus realized payoff", y=1.04, fontsize=12)
+    fig.subplots_adjust(left=0.10, right=0.99, bottom=0.30, top=0.84, wspace=0.52)
     return _save(fig, output_dir, "fig_model_fitness_beta_reward_divergence")
 
 
@@ -626,7 +623,7 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         },
     )
 
-    fig, axes = plt.subplots(1, 3, figsize=(11.2, 3.0), sharex=True)
+    fig, axes = plt.subplots(1, 3, figsize=BETRAYAL_FIGURE_SIZE, sharex=True)
     colors = {"affect": "#2f6f9f", "no_affect": "#8c8c8c", "lesioned": "#5f8f5f"}
     for variant in ["affect", "no_affect"]:
         rows = timecourse[timecourse["variant_id"] == variant].sort_values("round_bin_start")
@@ -667,17 +664,32 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
 
     for ax in axes:
         ax.axvline(31, color="#555555", linestyle="--", linewidth=0.9)
-        ax.set_xlabel("round")
+        ax.set_xlabel("round", labelpad=1)
+        ax.tick_params(axis="both", pad=1)
         ax.spines[["top", "right"]].set_visible(False)
-    axes[0].set_title("Betrayed-partner selection", pad=8)
-    axes[0].set_ylabel("P0 selection rate")
-    axes[1].set_title(r"Betrayed-partner posterior mean $\beta_k$", pad=8)
-    axes[1].set_ylabel(r"mean P0 posterior $\beta_k$")
-    axes[2].set_title("Policy entropy", pad=8)
-    axes[2].set_ylabel("mean entropy")
-    axes[0].legend(frameon=False, fontsize=8)
-    axes[1].legend(frameon=False, fontsize=8)
-    fig.suptitle("Betrayal time course", y=1.04, fontsize=12)
+    axes[0].set_title("Betrayed selection", pad=2)
+    axes[0].set_ylabel("P0 selection")
+    axes[1].set_title(r"Posterior mean $\beta_k$", pad=2)
+    axes[1].set_ylabel(r"P0 mean $\beta_k$")
+    axes[2].set_title("Policy entropy", pad=2)
+    axes[2].set_ylabel("entropy")
+    legend_kwargs = {
+        "frameon": False,
+        "fontsize": 8,
+        "handlelength": 1.3,
+        "handletextpad": 0.35,
+        "borderpad": 0.1,
+        "labelspacing": 0.2,
+    }
+    legend_handles = [axes[0].lines[0], axes[0].lines[1], axes[1].lines[1]]
+    fig.legend(
+        legend_handles,
+        [r"local $\beta$", "no affect", "tracked only"],
+        loc="center right",
+        bbox_to_anchor=(0.995, 0.54),
+        **legend_kwargs,
+    )
+    fig.subplots_adjust(left=0.09, right=0.80, bottom=0.28, top=0.84, wspace=0.60)
     return _save(fig, output_dir, "fig_betrayal_boundary_summary")
 
 
@@ -709,49 +721,37 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
     order = ["affect", tracked_variant]
     h2 = h2.set_index("variant_id").loc[order]
 
-    fig, axes = plt.subplots(1, 3, figsize=(10.8, 3.0))
+    fig, axes = plt.subplots(1, 3, figsize=MAIN_FIGURE_SIZE)
     _bar(
         axes[0],
         order,
         h2["beta_range"].tolist(),
         title=r"$\beta_k$ tracker movement",
-        ylabel=r"mean within-episode $\bar{\beta}_k$ range",
+        ylabel="",
         ci_bounds=list(zip(h2["beta_range_ci_low"], h2["beta_range_ci_high"], strict=True)),
+        headroom=1.35,
     )
-    affect = h2.loc["affect"]
     _bar(
         axes[1],
         order,
         h2["mean_q_pi_entropy"].tolist(),
-        title="Policy entropy",
-        ylabel="mean policy entropy",
+        title="Policy entropy (nats)",
+        ylabel="",
         ci_bounds=list(
             zip(h2["mean_q_pi_entropy_ci_low"], h2["mean_q_pi_entropy_ci_high"], strict=True)
         ),
-    )
-    _annotate_paired_contrast(
-        axes[1],
-        difference=float(affect["delta_entropy_vs_tracked_difference"]),
-        ci_low=float(affect["delta_entropy_vs_tracked_bootstrap_ci_low"]),
-        ci_high=float(affect["delta_entropy_vs_tracked_bootstrap_ci_high"]),
+        headroom=1.35,
     )
     _bar(
         axes[2],
         order,
         h2["total_payoff"].tolist(),
         title="Cumulative payoff",
-        ylabel="mean cumulative payoff",
+        ylabel="",
         ci_bounds=list(zip(h2["total_payoff_ci_low"], h2["total_payoff_ci_high"], strict=True)),
+        headroom=1.35,
     )
-    _annotate_paired_contrast(
-        axes[2],
-        difference=float(affect["delta_payoff_vs_tracked_difference"]),
-        ci_low=float(affect["delta_payoff_vs_tracked_bootstrap_ci_low"]),
-        ci_high=float(affect["delta_payoff_vs_tracked_bootstrap_ci_high"]),
-    )
-
-    fig.suptitle("Tracking requires deployment", y=1.04, fontsize=12)
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.10, right=0.99, bottom=0.30, top=0.84, wspace=0.58)
     return _save(fig, output_dir, "fig_deployment_social_summary")
 
 

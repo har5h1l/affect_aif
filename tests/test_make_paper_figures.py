@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import fitz
+import matplotlib.pyplot as plt
 import pandas as pd
 import pytest
 
@@ -284,12 +285,33 @@ def test_paper_figure_pdfs_embed_beta_labels(tmp_path):
     make_paper_figures.deployment_social_figure(source_dir, output_dir)
     pdf_text = fitz.open(output_dir / "fig_deployment_social_summary.pdf")[0].get_text().replace("\n", " ")
     assert "βk tracker movement" in pdf_text
-    assert "mean within-episode" in pdf_text
-    assert "βk range" in pdf_text
-    assert "Policy entropy" in pdf_text
+    assert "Policy entropy (nats)" in pdf_text
     assert "Cumulative payoff" in pdf_text
-    assert "paired Δ" in pdf_text
+    assert "95% CI" not in pdf_text
+    assert "Tracking requires deployment" not in pdf_text
     assert "Payoff nearly matched" not in pdf_text
+
+
+def test_main_figures_use_lncs_text_width():
+    expected_width = 12.2 / 2.54
+    assert make_paper_figures.LNCS_TEXT_WIDTH_IN == pytest.approx(expected_width)
+    assert make_paper_figures.MAIN_FIGURE_SIZE[0] == pytest.approx(expected_width)
+    assert make_paper_figures.BETRAYAL_FIGURE_SIZE[0] == pytest.approx(expected_width)
+
+
+def test_bar_value_labels_clear_confidence_whiskers():
+    fig, ax = plt.subplots()
+    intervals = [(0.49, 0.77), (0.00, 0.29)]
+    make_paper_figures._bar(
+        ax,
+        ["surprisal", "payoff"],
+        [0.66, 0.09],
+        title="test",
+        ylabel="test",
+        ci_bounds=intervals,
+    )
+    assert all(text.get_position()[1] > high for text, (_, high) in zip(ax.texts, intervals, strict=True))
+    plt.close(fig)
 
 
 def test_new_paper_figures_fail_on_missing_required_column(tmp_path):
