@@ -25,7 +25,7 @@ Second, a charge-based pseudo-likelihood maps positive charge toward high policy
 \end{equation}
 where $\beta_\ell$ ranges over the five support points. This auxiliary update satisfies the intended monotonicity: positive charge reinforces lower $\beta$, negative charge reinforces higher $\beta$, and the effect scales with effective precision at each support point.
 
-The fixed chance-level baseline, discrete $\beta_k$ support, persistence transition, and charge-based pseudo-likelihood are modeling choices that keep the auxiliary tracker bounded and interpretable; learned baselines and volatility-sensitive updates are natural alternatives.
+The fixed chance-level baseline, discrete $\beta_k$ support, persistence transition, and charge-based pseudo-likelihood are modeling choices that provide a bounded and interpretable implementation of the confidence tracker. Alternative formulations could learn partner-specific predictive baselines, adapt confidence persistence to inferred volatility, or represent $\beta_k$ continuously.
 
 \subsection{Posterior update and policy precision}
 
@@ -40,19 +40,19 @@ Policy precision is then set from the posterior mean as given in Eq.~\eqref{eq:g
 
 In partner-choice regimes, partner-specific precision sharpens or flattens policy commitment among policies directed toward a given partner while preserving the mean policy evidence associated with that partner. The transformation in Eq.~\eqref{eq:centered_policy_scores} applies $\gamma_k$ to deviations from the partner-specific policy mean, rather than to raw policy scores. The agent samples or selects policies from the combined set of transformed scores across all partners and policies. This lets $\gamma_k$ control commitment among policies involving partner $k$ without changing the average evidence for approaching partner $k$ during cross-partner comparison.
 
-\subsection{Ablation variants}
+\subsection{Ablation conditions}
 
-Runtime variants are summarized in Table~\ref{tab:precision_variants} (see also Section~\ref{sec:simulation_setup}).
+Precision conditions are summarized in Table~\ref{tab:precision_variants} (see also Section~\ref{sec:simulation_setup}).
 
 \Needspace{10\baselineskip}
 \begin{table}[H]
 \centering
 \small
-\caption{Precision-runtime ablation variants.}
+\caption{Precision ablation conditions.}
 \label{tab:precision_variants}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.18\linewidth}X>{\raggedright\arraybackslash}p{0.24\linewidth}@{}}
 \toprule
-Variant & $\beta$ tracker and $\gamma_k$ & Precision scope \\
+Condition & $\beta$ tracker and $\gamma_k$ & Precision scope \\
 \midrule
 No-affect & off; $\gamma_k = \gamma_{\text{base}}$ fixed & --- \\
 Tracked-only & $q(\beta_k)$ updated; $\gamma_k = \gamma_{\text{base}}$ fixed & per-partner \\

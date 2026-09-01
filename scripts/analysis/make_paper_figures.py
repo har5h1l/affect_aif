@@ -692,8 +692,8 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         "borderpad": 0.1,
         "labelspacing": 0.2,
     }
-    axes[0].legend(**legend_kwargs)
-    axes[1].legend(**legend_kwargs)
+    axes[0].legend(loc="upper right", **legend_kwargs)
+    axes[1].legend(loc="lower right", **legend_kwargs)
     fig.subplots_adjust(left=0.09, right=0.99, bottom=0.24, top=0.88, wspace=0.45)
     return _save(fig, output_dir, "fig_betrayal_boundary_summary")
 
