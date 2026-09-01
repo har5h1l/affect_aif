@@ -295,8 +295,8 @@ def test_paper_figure_pdfs_embed_beta_labels(tmp_path):
 def test_main_figures_use_lncs_text_width():
     expected_width = 12.2 / 2.54
     assert make_paper_figures.LNCS_TEXT_WIDTH_IN == pytest.approx(expected_width)
-    assert make_paper_figures.MAIN_FIGURE_SIZE == pytest.approx((expected_width, 1.50))
-    assert make_paper_figures.BETRAYAL_FIGURE_SIZE == pytest.approx((expected_width, 1.50))
+    assert make_paper_figures.MAIN_FIGURE_SIZE == pytest.approx((expected_width, 1.62))
+    assert make_paper_figures.BETRAYAL_FIGURE_SIZE == pytest.approx((expected_width, 1.62))
 
 
 def test_bar_value_labels_clear_confidence_whiskers():

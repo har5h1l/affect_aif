@@ -52,8 +52,8 @@ EXPECTED_MAX_ENTROPY = math.log(EXPECTED_COMBINED_CANDIDATES)
 # LNCS uses a 12.2 cm text block. Generate at final publication width so
 # embedded lettering is not reduced below its configured point size.
 LNCS_TEXT_WIDTH_IN = 12.2 / 2.54
-MAIN_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.50)
-BETRAYAL_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.50)
+MAIN_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.62)
+BETRAYAL_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.62)
 
 
 def _read(source_dir: Path, filename: str) -> pd.DataFrame:

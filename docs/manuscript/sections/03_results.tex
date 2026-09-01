@@ -6,7 +6,7 @@ Results test whether partner-local precision tracks predictability over payoff, 
 \subsection{Partner-local precision tracks predictability rather than realized payoff}
 \label{sec:predictability_value}
 
-Partner-local precision was more strongly associated with partner-response likelihood surprisal than with realized payoff. Because partner-response surprisal drives the update, this full multi-partner simulation checks whether the intended selectivity persists when confidence updating, partner choice, and policy selection interact. Because partner-choice episodes couple payoff, surprisal, and exposure, we computed active-encounter partial correlations controlling for encounter count and the alternative signal. The precision--surprisal association remained substantially stronger ($r=-0.660$, 95\% CI [$-0.766$, $-0.492$]) than the precision--payoff association ($r=0.094$, 95\% CI [$-0.112$, $0.291$]). Negative precision--surprisal association indicates that less surprising partner responses are associated with greater $\beta_k$-derived policy precision; Figure~\ref{fig:model_fitness_contrast} plots absolute magnitudes for readability.
+Partner-local precision was more strongly associated with partner-response likelihood surprisal than with realized payoff. Because partner-response surprisal drives the update, we use the full multi-partner simulation to check whether this intended selectivity persists once confidence updating, partner choice, and policy selection interact. Partner-choice episodes couple payoff, surprisal, and exposure, so we computed active-encounter partial correlations controlling for encounter count and the alternative signal. The precision--surprisal association remained substantially stronger ($r=-0.660$, 95\% CI [$-0.766$, $-0.492$]) than the precision--payoff association ($r=0.094$, 95\% CI [$-0.112$, $0.291$]). The negative sign reflects greater $\beta_k$-derived policy precision for less surprising responses; Figure~\ref{fig:model_fitness_contrast} plots absolute magnitudes for readability.
 
 Pooling precision evidence across partners weakened this relationship-specific signal. In the shared-$\beta$ ablation, per-partner beliefs remained separate but the precision tracker was updated from pooled partner evidence. The precision--surprisal association was weaker ($r=-0.454$, 95\% CI [$-0.619$, $-0.275$]), while the precision--payoff association remained small ($r=0.072$, 95\% CI [$-0.163$, $0.390$]). Thus, pooling preserves separate partner beliefs but weakens the alignment between confidence and the relationship-specific predictive history from which that confidence is derived.
 
@@ -15,7 +15,7 @@ Payoff in the same analysis run provides behavioral context rather than an indep
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.pdf}
-\caption{Partner-local precision is more strongly associated with partner-response surprisal than realized payoff. Left and middle panels show absolute partial correlations; the right panel shows payoff in the same analysis run. Pooling precision evidence across partners attenuates the relationship-specific predictability signature. Error bars show 95\% CIs.}
+\caption{Partner-local precision is more strongly associated with partner-response surprisal than realized payoff. Left and middle panels show absolute partial correlations; the right panel shows payoff. Error bars show 95\% CIs.}
 \label{fig:model_fitness_contrast}
 \end{figure}
 
@@ -31,7 +31,7 @@ This supports the interpretation of affective precision as a calibration layer r
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig_deployment_social_summary.pdf}
-\caption{Tracked-only and partner-local precision show comparable $\bar{\beta}_k$ movement, but only partner-local precision deploys that tracker through $\gamma_k$. Full deployment lowers policy entropy; payoff is shown as a secondary behavioral outcome. Error bars show 95\% CIs.}
+\caption{Tracked-only preserves $\bar{\beta}_k$ movement without the policy-sharpening effect. Full deployment lowers policy entropy; payoff is shown for context. Error bars show 95\% CIs.}
 \label{fig:deployment_contrast}
 \end{figure}
 
@@ -42,7 +42,7 @@ Using the same underlying partner-choice trajectories analyzed in Section~\ref{s
 
 Partner selection itself remained broadly distributed across the four partner types (cooperator $29.6\%$ versus $30.7\%$; exploiter $24.4\%$ versus $22.6\%$; reciprocator $22.0\%$ versus $24.0\%$; random $24.0\%$ versus $22.7\%$). The type-specific differences were small, and the paired 95\% bootstrap interval for each selected-type difference included zero. These allocation percentages therefore should not be read as evidence of a general preference for any one partner type. The main effect remains sharper commitment over partner--investment policies rather than systematic selection of a particular social type.
 
-Together, these results show that partner-local precision can alter policy commitment without imposing a fixed social preference. Whether sharper commitment helps or hurts depends on whether the social environment remains stable. The abrupt-betrayal condition tests this boundary directly.
+Thus, partner-local precision sharpens policy commitment without imposing a fixed social preference; the abrupt-betrayal condition next tests this mechanism under social change.
 
 \subsection{Abrupt betrayal tests confidence under change}
 \label{sec:betrayal}
@@ -58,7 +58,7 @@ Precision modulation continued to affect deployment after the switch. Mean polic
 \label{fig:betrayal_boundary}
 \end{figure}
 
-Payoff was also higher in this regime, with a cumulative difference of $58.2$ (95\% CI [$37.5$, $82.3$]). This is consistent with a calibration mechanism: confidence can keep policies decisive after a relationship changes, but whether that commitment improves payoff depends on how subsequent engagement is redistributed. The payoff result is therefore specific to the tested social environment rather than evidence that greater precision generally maximizes reward.
+Cumulative payoff was also higher by $58.2$ (95\% CI [$37.5$, $82.3$]), although this regime-specific difference does not imply that greater precision generally maximizes reward.
 
 The betrayal result exposes a timing problem in social confidence: confidence built from reliable past evidence can remain behaviorally active after the relationship changes. We next vary precision gain and prior model fitness to examine how confidence-revision dynamics differ across agents.
 
