@@ -32,15 +32,15 @@ from analysis.metrics import (
 from cli.common import load_results_table
 
 VARIANT_LABELS = {
-    "affect": "local beta",
-    "local_beta": "local beta",
+    "affect": r"local $\beta$",
+    "local_beta": r"local $\beta$",
     "no_affect": "no affect",
     "tracked_only": "tracked only",
     "lesioned": "tracked only",
     "tracked-only": "tracked only",
     "no_epistemic": "no epistemic",
-    "global_beta": "shared beta",
-    "affect_default": "local beta",
+    "global_beta": r"shared $\beta$",
+    "affect_default": r"local $\beta$",
     "affect_combined_caution": "combined caution",
     "low_gain": "low gain",
     "high_gain": "high gain",
@@ -52,8 +52,8 @@ EXPECTED_MAX_ENTROPY = math.log(EXPECTED_COMBINED_CANDIDATES)
 # LNCS uses a 12.2 cm text block. Generate at final publication width so
 # embedded lettering is not reduced below its configured point size.
 LNCS_TEXT_WIDTH_IN = 12.2 / 2.54
-MAIN_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.30)
-BETRAYAL_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.25)
+MAIN_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.50)
+BETRAYAL_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.50)
 
 
 def _read(source_dir: Path, filename: str) -> pd.DataFrame:
@@ -85,6 +85,17 @@ def _save(fig: plt.Figure, output_dir: Path, stem: str) -> list[Path]:
 
 def _label(values: list[str]) -> list[str]:
     return [VARIANT_LABELS.get(value, value.replace("_", " ")) for value in values]
+
+
+def _bar_label(values: list[str]) -> list[str]:
+    labels = _label(values)
+    wrapped = {
+        r"local $\beta$": "local\n$\\beta$",
+        r"shared $\beta$": "shared\n$\\beta$",
+        "no affect": "no\naffect",
+        "tracked only": "tracked\nonly",
+    }
+    return [wrapped.get(label, label) for label in labels]
 
 
 def _bar(
@@ -119,7 +130,7 @@ def _bar(
         capsize=2 if yerr is not None else 0,
         error_kw={"elinewidth": 0.8, "capthick": 0.8},
     )
-    ax.set_xticks(range(len(values)), _label(labels), rotation=22, ha="right")
+    ax.set_xticks(range(len(values)), _bar_label(labels), rotation=0, ha="center")
     ax.set_ylabel(ylabel)
     ax.set_title(title, pad=2)
     ax.tick_params(axis="both", pad=1)
@@ -600,7 +611,7 @@ def model_fitness_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ci_bounds=list(zip(payoff_rows["total_payoff_ci_low"], payoff_rows["total_payoff_ci_high"], strict=True)),
     )
 
-    fig.subplots_adjust(left=0.10, right=0.99, bottom=0.30, top=0.84, wspace=0.52)
+    fig.subplots_adjust(left=0.10, right=0.99, bottom=0.24, top=0.86, wspace=0.42)
     return _save(fig, output_dir, "fig_model_fitness_beta_reward_divergence")
 
 
@@ -681,15 +692,9 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         "borderpad": 0.1,
         "labelspacing": 0.2,
     }
-    legend_handles = [axes[0].lines[0], axes[0].lines[1], axes[1].lines[1]]
-    fig.legend(
-        legend_handles,
-        [r"local $\beta$", "no affect", "tracked only"],
-        loc="center right",
-        bbox_to_anchor=(0.995, 0.54),
-        **legend_kwargs,
-    )
-    fig.subplots_adjust(left=0.09, right=0.80, bottom=0.28, top=0.84, wspace=0.60)
+    axes[0].legend(**legend_kwargs)
+    axes[1].legend(**legend_kwargs)
+    fig.subplots_adjust(left=0.09, right=0.99, bottom=0.24, top=0.88, wspace=0.45)
     return _save(fig, output_dir, "fig_betrayal_boundary_summary")
 
 
@@ -751,7 +756,7 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         ci_bounds=list(zip(h2["total_payoff_ci_low"], h2["total_payoff_ci_high"], strict=True)),
         headroom=1.35,
     )
-    fig.subplots_adjust(left=0.10, right=0.99, bottom=0.30, top=0.84, wspace=0.58)
+    fig.subplots_adjust(left=0.10, right=0.99, bottom=0.24, top=0.86, wspace=0.42)
     return _save(fig, output_dir, "fig_deployment_social_summary")
 
 
