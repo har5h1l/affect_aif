@@ -462,14 +462,8 @@ def test_model_fitness_correlation_reports_reward_exposure_confound():
                     "round": round_idx,
                     "partner_idx": partner_idx,
                     "payoff": payoff,
-                    "betas": [
-                        1.0 / spec_precision
-                        for _, _, _, spec_precision, _ in partner_specs
-                    ],
-                    "prediction_errors": [
-                        spec_surprise
-                        for _, spec_surprise, _, _, _ in partner_specs
-                    ],
+                    "betas": [1.0 / spec_precision for _, _, _, spec_precision, _ in partner_specs],
+                    "prediction_errors": [spec_surprise for _, spec_surprise, _, _, _ in partner_specs],
                     "reward_avgs": [float("nan")] * len(partner_specs),
                     "inferred_type_correct": 1.0,
                 }
@@ -611,9 +605,7 @@ def test_evidence_effect_summary_reports_h1_and_h3_split_readouts():
 
     summary = evidence_effect_summary(pd.DataFrame(rows), bootstrap_iterations=50, random_seed=0)
 
-    final_entropy = summary.loc[
-        (summary["readout"] == "final") & (summary["metric"] == "mean_q_pi_entropy")
-    ].iloc[0]
+    final_entropy = summary.loc[(summary["readout"] == "final") & (summary["metric"] == "mean_q_pi_entropy")].iloc[0]
     assert final_entropy["treatment_variant"] == "affect"
     assert final_entropy["reference_variant"] == "no_affect"
     assert final_entropy["difference"] < 0
@@ -632,8 +624,7 @@ def test_evidence_effect_summary_reports_h1_and_h3_split_readouts():
     assert h1_partial["treatment_mean"] > 0
 
     reallocation = summary.loc[
-        (summary["readout"] == "betrayal_reallocation")
-        & (summary["metric"] == "mean_payoff_on_reencounter")
+        (summary["readout"] == "betrayal_reallocation") & (summary["metric"] == "mean_payoff_on_reencounter")
     ].iloc[0]
     assert reallocation["difference"] > 0
 

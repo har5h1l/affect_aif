@@ -146,17 +146,19 @@ class TestDiscreteAffectiveRuntime:
         from experiments.trust.config import ExperimentConfig
         from tasks.trust.runtime import select_decision
 
-        config = ExperimentConfig.from_dict({
-            "num_partners": 4,
-            "p_switch": 0.05,
-            "assignment_mode": "random",
-            "payoff_mode": "binary",
-            "mutual_coop": (3.0, 3.0),
-            "sucker": (-1.0, 5.0),
-            "temptation": (5.0, -1.0),
-            "mutual_defect": (1.0, 1.0),
-            "initial_beta": 0.5,
-        })
+        config = ExperimentConfig.from_dict(
+            {
+                "num_partners": 4,
+                "p_switch": 0.05,
+                "assignment_mode": "random",
+                "payoff_mode": "binary",
+                "mutual_coop": (3.0, 3.0),
+                "sucker": (-1.0, 5.0),
+                "temptation": (5.0, -1.0),
+                "mutual_defect": (1.0, 1.0),
+                "initial_beta": 0.5,
+            }
+        )
         runtime = build_runtime(config, variant_id="affect", affect="precision", planning_horizon=2, seed=0)
         decision = select_decision(
             bank=runtime.partner_bank,

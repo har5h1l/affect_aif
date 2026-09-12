@@ -64,11 +64,7 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def _summary_with_ci(metrics_df: pd.DataFrame, by: list[str], metric: str) -> pd.DataFrame:
-    summary = (
-        metrics_df.groupby(by, dropna=False)[metric]
-        .agg(mean="mean", std="std", count="count")
-        .reset_index()
-    )
+    summary = metrics_df.groupby(by, dropna=False)[metric].agg(mean="mean", std="std", count="count").reset_index()
     summary["ci95"] = summary.apply(
         lambda row: 0.0 if row["count"] <= 1 else 1.96 * float(row["std"]) / sqrt(float(row["count"])),
         axis=1,

@@ -42,7 +42,7 @@ def test_public_notebooks_load_and_use_current_paths():
 def test_reproduce_notebook_is_colab_and_results_aware():
     text = _notebook_text(ROOT / "notebooks" / "reproduce.ipynb")
 
-    assert "Path(\"/content\").exists()" in text
+    assert 'Path("/content").exists()' in text
     assert "configs/paper/01_predictability_value.toml" in text
     assert "configs/paper/05a_alpha_sweep.toml" in text
     assert "results/paper/01_predictability_value/raw/results.csv" in text

@@ -273,8 +273,7 @@ def test_h1_model_fitness(results: pd.DataFrame) -> dict[str, Any]:
     }
     if "total_payoff" in summary.columns:
         evidence["mean_total_payoff_by_variant"] = {
-            str(variant): _mean(group["total_payoff"])
-            for variant, group in summary.groupby("variant_id", sort=True)
+            str(variant): _mean(group["total_payoff"]) for variant, group in summary.groupby("variant_id", sort=True)
         }
     reason = None if available else "Requires beta or reward-control columns to test model fitness versus reward."
     return _payload(
@@ -292,9 +291,7 @@ def test_h2_deployment(results: pd.DataFrame, accuracy_margin: float = 0.05) -> 
     summary = _summary_by_variant(results)
     lesion_name = "lesioned"
     intact_name = "affect"
-    if lesion_name not in set(summary.get("variant_id", [])) or intact_name not in set(
-        summary.get("variant_id", [])
-    ):
+    if lesion_name not in set(summary.get("variant_id", [])) or intact_name not in set(summary.get("variant_id", [])):
         return _payload(
             HYPOTHESES["H2"],
             available=False,
@@ -340,8 +337,7 @@ def test_h3_locality(results: pd.DataFrame) -> dict[str, Any]:
     }
     if "total_payoff" in summary.columns:
         evidence["mean_total_payoff_by_variant"] = {
-            str(variant): _mean(group["total_payoff"])
-            for variant, group in summary.groupby("variant_id", sort=True)
+            str(variant): _mean(group["total_payoff"]) for variant, group in summary.groupby("variant_id", sort=True)
         }
     return _payload(
         HYPOTHESES["H3"],
@@ -450,9 +446,7 @@ def test_h8_observation_noise(results: pd.DataFrame) -> dict[str, Any]:
     """Observation-noise robustness is exploratory unless noise conditions are present."""
 
     has_noise = "observation_noise" in results.columns
-    noise_levels = (
-        sorted(results["observation_noise"].dropna().astype(float).unique().tolist()) if has_noise else []
-    )
+    noise_levels = sorted(results["observation_noise"].dropna().astype(float).unique().tolist()) if has_noise else []
     return _payload(
         HYPOTHESES["H8"],
         available=bool(noise_levels),

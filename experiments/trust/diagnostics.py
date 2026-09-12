@@ -24,9 +24,7 @@ def summarize_policy_space(
     q_pi = np.asarray(q_pi, dtype=float)
     per_partner_policy_count = int(per_partner_policy_count)
     candidate_policy_count = (
-        int(num_partners) * per_partner_policy_count
-        if assignment_mode == "agent_choice"
-        else per_partner_policy_count
+        int(num_partners) * per_partner_policy_count if assignment_mode == "agent_choice" else per_partner_policy_count
     )
     if q_pi.size != candidate_policy_count:
         raise AssertionError(
@@ -48,9 +46,7 @@ def summarize_policy_space(
             f"candidate_policy_count={candidate_policy_count}"
         )
 
-    normalized_q_pi_entropy = (
-        float(q_pi_entropy / max_q_pi_entropy) if max_q_pi_entropy > 0.0 else 0.0
-    )
+    normalized_q_pi_entropy = float(q_pi_entropy / max_q_pi_entropy) if max_q_pi_entropy > 0.0 else 0.0
     return {
         "q_pi_entropy": q_pi_entropy,
         "per_partner_policy_count": per_partner_policy_count,
@@ -58,9 +54,7 @@ def summarize_policy_space(
         "max_q_pi_entropy": max_q_pi_entropy,
         "normalized_q_pi_entropy": normalized_q_pi_entropy,
         "effective_policy_count": float(np.exp(q_pi_entropy)),
-        "policies_fully_enumerated": bool(
-            per_partner_policy_count == int(expected_per_partner_policy_count)
-        ),
+        "policies_fully_enumerated": bool(per_partner_policy_count == int(expected_per_partner_policy_count)),
     }
 
 
@@ -76,9 +70,7 @@ def build_decision_diagnostics(
 
     q_pi = np.asarray(decision.q_pi, dtype=float)
     per_partner_policy_count = int(runtime.template.policies.shape[0])
-    expected_per_partner_policy_count = int(np.prod(runtime.template.num_controls)) ** int(
-        runtime.planning_horizon
-    )
+    expected_per_partner_policy_count = int(np.prod(runtime.template.num_controls)) ** int(runtime.planning_horizon)
     policy_metrics = summarize_policy_space(
         q_pi=q_pi,
         per_partner_policy_count=per_partner_policy_count,
@@ -92,11 +84,7 @@ def build_decision_diagnostics(
         if runtime.partner_bank.beta is not None
         else default_vector
     )
-    global_beta = (
-        float(betas[0])
-        if runtime.affect_mode == "global" and np.asarray(betas, dtype=float).size
-        else np.nan
-    )
+    global_beta = float(betas[0]) if runtime.affect_mode == "global" and np.asarray(betas, dtype=float).size else np.nan
     local_betas = (
         np.full((config.num_partners,), global_beta, dtype=float)
         if runtime.affect_mode == "global"

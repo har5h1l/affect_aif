@@ -30,4 +30,3 @@ def test_tasks_do_not_import_higher_layers():
             if f"import {token}" in text or f"from {token}" in text:
                 offenders.append(f"{path.relative_to(ROOT)} imports {token}")
     assert offenders == []
-

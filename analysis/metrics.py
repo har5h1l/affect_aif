@@ -77,8 +77,7 @@ def _mean_beta(row: pd.Series) -> float:
 
 def _stack_beta_rows(series: pd.Series) -> np.ndarray:
     arrays = [
-        np.asarray(value, dtype=float) if isinstance(value, np.ndarray) else _ensure_array(value)
-        for value in series
+        np.asarray(value, dtype=float) if isinstance(value, np.ndarray) else _ensure_array(value) for value in series
     ]
     arrays = [array for array in arrays if array.size > 0]
     if not arrays:
@@ -665,9 +664,7 @@ def phenotype_validation_summary(results: pd.DataFrame) -> pd.DataFrame:
             else np.asarray([], dtype=float)
         )
         actions = group["selected_action"].dropna().to_numpy(dtype=float) if "selected_action" in group.columns else []
-        action_flip_rate = (
-            float(np.mean(np.diff(actions) != 0)) if len(actions) > 1 else np.nan
-        )
+        action_flip_rate = float(np.mean(np.diff(actions) != 0)) if len(actions) > 1 else np.nan
         finite_partner_ranges = partner_ranges[np.isfinite(partner_ranges)]
         rows.append(
             {
@@ -715,11 +712,7 @@ def partner_model_fitness_summary(results: pd.DataFrame) -> pd.DataFrame:
                 continue
             is_active = active_partner == partner_idx
             precision = float(1.0 / beta) if beta > 0 else np.nan
-            surprise = (
-                float(prediction_errors[partner_idx])
-                if len(prediction_errors) > partner_idx
-                else np.nan
-            )
+            surprise = float(prediction_errors[partner_idx]) if len(prediction_errors) > partner_idx else np.nan
             rows.append(
                 {
                     "variant_id": str(row["variant_id"]),
@@ -731,9 +724,7 @@ def partner_model_fitness_summary(results: pd.DataFrame) -> pd.DataFrame:
                     "active_precision": precision if is_active else np.nan,
                     "surprise": surprise,
                     "active_surprise": surprise if is_active else np.nan,
-                    "reward_signal": (
-                        float(reward_avgs[partner_idx]) if len(reward_avgs) > partner_idx else np.nan
-                    ),
+                    "reward_signal": (float(reward_avgs[partner_idx]) if len(reward_avgs) > partner_idx else np.nan),
                     "active_payoff": float(row["payoff"]) if is_active and "payoff" in row.index else np.nan,
                     "active_accuracy": (
                         float(row["inferred_type_correct"])
@@ -800,9 +791,7 @@ def _partial_corr(left: pd.Series, right: pd.Series, controls: dict[str, pd.Seri
     if len(frame) < 3:
         return np.nan
     usable_controls = [
-        name
-        for name in controls
-        if name in frame.columns and not np.isclose(frame[name].std(ddof=0), 0.0)
+        name for name in controls if name in frame.columns and not np.isclose(frame[name].std(ddof=0), 0.0)
     ]
     if not usable_controls:
         return _safe_corr(frame["left"], frame["right"])
@@ -814,16 +803,24 @@ def _partial_corr(left: pd.Series, right: pd.Series, controls: dict[str, pd.Seri
             frame[usable_controls].to_numpy(dtype=float),
         ]
     )
-    left_resid = frame["left"].to_numpy(dtype=float) - design @ np.linalg.lstsq(
-        design,
-        frame["left"].to_numpy(dtype=float),
-        rcond=None,
-    )[0]
-    right_resid = frame["right"].to_numpy(dtype=float) - design @ np.linalg.lstsq(
-        design,
-        frame["right"].to_numpy(dtype=float),
-        rcond=None,
-    )[0]
+    left_resid = (
+        frame["left"].to_numpy(dtype=float)
+        - design
+        @ np.linalg.lstsq(
+            design,
+            frame["left"].to_numpy(dtype=float),
+            rcond=None,
+        )[0]
+    )
+    right_resid = (
+        frame["right"].to_numpy(dtype=float)
+        - design
+        @ np.linalg.lstsq(
+            design,
+            frame["right"].to_numpy(dtype=float),
+            rcond=None,
+        )[0]
+    )
     return _safe_corr(pd.Series(left_resid), pd.Series(right_resid))
 
 
@@ -833,8 +830,7 @@ def _cohen_d(left: pd.Series, right: pd.Series) -> float:
     if len(left_values) < 2 or len(right_values) < 2:
         return np.nan
     pooled_var = (
-        ((len(left_values) - 1) * left_values.var(ddof=1))
-        + ((len(right_values) - 1) * right_values.var(ddof=1))
+        ((len(left_values) - 1) * left_values.var(ddof=1)) + ((len(right_values) - 1) * right_values.var(ddof=1))
     ) / (len(left_values) + len(right_values) - 2)
     if not np.isfinite(pooled_var) or np.isclose(pooled_var, 0.0):
         return np.nan
@@ -915,16 +911,19 @@ def paired_seed_contrast(
     if int(iterations) <= 0:
         raise ValueError("paired contrast requires a positive bootstrap iteration count")
 
-    paired = treatment[[seed_column, value_column]].merge(
-        reference[[seed_column, value_column]],
-        on=seed_column,
-        how="inner",
-        validate="one_to_one",
-        suffixes=("_treatment", "_reference"),
-    ).sort_values(seed_column, kind="stable")
+    paired = (
+        treatment[[seed_column, value_column]]
+        .merge(
+            reference[[seed_column, value_column]],
+            on=seed_column,
+            how="inner",
+            validate="one_to_one",
+            suffixes=("_treatment", "_reference"),
+        )
+        .sort_values(seed_column, kind="stable")
+    )
     differences = (
-        paired[f"{value_column}_treatment"].astype(float)
-        - paired[f"{value_column}_reference"].astype(float)
+        paired[f"{value_column}_treatment"].astype(float) - paired[f"{value_column}_reference"].astype(float)
     ).to_numpy(dtype=float)
     rng = np.random.default_rng(int(random_seed))
     samples = rng.choice(differences, size=(int(iterations), differences.size), replace=True)
@@ -1200,9 +1199,7 @@ def evidence_effect_summary(
                 if _series_is_constant(reward_proxy) and np.isfinite(corr_surprise):
                     corr_reward = 0.0
                 if np.isfinite(corr_surprise) and np.isfinite(corr_reward):
-                    seed_frame = pd.DataFrame(
-                        [{"seed": -1, "dominance": abs(corr_surprise) - abs(corr_reward)}]
-                    )
+                    seed_frame = pd.DataFrame([{"seed": -1, "dominance": abs(corr_surprise) - abs(corr_reward)}])
             if not seed_frame.empty:
                 rows.append(
                     _effect_row(
@@ -1539,9 +1536,7 @@ def betrayal_misdeployment_summary(
                     "encounters": int(len(window_frame)),
                     "mean_payoff": float(window_frame["payoff"].mean()),
                     "mean_q_pi_entropy": (
-                        float(window_frame["q_pi_entropy"].mean())
-                        if "q_pi_entropy" in window_frame.columns
-                        else np.nan
+                        float(window_frame["q_pi_entropy"].mean()) if "q_pi_entropy" in window_frame.columns else np.nan
                     ),
                     "wrong_type_rate": float(wrong_type.mean()),
                     "bad_payoff_rate": float(bad_payoff.mean()),

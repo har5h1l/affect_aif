@@ -35,9 +35,10 @@ results/
 ```
 
 Full per-round CSVs live under `raw/` subdirectories when present; those files
-are gitignored. The public data packet can include the full `results/` tree
-because tracked summaries and ignored raw files share the same canonical folder
-layout. The packet link lives in root `README.md` under **Paper Result Data**.
+are gitignored. The frozen public data package includes the canonical
+`results/paper/` tree, so tracked summaries and ignored raw files retain the
+same folder layout. The archive and checksum links live in root `README.md`
+under **Paper Result Data**.
 
 ## Evidence Contract
 
@@ -66,5 +67,6 @@ figure/source-table/result-card map.
   paper-needed raw files under gitignored `raw/` paths.
 - `results/diagnostics/` may be compact-summary only when raw diagnostic data
   is not needed for the paper packet.
-- The public data packet (see root `README.md`) is the row-level data route; git
-  remains the compact summary and provenance route.
+- The frozen ZIP under `results/releases/` (see root `README.md`) is the
+  row-level data route; the directly browsable Git tree remains the compact
+  summary and provenance route.

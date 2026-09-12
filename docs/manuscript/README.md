@@ -23,10 +23,10 @@ Output: `main.pdf`.
 - `appendix/`: appendix section files.
 - `main.pdf`: rendered PDF produced from `main.tex`.
 - `references.bib`: verified bibliography entries used by the manuscript.
-- `macros.tex`: shared LaTeX macros. The default build points reviewers to the
-  public data packet in root `README.md`. After de-anonymization, set
-  `\anonsupprepofalse` to print the public GitHub repository URL instead. The
-  supplementary statement appears once at the start of the appendix
+- `macros.tex`: shared LaTeX macros. The camera-ready build points readers to
+  the public GitHub repository, whose root `README.md` links the frozen
+  row-level result archive and checksums. The supplementary statement appears
+  once at the start of the appendix
   (`appendix/appendix_00_supplementary.tex`).
 - `figures/`: copied PNG/PDF panels from analysis outputs.
 - `source_tables/`: compact CSVs copied from paper analysis outputs for

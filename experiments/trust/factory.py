@@ -103,13 +103,11 @@ def create_agents_from_multi_focal_config(
         overrides = dict(spec.get("model_overrides", {}))
         if "num_partners" in overrides:
             raise ValueError(
-                "multi-focal model_overrides must not set 'num_partners'; "
-                "each agent model is forced to M - 1 partners."
+                "multi-focal model_overrides must not set 'num_partners'; each agent model is forced to M - 1 partners."
             )
         if "num_partners" in spec:
             raise ValueError(
-                "multi-focal agent specs must not set 'num_partners'; "
-                "each agent model is forced to M - 1 partners."
+                "multi-focal agent specs must not set 'num_partners'; each agent model is forced to M - 1 partners."
             )
         unknown_agent_keys = {
             key for key in spec if key not in {"kind", "model_overrides", "_label"} and key not in supported_agent_keys
@@ -205,11 +203,7 @@ def _create_runtime_from_config_and_variant(
             else "global_beta"
         )
         affect_mode = (
-            "normal"
-            if variant.affect == "precision"
-            else "decouple"
-            if variant.affect == "tracked_only"
-            else "global"
+            "normal" if variant.affect == "precision" else "decouple" if variant.affect == "tracked_only" else "global"
         )
         beta_entities = 1 if variant.affect == "global_beta" else config.num_partners
         beta = DiscreteBetaState(

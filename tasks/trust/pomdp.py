@@ -325,9 +325,9 @@ def stance_transition_for_executed_own_action(template: TrustPomdpTemplate, own_
 
 def predict_next_joint_belief(template: TrustPomdpTemplate, joint_belief: np.ndarray, own_action: int) -> np.ndarray:
     joint = as_joint_belief(template, joint_belief)
-    predictive = type_transition(template) @ joint @ stance_transition_for_executed_own_action(
-        template, int(own_action)
-    ).T
+    predictive = (
+        type_transition(template) @ joint @ stance_transition_for_executed_own_action(template, int(own_action)).T
+    )
     predictive /= max(float(predictive.sum()), 1e-16)
     return predictive
 

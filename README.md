@@ -95,9 +95,17 @@ python scripts/analysis/make_paper_figures.py --help
 ## Paper Result Data
 
 Full canonical per-round `results.csv` files for the paper suite are
-gitignored and retained outside git. Compact summaries and manifests remain
-under `results/paper/`; regenerate the raw trajectories from `configs/paper/`
-when needed.
+gitignored in their working-tree locations. The frozen IWAI 2026 camera-ready
+data package is available as a single tracked archive:
+
+- [`results/releases/affect_aif-iwai2026-camera-ready-results.zip`](results/releases/affect_aif-iwai2026-camera-ready-results.zip)
+- [`results/releases/affect_aif-iwai2026-camera-ready-results.zip.sha256`](results/releases/affect_aif-iwai2026-camera-ready-results.zip.sha256)
+
+The archive contains the compact summaries, manifests, and ten canonical
+row-level result tables under the same `results/paper/` layout used by the
+analysis scripts. Compact summaries and manifests remain directly browsable
+under `results/paper/`; regenerate trajectories from `configs/paper/` when
+needed.
 
 ## Where To Go Next
 

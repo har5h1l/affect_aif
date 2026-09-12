@@ -4,13 +4,17 @@ from pathlib import Path
 
 
 def write_example_toml(path: Path, *, sweeps: bool = False, rounds: int = 120, replications: int = 3) -> Path:
-    sweep_block = """
+    sweep_block = (
+        """
 
 [[sweeps]]
 parameter = "planning_horizon"
 values = [1, 4]
 applies_to = ["affect", "no_affect"]
-""" if sweeps else ""
+"""
+        if sweeps
+        else ""
+    )
     path.write_text(
         f"""
 [hypothesis]

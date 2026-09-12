@@ -57,6 +57,11 @@ results/**/checkpoint_manifest.json
 results/**/*checkpoint*
 results/**/*.log
 results/results_packet/
+!results/releases/
+!results/releases/README.md
+!results/releases/CANONICAL_RESULTS.sha256
+!results/releases/*.zip
+!results/releases/*.zip.sha256
 outputs/
 artifacts/
 tmp/
@@ -64,8 +69,11 @@ tmp/
 # LaTeX build artifacts
 docs/manuscript/*.aux
 docs/manuscript/*.blg
+docs/manuscript/*.fdb_latexmk
+docs/manuscript/*.fls
 docs/manuscript/*.log
 docs/manuscript/*.out
+docs/manuscript/*.synctex.gz
 
 # direnv
 .direnv/

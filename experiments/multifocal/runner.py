@@ -201,14 +201,8 @@ class MultiFocalRunner:
         is_focal: bool,
     ) -> dict:
         q_pi = np.asarray(decision.q_pi, dtype=float)
-        selection_mode = (
-            "agent_choice"
-            if is_focal and self.config.assignment_mode == "agent_choice"
-            else "random"
-        )
-        expected_per_partner_policy_count = int(np.prod(runtime.template.num_controls)) ** int(
-            runtime.planning_horizon
-        )
+        selection_mode = "agent_choice" if is_focal and self.config.assignment_mode == "agent_choice" else "random"
+        expected_per_partner_policy_count = int(np.prod(runtime.template.num_controls)) ** int(runtime.planning_horizon)
         policy_metrics = summarize_policy_space(
             q_pi=q_pi,
             per_partner_policy_count=int(runtime.template.policies.shape[0]),

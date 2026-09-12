@@ -479,8 +479,7 @@ def _agent_choice_policy_arrays(
     )
     if scores_by_partner.shape != (partner_count, policy_count):
         raise ValueError(
-            f"policy_scores_by_partner must have shape {(partner_count, policy_count)}, "
-            f"got {scores_by_partner.shape}."
+            f"policy_scores_by_partner must have shape {(partner_count, policy_count)}, got {scores_by_partner.shape}."
         )
 
     centers = scores_by_partner.mean(axis=1, keepdims=True)

@@ -27,9 +27,7 @@ def cross_partner_interference_summary(results: pd.DataFrame, *, post_window: in
     rows: list[dict] = []
     for (variant_id, seed), group in frame.groupby(["variant_id", "seed"], sort=False):
         group = group.sort_values("round")
-        scheduled = switch_rows.loc[
-            (switch_rows["variant_id"] == variant_id) & (switch_rows["seed"] == seed)
-        ]
+        scheduled = switch_rows.loc[(switch_rows["variant_id"] == variant_id) & (switch_rows["seed"] == seed)]
         if scheduled.empty:
             continue
         switch_round = int(scheduled.iloc[0]["round"])
@@ -76,9 +74,7 @@ def partner_phase_delta_summary(results: pd.DataFrame, *, window: int = 10) -> p
     rows: list[dict] = []
     for (variant_id, seed), group in frame.groupby(["variant_id", "seed"], sort=False):
         group = group.sort_values("round")
-        scheduled = switch_rows.loc[
-            (switch_rows["variant_id"] == variant_id) & (switch_rows["seed"] == seed)
-        ]
+        scheduled = switch_rows.loc[(switch_rows["variant_id"] == variant_id) & (switch_rows["seed"] == seed)]
         if scheduled.empty:
             continue
         switch_round = int(scheduled.iloc[0]["round"])
@@ -134,11 +130,7 @@ def global_vs_local_beta_summary(results: pd.DataFrame) -> pd.DataFrame:
             row["global_beta_mean"] = float(finite.mean()) if len(finite) else np.nan
             row["global_beta_range"] = float(finite.max() - finite.min()) if len(finite) else np.nan
         vector_column = (
-            "local_betas"
-            if "local_betas" in group.columns
-            else "betas"
-            if "betas" in group.columns
-            else None
+            "local_betas" if "local_betas" in group.columns else "betas" if "betas" in group.columns else None
         )
         if vector_column is not None:
             beta_stack = _stack_beta_rows(group[vector_column].apply(ensure_array))
