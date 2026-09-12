@@ -212,13 +212,18 @@ def high_investment_mask(group: pd.DataFrame) -> pd.Series:
     return actions >= max_action / 2.0
 
 
+def protocol_rounds(frame: pd.DataFrame) -> pd.Series:
+    """Map zero-based logged rounds to the one-based rounds used by protocols."""
+    return pd.to_numeric(frame["round"], errors="coerce") + 1
+
+
 def epoch_mean(group: pd.DataFrame, metric: str, start: int, end: int) -> float:
-    rows = group[(pd.to_numeric(group["round"], errors="coerce") >= start) & (pd.to_numeric(group["round"]) <= end)]
+    rows = group[(protocol_rounds(group) >= start) & (protocol_rounds(group) <= end)]
     return float(pd.to_numeric(rows[metric], errors="coerce").mean()) if len(rows) else float("nan")
 
 
 def betrayal_recovery_time(group: pd.DataFrame, *, partner: int = 0, switch_round: int = 81) -> float:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     selected = pd.to_numeric(group["partner_idx"], errors="coerce") == int(partner)
     pre = selected[rounds < switch_round]
     if pre.empty:
@@ -244,7 +249,7 @@ def has_betrayal_window(experiment_id: str) -> bool:
 
 
 def post_betrayal_p0_selection_rate(group: pd.DataFrame, *, switch_round: int = 81, window_end: int = 120) -> float:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     rows = group[(rounds >= int(switch_round)) & (rounds <= int(window_end))]
     if rows.empty:
         return float("nan")
@@ -257,7 +262,7 @@ def post_betrayal_p0_high_investment_rate(
     switch_round: int = 81,
     window_end: int = 120,
 ) -> float:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     rows = group[(rounds >= int(switch_round)) & (rounds <= int(window_end))]
     if rows.empty:
         return float("nan")
@@ -270,7 +275,7 @@ def common_group_metrics(results: pd.DataFrame) -> list[dict[str, Any]]:
     group_cols = ["experiment_id", "variant_id", "seed"]
     for keys, group in results.groupby(group_cols, dropna=False):
         experiment_id, variant_id, seed = keys
-        rounds = pd.to_numeric(group["round"], errors="coerce")
+        rounds = protocol_rounds(group)
         early = group[(rounds >= 1) & (rounds <= 30)]
         exploiter = early["true_partner_type"].astype(str).eq("exploiter")
         cooperative = high_investment_mask(early)

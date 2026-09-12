@@ -17,6 +17,7 @@ from analysis.phenotypes.common import (
     make_spec,
     mixed_volatility_scenario,
     no_affect_variant,
+    protocol_rounds,
     save_figure,
     variant_label,
     vector_value,
@@ -65,7 +66,7 @@ def _partner_beta_range(group: pd.DataFrame, partner: int) -> float:
 
 
 def _partner_beta_at_round(group: pd.DataFrame, partner: int, target_round: int) -> float:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     rows = group[rounds == int(target_round)]
     if rows.empty:
         rows = group[rounds == rounds[rounds <= int(target_round)].max()]
@@ -76,7 +77,7 @@ def _partner_beta_at_round(group: pd.DataFrame, partner: int, target_round: int)
 
 
 def _p0_selection_at_round(group: pd.DataFrame, target_round: int, *, window: int = 20) -> float:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     selected = (pd.to_numeric(group["partner_idx"], errors="coerce") == 0).astype(float)
     mask = (rounds <= int(target_round)) & (rounds > int(target_round) - int(window))
     values = selected[mask]
@@ -92,7 +93,7 @@ def _stable_partner_false_positive_rate(
     window: int = 20,
     drop_fraction: float = 0.15,
 ) -> float:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     selected = (pd.to_numeric(group["partner_idx"], errors="coerce") == int(partner)).astype(float)
     baseline = selected[rounds <= baseline_end]
     evaluation = pd.DataFrame(
@@ -155,11 +156,7 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def _summary_with_ci(metrics_df: pd.DataFrame, by: list[str], metric: str) -> pd.DataFrame:
-    summary = (
-        metrics_df.groupby(by, dropna=False)[metric]
-        .agg(mean="mean", std="std", count="count")
-        .reset_index()
-    )
+    summary = metrics_df.groupby(by, dropna=False)[metric].agg(mean="mean", std="std", count="count").reset_index()
     summary["ci95"] = summary.apply(
         lambda row: 0.0 if row["count"] <= 1 else 1.96 * float(row["std"]) / sqrt(float(row["count"])),
         axis=1,

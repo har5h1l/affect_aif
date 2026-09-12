@@ -122,6 +122,11 @@ class VariantSpec:
     beta_levels: tuple[float, ...] = (0.5, 0.67, 1.0, 1.5, 2.0)
     action_selection: str = "marginal"
 
+    @property
+    def effective_charge_transform(self) -> str:
+        """Report the transform actually used, including the tracker-free control."""
+        return "none" if self.affect == "none" else self.charge_transform
+
 
 @dataclass(frozen=True)
 class SweepSpec:
@@ -334,7 +339,10 @@ class ExperimentSpec:
             raise ValueError(f"charge_transform must be one of {sorted(CHARGE_TRANSFORMS)}")
         return replace(
             self,
-            variants=tuple(replace(variant, charge_transform=transform) for variant in self.variants),
+            variants=tuple(
+                variant if variant.affect == "none" else replace(variant, charge_transform=transform)
+                for variant in self.variants
+            ),
         )
 
     def to_payload(self) -> dict[str, Any]:
@@ -355,9 +363,7 @@ class ExperimentSpec:
             scenario["initial_stances"] = tuple(scenario["initial_stances"])
         for key in ("mutual_coop", "sucker", "temptation", "mutual_defect"):
             scenario[key] = tuple(scenario.get(key, getattr(ScenarioSpec, key)))
-        scenario["stance_switches"] = tuple(
-            StanceSwitchSpec(**item) for item in scenario.get("stance_switches", ())
-        )
+        scenario["stance_switches"] = tuple(StanceSwitchSpec(**item) for item in scenario.get("stance_switches", ()))
         scenario["type_switches"] = tuple(TypeSwitchSpec(**item) for item in scenario.get("type_switches", ()))
         data["scenario"] = ScenarioSpec(**scenario)
         data["variants"] = tuple(
@@ -434,9 +440,7 @@ def _parse_suite(data: dict[str, Any], path: Path) -> list[ExperimentSpec]:
         experiment = ExperimentMeta(**experiment_data)
         scenario = _parse_scenario(_merge_table(default_scenario, scenario_entry))
         variants = (
-            tuple(_parse_variant(item) for item in variant_entries)
-            if variant_entries is not None
-            else shared_variants
+            tuple(_parse_variant(item) for item in variant_entries) if variant_entries is not None else shared_variants
         )
         runtime = _parse_runtime(_merge_table(default_runtime, runtime_entry))
         analysis = _parse_analysis(_merge_table(default_analysis, analysis_entry), hypothesis)

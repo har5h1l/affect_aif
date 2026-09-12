@@ -6,6 +6,7 @@ from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from experiment_spec_helpers import write_example_toml
 
 from analysis.metrics import post_switch_window_summary
@@ -375,6 +376,7 @@ def test_batch_inline_runner_passes_verbose_options_to_experiment_runner(tmp_pat
                     "variant_id": run.variant_id,
                     "seed": run.seed,
                     "replication": run.replication,
+                    "charge_transform": run.variant.effective_charge_transform,
                     "round": 0,
                     "payoff": 1.0,
                     "config_path": config_path,
@@ -439,6 +441,31 @@ def test_batch_schedules_expanded_variant_runs(tmp_path):
     assert len(states[0].expanded_runs) == 6
 
 
+@pytest.mark.parametrize("mode", ["serial", "batch"])
+@pytest.mark.parametrize("old_transform", ["squared", None])
+def test_resume_rejects_incompatible_or_unknown_charge_before_reusing_rows(tmp_path, mode, old_transform):
+    path = write_example_toml(tmp_path / "config.toml", rounds=2, replications=1)
+    batch = BatchExperimentRunner(config_paths=[str(path)], output_root=str(tmp_path), batch_id="resume", workers=1)
+    state = batch._load_states()[0]
+    run = state.expanded_runs[0]
+    state.output_dir.mkdir(parents=True)
+    checkpoint = state.output_dir / "results_partial.csv"
+    rows = pd.DataFrame(
+        [{"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": i} for i in range(2)]
+    )
+    if old_transform is not None:
+        rows["charge_transform"] = old_transform
+    rows.to_csv(checkpoint, index=False)
+    before = checkpoint.read_bytes()
+    with pytest.raises(ValueError, match="Checkpoint charge transform"):
+        if mode == "serial":
+            ExperimentRunner.from_spec(state.spec).run_all(checkpoint_path=str(checkpoint))
+        else:
+            batch._load_checkpoint(state)
+    assert checkpoint.read_bytes() == before
+    assert not (state.output_dir / "results.csv").exists()
+
+
 def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
     path = write_example_toml(tmp_path / "betrayal_choice.toml", rounds=2, replications=2)
     path.write_text(path.read_text().replace("auto = true", "auto = false", 1), encoding="utf-8")
@@ -457,6 +484,7 @@ def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
                 "variant_id": completed_run.variant_id,
                 "seed": completed_run.seed,
                 "replication": completed_run.replication,
+                "charge_transform": completed_run.variant.effective_charge_transform,
                 "round": 0,
                 "payoff": 1.0,
                 "config_name": first.config_name,
@@ -466,6 +494,7 @@ def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
                 "variant_id": completed_run.variant_id,
                 "seed": completed_run.seed,
                 "replication": completed_run.replication,
+                "charge_transform": completed_run.variant.effective_charge_transform,
                 "round": 1,
                 "payoff": 1.0,
                 "config_name": first.config_name,
@@ -486,12 +515,14 @@ def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
                 "task_kind": "variant",
                 "variant_id": self.run.variant_id,
                 "replication": self.run.replication,
+                "charge_transform": self.run.variant.effective_charge_transform,
                 "seed": self.run.seed,
                 "records": [
                     {
                         "variant_id": self.run.variant_id,
                         "seed": self.run.seed,
                         "replication": self.run.replication,
+                        "charge_transform": self.run.variant.effective_charge_transform,
                         "round": 0,
                         "payoff": 2.0,
                         "config_name": first.config_name,
@@ -501,6 +532,7 @@ def test_batch_runner_resumes_completed_checkpoint_runs(tmp_path, monkeypatch):
                         "variant_id": self.run.variant_id,
                         "seed": self.run.seed,
                         "replication": self.run.replication,
+                        "charge_transform": self.run.variant.effective_charge_transform,
                         "round": 1,
                         "payoff": 2.0,
                         "config_name": first.config_name,
@@ -560,6 +592,7 @@ def test_batch_inline_runner_resumes_completed_checkpoint_runs(tmp_path):
                 "variant_id": completed_run.variant_id,
                 "seed": completed_run.seed,
                 "replication": completed_run.replication,
+                "charge_transform": completed_run.variant.effective_charge_transform,
                 "round": 0,
                 "payoff": 1.0,
                 "config_name": first.config_name,
@@ -569,6 +602,7 @@ def test_batch_inline_runner_resumes_completed_checkpoint_runs(tmp_path):
                 "variant_id": completed_run.variant_id,
                 "seed": completed_run.seed,
                 "replication": completed_run.replication,
+                "charge_transform": completed_run.variant.effective_charge_transform,
                 "round": 1,
                 "payoff": 1.0,
                 "config_name": first.config_name,
@@ -599,8 +633,20 @@ def test_batch_runner_does_not_resume_duplicate_incomplete_checkpoint(tmp_path):
     state.output_dir.mkdir(parents=True)
     pd.DataFrame(
         [
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
         ]
     ).to_csv(state.output_dir / "results_partial.csv", index=False)
 
@@ -622,8 +668,20 @@ def test_batch_checkpoint_resume_filters_without_row_apply(tmp_path, monkeypatch
     state.output_dir.mkdir(parents=True)
     pd.DataFrame(
         [
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 1},
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 1,
+            },
         ]
     ).to_csv(state.output_dir / "results_partial.csv", index=False)
 
@@ -649,6 +707,7 @@ def test_serial_runner_resumes_completed_checkpoint_runs(tmp_path, tiny_spec, mo
                 "variant_id": completed_run.variant_id,
                 "seed": completed_run.seed,
                 "replication": completed_run.replication,
+                "charge_transform": completed_run.variant.effective_charge_transform,
                 "round": 0,
                 "payoff": 1.0,
             },
@@ -656,6 +715,7 @@ def test_serial_runner_resumes_completed_checkpoint_runs(tmp_path, tiny_spec, mo
                 "variant_id": completed_run.variant_id,
                 "seed": completed_run.seed,
                 "replication": completed_run.replication,
+                "charge_transform": completed_run.variant.effective_charge_transform,
                 "round": 1,
                 "payoff": 1.0,
             },
@@ -672,6 +732,7 @@ def test_serial_runner_resumes_completed_checkpoint_runs(tmp_path, tiny_spec, mo
                 "variant_id": run.variant_id,
                 "seed": run.seed,
                 "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
                 "round": 0,
                 "payoff": 2.0,
             },
@@ -679,6 +740,7 @@ def test_serial_runner_resumes_completed_checkpoint_runs(tmp_path, tiny_spec, mo
                 "variant_id": run.variant_id,
                 "seed": run.seed,
                 "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
                 "round": 1,
                 "payoff": 2.0,
             },
@@ -699,8 +761,20 @@ def test_serial_checkpoint_resume_filters_without_row_apply(tmp_path, tiny_spec,
     checkpoint = tmp_path / "results_partial.csv"
     pd.DataFrame(
         [
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 1},
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 1,
+            },
         ]
     ).to_csv(checkpoint, index=False)
 
@@ -710,8 +784,20 @@ def test_serial_checkpoint_resume_filters_without_row_apply(tmp_path, tiny_spec,
         del config_path, config_name, batch_id
         executed.append((run.variant_id, run.seed, run.replication))
         return [
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 1},
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 1,
+            },
         ]
 
     def fail_apply(*_args, **_kwargs):
@@ -733,8 +819,20 @@ def test_serial_runner_does_not_resume_duplicate_incomplete_checkpoint(tmp_path,
     checkpoint = tmp_path / "results_partial.csv"
     pd.DataFrame(
         [
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
         ]
     ).to_csv(checkpoint, index=False)
 
@@ -744,8 +842,20 @@ def test_serial_runner_does_not_resume_duplicate_incomplete_checkpoint(tmp_path,
         del config_path, config_name, batch_id
         executed.append((run.variant_id, run.seed, run.replication))
         return [
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 0},
-            {"variant_id": run.variant_id, "seed": run.seed, "replication": run.replication, "round": 1},
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 0,
+            },
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "charge_transform": run.variant.effective_charge_transform,
+                "round": 1,
+            },
         ]
 
     runner = ExperimentRunner.from_spec(spec)

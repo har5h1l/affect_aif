@@ -49,9 +49,16 @@ unchanged base commit.
 
 ## Statistical Contract
 
+- Raw CSV `round` values are zero-based. Profile analysis converts them to
+  one-based protocol rounds before selecting windows or computing latencies:
+  baseline 1–80, betrayal 81–120, and repair 121–200. The final correction
+  regenerates alpha-sweep, prior-factorial, and forgiveness metrics and figures
+  from the same preserved trajectories; simulation code and raw data are unchanged.
 - Mean intervals resample simulation-seed means 10,000 times with bootstrap seed 0.
 - Treatment-control intervals resample paired seed differences.
 - H1 partial-correlation intervals resample whole seed clusters.
 - Figure refresh validates linear/none charge provenance, 1,296 policies per
   partner, 5,184 combined candidates, and the 8.553-nat entropy ceiling before
-  writing any paper table or figure.
+  writing any paper table or figure. It also requires the exact configured
+  variants, seeds, replications, and complete zero-based round sequences, with
+  no duplicate run/round keys.

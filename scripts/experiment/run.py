@@ -175,7 +175,11 @@ def _write_dry_run_manifest(args) -> int:
                     "rounds": spec.experiment.rounds,
                     "replications": spec.experiment.replications,
                     "variants": [variant.id for variant in spec.variants],
-                    "charge_transforms": sorted({variant.charge_transform for variant in spec.variants}),
+                    "charge_transforms": sorted({run.variant.effective_charge_transform for run in runs}),
+                    "resolved_spec": spec.to_payload(),
+                    "effective_charge_transforms": {
+                        run.variant_id: run.variant.effective_charge_transform for run in runs
+                    },
                     "sweeps": [sweep.parameter for sweep in spec.sweeps],
                     "expanded_runs": len(runs),
                     "runtime_profile": spec.runtime.profile,
@@ -260,7 +264,11 @@ def _serial_single_config_run(args) -> int:
                 "runtime_profile": spec.runtime.profile,
                 "workers": 1,
                 "charge_transform_override": args.charge_transform,
-                "charge_transforms": sorted({run.variant.charge_transform for run in spec.expand_runs()}),
+                "resolved_spec": spec.to_payload(),
+                "effective_charge_transforms": {
+                    run.variant_id: run.variant.effective_charge_transform for run in spec.expand_runs()
+                },
+                "charge_transforms": sorted({run.variant.effective_charge_transform for run in spec.expand_runs()}),
             },
             indent=2,
         )

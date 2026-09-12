@@ -31,9 +31,25 @@ def test_exp_c_payoff_recovery_uses_late_pre_betrayal_baseline():
             payoff = 4.0
         if 151 <= round_idx <= 200:
             payoff = 8.0
-        rows.append({"round": round_idx, "payoff": payoff})
+        rows.append({"round": round_idx - 1, "payoff": payoff})
 
     assert _payoff_recovery(pd.DataFrame(rows)) == 2.0
+
+
+def test_forgiveness_includes_first_repaired_interaction_and_excludes_switch_from_baseline():
+    from analysis.phenotypes.forgiveness import _partner0_beta_epoch, _reengagement_latency
+
+    frame = pd.DataFrame(
+        {
+            "round": range(200),
+            "partner_idx": [0 if i == 120 else 1 for i in range(200)],
+            "local_betas": ["[0.5]" if i < 80 else "[2.0]" for i in range(200)],
+        }
+    )
+    assert _reengagement_latency(frame) == 0.0
+    assert _partner0_beta_epoch(frame, 1, 80) == 0.5
+    assert _partner0_beta_epoch(frame, 81, 120) == 2.0
+    pd.testing.assert_series_equal(frame["round"], pd.Series(range(200), name="round"))
 
 
 def test_exp_d_false_positive_rate_tracks_stable_partner_drop_not_non_p0_selection():
@@ -44,7 +60,7 @@ def test_exp_d_false_positive_rate_tracks_stable_partner_drop_not_non_p0_selecti
                 "experiment_id": "mixed_volatility",
                 "variant_id": "default_reference",
                 "seed": 1,
-                "round": round_idx,
+                "round": round_idx - 1,
                 "partner_idx": 0 if round_idx <= 50 else 1,
                 "local_betas": "[0.5, 0.8, 1.2, 1.5]",
                 "payoff": 1.0,
@@ -68,7 +84,7 @@ def test_exp_a_early_exploitation_rate_uses_first_30_rounds():
                 "experiment_id": "open_graded",
                 "variant_id": "alpha_1p0",
                 "seed": 1,
-                "round": round_idx,
+                "round": round_idx - 1,
                 "partner_idx": 2,
                 "agent_action": 5 if round_idx <= 30 else 0,
                 "payoff": 1.0,
@@ -92,7 +108,7 @@ def test_exp_a_post_betrayal_commitment_metrics_are_betrayal_scoped():
                     "experiment_id": experiment_id,
                     "variant_id": "alpha_1p0",
                     "seed": 1,
-                    "round": round_idx,
+                    "round": round_idx - 1,
                     "partner_idx": 0,
                     "agent_action": 5 if 81 <= round_idx <= 90 else 1,
                     "payoff": 1.0,
@@ -164,7 +180,7 @@ def test_exp_c_metrics_include_partner0_beta_recovery_trajectory():
                 "experiment_id": "forgiveness",
                 "variant_id": "default_reference",
                 "seed": 1,
-                "round": round_idx,
+                "round": round_idx - 1,
                 "partner_idx": 0,
                 "payoff": 1.0,
                 "true_partner_type": "cooperator",
@@ -197,7 +213,7 @@ def test_exp_d_metrics_include_beta_and_p0_selection_trajectories():
                 "experiment_id": "mixed_volatility",
                 "variant_id": "default_reference",
                 "seed": 1,
-                "round": round_idx,
+                "round": round_idx - 1,
                 "partner_idx": 0 if round_idx <= 100 else 1,
                 "local_betas": f"[{round_idx / 100.0}, {1 + round_idx / 100.0}, 1.2, 1.5]",
                 "payoff": 1.0,
@@ -221,7 +237,7 @@ def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():
             "experiment_id": "partner_choice",
             "variant_id": "naive_high_alpha",
             "seed": 1,
-            "round": 1,
+            "round": 0,
             "partner_idx": 0,
             "agent_action": 1,
             "partner_action": 0,
@@ -234,7 +250,7 @@ def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():
             "experiment_id": "partner_choice",
             "variant_id": "naive_high_alpha",
             "seed": 1,
-            "round": 2,
+            "round": 1,
             "partner_idx": 0,
             "agent_action": 5,
             "partner_action": 0,
@@ -247,7 +263,7 @@ def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():
             "experiment_id": "partner_choice",
             "variant_id": "naive_high_alpha",
             "seed": 1,
-            "round": 4,
+            "round": 3,
             "partner_idx": 1,
             "agent_action": 5,
             "partner_action": 1,
@@ -260,7 +276,7 @@ def test_exp_b_trust_asymmetry_reports_component_latencies_and_direction():
             "experiment_id": "partner_choice",
             "variant_id": "naive_high_alpha",
             "seed": 1,
-            "round": 10,
+            "round": 9,
             "partner_idx": 1,
             "agent_action": 1,
             "partner_action": 1,

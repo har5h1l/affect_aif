@@ -1,11 +1,58 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import fitz
 import matplotlib.pyplot as plt
 import pandas as pd
 import pytest
 
 from scripts.analysis import make_paper_figures
+
+
+@pytest.mark.parametrize("damage", [None, "short", "duplicate", "variant", "seed", "round", "transform"])
+def test_canonical_validation_requires_exact_configured_runs(tmp_path, damage):
+    from experiments.trust.spec import load_experiment_specs
+
+    config = Path("configs/paper/04_betrayal_adaptation.toml")
+    frame = pd.DataFrame(
+        [
+            {
+                "variant_id": run.variant_id,
+                "seed": run.seed,
+                "replication": run.replication,
+                "round": round_idx,
+                "charge_transform": run.variant.effective_charge_transform,
+                "per_partner_policy_count": 1296,
+                "candidate_policy_count": 5184,
+                "max_q_pi_entropy": make_paper_figures.EXPECTED_MAX_ENTROPY,
+                "q_pi_entropy": 6.0,
+            }
+            for spec in load_experiment_specs(config)
+            for run in spec.expand_runs()
+            for round_idx in range(run.rounds)
+        ]
+    )
+    if damage == "short":
+        frame = frame.groupby(["variant_id", "seed", "replication"]).head(1)
+    elif damage == "duplicate":
+        frame = pd.concat([frame, frame.iloc[:1]])
+    elif damage == "variant":
+        frame = frame[frame.variant_id != "no_affect"]
+    elif damage == "seed":
+        frame["seed"] += 10000
+    elif damage == "round":
+        frame["round"] = frame["round"].astype(float)
+        frame.loc[0, "round"] = 0.5
+    elif damage == "transform":
+        frame.loc[frame.variant_id == "no_affect", "charge_transform"] = "linear"
+    path = tmp_path / "results.csv"
+    frame.to_csv(path, index=False)
+    if damage is None:
+        make_paper_figures._validate_canonical_linear_results(path, config_path=config)
+    else:
+        with pytest.raises(ValueError):
+            make_paper_figures._validate_canonical_linear_results(path, config_path=config)
 
 
 def _write_source_tables(source_dir):
@@ -195,6 +242,18 @@ def _write_source_tables(source_dir):
     ).to_csv(source_dir / "h5_betrayal_timecourse_summary.csv", index=False)
 
 
+def test_betrayal_plot_aligns_bins_with_one_based_switch_round(tmp_path, monkeypatch):
+    source = tmp_path / "tables"
+    _write_source_tables(source)
+    figures = []
+    monkeypatch.setattr(make_paper_figures, "_save", lambda fig, *_: figures.append(fig) or [])
+    make_paper_figures.betrayal_boundary_figure(source, tmp_path / "figures")
+    for ax in figures[0].axes:
+        assert list(ax.lines[0].get_xdata()) == [1, 11, 21, 31]
+        assert list(ax.lines[-1].get_xdata()) == [31, 31]
+    plt.close(figures[0])
+
+
 def test_betrayal_effect_source_contains_only_headline_final_rows(tmp_path, monkeypatch):
     summary = pd.DataFrame(
         [
@@ -358,6 +417,8 @@ def test_canonical_result_validation_rejects_entropy_above_policy_ceiling(tmp_pa
             {
                 "variant_id": variant,
                 "seed": seed,
+                "replication": 0,
+                "round": 0,
                 "charge_transform": "none" if variant == "no_affect" else "linear",
                 "per_partner_policy_count": 1296,
                 "candidate_policy_count": 5184,
@@ -370,4 +431,6 @@ def test_canonical_result_validation_rejects_entropy_above_policy_ceiling(tmp_pa
     ).to_csv(path, index=False)
 
     with pytest.raises(ValueError, match="policy entropy above"):
-        make_paper_figures._validate_canonical_linear_results(path)
+        make_paper_figures._validate_canonical_linear_results(
+            path, config_path=Path("configs/paper/04_betrayal_adaptation.toml")
+        )

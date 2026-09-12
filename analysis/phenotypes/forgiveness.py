@@ -14,6 +14,7 @@ from analysis.phenotypes.common import (
     common_group_metrics,
     forgiveness_scenario,
     make_spec,
+    protocol_rounds,
     save_figure,
     variant_label,
     vector_value,
@@ -52,29 +53,29 @@ def build_specs(*, rounds: int, seeds: int, seed: int):
 
 
 def _reengagement_latency(group: pd.DataFrame) -> float:
-    post = group[pd.to_numeric(group["round"], errors="coerce") >= 121]
+    post = group[protocol_rounds(group) >= 121]
     hits = post[pd.to_numeric(post["partner_idx"], errors="coerce") == 0]
     if hits.empty:
         return float("nan")
-    return float(pd.to_numeric(hits["round"], errors="coerce").min() - 121)
+    return float(protocol_rounds(hits).min() - 121)
 
 
 def _payoff_recovery(group: pd.DataFrame) -> float:
-    pre = pd.to_numeric(group.loc[group["round"].between(50, 80), "payoff"], errors="coerce").mean()
-    repaired = pd.to_numeric(group.loc[group["round"].between(151, 200), "payoff"], errors="coerce").mean()
+    pre = pd.to_numeric(group.loc[protocol_rounds(group).between(50, 80), "payoff"], errors="coerce").mean()
+    repaired = pd.to_numeric(group.loc[protocol_rounds(group).between(151, 200), "payoff"], errors="coerce").mean()
     if pd.isna(pre) or abs(float(pre)) < 1e-12:
         return float("nan")
     return float(repaired / pre)
 
 
 def _partner0_beta_epoch(group: pd.DataFrame, start: int, end: int) -> float:
-    rows = group[group["round"].between(start, end)]
+    rows = group[protocol_rounds(group).between(start, end)]
     values = [vector_value(value, 0) for value in rows["local_betas"]]
     return float(pd.Series(values).mean()) if values else float("nan")
 
 
 def _partner0_beta_at_round(group: pd.DataFrame, target_round: int) -> float:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     rows = group[rounds == int(target_round)]
     if rows.empty:
         rows = group[rounds == rounds[rounds <= int(target_round)].max()]
@@ -89,7 +90,7 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for keys, group in results.groupby(["experiment_id", "variant_id", "seed"], dropna=False):
         experiment_id, variant_id, seed = keys
-        post = group[pd.to_numeric(group["round"], errors="coerce") >= 121]
+        post = group[protocol_rounds(group) >= 121]
         rows.append(
             {
                 "experiment_id": experiment_id,

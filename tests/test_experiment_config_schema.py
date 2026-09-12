@@ -15,6 +15,19 @@ def example_spec(tmp_path):
     return ExperimentSpec.from_toml(write_example_toml(tmp_path / "betrayal_choice.toml"))
 
 
+def test_charge_override_preserves_no_affect_and_survives_payload_roundtrip():
+    (original,) = load_experiment_specs(Path("configs/paper/04_betrayal_adaptation.toml"))
+    changed = original.with_charge_transform("squared")
+    restored = ExperimentSpec.from_payload(changed.to_payload())
+    for before, after in zip(original.variants, restored.variants, strict=True):
+        if before.affect == "none":
+            assert after == before
+            assert after.effective_charge_transform == "none"
+        else:
+            assert after.charge_transform == "squared"
+            assert after.effective_charge_transform == "squared"
+
+
 def test_loads_hierarchical_toml_spec(tmp_path):
     spec = ExperimentSpec.from_toml(write_example_toml(tmp_path / "betrayal_choice.toml"))
 
@@ -250,8 +263,8 @@ def test_rejects_mismatched_variant_beta_prior(tmp_path):
     path = write_example_toml(tmp_path / "bad_prior.toml")
     text = path.read_text(encoding="utf-8")
     text = text.replace(
-        'planning_horizon = 4\n\n[[variants]]',
-        'planning_horizon = 4\nbeta_prior = [1.0]\n\n[[variants]]',
+        "planning_horizon = 4\n\n[[variants]]",
+        "planning_horizon = 4\nbeta_prior = [1.0]\n\n[[variants]]",
     )
     path.write_text(text, encoding="utf-8")
 

@@ -13,7 +13,8 @@ Supported command-line entry points:
   source tables; use `--refresh-source-tables` to refresh figure-specific
   compact tables from validated canonical `results/paper` raw CSVs
   before plotting. Refresh rejects noncanonical/squared provenance and invalid
-  policy-entropy ceilings.
+  policy-entropy ceilings, missing configured runs, incomplete episodes, and
+  duplicate run/round keys.
 
 Use `python <script> --help` for script-specific arguments.
 
@@ -27,3 +28,8 @@ absolute config paths in result provenance and supports
 inspection. JAX persistent compilation caching is enabled by default at
 `/tmp/affect_aif_jax_cache`; use `--jax-cache-dir` to choose another cache
 directory or `--no-jax-cache` for a one-off uncached check.
+
+Dry-run and completed-run metadata retain the resolved spec and effective
+per-variant charge transforms after overrides. Copied TOML files retain the
+original input. Profile artifact builders map zero-based raw rounds to the
+one-based protocol windows before computing metrics.

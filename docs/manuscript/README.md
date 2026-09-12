@@ -41,6 +41,11 @@ Use `docs/results/current.md` as the paper evidence surface. Abrupt-betrayal and
 profile results use the reviewed source tables in this folder. Only the
 canonical result cards and source tables support main-text numbers.
 
+Profile source tables use one-based protocol windows mapped from zero-based
+raw rounds. Regenerate the alpha-sweep, prior-factorial, and forgiveness
+metrics and figures together after changing this analysis convention; see
+`docs/results/provenance.md` for the mapping.
+
 Do not write a broad "affect improves reward" claim. The supported thesis matches
 the current manuscript abstract and Discussion:
 

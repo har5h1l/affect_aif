@@ -216,12 +216,14 @@ def _line_with_band(
         ax.fill_between(x, low, high, color=color, alpha=0.14, linewidth=0)
 
 
-def _validate_canonical_linear_results(results_path: Path) -> None:
+def _validate_canonical_linear_results(results_path: Path, *, config_path: Path) -> None:
     """Reject noncanonical, squared-charge, incomplete, or entropy-invalid paper data."""
 
     required = {
         "variant_id",
         "seed",
+        "replication",
+        "round",
         "charge_transform",
         "per_partner_policy_count",
         "candidate_policy_count",
@@ -235,18 +237,38 @@ def _validate_canonical_linear_results(results_path: Path) -> None:
     transforms = set(frame["charge_transform"].dropna().astype(str))
     if not transforms <= {"linear", "none"} or "linear" not in transforms:
         raise ValueError(f"{results_path} is not a corrected-linear result table: {sorted(transforms)}")
-    if set(frame["per_partner_policy_count"].dropna().astype(int)) != {EXPECTED_POLICIES_PER_PARTNER}:
+    if not frame["per_partner_policy_count"].eq(EXPECTED_POLICIES_PER_PARTNER).all():
         raise ValueError(f"{results_path} does not use 1,296 policies per partner")
-    if set(frame["candidate_policy_count"].dropna().astype(int)) != {EXPECTED_COMBINED_CANDIDATES}:
+    if not frame["candidate_policy_count"].eq(EXPECTED_COMBINED_CANDIDATES).all():
         raise ValueError(f"{results_path} does not use 5,184 combined policy candidates")
     entropy_ceiling = frame["max_q_pi_entropy"].astype(float)
     if not np.allclose(entropy_ceiling, EXPECTED_MAX_ENTROPY, atol=1e-10, rtol=0.0):
         raise ValueError(f"{results_path} has an unexpected policy-entropy ceiling")
     if (frame["q_pi_entropy"].astype(float) > entropy_ceiling + 1e-10).any():
         raise ValueError(f"{results_path} contains policy entropy above its recorded maximum")
-    seed_counts = frame.groupby("variant_id")["seed"].nunique()
-    if seed_counts.empty or not (seed_counts == 30).all():
-        raise ValueError(f"{results_path} does not contain 30 complete seeds per variant: {seed_counts.to_dict()}")
+    from experiments.trust.spec import load_experiment_specs
+
+    expected = {
+        (run.variant_id, run.seed, run.replication): run
+        for spec in load_experiment_specs(config_path)
+        for run in spec.expand_runs()
+    }
+    keys = ["variant_id", "seed", "replication"]
+    if frame[keys + ["round", "q_pi_entropy"]].isna().any().any():
+        raise ValueError(f"{results_path} contains missing run keys, rounds, or entropy")
+    if not np.isfinite(frame["q_pi_entropy"]).all() or (frame["q_pi_entropy"] < 0).any():
+        raise ValueError(f"{results_path} contains invalid policy entropy")
+    if frame.duplicated(keys + ["round"]).any():
+        raise ValueError(f"{results_path} contains duplicate run/round keys")
+    actual = dict(tuple(frame.groupby(keys, sort=False)))
+    if actual.keys() != expected.keys():
+        raise ValueError(f"{results_path} run keys do not match required variants, seeds, and replications")
+    for key, group in actual.items():
+        run = expected[key]
+        if len(group) != run.rounds or set(group["round"]) != set(range(run.rounds)):
+            raise ValueError(f"{results_path} contains incomplete or invalid rounds for {key}")
+        if not group["charge_transform"].eq(run.variant.effective_charge_transform).all():
+            raise ValueError(f"{results_path} has an incorrect charge transform for {key}")
 
 
 def _seed_variant_summary(results: pd.DataFrame) -> pd.DataFrame:
@@ -489,9 +511,7 @@ def build_betrayal_effect_source(results_path: Path, output_path: Path) -> Path:
         "mean_joint_accuracy",
         "mean_stance_accuracy",
     }
-    summary = summary.loc[
-        (summary["readout"] == "final") & summary["metric"].isin(headline_metrics)
-    ].copy()
+    summary = summary.loc[(summary["readout"] == "final") & summary["metric"].isin(headline_metrics)].copy()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     summary.to_csv(output_path, index=False)
     return output_path
@@ -505,7 +525,9 @@ def refresh_figure_source_tables(results_root: Path, source_dir: Path) -> list[P
     for path in (h1, h2, h4, h5):
         if not path.exists():
             raise FileNotFoundError(f"Required canonical paper result not found: {path}")
-        _validate_canonical_linear_results(path)
+        _validate_canonical_linear_results(
+            path, config_path=Path(__file__).resolve().parents[2] / "configs/paper" / f"{path.parents[1].name}.toml"
+        )
     return [
         *build_model_fitness_source(h1, source_dir / "h1_model_fitness_confirm"),
         build_deployment_pathway_source(
@@ -634,6 +656,9 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         },
     )
 
+    # Stored bins use raw zero-based indices; the intervention and paper use
+    # one-based protocol rounds. This changes display coordinates only.
+    timecourse["protocol_bin_start"] = timecourse["round_bin_start"] + 1
     fig, axes = plt.subplots(1, 3, figsize=BETRAYAL_FIGURE_SIZE, sharex=True)
     colors = {"affect": "#2f6f9f", "no_affect": "#8c8c8c", "lesioned": "#5f8f5f"}
     for variant in ["affect", "no_affect"]:
@@ -641,7 +666,7 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         _line_with_band(
             axes[0],
             rows,
-            x_col="round_bin_start",
+            x_col="protocol_bin_start",
             mean_col="p0_selection_mean",
             low_col="p0_selection_ci_low",
             high_col="p0_selection_ci_high",
@@ -653,7 +678,7 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         _line_with_band(
             axes[1],
             rows,
-            x_col="round_bin_start",
+            x_col="protocol_bin_start",
             mean_col="p0_beta_mean",
             low_col="p0_beta_ci_low",
             high_col="p0_beta_ci_high",
@@ -665,7 +690,7 @@ def betrayal_boundary_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         _line_with_band(
             axes[2],
             rows,
-            x_col="round_bin_start",
+            x_col="protocol_bin_start",
             mean_col="mean_q_pi_entropy_mean",
             low_col="mean_q_pi_entropy_ci_low",
             high_col="mean_q_pi_entropy_ci_high",
@@ -742,9 +767,7 @@ def deployment_social_figure(source_dir: Path, output_dir: Path) -> list[Path]:
         h2["mean_q_pi_entropy"].tolist(),
         title="Policy entropy (nats)",
         ylabel="",
-        ci_bounds=list(
-            zip(h2["mean_q_pi_entropy_ci_low"], h2["mean_q_pi_entropy_ci_high"], strict=True)
-        ),
+        ci_bounds=list(zip(h2["mean_q_pi_entropy_ci_low"], h2["mean_q_pi_entropy_ci_high"], strict=True)),
         headroom=1.35,
     )
     _bar(

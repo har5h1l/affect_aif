@@ -4,6 +4,86 @@ import subprocess
 import sys
 import textwrap
 
+import pandas as pd
+import pytest
+
+
+@pytest.mark.parametrize("mode", ["dry", "serial", "pool"])
+def test_charge_override_persists_effective_configuration(tmp_path, mode):
+    from experiment_spec_helpers import write_example_toml
+
+    from experiments.trust.spec import ExperimentSpec
+
+    config = write_example_toml(tmp_path / "config.toml", rounds=1, replications=1)
+    source = (
+        config.read_text()
+        .replace("auto = true", "auto = false")
+        .replace("planning_horizon = 4", "planning_horizon = 1")
+    )
+    config.write_text(source)
+    output = tmp_path / "out"
+    command = [
+        sys.executable,
+        "scripts/experiment/run.py",
+        "--config",
+        str(config),
+        "--output-dir",
+        str(output),
+        "--batch-name",
+        "override",
+        "--workers",
+        "2" if mode == "pool" else "1",
+        "--charge-transform",
+        "squared",
+    ]
+    if mode == "dry":
+        command.append("--dry-run")
+    result = subprocess.run(command, capture_output=True, text=True, timeout=90)
+    assert result.returncode == 0, result.stdout + result.stderr
+    if mode == "dry":
+        metadata = json.loads((output / "override/manifest.json").read_text())["configs"][0]
+    else:
+        metadata_path = next(output.rglob("batch_metadata.json"))
+        metadata = json.loads(metadata_path.read_text())
+        rows = pd.read_csv(metadata_path.parent / "results.csv")
+        assert rows.set_index("variant_id")["charge_transform"].to_dict() == {"affect": "squared", "no_affect": "none"}
+        assert (metadata_path.parent / "config.toml").read_text() == source
+    assert metadata["charge_transforms"] == ["none", "squared"]
+    assert metadata["effective_charge_transforms"] == {"affect": "squared", "no_affect": "none"}
+    restored = ExperimentSpec.from_payload(metadata["resolved_spec"])
+    assert {v.id: v.effective_charge_transform for v in restored.variants} == metadata["effective_charge_transforms"]
+
+
+def test_dry_run_charge_summary_uses_expanded_sweep(tmp_path):
+    from experiment_spec_helpers import write_example_toml
+
+    config = write_example_toml(tmp_path / "config.toml", rounds=1, replications=1)
+    with config.open("a") as handle:
+        handle.write('\n[[sweeps]]\nparameter = "charge_transform"\nvalues = ["squared"]\napplies_to = ["affect"]\n')
+    output = tmp_path / "out"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/experiment/run.py",
+            "--config",
+            str(config),
+            "--dry-run",
+            "--output-dir",
+            str(output),
+            "--batch-name",
+            "sweep",
+            "--workers",
+            "1",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    entry = json.loads((output / "sweep/manifest.json").read_text())["configs"][0]
+    assert entry["charge_transforms"] == sorted(set(entry["effective_charge_transforms"].values()))
+    assert entry["charge_transforms"] == ["none", "squared"]
+
 
 def test_experiment_run_help():
     result = subprocess.run(

@@ -128,14 +128,18 @@ class BatchExperimentRunner:
         if partial.empty or not required <= set(partial.columns):
             return set()
 
-        expected_rounds = {_run_key(run): int(run.rounds) for run in state.expanded_runs}
+        expected_runs = {_run_key(run): run for run in state.expanded_runs}
         completed_keys: set[tuple[str, int, int]] = set()
         for values, group in partial.groupby(["variant_id", "seed", "replication"], dropna=False):
             key = _run_key_from_values(*values)
-            expected = expected_rounds.get(key)
+            expected = expected_runs.get(key)
             if expected is None:
                 continue
-            if checkpoint_group_complete(group, expected):
+            if checkpoint_group_complete(
+                group,
+                expected.rounds,
+                expected_charge_transform=expected.variant.effective_charge_transform,
+            ):
                 completed_keys.add(key)
 
         if not completed_keys:
@@ -217,10 +221,7 @@ class BatchExperimentRunner:
     ):
         completed = sorted(
             completed_keys
-            or {
-                _run_key_from_values(row["variant_id"], row["seed"], row["replication"])
-                for row in state.primary_rows
-            }
+            or {_run_key_from_values(row["variant_id"], row["seed"], row["replication"]) for row in state.primary_rows}
         )
         manifest = {
             "batch_id": self.batch_id,
@@ -268,7 +269,11 @@ class BatchExperimentRunner:
             "expanded_runs": len(state.expanded_runs),
             "resumed_tasks": state.resumed_primary,
             "charge_transform_override": self.charge_transform,
-            "charge_transforms": sorted({run.variant.charge_transform for run in state.expanded_runs}),
+            "resolved_spec": state.spec.to_payload(),
+            "effective_charge_transforms": {
+                run.variant_id: run.variant.effective_charge_transform for run in state.expanded_runs
+            },
+            "charge_transforms": sorted({run.variant.effective_charge_transform for run in state.expanded_runs}),
         }
         metadata_path.write_text(json.dumps(metadata, indent=2))
         if self.make_gifs and not results.empty:

@@ -94,6 +94,13 @@ gitignored in the public repo but retained outside git.
 Result rows and `batch_metadata.json` record config paths as resolved absolute
 paths so provenance does not depend on whether a run used the serial,
 single-worker inline, or multi-worker batch path.
+Dry-run entries and completed-run metadata also include `resolved_spec` and
+`effective_charge_transforms`, recording the expanded variants' effective
+settings after command-line overrides. No-affect variants report `none`.
+The copied `config.toml` is the original input; use the resolved metadata to
+audit an overridden run.
+Resuming a complete checkpoint requires its recorded effective charge transform
+to match the requested run; use a separate output directory for another transform.
 
 Every result row records the policy space actually evaluated:
 `per_partner_policy_count`, `candidate_policy_count`, `max_q_pi_entropy`,

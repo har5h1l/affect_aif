@@ -29,13 +29,19 @@ from tasks.trust.runtime import (
 )
 
 
-def checkpoint_group_complete(group: pd.DataFrame, expected_rounds: int) -> bool:
+def checkpoint_group_complete(
+    group: pd.DataFrame, expected_rounds: int, *, expected_charge_transform: str | None = None
+) -> bool:
     """Return True when a partial checkpoint has one row for every expected round."""
 
     if "round" not in group.columns:
         return False
     observed_rounds = set(pd.to_numeric(group["round"], errors="coerce").dropna().astype(int))
-    return observed_rounds >= set(range(int(expected_rounds)))
+    complete = observed_rounds >= set(range(int(expected_rounds)))
+    if complete and expected_charge_transform is not None:
+        if "charge_transform" not in group or not group["charge_transform"].eq(expected_charge_transform).all():
+            raise ValueError("Checkpoint charge transform does not match this run; use a separate output directory.")
+    return complete
 
 
 def checkpoint_rows_for_completed_keys(
@@ -344,14 +350,17 @@ class ExperimentRunner:
                 partial = pd.read_csv(checkpoint, low_memory=False)
                 required = {"variant_id", "seed", "replication", "round"}
                 if not partial.empty and required <= set(partial.columns):
-                    expected_rounds = {
-                        (str(run.variant_id), int(run.seed), int(run.replication)): int(run.rounds)
-                        for run in expanded_runs
+                    expected_runs = {
+                        (str(run.variant_id), int(run.seed), int(run.replication)): run for run in expanded_runs
                     }
                     for values, group in partial.groupby(["variant_id", "seed", "replication"], dropna=False):
                         key = (str(values[0]), int(values[1]), int(values[2]))
-                        expected = expected_rounds.get(key)
-                        if expected is not None and checkpoint_group_complete(group, expected):
+                        expected = expected_runs.get(key)
+                        if expected is not None and checkpoint_group_complete(
+                            group,
+                            expected.rounds,
+                            expected_charge_transform=expected.variant.effective_charge_transform,
+                        ):
                             completed_keys.add(key)
                     if completed_keys:
                         resumed = checkpoint_rows_for_completed_keys(partial, completed_keys)
@@ -384,6 +393,7 @@ class ExperimentRunner:
             results.to_parquet(target, index=False)
             return
         results.to_csv(target, index=False)
+
 
 __all__ = [
     "ExperimentRunner",

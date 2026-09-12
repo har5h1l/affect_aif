@@ -17,6 +17,7 @@ from analysis.phenotypes.common import (
     make_spec,
     open_graded_scenario,
     partner_choice_scenario,
+    protocol_rounds,
     save_figure,
 )
 
@@ -60,11 +61,11 @@ def build_specs(*, rounds: int, seeds: int, seed: int):
 
 
 def _trust_latency_metrics(group: pd.DataFrame) -> dict[str, float]:
-    rounds = pd.to_numeric(group["round"], errors="coerce")
+    rounds = protocol_rounds(group)
     partner = pd.to_numeric(group["partner_idx"], errors="coerce")
     high_invest = group["agent_action"].astype(float) >= max(float(group["agent_action"].max()) / 2.0, 1.0)
     approach = rounds[high_invest & partner.notna()].min()
-    defections = group.loc[pd.to_numeric(group["partner_action"], errors="coerce") == 1, "round"]
+    defections = rounds[pd.to_numeric(group["partner_action"], errors="coerce") == 1]
     if pd.isna(approach) or defections.empty:
         return {
             "trust_approach_latency": float("nan"),
@@ -80,10 +81,7 @@ def _trust_latency_metrics(group: pd.DataFrame) -> dict[str, float]:
             "trust_asymmetry": float("nan"),
         }
     threshold = max(float(group["agent_action"].max()) / 2.0, 1.0)
-    low_invest_round = pd.to_numeric(
-        post_defect.loc[post_defect["agent_action"].astype(float) < threshold, "round"],
-        errors="coerce",
-    ).min()
+    low_invest_round = protocol_rounds(post_defect)[post_defect["agent_action"].astype(float) < threshold].min()
     if pd.isna(low_invest_round):
         return {
             "trust_approach_latency": float("nan"),
