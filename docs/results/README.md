@@ -67,6 +67,6 @@ figure/source-table/result-card map.
   paper-needed raw files under gitignored `raw/` paths.
 - `results/diagnostics/` may be compact-summary only when raw diagnostic data
   is not needed for the paper packet.
-- The frozen ZIP under `results/releases/` (see root `README.md`) is the
-  row-level data route; the directly browsable Git tree remains the compact
-  summary and provenance route.
+- The frozen ZIP at the repository root (see root `README.md`) is the row-level
+  data route; the directly browsable Git tree remains the compact summary and
+  provenance route.

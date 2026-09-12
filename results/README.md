@@ -1,18 +1,17 @@
 # Result Summaries
 
 This directory is the public result scaffold. Git tracks compact summaries,
-manifests, README files, and one frozen camera-ready ZIP under `releases/`.
-Full per-round trajectories named `results.csv` remain intentionally ignored
-in their working-tree locations; they are included in the release ZIP (see
-root `README.md`) or can be regenerated.
+manifests, and README files. Full per-round trajectories named `results.csv`
+remain intentionally ignored in their working-tree locations; they are
+included in the frozen ZIP at the repository root (see root `README.md`) or
+can be regenerated.
 
 ## Frozen Release Data
 
-- `releases/affect_aif-iwai2026-camera-ready-results.zip` contains the final
-  linear-charge paper result tree.
-- `releases/affect_aif-iwai2026-camera-ready-results.zip.sha256` verifies the
-  archive download.
-- `releases/CANONICAL_RESULTS.sha256` records the ten row-level CSV digests.
+- `../affect_aif-iwai2026-camera-ready-results.zip` contains the final
+  linear-charge `results/paper/` tree.
+- `../affect_aif-iwai2026-camera-ready-results.zip.sha256` verifies the archive
+  download.
 
 ## Paper Results
 

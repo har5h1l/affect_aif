@@ -98,8 +98,8 @@ Full canonical per-round `results.csv` files for the paper suite are
 gitignored in their working-tree locations. The frozen IWAI 2026 camera-ready
 data package is available as a single tracked archive:
 
-- [`results/releases/affect_aif-iwai2026-camera-ready-results.zip`](results/releases/affect_aif-iwai2026-camera-ready-results.zip)
-- [`results/releases/affect_aif-iwai2026-camera-ready-results.zip.sha256`](results/releases/affect_aif-iwai2026-camera-ready-results.zip.sha256)
+- [`affect_aif-iwai2026-camera-ready-results.zip`](affect_aif-iwai2026-camera-ready-results.zip)
+- [`affect_aif-iwai2026-camera-ready-results.zip.sha256`](affect_aif-iwai2026-camera-ready-results.zip.sha256)
 
 The archive contains the compact summaries, manifests, and ten canonical
 row-level result tables under the same `results/paper/` layout used by the
