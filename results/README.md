@@ -8,10 +8,9 @@ can be regenerated.
 
 ## Frozen Release Data
 
-- `../affect_aif-iwai2026-camera-ready-results.zip` contains the final
-  linear-charge `results/paper/` tree.
-- `../affect_aif-iwai2026-camera-ready-results.zip.sha256` verifies the archive
-  download.
+- `../paper_results.zip` contains the final linear-charge `results/paper/`
+  tree.
+- `../paper_results.zip.sha256` verifies the archive download.
 
 ## Paper Results
 
