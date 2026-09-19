@@ -1,10 +1,10 @@
-# Current Results
+# Paper Findings
 
 > **Canonical paper evidence.** The values in this file are generated from the
 > shared-action policy space with the linear affective-charge update.
 
 Canonical interpreted evidence for the active architecture is stored under
-`results/paper/`. Manuscript prose lives in `docs/manuscript/sections/`;
+`results/paper/`. Manuscript prose lives in `docs/manuscript/main.tex`;
 paper-facing compact CSVs live in `docs/manuscript/source_tables/`.
 
 ## Inclusion Decision
@@ -28,7 +28,7 @@ binary-confirmation outputs are not paper evidence.
 
 - Canonical suite manifest: `results/paper/manifest.json`
 - Figure and source-table map: `docs/results/provenance.md`
-- Config-to-result routes: `docs/results/config_map.md`
+- Config-to-result routes: `docs/guide/configs.md`
 - Bootstrap contract: 10,000 percentile resamples, bootstrap seed 0
 - Treatment-control effects: paired at the simulation-seed level
 - Correlations: pooled partial correlations with a seed-cluster bootstrap
@@ -119,3 +119,12 @@ Avoid:
 - clinical validation or human-behavior generalization;
 - presenting beta as a variational hidden state;
 - presenting the construct checks as independent replications.
+
+### Additional Scope Boundaries
+
+The shared-beta comparison supports partner-specific signal quality, not
+universal behavioral necessity of separate trackers. Partners are scripted,
+parameterized policies; only the focal agent performs full active inference.
+The current evidence therefore does not establish reciprocal multi-agent
+active-inference dynamics. The novelty claim concerns partner-local model
+fitness and precision deployment, not the first active-inference model of trust.

@@ -1,8 +1,5 @@
 # Diagnostics
 
-Diagnostics are not paper evidence by default. They support smoke checks,
-reviewer controls, and informative mechanism probes.
-
 ## Smoke Dry-Run
 
 ```bash

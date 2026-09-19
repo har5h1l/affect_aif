@@ -2,7 +2,7 @@
 
 ## Responsibility
 
-Tests in this directory cover the supported package, CLI, result, notebook, and analysis surface.
+Tests in this directory cover the supported package, CLI, result, notebook, and analysis code.
 
 ## Verification Flow
 
@@ -15,5 +15,5 @@ python -m mypy
 
 ## Internal Notes
 
-- The suite includes explicit checks for the supported import surface.
-- Exploratory scripts are intentionally excluded from the default test surface.
+- The suite includes explicit checks for the public imports.
+- Exploratory scripts are intentionally excluded from the default test suite.

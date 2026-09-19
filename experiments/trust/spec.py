@@ -332,7 +332,7 @@ class ExperimentSpec:
         )
 
     def with_charge_transform(self, charge_transform: str) -> ExperimentSpec:
-        """Return an otherwise identical spec with one charge transform."""
+        """Force one charge transform, replacing any sweep over that setting."""
 
         transform = str(charge_transform)
         if transform not in CHARGE_TRANSFORMS:
@@ -343,6 +343,7 @@ class ExperimentSpec:
                 variant if variant.affect == "none" else replace(variant, charge_transform=transform)
                 for variant in self.variants
             ),
+            sweeps=tuple(sweep for sweep in self.sweeps if sweep.parameter != "charge_transform"),
         )
 
     def to_payload(self) -> dict[str, Any]:

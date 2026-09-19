@@ -1,16 +1,9 @@
 # Result Summaries
 
-This directory is the public result scaffold. Git tracks compact summaries,
-manifests, and README files. Full per-round trajectories named `results.csv`
-remain intentionally ignored in their working-tree locations; they are
-included in the frozen ZIP at the repository root (see root `README.md`) or
-can be regenerated.
-
-## Frozen Release Data
-
-- `../paper_results.zip` contains the final linear-charge `results/paper/`
-  tree.
-- `../paper_results.zip.sha256` verifies the archive download.
+Experiment results, grouped below. Download the [paper data](../paper_results.zip)
+and [checksum](../paper_results.zip.sha256); see the
+[reproduction guide](../docs/guide/reproduce.md#use-the-published-results-without-rerunning)
+for extraction instructions.
 
 ## Paper Results
 
@@ -23,20 +16,19 @@ can be regenerated.
 - `paper/05c_forgiveness/`
 
 The full suite map is `paper/manifest.json`. Every config-to-result route is
-documented in `docs/results/config_map.md`.
+documented in `docs/guide/configs.md`.
 
 ## Diagnostics
 
-`diagnostics/` contains complete informative non-paper runs that remain
-runnable from public configs.
+`diagnostics/` contains additional experiments not used as the main paper results.
 
-- `diagnostics/model_fitness/` — binary H1 confirmation retained as supplementary provenance only.
+- `diagnostics/model_fitness/` — binary H1 confirmation retained as an additional comparison.
 - `diagnostics/social_allocation/` — binary H4 partner-choice confirmation
-  retained as boundary provenance only; paper partner selection remains graded.
+  retained as an additional comparison; paper partner selection remains graded.
 
 ## Future Extensions
 
-`future/` contains compact summaries for implemented follow-up surfaces that
+`future/` contains compact summaries for exploratory experiments that
 are not paper evidence.
 
 - `future/mixed_volatility/` — heterogeneous-volatility extension retained for

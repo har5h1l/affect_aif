@@ -7,6 +7,5 @@
 - Tracked summaries: `summary.csv`, `source_tables/binary_partner_choice_confirm_aggregate.csv`, `source_tables/final_round_summary.csv`, `source_tables/partner_choice_confirm_summary.csv`
 - Raw policy: full per-round `results.csv` is ignored in git and retained outside git; see root `README.md` for the public data packet.
 
-This binary partner-choice confirmation is not part of the paper evidence
-surface. Paper Section 3.3 uses the graded partner-selection config under
+This binary partner-choice confirmation is not part of the paper experiments. Paper Section 3.3 uses the graded partner-selection config under
 `configs/paper/03_partner_selection.toml`.

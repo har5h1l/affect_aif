@@ -7,7 +7,7 @@ import pytest
 from experiment_spec_helpers import write_example_toml
 
 from experiments.trust.factory import create_native_runtime_from_run
-from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, load_experiment_specs
+from experiments.trust.spec import ExpandedRunSpec, ExperimentSpec, SweepSpec, load_experiment_specs
 
 
 @pytest.fixture
@@ -420,3 +420,15 @@ def test_factory_uses_global_beta_shared_tracker(example_spec):
     assert runtime.partner_bank.beta is not None
     assert runtime.partner_bank.beta.num_entities == 1
     assert len(runtime.partner_bank.agents) == global_beta.scenario.partners
+
+
+def test_charge_override_replaces_transform_sweep_and_preserves_other_sweeps():
+    (spec,) = load_experiment_specs(Path("configs/paper/04_betrayal_adaptation.toml"))
+    targets = tuple(v.id for v in spec.variants if v.affect != "none")
+    gain = SweepSpec("alpha_charge", (1.0, 2.0), targets)
+    spec = replace(spec, sweeps=(SweepSpec("charge_transform", ("linear", "squared"), targets), gain))
+    overridden = ExperimentSpec.from_payload(spec.with_charge_transform("linear").to_payload())
+    assert overridden.sweeps == (gain,)
+    runs = overridden.expand_runs()
+    assert {r.variant.effective_charge_transform for r in runs} == {"linear", "none"}
+    assert {r.variant.alpha_charge for r in runs if r.variant.affect != "none"} == {1.0, 2.0}

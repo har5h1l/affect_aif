@@ -3,128 +3,62 @@
 Active-inference trust-game simulations for studying partner-local affective
 precision as a relationship-specific confidence signal.
 
-Accepted for the IWAI 2026 proceedings. This repository contains the canonical
-reference implementation and reproducibility surface.
+Accepted for the IWAI 2026 proceedings. This repository contains the code,
+experiment configurations, results, and manuscript.
 
 ## What This Is
 
 `affect_aif` contains a pymdp-backed trust-game model, paper reproduction
-configs, compact result summaries, and the manuscript source. The central
-mechanism tracks partner-local prediction error in an external beta state and
-maps that state into policy precision during action selection.
+configs, compact result summaries, and the manuscript source. It studies
+how confidence in each social partner shapes the agent's decisions.
 
-The canonical model uses one shared six-valued social action, exhaustive
-horizon-four planning with 1,296 policies per partner, and linear affective
-charge. Squared charge is retained only as an explicit diagnostic override.
+## Code And Repository Map
 
-## How The Repo Works
+| Area | Start here |
+|---|---|
+| User guide | [docs/guide/](docs/guide/README.md): reproduce, configure, and use notebooks or scripts. |
+| Agent and environment | [tasks/](tasks/README.md): partner-local pymdp agents, confidence updates, and trust-game mechanics. |
+| Experiment execution | [experiments/](experiments/README.md): config expansion, runtime construction, episode loop, and logging. |
+| Analysis | [analysis/](analysis/README.md): metrics, statistics, profiles, and plots from existing data. |
+| Commands | [scripts/](scripts/README.md): supported run, inspect, and analysis entry points. |
+| Config files | [configs/](configs/README.md): paper, demo, diagnostic, and future TOML files. |
+| Notebooks | [Notebook guide](docs/guide/notebooks.md): demo and full-reproduction walkthroughs. |
+| Results | [Findings and provenance](docs/results/README.md); [data folders](results/README.md). |
+| Manuscript | [main.tex](docs/manuscript/main.tex), bibliography, figures, and the compiled PDF. |
+| Tests | [tests/](tests/README.md): implementation and interface checks. |
 
-- `tasks/trust/`: trust-game environments, POMDP construction, affect update,
-  partner-local agent/runtime state, and payoff helpers. This is the core
-  trust model package, even though it contains the agent machinery.
-- `experiments/trust/`: TOML spec loading, variant expansion, batch execution,
-  logging, and configured analysis hooks for the focal-agent paper experiments.
-- `experiments/multifocal/`: tested reciprocal AIF-vs-AIF extension code. This
-  is future work and is not used by the paper reproduction configs.
-- `configs/`: public runnable TOML specs grouped by intent.
-- `scripts/`: supported command-line entry points for running experiments and
-  analyzing existing results.
-- `analysis/`: post-hoc metrics, figures, and compact artifact builders.
-- `docs/`: model, experiment, result, and manuscript documentation.
-- `results/`: tracked compact summaries and manifests; raw CSVs are retained
-  outside git (see [Paper Result Data](#paper-result-data) below).
+To follow one run through the code, start with `scripts/experiment/run.py`,
+then `experiments/trust/spec.py` and `factory.py`, followed by
+`experiments/trust/runner.py`. The runner calls the agent machinery in
+`tasks/trust/runtime.py` and the environment under `tasks/trust/envs/`.
+Once trajectories are written, the analysis scripts read them to produce
+summaries. The package READMEs above identify the files for each step.
 
-## Setup
+## Getting Started
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-```
-
-## Quick Demo
-
-```bash
-python scripts/experiment/run.py \
-  --config configs/demo/01_predictability_value.toml \
-  --workers 1
-```
-
-Inspect a config without running it:
-
-```bash
-python scripts/experiment/inspect.py --config configs/demo/01_predictability_value.toml
-```
-
-## Reproduce The Paper
-
-Dry-run the paper suite first:
-
-```bash
-python scripts/experiment/run.py \
-  --config configs/paper/01_predictability_value.toml \
-  --config configs/paper/02_deployment_ablation.toml \
-  --config configs/paper/03_partner_selection.toml \
-  --config configs/paper/04_betrayal_adaptation.toml \
-  --config configs/paper/05a_alpha_sweep.toml \
-  --config configs/paper/05b_prior_factorial.toml \
-  --config configs/paper/05c_forgiveness.toml \
-  --workers 1 \
-  --dry-run
-```
-
-Remove `--dry-run` to launch the full reproduction. Use `--workers 1` unless
-you intentionally want parallel local execution.
-
-## Analyze Results
-
-```bash
-python scripts/analysis/analyze.py \
-  --results results/paper/04_betrayal_adaptation/raw/results.csv \
-  --output-dir /tmp/affect_aif_analysis
-```
-
-Phenotype compact tables and manuscript figures are regenerated from existing
-raw trajectories with:
-
-```bash
-python scripts/analysis/phenotype_artifacts.py --help
-python scripts/analysis/make_paper_figures.py --help
-```
+- [Install and reproduce](docs/guide/reproduce.md): setup, a small demo,
+  the full paper suite, and manuscript compilation.
+- [Use the notebooks](docs/guide/notebooks.md): local and Colab walkthroughs.
+- [Configure an experiment](docs/guide/configs.md): model controls, variants,
+  sweeps, workloads, and output paths.
+- [Run and analyze](docs/guide/running.md): CLI options, checkpoints, and
+  post-hoc analysis.
+- [Read the findings](docs/results/findings.md): measured results and limitations.
 
 ## Paper Result Data
 
-Full canonical per-round `results.csv` files for the paper suite are
-gitignored in their working-tree locations. The frozen IWAI 2026 camera-ready
-data package is available as a single tracked archive:
+Download the paper's results and verify the archive with its checksum:
 
 - [`paper_results.zip`](paper_results.zip)
 - [`paper_results.zip.sha256`](paper_results.zip.sha256)
 
-The archive contains the compact summaries, manifests, and ten canonical
-row-level result tables under the same `results/paper/` layout used by the
-analysis scripts. Compact summaries and manifests remain directly browsable
-under `results/paper/`; regenerate trajectories from `configs/paper/` when
-needed.
-
-## Where To Go Next
-
-- `configs/README.md`: choose a config.
-- `docs/overview/`: understand the model and hypotheses.
-- `docs/experiments/`: run demos, paper configs, and diagnostics.
-- `docs/results/`: inspect compact result summaries and provenance.
-- `docs/manuscript/`: build and inspect the manuscript.
-- `notebooks/`: demo and reproduction notebooks.
+See the [guide](docs/guide/reproduce.md#use-the-published-results-without-rerunning)
+for extraction and analysis instructions.
 
 ## Citation
 
-**Partner-Specific Affective Precision in Social Active Inference** models
-relationship-specific confidence in social active inference: each partner has a
-local precision estimate, updated from that partner's evidence and mapped into
-policy selection during the trust game. This repository is the reference
-implementation—the task, POMDP, affective-precision update, experiments, and
-analysis—built on [`inferactively-pymdp`](https://github.com/infer-actively/pymdp)
-for belief updating and policy selection.
+Built on [inferactively-pymdp](https://github.com/infer-actively/pymdp) for
+belief updating and policy selection.
 
 The manuscript has been accepted for IWAI 2026. Use the final proceedings
 citation once its bibliographic metadata is available; pin a repository commit

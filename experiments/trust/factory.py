@@ -93,6 +93,7 @@ def create_agents_from_multi_focal_config(
         "use_information_gain",
         "alpha_charge",
         "sigma_0_sq",
+        "charge_transform",
         "initial_beta",
         "initial_beta_prior",
         "num_levels",

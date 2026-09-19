@@ -76,23 +76,13 @@ docs/manuscript/*.synctex.gz
 # Cloud credentials
 .env
 
-# Conductor session logs
-conductor/log/
-
 docs/archive/
 docs/active/
 docs/superpowers/
 docs/handoffs/
-docs/manuscript/notes/
 docs/results/cleanup/
 docs/results/notes/
 AGENTS.md
 
 # Hook state files
 .pytest_last_run
-cloud/
-conductor/conductor.sh
-conductor/conductor.service
-conductor/USAGE.md
-start_research.sh
-run.sh

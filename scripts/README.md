@@ -1,35 +1,15 @@
-# Scripts
+# Commands
 
-Supported command-line entry points:
+| Script | Purpose |
+|---|---|
+| `experiment/run.py` | Run one or more experiment configs. |
+| `experiment/inspect.py` | Show a config's expanded runs without executing them. |
+| `analysis/analyze.py` | Generate summaries and plots from an existing result CSV. |
+| `analysis/phenotype_artifacts.py` | Build profile metrics and figures from existing trajectories. |
+| `analysis/make_paper_figures.py` | Build paper figures; add `--refresh-source-tables` to regenerate their input tables from the paper results. |
 
-- `experiment/run.py`: run one or more trust experiment TOML configs.
-- `experiment/inspect.py`: inspect config expansion without running.
-- `analysis/analyze.py`: compute generic post-hoc summaries and figures from
-  an existing `results.csv`.
-- `analysis/phenotype_artifacts.py`: regenerate compact profile metrics,
-  source tables, and figures from existing paper or future-extension raw
-  trajectories.
-- `analysis/make_paper_figures.py`: rebuild manuscript composite figures from
-  source tables; use `--refresh-source-tables` to refresh figure-specific
-  compact tables from validated canonical `results/paper` raw CSVs
-  before plotting. Refresh rejects noncanonical/squared provenance and invalid
-  policy-entropy ceilings, missing configured runs, incomplete episodes, and
-  duplicate run/round keys.
+Use `python <script> --help` for available arguments.
 
-Use `python <script> --help` for script-specific arguments.
-
-`experiment/run.py` honors each config's `[runtime].profile`. Use
-`data_collection` for paper/demo/diagnostic trajectory collection: it writes
-the manuscript-facing row contract and keeps diagnostic tensors out of raw
-CSVs. Use `debug` only for narrow local inspection when full policy traces,
-belief matrices, and posterior tensors are needed. The runner records resolved
-absolute config paths in result provenance and supports
-`--verbose --verbosity-mode stage_stream` for serial and single-worker inline
-inspection. JAX persistent compilation caching is enabled by default at
-`/tmp/affect_aif_jax_cache`; use `--jax-cache-dir` to choose another cache
-directory or `--no-jax-cache` for a one-off uncached check.
-
-Dry-run and completed-run metadata retain the resolved spec and effective
-per-variant charge transforms after overrides. Copied TOML files retain the
-original input. Profile artifact builders map zero-based raw rounds to the
-one-based protocol windows before computing metrics.
+See [Running experiments](../docs/guide/running.md) for examples,
+[Configs](../docs/guide/configs.md) for settings, and
+[Result provenance](../docs/results/provenance.md) for figure inputs and checks.

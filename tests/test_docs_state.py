@@ -6,20 +6,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_public_docs_route_exists():
     required = [
-        "docs/overview/README.md",
-        "docs/overview/core/pomdp.md",
-        "docs/overview/core/affective_precision.md",
-        "docs/overview/core/hypotheses.md",
-        "docs/experiments/README.md",
-        "docs/experiments/running.md",
-        "docs/experiments/configs.md",
-        "docs/experiments/paper.md",
-        "docs/experiments/diagnostics.md",
+        "docs/guide/README.md",
+        "docs/guide/reproduce.md",
+        "docs/guide/configs.md",
+        "docs/guide/notebooks.md",
+        "docs/guide/running.md",
+        "docs/guide/diagnostics.md",
         "docs/results/README.md",
-        "docs/results/paper.md",
+        "docs/results/findings.md",
         "docs/results/provenance.md",
         "docs/results/diagnostics.md",
-        "docs/manuscript/README.md",
+        "docs/manuscript/main.tex",
     ]
     missing = [path for path in required if not (ROOT / path).exists()]
     assert missing == []
@@ -30,7 +27,7 @@ def test_top_level_doc_links_exist():
         ROOT / "README.md",
         ROOT / "docs" / "README.md",
         ROOT / "scripts" / "README.md",
-        ROOT / "docs" / "experiments" / "running.md",
+        *sorted((ROOT / "docs" / "guide").glob("*.md")),
     ]
     pattern = re.compile(r"\[[^\]]+\]\(([^)]+\.md)(?:#[^)]+)?\)")
     missing = []
@@ -47,7 +44,7 @@ def test_top_level_doc_links_exist():
 
 
 def test_appendix_protocol_round_counts_match_current_paper_configs():
-    appendix = (ROOT / "docs/manuscript/appendix/appendix_d_protocols.tex").read_text()
+    appendix = (ROOT / "docs/manuscript/main.tex").read_text()
 
     assert "Locality probe & graded partner choice & 200 & 30" in appendix
     assert "Locality probe & graded partner choice & 100 & 30" not in appendix

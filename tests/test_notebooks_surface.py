@@ -48,8 +48,8 @@ def test_reproduce_notebook_is_colab_and_results_aware():
     assert "results/paper/01_predictability_value/raw/results.csv" in text
     assert "results/paper/05a_alpha_sweep/raw/open_graded/results.csv" in text
     assert "results/paper/05a_alpha_sweep/raw/betrayal/results.csv" in text
-    assert "docs/manuscript/source_tables/h2_deployment_contrast_summary.csv" in text
-    assert "docs/manuscript/source_tables/h4_partner_choice_summary.csv" in text
+    assert "analysis/h2_deployment_contrast_summary.csv" in text
+    assert "analysis/h4_partner_choice_summary.csv" in text
     assert "scripts/analysis/phenotype_artifacts.py" in text
     assert "google.colab" not in text
     assert "drive.mount" not in text
@@ -181,7 +181,7 @@ def test_demo_notebook_sanitizes_markdown_repo_urls():
     exec(compile(module, "demo-bootstrap-sanitizer", "exec"), namespace)
     sanitize_repo_url = namespace["sanitize_repo_url"]
 
-    placeholder = "https://anonymous.4open.science/r/affect_aif"
+    placeholder = "https://github.com/har5h1l/affect_aif.git"
     assert sanitize_repo_url(placeholder) == placeholder
     assert sanitize_repo_url(f"<{placeholder}>") == placeholder
     assert sanitize_repo_url(f"[{placeholder}]({placeholder})") == placeholder
@@ -221,3 +221,72 @@ def test_reproduce_notebook_is_split_by_paper_experiment():
         "Exp C Forgiveness: Run And Analyze",
     ]:
         assert heading in text
+
+
+def test_notebook_public_clone_defaults_and_local_discovery():
+    for name in ["demo", "reproduce"]:
+        source = _notebook_code_cell(ROOT / "notebooks" / f"{name}.ipynb", "def find_repo_root")
+        assert '"https://github.com/har5h1l/affect_aif.git"' in source
+        assert "anonymous.4open.science" not in source
+        tree = ast.parse(source)
+        finder = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "find_repo_root")
+        namespace = {"Path": Path}
+        exec(compile(ast.Module(body=[finder], type_ignores=[]), name, "exec"), namespace)
+        assert namespace["find_repo_root"](ROOT / "notebooks") == ROOT
+
+
+def test_demo_partner_mix_uses_current_runner_column():
+    import pandas as pd
+
+    source = _notebook_code_cell(ROOT / "notebooks/demo.ipynb", "def partner_selection_mix")
+    tree = ast.parse(source)
+    function = next(
+        node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "partner_selection_mix"
+    )
+    namespace = {"pd": pd, "display": lambda *_: None}
+    exec(compile(ast.Module(body=[function], type_ignores=[]), "partner-mix", "exec"), namespace)
+    result = namespace["partner_selection_mix"](
+        pd.DataFrame(
+            {
+                "variant_id": ["affect", "affect", "affect", "none"],
+                "true_partner_type": ["cooperator", "cooperator", "random", "random"],
+            }
+        )
+    )
+    assert result.loc["cooperator", "affect"] == 2 / 3
+    assert result.loc["random", "none"] == 1.0
+
+
+def test_reproduce_rejects_stale_core_data_before_summary(tmp_path, monkeypatch):
+    import pandas as pd
+
+    source = _notebook_code_cell(ROOT / "notebooks/reproduce.ipynb", "def analyze_core")
+    tree = ast.parse(source)
+    function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "analyze_core")
+    raw = tmp_path / "results.csv"
+    pd.DataFrame(
+        {
+            "variant_id": ["affect"],
+            "seed": [1],
+            "replication": [0],
+            "round": [0],
+            "charge_transform": ["squared"],
+            "per_partner_policy_count": [1296],
+            "candidate_policy_count": [5184],
+            "max_q_pi_entropy": [8.553332],
+            "q_pi_entropy": [1.0],
+        }
+    ).to_csv(raw, index=False)
+    namespace = {
+        "Path": Path,
+        "ROOT": ROOT,
+        "RUN_ANALYSIS": True,
+        "CANONICAL_RAW": {"deployment_ablation": raw},
+        "PAPER_CONFIGS": {"deployment_ablation": "configs/paper/02_deployment_ablation.toml"},
+    }
+    exec(compile(ast.Module(body=[function], type_ignores=[]), "core-analysis", "exec"), namespace)
+    import pytest
+
+    with pytest.raises(ValueError, match="not a corrected-linear result table"):
+        namespace["analyze_core"]("deployment_ablation")
+    assert not (tmp_path / "analysis").exists()

@@ -206,7 +206,7 @@ def test_removed_script_surface_stays_out_of_supported_cli():
     }
     top_level_scripts = {path.name for path in (REPO_ROOT / "scripts").glob("*.py")}
     all_scripts = {str(path.relative_to(REPO_ROOT / "scripts")) for path in (REPO_ROOT / "scripts").rglob("*.py")}
-    cli_doc = (REPO_ROOT / "docs" / "experiments" / "running.md").read_text()
+    cli_doc = (REPO_ROOT / "docs" / "guide" / "running.md").read_text()
 
     assert top_level_scripts == set()
     assert primary_scripts <= all_scripts

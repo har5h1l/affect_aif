@@ -1,7 +1,7 @@
 # Result Provenance
 
 This file maps current paper results to manuscript source tables and figures.
-Use it with `docs/results/current.md` for interpreted numbers. Do not replace a
+Use it with `docs/results/findings.md` for interpreted numbers. Do not replace a
 manuscript number from raw output unless the corresponding source table and
 interpreted result note are refreshed together.
 
@@ -45,7 +45,6 @@ unchanged base commit.
 - Binary H4 partner-choice confirmation:
   `results/diagnostics/social_allocation/raw/partner_choice_confirm_20260609/`.
 - Mixed-volatility outputs under `results/future/`.
-- Incomplete and dry-run outputs.
 
 ## Statistical Contract
 

@@ -23,7 +23,7 @@ agent-choice episodes. It should not be used to update Section 3.3 paper
 numbers, which come from `configs/paper/03_partner_selection.toml`.
 
 Configs without promoted diagnostic cards still have canonical raw destinations
-in `config_map.md`.
+in the [config guide](../guide/configs.md).
 
 ## Refresh Rule
 

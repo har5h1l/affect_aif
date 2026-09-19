@@ -1,6 +1,6 @@
 # Running Experiments
 
-The canonical runner is `scripts/experiment/run.py`.
+Run experiments with `scripts/experiment/run.py`.
 
 ```bash
 python scripts/experiment/run.py \
@@ -39,8 +39,8 @@ The runner currently has these execution paths:
   deterministic local path and avoids process-pool startup overhead.
 - `--workers N` for `N > 1`: runs expanded variant/replication tasks through a
   process pool and keeps the same per-config output and checkpoint layout.
-- `profile = "data_collection"`: the default maintained-config profile; writes
-  manuscript-facing per-round result rows and compact checkpoints as quickly
+- `profile = "data_collection"`: the default profile; writes
+  per-round result rows and compact checkpoints as quickly
   as the configured model allows. This profile keeps payoff, choice,
   entropy, beta, surprise/log-evidence, inference-correctness, switch, seed,
   variant, and config metadata needed by the paper analyses, while omitting
@@ -53,7 +53,7 @@ The runner currently has these execution paths:
   and posterior tensors. Do not use it for statistical data collection because
   these arrays can make checkpoints and CSVs very large.
 - post-hoc analysis: run `scripts/analysis/*` after data collection. Keep
-  `[analysis].auto = false` for maintained data-collection configs; enable it
+  `[analysis].auto = false` for data-collection configs; enable it
   only for narrow local configs where immediate summaries matter more than
   throughput.
 
@@ -74,15 +74,14 @@ python scripts/experiment/run.py \
 The cache changes compilation reuse only; it must not change seeds, expanded
 variants, model parameters, observations, actions, or result rows.
 
-By default, `run.py` omits legacy batch folders and writes to the canonical
-family layout documented in `docs/results/config_map.md`:
+By default, `run.py` writes to the locations listed in `docs/guide/configs.md`:
 
 - paper configs -> `results/paper/<section>/raw/`
 - diagnostic configs -> `results/diagnostics/...`
 - future configs -> `results/future/<name>/raw/`
 - demo configs -> `outputs/demo/...`
 
-Pass `--output-dir` and/or `--batch-name` only when you want the legacy layout:
+Pass `--output-dir` and/or `--batch-name` only when you want a custom layout:
 
 ```text
 <output-dir>/<batch-name>/<hypothesis-id>/<experiment-id>/
@@ -102,35 +101,15 @@ audit an overridden run.
 Resuming a complete checkpoint requires its recorded effective charge transform
 to match the requested run; use a separate output directory for another transform.
 
-Every result row records the policy space actually evaluated:
-`per_partner_policy_count`, `candidate_policy_count`, `max_q_pi_entropy`,
-`normalized_q_pi_entropy`, `effective_policy_count`, and
-`policies_fully_enumerated`. For a four-partner graded run at horizon four,
-these diagnostics must report 1,296 policies per partner, 5,184 candidates,
-and a maximum entropy of approximately 8.553332 nats. The runtime does not
-report a synthetic planning-cost proxy; candidate count and configured horizon
-are recorded directly, while actual compute should be measured with timings or
-profiling when needed.
-
-For affect-enabled runs, rows record `charge_transform`,
-`affective_charge_active`, `affective_charge_linear`, and
-`affective_charge_squared`. Linear charge is the canonical default; squared
-charge is an explicit diagnostic override.
-
-Runner diagnostics are assembled in `experiments/trust/diagnostics.py`, while
-POMDP matrices are assembled in `tasks/trust/pomdp_matrices.py` and wrapped by
-`tasks/trust/pomdp.py`. These modules are structural boundaries only: changing
-them should be verified with fixed-seed data-collection and debug checks. Exact
-`results.csv` hash comparison is appropriate only for changes intended to
-preserve runtime behavior. The exhaustive shared-action correction establishes
-a new baseline: policy construction no longer consumes the action RNG, so its
-rows are not expected to hash-match runs from the former subsampled planner.
+Result rows include the settings and measurements needed to check and analyze a
+run. See [Configs](configs.md) for parameter definitions and
+[Result provenance](../results/provenance.md) for the paper's validation rules.
 
 Post-hoc analysis:
 
 ```bash
 python scripts/analysis/analyze.py \
-  --results results/paper/04_betrayal_adaptation/raw/betrayal_adaptation/betrayal_adaptation/results.csv \
+  --results results/paper/04_betrayal_adaptation/raw/results.csv \
   --output-dir /tmp/affect_aif_analysis
 ```
 
@@ -143,7 +122,7 @@ Colab-compatible and call the same CLI scripts shown here.
 ## Choosing An Output Directory
 
 Demo configs already default to `outputs/demo/...`. For other throwaway checks,
-pass an explicit legacy root such as `/tmp` or `outputs/`:
+pass a custom output root such as `/tmp` or `outputs/`:
 
 ```bash
 python scripts/experiment/run.py \
@@ -159,9 +138,9 @@ tracked.
 
 ## What The Runner Does Not Run
 
-`scripts/experiment/run.py` intentionally executes only the maintained
-focal-agent trust TOML surface (`family = "trust"`). The
+`scripts/experiment/run.py` runs the focal-agent trust experiments
+(`family = "trust"`). The
 `experiments/multifocal/` package contains a tested reciprocal AIF-vs-AIF
 prototype with JSON configs under `experiments/multifocal/configs/`, but that
 code is future work. It is not part of the paper reproduction command, demo
-notebooks, or canonical result layout yet.
+notebooks, or default result layout yet.

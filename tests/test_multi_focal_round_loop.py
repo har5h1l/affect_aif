@@ -128,3 +128,17 @@ def test_metrics_columns_propagate():
         "partner_beliefs",
     }
     assert expected_keys.issubset(rows[0].keys())
+
+
+def test_explicit_multifocal_charge_transform_reaches_tracker():
+    cfg = MultiFocalConfig.from_dict(
+        {
+            "experiment_name": "charge_selection",
+            "agents": [
+                {"kind": "affective", "planning_horizon": 1, "charge_transform": transform}
+                for transform in ("linear", "squared")
+            ],
+        }
+    )
+    agents = create_agents_from_multi_focal_config(cfg, seed=0)
+    assert [agent.partner_bank.beta.charge_transform for agent in agents] == ["linear", "squared"]
