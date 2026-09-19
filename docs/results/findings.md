@@ -29,7 +29,9 @@ binary-confirmation outputs are not paper evidence.
 - Canonical suite manifest: `results/paper/manifest.json`
 - Figure and source-table map: `docs/results/provenance.md`
 - Config-to-result routes: `docs/guide/configs.md`
-- Bootstrap contract: 10,000 percentile resamples, bootstrap seed 0
+- Bootstrap contract: 10,000 percentile resamples, bootstrap seed 0;
+  Figure 4 uses normal-approximation intervals instead (see
+  [Statistical Contract](provenance.md#statistical-contract)).
 - Treatment-control effects: paired at the simulation-seed level
 - Correlations: pooled partial correlations with a seed-cluster bootstrap
 - Time courses: seed means bootstrapped within round bins

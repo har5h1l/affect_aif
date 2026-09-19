@@ -73,8 +73,8 @@ Hampton, A.N., Bossaerts, P., O'Doherty, J.P.: Neural correlates of
 
 \bibitem{Heins2022Pymdp}
 Heins, C., Millidge, B., Demekas, D., Klein, B., Friston, K., Couzin, I.D.,
-  Tschantz, A.: pymdp: A python library for active inference in discrete state
-  spaces. Journal of Open Source Software  \textbf{7}(73), ~4098 (2022).
+  Tschantz, A.: pymdp: A {Python} library for active inference in discrete
+  state spaces. Journal of Open Source Software  \textbf{7}(73), ~4098 (2022).
   \doi{10.21105/joss.04098}
 
 \bibitem{Hesp2021DeeplyFeltAffect}

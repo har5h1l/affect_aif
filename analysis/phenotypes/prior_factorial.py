@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from analysis.figure_style import apply_manuscript_figure_style
 from analysis.phenotypes.common import (
     betrayal_scenario,
     build_phenotype_variants,
@@ -115,6 +116,7 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
+    apply_manuscript_figure_style()
     betrayal = metrics_df.loc[metrics_df["experiment_id"] == "betrayal"]
     means = betrayal.groupby("variant_id", sort=False)[
         ["cumulative_payoff", "betrayal_recovery_time", "selection_gini", "beta_range", "trust_asymmetry"]
@@ -128,7 +130,7 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     spans = raw.max(axis=0) - mins
     normalized = np.divide(raw - mins, spans, out=np.full_like(raw, 0.5), where=spans != 0.0)
 
-    fig, ax = plt.subplots(figsize=(7.2, 3.0))
+    fig, ax = plt.subplots(figsize=(12.2 / 2.54, 2.6))
     image = ax.imshow(normalized, cmap="viridis", vmin=0.0, vmax=1.0, aspect="auto")
     ax.set_xticks(np.arange(len(EXP_B_HEATMAP_COLUMNS)))
     ax.set_xticklabels(EXP_B_HEATMAP_COLUMNS, fontsize=8)
@@ -146,10 +148,10 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
         for col_idx, value in enumerate(row):
             text = f"{value:.0f}" if col_idx == 0 else f"{value:.3g}"
             color = "white" if normalized[row_idx, col_idx] < 0.35 else "black"
-            ax.text(col_idx, row_idx, text, ha="center", va="center", fontsize=7, color=color)
+            ax.text(col_idx, row_idx, text, ha="center", va="center", fontsize=8, color=color)
 
     colorbar = fig.colorbar(image, ax=ax, fraction=0.035, pad=0.03)
     colorbar.set_label("Column-normalized value", fontsize=8)
-    colorbar.ax.tick_params(labelsize=7)
+    colorbar.ax.tick_params(labelsize=8)
     fig.tight_layout()
     save_figure(fig, figure_dir / "fig_phenotype_quadrants.pdf")

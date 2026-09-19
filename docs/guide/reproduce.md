@@ -122,9 +122,9 @@ For figure regeneration and the source-table map, see
 | 3.2 deployment ablation | `configs/paper/02_deployment_ablation.toml` | `results/paper/02_deployment_ablation/` | `source_tables/*.csv`, `manifest.json` |
 | 3.3 partner selection | `configs/paper/03_partner_selection.toml` | `results/paper/03_partner_selection/` | `source_tables/*.csv`, `manifest.json` |
 | 3.4 betrayal adaptation | `configs/paper/04_betrayal_adaptation.toml` | `results/paper/04_betrayal_adaptation/` | `summary.csv`, `source_tables/*.csv`, `manifest.json` |
-| 3.5 / Appendix E precision-gain profiles | `configs/paper/05a_alpha_sweep.toml` | `results/paper/05a_alpha_sweep/` | `metrics.csv`, `manifest.json` |
-| 3.5 / Appendix E prior x gain profiles | `configs/paper/05b_prior_factorial.toml` | `results/paper/05b_prior_factorial/` | `metrics.csv`, `manifest.json` |
-| 3.5 / Appendix E forgiveness / trust repair | `configs/paper/05c_forgiveness.toml` | `results/paper/05c_forgiveness/` | `metrics.csv`, `manifest.json` |
+| 3.5 / Appendix 5 precision-gain profiles | `configs/paper/05a_alpha_sweep.toml` | `results/paper/05a_alpha_sweep/` | `metrics.csv`, `manifest.json` |
+| 3.5 / Appendix 5 prior x gain profiles | `configs/paper/05b_prior_factorial.toml` | `results/paper/05b_prior_factorial/` | `metrics.csv`, `manifest.json` |
+| 3.5 / Appendix 5 forgiveness / trust repair | `configs/paper/05c_forgiveness.toml` | `results/paper/05c_forgiveness/` | `metrics.csv`, `manifest.json` |
 
 The exact manuscript source tables and final paper figures live under
 `docs/manuscript/source_tables/` and `docs/manuscript/figures/`.

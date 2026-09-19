@@ -10,6 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from analysis.figure_style import apply_manuscript_figure_style
 from analysis.phenotypes.common import (
     betrayal_scenario,
     build_alpha_variants,
@@ -73,46 +74,81 @@ def _summary_with_ci(metrics_df: pd.DataFrame, by: list[str], metric: str) -> pd
 
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
-    fig, axes = plt.subplots(2, 3, figsize=(12, 7))
+    apply_manuscript_figure_style()
+    fig, axes = plt.subplots(3, 2, figsize=(12.2 / 2.54, 3.8), layout="constrained")
     axes = axes.reshape(-1)
     titles = {
         "early_exploitation_rate": "Early exploiter investment",
-        "betrayal_recovery_time": "Betrayal recovery rounds",
+        "betrayal_recovery_time": "Recovery time (rounds)",
         "selection_gini": "Selection gini",
-        "entropy_trajectory": "Policy entropy trajectory",
-        "beta_range": r"Mean within-episode $\bar{\beta}_k$ range",
+        "entropy_trajectory": "Policy entropy",
+        "beta_range": r"Within-episode $\bar{\beta}_k$ range",
     }
     for ax, metric in zip(axes, EXP_A_PANELS, strict=False):
         if metric == "entropy_trajectory":
-            for entropy_metric, label in (
-                ("entropy_early", "early"),
-                ("entropy_mid", "mid"),
-                ("entropy_late", "late"),
+            for style_idx, (entropy_metric, label) in enumerate(
+                (
+                    ("entropy_early", "early"),
+                    ("entropy_mid", "mid"),
+                    ("entropy_late", "late"),
+                )
             ):
                 summary = _summary_with_ci(metrics_df, ["alpha"], entropy_metric)
                 ax.errorbar(
                     summary["alpha"],
                     summary["mean"],
                     yerr=summary["ci95"],
-                    marker="o",
+                    marker=("o", "s", "^")[style_idx],
+                    linestyle=("-", "--", ":")[style_idx],
+                    markersize=3,
                     capsize=2,
                     label=label,
                 )
         else:
             summary = _summary_with_ci(metrics_df, ["experiment_id", "alpha"], metric)
-            for experiment_id, group in summary.groupby("experiment_id"):
+            for style_idx, (experiment_id, group) in enumerate(summary.groupby("experiment_id")):
                 ax.errorbar(
                     group["alpha"],
                     group["mean"],
                     yerr=group["ci95"],
-                    marker="o",
+                    marker=("o", "s", "^")[style_idx],
+                    linestyle=("-", "--", ":")[style_idx],
+                    markersize=3,
                     capsize=2,
-                    label=str(experiment_id),
+                    label=str(experiment_id).replace("_", " "),
                 )
         ax.set_xscale("log")
-        ax.set_xlabel(r"gain $\alpha$")
+        ax.set_xlim(0.04, 10)
+        ax.tick_params(axis="x", labelsize=9)
+        if ax is axes[4]:
+            ax.set_xlabel(r"gain $\alpha$")
         ax.set_title(titles[metric])
     axes[-1].axis("off")
-    axes[0].legend(frameon=False)
-    axes[3].legend(frameon=False)
-    save_figure(fig, figure_dir / "fig_alpha_sweep.pdf")
+    environment_handles, environment_labels = axes[0].get_legend_handles_labels()
+    phase_handles, phase_labels = axes[3].get_legend_handles_labels()
+    environment_legend = axes[-1].legend(
+        environment_handles,
+        environment_labels,
+        title="Environment",
+        frameon=False,
+        loc="upper left",
+        bbox_to_anchor=(0, 1.05),
+        fontsize=8,
+        title_fontsize=9,
+        handlelength=1.2,
+    )
+    axes[-1].add_artist(environment_legend)
+    axes[-1].legend(
+        phase_handles,
+        phase_labels,
+        title="Episode phase",
+        frameon=False,
+        loc="upper left",
+        bbox_to_anchor=(0, 0.32),
+        ncol=3,
+        fontsize=8,
+        title_fontsize=9,
+        handlelength=1.0,
+        columnspacing=0.7,
+    )
+    save_figure(fig, figure_dir / "fig_alpha_sweep.pdf", tight_layout=False)

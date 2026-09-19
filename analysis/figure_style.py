@@ -13,7 +13,7 @@ def apply_manuscript_figure_style() -> None:
             "ps.fonttype": 42,
             "font.size": 9,
             "axes.titlesize": 9,
-            "axes.labelsize": 8,
+            "axes.labelsize": 9,
             "xtick.labelsize": 8,
             "ytick.labelsize": 8,
             "legend.fontsize": 8,

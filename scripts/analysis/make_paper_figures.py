@@ -52,8 +52,8 @@ EXPECTED_MAX_ENTROPY = math.log(EXPECTED_COMBINED_CANDIDATES)
 # LNCS uses a 12.2 cm text block. Generate at final publication width so
 # embedded lettering is not reduced below its configured point size.
 LNCS_TEXT_WIDTH_IN = 12.2 / 2.54
-MAIN_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.62)
-BETRAYAL_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.62)
+MAIN_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.85)
+BETRAYAL_FIGURE_SIZE = (LNCS_TEXT_WIDTH_IN, 1.85)
 
 
 def _read(source_dir: Path, filename: str) -> pd.DataFrame:
@@ -211,7 +211,14 @@ def _line_with_band(
     mean = frame[mean_col].astype(float).to_numpy()
     low = frame[low_col].astype(float).to_numpy()
     high = frame[high_col].astype(float).to_numpy()
-    ax.plot(x, mean, label=label, color=color, linewidth=1.3)
+    ax.plot(
+        x,
+        mean,
+        label=label,
+        color=color,
+        linewidth=1.3,
+        linestyle="-" if label == VARIANT_LABELS["affect"] else "--",
+    )
     if np.isfinite(low).any() and np.isfinite(high).any():
         ax.fill_between(x, low, high, color=color, alpha=0.14, linewidth=0)
 

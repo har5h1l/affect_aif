@@ -9,6 +9,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from analysis.figure_style import apply_manuscript_figure_style
 from analysis.phenotypes.common import (
     build_phenotype_variants,
     common_group_metrics,
@@ -114,22 +115,39 @@ def metrics(results: pd.DataFrame) -> pd.DataFrame:
 
 
 def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
-    fig, axes = plt.subplots(1, 3, figsize=(13.4, 4.8), gridspec_kw={"width_ratios": [0.75, 4.0, 0.65]})
+    apply_manuscript_figure_style()
+    fig = plt.figure(figsize=(12.2 / 2.54, 3.9))
+    # The trajectory uses the full width; only the lower bars reserve a label margin.
+    trajectory = fig.add_axes([0.13, 0.64, 0.84, 0.28])
+    legend_ax = fig.add_axes([0.13, 0.415, 0.84, 0.13])
+    legend_ax.axis("off")
+    reengagement = fig.add_axes([0.30, 0.12, 0.28, 0.21])
+    payoff = fig.add_axes([0.69, 0.12, 0.28, 0.21], sharey=reengagement)
+    axes = [reengagement, trajectory, payoff]
     table = metrics_df.groupby("variant_id", dropna=False)[["reengagement_rate", "payoff_recovery"]].mean()
     missing = sorted(item for item in EXP_C_PROFILE_ORDER if item not in table.index)
     if missing:
         raise ValueError(f"forgiveness figure missing profiles: {', '.join(missing)}")
     table = table.loc[list(EXP_C_PROFILE_ORDER)].reset_index()
-    labels = [variant_label(item) for item in table["variant_id"]]
+    display_labels = {
+        "cautious_high_alpha": r"cautious-high-$\alpha$",
+        "cautious_low_alpha": r"cautious-low-$\alpha$",
+        "default_reference": "default",
+        "naive_high_alpha": r"naive-high-$\alpha$",
+        "naive_low_alpha": r"naive-low-$\alpha$",
+        "no_affect": "no-affect",
+    }
+    labels = [display_labels.get(str(item), variant_label(item)) for item in table["variant_id"]]
 
     y_positions = range(len(table))
     axes[0].barh(y_positions, table["reengagement_rate"], color="#4c78a8")
     axes[0].set_yticks(y_positions)
-    axes[0].set_yticklabels(labels, fontsize=7)
+    axes[0].set_yticklabels(labels, fontsize=9)
     axes[0].invert_yaxis()
-    axes[0].set_title("A. Reengagement")
+    axes[0].set_title("B. Reengagement")
     axes[0].set_xlabel("post-repair P0 selection")
     axes[0].set_xlim(0.0, 0.7)
+    axes[0].set_xticks([0.0, 0.2, 0.4, 0.6])
 
     trajectory_cols = [f"beta_recovery_r{target_round:03d}" for target_round in BETA_RECOVERY_ROUNDS]
     summary = metrics_df.groupby("variant_id", dropna=False)[trajectory_cols].mean().reset_index()
@@ -141,40 +159,41 @@ def figure(metrics_df: pd.DataFrame, figure_dir: Path) -> None:
     axes[1].axvspan(81, 120, color="0.9", zorder=0)
     axes[1].axvline(80, color="0.45", linestyle="--", linewidth=1)
     axes[1].axvline(121, color="0.45", linestyle="--", linewidth=1)
-    for _, row in summary.iterrows():
+    for style_idx, (_, row) in enumerate(summary.iterrows()):
         axes[1].plot(
             BETA_RECOVERY_ROUNDS,
             [row[col] for col in trajectory_cols],
-            marker="o",
+            marker=("o", "s", "^", "D", "v")[style_idx],
+            linestyle=("-", "--", ":", "-.", (0, (3, 1, 1, 1)))[style_idx],
             linewidth=1.8,
             markersize=4,
-            label=variant_label(str(row["variant_id"])),
+            label=display_labels.get(str(row["variant_id"]), variant_label(str(row["variant_id"]))),
         )
-    axes[1].set_title(r"B. Reverted-partner posterior mean $\beta_k$")
+    axes[1].set_title(r"A. Reverted-partner posterior mean $\beta_k$")
     axes[1].set_xlabel("round")
     axes[1].set_ylabel(r"P0 posterior mean $\beta_k$")
     axes[1].set_xlim(78, 200)
     axes[1].set_xticks(BETA_RECOVERY_ROUNDS)
     axes[1].text(
         100.5,
-        0.98,
+        0.05,
         "betrayal",
         transform=axes[1].get_xaxis_transform(),
         ha="center",
-        va="top",
-        fontsize=7,
+        va="bottom",
+        fontsize=8,
         color="0.35",
     )
-    axes[1].legend(frameon=False, fontsize=7, ncol=2, loc="lower right")
+    legend_ax.legend(*axes[1].get_legend_handles_labels(), frameon=False, fontsize=9, ncol=2, loc="center")
 
     axes[2].barh(y_positions, table["payoff_recovery"], color="#f58518")
     axes[2].axvline(1.0, color="0.4", linestyle="--", linewidth=1)
     axes[2].set_yticks(y_positions)
-    axes[2].set_yticklabels([])
-    axes[2].invert_yaxis()
+    axes[2].tick_params(axis="y", labelleft=False)
     axes[2].set_title("C. Payoff recovery")
-    axes[2].set_xlabel("late repair / pre-betrayal payoff")
+    axes[2].set_xlabel("late repair /\npre-betrayal payoff")
     axes[2].set_xlim(0.94, 1.08)
+    axes[2].set_xticks([0.95, 1.00, 1.05])
     for ax in axes:
         ax.spines[["top", "right"]].set_visible(False)
-    save_figure(fig, figure_dir / "fig_forgiveness.pdf")
+    save_figure(fig, figure_dir / "fig_forgiveness.pdf", tight_layout=False)

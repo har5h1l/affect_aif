@@ -53,7 +53,10 @@ unchanged base commit.
   baseline 1–80, betrayal 81–120, and repair 121–200. The final correction
   regenerates alpha-sweep, prior-factorial, and forgiveness metrics and figures
   from the same preserved trajectories; simulation code and raw data are unchanged.
-- Mean intervals resample simulation-seed means 10,000 times with bootstrap seed 0.
+- Main-figure mean intervals resample simulation-seed means 10,000 times with
+  bootstrap seed 0. Figure 4 (alpha sweep) instead uses normal-approximation
+  intervals: mean ± 1.96 standard errors across available runs. Its entropy
+  panel pools both environments; undefined recovery times are excluded.
 - Treatment-control intervals resample paired seed differences.
 - H1 partial-correlation intervals resample whole seed clusters.
 - Figure refresh validates linear/none charge provenance, 1,296 policies per

@@ -69,6 +69,7 @@ docs/manuscript/*.fls
 docs/manuscript/*.log
 docs/manuscript/*.out
 docs/manuscript/*.synctex.gz
+docs/manuscript/DescriptionTexts.txt
 
 # direnv
 .direnv/

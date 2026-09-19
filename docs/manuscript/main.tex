@@ -1,13 +1,13 @@
-\documentclass[runningheads,a4paper]{llncs}
+\documentclass[runningheads,orivec]{llncs}
 
-\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{newtxtext}
+\usepackage[varvw]{newtxmath}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{graphicx}
-\usepackage{xcolor}
-\usepackage{subcaption}
 \usepackage{float}
-\usepackage{placeins}
 \usepackage{needspace}
 \usepackage{microtype}
 \usepackage{url}
@@ -17,58 +17,30 @@
 \graphicspath{{figures/}}
 
 \emergencystretch=1em
-\setcounter{topnumber}{3}
-\setcounter{bottomnumber}{2}
-\setcounter{totalnumber}{5}
-\renewcommand{\topfraction}{0.9}
-\renewcommand{\bottomfraction}{0.8}
-\renewcommand{\textfraction}{0.08}
-\renewcommand{\floatpagefraction}{0.75}
-\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
-\captionsetup[figure]{skip=4pt}
 
-\newcommand{\precision}{\mathrm{precision}}
 
-% appendix figures: cap height so table + figure can share a page cleanly
+% Appendix figures are generated at publication width with readable lettering.
 \newcommand{\appendixfigure}[1]{%
-    \includegraphics[width=\linewidth,height=0.30\textheight,keepaspectratio]{#1}%
+    \includegraphics[width=\linewidth]{#1}%
 }
-% remove extra float padding between appendix floats and following blocks
-\newcommand{\appendixfloatend}{\par\vskip-\intextsep}
-\newcommand{\appendixfloattosection}{%
-    \appendixfloatend
-    \vskip-\baselineskip
-    \vskip-\intextsep
-}
-
-% visible marker for any late manuscript result note
-\newcommand{\resultp}[1]{\textcolor{blue}{\textbf{[}\textit{#1}\textbf{]}}}
 
 % supplementary repository URL
 \newcommand{\githubrepourl}{\url{https://github.com/har5h1l/affect_aif}}
-% camera-ready build: use the public repository rather than the review mirror
-\newif\ifanonsupprepo
-\anonsupprepofalse
-\newcommand{\anonsupprepourl}{the repository \texttt{README.md}}
-\newcommand{\codereleaseartifactlist}{the simulation environments, precision conditions, experiment configuration files, analysis scripts, and figure-generation code used for the reported experiments}
 \newcommand{\appendixsupplementarystatement}{%
-  \ifanonsupprepo
-    Simulation code, experiment configurations, analysis scripts, figure-generation code, and row-level result files are available in the anonymous supplementary repository at~\githubrepourl.
-  \else
-    Simulation code, experiment configurations, analysis scripts, figure-generation code, and the frozen row-level result archive are available at~\githubrepourl.
-  \fi
+  Simulation code, experiment configurations, analysis scripts, figure-generation code, and the frozen row-level result archive are available at~\githubrepourl.
 }
 
 \title{Partner-Specific Affective Precision in Social Active Inference}
 \titlerunning{Partner-Specific Affective Precision}
 \author{Harshil Shah\inst{1}\orcidID{\href{https://orcid.org/0009-0006-0145-9958}{0009-0006-0145-9958}}\thanks{Corresponding author: \email{28hshah@gmail.com}.} \and
-Andrew Pashea\inst{2}}
+Andrew Pashea\inst{2}\orcidID{\href{https://orcid.org/0009-0004-4061-6296}{0009-0004-4061-6296}}}
 \authorrunning{H. Shah and A. Pashea}
-\institute{Mission San Jose High School
+\institute{Mission San Jose High School, Fremont, CA, USA
 \and
 Division of the Social Sciences, University of Chicago, Chicago, IL, USA}
 
 \begin{document}
+\raggedbottom
 \maketitle
 
 \begin{abstract}
@@ -101,7 +73,7 @@ We evaluate this mechanism in a repeated multi-partner graded trust game with pa
 
 A focal active-inference agent plays a repeated multi-partner trust/investment game with four partners whose behavioral types and stances are hidden. The agent is implemented using the \texttt{pymdp} library for discrete active inference~\cite{DaCosta2020DiscreteSynthesis,Heins2022Pymdp}, which provides standard components for belief updating and policy selection. Partner-local affective precision is layered on top of separate per-partner generative models, allowing both evidence and policy precision to remain relationship-specific. The task generative process, focal-agent POMDP, affective-precision update, and simulation protocols are specified in Appendices~\ref{app:generative_process}--\ref{app:protocols}.
 
-\subsection{Trust game}
+\subsection{Trust Game}
 \label{sec:trust_game}
 
 We evaluate the mechanism in a repeated multi-partner trust/investment game~\cite{Berg1995Trust}. The task has a Prisoner's-Dilemma-style social-dilemma structure: investing more can yield larger returns when a partner cooperates, but larger losses relative to the risk-free baseline when the partner defects. The task therefore requires the focal agent to solve two coupled problems: predicting how each partner is likely to respond, and deciding how strongly to commit to that prediction through investment.
@@ -122,14 +94,14 @@ Thus, cooperation yields \(\pi(a,\mathrm{cooperate})=10+0.5a\), whereas defectio
 
 Investment also affects future partner stance. Higher investment provides stronger cooperative evidence and shifts stance dynamics toward trust-building transitions; lower investment or withholding shifts dynamics toward trust-damaging transitions. Formally, the transition model interpolates between high-investment and low-investment endpoint matrices according to \(\rho(a)=a/5\), with environment-side transition matrices specified in Appendix~\ref{app:generative_process}.
 
-\subsection{Per-partner generative models}
+\subsection{Per-Partner Generative Models}
 \label{sec:partner_models}
 
 Rather than maintaining a single pooled social model, the focal agent maintains a separate discrete generative model $\mathcal{M}_k$ for each partner $k$. This factorization keeps observations, beliefs, and confidence evidence local to the relationship that generated them. Each $\mathcal{M}_k$ uses the standard $A$/$B$/$C$/$D$/$E$ components of discrete active inference~\cite{DaCosta2020DiscreteSynthesis}: observation likelihoods, transition dynamics, preferences, initial priors, and policy priors. The focal agent's partner-local POMDP specification is provided in Appendix~\ref{app:pomdp}.
 
 Each partner model contains partner type, partner stance, and an own-investment state factor. Type and stance are inferred from evidence; own investment is deterministically set by the agent's executed action and treated as fully observed. This factor lets the payoff likelihood condition on the investment level the agent just chose, so the agent is uncertain about partner type and stance but not about its own investment. Observations are the partner's cooperate-or-defect response and the focal agent's realized payoff. The partner-response likelihood depends on type and stance, so predictive reliability is defined by response model fit rather than payoff: a reliably cooperative and a reliably defecting partner can both be predictable. The payoff likelihood depends on investment level and marginalizes over partner response. The agent's transition model mirrors the process dynamics in Appendix~\ref{app:generative_process}, while scheduled betrayal and repair manipulations are environment-side interventions defined in Appendix~\ref{app:protocols}. This model supplies ordinary partner-state inference; the affective-precision layer in Section~\ref{sec:affective_precision} estimates how confidently each partner model should be deployed during policy selection.
 
-\subsection{Partner-local affective precision}
+\subsection{Partner-Local Affective Precision}
 \label{sec:affective_precision}
 
 Partner-local affective precision maps relationship-specific model fit onto policy precision. At each round \(t\), before assimilating the observed partner response, the focal agent evaluates how surprising that response would be under its predictive type--stance posterior for partner \(k\). After this precision update, the partner-state posterior is updated on the same observation. Unlike prior affective-precision accounts centered on policy-inference quantities~\cite{Hesp2021DeeplyFeltAffect}, the evidence source here is perceptual partner-response model fit. Because this update is computed separately for each partner, confidence can diverge across relationships even when the focal agent's task and preferences remain fixed.
@@ -168,7 +140,7 @@ where $\gamma_{\text{base}}$ is the baseline policy precision and $q(\beta_\ell)
 
 The $\beta_k$ posterior is maintained as an auxiliary precision tracker rather than as a hidden state inside the focal agent's generative model. This keeps the mechanism lightweight and experimentally isolable, but prevents the agent from forming prior expectations over its own future confidence states; this limitation is discussed in Section~\ref{sec:discussion}.
 
-\subsection{Cross-partner policy selection}
+\subsection{Cross-Partner Policy Selection}
 \label{sec:cross_partner_policy}
 
 In partner-choice regimes, the agent must decide which partner-specific policy candidate to execute. Each per-partner model \(\mathcal{M}_k\) first evaluates policies \(\pi \in \Pi_k\) directed toward partner \(k\). Let \(u_{k,\pi}\) denote the policy score for candidate \(\pi\) under partner model \(\mathcal{M}_k\) prior to the cross-partner precision transformation; under the uniform policy prior used here, this is the negative expected-free-energy score returned by policy inference, with larger values indicating greater policy support~\cite{Friston2017ProcessTheory,Heins2022Pymdp}. The cross-partner step then combines these partner-indexed candidates into a single choice set. This step does not add a new state-inference model; it specifies how partner-local precision \(\gamma_k\) enters the final comparison among partner--investment candidates.
@@ -182,16 +154,16 @@ where $\gamma_k$ is the partner-specific policy precision from Eq.~\eqref{eq:gam
 
 The final policy posterior is computed by applying a softmax over the transformed scores \(\tilde{u}_{k,\pi}\) across all partners and candidate policies. This procedure does not change the per-partner generative models; it only determines how partner-local precision enters cross-partner policy comparison. With six investment actions and planning horizon \(H=4\), each partner model evaluates all \(6^4=1{,}296\) candidate policies. In partner-choice conditions with four partners, the combined posterior therefore spans \(5{,}184\) partner--policy candidates. Reported policy entropy is the natural-log Shannon entropy of this posterior, whose maximum is \(\log(5{,}184)\approx8.55\) nats.
 
-\subsection{Simulation setup}
+\subsection{Simulation Setup}
 \label{sec:simulation_setup}
 
-Simulations compare four precision conditions: full partner-local precision, a shared-$\beta$ ablation that pools evidence across partners while keeping per-partner POMDP beliefs intact, a tracked-only ablation that updates $q(\beta_k)$ but fixes $\gamma_k = \gamma_{\text{base}}$, and a no-affect control that disables the $\beta$ tracker entirely. Conditions include open graded investment, partner choice, abrupt betrayal, and precision-dynamics/profile diagnostics. Full condition definitions, episode lengths, and metrics are provided in Appendix~\ref{app:protocols}. Code and experiment configurations are provided in the anonymized supplementary repository. Uncertainty is quantified using seed-level bootstrap procedures detailed in Appendix~\ref{app:protocols}.
+Simulations compare four precision conditions: full partner-local precision, a shared-$\beta$ ablation that pools evidence across partners while keeping per-partner POMDP beliefs intact, a tracked-only ablation that updates $q(\beta_k)$ but fixes $\gamma_k = \gamma_{\text{base}}$, and a no-affect control that disables the $\beta$ tracker entirely. Conditions include open graded investment, partner choice, abrupt betrayal, and precision-dynamics/profile diagnostics. Full condition definitions, episode lengths, and metrics are provided in Appendix~\ref{app:protocols}. Code and experiment configurations are available at~\githubrepourl. Uncertainty estimation procedures are detailed in Appendix~\ref{app:protocols}.
 \section{Results}
 \label{sec:results}
 
 Results test whether partner-local precision tracks predictability over payoff, acts through the \(\beta_k \rightarrow \gamma_k\) deployment pathway, and remains behaviorally consequential under partner choice, betrayal, and profile variation.
 
-\subsection{Partner-local precision tracks predictability rather than realized payoff}
+\subsection{Partner-Local Precision Tracks Predictability Rather than Realized Payoff}
 \label{sec:predictability_value}
 
 Partner-local precision was more strongly associated with partner-response likelihood surprisal than with realized payoff. Because partner-response surprisal drives the update, we use the full multi-partner simulation to check whether this intended selectivity persists once confidence updating, partner choice, and policy selection interact. Partner-choice episodes couple payoff, surprisal, and exposure, so we computed active-encounter partial correlations controlling for encounter count and the alternative signal. The precision--surprisal association remained substantially stronger ($r=-0.660$, 95\% CI [$-0.766$, $-0.492$]) than the precision--payoff association ($r=0.094$, 95\% CI [$-0.112$, $0.291$]). The negative sign reflects greater $\beta_k$-derived policy precision for less surprising responses; Figure~\ref{fig:model_fitness_contrast} plots absolute magnitudes for readability.
@@ -203,27 +175,29 @@ Payoff in the same analysis provides behavioral context rather than an independe
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig_model_fitness_beta_reward_divergence.pdf}
-\caption{Partner-local precision is more strongly associated with partner-response surprisal than realized payoff. Left and middle panels show absolute partial correlations; the right panel shows payoff. Error bars show 95\% CIs.}
+\Description{Three bar charts compare absolute partial correlations of precision with surprisal and payoff for partner-local and shared precision, followed by payoff for local, shared, and no-affect conditions. Surprisal correlations exceed payoff correlations in both precision conditions. Error bars indicate uncertainty.}
+\caption{Partner-local versus shared precision in the locality probe (30 seeds per condition). Left and middle: absolute active-encounter partial correlations of precision with surprisal and payoff, controlling for encounter count and the alternative signal. Right: cumulative payoff. Error bars: 95\% CIs.}
 \label{fig:model_fitness_contrast}
 \end{figure}
 
-\subsection{Tracked-only ablation isolates policy commitment}
+\subsection{Tracked-Only Ablation Isolates Policy Commitment}
 \label{sec:deployment}
 
 To test whether partner-local affective precision changes behavior through policy deployment rather than partner-state inference, we used a tracked-only ablation. This variant updates $q(\beta_k)$ normally while holding $\gamma_k=\gamma_{\text{base}}$, preserving the precision estimate but preventing it from modulating policy selection.
 
-The tracked-only ablation confirmed that the tracker can move without producing the same deployment effect. In the open graded partner-choice condition, partner-local and tracked-only conditions showed comparable within-episode variation in posterior mean $\bar{\beta}_k$, differing by only $0.043$ in mean range. The key difference was deployment: full precision modulation lowered policy entropy by $0.770$ nats relative to tracked-only (95\% CI [$-0.966$, $-0.577$]). Cumulative payoff was also somewhat higher under partner-local precision ($2003.3$ versus $1966.8$; difference $=36.5$, 95\% CI [$-8.6$, $84.1$]). Thus, $\beta_k$ matters behaviorally when it is allowed to modulate $\gamma_k$, producing sharper policy commitment. When that pathway is cut, the tracker remains active but the same entropy reduction is lost.
+The tracked-only ablation confirmed that the tracker can move without producing the same deployment effect (Figure~\ref{fig:deployment_contrast}). In the open graded partner-choice condition, partner-local and tracked-only conditions showed comparable within-episode variation in posterior mean $\bar{\beta}_k$, differing by only $0.043$ in mean range. The key difference was deployment: full precision modulation lowered policy entropy by $0.770$ nats relative to tracked-only (95\% CI [$-0.966$, $-0.577$]). Cumulative payoff was also somewhat higher under partner-local precision ($2003.3$ versus $1966.8$; difference $=36.5$, 95\% CI [$-8.6$, $84.1$]). Thus, $\beta_k$ matters behaviorally when it is allowed to modulate $\gamma_k$, producing sharper policy commitment. When that pathway is cut, the tracker remains active but the same entropy reduction is lost.
 
 This supports the interpretation of affective precision as a calibration layer rather than an inference-improvement mechanism. The tracker does not directly change the partner-state update; it regulates how strongly the agent commits to policies based on its current partner model. Whether sharper commitment improves payoff depends on the social context, not on precision alone.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig_deployment_social_summary.pdf}
-\caption{Tracked-only preserves $\bar{\beta}_k$ movement without the policy-sharpening effect. Full deployment lowers policy entropy; payoff is shown for context. Error bars show 95\% CIs.}
+\Description{Three bar charts compare partner-local and tracked-only conditions. Tracker movement is similar; policy entropy is lower with partner-local precision. The third panel reports cumulative payoff. Error bars indicate uncertainty.}
+\caption{Tracked-only ablation in the open graded partner-choice regime. Bars show means across 30 seeds for within-episode $\bar{\beta}_k$ range, policy entropy, and cumulative payoff (95\% CIs). Partner-local precision lowers entropy while tracker movement remains comparable. Paired contrasts are reported in the text.}
 \label{fig:deployment_contrast}
 \end{figure}
 
-\subsection{Partner choice extends policy commitment across social options}
+\subsection{Partner Choice Extends Policy Commitment across Social Options}
 \label{sec:partner_choice}
 
 Using the same underlying partner-choice trajectories analyzed in Section~\ref{sec:deployment}, we next examine a distinct readout: how precision deployment shapes commitment across partner--investment policies and how selected interactions are distributed across partner types. In this regime, each candidate pairs a partner with a multi-step investment plan, of which only the first step is executed each round. Precision modulation lowered policy entropy relative to the no-affect control ($6.887$ versus $7.657$; difference $=-0.770$, 95\% CI [$-0.966$, $-0.577$]), indicating that the $\beta_k \rightarrow \gamma_k$ pathway shapes commitment over partner--investment policies, not only investment levels within a fixed interaction.
@@ -232,17 +206,18 @@ Partner selection itself remained broadly distributed across the four partner ty
 
 Thus, partner-local precision sharpens policy commitment without imposing a fixed social preference; the abrupt-betrayal condition next tests this mechanism under social change.
 
-\subsection{Abrupt betrayal tests confidence under change}
+\subsection{Abrupt Betrayal Tests Confidence under Change}
 \label{sec:betrayal}
 
 Accumulated confidence helps when it remains attached to a valid partner model, but can lag behind abrupt social change. The abrupt-betrayal condition tests this boundary: partner~0 begins as an exploiter in a trusting stance and switches to a hostile stance at round~31, and the agent must adapt while carrying confidence built from the pre-switch relationship.
 
-Precision modulation remained behaviorally consequential through the betrayal episode. Mean policy entropy was lower under partner-local precision than under the no-affect control, with a mean difference of $-2.149$ nats (95\% CI [$-2.379$, $-1.895$]). Joint type--stance accuracy was also higher by $0.158$ (95\% CI [$0.084$, $0.226$]), consistent with altered engagement changing the evidence available to the agent. Because the tracked-only ablation in Section~\ref{sec:deployment} isolated the $\beta_k \rightarrow \gamma_k$ pathway, this accuracy difference is best interpreted as a downstream effect of changed engagement and sampling, not as a direct improvement to the partner-state update.
+Precision modulation remained behaviorally consequential through the betrayal episode (Figure~\ref{fig:betrayal_boundary}). Mean policy entropy was lower under partner-local precision than under the no-affect control, with a mean difference of $-2.149$ nats (95\% CI [$-2.379$, $-1.895$]). Joint type--stance accuracy was also higher by $0.158$ (95\% CI [$0.084$, $0.226$]), consistent with altered engagement changing the evidence available to the agent. Because the tracked-only ablation in Section~\ref{sec:deployment} isolated the $\beta_k \rightarrow \gamma_k$ pathway, this accuracy difference is best interpreted as a downstream effect of changed engagement and sampling, not as a direct improvement to the partner-state update.
 
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=\linewidth]{fig_betrayal_boundary_summary.pdf}
-\caption{Abrupt betrayal after partner~0's round-31 stance switch. Panels show betrayed-partner selection, posterior mean $\beta_k$, and policy entropy. Shading shows 95\% CIs.}
+\Description{Three time-series panels show selection of partner zero, its posterior mean inverse precision, and policy entropy. Dashed vertical lines mark the round-31 stance switch. Solid and dashed condition trajectories have shaded uncertainty bands.}
+\caption{Abrupt betrayal in the partner-choice regime. Left and right panels compare partner-local precision with no-affect; the middle panel compares partner-local precision with tracked-only. Dashed vertical lines mark partner~0's round-31 stance switch. Lines show means within 10-round bins across 30 seeds; shading: 95\% CIs.}
 \label{fig:betrayal_boundary}
 \end{figure}
 
@@ -250,7 +225,7 @@ Cumulative payoff was also higher by $58.2$ (95\% CI [$37.5$, $82.3$]), although
 
 The betrayal result exposes a timing problem in social confidence: confidence built from reliable past evidence can remain behaviorally active after the relationship changes. We next vary precision gain and prior model fitness to examine how confidence-revision dynamics differ across agents.
 
-\subsection{Precision dynamics as computational profiles of social trust calibration}
+\subsection{Precision Dynamics as Computational Profiles of Social Trust Calibration}
 \label{sec:phenotypes}
 
 The betrayal result shows that confidence revision has temporal structure: confidence can be too weak, too slow, or too reactive. Varying precision gain $\alpha$ confirmed that gain controls the amplitude of $\beta_k$ dynamics: in the betrayal regime, the average within-episode max--min range of posterior mean $\bar{\beta}_k$ increased monotonically from $0.097$ at $\alpha=0.05$ to $0.675$ at $\alpha=8.0$ (Spearman $\rho=1.0$). Payoff did not follow this monotonic pattern, indicating that stronger confidence responsiveness is not automatically better calibration.
@@ -276,40 +251,38 @@ We formalize social affective precision as a relationship-specific metacognitive
 
 These results support a distinction between social prediction and social commitment: an agent can infer what a partner is likely to do while separately estimating how strongly that inference should guide policy commitment. Precision gain and prior model fitness shape this calibration process, producing tradeoffs in confidence accumulation, betrayal adaptation, reengagement, and repair. Future empirical work can test whether human trust-game behavior similarly separates predictability from payoff, inference from policy commitment, and reengagement from restored confidence.
 
-\clearpage
-\bibliographystyle{splncs04}
-\bibliography{references}
+
+
 
 % appendix starts on a fresh page (supplementary; separate from main-text page budget)
 \clearpage
 \appendix
-\setlength{\textfloatsep}{6pt plus 1pt minus 2pt}
-\setlength{\floatsep}{6pt plus 1pt minus 2pt}
-\setlength{\intextsep}{6pt plus 1pt minus 2pt}
-\captionsetup[figure]{skip=3pt}
-\captionsetup[table]{skip=3pt}
+\renewcommand{\thesection}{\arabic{section}}
+% Name appendix headings while keeping numeric cross-references and subsections.
+\makeatletter
+\newcommand{\appendixprefix@section}{Appendix~}
+\renewcommand{\@seccntformat}[1]{\csname appendixprefix@#1\endcsname\csname the#1\endcsname\quad}
+\makeatother
+% Keep appendix PDF destinations distinct from main-text section numbers.
+\renewcommand{\theHsection}{appendix.\arabic{section}}
 \raggedbottom
-\section*{\appendixname}
-\addcontentsline{toc}{part}{\appendixname}
+\section{Trust-Game Generative Process}
+\label{app:generative_process}
 \label{app:supplementary}
 
 \appendixsupplementarystatement
 
-\vspace{1em}
-\section{Trust-Game Generative Process}
-\label{app:generative_process}
-
 This appendix specifies the environment-side trust-game process: scripted partners with hidden type and stance, investment-dependent stance transitions, binary responses, and deterministic payoff delivery. Appendix~\ref{app:pomdp} specifies the focal agent's POMDP model.
 
-\subsection{Episode structure}
+\subsection{Episode Structure}
 
 Each episode consists of repeated interactions between the focal agent and four environment-side partners. On each round, the partner is assigned or selected, the focal agent chooses \(a\in\{0,1,2,3,4,5\}\), the partner emits \(o^{act}_k\in\{\mathrm{cooperate},\mathrm{defect}\}\), payoff is delivered by Eq.~\eqref{eq:graded_payoff_map}, and stance updates by Eq.~\eqref{eq:b_stance}.
 
-\subsection{Partner state variables}
+\subsection{Partner State Variables}
 
 Each environment-side partner \(k\) has two process variables hidden from the focal agent: behavioral type \(s^{\mathrm{type}}_k \in \{\mathrm{cooperator},\mathrm{reciprocator},\mathrm{exploiter},\mathrm{random}\}\) and stance toward the focal agent \(s^{\mathrm{stance}}_k \in \{\mathrm{trusting},\mathrm{neutral},\mathrm{hostile}\}\). These govern how the environment samples partner responses and updates stance over the episode; type sets the partner's broad response tendency, and stance modulates how cooperative those responses are toward the focal agent at the current interaction.
 
-\subsection{Partner-response probabilities}
+\subsection{Partner-Response Probabilities}
 \label{app:process_response}
 
 The partner cooperation likelihood table defines the probability the partner cooperates given type and stance:
@@ -317,8 +290,9 @@ The partner cooperation likelihood table defines the probability the partner coo
 \Needspace{14\baselineskip}
 \begin{table}[H]
 \centering
-\caption{Cooperation likelihood $P(\text{cooperate} \mid s^{\text{type}}, s^{\text{stance}})$.}
+\caption{Cooperation likelihood $P(\text{cooperate} \mid s^{\text{type}}, s^{\text{stance}})$}
 \label{tab:coop_likelihood}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccc}
 \toprule
 Partner type & Trusting & Neutral & Hostile \\
@@ -334,7 +308,7 @@ Random & 0.60 & 0.50 & 0.35 \\
 The table defines the environment-side cooperation probability \(P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid s^{\mathrm{type}}_k,s^{\mathrm{stance}}_k)\), with \(P(o^{\mathrm{act}}_k=\mathrm{defect}\mid \cdot)=1-P(o^{\mathrm{act}}_k=\mathrm{cooperate}\mid \cdot)\).
 The same response probabilities are used in the focal agent's partner-response likelihood \(A^{\mathrm{act}}_k\) (Appendix~\ref{app:pomdp_likelihoods}), allowing the focal agent to infer type and stance from observed cooperate-or-defect responses.
 
-\subsection{Payoff function}
+\subsection{Payoff Function}
 \label{app:process_payoff}
 
 Payoff is delivered by the environment after the partner response is sampled. With endowment \(E=10\) and multiplier \(M=3\), the invested amount is subtracted from the focal agent's endowment. If the partner cooperates, the investment is multiplied by \(M\) and split evenly, so the focal agent receives \(Ma/2\). If the partner defects, the focal agent receives no return from the investment.
@@ -348,7 +322,7 @@ E-a, & o_k^{\mathrm{act}}=\mathrm{defect}.
 \end{equation}
 Thus, \(a=0\) is risk-free, while higher investment increases both possible gains and potential loss.
 
-\subsection{Stance transition dynamics}
+\subsection{Stance Transition Dynamics}
 \label{app:process_stance}
 
 Stance transitions depend on the focal agent's graded investment $a$ by interpolating between a high-investment/trust-building endpoint and a low-investment/withholding endpoint:
@@ -365,6 +339,7 @@ High investment shifts dynamics toward trust building; low investment or withhol
 \centering
 \caption{Endpoint stance transition dynamics. The focal agent's graded investment interpolates between $B^{\mathrm{high}}$ and $B^{\mathrm{low}}$ according to Eq.~\eqref{eq:b_stance}.}
 \label{tab:stance_transition}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccc}
 \toprule
 \multicolumn{4}{c}{\textbf{High investment / trust-building endpoint }$B^{\mathrm{high}}$} \\
@@ -388,7 +363,7 @@ Hostile & 0.40 & 0.60 & 0.80 \\
 
 These dynamics instantiate the asymmetry of trust: sustained high investment gradually builds trust, while sustained withholding rapidly damages trust; recovery from hostility is slow. In scheduled betrayal and repair protocols, the environment can additionally intervene on a partner's stance according to the protocol schedule; these interventions are not known transition events in the focal agent's POMDP.
 
-\subsection{Boundary of the current simulation}
+\subsection{Boundary of the Current Simulation}
 
 All reported simulations use one focal active-inference agent interacting with four scripted partners that maintain hidden type and stance, sample responses by Appendix~\ref{app:process_response}, and update stance by Appendix~\ref{app:process_stance}; they do not infer policies or maintain affective precision.
 \section{Focal-Agent POMDP Specification}
@@ -396,11 +371,11 @@ All reported simulations use one focal active-inference agent interacting with f
 
 This appendix specifies the focal agent's partner-local generative model in standard discrete active-inference form. Each partner \(k\) has a POMDP \(\mathcal{M}_k\) with hidden type, stance, and own-investment state factors. The model follows Appendix~\ref{app:generative_process} but is not identical to the environment: payoff is an observation modality marginalizing over partner response; scheduled betrayal and repair are environment-side; affective precision is external to the POMDP.
 
-\subsection{Partner-local factorization}
+\subsection{Partner-Local Factorization}
 
 The focal agent maintains a separate model \(M_k\) for each partner, with partner-specific likelihoods, transitions, preferences, priors, and policy priors. Partner choice is handled outside the individual POMDPs by comparing partner--investment policies after each \(M_k\) has produced policy evidence.
 
-\subsection{Hidden state factors and observations}
+\subsection{Hidden State Factors and Observations}
 
 As described in Section~\ref{sec:partner_models}, the focal agent's generative model for each partner $k$ maintains three hidden factors:
 \begin{align}
@@ -423,7 +398,7 @@ o_k^{\text{pay}} &\in \mathcal{O}^{\text{pay}}, \nonumber
 \end{align}
 where $\mathcal{O}^{\text{act}}=\{\text{cooperate, defect}\}$ and $\mathcal{O}^{\text{pay}}$ comprises eleven discrete payoff levels (Eq.~\eqref{eq:graded_payoff_map}).
 
-\subsection{Observation likelihoods}
+\subsection{Observation Likelihoods}
 \label{app:pomdp_likelihoods}
 
 \paragraph{Partner-response likelihood \(A^{\mathrm{act}}_k\).}
@@ -442,7 +417,7 @@ P(o^{\mathrm{act}}_k=o^{\mathrm{act}} \mid s^{\mathrm{type}}_k,s^{\mathrm{stance
 \end{equation}
 This makes higher investment beneficial when cooperation is likely and costly when defection is likely, while keeping payoff preferences inside the generative model.
 
-\subsection{Transition dynamics}
+\subsection{Transition Dynamics}
 
 \paragraph{Type drift \(B_k^{\mathrm{type}}\).}
 Partner type is uncontrollable and drifts slowly:
@@ -467,7 +442,7 @@ P(s^{\mathrm{own}\prime}=a^\prime \mid s^{\mathrm{own}}, a)=\mathbb{I}[a^\prime=
 \end{equation}
 Both \(B_k^{\mathrm{stance}}\) and \(B^{\mathrm{own}}\) are indexed by the same investment action \(a\); stance and own investment are separate hidden-state factors, not separate control factors.
 
-\subsection{Preferences, priors, and policy priors}
+\subsection{Preferences, Priors, and Policy Priors}
 
 \paragraph{Observation preferences \(C_k\).}
 There is no direct preference over partner responses:
@@ -494,7 +469,7 @@ D^{\mathrm{own}} &= \mathrm{Unif}(\{0,1,2,3,4,5\}). \label{eq:d_own}
 \paragraph{Policy priors \(E_k\).}
 Policy priors are uniform over admissible graded investment sequences at the configured planning horizon. In partner-choice settings, partner selection is handled outside the per-partner POMDP by evaluating partner--investment policy candidates with precision-adjusted scores before executing the chosen investment. This cross-partner comparison is specified in Appendix~\ref{app:affective_update}.
 
-\subsection{Runtime and precision boundary}
+\subsection{Runtime and Precision Boundary}
 \label{app:pomdp_beta_auxiliary}
 
 The partner-local POMDPs supply ordinary active-inference belief updating and policy evidence for each partner. They do not contain \(\beta_k\) as a hidden state. Instead, \(\beta_k\) is maintained as an auxiliary partner-local precision tracker, updated from partner-response likelihood surprisal and then mapped to policy precision \(\gamma_k\). This design keeps the POMDP state space compact and makes the precision pathway experimentally isolable. The cost is that the focal agent cannot form prior expectations over its own future confidence states. Appendix~\ref{app:affective_update} specifies the auxiliary update and the cross-partner policy-selection procedure.
@@ -503,11 +478,11 @@ The partner-local POMDPs supply ordinary active-inference belief updating and po
 
 This appendix specifies the auxiliary affective-precision update layered on top of the focal agent's partner-local POMDPs. The update maps partner-response model fit into a categorical posterior over inverse precision \(\beta_k\), then maps the posterior mean to partner-specific policy precision \(\gamma_k\). The same appendix also specifies how \(\gamma_k\) enters partner-choice policy comparison. At each round \(t\), affective charge is computed from Eq.~\eqref{eq:epsilon} using the pre-update predictive posterior \(q_{k,t}^-\) before the partner-state posterior is updated on \(\hat{o}_{k,t}^{\text{act}}\) (Section~\ref{sec:affective_precision}).
 
-\subsection{Categorical beta support}
+\subsection{Categorical Beta Support}
 
 Each partner maintains a categorical posterior $q(\beta_k)$ over discrete inverse-precision levels $\{0.5, 0.67, 1.0, 1.5, 2.0\}$, updated each round from affective charge $\phi_k$. The categorical representation keeps the inverse-precision convention explicit, bounds the precision dynamics, and allows the update to be analyzed as movement over interpretable confidence states.
 
-\subsection{Persistence prior}
+\subsection{Persistence Prior}
 
 The update proceeds in three steps. First, a persistence prior smooths the previous posterior via a tridiagonal transition matrix:
 \begin{equation}
@@ -516,7 +491,7 @@ p(\beta_k) \leftarrow T \cdot q_{\text{prev}}(\beta_k),
 \end{equation}
 where $T$ is tridiagonal with persistence parameter 0.8 and reflecting boundaries, encoding the prior expectation that precision evolves slowly.
 
-\subsection{Charge-based pseudo-likelihood}
+\subsection{Charge-Based Pseudo-Likelihood}
 
 Second, a charge-based pseudo-likelihood maps positive charge toward high policy precision (low $\beta$) and negative charge toward low policy precision (high $\beta$):
 \begin{equation}
@@ -527,7 +502,7 @@ where $\beta_\ell$ ranges over the five support points. This auxiliary update sa
 
 The fixed chance-level baseline, discrete $\beta_k$ support, persistence transition, and charge-based pseudo-likelihood are modeling choices that provide a bounded and interpretable implementation of the confidence tracker. Alternative formulations could learn partner-specific predictive baselines, adapt confidence persistence to inferred volatility, or represent $\beta_k$ continuously.
 
-\subsection{Posterior update and policy precision}
+\subsection{Posterior Update and Policy Precision}
 
 Third, the posterior is normalized:
 \begin{equation}
@@ -536,11 +511,11 @@ q(\beta_k) \propto \exp(\log \ell(\beta_\ell)) \cdot p(\beta_k).
 \end{equation}
 Policy precision is then set from the posterior mean as given in Eq.~\eqref{eq:gamma_update} of the main text. The quantity $\beta_k$ is inverse precision, so higher posterior mean $\beta_k$ lowers policy precision $\gamma_k$, while lower posterior mean $\beta_k$ raises $\gamma_k$. As noted in Appendix~\ref{app:pomdp_beta_auxiliary}, $\beta_k$ is maintained as an auxiliary tracker outside the POMDP.
 
-\subsection{Cross-partner policy selection}
+\subsection{Cross-Partner Policy Selection}
 
 In partner-choice regimes, partner-specific precision sharpens or flattens policy commitment among policies directed toward a given partner while preserving the mean policy evidence associated with that partner. The transformation in Eq.~\eqref{eq:centered_policy_scores} applies $\gamma_k$ to deviations from the partner-specific policy mean, rather than to raw policy scores. The agent samples or selects policies from the combined set of transformed scores across all partners and policies. This lets $\gamma_k$ control commitment among policies involving partner $k$ without changing the average evidence for approaching partner $k$ during cross-partner comparison.
 
-\subsection{Ablation conditions}
+\subsection{Ablation Conditions}
 
 Precision conditions are summarized in Table~\ref{tab:precision_variants} (see also Section~\ref{sec:simulation_setup}).
 
@@ -548,7 +523,7 @@ Precision conditions are summarized in Table~\ref{tab:precision_variants} (see a
 \begin{table}[H]
 \centering
 \small
-\caption{Precision ablation conditions.}
+\caption{Precision ablation conditions}
 \label{tab:precision_variants}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.18\linewidth}X>{\raggedright\arraybackslash}p{0.24\linewidth}@{}}
 \toprule
@@ -566,7 +541,7 @@ Shared-$\beta$ & pooled $q(\beta)$ updated; $\gamma_k$ from shared $\beta$ & poo
 
 This appendix summarizes simulation conditions, replication counts, schedules, and metrics.
 
-\subsection{Simulation conditions}
+\subsection{Simulation Conditions}
 
 All reported experiments use one focal active-inference agent with four partners (\(K=4\)), per-partner generative models, graded investment actions, and environment-side partner policies (Appendices~\ref{app:generative_process}--\ref{app:pomdp}). Conditions differ by assignment mode, scheduled partner changes, and precision/profile manipulations within the graded payoff regime. In conditions without explicit partner choice, the interaction partner is assigned according to the configured protocol; in partner-choice conditions, the agent selects the partner before selecting an investment level. Table~\ref{tab:simulation_conditions} summarizes the condition families.
 
@@ -574,7 +549,7 @@ All reported experiments use one focal active-inference agent with four partners
 \begin{table}[H]
 \centering
 \small
-\caption{Simulation condition families and purpose.}
+\caption{Simulation condition families and purpose}
 \label{tab:simulation_conditions}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.22\linewidth}X@{}}
 \toprule
@@ -589,16 +564,16 @@ Forgiveness & Reengagement and $\beta$ recovery after repair \\
 \end{tabularx}
 \end{table}
 
-\subsection{Seed counts and episode lengths}
+\subsection{Seed Counts and Episode Lengths}
 
 Behavioral comparisons use 30 seeds per condition and profile sweeps use 20 seeds (Table~\ref{tab:protocol_scales}).
 
 \begin{table}[H]
 \centering
 \small
-\caption{Representative episode lengths and replication counts by experiment family.}
+\caption{Representative episode lengths and replication counts by experiment family}
 \label{tab:protocol_scales}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.28\linewidth}Xrr@{}}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.28\linewidth}Xr@{\hspace{8pt}}r@{}}
 \toprule
 Experiment family & Setting & Rounds & Seeds \\
 \midrule
@@ -610,7 +585,7 @@ Profile program & sweeps, factorial, forgiveness & 200 & 20 \\
 \end{tabularx}
 \end{table}
 
-\subsection{Betrayal schedule}
+\subsection{Betrayal Schedule}
 
 Protocol rounds are numbered from 1; analysis converts the zero-based round indices in the raw output accordingly.
 
@@ -624,7 +599,7 @@ Table~\ref{tab:metrics_glossary} defines reported metrics.
 \begin{table}[H]
 \centering
 \small
-\caption{Metric glossary.}
+\caption{Metric glossary}
 \label{tab:metrics_glossary}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}X@{}}
 \toprule
@@ -639,28 +614,28 @@ Mean within-episode $\bar{\beta}_k$ range & Average within-episode max--min rang
 Investment churn & Fraction of adjacent rounds with changed investment \\
 Early exploiter investment & Rounds 1--30 choosing exploiter with investment $\geq$ half range \\
 Trust asymmetry & Withdrawal latency / initial high-investment approach latency \\
-Recovery rounds & Rounds after switch until selection/payoff returns to threshold \\
+Recovery rounds & Rounds after switch until partner-0 rolling selection rate reaches 90\% of its pre-switch rate \\
 Locality-probe partial (\(r\)) & Partner--seed partial correlation between $\beta$-derived precision and surprisal/payoff. The precision--surprisal correlation controls for payoff and encounter count; the precision--payoff correlation controls for surprisal and encounter count. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\subsection{Uncertainty estimates}
+\subsection{Uncertainty Estimates}
 
-All reported confidence intervals are two-sided 95\% percentile bootstrap intervals based on 10,000 resamples with bootstrap seed 0. Matched variants are compared by resampling seed-level paired differences. Partial-correlation intervals resample complete simulation-seed clusters, and time-course intervals resample seed-level means within each round bin.
+Except for Figure~\ref{fig:alpha_sweep_appendix}, reported confidence intervals are two-sided 95\% percentile bootstrap intervals based on 10,000 resamples with bootstrap seed 0. Matched variants are compared by resampling seed-level paired differences. Partial-correlation intervals resample complete simulation-seed clusters, and time-course intervals resample seed-level means within each round bin. Figure~\ref{fig:alpha_sweep_appendix} instead uses normal-approximation intervals, computed as the mean $\pm 1.96$ times its standard error across available runs; its entropy panel pools both environments.
 \section{Extended Profile and Trust-Repair Results}
 \label{app:extended_results}
 
 This appendix reports gain sweeps, computational trust-calibration profiles, and trust-repair analyses.
 
-\subsection{Alpha sweep}
+\subsection{Alpha Sweep}
 \label{sec:phenotypes_alpha}
 
-Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whether precision gain controls reactive social confidence across metrics. The average within-episode max--min range of posterior mean $\bar{\beta}_k$ increases monotonically with $\alpha$ in the betrayal regime:
+Sweeping $\alpha$ across $\{0.05, 0.1, 0.3, 0.5, 1.0, 2.0, 4.0, 8.0\}$ tests whether precision gain controls reactive social confidence across metrics. The average within-episode max--min range of posterior mean $\bar{\beta}_k$ increases monotonically with $\alpha$ in the betrayal regime (Table~\ref{tab:alpha_sweep}). Figure~\ref{fig:alpha_sweep_appendix} shows the sweep across metrics.
 
 \begin{table}[H]
 \centering
-\caption{Mean within-episode $\bar{\beta}_k$ range by precision-gain $\alpha$ (betrayal regime).}
+\caption{Mean within-episode $\bar{\beta}_k$ range by precision-gain $\alpha$ (betrayal regime)}
 \label{tab:alpha_sweep}
 \begin{tabular}{cc}
 \toprule
@@ -681,24 +656,24 @@ $\alpha$ & Mean within-episode $\bar{\beta}_k$ range \\
 \begin{figure}[H]
 \centering
 \appendixfigure{fig_alpha_sweep.pdf}
-\caption{Precision-gain sweep across open graded and betrayal environments. Higher $\alpha$ expands the average within-episode max--min range of posterior mean $\bar{\beta}_k$, while engagement, recovery, entropy, and payoff readouts vary non-monotonically. Precision gain therefore controls confidence-reactivity amplitude rather than mapping directly to reward.}
+\Description{Five plots show early exploiter investment, recovery time, selection Gini, policy entropy, and inverse-precision range as precision gain increases on a logarithmic axis. Colors, markers, and line patterns distinguish environments or early, middle, and late episode windows. Inverse-precision range increases with gain.}
+\caption{Precision-gain sweep across open graded and betrayal environments (20 seeds per $\alpha$/environment). Points show means with 95\% CIs, excluding undefined recovery times. The entropy panel pools both environments (40 runs per $\alpha$); early, mid, and late denote rounds 1--50, 51--150, and 151--200. All horizontal axes show gain $\alpha$ on a logarithmic scale. Other metric definitions appear in Table~\ref{tab:metrics_glossary}.}
 \label{fig:alpha_sweep_appendix}
 \end{figure}
-\appendixfloattosection
 
-\subsection{Gain-prior profile signatures}
+\subsection{Gain-Prior Profile Signatures}
 \label{sec:phenotypes_quadrants}
 
 ``Naive'' and ``cautious'' refer to priors over $q(\beta_k)$: naive $[0.40, 0.40, 0.15, 0.04, 0.01]$, cautious $[0.01, 0.04, 0.15, 0.40, 0.40]$. Low/high gain use $\alpha=0.1/3.0$. Profile labels correspond to these combinations: naive-stubborn uses naive prior/low gain, anxious-reactive uses naive prior/high gain, avoidant-rigid uses cautious prior/low gain, and hypervigilant uses cautious prior/high gain. The default uses $\alpha=3.0$ with centered initialization at $\beta_k=1.0$. These labels denote computational parameter combinations rather than clinical classifications or validated human phenotypes. Table~\ref{tab:phenotypes} reports raw metrics and Figure~\ref{fig:phenotype_quadrants_appendix} shows column-normalized profile signatures.
 
 \begin{table}[H]
 \centering
-\caption{Behavioral metrics by profile (betrayal environment). Default agent shown for reference.}
+\caption{Behavioral metrics by profile in the betrayal environment; the default agent is shown for reference. Values are means from 20 seeds per profile, excluding undefined recovery times. The $\bar{\beta}_k$ range is the within-episode max--min range, averaged over partners and seeds.}
 \label{tab:phenotypes}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lccccc}
+\small
+\begin{tabularx}{\linewidth}{@{}l*{5}{>{\centering\arraybackslash}X}@{}}
 \toprule
-Profile & Payoff & Recovery rounds & Gini & Mean within-episode $\bar{\beta}_k$ range & Trust asymmetry \\
+Profile & Payoff & Recovery (rounds) & Gini & Mean $\bar{\beta}_k$ range & Trust asymmetry \\
 \midrule
 Anxious-reactive & 2285.8 & 25.1 & 0.626 & 0.459 & 14.87 \\
 Hypervigilant & 2230.7 & 21.8 & 0.609 & 0.556 & 6.97 \\
@@ -706,31 +681,30 @@ Naive-stubborn & 2218.0 & 15.5 & 0.567 & 0.173 & 4.87 \\
 Avoidant-rigid & 2166.0 & 13.8 & 0.567 & 0.302 & 1.47 \\
 Default & 2244.2 & 31.4 & 0.643 & 0.427 & 7.79 \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \begin{figure}[H]
 \centering
 \appendixfigure{fig_phenotype_quadrants.pdf}
-\caption{Gain-prior profile signatures from the prior-by-$\alpha$ factorial (betrayal environment). Cells are column-normalized across profiles for visual comparison; raw metric values are reported in Table~\ref{tab:phenotypes}. The heatmap shows that gain and prior model fitness produce distinct calibration signatures rather than a single reward-aligned ordering.}
+\Description{A five-by-five heatmap compares computational profiles across payoff, recovery, selection Gini, inverse-precision range, and trust asymmetry. Cell numbers show raw means; color encodes each column normalized separately. A color bar runs from zero to one.}
+\caption{Gain-prior profile signatures in the betrayal environment. Printed cell values are raw means; color scales each metric separately from the lowest to the highest profile mean. Thus, colors compare profiles within a column, not magnitudes between metrics. Table~\ref{tab:phenotypes} gives the numerical summary.}
 \label{fig:phenotype_quadrants_appendix}
 \end{figure}
-\appendixfloattosection
 
-\subsection{Forgiveness and trust repair}
+\subsection{Forgiveness and Trust Repair}
 
 The forgiveness protocol uses baseline rounds 1--80, betrayal rounds 81--120, and repair/reversion rounds 121--200. Table~\ref{tab:forgiveness} reports reengagement, payoff recovery, latency, and mean within-episode $\bar{\beta}_k$ range; Figure~\ref{fig:forgiveness_appendix} shows reengagement, $\beta_k$ recovery, and payoff recovery.
 
 \Needspace{10\baselineskip}
 \begin{table}[H]
 \centering
-\caption{Forgiveness and trust-repair metrics by precision profile. Reengagement is the post-repair P0 selection rate; payoff recovery compares late post-repair payoff with the late pre-betrayal baseline.}
+\caption{Forgiveness and trust-repair metrics (20 seeds per profile). Reengagement is the post-repair partner-0 selection rate; payoff recovery uses the windows in Figure~\ref{fig:forgiveness_appendix}. Latency averages only seeds that reengage (16--20 per profile). The dash denotes the absent no-affect $\beta$ tracker.}
 \label{tab:forgiveness}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lcccc}
+\small
+\begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
 \toprule
-Variant & Reengagement & Payoff recovery & Latency & Mean within-episode $\bar{\beta}_k$ range \\
+Variant & Reengagement & Payoff recovery & Latency (rounds) & Mean $\bar{\beta}_k$ range \\
 \midrule
 cautious-high-$\alpha$ & 0.529 & 1.043 & 14.5 & 0.607 \\
 cautious-low-$\alpha$ & 0.684 & 1.063 & 6.7 & 0.301 \\
@@ -739,15 +713,24 @@ naive-high-$\alpha$ & 0.577 & 0.989 & 3.5 & 0.604 \\
 naive-low-$\alpha$ & 0.613 & 1.010 & 7.9 & 0.190 \\
 no-affect & 0.586 & 1.042 & 12.4 & -- \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \begin{figure}[H]
 \centering
 \appendixfigure{fig_forgiveness.pdf}
-\caption{Forgiveness/trust-repair diagnostic from the profile analyses. Vertical markers indicate the transition from cooperative baseline to betrayal and then to repair/reversion. Reengagement and payoff recovery are shown alongside the reverted-partner $\beta_k$ trajectory. Because $\beta_k$ is inverse precision, lower $\beta_k$ indicates higher confidence / higher policy precision; no-affect is omitted from the $\beta_k$ trajectory panel because it has no $\beta$ tracker. The figure shows that agents can reengage a repaired partner before rebuilding the same confidence dynamics.}
+\Description{Panel A shows partner-zero inverse-precision trajectories for five profiles around betrayal and repair, with a shaded betrayal interval and distinct markers and line patterns. Panels B and C show profile-level reengagement and payoff recovery, including no-affect. A vertical reference line marks a payoff recovery ratio of one.}
+\caption{Forgiveness and trust repair (means across 20 seeds per profile). A: partner-0 posterior mean $\beta_k$; shading marks betrayal (rounds 81--120), followed by repair. Lower $\beta_k$ indicates higher policy precision; no-affect has no tracker. B: partner-0 selection during repair. C: payoff in rounds 151--200 relative to rounds 50--80; the dashed line at 1 marks baseline recovery.}
 \label{fig:forgiveness_appendix}
 \end{figure}
+
+\clearpage
+\begin{credits}
+\subsubsection{\discintname}
+The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+\bibliographystyle{splncs04}
+\bibliography{references}
 
 \end{document}

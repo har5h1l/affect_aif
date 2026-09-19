@@ -7,7 +7,7 @@ number or figure back to its source table and run.
 | Read | Purpose |
 |---|---|
 | [Findings](findings.md) | Current paper results and what they do or do not establish. |
-| [Provenance](provenance.md) | Run revisions, figure inputs, statistical methods, and excluded data. |
+| [Provenance](provenance.md) | Run revisions, figure inputs, [figure-specific uncertainty methods](provenance.md#statistical-contract), and excluded data. |
 | [Diagnostics](diagnostics.md) | Older or supplementary controls, separate from paper evidence. |
 
 ## Data

@@ -305,10 +305,11 @@ def common_group_metrics(results: pd.DataFrame) -> list[dict[str, Any]]:
     return rows
 
 
-def save_figure(fig: plt.Figure, path: Path) -> None:
+def save_figure(fig: plt.Figure, path: Path, *, tight_layout: bool = True) -> None:
     apply_manuscript_figure_style()
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig.tight_layout()
+    if tight_layout:
+        fig.tight_layout()
     fig.savefig(path, bbox_inches="tight", pad_inches=0.02)
     plt.close(fig)
 
