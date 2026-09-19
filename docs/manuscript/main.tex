@@ -361,7 +361,7 @@ Hostile & 0.40 & 0.60 & 0.80 \\
 \end{tabular}
 \end{table}
 
-These dynamics instantiate the asymmetry of trust: sustained high investment gradually builds trust, while sustained withholding rapidly damages trust; recovery from hostility is slow. In scheduled betrayal and repair protocols, the environment can additionally intervene on a partner's stance according to the protocol schedule; these interventions are not known transition events in the focal agent's POMDP.
+These dynamics instantiate the asymmetry of trust: sustained high investment gradually builds trust, while sustained withholding rapidly damages trust; recovery from hostility is slow. In scheduled betrayal and repair protocols, the environment can additionally intervene on a partner's type and stance according to the protocol schedule; these interventions are not known transition events in the focal agent's POMDP.
 
 \subsection{Boundary of the Current Simulation}
 
@@ -589,7 +589,7 @@ Profile program & sweeps, factorial, forgiveness & 200 & 20 \\
 
 Protocol rounds are numbered from 1; analysis converts the zero-based round indices in the raw output accordingly.
 
-In the abrupt-betrayal protocol, P0 begins as an exploiter in a trusting stance and switches to hostile at round 31; other partners retain their initial configurations and $p_{\mathrm{switch}}=0$. Headline readouts are episode-level payoff, policy entropy, and joint type--stance accuracy; post-switch behavior is additionally summarized through binned partner-selection, posterior-$\beta_k$, and entropy trajectories. The forgiveness protocol extends this schedule with baseline rounds 1--80, betrayal rounds 81--120, and repair/reversion rounds 121--200.
+The main abrupt-betrayal protocol switches P0 from trusting to hostile at round 31, retaining its exploiter type; other partners retain their initial configurations and spontaneous type switching is disabled. In the gain-sweep and gain--prior profile betrayal protocols, P0 instead changes from trusting cooperator to hostile exploiter at round 81. Forgiveness uses that same round-81 change, then restores cooperator type and trusting stance at round 121: baseline rounds 1--80, betrayal rounds 81--120, and repair rounds 121--200.
 
 \subsection{Metrics}
 
