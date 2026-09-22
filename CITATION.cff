@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+title: "Partner-Specific Affective Precision in Social Active Inference"
+message: "If you use this work, please cite the arXiv preprint and the repository version you used."
+type: software
+authors:
+  - family-names: Shah
+    given-names: Harshil
+  - family-names: Pashea
+    given-names: Andrew
+date-released: 2026-09-21
+version: "0.1.0"
+repository-code: "https://github.com/har5h1l/affect_aif"
+repository-artifact: "https://github.com/har5h1l/affect_aif"
+license: MIT
+identifiers:
+  - type: doi
+    value: "10.48550/arXiv.2609.24876"
+    description: "arXiv preprint DOI"
+  - type: url
+    value: "https://arxiv.org/abs/2609.24876"
+    description: "arXiv abstract page"
+preferred-citation:
+  type: article
+  title: "Partner-Specific Affective Precision in Social Active Inference"
+  authors:
+    - family-names: Shah
+      given-names: Harshil
+    - family-names: Pashea
+      given-names: Andrew
+  year: 2026
+  journal: "arXiv"
+  volume: "arXiv:2609.24876"
+  doi: "10.48550/arXiv.2609.24876"
+  url: "https://arxiv.org/abs/2609.24876"

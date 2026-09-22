@@ -3,8 +3,10 @@
 Active-inference trust-game simulations for studying partner-local affective
 precision as a relationship-specific confidence signal.
 
-Accepted for the IWAI 2026 proceedings. This repository contains the code,
-experiment configurations, results, and manuscript.
+Accepted as a full paper at the 7th International Workshop on Active
+Inference (IWAI 2026). The public preprint is
+[available on arXiv](https://arxiv.org/abs/2609.24876). This repository contains
+the code, experiment configurations, results, and manuscript.
 
 ## What This Is
 
@@ -60,21 +62,24 @@ for extraction and analysis instructions.
 Built on [inferactively-pymdp](https://github.com/infer-actively/pymdp) for
 belief updating and policy selection.
 
-The manuscript has been accepted for IWAI 2026. Use the final proceedings
-citation once its bibliographic metadata is available; pin a repository commit
-when citing implementation details.
+If you use the paper or this repository, please cite the arXiv preprint. A
+machine-readable version is also available in [`CITATION.cff`](CITATION.cff).
 
 ```bibtex
-@software{shah2026affect_aif,
-  title  = {affect\_aif: Partner-Specific Affective Precision in Social Active Inference},
-  author = {Shah, Harshil and Pashea, Andrew},
-  year   = {2026},
-  url    = {https://github.com/har5h1l/affect_aif},
-  version = {0.1.0},
-  license = {MIT},
-  note   = {Reference implementation on inferactively-pymdp}
+@misc{shah2026partner,
+  title         = {Partner-Specific Affective Precision in Social Active Inference},
+  author        = {Shah, Harshil and Pashea, Andrew},
+  year          = {2026},
+  eprint        = {2609.24876},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  doi           = {10.48550/arXiv.2609.24876},
+  url           = {https://arxiv.org/abs/2609.24876}
 }
 ```
+
+For implementation details, also cite the repository at the specific commit
+used: <https://github.com/har5h1l/affect_aif>.
 
 ## License
 

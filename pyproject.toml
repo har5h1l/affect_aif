@@ -8,6 +8,10 @@ version = "0.1.0"
 description = "pymdp-backed active-inference trust-game simulations"
 readme = "README.md"
 requires-python = ">=3.10"
+[project.urls]
+Repository = "https://github.com/har5h1l/affect_aif"
+Paper = "https://arxiv.org/abs/2609.24876"
+DOI = "https://doi.org/10.48550/arXiv.2609.24876"
 dependencies = [
   "jax>=0.4.28",
   "inferactively-pymdp==1.0.3",
