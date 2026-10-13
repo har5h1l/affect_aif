@@ -3,6 +3,8 @@
 Active-inference trust-game simulations for studying partner-local affective
 precision as a relationship-specific confidence signal.
 
+<img src="https://drive.google.com/uc?export=view&id=14R0FhbsoYzcYhqs7nEKbDSdkomGsFeqR" alt="IWAI Poster 2026 (Shah & Pashea, 2026)" width="1200">
+
 Accepted as a full paper at the 7th International Workshop on Active
 Inference (IWAI 2026). The public preprint is
 [available on arXiv](https://arxiv.org/abs/2609.24876). This repository contains
